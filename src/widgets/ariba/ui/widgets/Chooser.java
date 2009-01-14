@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#22 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#23 $
 */
 
 
@@ -160,7 +160,7 @@ public class Chooser extends AWComponent
         if (displayValue == null) {
             displayValue = displayObjectString();
         }
-        if (isReadOnly() && displayValue == null) {
+        if (displayValue == null) {
             displayValue = noSelectionString();
         }
         return displayValue;

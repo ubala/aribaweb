@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuButton.awl#19 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuButton.awl#20 $
     </Copyright>
 
     <Overview>
@@ -75,8 +75,8 @@
     <NamedContent name="controlImage" required="$false">
         TBD
     </NamedContent>
-</a:Api>
-
+</a:Api>\
+\
 <a:If ifFalse="$^justify:$false">\
     <table border="0" cellspacing="0" cellpadding="0" style="display:inline">\
         <tr>\
@@ -95,21 +95,21 @@
             </td>\
         </tr>\
     </table>\
-<a:Else/>
-                <div class="popupMenuButtonJustify" style="$^style" omitTags="$isIE4" title="$^title">\
-                    <w:PopupMenuLink tagName="div"
-                        omitTags="$^omitTags" menuId="$^menuId" class="awmenuLink"
-                        index="$^index" style="text-decoration:none;" position="this"
-                        actionSetup="$^actionSetup">\
-                        <nobr>\
-                            <a:IncludeContent/>\
-                            <a:If ifTrue="$hasControlImage">
-                                <a:IncludeContent name="controlImage" required="$true"/>\
-                            <a:Else/>
-                                <a:Image filename="widg/arrowcolor.gif" align="absmiddle"
-                                    style="position:absolute;top:1px;right:1px;margin-bottom:1px;"/>\
-                            </a:If>
-                        </nobr>\
-                    </w:PopupMenuLink>\
-                </div>\
-</a:If>
+<a:Else/>\
+    <div class="popupMenuButtonJustify" style="$^style" omitTags="$isIE4" title="$^title">\
+        <w:PopupMenuLink tagName="div"
+            omitTags="$^omitTags" menuId="$^menuId" class="awmenuLink"
+            index="$^index" style="text-decoration:none;" position="this"
+            actionSetup="$^actionSetup">\
+            <nobr>\
+                <a:IncludeContent/>\
+                <a:If ifTrue="$hasControlImage">\
+                    <a:IncludeContent name="controlImage" required="$true"/>\
+                <a:Else/>\
+                    <a:Image filename="widg/arrowcolor.gif" align="absmiddle"
+                        style="position:absolute;top:1px;right:1px;margin-bottom:1px;"/>\
+                </a:If>\
+            </nobr>\
+        </w:PopupMenuLink>\
+    </div>\
+</a:If>\

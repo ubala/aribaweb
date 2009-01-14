@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVLocalizedDateFormatter.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVLocalizedDateFormatter.java#4 $
 */
 package ariba.ui.validation;
 
@@ -20,6 +20,7 @@ import ariba.ui.aribaweb.util.AWFormatter;
 import ariba.util.core.Date;
 import ariba.util.core.Fmt;
 import ariba.util.core.Assert;
+import ariba.util.core.StringUtil;
 import ariba.util.formatter.DateFormatter;
 
 import java.util.TimeZone;
@@ -39,6 +40,7 @@ public abstract class AWVLocalizedDateFormatter extends  AWFormatter
 
     public Object parseObject (String stringToParse) throws ParseException
     {
+        if (StringUtil.nullOrEmptyOrBlankString(stringToParse)) return null;
         Date date =  DateFormatter.parseDateUsingFormats(stringToParse, _locale,
                 getFormatsKey(), _timeZone, true);
 

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormTable.awl#3 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormTable.awl#4 $
     </Copyright>
 
     <Overview>
@@ -56,15 +56,14 @@
 </a:Api>\
 
 <table border="0" cellspacing="0" cellpadding="0" omitTags="$alreadyInFormTable">
-    <tr>\
-        <td style="padding-right:130px"></td>
-        <td></td>
-        <td style="padding-right:130px"></td>
-        <td style="padding-right:150px"></td>
-    </tr>\
-
     <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags" inFormTable="$true">
         <a:If ifTrue="$^useFourZones">\
+            <tr>\
+                <td style="padding-right:130px"></td>
+                <td></td>
+                <td style="padding-right:130px"></td>
+                <td style="padding-right:150px"></td>
+            </tr>\
             <a:Environment formRowTrailingColspan="2">
                 <a:IncludeContent name="top" required="$false"/>\
             </a:Environment>

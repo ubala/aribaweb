@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#110 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#111 $
     </Copyright>
 
     <Overview>
@@ -227,6 +227,10 @@
 
     <Binding key="csvPath" type="String" required="$false" direction="get">
         Demo feature -- path to a CSV file that will be used to initialize the item list of the table.
+    </Binding>
+
+    <Binding key="dataSource" type="AWTDataSource" required="$false" direction="get">
+        DataSource to bind to the displayGroup
     </Binding>
 
     <Binding key="width" type="String" required="$false" direction="get">

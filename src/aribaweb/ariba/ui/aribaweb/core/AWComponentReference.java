@@ -28,6 +28,8 @@ import ariba.util.core.Fmt;
 import java.util.Map;
 import ariba.util.core.StringUtil;
 import java.util.List;
+import java.util.LinkedHashMap;
+
 import ariba.util.core.Assert;
 import java.lang.reflect.Field;
 
@@ -83,7 +85,7 @@ public class AWComponentReference extends AWContainerElement
         String supportedBindingNames[] = _componentDefinition.supportedBindingNames();
         if (supportedBindingNames != null) {
             Map otherBindings = bindingsHashtable;
-            bindingsHashtable = MapUtil.map();
+            bindingsHashtable = new LinkedHashMap();
             int supportedBindingNamesCount = supportedBindingNames.length;
 
             // special case for otherBindings

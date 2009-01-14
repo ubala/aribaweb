@@ -1,8 +1,8 @@
 <a:For list="$allLayouts" item="$layout">
-    <m:Context restoreActivation="$layout.activation">
-        <a:SectionHeading title="$label"/>
-        <a:SectionBody>\
-            <m:IncludeComponent awpropertyMap="$propertyMap"/>\
-        </a:SectionBody>
+    <m:Context layout="$layout.name">
+        <w:SectionHeading title="$label"/>
+        <w:SectionBody>\
+            <m:IncludeComponent/>\
+        </w:SectionBody>
     </m:Context>
 </a:For>

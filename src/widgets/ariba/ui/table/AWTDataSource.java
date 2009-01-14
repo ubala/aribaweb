@@ -12,9 +12,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataSource.java#4 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataSource.java#5 $
 */
 package ariba.ui.table;
+
+import ariba.ui.aribaweb.util.AWGenericException;
 
 import java.util.List;
 
@@ -23,4 +25,19 @@ public abstract class AWTDataSource
     public abstract List fetchObjects ();
 
     public abstract AWTEntity entity ();
+
+    public boolean hasChanges ()
+    {
+        return true;
+    }
+
+    public Object insert ()
+    {
+        throw new AWGenericException("Not implemented");
+    }
+
+    public void delete (Object object)
+    {
+        throw new AWGenericException("Not implemented");
+    }
 }

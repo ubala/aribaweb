@@ -1,0 +1,6 @@
+<m:Context operation="search" object="$searchMap">
+    <div style="float:right">\
+        <w:TextButton action="$search">Search</w:TextButton>\
+    </div>
+    <m:Form/>
+</m:Context>

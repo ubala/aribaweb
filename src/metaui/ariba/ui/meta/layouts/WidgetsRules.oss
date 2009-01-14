@@ -15,8 +15,14 @@
     $Id:  $
 */
 object { class: ${object.getClass().getName()} }
+object declare { class: ${object.getClass().getName()} }
 
-operation=(edit, create) {
+/* for search, force explicit class, not one from object (since that's a hashmap */
+operation=search {
+    class:${values.get("class")}
+}
+
+operation=(edit, create, search) {
     editing:true;
     field="*" { editable:true; }
 }
@@ -25,14 +31,26 @@ operation=(view, list) {
     field="*" { editable:false; }
 }
 
-field="*" {
-    type="*"                    { component:AWString; bindings:{value:$value} }
+class {
+    trait=fourZones {
+        zones: zLeft, zRight, zTop, zBottom, zDetail;
+        fourZoneLayout:true;
+    }
+    trait=oneZone {
+        zones: [zLeft, zDetail];
+    }
+
+    traits: fourZones;
+}
+
+field {
+    type                    { component:AWString; bindings:{value:$value} }
     type=boolean { 
         bindings:{formatter:$component.formatters.boolean};
         editable { component:AWCheckbox }
     }
     type=ariba.util.core.Date   {
-        bindings:{formatter:$component.formatters.dateTime};
+        bindings:{formatter:$component.formatters.shortDate};
         editable                { component:DateField }
     }
     type=java.math.BigDecimal   {
@@ -55,6 +73,10 @@ field="*" {
                 displayKey:"name";
                 formatter:$component.formatters.identifier;
             };
+
+            operation=(search, list) {
+                bindings: { type:Popup; }
+            }
         }
     }
 
@@ -70,6 +92,7 @@ field="*" {
                 formatter:$component.formatters.identifier;
             };
         }
+        operation=(search, list)        { visible:false }
     }
     type=(java.math.Integer, int) {
         bindings:{formatter:$component.formatters.integer};
@@ -78,10 +101,11 @@ field="*" {
     type=java.lang.String {
         editable                { component:AWTextField }
         trait=richtext {
+            after:zBottom;
             bindings:{escapeUnsafeHtml:true}
             editable            { component:${ariba.util.core.ClassUtil.classForName("ariba.ui.richtext.RichTextArea", false) ? "RichTextArea" : "AWTextArea" };
                                   bindings:{cols:60; rows:10} }
-            operation=list      { visible:false }
+            operation=(search)  { visible:false }
         }
         trait=secret       {
             bindings:{formatter:$component.formatters.hiddenPassword};
@@ -93,7 +117,7 @@ field="*" {
 
     trait=derived {
         editable:false;
-        visible:true;
+        visible:false;
         editing { visible:false; }
     }
 
@@ -110,17 +134,32 @@ field="*" {
     }
 
     trait=noCreate operation=create { visible:false }
+
+    trait=ownedToMany {
+        after:zDetail;
+        component:MetaDetailTable;
+    }
 }
 
-action="*" {
+field {
+    trait=(action, pageAction) {
+        bindings: { action: [${meta().fireAction(this, component.requestContext)}] }
+    }
+
+    trait=pageAction {
+        actionResults:${requestContext.pageWithName(properties.pageName)}
+    }
+}
+
+action {
     visible:true;
 
     trait=pageAction {
-        actionResults:[${requestContext.pageWithName(properties.pageName)}]
+        actionResults:${requestContext.pageWithName(properties.pageName)}
     }
 
     trait=modalComponentPage {
-        actionResults:[${requestContext.pageWithName("MetaModalPage")}];
+        actionResults:${requestContext.pageWithName("MetaModalPage")};
         pageBindings:{
             componentName:${properties.componentName};
             title:${properties.title};
@@ -128,7 +167,7 @@ action="*" {
     }
     
     trait=modalComponentPanel {
-        actionResults:[${requestContext.pageWithName("MetaModalPage")}];
+        actionResults:${requestContext.pageWithName("MetaModalPage")};
         pageBindings:{
             componentName:${properties.componentName};
             title:${properties.title};
@@ -138,19 +177,12 @@ action="*" {
 
     trait=messageResults {
         message:"Action Performed: %s";
-        actionResults:[${
-            def c = ariba.util.core.ClassUtil.classForName(properties.class);
-            def v = ariba.util.fieldvalue.FieldValue.getFieldValue(c, properties.action);
+        actionResults:${
+            def o = (properties.isInstanceAction) ? object : ariba.util.core.ClassUtil.classForName(properties.class);
+            def v = ariba.util.fieldvalue.FieldValue.getFieldValue(o, properties.action);
             def m = ariba.util.core.Fmt.S(properties.message, v);
             ariba.ui.widgets.AribaPageContent.setMessage(m, requestContext.session());
-            null}];
-        object {
-            actionResults:[${
-                def v = ariba.util.fieldvalue.FieldValue.getFieldValue(object, properties.action);
-                def m = ariba.util.core.Fmt.S(properties.message, v);
-                ariba.ui.widgets.AribaPageContent.setMessage(m, requestContext.session());
-                null}];
-        }
+            null};
     }
 
     trait=instance {
@@ -163,13 +195,41 @@ action="*" {
     }
 }
 
-module="*" {
+layout {
+    zones: [zMain];
+    trait=ActionMenu { visible:true; component:MetaActionList bindings:{renderAsMenu:true} elementClass:flR }
+    trait=ActionButtons { visible:true; component:MetaActionList bindings:{renderAsButtons:true} elementClass:flR }
+    trait=Tabs { visible:true; component:MetaTabs }
+    trait=Sections { visible:true; component:MetaSections }
+    trait=Form { visible:true; component:MetaForm }
+    trait=Stack { visible:true; component:MetaElementList }
+
+    trait=OwnZone class {
+        zonePath:${layout}
+    }
+}
+layout=Inspect { traits:Form }
+layout=ButtonArea { traits:ActionButtons }
+layout=SelectionButtonArea { traits:ActionButtons }
+
+module {
     visible:true;
     homePage:MetaHomePage;
     component:MetaDashboardLayout;
-    layout="*" { visible:true }
+    layout { visible:true }
+
+    trait=ActionTOC {
+        @layout=Actions {
+           label:"Actions";
+           component:"MetaActionList";
+           after:zToc;
+        }
+    }
 }
 
-actionCategory="*" {
+actionCategory {
     visible:true;
 }
+
+
+/* */

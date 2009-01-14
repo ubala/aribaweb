@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.awl#19 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.awl#20 $
     </Copyright>
 
     <Overview>
@@ -104,8 +104,7 @@
     <Binding key="class" direction="get" type="String" required="$false">
         Override the default css class (awmenu)
     </Binding>
-</a:Api>
-
+</a:Api>\
 <t:ExportConditional>\
     <a:Singleton>\
         <w:WidgetsJavaScript/>\

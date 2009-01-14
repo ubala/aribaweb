@@ -20,273 +20,8 @@
     $Id:  $
  -->
 
-<project name="aribaweb-all" default="default" basedir=".">
-
-    <property file="version.properties"/>
-    <property name="junit.includes" value="**/Test*.java"/>
-
-    <available file="build-support" value="build-support" property="make.common.dir"/>
-    <available file="../build-support" value="../build-support" property="make.common.dir"/>
-    <import file="${make.common.dir}/common-build.xml"/>
-
-    <property name="javadoc.link" value="http://java.sun.com/j2se/1.4/docs/api/"/>
-
-    <!-- Type of checksum to compute for distribution files -->
-    <property name="checksum.algorithm" value="md5"/>
-
-    <available file="${basedir}/../../util/core"
-              value="${basedir}/../../util/core"
-           property="src.util.dir"/>
-    <property name="src.util.dir" location="${basedir}/util"/>
-    <available file="${basedir}/../../util/expr"
-              value="${basedir}/../../util/expr"
-           property="src.expr.dir"/>
-    <property name="src.expr.dir" location="${basedir}/expr"/>
-    <available file="${basedir}/../aribaweb"
-              value="${basedir}/../"
-           property="src.ui.dir"/>
-    <property name="src.ui.dir" location="${basedir}"/>
-
-    <property name="binary.dist.zip" location="${dist.dir}/aribaweb-${version}.zip"/>
-    <property name="src.dist.zip" location="${dist.dir}/aribaweb-src-${version}.zip"/>
-    
-    <!-- Build classpath -->
-    <path id="classpath">
-        <resources refid="build.deps"/>
-        <resources refid="build.deps-internal"/>
-        <resources refid="build.jars"/>
-        <pathelement location="${build.dir}/classes/java"/>
-    </path>
-
-    <!-- Javadoc classpath -->
-    <path id="javadoc.classpath">
-        <path refid="classpath"/>
-        <pathelement location="${ant.home}/lib/ant.jar"/>
-
-        <!-- NOTE: gdata jars only used with jdk 5 but include them even for lower jdk -->
-        <fileset dir="module">
-            <include name="**/*.jar"/>
-        </fileset>
-    </path>
-
-    <path id="demo.classpath">
-        <path refid="classpath"/>
-        <pathelement location="${build.dir}/classes/demo"/>
-    </path>
-
-    <path id="test.classpath">
-        <path refid="demo.classpath"/>
-        <pathelement location="${build.dir}/classes/test"/>
-    </path>
-
-
-    <path id="junit.classpath">
-        <pathelement location="${build.dir}/classes/test"/>
-        <pathelement location="${build.dir}/classes"/>
-        <pathelement location="${build.dir}/classes/demo"/>
-        <pathelement path="${java.class.path}"/>
-    </path>
-
-    <!-- ================================================================== -->
-    <!-- Prepares the build directory                                       -->
-    <!-- ================================================================== -->
-
-    <target name="test-core" depends="common.test"
-            description="Runs unit tests for the core AribaWeb code"
-            />
-    <target name="test" depends="test-core, test-module"
-            description="Runs all unit tests (including modules)"
-            />
-
-    <!-- ================================================================== -->
-    <!-- J A R                                                              -->
-    <!-- ================================================================== -->
-    <!--                           `                                         -->
-    <!-- ================================================================== -->
-
-    <target name="jar" depends="jar-module"
-            description="Packages the JAR file">
-    </target>
-
-    <target name="demoshell-war" depends="jar">
-        <subant target="war" failonerror="true">
-            <property name="make.common.dir" value="${basedir}/build-support"/>
-            <property name="build.dir" value="${build.dir}"/>
-            <fileset dir="${src.ui.dir}" includes="demoshell/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="simple-war" depends="jar">
-        <subant target="war" failonerror="true">
-            <property name="make.common.dir" value="${basedir}/build-support"/>
-            <property name="build.dir" value="${build.dir}"/>
-            <fileset dir="${basedir}" includes="samples/simple/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="BusObjUI-war" depends="jar">
-        <subant target="war" failonerror="true">
-            <property name="make.common.dir" value="${basedir}/build-support"/>
-            <property name="build.dir" value="${build.dir}"/>
-            <fileset dir="${basedir}" includes="samples/BusObjUI/build.xml"/>
-        </subant>
-    </target>
-
-    <target name="wars" depends="demoshell-war, simple-war, BusObjUI-war"/>
-
-    <target name="has-tomcat">
-        <fail unless="env.CATALINA_HOME" message="CATALINA_HOME must be set to launch tomcat"/>
-    </target>
-
-    <target name="-tomcat-no-debug" unless="env.JPDA_ADDRESS">
-        <property name="demoshell.home" location="${src.ui.dir}/demoshell/site"/>
-        <echo message="Launching tomcat with CATALINA_BASE=${catalina.base.dir}, ARIBA_DEMOSHELL_HOME=${demoshell.home} ([CTRL-C] to stop)..."/>
-        <echo message="Connect via http://localhost:8080/Demo/AribaWeb"/>
-        <java jar="${env.CATALINA_HOME}/bin/bootstrap.jar" fork="true">
-            <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
-            <jvmarg value="-Dcatalina.home=${env.CATALINA_HOME}"/>
-            <jvmarg value="-Dcatalina.base=${catalina.base.dir}"/>
-        </java>
-    </target>
-
-    <target name="-tomcat-debug" if="env.JPDA_ADDRESS">
-        <property name="demoshell.home" location="${src.ui.dir}/demoshell/site"/>
-        <echo message="Launching tomcat in debug mode (port ${env.JPDA_ADDRESS}) with CATALINA_BASE=${catalina.base.dir}, ARIBA_DEMOSHELL_HOME=${demoshell.home} ([CTRL-C] to stop)..."/>
-        <echo message="Connect via http://localhost:8080/Demo/AribaWeb"/>
-        <java jar="${env.CATALINA_HOME}/bin/bootstrap.jar" fork="true">
-            <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
-            <jvmarg value="-Dcatalina.home=${env.CATALINA_HOME}"/>
-            <jvmarg value="-Dcatalina.base=${catalina.base.dir}"/>
-            <jvmarg value="-Xdebug"/>
-            <jvmarg value="-Xrunjdwp:transport=${env.JPDA_TRANSPORT},address=${env.JPDA_ADDRESS},server=y,suspend=n"/>
-        </java>
-    </target>
-
-    <target name="tomcat" depends="has-tomcat, -tomcat-debug, -tomcat-no-debug"/>
-
-    <target name="tomcat-exec" depends="has-tomcat">
-        <property name="demoshell.home" location="${src.ui.dir}/demoshell/site"/>
-        <condition property="catalina-command" value="catalina.bat">
-            <os family="windows"/>
-        </condition>
-        <property name="catalina-command" value="catalina.sh"/>
-        <echo message="Launching tomcat with CATALINA_BASE=${catalina.base.dir}, ARIBA_DEMOSHELL_HOME=${demoshell.home} ([CTRL-C] to stop)..."/>
-        <echo message="Connect via http://localhost:8080/Demo/AribaWeb"/>        
-        <exec dir="." executable="${env.CATALINA_HOME}/bin/${catalina-command}">
-            <env key="CATALINA_BASE" value="${catalina.base.dir}"/>
-            <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
-            <arg value="jpda"/>
-            <arg value="run"/>
-        </exec>
-    </target>
-
-    <target name="tomcat-build" depends="wars, tomcat"/>
-
-
-    
-    <!-- ================================================================== -->
-    <!-- D O C U M E N T A T I O N                                          -->
-    <!-- ================================================================== -->
-    <!--                                                                    -->
-    <!-- ================================================================== -->
-    <target name="docs" description="Build the website">
-        <echo>DEPRECATED - Doing Nothing. See
-            http://wiki.apache.org/aribaweb-java/HowToUpdateTheWebsite
-        </echo>
-    </target>
-
-    <target name="javadocs" description="Generate javadoc" depends="build-module">
-        <mkdir dir="${build.dir}/docs/api"/>
-        <invoke-javadoc
-                access="protected"
-                destdir="${build.dir}/docs/api"
-                />
-    </target>
-
-    <target name="javadocs-internal" depends="build-module">
-        <mkdir dir="${build.dir}/docs/api-internal"/>
-        <invoke-javadoc
-                access="package"
-                destdir="${build.dir}/docs/api-internal"
-                />
-    </target>
-
-
-    <!-- ================================================================== -->
-    <!-- D I S T R I B U T I O N                                            -->
-    <!-- ================================================================== -->
-    <!--                                                                    -->
-    <!-- ================================================================== -->
-    <target name="package"
-            depends="package-zip, package-src">
-    </target>
-
-    <!-- ================================================================== -->
-    <!-- Packages the distribution with zip                                 -->
-    <!-- ================================================================== -->
-    <!--                                                                    -->
-    <!-- ================================================================== -->
-    <target name="package-zip" depends="wars"
-            description="--> Generates the AribaWeb distribution as .zip">
-        <mkdir dir="${dist.dir}"/>
-        <delete file="${binary.dist.zip}"/>
-        <zip destfile="${binary.dist.zip}">
-            <zipfileset prefix="aribaweb-${version}" dir="${dist.root.dir}">
-                <patternset refid="binary.root.dist.patterns"/>
-            </zipfileset>
-        </zip>
-        <aribaweb-checksum file="${binary.dist.zip}"/>
-    </target>
-
-    <target name="package-src"
-            description="--> Generates the AribaWeb source code distribution as .zip">
-        <mkdir dir="${dist.dir}"/>
-        <delete file="${src.dist.zip}"/>
-        <zip destfile="${src.dist.zip}">
-            <zipfileset prefix="aribaweb-${version}" dir="${dist.root.dir}">
-                <patternset refid="src.dist.patterns"/>
-            </zipfileset>
-        </zip>
-        <aribaweb-checksum file="${src.dist.zip}"/>
-    </target>
-
-
-    <target name="dist-all" depends="package"/>
-
-    <target name="check-ftp">
-        <fail unless="env.ARIBAWEB_FTP_HOST"/>
-        <fail unless="env.ARIBAWEB_FTP_USERNAME"/>        
-        <fail unless="env.ARIBAWEB_FTP_PASSWORD"/>
-    </target>
-
-    <target name="ftp-dist" depends="check-ftp, dist-all">
-        <ftp server="${env.ARIBAWEB_FTP_HOST}"
-             remotedir="/incoming"
-             userid="${env.ARIBAWEB_FTP_USERNAME}"
-             password="${env.ARIBAWEB_FTP_PASSWORD}"
-             depends="yes">
-          <fileset dir="${dist.dir}">
-              <include name="*.zip"/>
-          </fileset>
-        </ftp>
-    </target>
-
-    <target name="generate-maven-artifacts" depends="maven.ant.tasks-check, package">
-        <sequential>
-            <m2-deploy pom.xml="aribaweb-parent-pom.xml"/>
-            <m2-deploy pom.xml="aribaweb-core-pom.xml"/>
-            <module-crawl target="dist-maven"/>
-            <!-- do md5 checksums -->
-            <checksum forceOverwrite="yes" fileext=".md5">
-                <fileset dir="${maven.dist.dir}" excludes="**/*.md5"/>
-            </checksum>
-
-            <!-- do sha1 checksums -->
-            <checksum forceOverwrite="yes" algorithm="SHA" fileext=".sha1">
-                <fileset dir="${maven.dist.dir}" excludes="**/*.sha1, **/*.md5"/>
-            </checksum>
-        </sequential>
-    </target>
+<project name="aribaweb-libs" default="default" basedir=".">
+    <import file="build-support/common-build.xml"/>
 
     <macrodef name="module-crawl">
         <attribute name="target" default=""/>
@@ -300,8 +35,8 @@
                 <fileset dir="${src.ui.dir}" includes="aribaweb/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="widgets/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="metaui/build.xml"/>
+                <fileset dir="${src.ui.dir}" includes="metaui-jpa/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="demoshell/build.xml"/>
-                <fileset dir="${src.ui.dir}" includes="samples/simple/build.xml"/>
             </subant>
         </sequential>
     </macrodef>
@@ -311,30 +46,16 @@
         <module-crawl target="build"/>
     </target>
 
-    <target name="jar-module"
-            description="Builds all module modules and their tests">
-        <module-crawl target="jar"/>
+    <target name="war">
+        <subant target="war">
+            <property name="make.common.dir" location="${make.common.dir}"/>
+            <property name="build.dir" value="${build.dir}"/>
+            <fileset dir="${src.ui.dir}" includes="demoshell/build.xml"/>
+        </subant>
     </target>
 
-    <target name="test-module" depends="build-module">
-        <!-- Don't fail on error, instead check for flag file so we run
-            all the tests possible and can "ant generate-test-reports"
-            for all of them.
-
-            Because of this, we depend on "build-module" even though the
-            Individual module "test" targets probably have the
-            neccessary dependencies.  If they fail to compile, we won't
-            know about it.
-        -->
-        <module-crawl target="test" failonerror="false"/>
-        <available property="modules.failed" file="junitfailed.flag">
-            <filepath>
-                <dirset dir="${build.dir}/module/">
-                    <include name="**/test/"/>
-                </dirset>
-            </filepath>
-        </available>
-        <fail if="modules.failed">Contrib tests failed!</fail>
+    <target name="jar">
+        <module-crawl target="jar"/>
     </target>
 
     <macrodef name="invoke-javadoc">
@@ -383,34 +104,6 @@
 
             </javadoc>
 
-        </sequential>
-    </macrodef>
-
-    <!-- Macro for building checksum files
-        This is only needed until the "format" option is supported
-        by ant's built in checksum task
-    -->
-    <macrodef name="aribaweb-checksum">
-        <attribute name="file"/>
-        <!-- NOTE: we use the value of @{file} in the names any properties
-           set because macro's don't have variables, and otherwise we
-           wouldn't be able to checksum more then one file per build
-        -->
-        <sequential>
-            <checksum file="@{file}"
-                      property="@{file}.sum"
-                      algorithm="${checksum.algorithm}"/>
-            <basename file="@{file}" property="@{file}.base"/>
-            <concat destfile="@{file}.${checksum.algorithm}"
-                    force="yes"
-                    append="false"
-                    fixlastline="yes">
-                <header trimleading="yes">${@{file}.sum}</header>
-                <!-- empty fileset to trick concat -->
-                <fileset dir="." excludes="**"/>
-                <footer trimleading="yes">${@{file}.base}
-                </footer>
-            </concat>
         </sequential>
     </macrodef>
 </project>

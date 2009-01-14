@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Log.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Log.java#2 $
 */
 package ariba.ui.meta.core;
 
@@ -37,6 +37,12 @@ public final class Log extends ariba.util.log.Log
     */
     public static final Logger meta_detail =
         (Logger)Logger.getLogger("aribaweb.meta_detail");
+
+    /**
+        @aribaapi ariba
+    */
+    public static final Logger meta_context =
+        (Logger)Logger.getLogger("aribaweb.meta_context");
 
     /**
         Log classes cannot be instantiated.

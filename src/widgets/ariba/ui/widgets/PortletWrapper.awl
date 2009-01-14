@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PortletWrapper.awl#3 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PortletWrapper.awl#4 $
     </Copyright>
 
     <Overview>
@@ -62,55 +62,57 @@
     class="vtDropField"
     dropClass="vtDropFieldSelected"
     omitTags="$^disableDragDrop">
-    <a:DragContainer type="RegularPortlet"
-        omitTags="$^disableDragDrop"
-        dragAction="$^dragAction"
-        showParent="$true">
+    <a:DragContainer type="RegularPortlet" omitTags="$^disableDragDrop">
         <w:RoundedBox class="$portletStyle.containerCssClass" hideGradient="$portletStyle.hideGradient">
-            <table border="0" cellspacing="0" cellpadding="0" width="100%" class="portletTitleBar">\
-                <tr>\
-                    <td align="$languageLeft" width="1%">
-                        <div class="grab">&nbsp;</div>
-                    </td>
-                    <td align="$languageLeft" class="bold portletTitle">\
-                        <w:TruncateString value="$^title" size='${env().peek("portletWidth")=="narrow" ? 20 : 50}'/>\
-                    </td>\
-                    <!---
-                    <a:If ifTrue="$showWarning">
-                        <td align="$languageRight" width="1%" class="titleBarAction" style="cursor:default">\
-                            <span title="$[a004]Content retrieval still in progress -- some items may be missing or out of date.">\
-                                <a:Image filename="$fetchWarningImage"/>\
-                            </span>
-                        </td>\
-                    <a:Else ifTrue="$showError"/>
-                        <td align="$languageRight" width="1%" class="titleBarAction" style="cursor:default">\
-                            <span title="$[a005]An error occurred while retrieving content -- If this problem persists, contact your administrator.">\
-                                <a:Image filename="$fetchErrorImage"/>\
-                            </span>
-                        </td>\
-                    </a:If>
-                    -->
-                    <td align="$languageRight" width="1%" class="titleBarAction">\
-                        <a:IncludeContent name="actions" required="$false"/>
-                    </td>\
-                    <a:If ifTrue="$^showMaxMin">
-                        <td align="$languageRight" width="1%" class="titleBarAction">\
-                            <a:IncludeBlock name="TitleBarAction" action="$^toggleMinMaxAction"
-                                tooltip="$[]Show / Hide content">
-                                <a:Image filename="$minMaxButtonImage"/>
-                            </a:IncludeBlock>
+            <a:DragContainer type="RegularPortlet"
+                omitTags="$^disableDragDrop"
+                dragAction="$^dragAction"
+                showParent="$true">
+                <table border="0" cellspacing="0" cellpadding="0" width="100%" class="portletTitleBar">\
+                    <tr>\
+                        <td align="$languageLeft" width="1%">
+                            <div class="grab">&nbsp;</div>
                         </td>
-                    </a:If>
-                    <td align="$languageRight" width="1%" class="titleBarAction" style="padding-right:2px">\
-                        <a:If ifTrue="$^showClose">\
-                            <a:IncludeBlock name="TitleBarAction" action="$^closeAction"
-                                tooltip="$[]Remove this item">
-                                <a:Image filename="$portletStyle.closeImage"/>
-                            </a:IncludeBlock>
+                        <td align="$languageLeft" class="bold portletTitle">\
+                            <w:TruncateString value="$^title" size='${env().peek("portletWidth")=="narrow" ? 20 : 50}'/>\
+                        </td>\
+                        <!---
+                        <a:If ifTrue="$showWarning">
+                            <td align="$languageRight" width="1%" class="titleBarAction" style="cursor:default">\
+                                <span title="$[a004]Content retrieval still in progress -- some items may be missing or out of date.">\
+                                    <a:Image filename="$fetchWarningImage"/>\
+                                </span>
+                            </td>\
+                        <a:Else ifTrue="$showError"/>
+                            <td align="$languageRight" width="1%" class="titleBarAction" style="cursor:default">\
+                                <span title="$[a005]An error occurred while retrieving content -- If this problem persists, contact your administrator.">\
+                                    <a:Image filename="$fetchErrorImage"/>\
+                                </span>
+                            </td>\
                         </a:If>
-                    </td>
-                </tr>\
-            </table>\
+                        -->
+                        <td align="$languageRight" width="1%" class="titleBarAction">\
+                            <a:IncludeContent name="actions" required="$false"/>
+                        </td>\
+                        <a:If ifTrue="$^showMaxMin">
+                            <td align="$languageRight" width="1%" class="titleBarAction">\
+                                <a:IncludeBlock name="TitleBarAction" action="$^toggleMinMaxAction"
+                                    tooltip="$[]Show / Hide content">
+                                    <a:Image filename="$minMaxButtonImage"/>
+                                </a:IncludeBlock>
+                            </td>
+                        </a:If>
+                        <td align="$languageRight" width="1%" class="titleBarAction" style="padding-right:2px">\
+                            <a:If ifTrue="$^showClose">\
+                                <a:IncludeBlock name="TitleBarAction" action="$^closeAction"
+                                    tooltip="$[]Remove this item">
+                                    <a:Image filename="$portletStyle.closeImage"/>
+                                </a:IncludeBlock>
+                            </a:If>
+                        </td>
+                    </tr>\
+                </table>\
+            </a:DragContainer>
             <a:If ifFalse="$^isMinimized">
                 <a:IncludeContent/>\
             </a:If>

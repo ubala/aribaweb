@@ -1,0 +1,43 @@
+CHANGES.txt
+
+New in Version 0.8.2 (6/25/2008)
+---------------------------------
+- Ant build file cleanup
+    - Top level ant file!
+    - Much faster incremental builds (no rebuilding jars/wars that didn't change)
+    - Just type "ant" to build and run
+    - Non-library apps can build without AW source (just need jars)
+    - Apps automatically launched with rapid turnaround set up (ARIBA_AW_SEARCH_PATH set)
+
+- Source tree simplification
+    - Examples moved to top level examples directory
+    - Demoshell examples moved to examples/demoshell-site (out of the demoshell src)
+
+- MetaUI greatly enhanced
+    - Big performance and correctness enhancements
+    - Support for complex nested layouts (tabs, sections, to-many property display)
+    - Persistence package -- foundation for JPA/Hibernate (or other ORM) integration
+    - App nav tabs now track current page (regardless of how user got there)
+    - More MetaUI examples (BusObjUI now has Simple, Medium, and Advanced examples)
+    - Exceptions post rapid-turnaround edits (especially with .oss files) eliminated
+    - Continuing after .oss parse failure and fix now possible
+    - Cleaner factoring for rule/property assigning Annotation listeners
+    - MetaActionList now can render as button list (as well as menu button and wrapper menu link)
+    
+- AW / Widgets enhancements
+    - Nicer exception page (and proper UI rendering of exceptions occuring on first request)
+    - AWLocalLoginSessionHander -- clean support for actions that require authentication
+        before proceeding (see initSessionValidator() in demoshell/.../Application.java
+        and secureAction in examples/demoshell-site/TnE/ERPage.htm)
+    - AWJarWalker support for load-time (cheap) annotation listeners
+    
+- Many bug fixes
+    - All known example exceptions fixed
+    - Disabled ./logs/perf*.csv spew
+    - Number of fixes to GenericChooser
+    - Fix DatePicker exception (no time zone)
+    - Chooser triggering non-smooth refresh (especially with DataTables) fixed
+    - javax.servlet eliminated from .war files
+    - Fix look of (modally) disabled Nav tabs and actions
+    - Fix drag/mouse behavior in PortletWrapper
+    ...

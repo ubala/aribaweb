@@ -1,4 +1,21 @@
-<w:TabList list="$allLayouts" item="$tabLayout" label="$tabLabel" selection="$selectedLayout"/>\
-<m:Context restoreActivation="$layout.activation">
-    <m:IncludeComponent awpropertyMap="$propertyMap"/>\
+<m:Context contextKey="layout">\
+    <a:SetValue tabLayoutNames="$metaContext.properties.layoutsByZone.zMain"/>
+    <a:RefreshRegion>\
+        <table cellspacing="0" cellpadding="0" width="100%">\
+            <tr>\
+                <td class="$^class:pageTabWrapper">\
+                    <w:TabList class="pageTabWrapper" list="$tabLayoutNames" item="$currentTabName" label="$currentTabLabel" selection="$selectedTabName"/>\
+                </td>\
+            </tr>
+            <tr>\
+                <td class="$metaContext.properties.contentClass">\
+                    <div class="tabPanel">\
+                        <m:Context layout="$selectedTabName">
+                            <m:IncludeComponent/>\
+                        </m:Context>
+                    </div>
+                </td>\
+            </tr>
+        </table>
+    </a:RefreshRegion>\
 </m:Context>

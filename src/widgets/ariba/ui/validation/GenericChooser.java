@@ -20,6 +20,8 @@ import ariba.util.formatter.Formatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.text.ParseException;
 
 /*
@@ -36,7 +38,7 @@ import java.text.ParseException;
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.java#4 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.java#5 $
 */
 public class GenericChooser extends AWComponent implements ChooserSelectionState
 {
@@ -50,6 +52,7 @@ public class GenericChooser extends AWComponent implements ChooserSelectionState
     public boolean _isMulti;
     public String _displayKey;
     public Object /*AWFormatting*/ _formatter;
+    public Object /*AWFormatting*/ _chooserFormatter;
     Object _object;
     FieldPath _keyPath;
 
@@ -58,15 +61,20 @@ public class GenericChooser extends AWComponent implements ChooserSelectionState
         return false;
     }
 
-    public void renderResponse(AWRequestContext requestContext, AWComponent component)
+    public void init()
     {
-        _object = valueForBinding("object");
-        if (_object == null) _object = parent();
+        super.init();
         _keyPath = FieldPath.sharedFieldPath(stringValueForBinding("key"));
         _isMulti = booleanValueForBinding(BindingNames.multiSelect);
         _displayKey = stringValueForBinding("displayKey");
         if (_displayKey == null) _displayKey = "self";
         _formatter = valueForBinding(AWBindingNames.formatter);
+    }
+
+    public void renderResponse(AWRequestContext requestContext, AWComponent component)
+    {
+        _object = valueForBinding("object");
+        if (_object == null) _object = parent();
 
         AWBinding listBinding = bindingForName(AWBindingNames.list);
         Object choiceSource;
@@ -98,11 +106,14 @@ public class GenericChooser extends AWComponent implements ChooserSelectionState
             }
         }
 
+
         if (_type == ChooserType.Chooser) {
-            _chooserSource = ChoiceSource.get(choiceSource).chooserSelectionSource(choiceSource, _displayKey);
-            _chooserState = new ChooserState(this);
-            _chooserState.setMultiSelect(_isMulti);
-            _formatter = new FieldPathFormatter(_displayKey, _formatter);
+            if  (_chooserSource == null) {
+                _chooserSource = ChoiceSource.get(choiceSource).chooserSelectionSource(choiceSource, _displayKey);
+                _chooserState = new ChooserState(this);
+                _chooserState.setMultiSelect(_isMulti);
+                _chooserFormatter = new FieldPathFormatter(_displayKey, _formatter);
+            }
         }
         else {
             _list = ChoiceSource.get(choiceSource).list(choiceSource);
@@ -154,6 +165,7 @@ public class GenericChooser extends AWComponent implements ChooserSelectionState
             }
         }
         else {
+            if (!selected) selection = null;
             setSelection(selection);
         }
     }
@@ -169,7 +181,12 @@ public class GenericChooser extends AWComponent implements ChooserSelectionState
 
     public List selectedObjects ()
     {
-        return (List)selection();
+        Object selection = selection();
+        if (_isMulti && selection == null) {
+            selection = new ArrayList();
+            setSelection(selection);
+        }
+        return (_isMulti) ? (List)selection : Arrays.asList(selection);
     }
 
     public boolean isSelected (Object selection)

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#3 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#8 $
 */
 package ariba.ui.meta.core;
 
@@ -29,32 +29,35 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.Iterator;
 
 
 public class Meta
 {
     public static final String KeyAny = "*";
     public static final String KeyDeclare = "declare";
-    static final int LowRulePriority = -100000;
-    static final int SystemRulePriority = -200000;
-    static final int ClassRulePriority = -100000;
+    public static final int LowRulePriority = -100000;
+    public static final int SystemRulePriority = -200000;
+    public static final int ClassRulePriority = -100000;
+    public static final int TemplateRulePriority = 100000;
     static final int MaxKeyDatas = 32;
-
+    static final Object NullMarker = new Object();
+    
     Map <String, KeyData> _keyData = new HashMap();
     KeyData[] _keyDatasById = new KeyData[MaxKeyDatas];
     int _nextKeyId = 0;
     List <Rule> _rules = new ArrayList();
-    Map <MatchResult, PropertyMap> _MatchToPropsCache = new HashMap();
+    // Todo: NOT THREAD SAFE!
+    Map <ImmutableMatchResult, PropertyMap> _MatchToPropsCache = new HashMap();
     Map<PropertyMap, PropertyMap> _PropertyMapUniquer = new HashMap();
     IdentityHashMap _identityCache = new IdentityHashMap();
     RuleSet _currentRuleSet;
     Map <String, PropertyManager> _managerForProperty = new HashMap();
+    int _declareKeyMask;
 
     public Meta ()
     {
-
+        _declareKeyMask = keyData(KeyDeclare).maskValue();
     }
 
     public void addRule (Rule rule)
@@ -63,6 +66,9 @@ public class Meta
         if (predicates.size() > 0 && predicates.get(predicates.size()-1)._isDecl) {
             addDecl(rule);
         }
+
+        // After we've captured the decl, do the collapse
+        predicates = rule._predicates = rule.collapseKeyOverrides(rule._predicates);
 
         // we allow null to enable creation of a decl, but otherwise this rule has no effect
         if (rule._properties == null) return;
@@ -74,21 +80,40 @@ public class Meta
 
         // index it
         String lastScopeKey = null;
-        int mask = 0;
-        for (Predicate p : predicates) {
+        int mask = 0, antiMask = 0;
+        int count = predicates.size();
+        for (int i=0; i < count; i++) {
+            Predicate p = predicates.get(i);
+
+            // See if overridded by same key later in predicate
+            boolean overridden = false;
+            for (int j=count-1; j>i; j--) {
+                if (predicates.get(j)._key.equals(p._key)) { overridden=true; break; }
+            }
+            if (overridden) continue;
+
             KeyData data = keyData(p._key);
-            if (p._value instanceof List) {
-                for (Object v : (List)p._value) {
-                    data.addEntry(v, entryId);
+            if (p._value != NullMarker) {
+                if (p._value instanceof List) {
+                    for (Object v : (List)p._value) {
+                        data.addEntry(v, entryId);
+                    }
                 }
+                else {
+                    data.addEntry(p._value, entryId);
+                }
+                mask |= (1 << data._id);
+
+                String scopeKey = data.propertyScopeKey();
+                if (scopeKey != null) lastScopeKey = scopeKey;
+            } else {
+                antiMask |= (1 << data._id);
             }
-            else {
-                data.addEntry(p._value, entryId);
-            }
-            mask |= (1 << data._id);
-            String scopeKey = data.propertyScopeKey();
-            if (scopeKey != null) lastScopeKey = scopeKey;
         }
+
+        // all non-decl rules don't apply outside decl context
+        int declMask = declareKeyMask();
+        if ((mask & declMask) == 0) antiMask |= declMask;
 
         if (lastScopeKey != null) {
             rule._predicates = ListUtil.copyList(predicates);
@@ -100,6 +125,7 @@ public class Meta
 
         rule._id = entryId;
         rule._keyMatchesMask = mask;
+        rule._keyAntiMask = antiMask;
         _rules.add(rule);
     }
 
@@ -112,12 +138,29 @@ public class Meta
         */
         // add rule for declaration
         List <Predicate> predicates =  rule._predicates;
-        List <Predicate> prePreds = new ArrayList(predicates.subList(0, predicates.size()-1));
         Predicate declPred = predicates.get(predicates.size()-1);
+
+        // see if we have a colliding preceding contraint assignment
+        Predicate matchPred = null;
+        for (int i=predicates.size()-2; i >=0; i--) {
+            Predicate p = predicates.get(i);
+            if (p._key.equals(declPred._key)) {
+                matchPred = p;
+                break;
+            }
+        }
+        if (matchPred == null) matchPred = new Predicate(declPred._key, KeyAny);
+
+        // Mutate the predicates list to scope overrides
+        predicates = rule.collapseKeyOverrides(predicates);
+        List <Predicate> prePreds = new ArrayList(predicates.subList(0, predicates.size()-1));
+        declPred = predicates.get(predicates.size()-1);
+
+        // The decl rule...
+        prePreds.add(matchPred);
+        prePreds.add(new Predicate(KeyDeclare, true));
         Map m = new HashMap();
         m.put(declPred._key, declPred._value);
-        prePreds.add(new Predicate(declPred._key, KeyAny));
-        prePreds.add(new Predicate(KeyDeclare, true));
         addRule(new Rule(prePreds, m));
 
         // Add property decl to main rule
@@ -137,7 +180,14 @@ public class Meta
 
     public void addRule (Map predicateMap, Map propertyMap)
     {
-        addRule(new Rule(predicateMap, propertyMap));
+        addRule(predicateMap, propertyMap,  0);
+    }
+
+    public void addRule (Map predicateMap, Map propertyMap, int rank)
+    {
+        Rule rule = new Rule(predicateMap, propertyMap);
+        if (rank != 0) rule._rank = rank;
+        addRule(rule);
     }
 
     public void addRules (Map <String, Object> ruleSet, List predicates)
@@ -176,6 +226,8 @@ public class Meta
     protected void clearCaches ()
     {
         _MatchToPropsCache = new HashMap();
+        _PropertyMapUniquer = new HashMap();
+        _identityCache = new IdentityHashMap();
     }
 
     public class RuleSet
@@ -219,9 +271,20 @@ public class Meta
         return result;
     }
 
+    // Can be compared to detect if rule set has been updated (due to incremental loading)
+    public int ruleSetGeneration ()
+    {
+        return _rules.size();
+    }
+
     public Context newContext()
     {
         return new Context(this);
+    }
+
+    int declareKeyMask ()
+    {
+        return _declareKeyMask;
     }
 
     // Touch a key/value to force pre-loading/registration of associated rule files
@@ -230,8 +293,15 @@ public class Meta
         Context context = newContext();
         context.push();
         context.set(key, value);
-        context.resolvedProperties();
+        context.allProperties();
         context.pop();
+    }
+
+    Object transformValue (String key, Object value)
+    {
+        KeyData keyData = _keyData.get(key);
+        if (keyData != null && keyData._transformer != null) value = keyData._transformer.tranformForMatch(value);
+        return value;
     }
 
     MatchResult match (String key, Object value, MatchResult intermediateResult)
@@ -240,34 +310,10 @@ public class Meta
         if (keyData == null) return intermediateResult;
         int keyMask = 1 << keyData._id;
 
-        // get vec for this key/value -- if value is list, compute the union
-        int[] newArr = null;
-        if (value instanceof List) {
-            for (Object v : (List)value) {
-                int a[] = keyData.lookup(this, v);
-                newArr = union(a, newArr);
-            }
-        }
-        else {
-            newArr = keyData.lookup(this, value);
-        }
-
-        if (intermediateResult == null || intermediateResult._matches == null) {
-            return new MatchResult(newArr, keyMask);
-        }
-
-        if (newArr == null) {
-            return new MatchResult(filter(intermediateResult._matches, keyMask), 
-                    keyMask | intermediateResult._keysMatchedMask);
-        }
-
         // Does our result already include this key?  Then no need to join again
-        if ((intermediateResult._keysMatchedMask & keyMask) != 0) return intermediateResult;
+        if (intermediateResult != null && (intermediateResult._keysMatchedMask & keyMask) != 0) return intermediateResult;
 
-        // Join
-        int[] result = intersect(newArr, intermediateResult._matches,
-                1 << keyData._id, intermediateResult._keysMatchedMask);
-        return new MatchResult(result, keyMask | intermediateResult._keysMatchedMask);
+        return new MatchResult(this, keyData, value, intermediateResult);
     }
 
     // subclasses can override to provide specialized properties Map subclasses
@@ -276,9 +322,25 @@ public class Meta
         return new PropertyMap();
     }
 
+    public interface PropertyMapAwaking
+    {
+        Object awakeForPropertyMap (PropertyMap map);
+    }
+
     public static class PropertyMap extends HashMap <String, Object>
     {
         List<PropertyManager> _contextPropertiesUpdated;
+
+        void awakeProperties ()
+        {
+            for (Map.Entry<String, Object> e : entrySet()) {
+                Object value = e.getValue();
+                if (value instanceof PropertyMapAwaking) {
+                    Object newValue = ((PropertyMapAwaking)value).awakeForPropertyMap(this);
+                    if (newValue != value) put(e.getKey(), newValue);
+                }
+            }
+        }
 
         void addContextKey (PropertyManager key)
         {
@@ -301,7 +363,7 @@ public class Meta
 
         properties = newPropertiesMap();
 
-        int[] arr = filter(matchResult._matches, ~matchResult._keysMatchedMask);
+        int[] arr = filter(matchResult.matches(), ~matchResult._keysMatchedMask);
         if (arr == null) return properties;
         // first entry is count
         int count = arr[0];
@@ -323,6 +385,9 @@ public class Meta
             modifiedMask |= r.apply(this, properties);
         }
 
+        properties.awakeProperties();
+
+/* Uniquer doesn't interact well with DynamicStaticProperties
         // Unique property maps
         PropertyMap matchingMap = _PropertyMapUniquer.get(properties);
         if (matchingMap != null) {
@@ -330,14 +395,14 @@ public class Meta
         } else {
             _PropertyMapUniquer.put(properties, properties);
         }
-
-        _MatchToPropsCache.put(matchResult, properties);
+*/
+        _MatchToPropsCache.put(matchResult.immutableCopy(), properties);
         return properties;
     }
 
     void _checkMatch (MatchResult matchResult, Map values)
     {
-        int[] arr = filter(matchResult._matches, ~matchResult._keysMatchedMask);
+        int[] arr = filter(matchResult.matches(), ~matchResult._keysMatchedMask);
         if (arr == null) return;
         // first entry is count
         int count = arr[0];
@@ -355,10 +420,14 @@ public class Meta
 
             if (keyData._transformer != null) contextValue = keyData._transformer.tranformForMatch(contextValue);
 
-            if (KeyAny.equals(p._value) || objectEquals(contextValue, p._value)
+            if (contextValue != null &&
+                       ((KeyAny.equals(p._value) && !Boolean.FALSE.equals(contextValue))
+                    || objectEquals(contextValue, p._value)
                     || ((p._value instanceof List) && ((List)p._value).contains(contextValue))
-                    || ((contextValue instanceof List) && ((List)contextValue).contains(p._value)))
+                    || ((contextValue instanceof List) && ((List)contextValue).contains(p._value))))
             {
+                // okay
+            } else {
                 Log.meta_detail.debug("Possible bad rule match!  Rule: %s; predicate: %s, context val: %s",
                     r, p, contextValue);
             }
@@ -379,7 +448,7 @@ public class Meta
         return data;
     }
 
-    protected void registerKeyInitObserver (String key, ValueQueriedObserver o)
+    public void registerKeyInitObserver (String key, ValueQueriedObserver o)
     {
         keyData(key).addObserver(o);
     }
@@ -409,15 +478,32 @@ public class Meta
     }
 
     // only rules that use only the activated (queried) keys
-    int[] filter (int[] arr, int queriedMask)
+    int[] filter (int[] arr, int notQueriedMask)
     {
         if (arr == null) return null;
         int[] result = null;
         int count = arr[0];
         for (int i=0; i < count; i++) {
             int r = arr[i+1];
-            int ruleMatches = _rules.get(r)._keyMatchesMask;
-            if ((ruleMatches & queriedMask) == 0) {
+            Rule rule = _rules.get(r);
+            if ((rule._keyMatchesMask & notQueriedMask) == 0
+                    && (rule._keyAntiMask & ~notQueriedMask) == 0 ) {
+                result = addInt(result, r);
+            }
+        }
+        return result;
+    }
+
+    // only rules that use only the activated (queried) keys
+    int[] filterMustUse (int[] arr, int usesMask)
+    {
+        if (arr == null) return null;
+        int[] result = null;
+        int count = arr[0];
+        for (int i=0; i < count; i++) {
+            int r = arr[i+1];
+            Rule rule = _rules.get(r);
+            if ((rule._keyMatchesMask & usesMask) != 0) {
                 result = addInt(result, r);
             }
         }
@@ -479,16 +565,17 @@ public class Meta
         return true;
     }
 
-    protected class MatchResult
+    protected static class ImmutableMatchResult
     {
         int _keysMatchedMask;
         int[] _matches;
-        PropertyMap _properties;
 
-        public MatchResult (int[] matches, int keysMatchedMask)
+        protected ImmutableMatchResult () {}
+
+        public ImmutableMatchResult (int[] matches, int keysMatchedMask)
         {
-            _matches = matches;
             _keysMatchedMask = keysMatchedMask;
+            _matches = matches;
         }
 
         // Hash implementation so we can cache properties by MatchResult
@@ -503,21 +590,152 @@ public class Meta
         }
 
         public boolean equals(Object o) {
-            MatchResult other = (MatchResult)o;
+            ImmutableMatchResult other = (ImmutableMatchResult)o;
             return (_keysMatchedMask == other._keysMatchedMask) &&
                      _arrayEq(_matches, other._matches);
+        }
+    }
+
+    static final int[] EmptyMatchArray = {0};
+    
+    protected static class MatchResult extends ImmutableMatchResult
+    {
+        Meta _meta;
+        KeyData _keyData;
+        Object _value;
+        PropertyMap _properties;
+        MatchResult _prevMatch;
+        int _metaGeneration;
+
+        public MatchResult (Meta meta, KeyData keyData, Object value, MatchResult prev)
+        {
+            _meta = meta;
+            _keyData = keyData;
+            _value = value;
+            _prevMatch = prev;
+            _initMatch();
+        }
+
+        public int[] matches ()
+        {
+            _invalidateIfStale();
+            if (_matches == null) _initMatch();
+            return _matches;
+        }
+
+        public ImmutableMatchResult immutableCopy ()
+        {
+            _invalidateIfStale();
+            return new ImmutableMatchResult(matches(), _keysMatchedMask);
+        }
+
+        void _invalidateIfStale ()
+        {
+            if (_metaGeneration < _meta.ruleSetGeneration()) {
+                _initMatch();
+                _metaGeneration = _meta.ruleSetGeneration();
+                _properties = null;
+            }
+        }
+
+        protected void _initMatch ()
+        {
+            int keyMask = 1 << _keyData._id;
+
+            // get vec for this key/value -- if value is list, compute the union
+            int[] newArr = null;
+            if (_value instanceof List) {
+                for (Object v : (List)_value) {
+                    int a[] = _keyData.lookup(_meta, v);
+                    newArr = union(a, newArr);
+                }
+            }
+            else {
+                newArr = _keyData.lookup(_meta, _value);
+            }
+
+            int[] prevMatches = (_prevMatch == null) ? null : _prevMatch.matches();
+            if (prevMatches == null) {
+                _matches = newArr;
+                _keysMatchedMask = keyMask;
+            }
+            else {
+                if (newArr == null) {
+                    newArr = EmptyMatchArray;
+                }
+                // Join
+                _matches = _meta.intersect(newArr, prevMatches,
+                        keyMask, _prevMatch._keysMatchedMask);
+
+                // if this is a Declare match, then force match on the last property
+                if (keyMask == _meta.declareKeyMask()) {
+                    MatchResult prev = _prevMatch;
+                    // first nearest property scope key
+                    while (prev != null && prev._keyData._propertyScopeKey == null) prev = prev._prevMatch;
+                    if (prev != null) {
+                        int[] filtered = _meta.filterMustUse(_matches, prev._keyData.maskValue());
+                        if (filtered[0] != _matches[0]) {
+                            /*
+                            System.out.println("*** Filtered decl rules for must use: "
+                                + prev._keyData._key + "  " + debugString());
+                            _logMatchDiff(filtered, _matches);
+                             */
+                            _matches = filtered;
+                        }
+                    }
+                }
+                _keysMatchedMask =  keyMask | _prevMatch._keysMatchedMask;
+            }
+        }
+
+        void _logMatchDiff(int[] a, int[] b)
+        {
+            int iA = 1, sizeA = a[0], iB = 1, sizeB = b[0];
+            while (iA <= sizeA || iB <=sizeB) {
+                int c = (iA > sizeA ? 1 : (iB > sizeB ? -1
+                        : (a[iA] - b[iB])));
+                if (c == 0) {
+                    iA++; iB++;
+                } else if (c < 0) {
+                    // If A not in B, but A doesn't filter on B's mask, then add it
+                    System.out.println("  -- Only in A: " + _meta._rules.get(a[iA]));
+                    iA++;
+                }
+                else {
+                    System.out.println("  -- Only in B: " + _meta._rules.get(b[iB]));
+                    iB++;
+                }
+            }
         }
 
         public PropertyMap properties ()
         {
             if (_properties == null) {
-                _properties = propertiesForMatch(this);
+                _properties = _meta.propertiesForMatch(this);
             }
             return _properties;
         }
+
+        public String debugString ()
+        {
+            StringBuffer buf = new StringBuffer();
+            buf.append("Match Result path: ");
+            _appendPrevPath(buf);
+            return buf.toString();
+        }
+
+        void _appendPrevPath (StringBuffer buf) {
+            if (_prevMatch != null) {
+                _prevMatch._appendPrevPath(buf);
+                buf.append(" -> ");
+            }
+            buf.append(_keyData._key);
+            buf.append("=");
+            buf.append(_value);
+        }
     }
 
-    static interface ValueQueriedObserver
+    public static interface ValueQueriedObserver
     {
         void notify (Meta meta, String key, Object value);
     }
@@ -547,13 +765,18 @@ public class Meta
 
         }
 
-        private _ValueMatches get(Object value)
+        public int maskValue ()
+        {
+            return 1 << _id;
+        }
+
+        private _ValueMatches get (Object value)
         {
             if (_transformer != null) value = _transformer.tranformForMatch(value);
             _ValueMatches matches = _ruleVecs.get(value);
             if (matches == null) {
-                matches = new _ValueMatches();
-                matches._parent = _any;
+                matches = new _ValueMatches(value);
+                if (value != null && !Boolean.FALSE.equals(value)) matches._parent = _any;
                 _ruleVecs.put(value, matches);
             }
             return matches;
@@ -575,8 +798,10 @@ public class Meta
             if (!matches._read && _observers != null) {
                 // notify
                 matches._read = true;
-                for (ValueQueriedObserver o : _observers) {
-                    o.notify(owner, _key, value);
+                if (value != null) {
+                    for (ValueQueriedObserver o : _observers) {
+                        o.notify(owner, _key, value);
+                    }
                 }
             }
             // check if parent has changed and need to union in parent data
@@ -589,6 +814,12 @@ public class Meta
             _ValueMatches parent = get(parentValue);
             _ValueMatches child = get(value);
             child._parent = parent;
+        }
+
+        Object parent (Object value)
+        {
+            _ValueMatches child = get(value);
+            return child._parent._value;
         }
 
         void addObserver (ValueQueriedObserver o)
@@ -614,10 +845,16 @@ public class Meta
     }
 
     static private class _ValueMatches {
+        Object _value;
         boolean _read;
         int[] _arr;
         _ValueMatches _parent;
         int _parentSize;
+
+        private _ValueMatches(Object value)
+        {
+            _value = value;
+        }
 
         void checkParent ()
         {
@@ -636,7 +873,7 @@ public class Meta
     public static final KeyValueTransformer Transformer_KeyPresent = new KeyValueTransformer()
     {
         public Object tranformForMatch(Object o) {
-            return (o != null) ? Boolean.TRUE : Boolean.FALSE;
+            return (o != null && !(o.equals(Boolean.FALSE))) ? Boolean.TRUE : Boolean.FALSE;
         }
     };
 
@@ -644,13 +881,14 @@ public class Meta
     {
         int _id;
         int _keyMatchesMask;
+        int _keyAntiMask;
         List <Predicate> _predicates;
         Map <String, Object> _properties;
         int _rank;
 
         public Rule (List predicates, Map properties, int rank)
         {
-            _predicates = predicates;
+            _predicates = predicates; // scopeNestedContraints(predicates);
             _properties = properties;
             _rank = rank;
         }
@@ -662,8 +900,7 @@ public class Meta
 
         public Rule (Map predicateValues, Map properties)
         {
-            _predicates = Predicate.fromMap(predicateValues);
-            _properties = properties;
+            this(Predicate.fromMap(predicateValues), properties, 0);
         }
 
         // returns context keys modified
@@ -694,13 +931,74 @@ public class Meta
                 }
             }
 
-            Log.meta_detail.debug("Evaluating Rule: %s ----> %s", this, properties);
+            Log.meta_detail.debug("Evaluating Rule: %s", this);
             return updatedMask;
         }
 
         void disable ()
         {
             _rank = Integer.MIN_VALUE;
+        }
+
+        // rewrite any predicate of the form "layout=l1, class=c, layout=l2" to
+        // "class=c, layout=l1_l2"
+        List <Predicate> collapseKeyOverrides (List<Predicate> orig)
+        {
+            List result = orig;
+            int count = orig.size();
+            int collapsed = 0;
+            for (int i=0; i < count; i++) {
+                Predicate p = orig.get(i);
+                boolean hide = false;
+                // See if overridded by same key later in predicate                
+                for (int j = i + 1; j < count; j++) {
+                    Predicate pNext = orig.get(j);
+                    if (pNext._key.equals(p._key)) {
+                        // if we're overridden, we drop ours, and replace the next collision
+                        // with one with our prefix
+
+                        // make a copy if we haven't already
+                        if (result == orig) result = new ArrayList(orig.subList(0,i));
+                        hide = true;
+                        break;
+                    }
+                }
+                if (result != orig && !hide) result.add(p);
+            }
+
+            return result;
+        }
+
+        // Alias values scoped by a parent assignment on the same key
+        //  E.g. "layout=l1, class=c, layout=l2" to
+        // "layout=l1, class=c, layout=l1_l2"
+        List <Predicate> scopeNestedContraints (List<Predicate> orig)
+        {
+            List result = orig;
+            int count = orig.size();
+            for (int i=count-1; i > 0; i--) {
+                Predicate p = orig.get(i);
+                if (p._value instanceof String) {
+                    String newVal = (String)p._value;
+                    // See if overridded by same key later in predicate
+                    for (int j = i - 1; j >= 0; j--) {
+                        Predicate pPrev = orig.get(j);
+                        if (pPrev._key.equals(p._key) && pPrev._value instanceof String) {
+                            newVal = newVal.equals(KeyAny)
+                                ? (String)pPrev._value
+                                : pPrev._value + "_" + newVal;
+                        }
+                    }
+                    if (newVal != p._value) {
+                        // make a copy if we haven't already
+                        if (result == orig) result = new ArrayList(orig);
+                        Predicate pReplacement = new Predicate(p._key, newVal, p._isDecl);
+                        result.set(i, pReplacement);
+                    }
+                }
+            }
+
+            return result;
         }
 
         public String toString ()
@@ -742,6 +1040,13 @@ public class Meta
         }
     }
 
+    public static class OverrideValue
+    {
+        Object _value;
+        public OverrideValue (Object value) { _value = value; }
+        public String toString () { return _value.toString() + "(!)"; }
+    }
+
     public class PropertyManager
     {
         String _name;
@@ -753,27 +1058,28 @@ public class Meta
             _name = propertyName;
         }
 
-        Object mergeProperty (String propertyName, Object orig, Object override)
+        Object mergeProperty (String propertyName, Object orig, Object newValue)
         {
-            if (orig == null) return override;
+            if (orig == null) return newValue;
+            if (newValue instanceof OverrideValue) return ((OverrideValue) newValue)._value;
             if (_merger == null) {
                 // Perhaps should have a data-type-based merger registry?
                 if (orig instanceof Map) {
-                    if (override != null && override instanceof Map) {
+                    if (newValue != null && newValue instanceof Map) {
                         // merge maps
-//                        override = MapUtil.mergeMapIntoMapWithObjects(MapUtil.cloneMap((Map)orig), (Map)override, true);
-                        override = MapUtil.mergeMapIntoMapWithObjects(MapUtil.cloneMap((Map)orig), (Map)override);
+                        newValue = MapUtil.mergeMapIntoMapWithObjects(MapUtil.cloneMap((Map)orig), (Map) newValue, true);
                     }
                 }
 
-                return override;
+                return newValue;
             }
 
-            if (orig instanceof Context.DynamicPropertyValue || override instanceof Context.DynamicPropertyValue) {
-                return new Context.DeferredOperationChain(_merger, orig, override);
+            if (!(_merger instanceof PropertyMergerDynamic) &&
+                 (orig instanceof Context.DynamicPropertyValue || newValue instanceof Context.DynamicPropertyValue)) {
+                return new Context.DeferredOperationChain(_merger, orig, newValue);
             }
 
-            return _merger.merge(orig, override);
+            return _merger.merge(orig, newValue);
         }
     }
 
@@ -804,6 +1110,9 @@ public class Meta
     {
         Object merge (Object orig, Object override);
     }
+
+    // marker interface for PropertyMerges that can handle dynamic values
+    public interface PropertyMergerDynamic extends PropertyMerger { }
 
     public void registerPropertyMerger (String propertyName, PropertyMerger merger)
     {

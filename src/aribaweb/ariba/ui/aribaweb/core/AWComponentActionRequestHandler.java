@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#64 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#67 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -24,7 +24,6 @@ import ariba.ui.aribaweb.util.AWNodeChangeException;
 import ariba.ui.aribaweb.util.AWNodeValidator;
 import ariba.ui.aribaweb.util.AWNodeManager;
 import ariba.ui.aribaweb.util.AWSingleLocaleResourceManager;
-import ariba.ui.aribaweb.util.AW2DVector;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.core.WrapperRuntimeException;
@@ -33,8 +32,6 @@ import ariba.util.core.PerformanceState;
 import ariba.util.core.ProgressMonitor;
 
 import javax.servlet.http.HttpSession;
-import java.util.Map;
-import java.util.Iterator;
 
 public final class AWComponentActionRequestHandler extends AWConcreteRequestHandler
 {
@@ -71,6 +68,8 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
 
     private String RefreshUrl;
     private String FullRefreshUrl;
+
+    private static final String ComponentName = "AWComponentActionRequestHandler";
 
     // ** Thread Safety Considerations: see requestHandlerUrl below
 
@@ -365,63 +364,6 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         }
     }
 
-    private AW2DVector _localizedStrings;
-    protected String localizedJavaString (int stringId, String originalString, AWSingleLocaleResourceManager resourceManager)
-    {
-        String localizedString = null;
-        if (_localizedStrings == null) {
-            _localizedStrings = new AW2DVector();
-        }
-        int resourceManagerIndex = resourceManager.index();
-        localizedString = (String)_localizedStrings.elementAt(resourceManagerIndex, stringId);
-        if (localizedString == null) {
-            synchronized (this) {
-                localizedString = (String)_localizedStrings.elementAt(resourceManagerIndex, stringId);
-                if (localizedString == null) {
-                    AWStringLocalizer localizer = AWConcreteApplication.SharedInstance.getStringLocalizer();
-                    String stringTableName = "ariba.ui.aribaweb.core";
-                    String componentName = "AWComponentActionRequestHandler";
-                    Map localizedStringsHashtable =
-                        localizer.getLocalizedStrings(stringTableName,
-                                                      componentName,
-                                                      resourceManager);
-
-                    if (localizedStringsHashtable != null) {
-                        AW2DVector localizedStringsCopy = (AW2DVector)_localizedStrings.clone();
-                        Iterator keyEnumerator = localizedStringsHashtable.keySet().iterator();
-                        while (keyEnumerator.hasNext()) {
-                            String currentStringId = (String)keyEnumerator.next();
-                            // Note: an application might choose to merge awl strings and java strings into one single string
-                            // file, so we need to check for the integer key. all the awl strings will start with a letter such as
-                            // "a001".
-                            char firstCharacter = currentStringId.charAt(0);
-                            if (firstCharacter >= '0' && firstCharacter <= '9') {
-                                String currentLocalizedString = (String)localizedStringsHashtable.get(currentStringId);
-                                localizedStringsCopy.setElementAt(currentLocalizedString, resourceManagerIndex, Integer.parseInt(currentStringId));
-                            }
-                        }
-                        localizedString = (String)localizedStringsCopy.elementAt(resourceManagerIndex, stringId);
-                        if (localizedString == null) {
-//                            if (AWLocal.IsDebuggingEnabled) {
-//                                localizedString =
-//                                    AWUtil.addEmbeddedContextForDefaultString(stringId, originalString, component.namePath());
-//                            }
-//                            else {
-                                localizedString = originalString;
-//                            }
-                            localizedStringsCopy.setElementAt(localizedString, resourceManagerIndex, stringId);
-                        }
-                        _localizedStrings = localizedStringsCopy;
-                    }
-                    else {
-                        localizedString = originalString;
-                    }
-                }
-            }
-        }
-        return localizedString;
-    }
-
     public AWResponse handleRequest (AWRequest request, AWRequestContext requestContext)
     {
         AWResponse response = null;
@@ -437,7 +379,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
 
         // Appears in page loading status panel
         // use browser preferred locale since we don't have access to session yet
-        String msg = localizedJavaString(1, "Waiting for previous request to complete ...",
+        String msg = localizedJavaString(ComponentName, 1, "Waiting for previous request to complete ...",
                                          AWConcreteApplication.SharedInstance.resourceManager(request.preferredLocale()));
 
         ProgressMonitor.instance().prepare(msg, 0);
@@ -452,7 +394,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         AWPage currentPage = session.restoreCurrentPage();
 
         // Appears in page loading status panel
-        msg = localizedJavaString(2, "Processing request ...",
+        msg = localizedJavaString(ComponentName, 2, "Processing request ...",
                                   AWSingleLocaleResourceManager.ensureSingleLocale(session.resourceManager()));
 
         ProgressMonitor.instance().prepare(msg, 0);
@@ -743,70 +685,36 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         AWApplication application = application();
         AWRequestContext requestContext = null;
         try {
-            requestContext = application.createRequestContext(request);
-            response = requestContext.handleRequest(request, this);
-        }
-        catch (AWHandledException exception) {
-            AWResponseGenerating handlerResults = exception.handlerResults();
-            AWSession session = requestContext.session();
-            response = processExceptionHandlerResults(
-                handlerResults, requestContext, session);
-        }
-        catch (AWSessionRestorationException exception) {
-            // redirect the user to the front door url of the application if the session id
-            // that we are looking for is not found.
-            // Redirect the user to main application URL.
-            // Example:  If the server is busy and does not respond to the
-            // webserver within a speicific amount of time, the webserver
-            // will redirect the request to another node.  The node is selected
-            // selected randomly, we could end up on a node that does not support
-            // the current realm.  The solution is redirect the user to main
-            // application url that will result in displaying the home page
-            // for the user on the correct node from the realm.
-            markMainPageRequest(requestContext);
-            AWResponseGenerating handlerResults =
-                handleComponentActionSessionValidationError(
-                    requestContext, exception);
-            if (handlerResults != null) {
-                response = handlerResults.generateResponse();
-            }
-            else {
-                HttpSession httpSession = requestContext.createHttpSession();
-                try {
-                    handlerResults = handleSessionRestorationError(requestContext);
-                    response = processExceptionHandlerResults(handlerResults, requestContext, AWSession.session(httpSession));
-                }
-                catch (RuntimeException secondException) {
-                    Log.aribaweb.debug(
-                        "*** exception handling session restoration exception: %s",
-                        ariba.util.core.SystemUtil.stackTrace(secondException));
-                    response = defaultHandleException(requestContext, secondException).generateResponse();
-                }
-            }
-        }
-        catch (AWNodeChangeException e) {
-            // This could occur with softafinity when an administrator
-            // redirects all users accessing the same object to a specific
-            // node.
-            AWNodeValidator nv = e.getNodeValidator();
-            if (nv == null) {
-                nv = AWNodeManager.getDefaultNodeValidator();
-            }
-
-            Assert.that(nv != null, "AWNodeChangeException caught but no valid " +
-                                    "AWNodeValidator declared in the nodeValidationException.");
-            AWResponseGenerating handlerResults =
-                nv.handleNodeValidationException(requestContext);
-            nv.terminateCurrentSession(requestContext);
-            response = handlerResults.generateResponse();
-        }
-        catch (AWSessionValidationException exception) {
-            // see comment in handler of AWSessionRestorationException
-            // redirec the user to the main application url.
             try {
-                if (AWConcreteApplication.IsDebuggingEnabled) {
-                    Log.aribaweb.debug("AWComponentActionRequestHandler: handling session validation exception");
+                requestContext = application.createRequestContext(request);
+                try {
+                    response = requestContext.handleRequest(request, this);
                 }
+                catch (WrapperRuntimeException e) {
+                    if (e.originalException() instanceof AWSessionValidationException)
+                        throw (AWSessionValidationException)e.originalException();
+                    throw e;
+                }
+
+            }
+            catch (AWHandledException exception) {
+                AWResponseGenerating handlerResults = exception.handlerResults();
+                AWSession session = requestContext.session();
+                response = processExceptionHandlerResults(
+                    handlerResults, requestContext, session);
+            }
+            catch (AWSessionRestorationException exception) {
+                // redirect the user to the front door url of the application if the session id
+                // that we are looking for is not found.
+                // Redirect the user to main application URL.
+                // Example:  If the server is busy and does not respond to the
+                // webserver within a speicific amount of time, the webserver
+                // will redirect the request to another node.  The node is selected
+                // selected randomly, we could end up on a node that does not support
+                // the current realm.  The solution is redirect the user to main
+                // application url that will result in displaying the home page
+                // for the user on the correct node from the realm.
+                markMainPageRequest(requestContext);
                 AWResponseGenerating handlerResults =
                     handleComponentActionSessionValidationError(
                         requestContext, exception);
@@ -814,24 +722,68 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                     response = handlerResults.generateResponse();
                 }
                 else {
-                    handlerResults = handleSessionValidationError(requestContext, exception);
-                    AWSession session = requestContext.session();
-                    response = processExceptionHandlerResults(handlerResults, requestContext, session);
+                    HttpSession httpSession = requestContext.createHttpSession();
+                    try {
+                        handlerResults = handleSessionRestorationError(requestContext);
+                        response = processExceptionHandlerResults(handlerResults, requestContext, AWSession.session(httpSession));
+                    }
+                    catch (RuntimeException secondException) {
+                        Log.aribaweb.debug(
+                            "*** exception handling session restoration exception: %s",
+                            ariba.util.core.SystemUtil.stackTrace(secondException));
+                        response = defaultHandleException(requestContext, secondException).generateResponse();
+                    }
                 }
             }
-            catch (RuntimeException e) {
-                AWGenericException newException =
-                    new AWGenericException(
-                        "Error occurred while handling session validation.  Please make" +
-                        " sure that if session validation is configured properly.",e);
-                return handleException(requestContext, newException).generateResponse();
-            }
-        }
-        catch (AWSiteUnavailableException e) {
-            AWResponseGenerating handlerResults =
-                handleSiteUnavailableException(requestContext);
-            if (handlerResults != null) {
+            catch (AWNodeChangeException e) {
+                // This could occur with softafinity when an administrator
+                // redirects all users accessing the same object to a specific
+                // node.
+                AWNodeValidator nv = e.getNodeValidator();
+                if (nv == null) {
+                    nv = AWNodeManager.getDefaultNodeValidator();
+                }
+
+                Assert.that(nv != null, "AWNodeChangeException caught but no valid " +
+                                        "AWNodeValidator declared in the nodeValidationException.");
+                AWResponseGenerating handlerResults =
+                    nv.handleNodeValidationException(requestContext);
+                nv.terminateCurrentSession(requestContext);
                 response = handlerResults.generateResponse();
+            }
+            catch (AWSessionValidationException exception) {
+                // see comment in handler of AWSessionRestorationException
+                // redirec the user to the main application url.
+                try {
+                    if (AWConcreteApplication.IsDebuggingEnabled) {
+                        Log.aribaweb.debug("AWComponentActionRequestHandler: handling session validation exception");
+                    }
+                    AWResponseGenerating handlerResults =
+                        handleComponentActionSessionValidationError(
+                            requestContext, exception);
+                    if (handlerResults != null) {
+                        response = handlerResults.generateResponse();
+                    }
+                    else {
+                        handlerResults = handleSessionValidationError(requestContext, exception);
+                        AWSession session = requestContext.session();
+                        response = processExceptionHandlerResults(handlerResults, requestContext, session);
+                    }
+                }
+                catch (RuntimeException e) {
+                    AWGenericException newException =
+                        new AWGenericException(
+                            "Error occurred while handling session validation.  Please make" +
+                            " sure that if session validation is configured properly.",e);
+                    return handleException(requestContext, newException).generateResponse();
+                }
+            }
+            catch (AWSiteUnavailableException e) {
+                AWResponseGenerating handlerResults =
+                    handleSiteUnavailableException(requestContext);
+                if (handlerResults != null) {
+                    response = handlerResults.generateResponse();
+                }
             }
         }
         catch (RuntimeException runtimeException) {

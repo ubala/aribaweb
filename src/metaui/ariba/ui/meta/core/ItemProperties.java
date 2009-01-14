@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ItemProperties.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ItemProperties.java#2 $
 */
 package ariba.ui.meta.core;
 
@@ -22,13 +22,13 @@ public class ItemProperties
 {
     String _name;
     Map _properties;
-    Context.Activation _activation;
+    boolean _hidden;
 
-    public ItemProperties(String name, Map properties, Context.Activation activation)
+    public ItemProperties(String name, Map properties, boolean hidden)
     {
         _name = name;
         _properties = properties;
-        _activation = activation;
+        _hidden = hidden;
     }
 
     public String name() {
@@ -39,7 +39,8 @@ public class ItemProperties
         return _properties;
     }
 
-    public Context.Activation activation() {
-        return _activation;
+    public boolean isHidden()
+    {
+        return _hidden;
     }
 }

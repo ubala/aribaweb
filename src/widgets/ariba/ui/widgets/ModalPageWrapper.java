@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.java#30 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.java#32 $
 */
 package ariba.ui.widgets;
 
@@ -21,6 +21,7 @@ import ariba.ui.aribaweb.core.AWPageCacheMark;
 import ariba.ui.aribaweb.core.AWPage;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWBinding;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.util.core.Assert;
 
@@ -49,12 +50,7 @@ public class ModalPageWrapper extends AWComponent implements ActionInterceptor
         super.init();
 
         // see if there's a client panel in our parent chain
-        _inClientPanel = false;
-        AWComponent p = this;
-        do {
-            _inClientPanel = p.isClientPanel();
-            p = p.parent();
-        } while (p != null && !_inClientPanel);
+        _inClientPanel = inClientPanel(this);
 
         _hasBodyAreaSubTemplate = hasSubTemplateNamed("bodyArea");
         _hasBottomLeftAreaSubTemplate = hasSubTemplateNamed("bottomLeftArea");
@@ -83,6 +79,22 @@ public class ModalPageWrapper extends AWComponent implements ActionInterceptor
         /*  Use this unstead when Charles makes the methods public...
         _returnPage = session().requestHistory(null).pageAtOffsetFromLastElement(1).pageComponent();
         */
+    }
+
+    /*
+        ModalPageWrapper.okClicked calls prepareToExit and before that is also evaluates
+        and other binding for okClicked action.  Some of those bindings were also calling prepareToExit (via backPage)
+
+        The result to 2 calls were made to Confirmation.hideConfirmation(requestContext()), where we only
+        need to make one call to maintain correct stack on the env for the confirmation id.
+
+        So we added the checkin to allow one call to prepageToExit per one call to invokeAction.
+    */
+    private static String PrepareToExit = "PrepareToExit";
+    public AWResponseGenerating invokeAction(AWRequestContext requestContext, AWComponent component)
+    {
+        requestContext().remove(PrepareToExit);
+        return super.invokeAction(requestContext, component);
     }
 
 
@@ -116,6 +128,17 @@ public class ModalPageWrapper extends AWComponent implements ActionInterceptor
         ModalPageWrapper instance =
             (ModalPageWrapper)component.env().peek(EnvironmentKey);
         return instance;
+    }
+
+    public static boolean inClientPanel (AWComponent component)
+    {
+        boolean inClientPanel;
+        do {
+            inClientPanel = component.isClientPanel();
+            component = component.parent();
+        } while (component != null && !inClientPanel);
+
+        return inClientPanel;
     }
 
     /**
@@ -164,6 +187,10 @@ public class ModalPageWrapper extends AWComponent implements ActionInterceptor
 
     public void prepareToExit ()
     {
+        if (requestContext().get(PrepareToExit) != null) {
+            return;
+        }
+
         if (_panelId == null) {
             session().truncatePageCache(_pageCacheMark, true);
         } else {
@@ -172,6 +199,9 @@ public class ModalPageWrapper extends AWComponent implements ActionInterceptor
             // Todo: would this me the wrong page?
             page().popModalPanel();            
         }
+        
+        // block extra calls to prepareToExit
+        requestContext().put(PrepareToExit, PrepareToExit);
     }
 
     /* Default impls if okction and cancelAction aren't bound */

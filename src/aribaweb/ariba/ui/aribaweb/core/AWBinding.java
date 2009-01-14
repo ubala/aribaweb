@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBinding.java#44 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBinding.java#45 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -41,6 +41,7 @@ import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.List;
+import java.util.LinkedHashMap;
 
 final class AWFormattedBinding extends AWVariableBinding
 {
@@ -1493,8 +1494,10 @@ abstract public class AWBinding extends AWBaseObject implements Cloneable
 
     public static AWBindingDictionary bindingsDictionary (Map bindingsHashtable, NameFilter filter)
     {
-        // This is provided to allow users of AWIncludeComponent's awbindingsDictionary to convert a Map of AWBindings to an AWBindingDictionary with uniqued keys.
-        Map uniquedHashtable = MapUtil.map(bindingsHashtable.size());
+        // This is provided to allow users of AWIncludeComponent's awbindingsDictionary to
+        // convert a Map of AWBindings to an AWBindingDictionary with uniqued keys.
+        // (Use LinkedHashMap to keep bindings in original order)
+        Map uniquedHashtable = new LinkedHashMap(bindingsHashtable.size());
         if (!bindingsHashtable.isEmpty()) {
             Iterator bindingEnumerator = bindingsHashtable.values().iterator();
             while (bindingEnumerator.hasNext()) {
@@ -1545,8 +1548,8 @@ abstract public class AWBinding extends AWBaseObject implements Cloneable
         String message = null;
         if (object instanceof AWComponent) {
             AWComponent component = (AWComponent)object;
-            message = Fmt.S("The following exception occurred while evaluating\nfieldpath: %s\nComponent path:\n%s",
-                    toString(), component.componentPath("\n").toString());
+            message = Fmt.S("The following exception occurred while evaluating fieldpath: %s, Component: %s",
+                    toString(), component.toString());
         }
         else {
             message = Fmt.S("The following exception occurred while evaluating fieldpath: %s\n", fieldPath);

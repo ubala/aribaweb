@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaRules.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaRules.java#5 $
 */
 package ariba.ui.meta.core;
 
@@ -25,6 +25,7 @@ import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWTemplate;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.util.core.Assert;
+import ariba.util.core.Fmt;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +62,12 @@ public class MetaRules extends AWContainerElement implements AWHtmlTemplateParse
                 ruleSet.disableRules();
                 // FIXME!  Need to support reloading rules with same "natural order"
                 // salience as in the original rule set
+
+                // Force page rerendering, because we are invalidating the global
+                // match -> property -> componentreference cache and will possibly
+                // break the interphase (render -> applyValues) change rule for
+                // meta content rendered *before* this
+                component.requestContext().forceRerender();
             }
             data = null;
         }
@@ -72,13 +79,16 @@ public class MetaRules extends AWContainerElement implements AWHtmlTemplateParse
 
         Meta.RuleSet ruleSet= data.elementMap.get(this);
         if (ruleSet == null) {
-            meta.beginRuleSet();
+            meta.beginRuleSet(Meta.TemplateRulePriority);
             try {
                 new Parser(meta, contentString()).addRulesWithPredicate(
                         Arrays.asList(new Meta.Predicate(TemplateId, templateId)));
+            } catch (Error e) {
+                meta.endRuleSet().disableRules();
+                throw new AWGenericException(Fmt.S("Error reading rules in <m:Rules> tag in %s -- %s", template.templateName(), e));
             } catch (Exception e) {
                 meta.endRuleSet().disableRules();
-                throw new AWGenericException(e);
+                throw new AWGenericException(Fmt.S("Exception reading rules in <m:Rules> tag in %s", template.templateName()), e);
             }
             data.elementMap.put(this, meta.endRuleSet());
         }

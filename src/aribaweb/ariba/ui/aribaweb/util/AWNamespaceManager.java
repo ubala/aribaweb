@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNamespaceManager.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNamespaceManager.java#4 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -175,7 +175,9 @@ public class AWNamespaceManager
 
         public String lookup (String referenence)
         {
-            return (_allowedSet.contains(referenence) || allowedPrefix(referenence)) ? referenence
+            return (!referenence.contains(":")
+                        && (_allowedSet.contains(referenence) || allowedPrefix(referenence))) 
+                    ? referenence
                     : ((_fallbackResolver != null) ? _fallbackResolver.lookup(referenence)
                                                    : null);
         }

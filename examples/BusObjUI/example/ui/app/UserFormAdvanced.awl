@@ -1,0 +1,89 @@
+<w:HintMessage>
+    Example of Meta-Data derived form UI.  Use "Operation" menu below to see how
+    contextual meta-data yields diffent results as context is changed. Try clicking
+    Save to see how the validation framework comes into play.
+</w:HintMessage>
+
+Operation:
+<w:GenericChooser list='${["create", "edit", "view"]}' key="op" type="Popup" action="$null"/>
+<hr/>
+
+<m:Context operation="$op">
+    <m:Rules>
+        /*
+            Custom OSS rules specific to this page
+            More rules come in from busobj/rules.oss, and from annotations on the Java classes
+        */
+        class=example.ui.busobj.User {
+            field { after:Overview.zLeft } 
+ 
+            /* Custom layout directives for email and phone: put in Right Zone ... */
+            field=(firstName, lastName) { after:zLeft }
+            field=email { after:zRight }
+            field=projects { after:Projects.zDetail }
+
+            /* Use a custom AWXRatingBar component for the "rating" field and put it at the top */
+            field=rating {
+                editable=false {component:AWXRatingBar;}
+                editable { bindings:{isRefresh:true} }
+                after:zTop;
+            }
+ 
+            field=(rating, bio) { after:Details.zBottom }
+            field=password { visible:false }
+
+            field=accountStatus {
+                /* Tell the GenericChooser for this enum field to render as a PopupControl */
+                editable { bindings:{ type:PopupControl } }
+            }
+
+            operation=view {
+                field=email { after:lastName }
+                field=birthDay { after:email }
+            }
+
+            operation=create {
+                /* Hide all fields other than firstName, lastName, email, and birthday */
+                field { after:zNone; }
+                field=(firstName, lastName) { after:zLeft }
+                field=(email, birthDay) { after:zRight }
+            }
+
+            /* Replace the default Inspect layout with something nested */
+            operation=(view, edit)
+            layout=Inspect {
+                traits:Stack!;
+
+                @layout#ActionMenu;
+                @layout#Form;
+                @layout#Tabs {
+                    contentClass:tabContentWrapper;
+                    @layout=Overview {
+                        traits:Form;
+                        class { zonePath:Overview }
+                    }
+                    @layout=Details {
+                        traits:Form;
+                        class { zonePath:Details }
+                    }
+                    @layout=Projects {
+                        traits:Form;
+                        class { zonePath:Projects }
+                    }
+                }
+            }
+        }
+    </m:Rules>
+
+    <a:If ifTrue="$metaContext.properties.editing">
+        <div style="float:right">
+            <w:TextButton action="$save">Save</w:TextButton>
+        </div>
+    </a:If>
+    <m:Context object="$user" layout="Inspect" filterActions="instance">
+        <!-- The whole from comes from THIS!  The bindings (i.e. user, operation)
+             in its containing context dictate what gets generated here -->
+        <!--<pre>$metaContext.debugString</pre>-->
+        <m:IncludeComponent/>
+    </m:Context>
+</m:Context>

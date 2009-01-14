@@ -11,28 +11,31 @@
             </a:If>\
         </td>
          <a:For list="$actionCategories" item="$actionCategory">\
+            <m:Context actionCategory="$actionCategory.name">
             <a:If ifTrue="$showCurrentCategory">\
                 <td align="left" class="mastCmd" width="1%">\
                     <a:SetValue currentMenuId="$requestContext.nextElementId"/>\
-                    <w:PopupMenuLink class="mastCmdMenu" awname="$actionCategory.properties.label"
+                    <w:PopupMenuLink class="mastCmdMenu" awname="$metaContext.properties.label"
                                    menuId="$currentMenuId" position="this" omitTags="$disabled">\
-                        <a:String value="$actionCategory.properties.label"/>\
+                        <a:String value="$metaContext.properties.label"/>\
                     </w:PopupMenuLink>\
                     <a:If ifFalse="$disabled">
                         <w:PopupMenu menuId="$currentMenuId">\
                             <a:For list="$actions" item="$action">\
-                                <a:If ifTrue="$currentItemIsInTop">\
-                                    <w:PopupMenuItem action="$currentItemClicked"
-                                                   awname="$action.name">\
-                                        $action.properties.label\
-                                    </w:PopupMenuItem>\
-                                <a:Else/>\
-                                    <w:PopupMenuItem action="$overflowItemClicked"
-                                                   awname="action.name"
-                                                   collapsed="$true">\
-                                        $action.properties.label\
-                                    </w:PopupMenuItem>\
-                                </a:If>\
+                                <m:Context action="$action.name">
+                                    <a:If ifTrue="$currentItemIsInTop">\
+                                        <w:PopupMenuItem action="$currentItemClicked"
+                                                       awname="$action.name">\
+                                            $metaContext.properties.label\
+                                        </w:PopupMenuItem>\
+                                    <a:Else/>\
+                                        <w:PopupMenuItem action="$overflowItemClicked"
+                                                       awname="action.name"
+                                                       collapsed="$true">\
+                                            $metaContext.properties.label\
+                                        </w:PopupMenuItem>\
+                                    </a:If>\
+                                </m:Context>
                             </a:For>\
                             <a:If notEqualNull="$overflowActions">
                                 <w:PopupMenuItem action="$showAllClicked"
@@ -44,6 +47,7 @@
                     </a:If>
                 </td>\
             </a:If>\
+        </m:Context>
         </a:For>
      <a:Else/>\
          <td align="left" width="25px" class="mastCmd">

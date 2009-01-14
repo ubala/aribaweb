@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.java#3 $
 */
 package ariba.ui.meta.layouts;
 
@@ -30,11 +30,14 @@ import java.util.Map;
 
 public class MetaForm extends AWComponent implements AWFullValidationHandler
 {
+    public static String[] ZonesTLRBD = {UIMeta.ZoneLeft, UIMeta.ZoneRight,
+                                         UIMeta.ZoneTop, UIMeta.ZoneBottom,
+                                         "zDetail"};
     public Object _object;
-    public ItemProperties _field;
-    public List<ItemProperties> _allFields;
-    public Map<String, List<ItemProperties>> _fieldsByZone;
-    Context _contextSnapshot;
+    public String _field;
+    public Map<String, List<String>> _fieldsByZone;
+    Context.Snapshot _contextSnapshot;
+    public Object _properties; 
 
     public void init() {
         super.init();
@@ -43,22 +46,14 @@ public class MetaForm extends AWComponent implements AWFullValidationHandler
     public void renderResponse (AWRequestContext requestContext, AWComponent component)
     {
         Context context = MetaContext.currentContext(this);
-        UIMeta meta = (UIMeta)context.meta();
 
         _object = context.values().get("object");
-        if (!hasBinding("useFourZone") || booleanValueForBinding("useFourZone")) {
-            _fieldsByZone = meta.fieldsByZones(context);
-            _allFields = null;
-        } else {
-            _allFields = meta.fieldList(context);
-            _fieldsByZone = null;
-        }
 
         // register validation callback if necessary
         Boolean editing = (Boolean)context.propertyForKey(UIMeta.KeyEditing);
         if (editing != null && editing.booleanValue()) {
             _contextSnapshot = context.snapshot();
-            // FIXME!!  Need to change error manager not to add dups
+            // ToDo: Need to change error manager not to add dups
             errorManager().registerFullValidationHandler(this);
         }
         super.renderResponse(requestContext, component);
@@ -76,26 +71,25 @@ public class MetaForm extends AWComponent implements AWFullValidationHandler
     public void evaluateValidity(AWComponent pageComponent)
     {
         if (_fieldsByZone != null) {
-            for (List<ItemProperties> fields : _fieldsByZone.values()) {
-                processValidationForFields(fields);
+            for (String zone : ZonesTLRBD) {
+                List<String> fields = _fieldsByZone.get(zone);
+                if (fields != null) processValidationForFields(fields);
             }
-        } else {
-            processValidationForFields(_allFields);
         }
     }
 
-    void processValidationForFields (List<ItemProperties>fields)
+    void processValidationForFields (List<String> fields)
     {
-        for (ariba.ui.meta.core.ItemProperties fi : fields) {
-            if (fi.properties().get(UIMeta.KeyValid) != null) {
-                // restore context for validation evaluation
-                _contextSnapshot.restoreActivation(fi.activation());
-                String errorMessage = UIMeta.validationError(_contextSnapshot);
-                _contextSnapshot.pop();
-                if (errorMessage != null) {
-                    recordValidationError(new AWErrorInfo(_object, fi.name(), null,
-                        errorMessage, null, false));
-                }
+        for (String fi : fields) {
+            // restore context for validation evaluation
+            Context context = _contextSnapshot.hydrate();
+            context.push();
+            context.set(UIMeta.KeyField, fi);
+            String errorMessage = UIMeta.validationError(context);
+            context.pop();
+            if (errorMessage != null) {
+                recordValidationError(new AWErrorInfo(_object, fi, null,
+                    errorMessage, null, false));
             }
         }
     }

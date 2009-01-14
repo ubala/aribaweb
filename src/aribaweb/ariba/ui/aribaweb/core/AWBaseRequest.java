@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#62 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#63 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -90,6 +90,8 @@ abstract public class AWBaseRequest extends AWBaseObject
     private String[] _senderIds;
     private boolean _isQueued = false;
 
+    private static final String ComponentName = "AWBaseRequest";
+    
     public static final String AWLogFilterListKey = "AWLogFilter";
     abstract protected int applicationNumberInt ();
     abstract public InputStream inputStream ();
@@ -210,6 +212,9 @@ abstract public class AWBaseRequest extends AWBaseObject
                     if (headerContentType == null) {
                         headerContentType = MIME.ContentTypeApplicationOctetStream;
                     }
+
+                    // get locale for this request.  Default to browser preferred locale.
+                    Locale locale = preferredLocale();
                     // get max size for this request
                     int maxLength = AWMimeReader.maxBytesPerChunk();
                     HttpSession httpSession = getSession(false);
@@ -218,12 +223,17 @@ abstract public class AWBaseRequest extends AWBaseObject
                         if (length != null) {
                             maxLength = length.intValue();
                         }
+                        locale = (Locale)httpSession.getAttribute(Locale.class.getName());
                     }
 
                     String sessionId = initSessionId();
                     ProgressMonitor.register(sessionId);
-                    ProgressMonitor.instance().prepare(/*[In file upload status panel]*/ "Uploaded %s KB of %s KB...",
-                            contentLength()/1024);
+
+                    // Message for file upload status panel
+                    String msg = localizedJavaString(ComponentName, 1, "Uploaded %s KB of %s KB...",
+                                        AWConcreteServerApplication.sharedInstance().resourceManager(locale));
+
+                    ProgressMonitor.instance().prepare(msg, contentLength()/1024);
 
                     AWFileData fileData =
                         mimeReader.nextChunk(fileName, headerContentType, maxLength);

@@ -51,14 +51,14 @@ public class ExpressionSyntaxException extends ExprException
      */
     public String toString()
     {
-        if ( getReason() == null ) {
+        if ( getCause() == null ) {
           return super.getLocalizedMessage();
         }
 
         FastStringBuffer buffer = new FastStringBuffer(500);
         buffer.append(super.getLocalizedMessage());
         buffer.append("\nReason:\n");
-        buffer.append(getReason());
+        buffer.append(getCause());
         buffer.append("\n");
         return buffer.toString();
     }

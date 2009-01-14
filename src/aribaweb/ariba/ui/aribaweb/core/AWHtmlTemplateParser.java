@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHtmlTemplateParser.java#42 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHtmlTemplateParser.java#44 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -37,6 +37,7 @@ import ariba.util.core.Assert;
 import java.util.List;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplateParser
@@ -210,7 +211,8 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
             isDebuggingEnabled = awdebugValue.equals("$true") || awdebugValue.equals("true");
             attributeList.remove(AWBindingNames.awdebug);
         }
-        Map bindingsHashtable = MapUtil.map();
+        // LinkedHashMap to keep bindings in declaration order
+        Map bindingsHashtable = new LinkedHashMap();
         Iterator keysIterator = attributeList.keySet().iterator();
         while (keysIterator.hasNext()) {
             AWBinding newBinding = null;
@@ -624,7 +626,8 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
     private Map parseTagAttributes (String tagBodyString)
     {
         String equalsSkipSet = "= \t\n\r/";
-        Map tagAttributes = MapUtil.map();
+        // use LinkedHashMap to preserve attribute ordering
+        Map tagAttributes = new LinkedHashMap();
         int currentIndex = 0;
         if (tagBodyString.endsWith("/")) {
             tagBodyString = tagBodyString.substring(0, tagBodyString.length() - 1);
@@ -1046,12 +1049,20 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
         _resolver = resolver;
     }
 
+    public static String packageNameForTemplate (String templateName, AWComponent component)
+    {
+        // try to use the path in the template name as the package, if available
+        return (templateName.contains("/"))
+                ? templateName.substring(0, templateName.lastIndexOf("/")).replace("/", ".")
+                : component.getCurrentPackageName();
+    }
+
     public synchronized AWTemplate templateFromString (String templateString, String templateName, AWComponent component)
     {
         // This gets cleared by reset()
         _component = component;
         AWNamespaceManager.Resolver origResolver = _resolver;
-        _resolver = AWNamespaceManager.instance().resolverForPackage(_component.getCurrentPackageName());
+        _resolver = AWNamespaceManager.instance().resolverForPackage(packageNameForTemplate(templateName, component));
         AWTemplate template = templateFromString(templateString, templateName);
         _resolver = origResolver;
         return template;

@@ -20,59 +20,14 @@
     $Id:  $
  -->
 
-<project name="module-build" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
-    <echo>Building ${ant.project.name}...</echo>
+<project name="src-module" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+    <description>
+       Included by all AW core jar build.xml files
+    </description>
 
-    <import file="${make.common.dir}/common-build.xml"/>
-
-    <!-- TODO: adjust build.dir/dist.dir appropriately when a module project is run individually -->
-    <property name="build.dir" location="../../build/module/${ant.project.name}"/>
-    <property name="dist.dir" location="../../dist/module/${ant.project.name}"/>
-    <property name="maven.dist.dir" location="../../dist/maven"/>
-
-    <available property="module.has.tests" type="dir" file="test"/>
-
-    <path id="classpath">
-        <resources refid="build.deps"/>
-        <resources refid="build.deps-internal"/>
-        <resources refid="build.jars"/>
-    </path>
-
-    <path id="test.classpath">
-        <path refid="classpath"/>
-        <pathelement location="../../build/classes/test/"/>
-        <pathelement location="${junit.jar}"/>
-        <pathelement location="${build.dir}/classes/java"/>
-    </path>
-
-    <path id="junit.classpath">
-        <path refid="test.classpath"/>
-        <pathelement location="${build.dir}/classes/test"/>
-        <pathelement location="${build.dir}/classes/java"/>
-    </path>
-
-    <target name="init" depends="common.init"/>
-    <target name="compile-test" depends="init" if="module.has.tests">
-        <antcall target="common.compile-test" inheritRefs="true"/>
-    </target>
-    <target name="test" depends="init" if="module.has.tests">
-        <antcall target="common.test" inheritRefs="true"/>
-    </target>
-    <target name="build" depends="jar, compile-test"/>
-
-    <available
-            type="file"
-            file="${pom.xml}"
-            property="pom.xml.present">
-    </available>
-
-    <target name="dist-maven" if="pom.xml.present" depends="compile">
-        <artifact:pom file="${common.dir}/build/aribaweb-parent-pom.xml"
-                      id="maven.project"/>
-        <artifact:pom file="${common.dir}/build/aribaweb-core-pom.xml" id="maven.project"/>
-        <artifact:pom file="${common.dir}/build/aribaweb-module-pom.xml"
-                      id="maven.project"/>
-        <m2-deploy/>
-    </target>
+    <!-- Nothing to do here... -->
+    <import file="common-build.xml"/>
 
 </project>
+
+

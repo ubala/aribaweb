@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#14 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -22,6 +22,7 @@ import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.core.PerformanceState;
 import java.util.List;
+import java.util.Map;
 
 public class AWFormRedirect extends AWComponent
 {
@@ -148,6 +149,16 @@ public class AWFormRedirect extends AWComponent
     {
         getFormNames().add(name);
         getFormValues().add(value);
+    }
+
+    public void addFormValues (Map <String, String[]> values)
+    {
+        for (Map.Entry<String, String[]> e : values.entrySet()) {
+            String[] vals = (String[])e.getValue();
+            for (int i = 0; i < vals.length; i++) {
+                addFormValue(e.getKey(), vals[i]);
+            }
+        }
     }
 
     public void setFormActionUrl (String url)

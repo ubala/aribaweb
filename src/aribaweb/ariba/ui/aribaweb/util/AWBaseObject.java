@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBaseObject.java#21 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBaseObject.java#22 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -23,9 +23,13 @@ import ariba.util.core.Fmt;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.ListUtil;
 import ariba.util.fieldvalue.FieldValue;
+import ariba.ui.aribaweb.core.AWStringLocalizer;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
+
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -299,5 +303,59 @@ abstract public class AWBaseObject extends Object implements AWObject
     public void ensureFieldValuesClear ()
     {
         ensureFieldValuesClear(getClass(), AWBaseObject.class);
+    }
+
+
+    private static AW2DVector LocalizedStrings;
+    private static String StringTableName = "ariba.ui.aribaweb.core";
+
+    public static String localizedJavaString (String componentName,
+                                              int stringId, String originalString,
+                                              AWSingleLocaleResourceManager resourceManager)
+    {
+        String localizedString = null;
+        if (LocalizedStrings == null) {
+            LocalizedStrings = new AW2DVector();
+        }
+        int resourceManagerIndex = resourceManager.index();
+        localizedString = (String)LocalizedStrings.elementAt(resourceManagerIndex, stringId);
+        if (localizedString == null) {
+            synchronized (LocalizedStrings) {
+                localizedString = (String)LocalizedStrings.elementAt(resourceManagerIndex, stringId);
+                if (localizedString == null) {
+                    AWStringLocalizer localizer = AWConcreteApplication.SharedInstance.getStringLocalizer();
+                    Map localizedStringsHashtable =
+                        localizer.getLocalizedStrings(StringTableName,
+                                                      componentName,
+                                                      resourceManager);
+
+                    if (localizedStringsHashtable != null) {
+                        AW2DVector localizedStringsCopy = (AW2DVector)LocalizedStrings.clone();
+                        Iterator keyEnumerator = localizedStringsHashtable.keySet().iterator();
+                        while (keyEnumerator.hasNext()) {
+                            String currentStringId = (String)keyEnumerator.next();
+                            // XXX aliu: an application might choose to merge awl strings and java strings into one single string
+                            // file, so we need to check for the integer key. all the awl strings will start with a letter such as
+                            // "a001".
+                            char firstCharacter = currentStringId.charAt(0);
+                            if (firstCharacter >= '0' && firstCharacter <= '9') {
+                                String currentLocalizedString = (String)localizedStringsHashtable.get(currentStringId);
+                                localizedStringsCopy.setElementAt(currentLocalizedString, resourceManagerIndex, Integer.parseInt(currentStringId));
+                            }
+                        }
+                        localizedString = (String)localizedStringsCopy.elementAt(resourceManagerIndex, stringId);
+                        if (localizedString == null) {
+                            localizedString = originalString;
+                            localizedStringsCopy.setElementAt(localizedString, resourceManagerIndex, stringId);
+                        }
+                        LocalizedStrings = localizedStringsCopy;
+                    }
+                    else {
+                        localizedString = originalString;
+                    }
+                }
+            }
+        }
+        return localizedString;
     }
 }

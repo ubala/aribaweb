@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.awl#4 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.awl#6 $
     </Copyright>
 
     <Overview>
@@ -21,33 +21,47 @@
     </Overview>
 
     <Binding key="label" direction="get" type="String" required="$false">
-        TBD
+        Field label string
+    </Binding>
+
+    <Binding key="cueTip" direction="get" type="String" required="$false">
+        String to appear in help text (CueTip) popup with field
     </Binding>
 
     <Binding key="required" direction="get" type="boolean" default="$false">
-        TBD
+        Is this field required (marked with the required asterisk)
     </Binding>
 
     <Binding key="errorValueSource" direction="get" type="Object" default="$false">
-        See AWHighLightedErrorScope
+        For validation: See AWHighLightedErrorScope
     </Binding>
     
     <Binding key="errorFieldPath" direction="get" type="String" default="$false">
-        See AWHighLightedErrorScope
+        For validation: See AWHighLightedErrorScope
     </Binding>
 
     <Binding key="errorGroupName" direction="get" type="String" default="$false">
-        See AWHighLightedErrorScope
+        For validation: See AWHighLightedErrorScope
+    </Binding>
+
+    <Binding key="hidden" direction="get" type="boolean" default="$false">
+        Show this form row be hidden
+        (in form table, even hidden rows should lay down a FormRow in order to
+        balance the number of TRs in the left and right zones of the four-zone FormTable)
     </Binding>
 </a:Api>\
 
 <tr valign="middle">
-    <td class="top">\
+  <a:If ifFalse="$^hidden">
+    <td class="ffl">\
         <a:If notEqualNull="$^label">
             <label elementId="$elementId" for="$elementId">\
                 <a:String value="$^label"/>\
                 :\
             </label>\
+        </a:If>\
+        <a:If notEqualNull="$^cueTip">
+            <w:CueTip value="$^cueTip"/>
         </a:If>\
     </td>
 
@@ -85,4 +99,5 @@
             </a:AppendEnvironment>\
         </td>
     </a:If>
+  </a:If>
 </tr>

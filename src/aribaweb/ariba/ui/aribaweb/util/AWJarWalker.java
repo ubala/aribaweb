@@ -16,9 +16,17 @@
     (by <a href="mailto:bill@burkecentral.com">Bill Burke</a>)
     also licensed under Apache v 2.0.
     
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWJarWalker.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWJarWalker.java#3 $
 */
 package ariba.ui.aribaweb.util;
+
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.AnnotationVisitor;
+import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.Attribute;
+import org.objectweb.asm.Label;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContext;
@@ -38,6 +46,8 @@ import java.util.List;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AWJarWalker
@@ -564,6 +574,260 @@ public class AWJarWalker
             catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+
+    public interface AnnotationListener
+    {
+        void annotationDiscovered (String className, String annotationType);
+    }
+
+    static Map<String, List<AnnotationListener>> _AnnotationListeners = new HashMap();
+
+    public static void registerAnnotationListener (Class annotationClass, AnnotationListener listener)
+    {
+        String key = "L" + annotationClass.getCanonicalName().replace(".", "/") + ";";
+        List<AnnotationListener> listeners = _AnnotationListeners.get(key);
+        if (listeners == null) {
+            listeners = new ArrayList();
+            _AnnotationListeners.put(key, listeners);
+        }
+        listeners.add(listener);
+    }
+
+    static void notifyAnnotationListeners (String className, String annotationType)
+    {
+        List<AnnotationListener> listeners = _AnnotationListeners.get(annotationType);
+        if (listeners != null) {
+            for (AnnotationListener l : listeners) {
+                l.annotationDiscovered(className, annotationType);
+            }
+        }
+    }
+
+    static void processBytecode (StreamIterator iter, String filename)
+    {
+        if (_AnnotationListeners == null) return;
+        try {
+            InputStream is = iter.getInputStream();
+            
+            ClassReader cr = new ClassReader(is);
+            cr.accept(new EmptyVisitor() {
+                String _classNamePath;
+
+                public void visit(int i, int i1, String s, String s1, String s2, String[] strings)
+                {
+                    // System.out.println(" *** CLASS " + s);
+                    _classNamePath = s;
+                }
+
+                public AnnotationVisitor visitAnnotation(String s, boolean b)
+                {
+                    String className = _classNamePath.replace("/", ".");
+                    // System.out.println("   --  Class: " + className + " - Annotation.. " + s);
+                    notifyAnnotationListeners(className, s);
+                    return this;
+                }
+
+                public FieldVisitor visitField(int i, String s, String s1, String s2, Object o)
+                {
+                    // System.out.println("   --  Field " + s);
+                    return this;
+                }
+
+                public MethodVisitor visitMethod(
+                    final int access,
+                    final String name,
+                    final String desc,
+                    final String signature,
+                    final String[] exceptions)
+                {
+                    // System.out.println("   --  Method " + name);
+                    return this;
+                }
+
+                public void visitEnd()
+                {
+
+                }
+            }, false);
+        } catch (IOException e) {
+            // skip?
+        }
+
+    }
+
+    static class EmptyVisitor implements ClassVisitor, MethodVisitor, FieldVisitor, AnnotationVisitor
+    {
+        public void visit(int i, int i1, String s, String s1, String s2, String[] strings)
+        {
+
+        }
+
+        public void visitSource(String s, String s1)
+        {
+
+        }
+
+        public void visitOuterClass(String s, String s1, String s2)
+        {
+
+        }
+
+        public AnnotationVisitor visitAnnotation(String s, boolean b)
+        {
+            return this;
+        }
+
+        public void visitAttribute(Attribute attribute)
+        {
+
+        }
+
+        public void visitInnerClass(String s, String s1, String s2, int i)
+        {
+
+        }
+
+        public FieldVisitor visitField(int i, String s, String s1, String s2, Object o)
+        {
+            return this;
+        }
+
+        public MethodVisitor visitMethod(int i, String s, String s1, String s2, String[] strings)
+        {
+            return this;
+        }
+
+        public void visitEnd()
+        {
+
+        }
+
+        public AnnotationVisitor visitAnnotationDefault()
+        {
+            return this;
+        }
+
+        public AnnotationVisitor visitParameterAnnotation(int i, String s, boolean b)
+        {
+            return this;
+        }
+
+        public void visitCode()
+        {
+
+        }
+
+        public void visitFrame(int i, int i1, Object[] objects, int i2, Object[] objects1)
+        {
+
+        }
+
+        public void visitInsn(int i)
+        {
+
+        }
+
+        public void visitIntInsn(int i, int i1)
+        {
+
+        }
+
+        public void visitVarInsn(int i, int i1)
+        {
+
+        }
+
+        public void visitTypeInsn(int i, String s)
+        {
+
+        }
+
+        public void visitFieldInsn(int i, String s, String s1, String s2)
+        {
+
+        }
+
+        public void visitMethodInsn(int i, String s, String s1, String s2)
+        {
+
+        }
+
+        public void visitJumpInsn(int i, Label label)
+        {
+
+        }
+
+        public void visitLabel(Label label)
+        {
+
+        }
+
+        public void visitLdcInsn(Object o)
+        {
+
+        }
+
+        public void visitIincInsn(int i, int i1)
+        {
+
+        }
+
+        public void visitTableSwitchInsn(int i, int i1, Label label, Label[] labels)
+        {
+
+        }
+
+        public void visitLookupSwitchInsn(Label label, int[] ints, Label[] labels)
+        {
+
+        }
+
+        public void visitMultiANewArrayInsn(String s, int i)
+        {
+
+        }
+
+        public void visitTryCatchBlock(Label label, Label label1, Label label2, String s)
+        {
+
+        }
+
+        public void visitLocalVariable(String s, String s1, String s2, Label label, Label label1, int i)
+        {
+
+        }
+
+        public void visitLineNumber(int i, Label label)
+        {
+
+        }
+
+        public void visitMaxs(int i, int i1)
+        {
+
+        }
+
+        public void visit(String s, Object o)
+        {
+
+        }
+
+        public void visitEnum(String s, String s1, String s2)
+        {
+
+        }
+
+        public AnnotationVisitor visitAnnotation(String s, String s1)
+        {
+            return this;
+        }
+
+        public AnnotationVisitor visitArray(String s)
+        {
+            return this;
         }
     }
 }

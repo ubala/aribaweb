@@ -1,5 +1,6 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2008 Ariba, Inc.
+    All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Constants.java#20 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Constants.java#21 $
 */
 
 package ariba.util.core;
@@ -142,6 +143,10 @@ public class Constants implements Externalizable
     */
     public static final Constants BlobNull  = new Constants(5);
 
+    /**
+        @aribaapi private
+    */
+    public static final Constants LongNull  = new Constants(6);
     /**
         String constant for java.lang.Object
         @aribaapi documented

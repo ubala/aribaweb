@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#7 $
 */
 package ariba.ui.meta.layouts;
 
@@ -24,6 +24,7 @@ import ariba.ui.widgets.ActionHandler;
 import ariba.ui.widgets.AribaAction;
 import ariba.ui.widgets.ModalPageWrapper;
 import ariba.ui.meta.core.ItemProperties;
+import ariba.ui.meta.core.UIMeta.ModuleProperties;
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.MetaContext;
 import ariba.ui.meta.core.Context;
@@ -40,6 +41,7 @@ public class MetaNavTabBar extends AWComponent
             state = new State();
             session.dict().put("_MNBSessState", state);
         }
+        state.prepare();
         return state;
     }
 
@@ -47,17 +49,25 @@ public class MetaNavTabBar extends AWComponent
 
     public static class State
     {
-        public List<ItemProperties> _modules;
-        protected ItemProperties _selectedModule;
+        public List<ModuleProperties> _modules;
+        protected ModuleProperties _selectedModule;
         protected List<ItemProperties> _actionCategories;
         protected Map<String, List<ariba.ui.meta.core.ItemProperties>> _actionsByCategory;
-        protected ItemProperties _lastSelectedModule;
+        protected ModuleProperties _lastSelectedModule;
+        int _ruleSetGeneration = 0;
 
         public State ()
         {
+        }
+
+        void prepare ()
+        {
             UIMeta meta = UIMeta.getInstance();
-            Context context = meta.newContext();
-            _modules = meta.itemList(context, UIMeta.KeyModule, Zones);
+            if (_modules == null || _ruleSetGeneration < meta.ruleSetGeneration()) {
+                Context context = meta.newContext();
+                _modules = meta.modules(context);
+                _ruleSetGeneration = meta.ruleSetGeneration();
+            }
         }
 
         public AWResponseGenerating userSelectedModule (final AWComponent component, ItemProperties module)
@@ -69,9 +79,11 @@ public class MetaNavTabBar extends AWComponent
                     
                     UIMeta meta = UIMeta.getInstance();
                     Context context = meta.newContext();
-                    context.restoreActivation(_lastSelectedModule.activation());
-                    String pageName = (String)context.propertyForKey("homePage");
+                    context.push();
+                    context.set(UIMeta.KeyModule, _lastSelectedModule.name());
+                    String pageName = (String)context.propertyForKey(UIMeta.KeyHomePage);
                     AWComponent page = requestContext.pageWithName(pageName);
+                    meta.preparePage(context, page);
                     context.pop();
                     return page;
                 }
@@ -97,18 +109,19 @@ public class MetaNavTabBar extends AWComponent
             return _actionsByCategory;
         }
 
-        public void setSelectedModule(ItemProperties selectedModule)
+        public void setSelectedModule(ModuleProperties selectedModule)
         {
             _lastSelectedModule = selectedModule;
         }
 
-        public void selectModule(ItemProperties selectedModule)
+        public void selectModule(ModuleProperties selectedModule)
         {
+            if (_selectedModule == selectedModule) return;
             _selectedModule = selectedModule;
             UIMeta meta = UIMeta.getInstance();
             Context context = meta.newContext();
             context.push();
-            context.restoreActivation(selectedModule.activation());
+            context.set(UIMeta.KeyModule, _selectedModule.name());
             _actionCategories = meta.itemList(context, UIMeta.KeyActionCategory, Zones);
             _actionsByCategory = meta.navActionsByCategory(context);
             context.pop();
@@ -116,10 +129,9 @@ public class MetaNavTabBar extends AWComponent
 
         void checkSelectedModule (AWComponent pageComponent)
         {
-            // ToDo -- Tab detection protocol
-            if (_selectedModule == null && _modules.size() > 0) {
-                selectModule(_modules.get(0));
-            }
+            // Auto select the best match for the current page
+            UIMeta meta = UIMeta.getInstance();
+            selectModule(meta.matchForPage(_modules, pageComponent, _selectedModule));
         }
 
         public AWResponseGenerating fireAction (ItemProperties action, AWRequestContext requestContext)
@@ -129,10 +141,28 @@ public class MetaNavTabBar extends AWComponent
             UIMeta meta = UIMeta.getInstance();
             Context context = meta.newContext();
             context.push();
-            context.restoreActivation(_selectedModule.activation());
-            return meta.fireAction(action, context, requestContext);
+            context.set(UIMeta.KeyModule, _selectedModule.name());
+            AWResponseGenerating response =  meta.fireAction(action, context, requestContext);
+            context.pop();
+            return response;
         }
 
+        public AWResponseGenerating redirectForPage (AWComponent pageComponent)
+        {
+            AWComponent page = pageComponent;
+            checkSelectedModule(pageComponent);
+            UIMeta meta = UIMeta.getInstance();
+            Context context = meta.newContext();
+            context.push();
+            context.set(UIMeta.KeyModule, _selectedModule.name());
+            String pageName = (String)context.propertyForKey(UIMeta.KeyHomePage);
+            if (pageName != null && !pageName.equals(pageComponent.componentDefinition().componentName())) {
+                page = pageComponent.requestContext().pageWithName(pageName);
+                meta.preparePage(context, page);
+            }
+            context.pop();
+            return page;
+        }
     }
 
     public State _state;
@@ -158,9 +188,9 @@ public class MetaNavTabBar extends AWComponent
 
     public String currentModuleLabel ()
     {
-        // Todo: maybe label should be pre-resolved on the Item...
         Context context = MetaContext.currentContext(this);
-        context.restoreActivation(_currentModule.activation());
+        context.push();
+        context.set(UIMeta.KeyModule, _currentModule.name());
         String label = (String)context.propertyForKey(UIMeta.KeyLabel);
         context.pop();
         return label;

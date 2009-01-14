@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue.java#3 $
 */
 
 package ariba.util.fieldvalue;
@@ -51,8 +51,6 @@ abstract public class FieldValue extends ClassExtension
                                new FieldValue_Class());
         registerClassExtension(java.util.Map.class,
                                new FieldValue_JavaHashtable());
-        registerClassExtension(java.util.Map.class,
-                               new FieldValue_AribaHashtable());
         registerClassExtension(Extensible.class, new FieldValue_Extensible());
     }
 

@@ -560,7 +560,7 @@ abstract public class AWDirectAction extends AWBaseObject
     protected boolean skipValidation (String actionName)
     {
         return ProgressCheckActionName.equals(actionName) ||
-               AWResActionName.equals(actionName);
+               AWResActionName.equals(actionName) || AWImgActionName.equals(actionName);
     }
 
     /**

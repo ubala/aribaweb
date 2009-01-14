@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#171 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#174 $
 */
 
 package ariba.ui.table;
@@ -182,6 +182,12 @@ public final class AWTDataTable extends AWComponent
                 : AWTSortOrdering.sortOrderingWithKey(keyPathString, AWTSortOrdering.CompareCaseInsensitiveAscending);
         }
 
+
+        public void prepareSortOrdering (AWTDataTable table, AWTSortOrdering ordering)
+        {
+
+        }
+
         public boolean matchesKey (String key)
         {
             String ourKey = keyPathString();
@@ -324,7 +330,6 @@ public final class AWTDataTable extends AWComponent
 
     /** Instance Variables */
     protected AWTDisplayGroup _displayGroup;
-    private AWTDataSource _dataSource;
     private AWComponentReference _processedReference;  // stored to check for rapid turnaround changes
     private List _allColumns;
     private boolean _visibilityArray[];
@@ -488,7 +493,7 @@ public final class AWTDataTable extends AWComponent
             _didHibernate = false;
         }
 
-        checkListBinding();
+        checkListChanges();
         prepareForIteration();
         checkGroupByColumn();
         _rowToggleState = false;
@@ -907,7 +912,8 @@ public final class AWTDataTable extends AWComponent
     {
         if (hasValueColumn()) return;  // only addOrFind if there are no other data columns
         AWTEntity entity;
-        if ((_dataSource != null) && ((entity = _dataSource.entity()) != null)) {
+        AWTDataSource dataSource = displayGroup().dataSource();
+        if ((dataSource != null) && ((entity = dataSource.entity()) != null)) {
             List keys = entity.propertyKeys();
             for (int i=0; i<keys.size(); i++) {
                 String key = (String)keys.get(i);
@@ -1066,10 +1072,15 @@ public final class AWTDataTable extends AWComponent
     /** called by AWTCSVData tag, and the csvPath binding */
     public void setDataSource (AWTDataSource dataSource)
     {
-        _dataSource = dataSource;
-        if (_dataSource != null) {
+        displayGroup().setDataSource(dataSource);
+        if (dataSource != null) {
             addColumnsFromDataSource();
         }
+    }
+
+    public AWTDataSource dataSource ()
+    {
+        return displayGroup().dataSource();
     }
 
     public void registerColumn (Column c)
@@ -1210,12 +1221,17 @@ public final class AWTDataTable extends AWComponent
         }
     }
 
-    protected void checkListBinding ()
+    protected void checkListChanges()
     {
-        AWBinding listBinding = bindingForName(AWBindingNames.list);
-        if (listBinding != null) {
-            Object list = valueForBinding(listBinding);
-            _displayGroup.checkObjectArray (list);
+        if (_displayGroup.dataSource() != null) {
+            _displayGroup.checkDataSource();
+        }
+        else {
+            AWBinding listBinding = bindingForName(AWBindingNames.list);
+            if (listBinding != null) {
+                Object list = valueForBinding(listBinding);
+                _displayGroup.checkObjectArray (list);
+            }
         }
     }
 
@@ -1430,8 +1446,10 @@ public final class AWTDataTable extends AWComponent
         // Note: the check on parentTable is meant to check for a sub / embedded table, but
         // will also be tripped if a Confirmation panel is embedded in a table
         // In the latter case we try to distinguish via enableScrolling (which is not quite right)
+
+        // _parentTable can be equal to this in the export case.
         if (_exportState == EXPORT_ALL || requestContext().isPrintMode()
-                || (_parentTable != null && !enableScrolling())) {
+                || (_parentTable != null && _parentTable != this && !enableScrolling())) {
             // render all objects
             return displayGroup().filteredObjects().size();
         }
@@ -2033,21 +2051,22 @@ public final class AWTDataTable extends AWComponent
 
     private void initializeDataSource ()
     {
-        String csvPath;
-        if (((csvPath = stringValueForBinding(BindingNames.csvPath)) != null) && (_CSVSourceFactory != null)) {
-            // note that "setDataSource" has a side effect of creating columns
-            setDataSource(_CSVSourceFactory.dataSourceForPath(csvPath, parent()));
+        AWTDataSource dataSource = (AWTDataSource)valueForBinding("dataSource");
+        if (dataSource != null) {
+            setDataSource(dataSource);
+        }
+        else {
+            String csvPath;
+            if (((csvPath = stringValueForBinding(BindingNames.csvPath)) != null) && (_CSVSourceFactory != null)) {
+                // note that "setDataSource" has a side effect of creating columns
+                setDataSource(_CSVSourceFactory.dataSourceForPath(csvPath, parent()));
+            }
         }
     }
 
     private void initializeDisplayGroupObjects ()
     {
-        if (_dataSource != null) {
-            List objects = _dataSource.fetchObjects();
-            _displayGroup.setObjectArray(objects);
-        } else {
-            checkListBinding();
-        }
+        checkListChanges();
     }
 
     private static final String DragStylePrefix = "awtDrg_";
@@ -2501,10 +2520,12 @@ public final class AWTDataTable extends AWComponent
                         String serializedOrdering = (String)iter.next();
                         AWTSortOrdering sortOrdering =
                             AWTSortOrdering.deserialize(serializedOrdering, this);
-
-                        if (sortOrdering != null &&
-                            findColumnForKey(sortOrdering.key()) != null) {
-                            orderings.add(sortOrdering);
+                        if (sortOrdering != null ) {
+                            Column sortedColumn = findColumnForKey(sortOrdering.key());
+                            if (sortedColumn != null) {
+                                sortedColumn.prepareSortOrdering(this, sortOrdering);
+                                orderings.add(sortOrdering);
+                            }
                         }
                     }
                     _displayGroup.setSortOrderings(orderings);
