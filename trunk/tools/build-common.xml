@@ -169,20 +169,29 @@
     <property name="build.docroot.dir" value="${build.classes.dir}/docroot"/>
     <property name="build.jars.dir" value="${dist.root.dir}/lib"/>
     <property name="build.jar.file" location="${build.jars.dir}/${jar.name}"/>    
-    <property name="build.wars.dir" value="${dist.root.dir}/webapps"/>
-    <property name="build.war.file" location="${build.wars.dir}/${war.name}.war"/>    
-    <property name="catalina.base.dir" value="${dist.root.dir}"/>
     <property name="doc.dir" location="${dist.root.dir}/docs"/>
     <property name="tools.dir" location="${dist.root.dir}/tools"/>
     <property name="awreload.jar" location="${build.jars.dir}/ariba.awreload-jmti.jar"/>
 
-    <!-- web.xml: defaults  -->
-    <property name="servlet.name" value="${war.name}"/>
-    <property name="servlet.displayName" value="${war.name}"/>
-    <property name="servlet.description" value="Web application ${war.name}"/>
-    <property name="servlet.class" value="ariba.ui.servletadaptor.AWDispatcherServlet"/>
-    <property name="app.url" value="http://localhost:8080/${servlet.name}/AribaWeb"/>
-    
+    <target name="init">
+        <property name="catalina.base.dir" value="${dist.root.dir}"/>
+        <property name="build.wars.dir" value="${catalina.base.dir}/webapps"/>
+        <property name="build.war.file" location="${build.wars.dir}/${war.name}.war"/>
+
+        <!-- web.xml: defaults  -->
+        <property name="servlet.name" value="${war.name}"/>
+        <property name="servlet.displayName" value="${war.name}"/>
+        <property name="servlet.description" value="Web application ${war.name}"/>
+        <property name="servlet.class" value="ariba.ui.servletadaptor.AWDispatcherServlet"/>
+        <property name="servlet.port" value="8080"/>
+        <property name="app.url" value="http://localhost:${servlet.port}/${servlet.name}/AribaWeb"/>
+
+        <!-- Need to build this even if we won't use it or the compiler will complain... -->
+        <mkdir dir="${src.derived.dir}"/>
+        <mkdir dir="${build.jars.dir}"/>
+    </target>
+
+
     <!-- Dependencies classpath -->
     <fileset id="build.deps" dir="${lib.dir}">
         <include name="log4j.jar"/>
@@ -332,12 +341,6 @@
         <delete dir="${doc.dir}/api"/>
         <delete dir="${doc.dir}/index.lucene"/>
         <delete dir="${doc.dir}/xsd"/>
-    </target>
-
-    <target name="init">
-        <!-- Need to build this even if we won't use it or the compiler will complain... -->
-        <mkdir dir="${src.derived.dir}"/>
-        <mkdir dir="${build.jars.dir}"/>
     </target>
 
     <target name="javacc-tree-check" if="src.jjt.path">
@@ -523,7 +526,7 @@
         <evaluate-template templateFile="${tools.dir}/templates/aribaweb.properties" outputFile="${aribaweb.properties}"/>
     </target>
 
-    <target name="war" depends="war-check, war-resources, check-web-xml" if="war.name" unless="war.uptodate">
+    <target name="war" depends="init, war-check, war-resources, check-web-xml" if="war.name" unless="war.uptodate">
         <mkdir dir="${build.wars.dir}"/>
         <!-- delete expanded war if present -->
         <delete dir="${build.wars.dir}/${war.name}" quiet="true"/>
@@ -645,7 +648,7 @@
         <condition property="catalina.home.dir" value="${env.CATALINA_HOME}">
             <not><equals arg1="${env.CATALINA_HOME}" arg2="NOT_SET"/></not>
         </condition>
-        <available file="${dist.root.dir}/conf/server.xml" property="has.tomcat.conf"/>
+        <available file="${catalina.base.dir}/conf/server.xml" property="has.tomcat.conf"/>
     </target>
 
     <target name="has-tomcat" depends="has-tomcat-env" unless="catalina.home.dir">
@@ -655,9 +658,24 @@
         <fail unless="catalina.home.dir" message="CATALINA_HOME environment var (or catalina.home.dir property) must be set to launch tomcat"/>
     </target>
 
-    <target name="ensure-tomcat-conf" unless="has.tomcat.conf">
-        <echo message="Copying your CATALINA_HOME/conf from ${catalina.home.dir}/conf to ${dist.root.dir}/conf..."/>
-        <copy todir="${dist.root.dir}" failonerror="true">
+    <target name="ensure-tomcat-conf" depends="init" unless="has.tomcat.conf">
+        <echo message="Copying your CATALINA_HOME/conf from ${catalina.home.dir}/conf to ${catalina.base.dir}/conf..."/>
+        <copy todir="${catalina.base.dir}" failonerror="true">
+            <fileset dir="${catalina.home.dir}" includes="conf/**/*"/>
+        </copy>
+        <antcall target="update-conf-port"/>
+    </target>
+
+    <target name="update-conf-port" if="tomcat.port.prefix.override">
+        <echo message="Updating tomcat server.xml with port prefix: ${tomcat.port.prefix.override}"/>
+        <groovy>
+            File file = new File(properties["catalina.base.dir"], "conf/server.xml")
+            String pre = properties["tomcat.port.prefix.override"]
+            String conf = file.text.replace("port=\"8", "port=\"" + pre)
+            conf = conf.replace("Port=\"8", "Port=\"" + pre)
+            file.write(conf)
+        </groovy>
+        <copy todir="${catalina.base.dir}" failonerror="true">
             <fileset dir="${catalina.home.dir}" includes="conf/**/*"/>
         </copy>
     </target>
@@ -670,6 +688,12 @@
             <equals arg1="${aw.reload}" arg2="true"/>
         </condition>
         <property name="tomcat.jvmarg" value="-Dnop=x"/>
+    </target>
+
+    <!-- can be run as precursor target.  I.e.:  `ant with-debug launch` -->
+    <target name="with-debug">
+        <property name="env.JPDA_ADDRESS" value="8000"/>
+        <property name="env.JPDA_TRANSPORT" value="dt_socket"/>
     </target>
 
     <target name="-tomcat-no-debug" unless="env.JPDA_ADDRESS">
@@ -686,10 +710,10 @@
         </launch-tomcat>
     </target>
 
-    <target name="tomcat" depends="check-awreload, has-tomcat, ensure-tomcat-conf, -tomcat-debug, -tomcat-no-debug"
+    <target name="tomcat" depends="init, check-awreload, has-tomcat, ensure-tomcat-conf, -tomcat-debug, -tomcat-no-debug"
             description="Start tomcat (wihout rebuilding)"/>
 
-    <target name="tomcat-browse" depends="has-tomcat, ensure-tomcat-conf"
+    <target name="tomcat-browse" depends="init, has-tomcat, ensure-tomcat-conf"
             description="Start tomcat and open in browser">
         <parallel>
             <antcall target="tomcat"/>

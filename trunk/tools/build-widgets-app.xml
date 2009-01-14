@@ -35,6 +35,17 @@
 
     <import file="${aw.home}/tools/build-common.xml"/>
 
+    <!-- support for tomcat base in build dir on alternate port -->
+    <condition property="servlet.port" value="9080">
+        <isset property="create.temp.webapps.base"/>
+    </condition>
+    <condition property="catalina.base.dir" value="${build.dir}/tomcat-bases/${name}">
+        <isset property="create.temp.webapps.base"/>
+    </condition>
+    <condition property="tomcat.port.prefix.override" value="9">
+        <isset property="create.temp.webapps.base"/>
+    </condition>
+    
     <!-- include our jar in the war -->
     <fileset id="war.jars" dir="${build.jars.dir}">
         <include name="${jar.name}"/>

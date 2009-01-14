@@ -370,8 +370,9 @@ abstract public class AWConcreteApplication
                 }
             }
         }
-        return Thread.currentThread().getContextClassLoader().getResource(new File(relativePath,fileName).getPath());
+        return Thread.currentThread().getContextClassLoader().getResource(relativePath + fileName);
     }
+    
     private static void loadSafeHtmlConfig ()
     {
         URL safeAttrsUrl = urlForResource("resource/html/", SAFE_ATTRS_FILE);

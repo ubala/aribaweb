@@ -59,7 +59,7 @@
         <property name="catalina-command" value="catalina.sh"/>
         <echo message="Launching tomcat with CATALINA_BASE=${catalina.base.dir}, ARIBA_DEMOSHELL_HOME=${demoshell.home} ([CTRL-C] to stop)..."/>
         <echo message="Setting ARIBA_AW_SEARCH_PATH=${aw.search.path}"/>
-        <echo message="Connect via http://localhost:8080/Demo/AribaWeb"/>
+        <echo message="Connect via ${app.url}"/>
         <exec dir="." executable="${catalina.home.dir}/bin/${catalina-command}">
             <env key="CATALINA_BASE" value="${catalina.base.dir}"/>
             <env key="CATALINA_HOME" value="${catalina.home.dir}"/>
@@ -93,7 +93,11 @@
     <!-- ================================================================== -->
     <!-- D O C U M E N T A T I O N                                          -->
     <!-- ================================================================== -->
-    <target name="doc-resources">
+    <target name="no-doc">
+        <property name="nodoc" value="true"/>
+    </target>
+
+    <target name="doc-resources" unless="nodoc">
         <property name="doc.resource.dir" location="${doc.dir}/resource"/>
         <property name="widgets.resource.dir" location="${src.ui.dir}/widgets/resource/webserver/"/>
         <delete dir="${doc.resource.dir}"/>
@@ -103,7 +107,7 @@
         <copy file="${src.dir}/docs/index.html" todir="${doc.dir}"/>
     </target>
 
-    <target name="process-doc" depends="doc-resources">
+    <target name="process-doc" depends="doc-resources" unless="nodoc">
         <property name="doc.template" location="${tools.dir}/templates/doctemplate.awl"/>
         <property name="tutorial.src.dir" location="${src.dir}/docs/tutorial/"/>
         <property name="tutorial.doc.dir" location="${doc.dir}/tutorial"/>
@@ -119,17 +123,17 @@
         </groovy>
     </target>
 
-    <target name="javadocs" description="Generate javadoc" depends="doc-resources">
+    <target name="javadocs" description="Generate javadoc" depends="doc-resources"  unless="nodoc">
         <module-crawl target="javadocs"/>
     </target>
 
-    <target name="javadocs-internal">
+    <target name="javadocs-internal"  unless="nodoc">
         <module-crawl target="javadocs-internal"/>
     </target>
 
     <target name="docs" description="Generate docs" depends="javadocs, process-doc"/>
 
-    <target name="index-doc" depends="">
+    <target name="index-doc" depends="" unless="nodoc">
         <property name="doc.index" location="${doc.dir}/index.lucene"/>
         <delete dir="${doc.index}"/>
         <mkdir dir="${doc.index}"/>

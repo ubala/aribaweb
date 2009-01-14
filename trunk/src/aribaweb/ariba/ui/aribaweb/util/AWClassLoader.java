@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClassLoader.java#11 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClassLoader.java#12 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -107,6 +107,8 @@ public class AWClassLoader
         public long loadTime;
 
         public LoadInfo (Class c, AWResource r, long t) { cls = c; resource = r; loadTime = t; }
+
+        public void updateLoadTime () { loadTime = System.currentTimeMillis(); } 
     }
 
     /**
@@ -136,7 +138,7 @@ public class AWClassLoader
             if (info == null || info.resource == null) return super.checkReloadClass(cls);
             if (info.resource.lastModified() > info.loadTime) {
                 cls = loadClassFromResource(cls.getName(), info.resource);
-
+                info.updateLoadTime();
                 // let others know we did a reload
                 notifyReload(Arrays.asList(cls.getName()));
             }
@@ -173,6 +175,7 @@ public class AWClassLoader
             for (LoadInfo info : classInfos) {
                 String className = info.cls.getName();
                 compileSourceFromResource(className, info.resource);
+                info.updateLoadTime();
                 reloaded.add(className);
             }
             return reloaded;

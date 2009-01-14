@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/awreload/ariba/awreload/Compiler.java#5 $
+    $Id: //ariba/platform/ui/awreload/ariba/awreload/Compiler.java#6 $
 */
 package ariba.awreload;
 
@@ -21,6 +21,7 @@ import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.Fmt;
 import ariba.util.core.SystemUtil;
 import ariba.util.core.StringUtil;
+import ariba.util.core.ClassUtil;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -48,7 +49,8 @@ public class Compiler
         if (!SystemUtil.isWin32()) dir = "/".concat(dir);
             // replace trailing ".java" with ".class"
 
-        if (JavaReloadClassLoader._IsAntBuild) {
+        JavaReloadClassLoader loader = (JavaReloadClassLoader) ClassUtil.getClassFactory();
+        if (loader._IsAntBuild) {
             antBuild(dir, source.name());
         } else {
             gnuMake(dir, source.name());

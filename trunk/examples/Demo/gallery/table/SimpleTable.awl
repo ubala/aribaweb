@@ -3,13 +3,12 @@
     kinds of great information that is sure to peak the attention of out more inquisitive
     users.  They will surely find the process of getting to this information rewarding!
 </w:HintMessage>
-<t:DataTable singleSelect="$true" batchSize="30" displayGroup="$displayGroup" csvPath="SampleSpend.csv"
+<t:DataTable title="Wide Table With Scrolling!" enableScrolling="$true"
+        displayGroup="$displayGroup" csvPath="SampleSpend.csv" singleSelect="$true"
         initialSortDirection="descending" initialSortKey="Category"
-        reorderAction="$null" tableConfigName="SimpleTable"
-        enableScrolling="$true" useRefresh="$true" showOptionsMenu="$true" title="Wide Table With Scrolling!"
-        scopeSubcomponentsByItem="$true">
+        tableConfigName="SimpleTable" showOptionsMenu="$true">
 
-    <t:Column key="Department" label="Big D!123456788" action="$goto.Home" nowrap/>
+    <t:Column key="Department" label="Big D!" action="$goto.Home" nowrap/>
 
     <t:Column key="Category"/>
 
