@@ -30,6 +30,7 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
+import ariba.util.fieldtype.TypeInfo;
 import ariba.util.fieldvalue.OrderedList;
 
 import java.util.*;
@@ -122,8 +123,10 @@ class ASTProject extends SimpleNode implements Symbol
         Object result = null;
 
         while (e.hasNext()) {
-            Object value = expr.getValue(context, e.next());
-            result = ExprOps.add( result, value );
+        	Object value = expr.getValue(context, e.next());
+        	TypeInfo valueInfo = getTypeInfo();
+            result = ExprOps.add(
+            	result, value, null, valueInfo != null? valueInfo.getName(): null);
         }
         return result;
     }
@@ -131,14 +134,21 @@ class ASTProject extends SimpleNode implements Symbol
     protected Object avg(Iterator e, Node expr, ExprContext context, Object source) throws ExprException
     {
         Object result = new Integer(0);
+        String resultType = Integer.class.getName();
         int count = 0;
 
         while (e.hasNext()) {
             Object value = expr.getValue(context, e.next());
-            result = ExprOps.add( result, value );
+            TypeInfo valueInfo = expr.getTypeInfo();
+            result = ExprOps.add(
+            		result, 
+            		value,
+            		resultType,
+            		valueInfo != null? valueInfo.getName(): null);
+            resultType = result != null? result.getClass().getName(): null;
             count++;
         }
-        return ExprOps.divide(result, new Integer(count));
+        return ExprOps.divide(result, new Integer(count), resultType);
     }
 
     protected Object min(Iterator e, Node expr, ExprContext context, Object source) throws ExprException

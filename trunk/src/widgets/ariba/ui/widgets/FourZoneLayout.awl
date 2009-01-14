@@ -13,12 +13,20 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FourZoneLayout.awl#1 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FourZoneLayout.awl#2 $
     </Copyright>
 
     <Overview>
         Top, Bottom, Left, Right box layout
     </Overview>
+
+    <Binding key="widthLeft" direction="get" type="String" default="50%">
+        Width for left TD
+    </Binding>
+
+    <Binding key="widthRight" direction="get" type="String" default="50%">
+        Width for right TD
+    </Binding>
 
     <NamedContent name="top" required="$false">
         Top zone
@@ -43,7 +51,7 @@
         </td>
     </tr>
     <tr>
-        <td width="50%" valign="top">\
+        <td width="$^widthLeft:50%" valign="top">\
             <div class="flexContainer">
                 <a:IncludeContent name="left" required="$false"/>
             </div>
@@ -53,7 +61,7 @@
             <div style="width:20px"/>\
         </td>
 
-        <td width="50%" valign="top">\
+        <td width="$^widthRight:50%" valign="top">\
             <div class="flexContainer">
                 <a:IncludeContent name="right" required="$false"/>
             </div>

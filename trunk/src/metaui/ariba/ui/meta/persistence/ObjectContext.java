@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#2 $
 */
 package ariba.ui.meta.persistence;
 
 import ariba.util.core.ClassUtil;
 import ariba.util.core.Assert;
+import ariba.ui.aribaweb.util.AWUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,9 @@ public abstract class ObjectContext
 
     public Object create (String className)
     {
-        return create(ClassUtil.classForName(className, true));
+        // Would be nice to use AWUtil classForName for reloading support,
+        // but hibernate doesn't seem to like us swapping the class...
+        return create(ClassUtil.classForName(className));
     }
 
     public Object create (Class tClass)

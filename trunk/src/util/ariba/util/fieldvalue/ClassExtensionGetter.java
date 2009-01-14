@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/ClassExtensionGetter.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/ClassExtensionGetter.java#3 $
 */
 
 package ariba.util.fieldvalue;
@@ -101,7 +101,6 @@ public class ClassExtensionGetter extends ReflectionMethodGetter
     actual target object.
 
     @param target the target object
-    @param fieldName the name of the field for which the accessor applies
     @return the result of invoking the getter
     */
     protected Object invokeGetMethod (Object target)

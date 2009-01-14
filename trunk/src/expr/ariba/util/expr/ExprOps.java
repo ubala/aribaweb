@@ -37,8 +37,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Iterator;
 import ariba.util.fieldtype.NumericTypes;
+import ariba.util.fieldtype.PrimitiveTypeProvider;
+import ariba.util.fieldtype.TypeInfo;
 import ariba.util.core.ArithmeticOperations;
 import ariba.util.core.Assert;
+import ariba.util.core.ClassUtil;
+import ariba.util.core.StringUtil;
 
 /**
  * This is an abstract class with static methods that define the operations of AribaExpr.
@@ -177,8 +181,8 @@ public abstract class ExprOps implements NumericTypes
      * sense that they are the same object or, if both are non-null
      * if they are equal in the <CODE>equals()</CODE> sense.
      *
-     * @param v1 First object to compare
-     * @param v2 Second object to compare
+     * @param object1 First object to compare
+     * @param object2 Second object to compare
      *
      * @return true if v1 == v2
      */
@@ -389,7 +393,7 @@ public abstract class ExprOps implements NumericTypes
         }
         return NULL;
     }
-
+    
     /**
        * Returns the value converted numerically to the given class type
        *
@@ -459,7 +463,7 @@ public abstract class ExprOps implements NumericTypes
        */
     public static int getNumericType( int t1, int t2, boolean canBeNonNumeric )
     {
-        if ( t1 == t2 )
+        if ( t1 == t2 && t1 != NULL)
             return t1;
 
         if ( canBeNonNumeric && (t1 == NONNUMERIC || t2 == NONNUMERIC || t1 == CHAR || t2 == CHAR) )
@@ -513,6 +517,32 @@ public abstract class ExprOps implements NumericTypes
     public static int getNumericType( Object v1, Object v2, boolean canBeNonNumeric )
     {
         return getNumericType(getNumericType(v1), getNumericType(v2), canBeNonNumeric);
+    }
+    
+    public static int getNumericType (
+    		Object v1, 
+    		Object v2, 
+    		String type1, 
+    		String type2,
+    		boolean canBeNonNumeric)
+    {
+        int t1 = getNumericType(v1);
+        int t2 = getNumericType(v2);
+        if (canBeNonNumeric) {
+        	// if the numeric type is NULL, we need to find out if the
+        	// real type of v1 is non-numeric type
+            if (t1 == NULL && 
+                !StringUtil.nullOrEmptyOrBlankString(type1) &&
+            	!PrimitiveTypeProvider.isNumericType(type1)) {
+                t1 = NONNUMERIC;	
+            }
+            if (t2 == NULL &&
+            	!StringUtil.nullOrEmptyOrBlankString(type2) &&
+            	!PrimitiveTypeProvider.isNumericType(type2)) {
+            	t2 = NONNUMERIC;	
+            }
+        }
+        return getNumericType(t1, t2, canBeNonNumeric);
     }
 
       /**
@@ -674,10 +704,15 @@ public abstract class ExprOps implements NumericTypes
         }
         return newInteger( type, longValue(v1) >>> (int)longValue(v2) );
     }
-
-    public static Object add ( Object v1, Object v2 )
+    
+    public static Object add (
+    		Object v1, 
+    		Object v2, 
+    		String v1Type, 
+    		String v2Type)
     {
-        int type = getNumericType(v1,v2,true);
+    	
+        int type = getNumericType(v1, v2, v1Type, v2Type, true);
         switch ( type )
           {
             case BIGINT:    return bigIntValue(v1).add(bigIntValue(v2));
@@ -686,7 +721,9 @@ public abstract class ExprOps implements NumericTypes
             case DOUBLE:    return newReal( type, doubleValue(v1) + doubleValue(v2) );
             case NONNUMERIC:
             {
-                ArithmeticOperations ops = getArithmeticOperations(v1, v2);
+            	// if this is modified, please modify the getArithmeticOperations
+            	// in TypeChecker as well
+                ArithmeticOperations ops = getArithmeticOperations(v1Type, v2Type);
                 if (ops != null) {
                     return ops.add(v1, v2);
                 }
@@ -696,7 +733,8 @@ public abstract class ExprOps implements NumericTypes
                 return concatenate(v1, v2);
 
             }
-            default:        return newInteger( type, longValue(v1) + longValue(v2) );
+            default:        
+            	return newInteger( type, longValue(v1) + longValue(v2) );
           }
     }
 
@@ -705,9 +743,13 @@ public abstract class ExprOps implements NumericTypes
         return stringValue(v1) + stringValue(v2);
     }
 
-    public static Object subtract ( Object v1, Object v2 )
+    public static Object subtract (
+    		Object v1, 
+    		Object v2,
+    		String v1Type, 
+    		String v2Type)
     {
-        int type = getNumericType(v1,v2,true);
+        int type = getNumericType(v1, v2, v1Type, v2Type, true);
         switch ( type )
         {
             case BIGINT:    return bigIntValue(v1).subtract(bigIntValue(v2));
@@ -715,7 +757,9 @@ public abstract class ExprOps implements NumericTypes
             case FLOAT:
             case DOUBLE:    return newReal( type, doubleValue(v1) - doubleValue(v2) );
             case NONNUMERIC :
-                ArithmeticOperations ops = getArithmeticOperations(v1, v2);
+            	// if this is modified, please modify the getArithmeticOperations
+            	// in TypeChecker as well            	
+                ArithmeticOperations ops = getArithmeticOperations(v1Type, v2Type);
                 if (ops != null) {
                     return ops.substract(v1, v2);
                 }
@@ -725,9 +769,13 @@ public abstract class ExprOps implements NumericTypes
         }
     }
 
-    public static Object multiply ( Object v1, Object v2 )
+    public static Object multiply (
+    		Object v1, 
+    		Object v2,
+    		String v1Type,
+    		String v2Type)
     {
-        int type = getNumericType(v1,v2,true);
+        int type = getNumericType(v1, v2, v1Type, v2Type, true);
         switch ( type )
         {
             case BIGINT:    return bigIntValue(v1).multiply(bigIntValue(v2));
@@ -735,12 +783,14 @@ public abstract class ExprOps implements NumericTypes
             case FLOAT:
             case DOUBLE:    return newReal( type, doubleValue(v1) * doubleValue(v2) );
             case NONNUMERIC:
-                ArithmeticOperations ops = getArithmeticOperations(v1);
+            	// if this is modified, please modify the getArithmeticOperations
+            	// in TypeChecker as well
+                ArithmeticOperations ops = getArithmeticOperations(v1Type);
                 if (ops != null) {
                     return ops.multiply(v1, bigDecValue(v2));
                 }
                 else {
-                    ops = getArithmeticOperations(v2);
+                    ops = getArithmeticOperations(v2Type);
                     if (ops != null) {
                         return ops.multiply(v2, bigDecValue(v1));
                     }
@@ -751,9 +801,12 @@ public abstract class ExprOps implements NumericTypes
         }
     }
 
-    public static Object divide ( Object v1, Object v2 )
+    public static Object divide (
+    		Object v1, 
+    		Object v2,
+    		String v1Type)
     {
-        int type = getNumericType(v1,v2,true);
+        int type = getNumericType(v1, v2, v1Type, null, true);
         switch ( type )
         {
             case BIGINT:    return bigIntValue(v1).divide(bigIntValue(v2));
@@ -761,7 +814,9 @@ public abstract class ExprOps implements NumericTypes
             case FLOAT:
             case DOUBLE:    return newReal( type, doubleValue(v1) / doubleValue(v2) );
             case NONNUMERIC :
-                ArithmeticOperations ops = getArithmeticOperations(v1);
+            	// if this is modified, please modify the getArithmeticOperations
+            	// in TypeChecker as well
+                ArithmeticOperations ops = getArithmeticOperations(v1Type);
                 if (ops != null) {
                     return ops.divide(v1, v2);
                 }
@@ -776,28 +831,23 @@ public abstract class ExprOps implements NumericTypes
         return v1 == null;
     }
 
+    /**
+        Returns the {@link ArithmeticOperations} for the given 
+        <code>obj1</code> and <code>obj2</code>.         
+    */
     private static ArithmeticOperations getArithmeticOperations (
-                                                   Object obj1,
-                                                   Object obj2)
+        Object obj1, Object obj2)
     {
         ArithmeticOperations op1 = getArithmeticOperations(obj1);
         ArithmeticOperations op2 = getArithmeticOperations(obj2);
-
-        if (op1 == null) {
-            return op2;
-        }
-
-        if (op2 == null) {
-            return op1;
-        }
-
-        if (op1 == op2) {
-            return op1;
-        }
-
-        return null;
+        return getArithmeticOperationsInternal(op1, op2);
     }
 
+    /**
+        Returns the {@link ArithmeticOperations} for the given 
+        <code>obj</code>.  If there is no {@link ArithmeticOperations}
+        for the given <code>obj</code>, <code>null</code> is returned.         
+    */    
     private static ArithmeticOperations getArithmeticOperations (Object obj)
     {
         ArithmeticOperations op = null;
@@ -807,6 +857,53 @@ public abstract class ExprOps implements NumericTypes
         return op;
     }
 
+    /**
+        Returns the {@link ArithmeticOperations} for the 2 operands
+        of the given <code>type1</code> and <code>type2</code>.
+        
+        @aribaapi private
+    */
+    public static ArithmeticOperations getArithmeticOperations (
+    		String type1, String type2)
+    {
+    	ArithmeticOperations op1 = getArithmeticOperations(type1);
+    	ArithmeticOperations op2 = getArithmeticOperations(type2);
+    	return getArithmeticOperationsInternal(op1, op2);
+    }
+
+    /**
+        Returns the {@link ArithmeticOperations} for the operand
+        of the given <code>type</code>.  If there is no {@link ArithmeticOperations}
+        for the given <code>type</code>, <code>null</code> is returned.
+    */
+    public static ArithmeticOperations getArithmeticOperations (String type)
+    {
+    	ArithmeticOperations op = null;
+    	if (!StringUtil.nullOrEmptyOrBlankString(type)) {
+    		op = ArithmeticOperations.getByName(type);
+    	}
+    	return op;
+    }
+
+    private static ArithmeticOperations getArithmeticOperationsInternal (
+    		ArithmeticOperations op1,
+    		ArithmeticOperations op2)
+    {
+    	if (op1 == null) {
+    		return op2;
+    	}
+
+    	if (op2 == null) {
+    		return op1;
+    	}
+
+    	if (op1 == op2) {
+    		return op1;
+    	}
+
+    	return null;    	
+    }
+    
     public static Object remainder ( Object v1, Object v2 )
     {
         int type = getNumericType(v1,v2);

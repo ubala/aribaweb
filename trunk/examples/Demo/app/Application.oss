@@ -1,0 +1,52 @@
+/* Generic Action Set up */
+@actionCategory=Create { }
+@actionCategory=Search { }
+@actionCategory=Manage { }
+
+action=create {
+    actionCategory:Create;
+    label:${ariba.ui.meta.core.UIMeta.beautifyClassName(properties.class)};
+}
+
+action=search {
+    actionCategory:Search;
+    label:${ariba.ui.meta.core.UIMeta.beautifyClassName(properties.class)};
+}
+
+/* Used for Dashboard modules rules */
+@module="Home"  {
+    label:"Home";
+    showsClasses: "*";
+
+    @layout=Main {
+       label:"Welcome to AribaWeb!";
+       component:"HomeContent";
+       after:zTop;
+    }
+
+    @layout=Actions {
+       label:"Actions";
+       component:"Toc";
+       after:zToc;
+    }
+}
+
+@module="Documentation"  {
+    homePage:"SearchSource";
+}
+
+@module="DataTables"  {
+    homePage:"TableTabs";
+}
+
+@module="PivotTables"  {
+    homePage:"PivotTabs";
+}
+
+@module="Forms"  {
+    homePage:MetaUIForms;
+}
+
+@module="Master Detail"  {
+    homePage:ERPage;
+}

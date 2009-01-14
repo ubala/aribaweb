@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConstants.java#22 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConstants.java#23 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -56,6 +56,7 @@ abstract public class AWConstants extends AWBaseObject
 
     public static final AWEncodedString TagOnClick = new AWEncodedString("ariba.Handlers.hTagClick");
     public static final AWEncodedString TagOnKeyPress = new AWEncodedString("ariba.Handlers.hTagKeyDown");
+    public static final AWEncodedString TagRefreshOnKeyPress = new AWEncodedString("ariba.Handlers.hTagRefreshKeyDown");
     public static final AWEncodedString OpenWindow = AWEncodedString.sharedEncodedString("Handlers.hOpenWindow");
     public static final AWEncodedString Event = AWEncodedString.sharedEncodedString("event");
     public static final AWEncodedString Class = AWEncodedString.sharedEncodedString("class");

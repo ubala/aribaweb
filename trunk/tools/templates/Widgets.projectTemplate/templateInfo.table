@@ -1,0 +1,12 @@
+{
+    title = "Basic AribaWeb/Widgets Application";
+    description = "A starter template for a basic (non-database)\nAribaWeb application that uses the Widgets library.";
+    rank = 1;
+    parameters = (
+        {
+            key="ViewPkg";
+            description="Java package to use for your AW components/pages";
+            default="app";
+        }
+    );
+}

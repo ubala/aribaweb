@@ -43,7 +43,7 @@
     </th>
 </tr>
 <a:For list="$application.globalStatisticsStore.pageStatistics" item="$dict.currentItem" index="$dict.index">
-    <x:AlternatingColorRow index="$dict.index">
+    <tr>
         <td bgcolor="#cccccc">
             <a:String value="$dict.currentItem.pageName"/>
         </td>
@@ -65,7 +65,7 @@
         <td align="right">
             <a:String value="$dict.currentItem.renderResponseSecondsAverage" formatter="$=MillisecondsFormatter"/>
         </td>
-    </x:AlternatingColorRow>
+    </tr>
 </a:For>
 </table>
 

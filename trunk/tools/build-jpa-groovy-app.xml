@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!--
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    (Some contents derived from a parallel Apache Lucene file, also licenced
+     under the same license)
+
+    $Id:  $
+ -->
+<project name="groovy-jpa-app" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+    <description>
+        Build file for apps depending on metaui-jpa (and metaui, widgets, aribaweb) ...
+
+        Generates jar (and generates aribaweb.properties, if necessary)
+        and war (and generates persistence.xml, web.xml, if necessary)
+    </description>
+
+    <property name="compile.groovy" value="true"/>
+    <property name="aw.initializer" value="ariba.ui.groovy.AWGroovyLoader.initialize"/>
+
+    <import file="build-jpa-app.xml"/>
+
+    <!-- Must include demoshell for AWGroovyLoader rapid turnaround -->
+    <fileset id="war.jars" dir="${build.jars.dir}">
+        <include name="ariba.metaui-jpa.jar"/>
+        <include name="ariba.demoshell.jar"/>
+        <include name="${jar.name}"/>
+    </fileset>
+
+    <fileset id="module.libs2" dir="${lib-internal.dir}">
+        <include name="groovy-all.jar"/>
+    </fileset>
+
+</project>

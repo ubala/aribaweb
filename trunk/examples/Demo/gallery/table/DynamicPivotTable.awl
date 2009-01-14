@@ -1,0 +1,51 @@
+<t:DataTable list="$list" displayGroup="$displayGroup" multiSelect="$showSelection"
+        enableScrolling="$true" showOptionsMenu="$true" title="Bid Data!"
+        pivotLayout="$layout.c" forceColumnUpdate="$layoutChangeLatch"
+        columnFields="$layout.c" rowFields="$layout.r" columnAttributes="$layout.a"
+        overrideAttribute="$answerColumnName" showRowAttributes="$showDetails">
+
+    <t:HeadingArea>
+        <div style="float:left">
+            Layout: <a:Popup list="$layouts" item="$iter" selection="$layout" action="$optionsChanged">$iter.name</a:Popup>
+        </div>
+        <div style="float:left">
+            <w:TextButton action="$showFilterPanel">Filter</w:TextButton>
+        </div>
+        <div style="float:right;padding-right:4px">
+            <a:Checkbox value="$showSelection" action="$optionsChanged"/>Show Selection
+        </div>
+    </t:HeadingArea>
+
+    <t:Column key="Item" nowrap wantsSpan="$true">$displayGroup.currentItem.Item $displayGroup.currentItem.ItemDesc</t:Column>
+    <t:Column key="Region" wantsSpan="$true" isBlank='$!displayGroup.currentItem.Region'/>
+    <t:Column key="Year" wantsSpan="$true"/>
+    <t:Column key="Quarter" wantsSpan="$true"/>
+    <t:Column key="Supplier" wantsSpan="$true" isBlank='$!displayGroup.currentItem.Supplier'/>
+    <t:Column key="Price" nowrap>
+        <a:TextField value="$displayGroup.currentItem.Price" formatter="$formatters.money" size=9 style="text-align:right"/>
+        <a:If ifTrue="$showFlag">
+            <a:Hyperlink action="$inspect"><span style="color:red">*</span></a:Hyperlink>
+        </a:If>
+    </t:Column>
+
+    <!--- crazy / unnecessary use of DynamicColumns for testing purposes... -->
+    <t:DynamicColumns list='${["Quantity", "ExtendedPrice"]}' item="$curCol" key="$curCol" label="$curCol" isBlank="$isQuestion" wantsSpan="$true">
+        <a:If ifTrue='${curCol=="Quantity"}'>
+            <a:String value="$displayGroup.currentItem.Quantity" formatter="$formatters.integer"/>
+        <a:Else ifTrue='${curCol=="ExtendedPrice"}'/>
+            EP:<a:String value="$displayGroup.currentItem.ExtendedPrice" formatter="$formatters.money"/> ***
+        </a:If>
+    </t:DynamicColumns>
+    
+    <t:Column key="Color" isBlank="$isQuestion"/>
+    <t:Column key="Size" isBlank="$isQuestion"/>
+    <t:Column key="Answer" label="GOPAL" wantsSpan="$true" initiallyVisible="$false" isOptional="$false"/>
+</t:DataTable>
+
+<a:SetValue panelId="$requestContext.nextElementId"/>\
+<w:Confirmation id="$panelId">\
+    <a:Content name="header">Object Inspector</a:Content>\
+    <a:Content name="content">
+        $inspectedObject
+    </a:Content>\
+</w:Confirmation>\

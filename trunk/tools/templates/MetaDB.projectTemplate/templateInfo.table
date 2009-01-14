@@ -1,0 +1,18 @@
+{
+    title = "Meta UI Database Application";
+    description = "Starter template for a MetaUI database application\nBy default this application will use Hibernate to connect\nto a local HSQLDB database.";
+    rank = 10;
+
+    parameters = (
+        {
+            key="ModelClass";
+            description="Class name for first persistent object class";
+            default="Entry";
+        },
+        {
+            key="ModelPkg";
+            description="Java package to use for domain classes";
+            default="app.model";
+        }
+    );
+}

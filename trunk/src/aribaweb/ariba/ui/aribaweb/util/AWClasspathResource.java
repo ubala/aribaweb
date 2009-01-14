@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResource.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResource.java#3 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -31,6 +31,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.net.MalformedURLException;
 
 
 public class AWClasspathResource extends AWResource
@@ -70,5 +71,26 @@ public class AWClasspathResource extends AWResource
             throw new AWGenericException(
               Fmt.S("Exception opening stream for ClassPath Resource: %s", url()), e);
         }
+    }
+
+    public AWResource relativeResource (String relativePath, AWResourceManager resourceManager)
+    {
+        String refUrl = _url.toExternalForm();
+        int  relativeStart = refUrl.indexOf(_relativePath);
+        Assert.that(relativeStart != -1, "Resource External URL %s doesn't contain relative path %s",
+                refUrl, _relativePath);
+
+        URL url = null;
+        try {
+            url = new URL(_url, relativePath);
+        } catch (MalformedURLException e) {
+            return null;
+        }
+        String urlString = url.toExternalForm();
+
+        if (!urlString.startsWith(refUrl.substring(0, relativeStart))) return null;
+
+        String rootRelativePath = urlString.substring(relativeStart);
+        return resourceManager.resourceNamed(rootRelativePath);
     }
 }

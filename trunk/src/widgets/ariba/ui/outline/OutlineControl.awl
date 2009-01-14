@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/outline/OutlineControl.awl#3 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/outline/OutlineControl.awl#4 $
     </Copyright>
 
     <Overview>
@@ -93,7 +93,7 @@
     </a:If>\
 </a:If>\
 \
-<td emitTags="$renderInTable">\
+<td emitTags="$renderInTable" valign="$^valign:middle">\
     <a:IncludeContent name="icon" required="$false"/>\
 </td>\
 \

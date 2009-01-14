@@ -13,20 +13,20 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalWindowLink.awl#12 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalWindowLink.awl#13 $
     </Copyright>
 
     <Overview>
+        Examples:
+        
+                <w:ModalWindowLink id="foo">
+                    Click this to see ModalDialogBox "foo"
+                </w:ModalWindowLink>
 
-        <!-- Commenting out to prevent validation errors.
-        <w:ModalWindowLink id="foo">
-            Click this to see ModalDialogBox "foo"
-        </w:ModalWindowLink>
+                <w:ModalWindowLink id="foo">
+                    This is the content of ModalDialogBox foo
+                </w:ModalWindowLink>
 
-        <w:ModalWindowLink id="foo">
-            This is the content of ModalDialogBox foo
-        </w:ModalWindowLink>
-        -->
     </Overview>
 
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MasterPasswordClient.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MasterPasswordClient.java#5 $
 */
 
 package ariba.util.core;
@@ -115,7 +115,7 @@ public final class MasterPasswordClient
         case null will be returned.
         
         @return the master password, <b>null</b> if no masterPassword options are
-        specified in the command line when {@link #processArguments) is called.
+        specified in the command line when {@link #processArguments} is called.
 
         @aribaapi ariba
     */

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/WidgetsJavaScript.java#7 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/WidgetsJavaScript.java#8 $
 */
 
 package ariba.ui.widgets;
@@ -25,7 +25,7 @@ public final class WidgetsJavaScript extends AWComponent
     public boolean includeIndividualJSFiles ()
     {
         // if debugging and the individual files can be found (i.e. the
-        // ARIBA_AW_SEARCH_PATH has been set to include <aribaweb_src_dir>/resource/webserver)
+        // ARIBA_AW_SEARCH_PATH has been set to include <aribaweb_src_dir/>/resource/webserver)
         // the include individual files; otherwise use the compressed combo file
         return AWConcreteApplication.IsDebuggingEnabled
                 && resourceManager().resourceNamed("widg/Widgets.js") != null;

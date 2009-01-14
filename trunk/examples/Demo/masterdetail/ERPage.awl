@@ -1,0 +1,130 @@
+<w:BasicPageWrapper hasForm="$true">
+
+<w:HintMessage showTopLine="$true">
+    A side-by-side master-detail layout with type-specific detail panels!
+</w:HintMessage>
+<table width="100%">
+    <tr>
+        <td valign="top" width="100%">
+            <div class="flexContainer">
+                <t:DataTable displayGroup="$displayGroup" csvPath="ER.csv" item="$currentItem"
+                            multiSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                            enableScrolling="$true" showOptionsMenu="$true"
+                            title="Expense Items">
+
+                    <t:Column key="Year" label="Date" formatter="$formatters.shortDate"/>
+
+                    <t:Column key="Type" label="Type!" action="$goto.Home"/>
+
+                    <t:Column key="Amount" formatter="$formatters.money" align="right"/>
+                    <t:Column key="Project">
+                    </t:Column>
+
+
+                    <t:SelectionButtonArea>
+                    </t:SelectionButtonArea>
+
+                    <t:ButtonArea>
+                        <w:TextButton action="$deleteSelected">Delete</w:TextButton>\
+                        <w:PulldownButton menuId="AddItem">AddNewItem</w:PulldownButton>
+                        <w:TextButton action="$bigPanel">Big Panel</w:TextButton>\
+                        <w:TextButton action="$longRunningAction" confirmationId="LRAConf">Long Running Action</w:TextButton>\
+                        <w:TextButton action="$secureAction">Secure Action</w:TextButton>\
+                    </t:ButtonArea>
+
+                </t:DataTable>
+
+                <w:PopupMenu menuId="AddItem">
+                    <w:PopupMenuHeading showSeparator="$false">\
+                        Create New Expense\
+                    </w:PopupMenuHeading>
+
+                    <w:PopupMenuItem action='${addItem("Hotel")}'>\
+                            Hotel\
+                    </w:PopupMenuItem>
+                    <w:PopupMenuItem action='${addItem("Meal")}'>\
+                            Meal\
+                    </w:PopupMenuItem>
+                </w:PopupMenu>\
+            </div>
+        </td>
+
+        <a:PhaseInvocation append="$checkSelection"/>
+        
+        <td  style="padding:0px 8px 0px 8px">\
+            <!---
+            <div class="brandMd">
+                <a:Image filename="cleardot.gif" height="600" width="3"/>\
+            </div>
+            -->
+        </td>
+
+        <td valign="top" width="30%" class="smallFont">
+            <div class="flexContainer">
+                <w:TabSet class="tabWrapper" contentClass="noPadding tabContentWrapper" index="$tabIndex">
+                  <w:Tab label="Expense Items" dropType="Expense" dropAction="$null">
+                      <div style="padding:5px; width:300px">
+                          <a:If notEqualNull="$displayGroup.selectedObject">
+                              <table>
+                                  <tr>
+                                      <td width="99%">
+                                          <h1><a:String value="$displayGroup.selectedObject.Type"/></h1>
+                                      </td>
+                                      <td align="right">
+                                          <w:TextButton action="$save">Save</w:TextButton>
+                                      </td>
+                                  </tr>
+                                  <tr>\
+                                  <td colspan="2">
+
+                                  </td>
+                                      <a:IncludeComponent awcomponentName="$viewerForSelectedItem" currentItem="$displayGroup.selectedObject"/>
+                                  </tr>
+                              </table>
+
+                          <a:Else/>
+                              <h1>Add Expense Line</h1>
+                              <a:For item="$expenseType" list="$expenseTypes">
+                                  <li><a:Hyperlink action="${addItem(expenseType)}">$expenseType</a:Hyperlink>
+                              </a:For>
+                          </a:If>
+                      </div>
+                  </w:Tab>
+                  <w:Tab label="Charges" dropType="Expense" dropAction="$null">
+                      <t:DataTable class="noBox scrollTableWrapper" multiSelect="$true" csvPath="../gallery/table/SampleSpend.csv"
+                              initialSortDirection="descending" initialSortKey="Year"
+                              enableScrolling="$true" showOptionsMenu="$false">
+
+                          <t:Column key="Year" label="Date" formatter="$formatters.shortDate"/>
+                          <t:Column key="Department"/>
+                          <t:Column key="Amount" formatter="$formatters.money" align="right"/>
+                          <t:ButtonArea>
+                              <w:TextButton action="$null">Add Charge</w:TextButton>
+                          </t:ButtonArea>
+                      </t:DataTable>
+                  </w:Tab>
+                  <w:Tab label="TAs" isVisible="$false">
+                      <Include name="PivotOutline"/>
+                  </w:Tab>
+                </w:TabSet>
+                <div style="line-height:1px;height:1px;width:300px"></div>
+            </div>
+        </td>
+    </tr>
+</table>
+<a:PhaseInvocation append="$rememberLastSelected"/>
+<w:Confirmation id="LRAConf" lazyLoadConfirmation="$false" okAction="$longRunningAction">
+    <a:Content name="header">\
+        Sample Long Running Operation Alert!
+    </a:Content>\
+    <a:Content name="content">\
+        <table>\
+            <tr>\
+                <td>\
+                    Are you sure that you want to do this?  This will take > 30 seconds!
+                </td>\
+            </tr>\
+        </table>\
+    </a:Content>\
+</w:Confirmation>
+</w:BasicPageWrapper>

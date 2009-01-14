@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentApi.awl#7 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentApi.awl#8 $
     </Copyright>
 
     <Overview>
@@ -53,36 +53,41 @@
 </a:If>
 <a:If notEqualNull="$apiContainer">
     <b>Overview:</b>
-    <pre>$apiContainer.overview.bareStringContent</pre>
+    <w:Markdown value="$apiContainer.overview.bareStringContent"/>
     <t:DataTable title="Bindings" multiSelect="$false"
-                      batchSize="20" valign="middle"
+                      batchSize="999" valign="middle"
                       list="$apiContainer.bindingApis"
                       showOptionsMenu="$false"
                       showBatchNavigation="$false"
-                      item="$dict.currentApiBinding"
-                      indentDetailRow="$true">
+                      item="$binding"
+                      indentDetailRow="$false">
         <t:Column key="key" label="Binding Name" align="left" style="font-weight:bold"/>
         <t:Column key="typeString" label="Type" align="left"/>
         <t:Column key="directionString" label="Direction" align="left"/>
         <t:Column key="isRequired" label="Required" align="left"/>
         <t:Column key="defaultValue" label="Default Val" align="left"/>
-        <t:Column key="alternates" label="Alternates" align="left"/>
-        <t:RowDetail style="font-style:italic;padding:4px;">$dict.currentApiBinding.description</t:RowDetail>
+        <t:RowDetail style="padding-left:16px">\
+            <w:Markdown value="$binding.description"/>
+            <a:If ifTrue="$bindingHasAlternates">\
+                <b>See also: </b> $binding.alternates
+            </a:If>
+        </t:RowDetail>
     </t:DataTable>
 
     <a:If condition="$apiContainer.contentApis.size">
         <br/>
         <t:DataTable title="Named Templates" multiSelect="$false"
-                batchSize="20" valign="middle"
+                batchSize="999" valign="middle"
                 list="$apiContainer.contentApis"
                 showOptionsMenu="$false"
                 showBatchNavigation="$false"
-                width="67%"
                 item="$dict.currentContentApi"
-                indentDetailRow="$true">
+                indentDetailRow="$false">
             <t:Column key="name" label="Template Name" align="left" style="font-weight:bold"/>
             <t:Column key="required" label="Required" align="left"/>
-            <t:RowDetail style="font-style:italic;padding:4px;">$dict.currentContentApi.description</t:RowDetail>
+            <t:RowDetail style="padding-left:16px">\
+                <w:Markdown value="$dict.currentContentApi.description"/>
+            </t:RowDetail>
         </t:DataTable>
     </a:If>
 </a:If>

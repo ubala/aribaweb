@@ -1,0 +1,31 @@
+#!/bin/sh
+
+##
+## start
+##
+## Start up AW examples
+##
+
+DIRNAME=`dirname "$0"`
+
+if [ -z "$AW_HOME" -o ! -d "$AW_HOME" ] ; then
+    # Resolve links: $0 may be a link to groovy's home.
+    PRG="$0"
+    # Need this for relative symlinks.
+    while [ -h "$PRG" ] ; do
+        ls=`ls -ld "$PRG"`
+        link=`expr "$ls" : '.*-> \(.*\)$'`
+        if expr "$link" : '/.*' > /dev/null; then
+            PRG="$link"
+        else
+            PRG=`dirname "$PRG"`"/$link"
+        fi
+    done
+    SAVED="`pwd`"
+    cd "`dirname \"$PRG\"`/.."
+    export AW_HOME="`pwd -P`"
+    cd "$SAVED"
+fi
+
+echo "Starting up demo app..."
+$AW_HOME/bin/aw ant -emacs -logger org.apache.tools.ant.NoBannerLogger -f $AW_HOME/build.xml tomcat-build-browse

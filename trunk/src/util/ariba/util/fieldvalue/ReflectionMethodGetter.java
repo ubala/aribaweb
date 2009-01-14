@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/ReflectionMethodGetter.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/ReflectionMethodGetter.java#3 $
 */
 
 package ariba.util.fieldvalue;
@@ -87,7 +87,6 @@ public class ReflectionMethodGetter extends ReflectionMethodAccessor implements 
     desired behavior.
 
     @param target the target object
-    @param fieldName the name of the field for which the accessor applies
     @return the result of invoking the getter
     */
     protected Object invokeGetMethod (Object target)

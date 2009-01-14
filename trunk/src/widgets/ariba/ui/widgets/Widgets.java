@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Widgets.java#67 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Widgets.java#69 $
 */
 
 package ariba.ui.widgets;
@@ -152,7 +152,7 @@ public final class Widgets
                 Arrays.asList("AW")));
         resolver.addIncludeToNamespace("w", new AWNamespaceManager.Import(
                 Arrays.asList("ariba.ui.widgets", "ariba.ui.wizard",
-                        "ariba.ui.outline", "ariba.ui.validation"),
+                        "ariba.ui.outline", "ariba.ui.validation", "ariba.ui.richtext"),
                 Arrays.asList("")));
         resolver.addIncludeToNamespace("t", new AWNamespaceManager.Import(
                 Arrays.asList("ariba.ui.table"),
@@ -167,6 +167,7 @@ public final class Widgets
         ns.registerResolverForPackage("ariba.ui.outline", resolver);
         ns.registerResolverForPackage("ariba.ui.validation", resolver);
         ns.registerResolverForPackage("ariba.ui.wizard", resolver);
+        ns.registerResolverForPackage("ariba.ui.richtext", resolver);
     }
 
     private static void registerPackageNames (AWMultiLocaleResourceManager resourceManager)
@@ -225,6 +226,7 @@ public final class Widgets
         ariba.ui.validation.Initialization.init();
         ariba.ui.outline.Initialization.init();
         ariba.ui.table.Initialization.init();
+        ariba.ui.richtext.Initialization.init();
     }
 
     public static void setDelegate (WidgetsDelegate delegate)

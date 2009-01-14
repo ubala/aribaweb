@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BrandedComponent.java#13 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BrandedComponent.java#14 $
 */
 
 package ariba.ui.widgets;
@@ -27,7 +27,7 @@ abstract public class BrandedComponent extends AWComponent
 {
     protected abstract String shortTemplateName ();
 
-    protected AWResource templateResource ()
+    public AWResource templateResource ()
     {
         AWResource resource = safeTemplateResource();
         if (resource == null) {

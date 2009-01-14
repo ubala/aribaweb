@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#104 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#109 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -210,7 +210,6 @@ abstract public class AWConcreteApplication
     }
 
     /**
-     * @return
      * @deprecated No longer an optional setting.
      */
     protected boolean isRefreshRegionEnabled ()
@@ -362,10 +361,10 @@ abstract public class AWConcreteApplication
         File rootDir = SystemUtil.getSystemDirectory();
         File dir = new File(rootDir, relativePath);
         if (dir.isDirectory()) {
-            File tagsFile = new File(dir, SAFE_TAGS_FILE);
+            File tagsFile = new File(dir, fileName);
             if (tagsFile.canRead()) {
                 try {
-                    return dir.toURL();
+                    return tagsFile.toURL();
                 } catch (MalformedURLException e) {
                     // ignore
                 }
@@ -1303,7 +1302,7 @@ abstract public class AWConcreteApplication
         try {
             initSessionValidator();
         }
-        catch(RuntimeException e)
+        catch(Throwable e)
         {
             Log.aribaweb.warning(9240, e.getMessage());
             Log.aribaweb.debug(SystemUtil.stackTrace(e));
@@ -1376,6 +1375,11 @@ abstract public class AWConcreteApplication
         // as we may implement basic validation here in the future.
     }
 
+    public String getSessionSecureId (AWRequestContext requestContext)
+    {
+        return null;
+    }
+
     ////////////////////////
     // Brand Support
     ////////////////////////
@@ -1442,7 +1446,6 @@ abstract public class AWConcreteApplication
     /**
      * Default pollinterval for the application in seconds.  Should be overridden
      * by applications to set default poll interval.
-     * @return
      * @aribaapi private
      */
     protected int initPollInterval ()

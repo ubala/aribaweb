@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceCheck.java#6 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceCheck.java#7 $
 */
 
 package ariba.util.core;
@@ -167,6 +167,7 @@ public class PerformanceCheck
     
     /**
         Callback interface for to record warnings/erros detected.
+        @aribaapi ariba
     */
     public interface ErrorSink
     {

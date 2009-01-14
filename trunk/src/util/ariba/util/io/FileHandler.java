@@ -92,7 +92,7 @@ public class FileHandler
         Sets system default encoding
         Basically this is used by FileServer
 
-        @param   system default encoding
+        @param encoding  system default encoding
     */
     public static void setSystemDefaultEncoding (String encoding)
     {

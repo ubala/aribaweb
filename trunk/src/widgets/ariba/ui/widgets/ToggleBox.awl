@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ToggleBox.awl#4 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ToggleBox.awl#6 $
     </Copyright>
 
     <Overview>
@@ -30,17 +30,18 @@
         binding is used, then a checkbox image will be used to represent true (checked)
         and false (unchecked). You may also provide your own images to represent true/false.
 
-        By default, a h2 is used around the title in the heading.  To provide a custom heading, use ToggleBoxHeading:
+        By default, a `h2` is used around the title in the heading.  To provide a custom heading, use ToggleBoxHeading:
 
         Example:
-        <w:ToggleBox state="$state">
-            <w:ToggleBoxHeading>
-                <w:TextButton>Custom Heading</w:TextButton>
-            </w:ToggleBoxHeading>
-            <w:ToggleBoxBody>
-                ...
-            </w:ToggleBoxBody>
-        </w:ToggleBox>
+
+                <w:ToggleBox state="$state">
+                    <w:ToggleBoxHeading>
+                        <w:TextButton>Custom Heading</w:TextButton>
+                    </w:ToggleBoxHeading>
+                    <w:ToggleBoxBody>
+                        ...
+                    </w:ToggleBoxBody>
+                </w:ToggleBox>
 
     </Overview>
 
@@ -82,18 +83,18 @@
 </a:Api>
 
 <a:RefreshRegion>\
-    <div class="$^class:toggleBox" style="$^style">\
-        <table cellspacing="0" cellpadding="0" border="0" width="100%" class="grayVeryLt">\
+    <div class="$^class:scrollTableWrapper" style="$^style">\
+        <table cellspacing="0" cellpadding="0" border="0" width="100%">\
             <tr>\
-                <td width="1%" style="padding:3px 2px 3px 2px;">\
-                    <w:ToggleImage state="$^state"
-                                   isExternal="$true"
-                                   trueImageName="$^trueImageName"
-                                   falseImageName="$^falseImageName"
-                                   useCheckboxIcon="$^useCheckboxIcon"
-                                   title="$^controlTitle"/>\
-                </td>\
-                <td width="99%">\
+                <td class="tableHeader">
+                    <div class="tableBodyToggle">
+                        <w:ToggleImage state="$^state"
+                                       isExternal="$true"
+                                       trueImageName="$^trueImageName"
+                                       falseImageName="$^falseImageName"
+                                       useCheckboxIcon="$^useCheckboxIcon"
+                                       title="$^controlTitle"/>\
+                    </div>
                     <a:If notEqualNull="$headingContentElement">
                         <a:IncludeContent template="$headingContentElement"/>\
                     <a:Else/>
@@ -104,7 +105,7 @@
         </table>\
         <a:If ifTrue="$^state">
             <a:If notEqualNull="$bodyContentElement">
-                    <a:IncludeContent template="$bodyContentElement"/>\
+                <a:IncludeContent template="$bodyContentElement"/>\
             </a:If>
         </a:If>
     </div>\

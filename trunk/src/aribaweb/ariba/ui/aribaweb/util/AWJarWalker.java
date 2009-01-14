@@ -16,39 +16,46 @@
     (by <a href="mailto:bill@burkecentral.com">Bill Burke</a>)
     also licensed under Apache v 2.0.
     
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWJarWalker.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWJarWalker.java#6 $
 */
 package ariba.ui.aribaweb.util;
 
-import org.objectweb.asm.ClassReader;
+import ariba.util.core.Assert;
+import ariba.util.core.ClassUtil;
+import ariba.util.core.ListUtil;
 import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.FieldVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Attribute;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
 
-import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContext;
-import java.io.InputStream;
-import java.io.IOException;
+import javax.servlet.ServletContextEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.net.URL;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.util.jar.JarInputStream;
-import java.util.jar.JarEntry;
-import java.util.jar.Manifest;
-import java.util.jar.Attributes;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Enumeration;
-import java.util.StringTokenizer;
-import java.util.Set;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
 public class AWJarWalker
 {
@@ -356,7 +363,6 @@ public class AWJarWalker
          * from loader.getResources() using the baseResource.
          *
          * @param baseResource
-         * @return
          */
         public static URL[] findResourceBases(String baseResource, ClassLoader loader, UrlFilter filter)
         {
@@ -381,7 +387,6 @@ public class AWJarWalker
          * from loader.getResources() using the baseResource.
          *
          * @param baseResource
-         * @return
          */
         public static URL[] findResourceBases(String baseResource)
         {
@@ -426,7 +431,6 @@ public class AWJarWalker
          * from Thread.currentThread().getContextClassLoader().getResource() using the baseResource.
          *
          * @param baseResource
-         * @return
          */
         public static URL findResourceBase(String baseResource)
         {
@@ -439,7 +443,6 @@ public class AWJarWalker
          *
          * @param baseResource
          * @param loader
-         * @return
          */
         public static URL findResourceBase(String baseResource, ClassLoader loader)
         {
@@ -451,7 +454,6 @@ public class AWJarWalker
          * Find the classpath for the particular class
          *
          * @param clazz
-         * @return
          */
         public static URL findClassBase(Class clazz)
         {
@@ -461,8 +463,6 @@ public class AWJarWalker
 
         /**
          * Uses the java.class.path system property to obtain a list of URLs that represent the CLASSPATH
-         *
-         * @return
          */
         public static URL[] findClassPaths()
         {
@@ -489,8 +489,7 @@ public class AWJarWalker
          * <p/>
          * paths is used as a filter to only include paths that have the specific relative file within it
          *
-         * @param paths comma list of files that should exist in a particular path
-         * @return
+         * @param paths list of files that should exist in a particular path
          */
         public static URL[] findClassPaths(String... paths)
         {
@@ -581,6 +580,45 @@ public class AWJarWalker
     public interface AnnotationListener
     {
         void annotationDiscovered (String className, String annotationType);
+    }
+
+    /**
+     * Lookup all annotations on the given class.  Should be called late/lazily
+     * to avoid class instantiation until absolutely necessary
+     * @param className class name to search
+     * @return map from Annotation class to introspection Field, Method, or Class
+     */
+    public static Map<Class, Object> annotationsForClassName (String className, Class[] types)
+    {
+        Class cls = ClassUtil.classForName(className);
+        Assert.that(cls != null, "Unable to find class: %s", className);
+
+        Map<Class, Object> annotationMap = new IdentityHashMap();
+
+        for (Method method : cls.getDeclaredMethods()) {
+            _addToMap(annotationMap, method.getAnnotations(), method, types);
+        }
+
+        for (Field field : cls.getDeclaredFields()) {
+            _addToMap(annotationMap, field.getAnnotations(), field, types);
+        }
+
+        _addToMap(annotationMap, cls.getAnnotations(), cls, types);
+
+        return annotationMap;
+    }
+
+    static void _addToMap (Map map, Annotation[] annotations, Object ref, Class[] types)
+    {
+        if (annotations == null) return;
+        for (Annotation a : annotations) {
+            for (Class type : types) {
+                if (type.isAssignableFrom(a.annotationType())) {
+                    map.put(a, ref);
+                    break;
+                }
+            }
+        }
     }
 
     static Map<String, List<AnnotationListener>> _AnnotationListeners = new HashMap();

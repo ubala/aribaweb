@@ -178,7 +178,7 @@ action {
     trait=messageResults {
         message:"Action Performed: %s";
         actionResults:${
-            def o = (properties.isInstanceAction) ? object : ariba.util.core.ClassUtil.classForName(properties.class);
+            def o = (properties.isInstanceAction) ? object : ariba.ui.aribaweb.util.AWUtil.classForName(properties.class);
             def v = ariba.util.fieldvalue.FieldValue.getFieldValue(o, properties.action);
             def m = ariba.util.core.Fmt.S(properties.message, v);
             ariba.ui.widgets.AribaPageContent.setMessage(m, requestContext.session());
@@ -232,4 +232,5 @@ actionCategory {
 }
 
 
-/* */
+/* For groovy */
+field=metaClass { visible:false }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ResourceService.java#53 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ResourceService.java#56 $
 */
 
 package ariba.util.core;
@@ -1047,6 +1047,7 @@ public class ResourceService
                                    stringTable,
                                    locale);
                 SystemUtil.err().println(msg);
+                SystemUtil.err().flush();
                 if (Log.i18n.isDebugEnabled()) {
                     Log.logStack(Log.i18n, msg);
                 }
@@ -1351,6 +1352,7 @@ public class ResourceService
      * the 1th element is the key.  If the compositeKey is not of the composite key
      * form then the the 0th element will be null and the string will just be the
      * composite key
+     * @param compositeKey The composite key to be parsed
      * @return the parsed composite key
      * @aribaapi documented
      */
@@ -1467,7 +1469,7 @@ public class ResourceService
 
         @param path path
         @param locale locale
-        @param processor: customer string csv processor
+        @param processor customer string csv processor
         @return string table with the specified path in the specified
                 locale
         @aribaapi ariba
@@ -1483,7 +1485,7 @@ public class ResourceService
 
         @param path path
         @param locale locale
-        @param processor: customer string csv processor
+        @param processor customer string csv processor
         @param defaultingLocale toggle defaulting to relaxed locale
 
         @return string table with the specified path in the specified
@@ -1504,7 +1506,7 @@ public class ResourceService
 
         @param path path
         @param locale locale
-        @param processor: customer string csv processor
+        @param processor customer string csv processor
         @param defaultingLocale toggle defaulting to relaxed locale
         @param defaultingSystem toggles defaulting to system resource
 
@@ -1586,7 +1588,7 @@ public class ResourceService
 
         @param path path
         @param locale locale
-        @param processor: customer string csv processor
+        @param processor customer string csv processor
         @param defaultingLocale toggle defaulting to relaxed locale
         @param defaultingSystem toggles defaulting to system resource
 

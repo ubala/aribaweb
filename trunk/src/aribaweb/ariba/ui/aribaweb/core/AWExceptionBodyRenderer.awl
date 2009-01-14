@@ -34,6 +34,16 @@
         background-color:#DDDDDD;
         border-bottom:2px solid #999999;
     }
+
+    <!--- for AWDebugRemoteOpen -->
+    .ro {
+        text-decoration:none;
+        cursor:pointer;
+    }
+
+    .ro:hover{
+        text-decoration:underline;
+    }
 </style>
 <div style="text-align:right">
     <a href="#" oncLick='document.getElementById("rawStackTrace").style.display="block"'>Show Raw Stack Trace</a>
@@ -65,11 +75,11 @@
                     <th>Method</th>
                     <th>Java File</th>
                 </tr>
-                <a:For list="$parsedException.frames" item="$currentFrameInfo">
-                    <tr>
-                        <td><b>$currentFrameInfo.template</b></td>
+                <a:For list="$parsedException.frames" item="$currentFrameInfo" index="$frameIndex">
+                    <tr _ifTrue="$shouldDisplayCurrentFrame">
+                        <td><b><a:DebugRemoteOpen>$currentFrameInfo.template</a:DebugRemoteOpen></b></td>
                         <td><a:PrimitiveString value="$wrappedMethodString"/>()</td>
-                        <td>$currentFrameInfo.file</td>
+                        <td><a:DebugRemoteOpen>$currentFrameInfo.file</a:DebugRemoteOpen></td>
                     </tr>
                 </a:For>
         </a:For>

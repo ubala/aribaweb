@@ -12,12 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/ResourceLocator.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/ResourceLocator.java#6 $
 */
 package ariba.ui.table;
 
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.util.AWResource;
+
 import java.io.File;
+import java.net.URL;
+import java.net.MalformedURLException;
+
 import ariba.util.core.Assert;
 
 public final class ResourceLocator
@@ -31,6 +36,17 @@ public final class ResourceLocator
     public static void setProvider (Provider provider)
     {
         _Provider = provider;
+    }
+
+    public static URL urlForRelativePath (String path, AWComponent parentComponent)
+    {
+        AWResource baseResource = parentComponent.templateResource();
+        AWResource resource = baseResource.relativeResource(path, AWComponent.templateResourceManager());
+        try {
+            return (resource != null) ? new URL(resource.fullUrl()) : null;
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
 
     public static File fileForRelativePath (String path, AWComponent parentComponent)

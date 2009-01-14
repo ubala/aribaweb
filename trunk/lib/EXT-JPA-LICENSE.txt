@@ -1,0 +1,40 @@
+LICENSES FOR THIRD-PARTY COMPONENTS in lib/ext-jpa
+(See lib/ext-jpa directory for more license details)
+
+* antlr-2.7.6.jar
+- ANTLR 2.7.6 (http://www.antlr.org) BSD License
+- required for running Hibernate
+
+* cglib-nodep-2.1_3.jar
+- CGLIB 2.1_3 with ObjectWeb ASM 1.5.3 (http://cglib.sourceforge.net) Apache 1.1 License
+- required for running Hibernate
+
+* commons-collections-3.2.jar
+- Commons Collections 3.2 (http://commons.apache.org/collections/) Apache 2.0 License
+
+* commons-logging-1.1.jar
+- Commons Logging 1.1 (http://commons.apache.org/logging/) Apache 2.0 License
+
+* dom4j-1.6.1.jar
+- Dom4J 1.6.1 (http://dom4j.org/) BSD Style License (see http://www.dom4j.org/license.html)
+
+* ejb3-persistence.jar
+- EJB 3.0 Final Release
+
+* hibernate-annotations.jar
+- Hibernate Annotations 3.3.0 GA (http://annotations.hibernate.org) LGPL License
+
+* hibernate-entitymanager.jar
+- Hibernate Entity Manager 3.3.0 GA (http://entitymanager.hibernate.org) LGPL License
+
+* hibernate-tools.jar
+- Hibernate Tools 3.3.0 GA (http://tools.hibernate.org) LGPL License
+
+* hibernate3.jar
+- Hibernate 3.2.6.GA (http://www.hibernate.org) LGPL License
+
+* hsqldb.jar
+- HSQLDB (http://hsqldb.org/) HSQLDB License (see http://hsqldb.org/web/hsqlLicense.html)
+
+* javassist.jar
+- JavaAssist (http://www.jboss.org/javassist/), Mozilla Public License (see mpl.txt)

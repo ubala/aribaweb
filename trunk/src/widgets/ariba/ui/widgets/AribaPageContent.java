@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaPageContent.java#20 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaPageContent.java#21 $
 */
 
 package ariba.ui.widgets;
@@ -38,13 +38,6 @@ public final class AribaPageContent extends BrandingComponent
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
-        AWSession session = requestContext.session(false);
-        if (session != null) {
-            _oneTimeMessage = session.dict().get(MessageKey);
-            _stickyMessage = (AWComponent)session.dict().get(StickyMessageKey);
-            session.dict().remove(MessageKey);
-        }
-
         super.renderResponse(requestContext, component);
     }
 
@@ -79,6 +72,16 @@ public final class AribaPageContent extends BrandingComponent
 
         addContentMargin = (Boolean)findValueForBinding(BindingNames.addContentMargin);
         return addContentMargin != null ? addContentMargin.booleanValue() : true;
+    }
+
+    public void updateMessage ()
+    {
+        AWSession session = requestContext().session(false);
+        if (session != null) {
+            _oneTimeMessage = session.dict().get(MessageKey);
+            _stickyMessage = (AWComponent)session.dict().get(StickyMessageKey);
+            session.dict().remove(MessageKey);
+        }
     }
 
     public Object getMessage ()

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/AWXHTMLComponent.java#11 $
+    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/AWXHTMLComponent.java#12 $
 */
 
 // This component is used for any included HTML template.
@@ -27,6 +27,7 @@ import ariba.ui.aribaweb.core.AWComponentDefinition;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWTemplate;
+import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.widgets.ActionInterceptor;
 import ariba.ui.widgets.ActionHandler;
 import ariba.ui.widgets.AribaAction;
@@ -67,6 +68,11 @@ public class AWXHTMLComponent extends AWComponent implements Extensible, ActionI
     {
         return AWXHTMLComponentFactory.sharedInstance().pathForComponentDefinition(componentDefinition());
 
+    }
+
+    public AWResource templateResource ()
+    {
+        return AWXHTMLComponentFactory.sharedInstance().templateResourceForDefinition(componentDefinition());
     }
 
     public static class GotoHTMLActionHandler extends ActionHandler {

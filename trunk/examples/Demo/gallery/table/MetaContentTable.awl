@@ -1,0 +1,33 @@
+<w:HintMessage showTopLine="$true">
+    AWTDataTable with AWTGroup!
+</w:HintMessage>
+<br/>
+
+<!---
+    <x:LoadXML filename="DashboardData.xml" value="$data"/>
+-->
+
+<a:InitializeValue displayGroup="$null" sourceURL="$calcURL"/>
+
+<w:FormTable>
+    <w:FormRow label="URL">
+        <a:TextField value="$sourceURL" size="60"/>
+    </w:FormRow>
+    <w:FormRow>
+        <w:TextButton action="$fetch">Fetch</w:TextButton>
+    </w:FormRow>
+</w:FormTable>
+
+<a:If notEqualNull="$data">
+    <t:DataTable batchSize="5" list="$data" displayGroup="$displayGroup"
+            showOptionsMenu="$true">
+        <t:MetaContent layout="$layout" useXMLFieldPath="$true"/>
+        <t:Column align="right">
+            <div style="float:right">
+                <w:TextButton action="$null">Delete</w:TextButton>
+            </div>
+        </t:Column>
+    </t:DataTable>
+</a:If>
+<br/>
+<b>Selection:</b> <a:String value="$displayGroup.selectedObject"/><br/>

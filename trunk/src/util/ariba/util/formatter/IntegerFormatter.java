@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/IntegerFormatter.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/IntegerFormatter.java#9 $
 */
 
 package ariba.util.formatter;
@@ -299,11 +299,12 @@ public class IntegerFormatter extends Formatter
     }
 
     /**
-        Tries to parse the given string as an integer in the default locale.  If the
+        Tries to parse the given string as an integer in the specified locale.  If the
         parsed value is less than Integer.MIN_VALUE or greater than Integer.MAX_VALUE,
         throws ParseException.
 
         @param     string the string to parse as an <code>int</code>
+        @param     locale the locale to use for parsing.
         @return           an <code>int</code> value derived from the string
         @exception        ParseException if the string cannot be parsed as an
                           <code>int</code> or if the string causes an overflow / underflow

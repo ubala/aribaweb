@@ -1,0 +1,38 @@
+<BODY>
+
+The core of the meta-data / rule driven UI engine.  MetaUI takes meta data from java
+"model" classes (both inferred from fields, and augmented by optional annotations)
+and combines that with external meta data (possibly from ".oss" files or ORM persistence
+meta data) and uses it to create full featured UIs (consisting of forms, tables, tab sets, etc).
+<p/>
+Using metaui, the .awl (template) code to generate a full featured form for a business
+object could be as terse as:
+{@code
+<m:Context object="$myBusinessObject" operation="edit">
+    <m:Form/>
+</m:Context>
+}
+<p/>
+Commonly used Core java APIs include:
+    <ul>
+        <li>{@link ariba.ui.meta.core.Context}</li>
+        <li>{@link ariba.ui.meta.core.Meta}</li>
+        <li>{@link ariba.ui.meta.core.UIMeta}</li>
+    </ul>
+
+Core tags include:
+    <ul>
+        <li>{@link ariba.ui.meta.core.MetaContext m:Context}</li>
+        <li>{@link ariba.ui.meta.core.MetaIncludeComponent m:IncludeComponent}</li>
+        <li>{@link ariba.ui.meta.core.MetaContext m:Rules}</li>
+    </ul>
+<p/>
+
+Other packages provide meta data annotations for java classes, UI layouts, and
+persistence layer bindings.
+
+@see ariba.ui.meta.annotations
+@see ariba.ui.meta.layouts
+@see ariba.ui.meta.persistence
+
+</BODY>

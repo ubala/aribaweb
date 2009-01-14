@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#47 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#49 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -179,18 +179,14 @@ public class AWTextField extends AWComponent
         return id;
     }
 
-    public AWEncodedString onKeyDownString ()
+    public String tfActionType ()
     {
         if (_action != null) {
-            AWRequestContext requestContext = requestContext();
-            AWEncodedString formName = requestContext.currentForm().formName();
-            AWGenericActionTag.appendEventHandler(requestContext, AWConstants.OnKeyDown, AWConstants.TagOnKeyPress, formName, null, null);
-            return null;
+            return _isRefresh ? "ROKP" : "AC";
         }
         else if (_isRefresh) {
-            return ForceRefreshFunction;
+            return "FRF";
         }
-        // Prevent browser auto-submit, since it doesn't go through our javascript submit.
         return null;
     }
 

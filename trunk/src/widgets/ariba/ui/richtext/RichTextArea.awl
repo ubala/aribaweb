@@ -1,0 +1,123 @@
+<a:Api>
+    <Copyright>
+        Copyright (c) 1996-2008 Ariba, Inc.
+        All rights reserved. Patents pending.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.awl#15 $
+    </Copyright>
+
+    <Responsible>
+        kngan
+    </Responsible>
+
+    <Overview>
+        The rich text area both rich text and plain text creation.
+        It supports:
+            bold
+            italic
+            underline
+            newline
+            multiple spaces
+            font size
+            font color
+            highlight color
+            ordered list
+            bulleted list
+    </Overview>
+
+    <Binding key="value" direction="both" type="String" required="$true">
+        The text to be edited or displayed.
+
+        In display mode, unsafe html tags are escaped.
+
+        AWString can also be used (with escapeUnsafeHtml="$true") for display.
+    </Binding>
+
+    <Binding key="editable" direction="get" type="boolean" default="$true">
+        Determines the editability of the rich text area.
+    </Binding>
+
+    <Binding key="readonly" direction="get" type="boolean" default="$false">
+        See AWEditableRegion
+    </Binding>
+
+    <Binding key="errorKey" type="Object" direction="get" required="$false">
+        See AWTextArea
+    </Binding>
+
+    <Binding key="emptyStringValue" type="String" default="" direction="get">
+        See AWTextArea
+    </Binding>
+
+    <Binding key="rows" type="String" default="10" direction="get">
+        See HTML textarea. Minimun is 10 rows.
+    </Binding>
+
+    <Binding key="cols" type="String" default="69" direction="get">
+        See HTML textarea. Minimun is 69 columns.
+    </Binding>
+
+</a:Api>\
+<a:If ifTrue="$^readonly:$false">
+    <a:ClientSideScript filename="widg/richtext.js"/>\
+    <span elementId="$areaName" class="rtaWrapper">
+        <textarea type="textarea"
+                  id="$areaName"
+                  rows="$rows"
+                  cols="$cols"
+                  style="$style"
+                  class="rtt">\
+            <a:String value="$displayValue" escapeUnsafeHtml="$true"/>\
+        </textarea>\
+        <a:ClientSideScript isSingleton="$false">
+            initRTARO('$areaName');
+        </a:ClientSideScript>
+    </span>
+<a:Else ifTrue="$^editable:$true"/>
+    <a:If ifTrue="$requestContext.isAccessibilityEnabled">
+        <a:TextArea value="$displayValue"
+                    name="$areaName"
+                    rows="$rows"
+                    cols="$cols"
+                    style="$style"
+                    erroKey="$^errorKey"
+                    emptyStringValue="$^emptyStringValue"
+                    otherBindings="$otherBindingsValues"/>\        
+    <a:Else/>
+        <w:RichTextAreaScript/>
+        <a:RefreshRegion>
+            <span elementId="$areaName" class="rtaWrapper">\
+                <a:RefreshRegion alwaysRender="$true">\
+                    <a:GenericContainer tagName="script">
+                        if (window.name == "AWRefreshFrame") {
+                            if (parent.registerRefreshRTEId) {
+                                parent.registerRefreshRTEId('$areaName');
+                            }
+                        }
+                    </a:GenericContainer>
+                </a:RefreshRegion>
+                <a:GenericContainer tagName="script">
+                    if (window.name == "AWRefreshFrame") {
+                        if (parent.prepRTEReplacement) {
+                            parent.prepRTEReplacement('$areaName');
+                        }
+                    }
+                </a:GenericContainer>
+                <a:TextArea value="$displayValue"
+                            name="$areaName"
+                            rows="$rows"
+                            cols="$cols"
+                            style="$style"
+                            class="rtt"
+                            erroKey="$^errorKey"
+                            emptyStringValue="$^emptyStringValue"
+                            otherBindings="$otherBindingsValues"/>\
+                <a:ClientSideScript isSingleton="$false">
+                    initRTA('$areaName');
+                </a:ClientSideScript>
+            </span>
+        </a:RefreshRegion>
+    </a:If>
+<a:Else/>\
+     <a:String value="$displayValue" escapeUnsafeHtml="$true"/>\
+</a:If>\

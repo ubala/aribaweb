@@ -12,23 +12,35 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#7 $
 */
 package ariba.ui.aribaweb.util;
 
-import ariba.ui.aribaweb.core.*;
 import ariba.util.core.MapUtil;
 import ariba.util.core.ListUtil;
+import ariba.util.core.ClassExtension;
+import ariba.util.core.ClassExtensionRegistry;
+import ariba.ui.aribaweb.core.AWRequestContext;
+import ariba.ui.aribaweb.core.AWComponentDefinition;
+import ariba.ui.aribaweb.core.AWComponentReference;
+import ariba.ui.aribaweb.core.AWBaseElement;
+import ariba.ui.aribaweb.core.AWBindableElement;
 
 import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class AWDebugTrace
 {
     AWRequestContext _requestContext;
     ComponentTraceNode _currentComponentTraceNode;
     MetadataTraceNode _currentMetadataTraceNode;
-    List _componentPathList;
+    boolean _assignMetaDataToNext;
+    boolean _doingPathTrace;
+    List<ComponentTraceNode> _componentPathList;
     AWComponentDefinition _mainComponentDefinition;
 
     public AWDebugTrace (AWRequestContext requestContext)
@@ -37,7 +49,16 @@ public class AWDebugTrace
         _mainComponentDefinition = requestContext.pageComponent().componentDefinition();
     }
 
-    public List componentPathList ()
+    public void didFinishPathTracePhase ()
+    {
+        _currentComponentTraceNode = null;
+        _currentMetadataTraceNode = null;
+        _assignMetaDataToNext = false;
+        _doingPathTrace = false;
+        _mainComponentDefinition = null;
+    }
+
+    public List<ComponentTraceNode> componentPathList ()
     {
         return _componentPathList;
     }
@@ -52,10 +73,16 @@ public class AWDebugTrace
         return _currentMetadataTraceNode;
     }
     
-    public void pushComponentPathEntry (AWComponentReference componentReference)
+    public void pushComponentPathEntry (AWBindableElement componentReference)
     {
         if (_componentPathList == null) _componentPathList = ListUtil.list();
-        _componentPathList.add(componentReference);
+        _currentComponentTraceNode = new ComponentTraceNode(componentReference, ListUtil.lastElement(_componentPathList));
+        _componentPathList.add(_currentComponentTraceNode);
+        if (_assignMetaDataToNext && _currentMetadataTraceNode != null) {
+            _currentComponentTraceNode._associatedMetadata = _currentMetadataTraceNode;
+            _assignMetaDataToNext = false;
+        }
+        _doingPathTrace = true;
     }
 
     public ComponentTraceNode componentTraceRoot ()
@@ -78,21 +105,30 @@ public class AWDebugTrace
     public AWComponentDefinition mainComponentDefinition ()
     {
         return _mainComponentDefinition != null ? _mainComponentDefinition
-                : componentTraceRoot().componentReference().componentDefinition();
+                : componentTraceRoot().componentDefinition();
     }
     
-    public void pushTraceNode (AWComponent component)
+    public void pushTraceNode (AWBindableElement element)
     {
-        _currentComponentTraceNode = currentComponentTraceNode().pushChild(component.componentReference());
+        _currentComponentTraceNode = currentComponentTraceNode().pushChild(element);
 
+        // See if we have a pending metadata association
+        if (_assignMetaDataToNext && _currentMetadataTraceNode != null) {
+            _currentComponentTraceNode._associatedMetadata = _currentMetadataTraceNode;
+            _assignMetaDataToNext = false;
+        }
+        
         // Record the "main" component to highlight by default in the viewer
         if (_mainComponentDefinition == null) {
+            if (element instanceof AWComponentReference) {
+                AWComponentDefinition def = ((AWComponentReference)element).componentDefinition();
+                if (!def.isStateless()) _mainComponentDefinition = def;
+            }
+            /*
             if (component == component.pageComponent()) {
                 _mainComponentDefinition = component.componentDefinition();
             }
-            else if (!component.isStateless()) {
-                _mainComponentDefinition = component.componentReference().componentDefinition();
-            }
+            */
         }
     }
 
@@ -134,21 +170,51 @@ public class AWDebugTrace
         return (path != null) ? path.replaceFirst("\\.[\\w]+", "") : null;
     }
 
-
-    public static class ComponentTraceNode
+    public static String elementName (AWBindableElement element)
     {
-        AWComponentReference _componentReference;
-        AWComponentReference _sourceReference;
+        return (element instanceof AWComponentReference)
+                ? ((AWComponentReference)element).componentDefinition().componentName()
+                : element.tagName();
+    }
+
+
+    public static class ComponentTraceNode implements Cloneable
+    {
+        AWBindableElement _element;
+        AWBindableElement _sourceReference;
         ComponentTraceNode _parent;
-        List _children;
+        List<ComponentTraceNode> _children;
         int _suppressLevels = 0;
         AWBaseElement _suppressingElement;
         MetadataTraceNode _associatedMetadata;
 
-        public ComponentTraceNode (AWComponentReference ref, ComponentTraceNode parent)
+        public ComponentTraceNode (AWBindableElement ref, ComponentTraceNode parent)
         {
             _parent = parent;
-            _componentReference = ref;
+            _element = ref;
+        }
+
+        protected Object clone() throws CloneNotSupportedException
+        {
+            ComponentTraceNode clone = (ComponentTraceNode)super.clone();
+            if (clone._children != null) {
+                List<ComponentTraceNode> newList = new ArrayList();
+                for (ComponentTraceNode child : clone._children) {
+                    newList.add((ComponentTraceNode)child.clone());
+                }
+                clone._children = newList;
+            }
+            return clone;
+        }
+
+        public ComponentTraceNode cloneTree ()
+        {
+            try {
+                return (ComponentTraceNode)clone();
+            } catch (CloneNotSupportedException e) {
+                // won't happen...
+                return null;
+            }
         }
 
         protected boolean suppressing ()
@@ -161,7 +227,7 @@ public class AWDebugTrace
             return false;
         }
 
-        public ComponentTraceNode pushChild (AWComponentReference ref)
+        public ComponentTraceNode pushChild (AWBindableElement ref)
         {
             // already suppressing children?
             boolean suppress = (_suppressLevels > 0) || (_suppressingElement != null);
@@ -169,12 +235,12 @@ public class AWDebugTrace
             // check if we are to suppress this one
             if (!suppress) {
                 // check for suppression match both in source template and referenced component
-                Boolean sup = (Boolean)_ComponentDefinitionsToSuppress.get(ref.componentDefinition().componentName());
+                Boolean sup = (Boolean)_ComponentDefinitionsToSuppress.get(elementName(ref));
                 if (sup != null && sup.booleanValue()) {
                     suppress = true;
                 }
                 else if (_children != null) {
-                    ComponentTraceNode lastSibling = (ComponentTraceNode) ListUtil.lastElement(_children);
+                    ComponentTraceNode lastSibling = ListUtil.lastElement(_children);
                     // Our sibling is a dup (from a repetition, for instance -- suppress this child (and his sub-tree)
                     // if (lastSibling._componentReference == ref) suppress = true;
                 }
@@ -201,30 +267,33 @@ public class AWDebugTrace
             return _parent;
         }
 
+        interface NodeFilter {
+            boolean shouldKeep (ComponentTraceNode node);
+        }
+
         // recursively collapse skip children
         // Skip if we're in the Suppress list and have only one child.
         // We preserve our reference as the "source" reference and then take our childs ref and children
-        public ComponentTraceNode collapseChildren ()
+        public ComponentTraceNode collapseChildren (NodeFilter filter)
         {
             if (_children != null) {
                 int i = _children.size();
                 while (i-- > 0) {
-                    ComponentTraceNode child = (ComponentTraceNode)_children.get(i);
+                    ComponentTraceNode child = _children.get(i);
                     // recurse to children, and do replace / removal as necessary
-                    child = child.collapseChildren();
+                    child = child.collapseChildren(filter);
                     if (child != null) _children.set(i, child); else _children.remove(i);
                 }
             }
             // See if we should be removed
-            Boolean sup = (Boolean)_ComponentDefinitionsToSuppress.get(_componentReference.componentDefinition().componentName());
-            if (sup != null && !sup.booleanValue()) {
+            if (!filter.shouldKeep(this)) {
                 if (_children == null || _children.size() == 0) {
                     // remove us
                     return null;
                 } else if (_children.size() == 1) {
                     // use our child
-                    ComponentTraceNode child = (ComponentTraceNode)_children.get(0);
-                    child._sourceReference = _componentReference;
+                    ComponentTraceNode child = _children.get(0);
+                    child._sourceReference = _element;
                     return child;
                 }
             }
@@ -232,13 +301,37 @@ public class AWDebugTrace
             return this;
         }
 
+        // Collapse suppressed single-child parents
+        public ComponentTraceNode collapseChildren ()
+        {
+            return collapseChildren(new NodeFilter () {
+                public boolean shouldKeep(ComponentTraceNode node)
+                {
+                    Boolean sup = (Boolean)_ComponentDefinitionsToSuppress.get(elementName(node._element));
+                    return (sup == null || sup.booleanValue());
+                }
+            });
+        }
+
+        // Collapse suppressed single-child parents
+        public ComponentTraceNode collapseNonMetadataChildren ()
+        {
+            return collapseChildren(new NodeFilter () {
+                public boolean shouldKeep(ComponentTraceNode node)
+                {
+                    Boolean sup = (Boolean)_ComponentDefinitionsToSuppress.get(elementName(node._element));
+                    return (sup == null || sup.booleanValue()) && node.associatedMetadata() != null;
+                }
+            });
+        }
+
         public ComponentTraceNode findFirstNodeMatching (AWComponentDefinition componentDefinition)
         {
-            if (_componentReference.componentDefinition() == componentDefinition) return this;
+            if (componentDefinition() == componentDefinition) return this;
             if (_children != null) {
                 int i=0, count = _children.size();
                 for ( ; i < count; i++) {
-                    ComponentTraceNode child = (ComponentTraceNode)_children.get(i);
+                    ComponentTraceNode child = _children.get(i);
                     ComponentTraceNode match = child.findFirstNodeMatching(componentDefinition);
                     if (match != null) return match;
                 }
@@ -247,21 +340,68 @@ public class AWDebugTrace
         }
 
         public void setSourceReference (AWComponentReference ref) { _sourceReference = ref; }
-        public List children () { return _children; }
-        public AWComponentReference componentReference () { return _componentReference; }
-        public AWComponentReference sourceReference () { return (_sourceReference != null) ? _sourceReference : _componentReference; }
+        public List<ComponentTraceNode> children () { return _children; }
+        public AWBindableElement element() { return _element; }
+        public AWBindableElement sourceReference () { return (_sourceReference != null) ? _sourceReference : _element; }
+        public MetadataTraceNode associatedMetadata () { return _associatedMetadata; }
+
+        public Object associatedMetadataProvider () {
+            return (_associatedMetadata != null)
+                    ? _associatedMetadata._metaPropertyProvider
+                    : null;
+        }
+
+        public Map associatedMetadataProperties ()
+        {
+            return (_associatedMetadata != null)
+                    ? _associatedMetadata.properties(_element)
+                    : null;
+        }
+
+        public Map<AssignmentSource, List<Assignment>> associatedMetadataAssignmentMap ()
+        {
+            return (_associatedMetadata != null)
+                    ? _associatedMetadata.assignmentMap(_element)
+                    : null;
+        }
+
+        public AWComponentDefinition componentDefinition()
+        {
+            return (_element instanceof AWComponentReference) 
+                    ? ((AWComponentReference)_element).componentDefinition()
+                    : null;
+        }
+
+        public boolean elementIsStateless ()
+        {
+            return !(_element instanceof AWComponentReference)
+                    || ((AWComponentReference)_element).componentDefinition().isStateless();
+        }
     }
 
     // When called in append (component inspector, need to call "pop", in invoke don't call pop)
-    public void pushMetadata (String title, String details)
+    public void pushMetadata (String title, Object metaPropertyProvider)
+    {
+        pushMetadata(title, metaPropertyProvider, false);
+    }
+
+    boolean assignMetaOnPush (boolean assignToNext)
+    {
+        // since ordering is reversed when doing a path inspect "Next" becomes previous...
+        return _doingPathTrace ^ !assignToNext;
+    }
+
+    public void pushMetadata (String title, Object metaPropertyProvider, boolean assignToNext)
     {
         if (_currentMetadataTraceNode == null) _currentMetadataTraceNode = new MetadataTraceNode(null, null, null);
-        MetadataTraceNode node = new MetadataTraceNode(_currentMetadataTraceNode, title, details);
+        MetadataTraceNode node = new MetadataTraceNode(title, metaPropertyProvider, _currentMetadataTraceNode);
         _currentMetadataTraceNode.addChild(node);
 
         // We nest in append (component inspector), but just keep a list in invoke (click path)
-        if (_requestContext.currentPhase() == AWRequestContext.Phase_Render) _currentMetadataTraceNode = node;
-        if (_currentComponentTraceNode != null) _currentComponentTraceNode._associatedMetadata = node;
+        // if (_requestContext.currentPhase() == AWRequestContext.Phase_Render)
+        _currentMetadataTraceNode = node;
+        _assignMetaDataToNext = !assignMetaOnPush(assignToNext);
+        if (_currentComponentTraceNode != null && !_assignMetaDataToNext) _currentComponentTraceNode._associatedMetadata = node;
     }
 
     public void popMetadata ()
@@ -272,15 +412,18 @@ public class AWDebugTrace
     public static class MetadataTraceNode
     {
         MetadataTraceNode _parent;
-        public String _title;
-        public String _details;
+        String _title;
+        Object _metaPropertyProvider;
         List _children;
 
-        public MetadataTraceNode (MetadataTraceNode parent, String title, String details)
+        AssignmentRecorder _recorder;
+        Map _properties;
+
+        public MetadataTraceNode (String title, Object propertyProvider, MetadataTraceNode parent)
         {
             _parent = parent;
             _title = title;
-            _details = details;
+            _metaPropertyProvider = propertyProvider;
         }
 
         public void addChild (MetadataTraceNode child)
@@ -293,6 +436,194 @@ public class AWDebugTrace
         {
             return _children;
         }
+
+        public String title (AWBindableElement element)
+        {
+            return (_metaPropertyProvider != null)
+                ? MetaProvider.get(_metaPropertyProvider).title(_metaPropertyProvider, _title, element)
+                : null;
+        }
+
+        public Map properties (AWBindableElement element)
+        {
+            if (_properties == null) {
+                _properties = (_metaPropertyProvider != null)
+                    ? MetaProvider.get(_metaPropertyProvider).metaProperties(_metaPropertyProvider, element)
+                    : null;
+            }
+            return _properties;
+        }
+
+        public Map<AssignmentSource, List<Assignment>> assignmentMap (AWBindableElement element)
+        {
+            if (_recorder == null) {
+                _recorder = new AssignmentRecorder();
+                MetaProvider.get(_metaPropertyProvider).recordAssignments(_metaPropertyProvider, _recorder, element);
+            }
+            return _recorder.getAssignments();
+        }
+    }
+
+    abstract static public class MetaProvider extends ClassExtension
+    {
+        private static final ClassExtensionRegistry ClassExtensionRegistry = new ClassExtensionRegistry();
+
+        // ** Thread Safety Considerations: ClassExtension cache can be considered read-only, so it needs no external locking.
+
+        public static void registerClassExtension (Class receiverClass, MetaProvider providerClassExtension)
+        {
+            ClassExtensionRegistry.registerClassExtension(receiverClass, providerClassExtension);
+        }
+
+        public static MetaProvider get (Object target)
+        {
+            return (MetaProvider)ClassExtensionRegistry.get(target.getClass());
+        }
+
+        ////////////
+        // Api
+        ////////////
+        abstract public Map<String, Object> metaProperties (Object receiver, AWBindableElement element);
+
+        // default assignment record for a property map.  Subclasses should override...
+        public void recordAssignments (Object receiver, AssignmentRecorder recorder, AWBindableElement element)
+        {
+            Map<String, Object>  map = metaProperties(receiver, element);
+            recorder.setCurrentSource(0, "Values", "");
+            for (Map.Entry<String, Object> e : map.entrySet()) {
+                recorder.registerAssignment(e.getKey(), e.getValue());
+            }
+        }
+
+        public String title (Object receiver, String title, AWBindableElement element)
+        {
+            return title;
+        }
+    }
+
+    static public class AssignmentRecorder
+    {
+        Map <AssignmentSource, List<Assignment>> _assignments = new HashMap();
+        AssignmentSource _currentSource;
+        boolean _didProcess;
+
+        public void setCurrentSource (int rank, String description, String location)
+        {
+            _currentSource = new AssignmentSource(rank, description, location);
+            _assignments.put(_currentSource, new ArrayList());
+        }
+
+        public void registerAssignment (String key, Object value)
+        {
+            _assignments.get(_currentSource).add(new Assignment(key, value));
+        }
+
+        public Map<AssignmentSource, List<Assignment>> getAssignments()
+        {
+            if (!_didProcess) _process();
+            return _assignments;
+        }
+
+        /**
+            Marks all but the highest ranking assignments for a given key as overridden
+         */
+        void _process ()
+        {
+            _didProcess = true;
+            List <AssignmentSource> sources = new ArrayList(_assignments.keySet());
+            Collections.sort(sources, new Comparator<AssignmentSource> () {
+                public int compare(AssignmentSource assignmentSource, AssignmentSource assignmentSource1)
+                {
+                    return assignmentSource.rank - assignmentSource1.rank;
+                }
+            });
+
+            Map<String, Assignment> lastAssignmentForKey = new HashMap();
+            for (AssignmentSource s : sources) {
+                for (Assignment a : _assignments.get(s)) {
+                    Assignment last = lastAssignmentForKey.get(a.key);
+                    if (last != null) last.isOverridden = true;
+                    lastAssignmentForKey.put(a.key, a);
+                }
+            }
+        }
+    }
+
+    public static class Assignment
+    {
+        String key;
+        Object value;
+        boolean isOverridden;
+
+        public Assignment(String key, Object value)
+        {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey()
+        {
+            return key;
+        }
+
+        public Object getValue()
+        {
+            return value;
+        }
+
+        public boolean isOverridden()
+        {
+            return isOverridden;
+        }
+    }
+
+    public static class AssignmentSource
+    {
+        int rank;
+        String description;
+        String location;
+
+        public AssignmentSource(int rank, String description, String location)
+        {
+            this.rank = rank;
+            this.description = description;
+            this.location = location;
+        }
+
+        public int getRank()
+        {
+            return rank;
+        }
+
+        public String getDescription()
+        {
+            return description;
+        }
+
+        public String getLocation()
+        {
+            return location;
+        }
+
+        public String locationShortName()
+        {
+            return (location != null) ? AWUtil.lastComponent(location, "/") : "Unknown";
+        }
+    }
+
+    protected static class MetaProvider_Map extends MetaProvider
+    {
+        ////////////
+        // Api
+        ////////////
+        public Map<String, Object> metaProperties (Object receiver, AWBindableElement element)
+        {
+            return (Map)receiver;
+        }
+    }
+
+    static {
+        MetaProvider.registerClassExtension(Map.class, new MetaProvider_Map());
     }
 
 
@@ -337,6 +668,7 @@ public class AWDebugTrace
            "BaseTabSet",
            "TabList",
            "OulineInnerRepetition",
+           "AWHighLightedErrorScope",
 
            // Demoshell
            "AWXAnchorTag",

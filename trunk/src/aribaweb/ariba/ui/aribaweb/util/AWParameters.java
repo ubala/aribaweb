@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWParameters.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWParameters.java#5 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -42,7 +42,6 @@ public class AWParameters
      * parameter values.
      *
      * @param paramkey
-     * @return
      * @aribaapi private
      */
     public String getParameterValue (String paramkey)

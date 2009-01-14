@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/StandardPatternParser.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/log/StandardPatternParser.java#6 $
 */
 
 package ariba.util.log;
@@ -43,7 +43,7 @@ public class StandardPatternParser extends PatternParser
 
     /**
         Instantiates an instance of this class with the specific pattern
-        @param the specified pattern
+        @param pattern the specified pattern
     */
     public StandardPatternParser (String pattern)
     {

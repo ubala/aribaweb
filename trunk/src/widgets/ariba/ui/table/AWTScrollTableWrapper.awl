@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.awl#62 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.awl#64 $
     </Copyright>
 
     <Overview>
@@ -29,6 +29,10 @@
     </Binding>
 
     <Binding key="showHeader" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="tableBodyExpanded" direction="get" type="boolean" default="$true">
         TBD
     </Binding>
 
@@ -156,112 +160,114 @@
         </a:RefreshRegion>
     </a:If>
 
-    <a:If ifTrue="$enableScrolling">
-    <a:RefreshRegion tagName="tr" disabled="$disableRefresh">
-        <td><!--- wrapper table to allow awtWrapperTable to size out without being affected
-                  by the actual data contents or column header contents.  After table
-                  size is established, we'll put in scroll bars as necessary for the actual
-                  data content. -->
-            <table cellpadding="0" cellspacing="0" class="fixedTable">
-                <tr _ifTrue="$^showColumnHeader:$true">
-                    <td>
-                        <div class="tableHead">
-                        <!--- Set table width to 1px initially to force the header table to
-                          initially size to the minimum possible.  We capture these column
-                          widths as the minimum widths for the body columns.  Scrolltable
-                          sizing scripts then take care of forcing the header columns to the
-                          size of the body columns if necessary -->\
-                        <table style="width:1px;" cellspacing="0" cellpadding="0">
+    <a:If ifTrue="$^tableBodyExpanded:$true">
+        <a:If ifTrue="$enableScrolling">
+        <a:RefreshRegion tagName="tr" disabled="$disableRefresh">
+            <td><!--- wrapper table to allow awtWrapperTable to size out without being affected
+                      by the actual data contents or column header contents.  After table
+                      size is established, we'll put in scroll bars as necessary for the actual
+                      data content. -->
+                <table cellpadding="0" cellspacing="0" class="fixedTable">
+                    <tr _ifTrue="$^showColumnHeader:$true">
+                        <td>
+                            <div class="tableHead">
+                            <!--- Set table width to 1px initially to force the header table to
+                              initially size to the minimum possible.  We capture these column
+                              widths as the minimum widths for the body columns.  Scrolltable
+                              sizing scripts then take care of forcing the header columns to the
+                              size of the body columns if necessary -->\
+                            <table style="width:1px;" cellspacing="0" cellpadding="0">
+                                <a:If ifFalse="$hasHeadingRowsTemplate">
+                                    <tr>
+                                        <a:IncludeContent name="headingColumns" required="$true"/>\
+                                    </tr>
+                                <a:Else/>
+                                    <a:IncludeContent name="headingRows" required="$true"/>\
+                                </a:If>
+                            </table>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="tableBody">
+                                <a:RefreshRegion elementId="$tableId" tagName="table" isScope="$true"
+                                    disabled="$disableRefresh" class="tableBody"
+                                    style="$^style" cellspacing="0" cellpadding="0"
+                                    awname="$tableBodySemanticKey">
+                                    <a:IncludeContent name="bodyRows" required="$true"/>\
+                                    <a:If ifFalse="$requestContext.isExportMode">\
+                                        <a:ClientSideScript executeOnIncrementalUpdate="$true" isSingleton="$false">
+                                            ariba.Datatable.registerScrollTable("$tableId",  <a:String value="$^disableRowSelection:false"/>,
+                                                    <a:String value="$!^checkNbsps:false"/>, <a:String value="$^checkSelectionStyle:true"/>,"$tableHeaderId");
+                                        </a:ClientSideScript>\
+                                    </a:If>\
+                                </a:RefreshRegion>\
+                            </div>\
+                        </td>
+                    </tr>
+                </table>
+                <a:If ifFalse="$requestContext.isExportMode">\
+                    <!--- emit form if one not already in place... -->
+                    <a:Form omitTags="$requestContext.currentForm" style="margin:0px">\
+                        <a:RefreshRegion style="display:none" disabled="$disableRefresh">
+                            <!--- todo: rather than set the id on the textField, we should have it pass us its id --->
+                            <a:SetValue isMaximizedId="$requestContext.nextElementId"/>
+                            <a:TextField id="$isMaximizedId" value="$^isMaximized" formatter="$formatters.boolean" autoselect="$false"/>
+
+                            <a:SetValue topIndexId="$requestContext.nextElementId"/>
+                            <a:TextField id="$topIndexId" value="$^topIndex" formatter="$formatters.integer" autoselect="$false"/>
+
+                            <a:SetValue topOffsetId="$requestContext.nextElementId"/>
+                            <a:TextField id="$topOffsetId" value="$^topOffset" formatter="$formatters.integer" autoselect="$false"/>
+                            <a:ClientSideScript executeOnIncrementalUpdate="$true" isSingleton="$false">
+                                ariba.Datatable.updateScrollTable("$tableId", <a:String value="$^isDragDropEnabled:false"/>, "$isMaximizedId" ,
+                                        "$^topCount", "$^bottomCount", "$topIndexId", "$topOffsetId", "<a:ActionId action="$^scrollFaultAction"/>",
+                                        "<a:String value="$^elementIdForVisibleRow"/>", "<a:ActionId action="$^updateSelectAllAction"/>");
+                            </a:ClientSideScript>
+                        </a:RefreshRegion>\
+                    </a:Form>\
+                </a:If>\
+            </td>
+        </a:RefreshRegion>
+        <a:Else/>
+            <a:RefreshRegion tagName="tr" disabled="$disableRefresh">
+                <td style="width:100%">
+                    <a:RefreshRegion elementId="$tableId" id="tableId" tagName="table" isScope="$true" disabled="$disableRefresh"
+                                     class="tableBody" style="$^style" cellspacing="0" cellpadding="0"
+                                     awname="$tableBodySemanticKey">
+                        <a:If ifTrue="$^showColumnHeader:$true">\
                             <a:If ifFalse="$hasHeadingRowsTemplate">
-                                <tr>
+                                <a:RefreshRegion tagName="tr" disabled="$disableRefresh">
                                     <a:IncludeContent name="headingColumns" required="$true"/>\
-                                </tr>
+                                </a:RefreshRegion>\
                             <a:Else/>
                                 <a:IncludeContent name="headingRows" required="$true"/>\
                             </a:If>
-                        </table>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="tableBody">
-                            <a:RefreshRegion elementId="$tableId" tagName="table" isScope="$true"
-                                disabled="$disableRefresh" class="tableBody"
-                                style="$^style" cellspacing="0" cellpadding="0"
-                                awname="$tableBodySemanticKey">
-                                <a:IncludeContent name="bodyRows" required="$true"/>\
-                                <a:If ifFalse="$requestContext.isExportMode">\
-                                    <a:ClientSideScript executeOnIncrementalUpdate="$true" isSingleton="$false">
-                                        ariba.Datatable.registerScrollTable("$tableId",  <a:String value="$^disableRowSelection:false"/>,
-                                                <a:String value="$!^checkNbsps:false"/>, <a:String value="$^checkSelectionStyle:true"/>,"$tableHeaderId");
-                                    </a:ClientSideScript>\
-                                </a:If>\
-                            </a:RefreshRegion>\
-                        </div>\
-                    </td>
-                </tr>
-            </table>
-            <a:If ifFalse="$requestContext.isExportMode">\
-                <!--- emit form if one not already in place... -->
-                <a:Form omitTags="$requestContext.currentForm" style="margin:0px">\
-                    <a:RefreshRegion style="display:none" disabled="$disableRefresh">
-                        <!--- todo: rather than set the id on the textField, we should have it pass us its id --->
-                        <a:SetValue isMaximizedId="$requestContext.nextElementId"/>
-                        <a:TextField id="$isMaximizedId" value="$^isMaximized" formatter="$formatters.boolean" autoselect="$false"/>
-
-                        <a:SetValue topIndexId="$requestContext.nextElementId"/>
-                        <a:TextField id="$topIndexId" value="$^topIndex" formatter="$formatters.integer" autoselect="$false"/>
-
-                        <a:SetValue topOffsetId="$requestContext.nextElementId"/>
-                        <a:TextField id="$topOffsetId" value="$^topOffset" formatter="$formatters.integer" autoselect="$false"/>
-                        <a:ClientSideScript executeOnIncrementalUpdate="$true" isSingleton="$false">
-                            ariba.Datatable.updateScrollTable("$tableId", <a:String value="$^isDragDropEnabled:false"/>, "$isMaximizedId" ,
-                                    "$^topCount", "$^bottomCount", "$topIndexId", "$topOffsetId", "<a:ActionId action="$^scrollFaultAction"/>",
-                                    "<a:String value="$^elementIdForVisibleRow"/>", "<a:ActionId action="$^updateSelectAllAction"/>");
-                        </a:ClientSideScript>
-                    </a:RefreshRegion>\
-                </a:Form>\
-            </a:If>\
-        </td>
-    </a:RefreshRegion>
-    <a:Else/>
-        <a:RefreshRegion tagName="tr" disabled="$disableRefresh">
-            <td style="width:100%">
-                <a:RefreshRegion elementId="$tableId" id="tableId" tagName="table" isScope="$true" disabled="$disableRefresh"
-                                 class="tableBody" style="$^style" cellspacing="0" cellpadding="0"
-                                 awname="$tableBodySemanticKey">
-                    <a:If ifTrue="$^showColumnHeader:$true">\
-                        <a:If ifFalse="$hasHeadingRowsTemplate">
-                            <a:RefreshRegion tagName="tr" disabled="$disableRefresh">
-                                <a:IncludeContent name="headingColumns" required="$true"/>\
-                            </a:RefreshRegion>\
-                        <a:Else/>
-                            <a:IncludeContent name="headingRows" required="$true"/>\
+                        </a:If>\
+                        <a:IncludeContent name="bodyRows" required="$true"/>\
+                        <a:If ifFalse="$requestContext.isExportMode">
+                            <a:ClientSideScript executeOnIncrementalUpdate="$true" isSingleton="$false">
+                                ariba.Datatable.registerNonScrollTableId("$tableId", <a:String value="$^isDragDropEnabled:false"/>, <a:String value="$^disableRowSelection:false"/>,\
+                                    <a:String value="$!^checkNbsps:false"/>,  <a:String value="$^checkSelectionStyle:true"/>);
+                            </a:ClientSideScript>
                         </a:If>
-                    </a:If>\
-                    <a:IncludeContent name="bodyRows" required="$true"/>\
-                    <a:If ifFalse="$requestContext.isExportMode">
-                        <a:ClientSideScript executeOnIncrementalUpdate="$true" isSingleton="$false">
-                            ariba.Datatable.registerNonScrollTableId("$tableId", <a:String value="$^isDragDropEnabled:false"/>, <a:String value="$^disableRowSelection:false"/>,\
-                                <a:String value="$!^checkNbsps:false"/>,  <a:String value="$^checkSelectionStyle:true"/>);
-                        </a:ClientSideScript>
-                    </a:If>
-                </a:RefreshRegion>
-            </td>
-        </a:RefreshRegion>
-    </a:If>\
-    <a:If ifTrue="$^showFooter:$false">
-        <a:RefreshRegion tagName="tr" disabled="$disableRefresh">
-            <td>\<table width="100%" cellpadding="0" cellspacing="0"><tr>
-                <td class="tableFooter">\
-                    <a:IncludeContent name="footerArea" required="$false"/>\
-                </td>\
-                <td class="tableFooter" style="padding-right:10px;text-align:right" nowrap>\
-                    <a:IncludeContent name="footerAreaRight" required="$false"/>\
-                </td>\
-            </tr></table></td>
-        </a:RefreshRegion>
+                    </a:RefreshRegion>
+                </td>
+            </a:RefreshRegion>
+        </a:If>\
+        <a:If ifTrue="$^showFooter:$false">
+            <a:RefreshRegion tagName="tr" disabled="$disableRefresh">
+                <td>\<table width="100%" cellpadding="0" cellspacing="0"><tr>
+                    <td class="tableFooter">\
+                        <a:IncludeContent name="footerArea" required="$false"/>\
+                    </td>\
+                    <td class="tableFooter" style="padding-right:10px;text-align:right" nowrap>\
+                        <a:IncludeContent name="footerAreaRight" required="$false"/>\
+                    </td>\
+                </tr></table></td>
+            </a:RefreshRegion>
+        </a:If>\
     </a:If>
 </a:RefreshRegion>\
 </div>\

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMap.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMap.java#10 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -79,7 +79,7 @@ abstract public class AWMap extends ClassExtension
 
         @aribaapi private
 
-        @param receiver class
+        @param targetClass class
         @return AWMap for class
     */
     public static AWMap get (Class targetClass)
@@ -91,8 +91,6 @@ abstract public class AWMap extends ClassExtension
         Creates a new AWMap object.
 
         @aribaapi private
-
-        @return new AWMap object
     */
     public AWMap ()
     {

@@ -13,11 +13,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWImage.awl#9 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWImage.awl#11 $
     </Copyright>
 
     <Overview>
-        Renders an <img ../> tag into the outgoing html along with appropriate attributes.  If the filename attribute is
+        Renders an `<img ../>` tag into the outgoing html along with appropriate attributes.  If the filename attribute is
             provided, AWImage will automatically compute the width and height from the image file it locates under the
             application resource directories.  The url generated is controlled by the AWResourceManager's url specification
             for the directory in which the image is found, but generally, the url's generated are directed at the webserver
@@ -56,12 +56,13 @@
         alt is used for the title and alt.
     </Binding>
 
-    <Binding key="alt" type="String" default="$null" direction="get" seeAlso="title">
-        Provides the images alt attribute.
+    <Binding key="alt" type="String" default="" direction="get" seeAlso="title">
+        Provides the images alt attribute.    If the alt is not defined but the title attribute is defined, the value for
+        title is used for the title and alt.  If the title and alt is not specified, then the default is empty string.
     </Binding>
 
     <Binding key="*" type="String" default="$null" direction="get">
-        Arbitrary key/value pairs may be passed-through to the \<img.../> tag.  Most common html components also allow for this.
+        Arbitrary key/value pairs may be passed-through to the `<img.../>` tag.  Most common html components also allow for this.
     </Binding>
 
     <Binding key="src" type="String" default="$null" direction="get" alternates="filename">
@@ -69,4 +70,4 @@
     </Binding>
 </a:Api>\
 
-<a:GenericElement tagName="img" src="$imageUrl" width="$width" height="$height" border="$^border:0" title="$^title:$^alt" alt="$^alt" otherBindings="$otherBindingsValues" omitTags="$requestContext.isExportMode"/>\
+<a:GenericElement tagName="img" src="$imageUrl" width="$width" height="$height" border="$^border:0" title="$^title:$^alt" alt="$alt" otherBindings="$otherBindingsValues" omitTags="$requestContext.isExportMode"/>\

@@ -13,30 +13,30 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabSet.awl#2 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabSet.awl#3 $
     </Copyright>
 
     <Overview>
         Provides a set of "tabs" which can be clicked to change what is viewed.  This is a stateful component so it can
         remember what tab is currently selected even though the tab isn't clicked.  You may determine what tab is
         selected externally by providing the (optional) "index" binding and setting it to one of the tabs (zero-based
-        indexing)s.
+        indexing).
 
         An example of the usage is as follows:
 
-        <w:TabSet index="$selectedTabIndex">
-            <w:Tab label="Alpha">
-                This will show when Alpha is clicked
-            </w:Tab>
+            <w:TabSet index="$selectedTabIndex">
+                <w:Tab label="Alpha">
+                    This will show when Alpha is clicked
+                </w:Tab>
 
-            <w:Tab label="Beta" isVisible="$isBetaVisible">
-                This will show when Beta is clicked
-            </w:Tab>
+                <w:Tab label="Beta" isVisible="$isBetaVisible">
+                    This will show when Beta is clicked
+                </w:Tab>
 
-            <w:Tab label="Delta">
-                This will show when Delta is clicked
-            </w:Tab>
-        </w:TabSet>
+                <w:Tab label="Delta">
+                    This will show when Delta is clicked
+                </w:Tab>
+            </w:TabSet>
     </Overview>
 
     <Binding key="index" type="int" required="$false" direction="both">

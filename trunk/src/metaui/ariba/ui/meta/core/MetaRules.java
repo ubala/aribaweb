@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaRules.java#5 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaRules.java#6 $
 */
 package ariba.ui.meta.core;
 
@@ -79,7 +79,7 @@ public class MetaRules extends AWContainerElement implements AWHtmlTemplateParse
 
         Meta.RuleSet ruleSet= data.elementMap.get(this);
         if (ruleSet == null) {
-            meta.beginRuleSet(Meta.TemplateRulePriority);
+            meta.beginRuleSet(Meta.TemplateRulePriority, template.templateName());
             try {
                 new Parser(meta, contentString()).addRulesWithPredicate(
                         Arrays.asList(new Meta.Predicate(TemplateId, templateId)));

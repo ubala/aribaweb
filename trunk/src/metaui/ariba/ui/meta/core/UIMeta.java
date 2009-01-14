@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#12 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#14 $
 */
 package ariba.ui.meta.core;
 
@@ -343,7 +343,7 @@ public class UIMeta extends Meta
         AWResource resource = resourceManager.packageResourceNamed(filename);
         Assert.that(!required || resource != null, "Rule file not found in resource search path: %s", filename);
         if (resource != null) {
-            beginRuleSet(rank);
+            beginRuleSet(rank, filename);
             _loadRuleFile(resource);
             return true;
         }
@@ -876,6 +876,11 @@ public class UIMeta extends Meta
                 ? override
                 : orig;
         }
+
+        public String toString()
+        {
+            return "VALIDATE";
+        }
     }
 
     Set<String> _loadedNames = new HashSet();
@@ -888,7 +893,7 @@ public class UIMeta extends Meta
             AWResourceManager resourceManager = AWConcreteServerApplication.sharedInstance().resourceManager();
             AWResource resource = resourceManager.resourceNamed(name);
             if (resource != null) {
-                beginRuleSet();
+                beginRuleSet(resource.relativePath());
                 _loadRuleFile(resource);
             }
         }
@@ -908,8 +913,8 @@ public class UIMeta extends Meta
     {
         if (moduleClasses.size() == 0) return;
         Log.meta.debug("Auto declaring modules for classes: %s ", moduleClasses);
-        beginRuleSet();
         for (String className : moduleClasses) {
+            beginRuleSet(className);
             List <Predicate>predicates = Arrays.asList(new Predicate(KeyModule, className));
             ListUtil.lastElement(predicates)._isDecl = true;
 
@@ -927,8 +932,8 @@ public class UIMeta extends Meta
                           new Predicate(KeyClass, className, true)),
                     new HashMap(),
                     ClassRulePriority));
+            endRuleSet();
         }
-        endRuleSet();
     }
 
     public static void addTraits(List traits, Map map)
@@ -1050,7 +1055,7 @@ public class UIMeta extends Meta
         {
             List<String> classNames = (List)data;
             for (String className : classNames) {
-                Class cls = ClassUtil.classForName(className);
+                Class cls = AWUtil.classForName(className);
                 RuleSet ruleSet = _ruleSetsByClassName.get(className);
                 if (ruleSet != null && cls != null) {
                     Log.meta.debug("***** reprocessing reloaded class %s", className);
@@ -1063,7 +1068,7 @@ public class UIMeta extends Meta
         public void notify(Meta meta, String key, Object value)
         {
             Log.meta.debug("IntrospectionMetaProvider notified of first use of class: %s ", value);
-            Class cls = ClassUtil.classForName((String)value, Object.class, false);
+            Class cls = AWUtil.classForName((String)value);
             if (cls != null) {
                 registerRulesForClass(cls);
             }
@@ -1077,7 +1082,7 @@ public class UIMeta extends Meta
                 keyData(KeyClass).setParent(className, sc.getName());
             }
 
-            beginRuleSet();
+            beginRuleSet(cls.getName().replace(".", "/") + ".java");
             Properties propInfo =  (Properties)cls.getAnnotation(ariba.ui.meta.annotations.Properties.class);
             if (propInfo != null) {
                 String propString = propInfo.value();
@@ -1266,7 +1271,7 @@ public class UIMeta extends Meta
         public void notify(Meta meta, String key, Object value)
         {
             Log.meta.debug("FieldTypeIntrospectionMetaProvider notified of first use of field type: %s ", value);
-            Class cls = ClassUtil.classForName((String)value, Object.class, false);
+            Class cls = AWUtil.classForName((String)value);
             if (cls != null) {
                 registerRulesForClass(cls);
             }

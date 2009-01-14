@@ -1,0 +1,105 @@
+<style>
+.tableRowL1, .tableRowL1 td
+{
+    background-color: #DDDDDD;
+    color:#333366;
+    font:bold 11px/15px Verdana, Arial, Helvetica, sans-serif;
+}
+.tableRowL2, .tableRowL2 td
+{
+    background-color: #EEEEEE;
+    color:#333366;
+    font:bold 11px/15px Verdana, Arial, Helvetica, sans-serif;
+}
+.tableRowL3
+{
+    background-color: #FFFFFF;
+}
+.tdClass
+{
+    border-top: 1px solid #666699;
+    font-size:9pt;
+    font-weight:plain;
+}
+
+.noRowLines td.tableBody {
+    border-top:none;
+}
+</style>
+
+<a:SetValue layoutChangeLatch="$true"/> <!-- this is evil, but it is to simulate Sourcing's current bad behavior -->
+
+<t:DataTable list="$rootList" displayGroup="$displayGroup" children="$displayGroup.currentItem.children" hasChildren="$hasChildren"
+        enableScrolling="$true" showOptionsMenu="$true" title="Bid Data!" multiSelect="$showSelection"
+        pivotLayout="$layout.c" columnFields="$layout.c" rowFields="$layout.r" columnAttributes="$layout.a"
+        overrideAttribute="$overrideColumnName" filteredColumnAttributes="$filteredAttributeColumns"
+        forceColumnUpdate="$layoutChangeLatch"
+        rowClass="$rowClass" detailRowClass="" showRowAttributes="$true"
+        tableConfig="$layout.userConfig">
+<!--- shouldCollapseColumnLevel="$collapseSingleColumnLevel" -->
+    
+    <a:Content name="optionsMenu">
+        <t:OptionsMenuButton showConfigureLayout="$false"/>\
+    </a:Content>
+
+    <t:HeadingArea>
+        <div style="float:left">
+            File: <w:PopupControl list="$files" item="$iter" selection="$file" action="$updateFile">$iter.name</w:PopupControl>
+        </div>
+        <div style="float:left; padding-left:5px">
+            Layout: <w:PopupControl list="$layouts" item="$iter" selection="$layout" action="$optionsChanged">$iter.name</w:PopupControl>
+        </div>
+        <div style="float:left">
+            <w:TextButton action="$showFilterPanel">Filter</w:TextButton>
+        </div>
+        <div style="float:right;padding-right:4px">
+            <a:Label><a:Checkbox value="$filteringColumns" action="$optionsChanged"/> Col Filter</a:Label>
+        </div>
+        <div style="float:right;padding-right:4px">
+            <a:Label><a:Checkbox value="$showSelection" action="$optionsChanged"/> Selection</a:Label>
+        </div>
+    </t:HeadingArea>
+
+    <t:Column key="Item" pivotMoveType="None" minWidthPx="300">
+        <w:OutlineControl>\
+            <span style="color:000000">$displayGroup.currentItem.Item</span>
+            $displayGroup.currentItem.ItemDesc\
+        </w:OutlineControl>\
+    </t:Column>
+
+    <t:Column key="Description" wantsSpan="$true" uniquingKeyPath="Item" isBlank="$!displayGroup.currentItem.Description"
+               renderValueInLabelColumn="$true" style="font-style:italic"/>
+
+    <t:Column key="Price" isBlank="$!isItem" align="right">
+        <a:TextField value="$displayGroup.currentItem.Price" formatter="$formatters.money" size="11" style="text-align:right"/>
+    </t:Column>
+    <t:Column key="Quantity" formatter="$formatters.integer" align="right" isBlank="$!isItem" initiallyVisible="$false"/>
+    <t:Column key="ExtendedPrice" label="Extended Price" formatter="$formatters.money" align="right"  isBlank="$!isItem"/>
+    <t:Column key="Savings" label="Savings" formatter="$formatters.money" align="right"  isBlank="$!isItem"/>
+
+    <!--- Spanning Description and variable detail attributes for Attachments and Requirements -->
+
+    <t:DynamicDetailAttributes key="Requirements" label="Requirements" list="$requirements" item="$curRequirement"
+                                renderingColumnKey="RequirementRenderer" uniquingKeyPath="Region"/>
+    <t:Column key="RequirementRenderer" wantsSpan="$true" uniquingKeyPath="Region" isOptional="$false" initiallyVisible="$false">\
+        $curRequirement\
+    </t:Column>
+
+    <t:DynamicDetailAttributes key="BuyerAttachments" label="Buyer Attachments" list="$buyerAttachments" item="$curAttachment"
+                                renderingColumnKey="BuyerAttachmentRenderer" renderValueInLabelColumn="$true"/>
+    <t:Column key="BuyerAttachmentRenderer" wantsSpan="$true" uniquingKeyPath="Item" isOptional="$false" initiallyVisible="$false" valign="top">\
+        $currentAttachmentDescription <nobr><a:Image filename="$currentAttachmentIcon"/> <a>$currentAttachmentFilename</a></nobr>\
+    </t:Column>
+    <t:DynamicDetailAttributes key="Attachments" label="Supplier Attachments" list="$attachments" item="$curAttachment"
+                                renderingColumnKey="AttachmentRenderer" uniquingKeyPath="Supplier"/>
+    <t:Column key="AttachmentRenderer" wantsSpan="$true" uniquingKeyPath="Supplier" isOptional="$false" initiallyVisible="$false">\
+        $currentAttachmentDescription <nobr><a:Image filename="$currentAttachmentIcon" style="margin:3px 0px -5px 0px"/> <a>$currentAttachmentFilename</a></nobr>\
+    </t:Column>
+
+
+    <t:Column key="Supplier" sortOrdering="$supplierSortOrdering" isBlank='$!displayGroup.currentItem.Supplier'/>
+
+    <t:Column key="Answer" wantsSpan="$true" isOptional="$false" initiallyVisible="$false"/>
+    <t:Column key="Extra" isOptional="$false" initiallyVisible="$false"/>
+
+</t:DataTable>

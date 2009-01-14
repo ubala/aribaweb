@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/outline/OutlineRepetition.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/outline/OutlineRepetition.java#4 $
 */
 package ariba.ui.outline;
 
@@ -88,6 +88,9 @@ public final class OutlineRepetition extends AWComponent
 
     protected void checkBindings ()
     {
+        OutlineState outlineState = (OutlineState)valueForBinding(BindingNames.outlineState);
+        if (outlineState != null) _outlineState = outlineState;
+        
         if (_selectionPathBinding != null) {
             _outlineState.setExpansionPath((List)valueForBinding(_selectionPathBinding));
         }

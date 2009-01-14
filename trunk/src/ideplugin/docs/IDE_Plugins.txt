@@ -1,0 +1,88 @@
+IDE Plugins for AribaWeb
+========================
+
+This project defines a plug in for the Eclipse and IntelliJ IDEA development
+environments (IDEs).
+
+FEATURES
+--------
+The plugin adds three features to IDEA and Eclipse:
+
+
+#### Code to/from Template toggle  (Alt-A)
+
+By convention, in AribaWeb the code (.java or .groovy) and template (.awl or .htm)
+files sit together in the source directory and have the same name (but different file
+extensions).  The Alt-A command will toggle from viewing the code to template, or
+visa-versa.  You'd be surprised about just how handy this is in practice.
+
+
+#### Tag to Definition Jump (Alt-B)
+
+When viewing a .awl file, if your cursor sits in an AW tag (e.g. `<TextButton>`)
+and you press Alt-B you will be jumped to the .awl file that defines that
+tag.
+
+Note: This feature is presently not working correctly for tags with namespace
+prefixes (e.g. `<w:TextButton>`).  This will be remedied in a future release.
+
+
+#### App to Source File Navigation
+
+This one is pretty cool:  there are various contexts in which (when in development mode)
+your running AW app may display file names from your source code in the web page
+(e.g. in an exception backtrace, in Component Inspector, or in the SearchSource app).
+In these cases, when then name is displayed as a hyperlink, clicking it will open
+the file in your IDE (and navigate to the correct line number)!
+
+INSTALLING
+----------
+
+To use the plug in within your IDE you must first install the appropriate .jar file in
+your IDE's plug in directory.  These plugins can be found in your AribaWeb install root:
+
+    ide/
+        ariba.ideplugin.eclipse_0.8.x.jar
+        aribawebIdeaPlugin.jar
+
+Copy the appropriate one for your IDE into its plugins directory and restart your IDE.
+
+BUILDING
+--------
+
+To rebuild the plugin from source, you will need to point the Ant build at the location
+of your IDE's lib directory containing the integration jars.
+
+For IDEA, look for a directory that includes the following:
+
+ - openapi.jar
+ - extensions.jar
+
+(these can likely be found inside IDEA's application directory).
+
+Invoke the ant build as follows:
+
+        ant -Didea.lib.dir=/Applications/IntelliJIdea.app/lib
+
+(Assuming that your IDEA is installed in /Applications/IntelliJIdea.app).
+
+For Eclipse, look for a directory that includes something like the following:
+
+ - org.eclipse.core.commands_3.2.0.I20060605-1400.jar
+ - org.eclipse.core.jobs_3.2.0.v20060603.jar
+ - org.eclipse.core.resources_3.2.1.R32x_v20060914.jar
+ - org.eclipse.core.runtime_3.2.0.v20060603.jar
+ - org.eclipse.equinox.common_3.2.0.v20060603.jar
+ - org.eclipse.equinox.registry_3.2.1.R32x_v20060814.jar
+ - org.eclipse.jface_3.2.1.M20060908-1000.jar
+ - org.eclipse.osgi_3.2.1.R32x_v20060919.jar
+ - org.eclipse.swt.win32.win32.x86_3.2.1.v3235.jar
+ - org.eclipse.text_3.2.0.v20060605-1400.jar
+ - org.eclipse.ui.ide_3.2.1.M20060915-1030.jar
+ - org.eclipse.ui.workbench.texteditor_3.2.0.v20060605-1400.jar
+ - org.eclipse.ui.workbench_3.2.1.M20060906-0800.jar
+
+Invoke your ant build as follows:
+
+    ant -eclipse.lib.dir=/Applications/eclipse/plugins
+

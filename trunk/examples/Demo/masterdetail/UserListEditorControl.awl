@@ -1,0 +1,19 @@
+<w:ComplexRepetition list="$users" item="$user" count="$^maxCount:4">\
+    <a:Content name="body">
+        $user.Name\
+    </a:Content>
+
+    <a:Content name="separator">\
+        , \
+    </a:Content>
+
+    <a:Content name="overflow">
+        (More...)
+    </a:Content>
+
+    <a:Content name="empty">
+        (None)
+    </a:Content>
+
+</w:ComplexRepetition>
+<w:TextButton action="$showUserEditor">Edit</w:TextButton>

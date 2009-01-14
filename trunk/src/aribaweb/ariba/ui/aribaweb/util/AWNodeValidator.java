@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNodeValidator.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNodeValidator.java#8 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -200,7 +200,6 @@ public abstract class AWNodeValidator
      * request the adaptorURL (protocol://host/contextroot/
      * @param requestContext
      * @param nodeName
-     * @return
      * @aribaapi private
      */
     protected final AWFormRedirect getFormRedirectToNode (AWRequestContext requestContext,

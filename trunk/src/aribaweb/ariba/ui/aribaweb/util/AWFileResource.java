@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWFileResource.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWFileResource.java#10 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -100,6 +100,25 @@ public final class AWFileResource extends AWResource
         catch (FileNotFoundException fileNotFoundException) {
             throw new AWGenericException(fileNotFoundException);
         }
+    }
+
+    public AWResource relativeResource (String relativePath, AWResourceManager resourceManager)
+    {
+        File file = new File(_file.getParentFile(), relativePath);
+        if (!file.exists()) return null;
+
+        String filePath = null;
+        String resourceRootPrefix = null;
+        try {
+            filePath = file.getCanonicalPath();
+            resourceRootPrefix = (new File(_directory.directoryPath())).getCanonicalPath();
+        } catch (IOException e) {
+            return null;
+        }
+        if (!filePath.startsWith(resourceRootPrefix)) return null;
+
+        String rootRelativePath = filePath.substring(resourceRootPrefix.length());
+        return new AWFileResource(file.getName(), rootRelativePath, _directory);
     }
 
     public String toString ()

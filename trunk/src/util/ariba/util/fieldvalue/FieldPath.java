@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldPath.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldPath.java#3 $
 */
 
 package ariba.util.fieldvalue;
@@ -198,7 +198,6 @@ public class FieldPath extends Object
 
     @param target see the FieldPath version of this method
     @param value see the FieldPath version of this method
-    @return see the FieldPath version of this method
     */
     public void setFieldValue (Object target, Object value)
     {

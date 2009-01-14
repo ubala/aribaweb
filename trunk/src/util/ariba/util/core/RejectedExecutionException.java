@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/RejectedExecutionException.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/core/RejectedExecutionException.java#3 $
 */
 
 package ariba.util.core;
@@ -23,6 +23,8 @@ package ariba.util.core;
 
     Copy of java.util.concurrent.RejectedExecutionException which is
     part of Java 5.0
+    
+    @aribaapi ariba
 
 */
 public class RejectedExecutionException extends RuntimeException

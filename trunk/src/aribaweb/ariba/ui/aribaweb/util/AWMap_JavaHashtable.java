@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMap_JavaHashtable.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMap_JavaHashtable.java#11 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -33,8 +33,6 @@ public final class AWMap_JavaHashtable extends AWMap
         Creates a new AWMap_JavaHashtable object.
 
         @aribaapi private
-
-        @return new AWMap_JavaHashtable object
     */
     public AWMap_JavaHashtable ()
     {

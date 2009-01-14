@@ -19,93 +19,36 @@
 
     $Id:  $
  -->
-
-<!--
-    Should support:
-        - recursion into src to build jars
-        - recursion into examples to build jars/wars
-        - launch tomcat
--->
-
 <project name="aribaweb-all" default="tomcat-build" basedir=".">
-
-
-    <available file="${basedir}/src/build-support" value="${basedir}/src/build-support" property="make.common.dir"/>
+    <property name="aw.home" location="${basedir}"/>
+    <available file="${basedir}/tools" value="${basedir}/tools" property="make.common.dir"/>
     <property name="src.dir" location="${basedir}/src"/>
     <property file="${src.dir}/version.properties"/>
+    <property name="war.name" value="Demo"/>
 
-    <import file="build-common.xml"/>
+    <import file="tools/build-common.xml"/>
 
     <property name="demoshell.home" location="${src.samples.dir}/demoshell-site"/>
 
     <property name="binary.dist.zip" location="${dist.dir}/aribaweb-${version}.zip"/>
     <property name="src.dist.zip" location="${dist.dir}/aribaweb-src-${version}.zip"/>
 
-    <!-- Javadoc classpath -->
-    <path id="javadoc.classpath">
-        <path refid="classpath"/>
-        <pathelement location="${ant.home}/lib/ant.jar"/>
-
-        <!-- NOTE: gdata jars only used with jdk 5 but include them even for lower jdk -->
-        <fileset dir="module">
-            <include name="**/*.jar"/>
-        </fileset>
-    </path>
-
-    <!-- ================================================================== -->
     <!-- J A R                                                              -->
-    <!-- ================================================================== -->
-    <!--                           `                                         -->
-    <!-- ================================================================== -->
-
-    <target name="jar" depends="jar-module"
-            description="Packages the JAR file">
+    <target name="jars" description="Packages the JAR file">
+        <module-crawl target="jar"/>
     </target>
 
-    <target name="wars" depends="jar">
+    <target name="wars" depends="jars">
         <module-crawl target="war"/>
     </target>
 
-    <target name="has-tomcat">
-        <property name="env.CATALINA_HOME" value="NOT_SET"/>
-        <condition property="catalina.home.dir" value="${env.CATALINA_HOME}">
-            <not><equals arg1="${env.CATALINA_HOME}" arg2="NOT_SET"/></not>
-        </condition>
-        <fail unless="catalina.home.dir" message="CATALINA_HOME environment var (or catalina.home.dir property) must be set to launch tomcat"/>
-    </target>
-
-    <target name="-tomcat-no-debug" unless="env.JPDA_ADDRESS">
-        <echo message="Launching tomcat with CATALINA_BASE=${catalina.base.dir}, CATALINA_HOME=${catalina.home.dir}, ARIBA_DEMOSHELL_HOME=${demoshell.home} ([CTRL-C] to stop)..."/>
-        <echo message="Setting ARIBA_AW_SEARCH_PATH=${aw.search.path}"/>
-        <echo message="Connect via http://localhost:8080/Demo/AribaWeb"/>
-        <java jar="${catalina.home.dir}/bin/bootstrap.jar" fork="true">
-            <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
-            <env key="ARIBA_AW_SEARCH_PATH" value="${aw.search.path}"/>
-            <jvmarg value="-Dcatalina.home=${env.CATALINA_HOME}"/>
-            <jvmarg value="-Dcatalina.base=${catalina.base.dir}"/>
-        </java>
-    </target>
-
-    <target name="-tomcat-debug" if="env.JPDA_ADDRESS">
-        <echo message="Launching tomcat in debug mode (port ${env.JPDA_ADDRESS}) with CATALINA_BASE=${catalina.base.dir}, ARIBA_DEMOSHELL_HOME=${demoshell.home} ([CTRL-C] to stop)..."/>
-        <echo message="Setting ARIBA_AW_SEARCH_PATH=${aw.search.path}"/>
-        <echo message="Connect via http://localhost:8080/Demo/AribaWeb"/>
-        <java jar="${catalina.home.dir}/bin/bootstrap.jar" fork="true">
-            <env key="CATALINA_HOME" value="${catalina.home.dir}"/>
-            <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
-            <env key="ARIBA_AW_SEARCH_PATH" value="${aw.search.path}"/>
-            <jvmarg value="-Dcatalina.home=${catalina.home.dir}"/>
-            <jvmarg value="-Dcatalina.base=${catalina.base.dir}"/>
-            <jvmarg value="-Xdebug"/>
-            <jvmarg value="-Xrunjdwp:transport=${env.JPDA_TRANSPORT},address=${env.JPDA_ADDRESS},server=y,suspend=n"/>
-        </java>
-    </target>
-
-    <target name="tomcat" depends="has-tomcat, -tomcat-debug, -tomcat-no-debug"
-            description="Start tomcat (wihout rebuilding)"/>
-
     <target name="tomcat-build" depends="wars, tomcat"
             description="Rebuild WARs and start Tomcat"/>
+
+    <target name="tomcat-build-browse" depends="wars, tomcat-browse"/>
+
+    <target name="launch" depends="tomcat-build-browse"
+            description="Rebuild WARs, start Tomcat, opens browser window"/>
 
     <target name="tomcat-exec" depends="has-tomcat, wars"
             description="Build, then run Tomcat">
@@ -120,6 +63,7 @@
         <exec dir="." executable="${catalina.home.dir}/bin/${catalina-command}">
             <env key="CATALINA_BASE" value="${catalina.base.dir}"/>
             <env key="CATALINA_HOME" value="${catalina.home.dir}"/>
+            <env key="ARIBAWEB_HOME" value="${dist.root.dir}"/>
             <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
             <env key="ARIBA_AW_SEARCH_PATH" value="${aw.search.path}"/>
             <arg value="jpda"/>
@@ -130,15 +74,14 @@
     <target name="tomcat-build-exec" depends="wars, tomcat-exec"
             description="Rebuild WARs and start Tomcat"/>
 
-
     <target name="groovysh-broken">
         <echo message="Launching groovy shell"/>
-        <java classpathref="classpath" classname="org.codehaus.groovy.tools.shell.Main" fork="true">
+        <java classpathref="groovy.script.classpath" classname="org.codehaus.groovy.tools.shell.Main" fork="true">
         </java>
     </target>
 
     <target name="groovysh">
-        <pathconvert refid="classpath" property="classpath.string"/>
+        <pathconvert refid="groovy.script.classpath" property="classpath.string"/>
         <echo message="Launching groovy shell with classpath: ${classpath.string}"/>
         <exec dir="." executable="groovyConsole">
             <arg value="-cp"/>
@@ -150,41 +93,162 @@
     <!-- ================================================================== -->
     <!-- D O C U M E N T A T I O N                                          -->
     <!-- ================================================================== -->
-    <!--                                                                    -->
-    <!-- ================================================================== -->
-    <target name="javadocs" description="Generate javadoc" depends="build-module">
-        <mkdir dir="${build.dir}/docs/api"/>
+    <target name="doc-resources">
+        <property name="doc.resource.dir" location="${doc.dir}/resource"/>
+        <property name="widgets.resource.dir" location="${src.ui.dir}/widgets/resource/webserver/"/>
+        <delete dir="${doc.resource.dir}"/>
+        <mkdir dir="${doc.resource.dir}"/>
+        <copy file="${widgets.resource.dir}/widg/prettify.js" todir="${doc.resource.dir}"/>
+        <copy file="${widgets.resource.dir}/branding/ariba/widgets.css" todir="${doc.resource.dir}"/>
+        <copy file="${src.dir}/docs/index.html" todir="${doc.dir}"/>
+    </target>
+
+    <target name="process-doc" depends="doc-resources">
+        <property name="doc.template" location="${tools.dir}/templates/doctemplate.awl"/>
+        <property name="tutorial.src.dir" location="${src.dir}/docs/tutorial/"/>
+        <property name="tutorial.doc.dir" location="${doc.dir}/tutorial"/>
+        <delete dir="${tutorial.doc.dir}"/>
+        <mkdir dir="${tutorial.doc.dir}"/>
+        <groovy src="bin/processdoc.groovy" classpathref="groovy.script.classpath">
+            <arg value="${doc.template}"/>
+
+            <arg value="${tutorial.src.dir}"/>
+            <arg value="${src.ui.dir}/ideplugin/docs"/>
+
+            <arg value="${tutorial.doc.dir}"/>
+        </groovy>
+    </target>
+
+    <target name="javadocs" description="Generate javadoc" depends="doc-resources">
         <module-crawl target="javadocs"/>
     </target>
 
-    <target name="javadocs-internal" depends="build-module">
-        <mkdir dir="${build.dir}/docs/api-internal"/>
+    <target name="javadocs-internal">
         <module-crawl target="javadocs-internal"/>
     </target>
 
+    <target name="docs" description="Generate docs" depends="javadocs, process-doc"/>
+
+    <target name="index-doc" depends="">
+        <property name="doc.index" location="${doc.dir}/index.lucene"/>
+        <delete dir="${doc.index}"/>
+        <mkdir dir="${doc.index}"/>
+        <groovy src="bin/indexsource.groovy" classpathref="groovy.script.classpath">
+            <arg value="${doc.index}"/>
+
+            <arg value="${doc.dir}/api/"/>
+            <arg value="$ARIBAWEB_HOME/docs/api"/>
+            <arg value="doc"/>
+
+            <arg value="${doc.dir}/tutorial/"/>
+            <arg value="$ARIBAWEB_HOME/docs/tutorial"/>
+            <arg value="tutorial"/>
+
+            <arg value="${src.ui.dir}/aribaweb/"/>
+            <arg value="$ARIBAWEB_HOME/src/aribaweb"/>
+            <arg value="source"/>
+
+            <arg value="${src.ui.dir}/widgets/"/>
+            <arg value="$ARIBAWEB_HOME/src/widgets"/>
+            <arg value="source"/>
+
+            <arg value="${dist.root.dir}/examples/"/>
+            <arg value="$ARIBAWEB_HOME/examples"/>
+            <arg value="examples"/>
+        </groovy>
+    </target>
+
+    <!-- run groovy script with our classpath, as in  ant -Dscript=bin/something.groovy -Dargs="arg1 arg2" -->
+    <target name="groovy" depends="">
+        <groovy src="${script}" classpathref="groovy.script.classpath">
+            <arg line="${args}"/>
+        </groovy>
+    </target>
 
     <!-- ================================================================== -->
     <!-- D I S T R I B U T I O N                                            -->
     <!-- ================================================================== -->
-    <!--                                                                    -->
-    <!-- ================================================================== -->
+    <patternset id="src.dist.patterns"
+                includes="tools/,src/,examples/,*,lib/ext*/,bin/"
+                excludes="dist/, webapps/, work/, classes/, derived-src/"
+            />
+    <patternset id="binary.root.dist.patterns"
+                includes="**"
+                excludes="dist/, conf/, work/, classes/, build/, derived-src/, webapps/, bin/"
+            />
+
+    <patternset id="binary.root.dist.patterns.exe"
+                includes="bin/"
+            />
+
     <target name="package"
-            depends="package-zip, package-src">
+            depends="package-binary, package-src">
     </target>
 
-    <!-- ================================================================== -->
-    <!-- Packages the distribution with zip                                 -->
-    <!-- ================================================================== -->
-    <!--                                                                    -->
-    <!-- ================================================================== -->
-    <target name="package-zip" depends="wars"
+    <target name="package-binary"
+            depends="wars, docs, index-doc, check-ant, package-binary-min, package-binary-full">
+    </target>
+
+    <target name="check-ant">
+        <property name="env.ANT_DIST_HOME" value="NOT_SET"/>
+        <condition property="ant.dist.dir" value="${env.ANT_DIST_HOME}">
+            <and>
+                <not><equals arg1="${env.ANT_DIST_HOME}" arg2="NOT_SET"/></not>
+                <not><equals arg1="${env.ANT_DIST_HOME}" arg2=""/></not>
+            </and>
+        </condition>
+        <property name="env.TOMCAT_DIST_HOME" value="NOT_SET"/>
+        <condition property="tomcat.dist.dir" value="${env.TOMCAT_DIST_HOME}">
+            <and>
+                <not><equals arg1="${env.TOMCAT_DIST_HOME}" arg2="NOT_SET"/></not>
+                <not><equals arg1="${env.TOMCAT_DIST_HOME}" arg2=""/></not>
+            </and>
+        </condition>
+        <condition property="has.dist.deps">
+            <and>
+                <isset property="tomcat.dist.dir"/>
+                <isset property="ant.dist.dir"/>
+            </and>
+        </condition>
+    </target>
+
+    <target name="package-binary-min" unless="has.dist.deps"
             description="--> Generates the AribaWeb distribution as .zip">
+        <echo message="ANT_DIST_HOME or TOMCAT_DIST_HOME not set.  Building thin distribution..."/>
         <mkdir dir="${dist.dir}"/>
         <delete file="${binary.dist.zip}"/>
         <zip destfile="${binary.dist.zip}">
             <zipfileset prefix="aribaweb-${version}" dir="${dist.root.dir}">
                 <patternset refid="binary.root.dist.patterns"/>
             </zipfileset>
+            <zipfileset prefix="aribaweb-${version}" dir="${dist.root.dir}" filemode="777">
+                <patternset refid="binary.root.dist.patterns.exe"/>
+            </zipfileset>
+        </zip>
+        <aribaweb-checksum file="${binary.dist.zip}"/>
+    </target>
+
+    <target name="package-binary-full" if="has.dist.deps">
+        <echo message="Packaging Ant from ${ant.dist.dir}..."/>
+        <echo message="Packaging Tomcat from ${tomcat.dist.dir}..."/>
+        <mkdir dir="${dist.dir}"/>
+        <delete file="${binary.dist.zip}"/>
+        <zip destfile="${binary.dist.zip}">
+            <zipfileset prefix="aribaweb-${version}" dir="${dist.root.dir}">
+                <patternset refid="binary.root.dist.patterns"/>
+            </zipfileset>
+            <zipfileset prefix="aribaweb-${version}" dir="${dist.root.dir}" filemode="777">
+                <patternset refid="binary.root.dist.patterns.exe"/>
+            </zipfileset>
+            <zipfileset prefix="aribaweb-${version}/tools/ant" dir="${ant.dist.dir}"
+                        excludes="bin/,docs/**/*"/>
+            <zipfileset prefix="aribaweb-${version}/tools/ant" dir="${ant.dist.dir}" filemode="777"
+                        includes="bin/"/>
+
+            <zipfileset prefix="aribaweb-${version}/tools/tomcat" dir="${tomcat.dist.dir}"
+                        includes="*,conf/,lib/"/>
+            <zipfileset prefix="aribaweb-${version}/tools/tomcat" dir="${tomcat.dist.dir}" filemode="777"
+                        includes="bin/"/>
         </zip>
         <aribaweb-checksum file="${binary.dist.zip}"/>
     </target>
@@ -200,7 +264,6 @@
         </zip>
         <aribaweb-checksum file="${src.dist.zip}"/>
     </target>
-
 
     <target name="dist-all" depends="package"/>
 
@@ -228,23 +291,15 @@
         <sequential>
             <echo message="Invoking subant for target: @{target}"/>
             <subant target="@{target}" failonerror="@{failonerror}">
+                <property name="aw.home" location="${aw.home}"/>
                 <property name="make.common.dir" location="${make.common.dir}"/>
                 <property name="build.dir" value="${build.dir}"/>
-                <fileset dir="${src.dir}" includes="build.xml"/>
+                <fileset dir="${src.dir}" includes="build.xml" erroronmissingdir="false"/>
                 <fileset dir="${src.samples.dir}" includes="**/build.xml"/>
-                <fileset dir="${src.ui.dir}" includes="*/samples/*/build.xml"/>
+                <fileset dir="${src.ui.dir}" includes="*/examples/*/build.xml" erroronmissingdir="false"/>
             </subant>
         </sequential>
     </macrodef>
-
-    <target name="build-module"
-            description="Builds all module modules and their tests">
-        <module-crawl target="build-module"/>
-    </target>
-
-    <target name="jar-module">
-        <module-crawl target="jar"/>
-    </target>
 
     <!-- Macro for building checksum files
         This is only needed until the "format" option is supported

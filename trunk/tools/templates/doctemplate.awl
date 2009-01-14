@@ -1,0 +1,10 @@
+<html>
+    <head>
+        <title>$title</title>
+        <link href="../resource/widgets.css" type="text/css" rel=stylesheet>
+        \<script src="../resource/prettify.js" language=JavaScript>\</script>
+    </head>
+    <body class="doc" style="padding:8px" onload="prettyPrint()">
+        <w:Markdown value="$contents"/>
+    </body>
+</html>

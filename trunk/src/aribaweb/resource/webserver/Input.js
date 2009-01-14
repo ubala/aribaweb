@@ -600,7 +600,7 @@ ariba.Input = function() {
                 Event.gl_handler(e);
             };
         }
-        document.onkeydown = Input.keyDownEvtHandler.bindDocHandler(Input);
+        // document.onkeydown = Input.keyDownEvtHandler.bindDocHandler(Input);
     }
 
     return Input;

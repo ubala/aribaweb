@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWActiveImage.awl#2 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWActiveImage.awl#3 $
     </Copyright>
 
     <Overview>
@@ -67,5 +67,5 @@
 </a:Api>\
 
 <a:PrivateHyperlink action="$^action" submitForm="$^submitForm">\
-    <a:GenericElement tagName="img" src="$imageUrl" width="$width" height="$height" border="0" title="$^title:$^alt" otherBindings="$otherBindingsValues"/>\
+    <a:GenericElement tagName="img" src="$imageUrl" width="$width" height="$height" border="0" title="$^title:$^alt" alt="$alt" alt="$alt" otherBindings="$otherBindingsValues"/>\
 </a:PrivateHyperlink>\

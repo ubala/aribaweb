@@ -1,0 +1,42 @@
+<w:HintMessage showTopLine="$true">
+    Note -- using expandCurrentItem  and showExpansionControl to auto-open Jim_Spandler
+
+</w:HintMessage>
+<br/>
+
+<!--- <x:LoadXML filename="Users.xml" value="$users"/>  list="$users.children"  -->
+
+<t:DataTable multiSelect="$true" enableScrolling="$true" batchSize="10" item="$item"
+        showOptionsMenu="$true"
+        children="$item.manages.children"
+        showExpansionControl = "$!isJimSpandler"
+        showSelectionControl = "$!isJimSpandler"
+        scopeSubcomponentsByItem="$true"        
+        displayGroup="$displayGroup">
+
+    <t:Column key="name.text" label="Name" nowrap>\
+        <w:OutlineControl title="$item.name.text" action="$expansionClicked" indentationPerLevel="21" renderAsTable="$true"/>\
+    </t:Column>
+
+    <t:Column label="ID">$item.id</t:Column>
+
+    <t:Column key="phone.text" label="Phone"/>
+
+    <t:Column key="email.text" label="Email"/>
+    <t:Column key="email.text" label="Email"/>
+    <t:Column key="email.text" label="Email"/>
+
+    <t:Column align="right" width="1%">
+        <w:TextButton action="$markItem">Mark</w:TextButton>
+    </t:Column>
+
+    <t:ButtonArea>
+        <w:TextButton action="$null">Delete</w:TextButton>\
+        <w:TextButton action="$swap">Swap</w:TextButton>
+    </t:ButtonArea>
+</t:DataTable>
+<br/>
+<a:If notEqualNull="$markedItem">
+    <div>$markedItem</div>
+    <w:TextButton action="$makeVisible">Make Visible</w:TextButton>
+</a:If>

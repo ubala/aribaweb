@@ -13,11 +13,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.awl#23 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.awl#24 $
     </Copyright>
 
     <Overview>
-        Renders a <form ...>...</form> container in the html and must be used anytime a form is to be submitted from an
+        Renders a `<form ...>...</form>` container in the html and must be used anytime a form is to be submitted from an
         aribaweb application.  AWForm also renders several hidden fields that pass along critical information to the
         server about the state of the application.  Of course, these hiden fields are transparent to the developer, but
         you should be aware of these to understand why AWForm must be used for the state to be properly maintained.

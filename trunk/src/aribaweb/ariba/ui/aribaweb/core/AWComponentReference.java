@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#52 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#57 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -23,6 +23,7 @@ import ariba.util.core.MapUtil;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.ui.aribaweb.util.Log;
 import ariba.util.core.Constants;
 import ariba.util.core.Fmt;
 import java.util.Map;
@@ -254,14 +255,16 @@ public class AWComponentReference extends AWContainerElement
         return _isStateless;
     }
 
-    private AWComponent lookupStatefulComponent (AWElementIdPath elementIdPath, AWComponent parentComponent)
+    private AWComponent lookupStatefulComponent (AWElementIdPath elementIdPath,
+                                                 AWComponent parentComponent,
+                                                 boolean isRenderPhase)
     {
         AWPage page = parentComponent.page();
         AWComponent subcomponentInstance = parentComponent.requestContext().getStatefulComponent(elementIdPath);
 
         if (subcomponentInstance != null) {
                 // we have an existing instance for this class
-            if (AWConcreteApplication.IsRapidTurnaroundEnabled) {
+            if (AWConcreteApplication.IsRapidTurnaroundEnabled && isRenderPhase) {
                 subcomponentInstance = AWComponentReference.refreshedComponent(
                     _componentDefinition, parentComponent,
                     subcomponentInstance, elementIdPath);
@@ -277,7 +280,7 @@ public class AWComponentReference extends AWContainerElement
     {
         AWElementIdPath statefulSubcomponentId = statefulSubcomponentId(requestContext);
         AWPage page = parentComponent.page();
-        AWComponent subcomponentInstance = lookupStatefulComponent(statefulSubcomponentId, parentComponent);
+        AWComponent subcomponentInstance = lookupStatefulComponent(statefulSubcomponentId, parentComponent, true);
 
         if (subcomponentInstance == null) {
             subcomponentInstance = _componentDefinition.createComponent(this, parentComponent, requestContext);
@@ -292,7 +295,7 @@ public class AWComponentReference extends AWContainerElement
     protected AWComponent rendezvousWithStatefulComponent (AWRequestContext requestContext, AWComponent parentComponent)
     {
         AWElementIdPath elementIdPath = statefulSubcomponentId(requestContext);
-        AWComponent subcomponentInstance = lookupStatefulComponent(elementIdPath, parentComponent);
+        AWComponent subcomponentInstance = lookupStatefulComponent(elementIdPath, parentComponent, false);
         if (subcomponentInstance == null && !requestContext.pageRequiresPreGlidCompatibility()) {
             AWComponentDefinition componentDefinition = componentDefinition();
             String componentNamePath = componentDefinition == null ?
@@ -320,14 +323,23 @@ public class AWComponentReference extends AWContainerElement
                 // warn stale usage of class
             AWComponent replacement = subcomponentInstance.replacementInstance(parentComponent);
             if (replacement == null) {
+                // we can't replace this page-level component, so we're bail out and
+                // return to the front door
+                Log.aribaweb.debug(
+                        "Dynamic swapping of page-component class %s requires new object instance.  Redirecting to home page...",
+                        myClass.getName());
+                throw new AWSessionValidationException();
+                /*
                 String warningString = Fmt.S("Warning: Stateful component %s is using "+
                                              "a stale class.  Your changes are not being picked up yet.",
                                              componentDefinition.componentName());
                 componentDefinition.logReloadString(warningString);
                 return subcomponentInstance;
+                */
             } else {
                     // force creation of a new component
                 subcomponentInstance = replacement;
+                subcomponentInstance.requestContext().page()._clearSubcomponentsWithParentPath(elementIdPath);
                 if (parentComponent != null) {
                     subcomponentInstance.saveInPage(elementIdPath);
                 }
@@ -343,7 +355,8 @@ public class AWComponentReference extends AWContainerElement
 
     protected AWElementIdPath statefulSubcomponentId (AWRequestContext requestContext)
     {
-        return requestContext.nextElementIdPath();
+        requestContext.pushElementIdLevel();
+        return requestContext.currentElementIdPath();
     }
 
     public AWComponent _statelessSubcomponentInstanceInComponent (AWRequestContext requestContext, AWComponent parentComponent)
@@ -387,6 +400,10 @@ public class AWComponentReference extends AWContainerElement
         return sharedComponentInstance;
     }
 
+    /*
+        NOTE:  This code is copied VERBATIM to AWXComponentReference.
+        THE TWO MUST BE KEPT IN SYNC!
+     */
     public void _checkInSharedComponentInstance (AWComponent subcomponentInstance)
     {
         subcomponentInstance.flushState();
@@ -411,6 +428,10 @@ public class AWComponentReference extends AWContainerElement
         }
     }
 
+    /*
+        NOTE:  This code is copied VERBATIM to AWXComponentReference.
+        THE TWO MUST BE KEPT IN SYNC!
+     */
     public void applyValues(AWRequestContext requestContext, AWComponent component)
     {
         AWComponent subcomponentInstance = _isStateless ?
@@ -434,18 +455,25 @@ public class AWComponentReference extends AWContainerElement
         catch (AWGenericException ag) {
             throwException(ag);
         }
-        catch (RuntimeException re) {
+        catch (Throwable re) {
             throwException(re);
         }
                 requestContext.popCurrentComponent(component);
         if (_isStateless) {
             _checkInSharedComponentInstance(subcomponentInstance);
+        } else {
+            requestContext.popElementIdLevel();
         }
+        
         if (LogComponentEvaluation) {
             logPhase(requestContext, subcomponentInstance, "applyValues", false);
         }
     }
 
+    /*
+        NOTE:  This code is copied VERBATIM to AWXComponentReference.
+        THE TWO MUST BE KEPT IN SYNC!
+     */
     public AWResponseGenerating invokeAction(AWRequestContext requestContext, AWComponent component)
     {
         AWResponseGenerating actionResults = null;
@@ -469,14 +497,17 @@ public class AWComponentReference extends AWContainerElement
         catch (AWGenericException ag) {
             throwException(ag);
         }
-        catch (RuntimeException re) {
+        catch (Throwable re) {
             throwException(re);
         }
 
         requestContext.popCurrentComponent(component);
         if (_isStateless) {
             _checkInSharedComponentInstance(subcomponentInstance);
+        } else {
+            requestContext.popElementIdLevel();
         }
+
         if (LogComponentEvaluation) {
             logPhase(requestContext, subcomponentInstance, "invokeAction", false);
         }
@@ -520,20 +551,23 @@ public class AWComponentReference extends AWContainerElement
         catch (AWGenericException ag) {
             throwException(ag);
         }
-        catch (RuntimeException re) {
+        catch (Throwable re) {
             throwException(re);
         }
 
         requestContext.popCurrentComponent(component);
         if (_isStateless) {
             _checkInSharedComponentInstance(subcomponentInstance);
+        } else {
+            requestContext.popElementIdLevel();
         }
+
         if (LogComponentEvaluation) {
             logPhase(requestContext, subcomponentInstance, "renderResponse", false);
         }
     }
 
-    private void throwException (RuntimeException re)
+    private void throwException (Throwable re)
     {
         throwException(new AWGenericException(re));
     }

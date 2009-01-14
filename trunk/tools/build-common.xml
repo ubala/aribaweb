@@ -1,0 +1,865 @@
+<?xml version="1.0"?>
+
+<!--
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    (Some contents derived from a parallel Apache Lucene file, also licenced
+     under the same license)
+
+    $Id:  $
+ -->
+
+<project name="common" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+    <description>
+        This file is designed for importing into a main build file, and not intended
+        for standalone use.
+    </description>
+
+    <property environment="env"/>
+    <property name="aw.home" location="${env.AW_HOME}"/>
+
+    <dirname file="${ant.file.common}/.." property="common.dir"/>
+
+    <!-- Give user a chance to override without editing this file
+         (and without typing -D each time it compiles it -->
+    <property file="${user.home}/aribaweb.build.properties"/>
+    <property file="${user.home}/build.properties"/>
+    <property file="${basedir}/build.properties"/>
+    <property file="${common.dir}/build.properties"/>
+
+    <tstamp>
+        <format property="current.year" pattern="yyyy"/>
+        <format property="DSTAMP" pattern="yyyy-MM-dd"/>
+        <format property="TSTAMP" pattern="HH:mm:ss"/>
+    </tstamp>
+
+    <!--- Set certain vars from Ariba internal environment defaults -->
+    <property name="env.ARIBA_INSTALL_ROOT" value="NOT_SET"/>
+    <property name="env.ARIBA_BUILD_ROOT" value="NOT_SET"/>
+
+    <condition property="lib-internal.dir"
+               value="${env.ARIBA_INSTALL_ROOT}/internal/classes">
+        <not><equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/></not>
+    </condition>
+    <property name="lib-internal.dir" location="${common.dir}/lib/ext"/>
+
+    <condition property="lib.dir" value="${env.ARIBA_INSTALL_ROOT}/classes">
+        <not><equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/></not>
+    </condition>
+    <property name="lib.dir" location="${common.dir}/lib/ext"/>
+
+    <condition property="lib-build.dir" value="${env.ARIBA_INSTALL_ROOT}/classes">
+        <not><equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/></not>
+    </condition>
+    <property name="lib-build.dir" location="${common.dir}/lib/ext-build"/>
+
+    <condition property="lib-demo.dir" value="${env.ARIBA_INSTALL_ROOT}/classes">
+        <not><equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/></not>
+    </condition>
+    <property name="lib-demo.dir" location="${common.dir}/lib/ext-demo"/>
+
+    <condition property="build.dir" value="${env.ARIBA_BUILD_ROOT}/opensourceui">
+        <not><equals arg1="${env.ARIBA_BUILD_ROOT}" arg2="NOT_SET"/></not>
+    </condition>
+    <property name="build.dir" location="${common.dir}/build"/>
+
+    <condition property="dist.root.dir" value="${env.ARIBA_INSTALL_ROOT}/internal/opensource">
+        <not><equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/></not>
+    </condition>
+    <property name="dist.root.dir" location="${common.dir}"/>
+
+    <!-- YUI - try both lib dir and ariba internal build location -->
+    <available file="${common.dir}/lib/ext-build/yuicompressor-2.3.5.jar"
+              value="${common.dir}/lib/ext-build/yuicompressor-2.3.5.jar"
+           property="yuicompressor.jar"/>
+    <available file="${common.dir}/../aribaweb/bin/yuicompressor-2.3.5.jar"
+              value="${common.dir}/../aribaweb/bin/yuicompressor-2.3.5.jar"
+           property="yuicompressor.jar"/>
+
+    <!-- JavaCC -->
+    <available file="${common.dir}/lib/ext-build/javacc.jar"
+              value="${common.dir}/lib/ext-build"
+           property="javacc.home"/>
+    <available file="${common.dir}/../../util/expr/javacc/javacc.jar"
+              value="${common.dir}/../../util/expr/javacc"
+           property="javacc.home"/>
+    
+    <available file="${common.dir}/../../util/core"
+              value="${common.dir}/../../util/core"
+           property="src.util.dir"/>
+    <property name="src.util.dir" location="${common.dir}/src/util"/>
+    <available file="${common.dir}/../../util/expr"
+              value="${common.dir}/../../util/expr"
+           property="src.expr.dir"/>
+    <property name="src.expr.dir" location="${common.dir}/src/expr"/>
+    <property name="src.ui.dir.test" location="${common.dir}/../"/>
+    <available file="${src.ui.dir.test}/widgets"
+              value="${src.ui.dir.test}"
+           property="src.ui.dir"/>
+    <property name="src.ui.dir" location="${common.dir}/src"/>
+
+    <available file="${common.dir}/examples"
+              value="${common.dir}/examples"
+           property="src.samples.dir"/>
+
+    <!--- AW Source Search path (for rapid turnaround) -->
+    <path id="ui.resource.dirs">
+        <!-- Search for all directories with build.xml files - we'll strip the file in the regexmapper below -->
+      <fileset dir="${src.ui.dir}" erroronmissingdir="false"
+               includes="**/build.xml, aribaweb/resource/webserver, widgets/resource/webserver, widgets/resource/webserver/branding/ariba"
+               excludes="release/**,opensourceui/build.xml,opensourceui/src/build.xml"/>
+      <fileset dir="${src.samples.dir}" includes="**/build.xml"/>
+
+      <!-- JS resources -->
+      <dirset dir="${src.ui.dir}" erroronmissingdir="false"
+              includes="aribaweb/resource/webserver, widgets/resource/webserver, widgets/resource/webserver/branding/ariba"/>
+    </path>
+
+    <property name="env.ARIBA_AW_SEARCH_PATH" value="NOT_SET"/>
+    <condition property="aw.search.path" value="${env.ARIBA_AW_SEARCH_PATH}">
+        <and>
+            <not><equals arg1="${env.ARIBA_AW_SEARCH_PATH}" arg2="NOT_SET"/></not>
+            <not><equals arg1="${env.ARIBA_AW_SEARCH_PATH}" arg2=""/></not>
+        </and>
+    </condition>
+    <pathconvert refid="ui.resource.dirs" property="aw.search.path" pathsep=";">
+        <mapper>
+          <regexpmapper from="^(.*?)(/build\.xml)?$$" to="\1" handledirsep="true"/>
+        </mapper>
+    </pathconvert>
+
+    <property name="javadoc.link" value="http://java.sun.com/j2se/1.5/docs/api/"/>
+
+    <!-- Type of checksum to compute for distribution files -->
+    <property name="checksum.algorithm" value="md5"/>
+
+    
+    <property name="name" value="${ant.project.name}"/>
+    <property name="Name" value="AribaWeb"/>
+    <property name="version" value="1.0-dev"/>
+    <property name="year" value="2000-${current.year}"/>
+    <property name="final.name" value="ariba.${name}"/> <!-- -${version} -->
+    <property name="jar.name" value="${final.name}.jar"/> <!-- -${version} -->
+
+    <property name="javac.deprecation" value="off"/>
+    <property name="javac.debug" value="on"/>
+    <property name="javac.source" value="1.5"/>
+    <property name="javac.target" value="1.5"/>
+    <property name="javac.excludes" value=""/>
+
+    <property name="project.name" value="site"/>
+    <property name="build.encoding" value="utf-8"/>
+
+    <property name="src.dir" location="${basedir}"/>
+    <property name="src.resource.path" value="${src.dir}/resource/ariba"/>
+    <property name="dist.dir" location="${dist.root.dir}/dist"/>
+    <property name="src.derived.dir" value="${build.dir}/derived-src/${name}"/>
+    <property name="build.classes.dir" value="${build.dir}/classes/${name}"/>
+    <property name="build.docroot.dir" value="${build.classes.dir}/docroot"/>
+    <property name="build.jars.dir" value="${dist.root.dir}/lib"/>
+    <property name="build.jar.file" location="${build.jars.dir}/${jar.name}"/>    
+    <property name="build.wars.dir" value="${dist.root.dir}/webapps"/>
+    <property name="build.war.file" location="${build.wars.dir}/${war.name}.war"/>    
+    <property name="catalina.base.dir" value="${dist.root.dir}"/>
+    <property name="doc.dir" location="${dist.root.dir}/docs"/>
+    <property name="tools.dir" location="${dist.root.dir}/tools"/>
+    <property name="awreload.jar" location="${build.jars.dir}/ariba.awreload-jmti.jar"/>
+
+    <!-- web.xml: defaults  -->
+    <property name="servlet.name" value="${war.name}"/>
+    <property name="servlet.displayName" value="${war.name}"/>
+    <property name="servlet.description" value="Web application ${war.name}"/>
+    <property name="servlet.class" value="ariba.ui.servletadaptor.AWDispatcherServlet"/>
+    <property name="app.url" value="http://localhost:8080/${servlet.name}/AribaWeb"/>
+    
+    <!-- Dependencies classpath -->
+    <fileset id="build.deps" dir="${lib.dir}">
+        <include name="log4j.jar"/>
+        <include name="jakarta-oro.jar"/>
+        <include name="asm.jar"/>
+        <include name="bcel.jar"/>
+        <include name="mail.jar"/>
+        <include name="markdownj.jar"/>
+    </fileset>
+
+    <fileset id="build-only.deps" dir="${lib-build.dir}">
+        <include name="javax.servlet.zip"/>
+    </fileset>
+
+    <!-- ToDo: derive a module specific list from a list declared within each module -->
+    <fileset id="build.jars" dir="${build.jars.dir}">
+        <include name="ariba.util.jar"/>
+        <include name="ariba.expr.jar"/>
+        <include name="ariba.aribaweb.jar"/>
+        <include name="ariba.widgets.jar"/>
+        <include name="ariba.metaui.jar"/>
+        <include name="ariba.awreload.jar"/>
+    </fileset>
+
+    <fileset id="war.resource.jars" dir="${build.jars.dir}">
+        <include name="ariba.aribaweb.jar"/>
+        <include name="ariba.widgets.jar"/>
+        <include name="ariba.metaui.jar"/>
+    </fileset>
+
+    <fileset id="java.src.files" dir="${src.dir}" includes="**/*.java"/>
+    <resources id="source.files">
+        <fileset refid="java.src.files"/>
+        <fileset dir="${src.resource.path}" includes="resource/**/*" erroronmissingdir="false"/>
+        <fileset refid="jar.resources"/>
+        <resources refid="js.resources"/>
+    </resources>
+
+    <!--- placeholders -->
+    <fileset id="war.jars" dir="." excludes="**"/>
+    <fileset id="module.libs" dir="." excludes="**"/>
+    <fileset id="module.libs2" dir="." excludes="**"/>
+    <fileset id="module.libs3" dir="." excludes="**"/>
+    <fileset dir="." id="war.resources" excludes="**"/>
+    <fileset dir="." id="war.resources" excludes="**"/>
+
+    <!-- AW Tools classpath -->
+    <path id="aw.tools.classpath">
+        <resources refid="build-only.deps"/>
+        <resources refid="build.deps"/>
+        <resources refid="build.jars"/>
+    </path>
+
+    <!-- Build classpath -->
+    <path id="classpath">
+        <resources refid="build-only.deps"/>
+        <resources refid="build.deps"/>
+        <resources refid="build.jars"/>
+        <resources refid="module.libs"/>
+        <resources refid="module.libs2"/>
+        <resources refid="module.libs3"/>
+        <resources refid="war.jars"/>
+        <pathelement location="${build.dir}/classes/java"/>
+    </path>
+
+    <!-- Groovy task classpath -->
+    <path id="groovy.classpath">
+        <fileset dir="${lib-internal.dir}">
+            <include name="groovy-all.jar"/>
+        </fileset>
+    </path>
+
+    <!-- For launched groovy scripts -->
+    <path id="groovy.script.classpath">
+        <path refid="classpath"/>
+        <fileset dir="${lib-internal.dir}">
+            <include name="groovy-all.jar"/>
+        </fileset>
+        <fileset dir="${lib-demo.dir}">
+            <include name="lucene-core.jar"/>
+            <include name="lucene-highlighter.jar"/>
+        </fileset>
+    </path>
+
+    <taskdef name="groovy"
+             classname="org.codehaus.groovy.ant.Groovy"
+             classpathref="groovy.classpath"/>
+
+    <taskdef name="groovyc"
+             classname="org.codehaus.groovy.ant.Groovyc"
+             classpathref="groovy.classpath"/>
+
+    <!-- Javadoc classpath -->
+    <path id="javadoc.classpath">
+        <path refid="classpath"/>
+        <pathelement location="${ant.home}/lib/ant.jar"/>
+
+        <fileset refid="build.deps"/>
+
+        <fileset dir="${lib.dir}">
+            <include name="js.jar"/>
+        </fileset>
+
+        <fileset dir="${lib-internal.dir}">
+            <include name="groovy-all.jar"/>
+        </fileset>
+    </path>
+
+    <patternset id="jar.resource.patterns"
+                includes="**/*.awl,**/*.htm,**/*.oss,**/*.awz,**/*.afr,**/*.groovy,**/*.csv,**/*.xml"
+                excludes="build.xml,install.csv"
+            />
+
+    <fileset id="jar.resources" dir="${basedir}">
+        <patternset refid="jar.resource.patterns"/>
+    </fileset>
+
+    <resources id="aw.resources"/>
+
+    <patternset id="metainf.includes">
+        <exclude name="**/*"/>
+    </patternset>
+
+
+    <resource id="js.resources"/>
+
+    <target name="init-js-resources" if="js.merge.destpath">
+        <resources id="js.resources">
+            <filelist refid="merge.js.filelist"/>
+            <filelist refid="unmerged.js.filelist"/>
+        </resources>
+    </target>
+
+    <condition property="build-1-5-contrib">
+        <equals arg1="1.5" arg2="${ant.java.version}"/>
+    </condition>
+
+    <target name="clean"
+            description="Removes contents of build and dist directories">
+        <delete dir="${build.dir}"/>
+        <delete>
+          <fileset dir="${build.jars.dir}" includes="*.jar"/>
+        </delete>
+        <delete dir="${build.wars.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete dir="${dist.root.dir}/work"/>
+        <delete dir="${doc.dir}/api"/>
+        <delete dir="${doc.dir}/index.lucene"/>
+        <delete dir="${doc.dir}/xsd"/>
+    </target>
+
+    <target name="init">
+        <!-- Need to build this even if we won't use it or the compiler will complain... -->
+        <mkdir dir="${src.derived.dir}"/>
+        <mkdir dir="${build.jars.dir}"/>
+    </target>
+
+    <target name="javacc-tree-check" if="src.jjt.path">
+        <dirname property="jjt.dest.path" file="${src.derived.dir}/${src.jjt.path}"/>
+        <mkdir dir="${jjt.dest.path}"/>
+        <fileset id="jjt.fileset" dir="${jjt.dest.path}" includes="*.java"/>
+        <dependset>
+            <sources>
+                <path location="${src.jjt.path}"/>
+            </sources>
+            <targets>
+                <fileset refid="jjt.fileset"/>
+            </targets>
+        </dependset>
+        <pathconvert property="javacc.uptodate"
+                        refid="jjt.fileset"
+                   setonempty="false"/>
+    </target>
+
+    <target name="javacc-tree" depends="javacc-tree-check" if="src.jjt.path" unless="javacc.uptodate">
+      <invoke-javacc-tree target="${src.jjt.path}"
+                     outputDir="${jjt.dest.path}"/>
+    </target>
+
+    <target name="javacc" if="src.jj.path">
+        <dirname property="jj.dest.path" file="${src.derived.dir}/${src.jj.path}"/>
+        <invoke-javacc target="${src.jj.path}"
+                     outputDir="${jj.dest.path}"/>
+    </target>
+
+    <target name="compile-groovy" if="compile.groovy">
+        <echo message="Compiling ${basedir}"/>
+        <groovy-compile destdir="${build.classes.dir}" srcdir="${src.dir}:${src.derived.dir}">
+            <classpath refid="classpath"/>
+        </groovy-compile>
+    </target>
+
+    <target name="compile-java-only" unless="compile.groovy">
+        <echo message="Compiling ${basedir}"/>
+        <compile destdir="${build.classes.dir}" srcdir="${src.dir}:${src.derived.dir}">
+            <classpath refid="classpath"/>
+        </compile>
+    </target>
+
+    <target name="compile" depends="init, javacc, javacc-tree, compile-groovy, compile-java-only"
+            description="Compiles core classes">
+    </target>
+
+    <!-- Single file compile - invoked by awreload -->
+    <target name="compile-file">
+        <available file="${basedir}/${file}" property="the.file.exists"/>
+        <fail unless="the.file.exists" message="Specified file does not exist in ${basedir}: ${file}"/>
+
+        <echo message="Performing single file compile of ${file}"/>
+        <compile destdir="${build.classes.dir}" srcdir="${src.dir}:${src.derived.dir}" includes="${file}">
+            <classpath refid="classpath"/>
+        </compile>
+    </target>
+
+    <target name="merge-js-check" if="js.merge.destfile">
+        <property name="js.merge.fullpath" location="${src.derived.dir}/${js.merge.destpath}/${js.merge.destfile}"/>
+        <property name="js.compact.fullpath" location="${build.docroot.dir}/${js.merge.destpath}/${js.merge.destfile}"/>
+        <dependset>
+            <sources>
+                <filelist refid="merge.js.filelist"/>
+                <filelist refid="unmerged.js.filelist"/>
+            </sources>
+            <targets>
+                <path location="${js.compact.fullpath}"/>
+            </targets>
+        </dependset>
+        <available file="${js.compact.fullpath}" property="js.uptodate"/>
+    </target>
+
+    <target name="merge-js" depends="merge-js-check" if="js.merge.destfile" unless="js.uptodate" description="merges js files">
+        <echo message="Creating merged JS file: ${js.merge.fullpath}"/>
+        <mkdir dir="${src.derived.dir}/${js.merge.destpath}"/>
+        <concat destfile="${js.merge.fullpath}">
+            <filelist refid="merge.js.filelist"/>
+        </concat>
+        <echo message="Compacting to: ${js.compact.fullpath}"/>
+        <mkdir dir="${build.docroot.dir}/${js.merge.destpath}"/>
+        <java jar="${yuicompressor.jar}" fork="true" failonerror="true" inputstring="">
+            <arg value="--line-break"/>
+            <arg value="0"/>
+            <arg value="${js.merge.fullpath}"/>
+            <arg value="-o"/>
+            <arg value="${js.compact.fullpath}"/>
+        </java>
+
+        <echo message="Copying other JS files..."/>
+        <copy todir="${build.docroot.dir}/${js.merge.destpath}">
+            <filelist refid="unmerged.js.filelist"/>
+        </copy>
+    </target>
+
+    <target name="copy-docroot-resources" if="docroot.destpath">
+        <copy todir="${build.classes.dir}/${docroot.destpath}" failonerror="false">
+            <resources refid="src.docroot.resources"/>
+        </copy>
+    </target>
+
+    <target name="copy-resources" depends="merge-js,copy-docroot-resources"
+            description="Copy resources into classes directory">
+        <copy todir="${build.classes.dir}" failonerror="false">
+            <fileset dir="${src.resource.path}" includes="resource/**/*"/>
+            <fileset refid="jar.resources"/>
+        </copy>
+    </target>
+
+    <target name="jar-check" depends="init-js-resources">
+        <dependset>
+            <sources>
+                <resources refid="source.files"/>
+            </sources>
+            <targets>
+                <path location="${build.jar.file}"/>
+            </targets>
+        </dependset>
+        <available file="${build.jar.file}" property="jar.uptodate"/>
+    </target>
+
+    <target name="build-jar" depends="compile, copy-resources, check-aribaweb-properties">
+        <jarify/>
+    </target>
+
+    <target name="jar" depends="jar-check" unless="jar.uptodate"
+            description="Packages the JAR file">
+        <antcall target="build-jar"/>
+    </target>
+
+    <target name="war-resources" if="war.name" unless="war.uptodate">
+        <property name="war.resource.dir" location="${src.derived.dir}/${war.name}-resources"/>
+        <mkdir dir="${war.resource.dir}"/>
+        <fileset id="war.resources" dir="${war.resource.dir}" includes="**/*"/>
+        <!--- create resources by unzipping jars... -->
+        <pathconvert property="war.resource.jars.path" refid="war.resource.jars"/>
+        <echo message="Unzipping resources from ${war.resource.jars.path} to ${war.resource.dir}"/>
+        <unzip dest="${war.resource.dir}">
+            <patternset>
+                <include name="docroot/**/*"/>
+            </patternset>
+            <resources refid="war.resource.jars"/>
+        </unzip>
+    </target>
+
+    <target name="war-check" if="war.name">
+        <pathconvert property="war.jars.path" refid="war.jars"/>
+        <echo message="Checking for changes in ${war.jars.path} vs ${build.war.file}"/>
+
+        <dependset>
+            <sources>
+                <resources refid="build.deps"/>
+                <resources refid="build.jars"/>
+                <resources refid="war.jars"/>
+                <resources refid="war.resources"/>
+            </sources>
+            <targets>
+                <path location="${build.war.file}"/>
+            </targets>
+        </dependset>
+        <available file="${build.war.file}" property="war.uptodate"/>
+    </target>
+
+    <!-- Use concrete web.xml in src directory or generate one, if none -->
+    <target name="existing-web-xml">
+        <available file="${src.dir}/web.xml" property="web.xml" value="${src.dir}/web.xml"/>
+        <available file="${src.derived.dir}/web.xml" property="web.xml" value="${src.derived.dir}/web.xml"/>
+    </target>
+
+    <target name="check-web-xml" depends="existing-web-xml, init" unless="web.xml">
+        <property name="web.xml" location="${src.derived.dir}/web.xml"/>
+        <evaluate-template templateFile="${tools.dir}/templates/web.xml" outputFile="${web.xml}"/>
+    </target>
+    
+    <!-- Use concrete aribaweb.properties in src directory or generate one, if none -->
+    <target name="explicit-aribaweb-properties">
+        <available file="${src.dir}/aribaweb.properties" property="aribaweb.properties" value="${src.dir}/aribaweb.properties"/>
+    </target>
+
+    <target name="check-aribaweb-properties" depends="explicit-aribaweb-properties" if="needs.aribaweb.properties" unless="aribaweb.properties">
+        <property name="aribaweb.properties" location="${src.derived.dir}/aribaweb.properties"/>
+        <evaluate-template templateFile="${tools.dir}/templates/aribaweb.properties" outputFile="${aribaweb.properties}"/>
+    </target>
+
+    <target name="war" depends="war-check, war-resources, check-web-xml" if="war.name" unless="war.uptodate">
+        <mkdir dir="${build.wars.dir}"/>
+        <!-- delete expanded war if present -->
+        <delete dir="${build.wars.dir}/${war.name}" quiet="true"/>
+        <!-- build new war -->
+        <war destfile="${build.war.file}"
+             webxml="${web.xml}">
+            <lib refid="build.deps"/>
+            <lib refid="build.jars"/>
+            <lib refid="war.jars"/>
+            <lib refid="module.libs"/>
+            <lib refid="module.libs2"/>
+            <lib refid="module.libs3"/>
+            <resources refid="war.resources"/>
+            <manifest>
+                <attribute name="Specification-Title"
+                           value="AribaWeb application"/>
+                <!-- spec version must match "digit+{.digit+}*" -->
+                <attribute name="Specification-Version" value="${version}"/>
+                <attribute name="Specification-Vendor"
+                           value="Ariba, Inc."/>
+                <attribute name="Implementation-Title" value="ariba.ui.aribaweb"/>
+                <!-- impl version can be any string -->
+                <attribute name="Implementation-Version"
+                           value="${version}"/>
+                <attribute name="Implementation-Vendor"
+                           value="Ariba, Inc."/>
+                <attribute name="X-Compile-Source-JDK"
+                           value="${javac.source}"/>
+                <attribute name="X-Compile-Target-JDK"
+                           value="${javac.target}"/>
+            </manifest>
+            <metainf dir="${common.dir}">
+                <include name="LICENSE.txt"/>
+                <include name="NOTICE.txt"/>
+            </metainf>
+            <metainf dir="${build.jars.dir}">
+                <include name="EXT-LICENSE.txt"/>
+            </metainf>
+        </war>
+    </target>
+
+    <target name="javadocs"/>
+    <target name="javadocs-internal"/>
+
+    <macrodef name="jarify" description="Builds a JAR file">
+        <attribute name="title" default="AribaWeb: ${ant.project.name}"/>
+        <attribute name="destfile" default="${build.jar.file}"/>
+        <element name="manifest-attributes" optional="yes"/>
+        <element name="manifest-body" optional="yes"/>
+        <sequential>
+            <jar destfile="@{destfile}">
+                <fileset dir="${build.classes.dir}"/>
+                <manifest>
+                    <!--
+                    http://java.sun.com/j2se/1.5.0/docs/guide/jar/jar.html#JAR%20Manifest
+                    http://java.sun.com/j2se/1.5.0/docs/guide/versioning/spec/versioning2.html
+                    http://java.sun.com/j2se/1.5.0/docs/api/java/lang/Package.html
+                    http://java.sun.com/j2se/1.5.0/docs/api/java/util/jar/package-summary.html
+                    http://java.sun.com/developer/Books/javaprogramming/JAR/basics/manifest.html
+                    -->
+                    <!-- Don't set 'Manifest-Version' it identifies the version of the
+                         manifest file format, and should allways be 1.0 (the default)
+
+                         Don't set 'Created-by' attribute, it's purpose is
+                         to identify the version of java used to build the jar,
+                         which ant will do by default.
+
+                         Ant will happily override these with bogus strings if you
+                         tell it to, so don't.
+
+                         NOTE: we don't use section info because all of our manifest data
+                         applies to the entire jar/war ... no package specific info.
+                    -->
+                    <attribute name="Specification-Title" value="@{title}"/>
+                    <!-- spec version must match "digit+{.digit+}*" -->
+                    <attribute name="Specification-Version" value="${version}"/>
+                    <attribute name="Specification-Vendor"
+                               value="Ariba, Inc."/>
+                    <attribute name="Implementation-Title" value="ariba.ui.aribaweb"/>
+                    <!-- impl version can be any string -->
+                    <attribute name="Implementation-Version"
+                               value="${version} - ${DSTAMP} ${TSTAMP}"/>
+                    <attribute name="Implementation-Vendor"
+                               value="Ariba, Inc."/>
+                    <attribute name="X-Compile-Source-JDK"
+                               value="${javac.source}"/>
+                    <attribute name="X-Compile-Target-JDK"
+                               value="${javac.target}"/>
+                    <manifest-attributes/>
+                </manifest>
+                <metainf dir="${common.dir}">
+                    <include name="LICENSE.txt"/>
+                    <include name="NOTICE.txt"/>
+                </metainf>
+                <metainf dir="${src.dir}">
+                    <patternset refid="metainf.includes"/>
+                </metainf>
+                <metainf dir="${src.dir}">
+                    <include name="aribaweb.properties"/>
+                </metainf>
+                <metainf dir="${src.derived.dir}">
+                    <include name="aribaweb.properties"/>
+                </metainf>
+                <manifest-body/>
+            </jar>
+        </sequential>
+    </macrodef>
+
+    <target name="jar-src" depends="init">
+        <jar destfile="${build.dir}/${final.name}-src.jar">
+            <fileset dir="." includes="src/"/>
+        </jar>
+    </target>
+
+    <target name="default" depends="jar"/>
+
+    <target name="has-tomcat-env" >
+        <property name="env.CATALINA_HOME" value="NOT_SET"/>
+        <condition property="catalina.home.dir" value="${env.CATALINA_HOME}">
+            <not><equals arg1="${env.CATALINA_HOME}" arg2="NOT_SET"/></not>
+        </condition>
+        <available file="${dist.root.dir}/conf/server.xml" property="has.tomcat.conf"/>
+    </target>
+
+    <target name="has-tomcat" depends="has-tomcat-env" unless="catalina.home.dir">
+        <!-- try bundled tomcat, if none otherwise specified -->
+        <property name="local.catalina.home" location="${tools.dir}/tomcat"/>
+        <available file="${local.catalina.home}" property="catalina.home.dir" value="${local.catalina.home}"/>
+        <fail unless="catalina.home.dir" message="CATALINA_HOME environment var (or catalina.home.dir property) must be set to launch tomcat"/>
+    </target>
+
+    <target name="ensure-tomcat-conf" unless="has.tomcat.conf">
+        <echo message="Copying your CATALINA_HOME/conf from ${catalina.home.dir}/conf to ${dist.root.dir}/conf..."/>
+        <copy todir="${dist.root.dir}" failonerror="true">
+            <fileset dir="${catalina.home.dir}" includes="conf/**/*"/>
+        </copy>
+    </target>
+
+    <target name="check-awreload">
+        <!-- set aw.reload to true unless  env.ARIBA_AWRELOAD=false or aw.reload=false -->
+        <property name="env.ARIBA_AWRELOAD" value="true"/>
+        <property name="aw.reload" value="${env.ARIBA_AWRELOAD}"/>
+        <condition property="tomcat.jvmarg" value="-javaagent:${awreload.jar}">
+            <equals arg1="${aw.reload}" arg2="true"/>
+        </condition>
+        <property name="tomcat.jvmarg" value="-Dnop=x"/>
+    </target>
+
+    <target name="-tomcat-no-debug" unless="env.JPDA_ADDRESS">
+        <echo message="Launching tomcat with CATALINA_BASE=${catalina.base.dir}, CATALINA_HOME=${catalina.home.dir}, ([CTRL-C] to stop)..."/>
+        <launch-tomcat>
+        </launch-tomcat>
+    </target>
+
+    <target name="-tomcat-debug" if="env.JPDA_ADDRESS">
+        <echo message="Launching tomcat in debug mode (port ${env.JPDA_ADDRESS}) with CATALINA_BASE=${catalina.base.dir}, ([CTRL-C] to stop)..."/>
+        <launch-tomcat>
+            <jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xrunjdwp:transport=${env.JPDA_TRANSPORT},address=${env.JPDA_ADDRESS},server=y,suspend=n"/>
+        </launch-tomcat>
+    </target>
+
+    <target name="tomcat" depends="check-awreload, has-tomcat, ensure-tomcat-conf, -tomcat-debug, -tomcat-no-debug"
+            description="Start tomcat (wihout rebuilding)"/>
+
+    <target name="tomcat-browse" depends="has-tomcat, ensure-tomcat-conf"
+            description="Start tomcat and open in browser">
+        <parallel>
+            <antcall target="tomcat"/>
+            <sequential>
+                <sleep seconds="3"/>
+                <waitfor maxwait="45" maxwaitunit="second" checkevery="1000">
+                    <http url="${app.url}"/>
+                </waitfor>
+                <openurl url="${app.url}"/>
+            </sequential>
+        </parallel>
+    </target>
+
+    <target name="open-url">
+        <echo message="Opening ${url} in browser"/>
+        <exec executable="cmd.exe" os="Windows 2000,Windows NT,Windows XP" >
+                <arg line="/C start ${url}"/>
+        </exec>
+        <!--
+        <exec executable="rundll32" os="Windows 2000,Windows NT,Windows XP" >
+                <arg line="url.dll,FileProtocolHandler ${url}" />
+        </exec>
+        -->
+        <exec executable="open" os="Mac OS X" >
+            <!--
+                <arg value="-a"/>
+                <arg value="Firefox.app"/>
+            -->
+            <arg value="${url}"/>
+        </exec>
+    </target>
+
+    <!--+
+    | M A C R O S
+    +-->
+    <macrodef name="compile">
+        <attribute name="srcdir"/>
+        <attribute name="destdir"/>
+        <attribute name="includes" default="**/*.java"/>
+        <element name="nested" implicit="yes" optional="yes"/>
+
+        <sequential>
+            <mkdir dir="@{destdir}"/>
+            <javac
+                    encoding="${build.encoding}"
+                    srcdir="@{srcdir}"
+                    destdir="@{destdir}"
+                    deprecation="${javac.deprecation}"
+                    debug="${javac.debug}"
+                    source="${javac.source}"
+                    target="${javac.target}"
+                    includes="@{includes}"
+                    excludes="${javac.excludes}">
+                    <nested/>
+            </javac>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="groovy-compile">
+        <attribute name="srcdir"/>
+        <attribute name="destdir"/>
+        <element name="nested" implicit="yes" optional="yes"/>
+
+        <sequential>
+            <mkdir dir="@{destdir}"/>
+            <groovyc
+                    srcdir="@{srcdir}"
+                    destdir="@{destdir}"
+                    excludes="${javac.excludes}">
+                <nested/>
+                <javac
+                        encoding="${build.encoding}"
+                        deprecation="${javac.deprecation}"
+                        debug="${javac.debug}"
+                        source="${javac.source}"
+                        target="${javac.target}"
+                        excludes="${javac.excludes}"/>
+            </groovyc>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="invoke-javacc">
+        <attribute name="target"/>
+        <attribute name="outputDir"/>
+        <sequential>
+            <mkdir dir="@{outputDir}"/>
+            <javacc
+                    target="@{target}"
+                    outputDirectory="@{outputDir}"
+                    debugTokenManager="${javacc.debug.tokenmgr}"
+                    debugParser="${javacc.debug.parser}"
+                    debuglookahead="${javacc.debug.lookahead}"
+                    javacchome="${javacc.home}"
+                    />
+            <fixcrlf srcdir="@{outputDir}" includes="*.java">
+                <containsregexp expression="Generated.*By.*JavaCC"/>
+            </fixcrlf>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="invoke-javacc-tree">
+        <attribute name="target"/>
+        <attribute name="outputDir"/>
+        <sequential>
+            <mkdir dir="@{outputDir}"/>
+            <jjtree
+                    target="@{target}"
+                    outputDirectory="@{outputDir}"
+                    buildnodefiles="false"
+                    javacchome="${javacc.home}"
+                    />
+            <!-- BOGUS: convert target to .java? -->
+            <basename property="jjt.filename" file="@{target}" suffix=".jjt"/>
+            <invoke-javacc target="@{outputDir}/${jjt.filename}.jj" outputDir="@{outputDir}"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="launch-tomcat">
+        <element name="nested" implicit="yes" optional="yes"/>
+        <sequential>
+            <echo message="ARIBA_AWRELOAD=${aw.reload}, jvmarg: ${tomcat.jvmarg}, ANT_HOME=${ant.home}"/>
+            <echo message="Setting ARIBA_AW_SEARCH_PATH=${aw.search.path}"/>
+            <echo message="Connect via ${app.url}"/>
+            <java jar="${catalina.home.dir}/bin/bootstrap.jar" fork="true">
+                <env key="CATALINA_HOME" value="${catalina.home.dir}"/>
+                <env key="ARIBAWEB_HOME" value="${dist.root.dir}"/>
+                <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
+                <env key="ARIBA_AW_SEARCH_PATH" value="${aw.search.path}"/>
+                <env key="AW_HOME" value="${aw.home}"/>
+
+                <env key="ARIBA_AWRELOAD" value="${aw.reload}"/>
+                <env key="AW_RELOAD_CLASSES_ROOT" value="${build.dir}/classes"/>
+                <env key="ANT_HOME" value="${ant.home}"/>
+                <jvmarg value="${tomcat.jvmarg}"/>
+                
+                <jvmarg value="-Dcatalina.home=${catalina.home.dir}"/>
+                <jvmarg value="-Dcatalina.base=${catalina.base.dir}"/>
+
+                <nested/>
+            </java>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="evaluate-template">
+        <attribute name="templateFile"/>
+        <attribute name="outputFile"/>
+        <sequential>
+            <tempfile destdir="${java.io.tmpdir}" property="x.propertiesFile" suffix=".properties"/>
+            <echoproperties destfile="${x.propertiesFile}"/>
+            <java classname="ariba.ui.aribaweb.util.AWEvaluateTemplateFile" outputproperty="x.out">
+                <arg value="@{templateFile}"/>
+                <arg value="${x.propertiesFile}"/>
+                <arg value="@{outputFile}"/>
+                <classpath>
+                    <path refid="aw.tools.classpath"/>
+                </classpath>
+            </java>
+            <echo message="Output: ${x.out}"/>
+            <delete file="${x.propertiesFile}" quiet="true"/>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="openurl">
+        <attribute name="url"/>
+        <sequential>
+            <antcall target="open-url">
+                <param name="url" value="@{url}"/>
+            </antcall>
+        </sequential>
+    </macrodef>
+</project>
+
+

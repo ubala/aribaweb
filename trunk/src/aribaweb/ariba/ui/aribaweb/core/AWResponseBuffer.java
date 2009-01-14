@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#16 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#17 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -70,7 +70,7 @@ import java.util.List;
  *
  * However, if we detect a change in a child buffer (either insertion, deletion, or modification), we must still
  * write out the top-level contents of the scoped buffer as this is generally required to be legitimate html (that is,
- * a <tr> cannot exist in the absence of a <table>).  So to write the children of a scoped buffer, we iterate through
+ * a <tr/> cannot exist in the absence of a <table/>).  So to write the children of a scoped buffer, we iterate through
  * the encodedStrings at the top level which are intermingled with the subbuffers.  We write all encodedStrings,
  * but must determine what to do with each subbuffer.  If the subbuffer is a simple modification at the top level, its
  * checksum will differ from its predecessor and we simply write the entire child buffer.

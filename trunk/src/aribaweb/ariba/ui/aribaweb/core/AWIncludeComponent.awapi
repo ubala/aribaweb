@@ -1,0 +1,66 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id:  $
+    </Copyright>
+
+    <Overview>
+        AWIncludeComponent enables dynamic selection of a component (or element) to
+        be switched in dynamically.  This is a key enabler for extensible / meta-data-driven
+        UIs.
+
+        Example:
+
+                <!-- Use the right kind of form for the selected object -->
+                <a:IncludeComponent name="$componentNameForSelectedObject" inspect="$selectedObject"/>
+
+        In this example, the containing component may implement as follows:
+
+                public String componentNameForSelectedObject() {
+                    return (selectedObject instanceof Project)
+                            ? "ProjectInspector"
+                            : "GenericInspector";
+                }
+
+        (Of course, a more extensible app would consult a registry or set of delegates to
+        determine the appropriate component to return).
+
+        Note that IncludeComponent passes along any bindings that it doesn't recognize
+        to the included component (like "inspect" in the example above) so the app can
+        use component-specific bindings just as if the included component were being
+        bound statically.
+    </Overview>
+
+    <Binding key="name" direction="get" type="String">
+        The name of the component to include.
+        (Can use awcomponentName if name is needed to be passed as binding to the included
+        component).
+    </Binding>
+
+    <Binding key="awcomponentName" direction="get" type="String">
+        Alternate for "name"
+    </Binding>
+
+    <Binding key="awcomponentReference" direction="get" type="AWComponentReference">
+        Advanced.  Used by elements like TabSet to switch in embeded component references
+        (mined from the parent tags body).  Should be used with awcomponent binding.
+    </Binding>
+
+    <Binding key="awcomponent" direction="get" type="AWComponentReference">
+        Advanced.  Used in concert with awcomponentReference to provide the context
+        component for bindings of the componentReference.
+    </Binding>
+
+</a:Api>\

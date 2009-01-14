@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuItem.java#25 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuItem.java#26 $
 */
 
 package ariba.ui.widgets;
@@ -271,9 +271,9 @@ public final class PopupMenuItem extends AWComponent
     }
 
 
-    // in some circumstances, actions on <a> tags are ignored on the macintosh, and the
+    // in some circumstances, actions on <a/> tags are ignored on the macintosh, and the
     // dummy link "#" is followed instead when the user clicks the link. For macintosh users,
-    // we use the <div> tag for the popup menu item instead of an <a> tag.
+    // we use the <div> tag for the popup menu item instead of an <a/> tag.
     public String tagName ()
     {
         return request().isMacintosh() ? "div" : "a";

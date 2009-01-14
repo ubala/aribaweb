@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.java#5 $
 */
 
 package ariba.ui.widgets;
@@ -20,6 +20,7 @@ package ariba.ui.widgets;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWRedirect;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.aribaweb.core.AWBindingNames;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,10 +28,7 @@ import java.util.regex.Pattern;
 public final class HTMLActionFilter extends AWComponent
 {
     private static final Pattern EmbeddedActionPattern
-            = java.util.regex.Pattern.compile("href=\"([^\"]+)\"");
-/*
-            = java.util.regex.Pattern.compile("href=\"([/\\w\\.\\:\\?\\&\\=\\_\\%\\$\\;]+)\"");
-*/
+            = java.util.regex.Pattern.compile("(?:HREF|href)=\"([^#][^\"]+)\"");
     protected Matcher _matcher;
     protected String _input;
     protected int _readPos;
@@ -61,7 +59,11 @@ public final class HTMLActionFilter extends AWComponent
     public AWResponseGenerating currentClicked ()
     {
         String url = _matcher.group(1);
-        return AWRedirect.getRedirect(requestContext(), url);
+        setValueForBinding(url, "actionUrl");
+        AWResponseGenerating response = (AWResponseGenerating)valueForBinding(AWBindingNames.action);
+        return (response != null)
+                ? response
+                : AWRedirect.getRedirect(requestContext(), url);
     }
 
     protected void sleep ()

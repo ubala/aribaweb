@@ -10,22 +10,10 @@ public class ImagePrefetch extends AWComponent
 {
     private static String[] WidgetsImages =
     {
-        "cssBtn.gif",
-        "cssBtnApprove.gif",
-        "cssBtnApproveOver.gif",
-        "cssBtnBrand.gif",
-        "cssBtnBrandOver.gif",
-        "cssBtnDeny.gif",
-        "cssBtnDenyOver.gif",
-        "cssBtnHilite.gif",
+        "cssBtnBrandAWOver.gif",
         "cssBtnHiliteOver.gif",
         "cssBtnOver.gif",
-        "cssBtnSpecial2.gif",
         "cssBtnSpecial2Over.gif",
-        "cssBtnTotal.gif",
-        "cssBtnTotalOver.gif",
-        "cssBtnTab.gif",
-        "cssBtnTabOver.gif",
     };
 
     private static final String IsImagePretched = "IsImagePretched";

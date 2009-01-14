@@ -34,18 +34,44 @@ ariba.Util.extend(ariba.Debug, function() {
         focus      : false
     }
 
-    var _AWCPIWindOpts = "height=750,width=320,left=0,top=0,menubar=no,localtion=no,status=no,toolbar=no,resizable=yes";
+    var _AWCPIWindOpts = "height=750,width=320,left=0,top=0,menubar=no,location=no,status=no,toolbar=no,resizable=yes";
     var _ComponentInspectorWin;
 
     // pointer from debug panel back to main window that spawned it
-    var _AWXMainWindow = null;
     var _AWXUpdateCPICallback = null;
+
+    Event.registerBehaviors({
+        // remote open
+        _RO : {
+            click : function (elm, evt) {
+                var fileLocation = elm.getAttribute("_fl");
+                if (!fileLocation) {
+                    fileLocation = elm.innerHTML;
+                }
+                fileLocation = fileLocation.replace(/file:\\*/, "");
+                fileLocation = fileLocation.replace(/.*:\//, "");
+                fileLocation = fileLocation.replace("\\", "/");
+                var parts = fileLocation.split(".");
+                fileLocation = parts[0];
+                var length = parts.length;
+                for (var i = 1; i < length - 1; i++) {
+                    fileLocation = fileLocation + "/" + parts[i];
+                }
+                fileLocation = fileLocation + "." + parts[length - 1];
+                var url = "http://localhost:28073/" + fileLocation;
+                var iframe = Request.createRefreshIFrame("AWDebugRemoteOpen");
+                iframe.src = url;
+                return false;
+            }
+        }
+    });
 
     return {
 
         // Parameters put in the panel by AWComponentInspector.awl
         _AWCPISession : "",
         _AWCPIRefreshId : "",
+        _AWXMainWindow : null,
 
         // Public Globals
         AWDebugJSUrl : '',
@@ -330,6 +356,8 @@ ariba.Util.extend(ariba.Debug, function() {
             var senderId = null;
             var target = (evt.srcElement) ? evt.srcElement : evt.target;
             while (target) {
+                senderId = target.name;
+                if (senderId) break;
                 senderId = target.id;
                 if (senderId) break;
                 target = target.parentNode;
@@ -343,9 +371,14 @@ ariba.Util.extend(ariba.Debug, function() {
                 var win = open("", "AWComponentPath", "");
                 if (win) {
                     win.focus();
-                    setTimeout(function () {
-                        win._AWXMainWindow = window;
-                    }, 100);
+                    function setPtr() {
+                        if (win.ariba.Debug) {
+                            win.ariba.Debug._AWXMainWindow = window;
+                        } else {
+                            setTimeout(setPtr, 200);
+                        }
+                    }
+                    setTimeout(setPtr, 1000);
                 }
                 return true;
             }
@@ -358,7 +391,7 @@ ariba.Util.extend(ariba.Debug, function() {
             var scrollDiv = Dom.getElementById("sourceDiv");
             if (scrollDiv) {
                 var selLine = Dom.findChildUsingPredicate(scrollDiv, function (e) {
-                    return e.className == "plsel"
+                    return Dom.hasClass(e, "plsel");
                 });
             // alert ("scrollDiv=" + scrollDiv + ", selLine=" + selLine + ", scrollDiv.scrollTop=" + scrollDiv.scrollTop);
                 if (selLine && (selLine.offsetTop < scrollDiv.scrollTop
@@ -402,8 +435,8 @@ ariba.Util.extend(ariba.Debug, function() {
                     } catch (e) {
                         setTimeout(_AWXUpdateCPICallback, 1);
                     }
-                    if (_ComponentInspectorWin) {
-                        _ComponentInspectorWin._AWXMainWindow = this;
+                    if (_ComponentInspectorWin && _ComponentInspectorWin.ariba) {
+                        _ComponentInspectorWin.ariba.Debug._AWXMainWindow = this;
                         _ComponentInspectorWin.focus();
                     }
                 }
@@ -414,10 +447,10 @@ ariba.Util.extend(ariba.Debug, function() {
 
         fireMainWindowAction : function (actionId)
         {
-            if (_AWXMainWindow) {
+            if (this._AWXMainWindow) {
                 setTimeout(function() {
-                    _AWXMainWindow.Request.invoke.call(_AWXMainWindow.Request, null, actionId);
-                }, 200);
+                    this._AWXMainWindow.ariba.Request.invoke.call(this._AWXMainWindow.ariba.Request, null, actionId);
+                }.bind(this), 200);
             } else {
                 alert("Debug.fireMainWindowAction() - Trying to invoke in main window, but pointer not set");
             }
@@ -452,6 +485,7 @@ ariba.Util.extend(ariba.Debug, function() {
                 }
             }
         },
+
         /*
         _createFloater : function ()  {
             if (!document || !document.body) return null;
@@ -481,6 +515,7 @@ ariba.Util.extend(ariba.Debug, function() {
         */
 
         EOF:0};
+
 }());
 
 //****************************************************

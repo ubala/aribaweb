@@ -266,6 +266,14 @@ ariba.Handlers = function() {
             return this.tagOnKeyPress(tagObject, formId, windowName, actionName, mevent, windowAttributes);
         },
 
+        hTagRefreshKeyDown : function (tagObject, formId, windowName, actionName, mevent, windowAttributes)
+        {
+            if (this.tagOnKeyPress(tagObject, formId, windowName, actionName, mevent, windowAttributes)) {
+                return this.textRefresh(mevent, tagObject);                
+            }
+            return false;
+        },
+
         hPopupAction : function (popup, mevent)
         {
             var selectedOption = popup.options[popup.selectedIndex];
@@ -388,6 +396,14 @@ ariba.Handlers = function() {
         TF : {
             keypress : function (elm, evt) {
                 return ariba.Handlers.textNoSubmit(evt, elm);
+            },
+            keydown : function (elm, evt) {
+                var type = elm.getAttribute('_tf');
+                if (!type) return true;
+                var formId = Dom.lookupFormId(elm)
+                return (type == "AC") ? ariba.Handlers.hTagKeyDown(elm, formId, null, null, evt, false, null)
+                     : (type == "ROKP") ? ariba.Handlers.hTagRefreshKeyDown(elm, formId, null, null, evt, false, null)
+                     : ariba.Handlers.textRefresh(evt, elm);
             }
         },
 

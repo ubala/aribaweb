@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ThreadDebugState.java#9 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ThreadDebugState.java#10 $
 */
 
 package ariba.util.core;
@@ -330,6 +330,9 @@ public class ThreadDebugState
         return o;
     }
 
+    /**
+     *  @aribaapi ariba
+     */
     public static class StateMap extends EqHashtable
     {
         protected PerformanceState.Stats _performanceState;

@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#8 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#9 $
 */
 package ariba.ui.meta.core;
 
 import ariba.ui.aribaweb.core.AWChecksum;
+import ariba.ui.aribaweb.util.AWDebugTrace;
 import ariba.util.core.Assert;
 import ariba.util.core.Fmt;
 import ariba.util.core.ListUtil;
@@ -42,7 +43,8 @@ public class Meta
     public static final int TemplateRulePriority = 100000;
     static final int MaxKeyDatas = 32;
     static final Object NullMarker = new Object();
-    
+    protected static final String ScopeKeySuffix = "_p";
+
     Map <String, KeyData> _keyData = new HashMap();
     KeyData[] _keyDatasById = new KeyData[MaxKeyDatas];
     int _nextKeyId = 0;
@@ -75,7 +77,7 @@ public class Meta
 
         int entryId = _rules.size();
         if (rule._rank == 0) rule._rank = allocateNextRuleRank();
-
+        rule._ruleSet = _currentRuleSet;
         Log.meta_detail.debug("Add Rule, rank=%s: %s", Integer.toString(rule._rank), rule);
 
         // index it
@@ -232,6 +234,7 @@ public class Meta
 
     public class RuleSet
     {
+        String _filePath;
         int _start, _end, _rank;
 
         public void disableRules()
@@ -241,24 +244,30 @@ public class Meta
             }
             clearCaches();
         }
+
+        public String filePath()
+        {
+            return _filePath;
+        }
     }
 
-    public void beginRuleSet ()
+    public void beginRuleSet (String filePath)
     {
-        beginRuleSet(_rules.size());
+        beginRuleSet(_rules.size(), filePath);
     }
 
-    public void beginRuleSet (int rank)
+    public void beginRuleSet (int rank, String filePath)
     {
         Assert.that(_currentRuleSet == null, "Can't start new rule set while one in progress");
         _currentRuleSet = new RuleSet();
         _currentRuleSet._start = _rules.size();
         _currentRuleSet._rank = rank;
+        _currentRuleSet._filePath = filePath;
     }
 
     public void beginReplacementRuleSet (RuleSet orig)
     {
-        beginRuleSet();
+        beginRuleSet(orig.filePath());
         _currentRuleSet._rank = orig._rank - (orig._end - orig._start);
     }
 
@@ -354,11 +363,11 @@ public class Meta
         }
     }
 
-    PropertyMap propertiesForMatch (MatchResult matchResult)
+    PropertyMap propertiesForMatch (MatchResult matchResult, AWDebugTrace.AssignmentRecorder recorder)
     {
 
         PropertyMap properties = _MatchToPropsCache.get(matchResult);
-        if (properties != null) return properties;
+        if (properties != null && recorder == null) return properties;
 
 
         properties = newPropertiesMap();
@@ -382,7 +391,15 @@ public class Meta
 
         int modifiedMask = 0;
         for (Rule r : rules) {
-            modifiedMask |= r.apply(this, properties);
+            if (recorder != null) {
+                // for description, use predicate list, minus any propertyScope (_p) key
+                String desc = (ListUtil.lastElement(r._predicates)._key.endsWith(ScopeKeySuffix))
+                        ? r._predicates.subList(0, r._predicates.size()-1).toString()
+                        : r._predicates.toString();
+                recorder.setCurrentSource(r._rank, desc, r.location());
+            }
+
+            modifiedMask |= r.apply(this, properties, recorder);
         }
 
         properties.awakeProperties();
@@ -396,7 +413,7 @@ public class Meta
             _PropertyMapUniquer.put(properties, properties);
         }
 */
-        _MatchToPropsCache.put(matchResult.immutableCopy(), properties);
+        if (recorder == null) _MatchToPropsCache.put(matchResult.immutableCopy(), properties);
         return properties;
     }
 
@@ -711,7 +728,7 @@ public class Meta
         public PropertyMap properties ()
         {
             if (_properties == null) {
-                _properties = _meta.propertiesForMatch(this);
+                _properties = _meta.propertiesForMatch(this, null);
             }
             return _properties;
         }
@@ -885,26 +902,34 @@ public class Meta
         List <Predicate> _predicates;
         Map <String, Object> _properties;
         int _rank;
+        RuleSet _ruleSet;
+        int _lineNumber;
 
-        public Rule (List predicates, Map properties, int rank)
+        public Rule (List predicates, Map properties, int rank, int lineNumber)
         {
             _predicates = predicates; // scopeNestedContraints(predicates);
             _properties = properties;
             _rank = rank;
+            _lineNumber = lineNumber;
+        }
+
+        public Rule (List predicates, Map properties, int rank)
+        {
+            this(predicates, properties, rank, -1);
         }
 
         public Rule (List predicates, Map properties)
         {
-            this(predicates, properties, 0);
+            this(predicates, properties, 0, -1);
         }
 
         public Rule (Map predicateValues, Map properties)
         {
-            this(Predicate.fromMap(predicateValues), properties, 0);
+            this(Predicate.fromMap(predicateValues), properties, 0, -1);
         }
 
         // returns context keys modified
-        public int apply (Meta meta, PropertyMap properties)
+        public int apply (Meta meta, PropertyMap properties, AWDebugTrace.AssignmentRecorder recorder)
         {
             int updatedMask = 0;
             if (_rank == Integer.MIN_VALUE) return 0;
@@ -919,6 +944,8 @@ public class Meta
                 Object newVal = propManager.mergeProperty(key, orig, value);
                 if (newVal != orig) {
                     properties.put(key, newVal);
+
+                    if (recorder != null) recorder.registerAssignment(key, newVal);
 
                     KeyData keyData = propManager._keyDataToSet;
                     if (keyData != null) {
@@ -938,6 +965,22 @@ public class Meta
         void disable ()
         {
             _rank = Integer.MIN_VALUE;
+        }
+
+        public int getLineNumber ()
+        {
+            return _lineNumber;
+        }
+
+        public void setLineNumber (int lineNumber)
+        {
+            _lineNumber = lineNumber;
+        }
+
+        String location ()
+        {
+            String path = (_ruleSet != null) ? _ruleSet.filePath() : "Unknown";
+            return (_lineNumber >= 0) ? Fmt.S("%s:%s", path, _lineNumber) : path;
         }
 
         // rewrite any predicate of the form "layout=l1, class=c, layout=l2" to
@@ -1103,7 +1146,7 @@ public class Meta
     public void defineKeyAsPropertyScope (String contextKey)
     {
         KeyData keyData = keyData(contextKey);
-        keyData.setPropertyScopeKey(contextKey + "_p");
+        keyData.setPropertyScopeKey(contextKey.concat(ScopeKeySuffix));
     }
 
     public interface PropertyMerger
@@ -1125,6 +1168,11 @@ public class Meta
         public Object merge(Object orig, Object override) {
             return override;
         }
+
+        public String toString()
+        {
+            return "OVERWRITE";
+        }
     }
 
     // (false trumps true) for visible and editable
@@ -1134,6 +1182,11 @@ public class Meta
             // null will reset (so that it can be overridden to true subsequently
             if (override == null) return null;
             return booleanValue(orig) && booleanValue(override);
+        }
+
+        public String toString()
+        {
+            return "AND";
         }
     }
 

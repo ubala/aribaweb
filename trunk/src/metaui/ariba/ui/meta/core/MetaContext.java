@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#5 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#6 $
 */
 package ariba.ui.meta.core;
 
@@ -27,6 +27,7 @@ import ariba.ui.aribaweb.core.AWTemplate;
 import ariba.ui.aribaweb.util.AWEnvironmentStack;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWUtil;
+import ariba.ui.aribaweb.util.AWDebugTrace;
 import ariba.util.core.Assert;
 import ariba.util.core.ClassExtension;
 import ariba.util.core.ClassExtensionRegistry;
@@ -170,6 +171,18 @@ public class MetaContext extends AWContainerElement
     public void renderResponse (AWRequestContext requestContext, AWComponent component)
     {
         boolean needCleanup = pushPop(true, false, component);
+        boolean didPushTrace = false;
+        if (requestContext.componentPathDebuggingEnabled()) {
+            Context context = MetaContext.currentContext(component);
+            Object provider = context.debugTracePropertyProvider();
+            if (provider != null) {
+                AWDebugTrace debugTrace = requestContext.debugTrace();
+                debugTrace.pushMetadata(null, provider, true);
+                debugTrace.pushTraceNode(this);
+                didPushTrace = true;
+            }
+        }
+
         try {
             super.renderResponse(requestContext, component);
         }
@@ -177,6 +190,11 @@ public class MetaContext extends AWContainerElement
             throwAugmentedException(e, component);
         }
         finally {
+            if (didPushTrace) {
+                requestContext.debugTrace().popTraceNode();
+                requestContext.debugTrace().popMetadata();
+            }
+            
             pushPop(false, needCleanup, component);
         }
     }
@@ -201,6 +219,16 @@ public class MetaContext extends AWContainerElement
         AWResponseGenerating actionResults = null;
         try {
             actionResults = super.invokeAction(requestContext, component);
+
+            if (actionResults != null && requestContext.isPathDebugRequest()) {
+                Context context = MetaContext.currentContext(component);
+                Object provider = context.debugTracePropertyProvider();
+                if (provider != null) {
+                    requestContext.debugTrace().pushComponentPathEntry(this);
+                    requestContext.debugTrace().pushMetadata(null, provider, true);
+                }
+            }
+
         }
         catch (Exception e) {
             throwAugmentedException(e, component);

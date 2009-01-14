@@ -1,0 +1,111 @@
+<style>
+.tableRowL1
+{
+    background-color: #DDDDDD;
+}
+.tableRowL2
+{
+    background-color: #EEEEEE;
+}
+.tableRowL3
+{
+    background-color: #FFFFFF;
+}
+.tdClass
+{
+    border-top: 1px solid #666699;
+    font-size:9pt;
+    font-weight:plain;
+}
+
+.noRowLines td.tableBody {
+    border-top:none;
+}
+</style>
+
+<a:SetValue layoutChangeLatch="$true"/> <!-- this is evil, but it is to simulate Sourcing's current bad behavior -->
+
+<t:DataTable list="$rootList" displayGroup="$displayGroup" children="$displayGroup.currentItem.children" hasChildren="$hasChildren"
+        enableScrolling="$true" showOptionsMenu="$true" title="Bid Data!" multiSelect="$showSelection"
+        pivotLayout="$layout.c" columnFields="$layout.c" rowFields="$layout.r" columnAttributes="$layout.a"
+        overrideAttribute="$answerColumnName" filteredColumnAttributes="$filteredAttributeColumns" shouldCollapseColumnLevel="$collapseSingleColumnLevel"
+        forceColumnUpdate="$layoutChangeLatch"
+        rowClass="$rowClass" detailRowClass=""
+        tableConfig="$layout.userConfig">
+
+    <a:Content name="optionsMenu">
+        <t:OptionsMenuButton showConfigureLayout="$false"/>\
+    </a:Content>
+
+    <t:HeadingArea>
+        <div style="float:left">
+            File: <w:PopupControl list="$files" item="$iter" selection="$file" action="$updateFile">$iter.name</w:PopupControl>
+        </div>
+        <div style="float:left; padding-left:5px">
+            Layout: <w:PopupControl list="$layouts" item="$iter" selection="$layout" action="$optionsChanged">$iter.name</w:PopupControl>
+        </div>
+        <div style="float:left">
+            <w:TextButton action="$showFilterPanel">Filter</w:TextButton>
+        </div>
+        <div style="float:left; padding-left:8px">
+            <w:PopupMenuLink menuId="StatsMenu">Stats</w:PopupMenuLink>
+        </div>
+        <div style="float:right;padding-right:4px">
+            <a:Label><a:Checkbox value="$filteringColumns" action="$optionsChanged"/> Col Filter</a:Label>
+        </div>
+        <div style="float:right;padding-right:4px">
+            <a:Label><a:Checkbox value="$showSelection" action="$optionsChanged"/> Selection</a:Label>
+        </div>
+    </t:HeadingArea>
+
+    <t:Column key="Item" pivotMoveType="None" minWidthPx="300">
+        <w:OutlineControl>\
+            $displayGroup.currentItem.Item $displayGroup.currentItem.ItemDesc\
+        </w:OutlineControl>\
+    </t:Column>
+    <t:Column key="Price" isBlank="$!isItem">
+        <a:TextField value="$displayGroup.currentItem.Price" formatter="$formatters.money" size=9 style="text-align:right"/>
+    </t:Column>
+    <t:Column key="Quantity" formatter="$formatters.integer" align="right" isBlank="$!isItem"/>
+
+    <!--- Spanning Description and variable detail attributes for Attachments and Requirements -->
+    <t:Column key="Description" wantsSpan="$true" uniquingKeyPath="Item"/>
+
+    <t:DynamicDetailAttributes key="Requirements" label="Requirements" list="$requirements" item="$curRequirement"
+                                renderingColumnKey="RequirementRenderer" uniquingKeyPath="Region"/>
+    <t:Column key="RequirementRenderer" wantsSpan="$true" uniquingKeyPath="Region" isOptional="$false" initiallyVisible="$false">\
+        $curRequirement\
+    </t:Column>
+
+    <t:DynamicDetailAttributes key="Attachments" label="Attachments" list="$attachments" item="$curAttachment"
+                                renderingColumnKey="AttachmentRenderer" uniquingKeyPath="Region"/>
+    <t:Column key="AttachmentRenderer" wantsSpan="$true" uniquingKeyPath="Region" isOptional="$false" initiallyVisible="$false">\
+        $curAttachment\
+    </t:Column>
+
+    <t:Column key="ExtendedPrice" label="E P" formatter="$formatters.money" align="right"  isBlank="$!isItem"/>
+    <t:Column key="Color" isBlank="$isColorBlank"/>
+    <t:Column key="Size" isBlank="$!isItem"/>
+    <t:Column key="BigFlag" label="" isValueColumn="$false" isOptional="$false" isBlank="$!showBigFlag">
+        <a:If ifTrue="$showFlag">
+            <span style="color:red">*</span>
+        </a:If>
+    </t:Column>
+
+    <t:Column key="Region" isBlank='$!displayGroup.currentItem.Region'/>
+    <t:Column key="Year" initiallyVisible="$false"/>
+    <t:Column key="Quarter" initiallyVisible="$false"/>
+    <t:Column key="Supplier" sortOrdering="$supplierSortOrdering" isBlank='$!displayGroup.currentItem.Supplier'/>
+
+    <t:Column key="Answer" wantsSpan="$true" isOptional="$false" initiallyVisible="$false"/>
+    <t:Column key="Extra" isOptional="$false" initiallyVisible="$false"/>
+
+</t:DataTable>
+
+<w:PopupMenu menuId="StatsMenu">
+    <h3>Stats</h3>
+    AllObjects: $displayGroup.allObjects.size<br/>
+    All Rows: $displayGroup.filteredObjects.size<br/>
+    Rows in Batch: $displayGroup.numberOfDisplayedObjects<br/>
+    DisplayedObjects: $displayGroup.displayedObjects.size
+</w:PopupMenu>

@@ -13,34 +13,38 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/CueTip.awl#11 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/CueTip.awl#12 $
     </Copyright>
 
     <Overview>
 
         Usage:
-        <w:CueTip value="$value"/>
+
+                <w:CueTip value="$value"/>
+
         or
-        <w:CueTip>My cue tip string</w:CueTip>
+
+                <w:CueTip>My cue tip string</w:CueTip>
 
 
         The tip string passed as a value binding
-        <w:CueTip value="$value"/>
+
+                <w:CueTip value="$value"/>
 
         In this usage, the value binding is used as the tip string. The value binding is
         parsed and verified for "safeHTML" as defined by the "escapeUnsafeHtml" binding in
-        AWString. As a convenience, "\n" is converted to a "<br/>" before rendering.
+        AWString. As a convenience, "\n" is converted to a `<br/>` before rendering.
 
         By default, a CueTip is automatically sized based on the current window size.
         Autosizing occurs irrespective of any HTML content in the value string or in the
-        component content. This allows the <b></b> and <i></i> tags to be used in
+        component content. This allows the `<b></b>` and `<i></i>` tags to be used in
         conjunction with autosizing.
 
         If explicit formatting is desired, the autoSize binding can be set to $false.
         Alternatively for the string passed in via the "value" binding can be wrapped by
-        <html></html> which will disable autosizing of the tip dialog. In this case the
+        `<html></html>` which will disable autosizing of the tip dialog. In this case the
         sizing of the tip dialog is the responsibility of the user (for example, the tip
-        string can contain <br/> and <p/> tags).
+        string can contain `<br/>` and `<p/>` tags).
 
         For ease of translation, most developers should use the value binding method and
         not include any HTML in the tip string.

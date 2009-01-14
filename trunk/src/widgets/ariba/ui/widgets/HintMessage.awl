@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.awl#23 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.awl#24 $
     </Copyright>
 
     <Overview>
@@ -150,7 +150,7 @@
             <td class="hint" width="50%">\
                 <a:Image filename="cleardot.gif" class="block" width="1" height="1"/>\
             </td>
-            <td align="$languageRight" valign="top" width="1px">\
+            <td class="hint" align="$languageRight" valign="top" width="1px">\
                 <a:Image filename="hint_rc.gif"/>\
             </td>
         </tr>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.java#25 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.java#27 $
 */
 package ariba.ui.dev;
 
@@ -157,32 +157,29 @@ public final class AWDebugPane extends AWComponent implements PerformanceCheck.E
 
     public boolean isComponentPathDebuggingEnabled ()
     {
-        AWSession session = requestContext().session(false);
-        if (session == null) {
-            return false;
-        }
-        else {
-            Boolean flag = (Boolean)session.dict().get(AWConstants.ComponentPathDebugFlagKey);
-            return (flag != null) && flag.booleanValue();
-        }
+        return AWComponentInspector.isComponentPathDebuggingEnabled(requestContext());
     }
 
     public void togglePathDebugging ()
     {
-        boolean shouldEnable = !isComponentPathDebuggingEnabled();
-        AWSession session = requestContext().session(false);
-        if (session != null) {
-            session.dict().put(AWConstants.ComponentPathDebugFlagKey,
-                        (shouldEnable ? Boolean.TRUE: Boolean.FALSE ));
-        }
-        if (shouldEnable) {
-            AribaPageContent.setMessage("Path Debugging Enabled!  You may also Alt-click on elements to see the path to a particular part of the page", session());
-        }
+        AWComponentInspector.togglePathDebugging(requestContext());
     }
+
+    private final static String CPI_Session_Key = "AWCPI_ins";
+    protected AWComponentInspector getComponentInspector ()
+    {
+        AWComponentInspector page = (AWComponentInspector)session().dict().get(CPI_Session_Key);
+        if (page == null) {
+            page = (AWComponentInspector)pageWithName(AWComponentInspector.class.getName());
+            session().dict().put(CPI_Session_Key, page);
+        }
+        return page;
+    }
+
 
     public AWComponent showComponentPath ()
     {
-        AWComponentInspector page = (AWComponentInspector)pageWithName(AWComponentInspector.class.getName());
+        AWComponentInspector page = getComponentInspector();
         requestContext().stopComponentPathRecording();
         page.init(requestContext().debugTrace());
         requestContext().setFrameName("AWComponentPath");
@@ -191,7 +188,7 @@ public final class AWDebugPane extends AWComponent implements PerformanceCheck.E
 
     public AWComponent updateComponentInspector ()
     {
-        AWComponentInspector page = (AWComponentInspector)pageWithName(AWComponentInspector.class.getName());
+        AWComponentInspector page = getComponentInspector();
         requestContext().stopComponentPathRecording();
         page.init(requestContext().lastDebugTrace());
         requestContext().setFrameName("AWComponentPath");

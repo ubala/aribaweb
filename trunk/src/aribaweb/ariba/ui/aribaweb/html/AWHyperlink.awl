@@ -13,15 +13,15 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.awl#29 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.awl#31 $
     </Copyright>
 
     <Overview>
-        Provides for a standard Html hyperlink.  AWHyperlink may be wrapped around anything that a normal <a/> tag could
-            be around.  Allows for binding and action or specifying a pageName so that whe the usre clicks, the action
+        Provides for a standard Html hyperlink.  AWHyperlink may be wrapped around anything that a normal `<a/>` tag could
+            be around.  Allows for binding and action or specifying a pageName so that when the user clicks, the action
             is fired or the named page is displayed.  Optionally, you may use AWHyperlink to submit a form.  Bindings
-            which are not mentioned belowed may be passed-though to the opening <a/> as arbitrary attributes in the html
-                tag.
+            which are not mentioned belowed may be passed-though to the opening `<a/>` as arbitrary attributes in the html
+            tag.
     </Overview>
 
     <Binding key="action" direction="get" type="AWResponseGenerating" default="$null" alternates="pageName,href">

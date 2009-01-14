@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDefaultApplication.java#16 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDefaultApplication.java#17 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -21,6 +21,8 @@ import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWBrand;
 import ariba.ui.aribaweb.util.AWBrandManager;
+
+import java.io.StringWriter;
 
 /**
     This is provided as an application-level subclass of AWConcreteAppliction in
@@ -96,8 +98,7 @@ public class AWDefaultApplication extends AWConcreteApplication
 
     public AWResponse createResponse ()
     {
-        throw new AWGenericException(
-            "AWDefaultApplication createResponse not supported.");
+        return new AWWriterResponse(new StringWriter());
     }
 
     //////////////////////////

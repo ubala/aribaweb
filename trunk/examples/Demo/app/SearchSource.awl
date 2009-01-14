@@ -1,0 +1,134 @@
+<w:BasicPageWrapper hasForm="$true" hasSidebarNotch="$false" isSidebarVisible="$false">
+<style>
+    td.tableBody pre { line-height:95% }
+    .scrollClip { overflow:scroll; border: 1px solid #9C9CB8; margin-top: 5px; height:500px; }
+</style>
+<a:ClientSideScript filename="widg/prettify.js"/>
+<w:HintMessage>
+    You may search and filter by path hierarchy on the left, and see excerpts from matches on the right.
+    <a href="http://lucene.apache.org/java/docs/queryparsersyntax.html#Terms" target="new">Query Syntax</a>
+</w:HintMessage>
+<table width="100%"><tr>
+    <td valign="top" width="30%">
+        <div class="flexContainer">
+            <t:DataTable item="$node" children="$node.nonLeafChildren" displayGroup="$outlineDisplayGroup"
+                    multiSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                    class="scrollTableWrapper smallFont" enableScrolling="$true" showColumnHeader="$false">
+                <t:HeadingArea>
+                    <table cellspacing="0" cellpadding="0">
+                        <tr><td colspan="2"><b>Search Source</b>
+                        <a:If ifTrue="${searchers.size > 1}">\
+                            <w:PopupMenuLink menuId="searchers">$searcher.name</w:PopupMenuLink>
+                            <w:PopupMenu menuId="searchers">
+                                <a:For item="$iSearcher" list="$searchers">\
+                                    <w:PopupMenuItem action="${searcher=iSearcher;null}">$iSearcher.name</w:PopupMenuItem>
+                                </a:For>
+                            </w:PopupMenu>
+                        </a:If> </td></tr>
+                        <tr>
+                            <td><a:TextField value="$queryString" action="$searchAction" size="28"/>\
+                            <w:ErrorIndicator errorKey="query"/></td>
+                            <td><w:TextButton action="$searchAction">Search</w:TextButton></td>
+                        </tr>
+                        <tr><td colspan="2">\
+                            <a:For list="$fileTypeList" item="$fileType">
+                                <nobr><a:Label>\
+                                    <a:Checkbox action="$fileTypesChanged" value="$fileTypeEnabled"/>
+                                    $fileType ($fileTypeCount)
+                                </a:Label></nobr>
+                            </a:For>
+                        </td></tr>
+                    </table>
+                </t:HeadingArea>
+                <t:Column>\
+                    <w:OutlineControl indentationPerLevel="12" renderAsTable="$false">\
+                        $node.name ($node.leafCount)
+                    </w:OutlineControl>\
+                </t:Column>
+            </t:DataTable>
+        </div>
+    </td>
+    <td valign="top" width="100%" style="padding-left:12px">
+        <div class="flexContainer">
+            <a:PhaseInvocation append="$checkSelection"/>
+            <w:TabSet index="$selectedContentTab">
+                <w:Tab label="Matches">
+                    <t:DataTable item="$doc" displayGroup="$resultDisplayGroup"
+                            initialSortKey="score" initialSortDirection="descending"
+                            singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                            enableScrolling="$true" showOptionsMenu="$true" title="$message" showColumnHeader="$false">
+                        <a:Content name="optionsMenu">
+                            <a:If ifTrue="$showingDetails">
+                                <a:Hyperlink action="${showingDetails=false;null}">&lt; Hide Details</a:Hyperlink>
+                            <a:Else/>
+                                <a:Hyperlink action="${showingDetails=true;null}">Show Details &gt;</a:Hyperlink>
+                            </a:If>
+                            &nbsp;
+                        </a:Content>
+                        <t:Column label="Class" isValueColumn="$true">
+                            <b><a:String value='$doc.fileName'/></b> <a:String value='$doc.directory'/>
+                        </t:Column>
+                        <t:Column label="">\
+                            <a:For item="$matchDoc" list="$doc.allHits">\
+                                <a:Hyperlink action="$matchDocClicked">$matchDoc.typeLabel</a:Hyperlink>
+                            </a:For>
+                        </t:Column>
+                        <t:RowDetail style="padding:0px 4px 0px 4px" isVisible="$showingDetails">\
+                            <div style='font:normal 12px/15px "Courier New", Courier, mono'>\
+                                <a:PrimitiveString value='$doc.hitExcerpt'/>
+                            </div>\
+                        </t:RowDetail>
+                    </t:DataTable>
+                </w:Tab>
+                <w:Tab label="$selectedPackageLabel" isVisible="$selectedPackage">
+                    <a:IncludeBlock name="FileDisplay" doc="$selectedPackage"/>
+                </w:Tab>
+                <w:Tab label="$selectedDoc.className" isVisible="$selectedDoc">
+                    <table _ifTrue="${selectedDocPeers.size > 1}" width="100%"><tr>
+                        <td style="color:#666666; font:bold 11px/15px Verdana, Arial, Helvetica, sans-serif">\
+                            <a:If ifTrue="$!selectedSubDoc.isJavadoc">\
+                                <a:DebugRemoteOpen tagName="span" value="$selectedSubDoc.path">$selectedSubDoc.path</a:DebugRemoteOpen>
+                            <a:Else/>
+                                $selectedSubDoc.fileName
+                            </a:If>
+                        </td>\
+                        <td align="right">\
+                            <a:For item="$matchDoc" list="$selectedDocPeers">\
+                                <b emitTags="${matchDoc==selectedSubDoc}">\
+                                    <a:Hyperlink action="$subDocClicked">\
+                                        <a:If ifTrue="$matchDocIsSample">\
+                                            $matchDoc.className\
+                                        <a:Else ifTrue="$matchDoc.isJavadoc"/>\
+                                            doc\
+                                        <a:Else/>\
+                                            $matchDoc.extension\
+                                        </a:If>\
+                                    </a:Hyperlink></b>
+                            </a:For>
+                        </td>\
+                    </tr></table>
+                    <a:IncludeBlock name="FileDisplay" doc="$selectedSubDoc"/>
+                </w:Tab>
+            </w:TabSet>
+        </div>
+    </td>
+</tr></table>
+</w:BasicPageWrapper>\
+<a:Block name="FileDisplay">
+    <a:SetValue displayedDoc="$^doc"/>\
+    <a:If ifTrue="$displayedDoc">\
+        <div class="doc">
+        <table class="fixedTable" style="padding-left:5px" cellpadding="0" cellspacing="0"><tr><td>
+            <a:If ifTrue='$displayedDoc.isJavadoc'>
+                <w:HTMLActionFilter value='$contentsToDisplay'
+                        action="$contentLinkClicked" actionUrl="$newContentUrl"/>
+            <a:Else ifTrue="$displayedDocIsSample"/>
+                <a:IncludeComponent name="$displayedDoc.className"/>
+            <a:Else/>
+                <pre class="prettyprint"><a:String value='$contentsToDisplay'/></pre>
+                <a:ClientSideScript>prettyPrint()</a:ClientSideScript>
+            </a:If>
+        </td></tr></table>
+        </div>
+    </a:If>
+</a:Block>

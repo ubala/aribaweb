@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright Craig Federighi
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -14,9 +14,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    (Some contents derived from a parallel Apache Lucene file, also licenced
-     under the same license)
-
     $Id:  $
  -->
 
@@ -28,11 +25,9 @@
 
     <property name="src.resource.path" value=""/>
 
-    <condition property="make.common.dir" value="${basedir}/../ui/opensourceui/build-support/">
-        <available file="${basedir}/../ui/opensourceui/build-support/"/>
-    </condition>
-    <property name="make.common.dir" location="../build-support"/>
-    <import file="${make.common.dir}/module-build.xml"/>
+    <property environment="env"/>
+    <property name="aw.home" location="${env.AW_HOME}"/>
+    <import file="${aw.home}/tools/build-module.xml"/>
 
     <!-- JavaCC our grammar file -->
     <property name="src.jj.path" value="ariba/ui/meta/core/Parser.jj"/>

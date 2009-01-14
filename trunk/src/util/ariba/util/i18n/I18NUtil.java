@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/i18n/I18NUtil.java#14 $
+    $Id: //ariba/platform/util/core/ariba/util/i18n/I18NUtil.java#15 $
 */
 
 package ariba.util.i18n;
@@ -337,7 +337,7 @@ public class I18NUtil
 
         @param language locale language
         @param country  locale country
-        @param variant  locale variant
+        @param localeVariant  locale variant
         @return a new Locale object for the given <B>language</B>, <B>country</B>,
             and <B>variant</B> strings.
         @aribaapi private

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDefaultClassLoader.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDefaultClassLoader.java#7 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -24,41 +24,6 @@ import java.io.File;
     This default class loader is used in production environments.  It is optimized
     for performance, not for rapid turnaround.
 */
-public final class AWDefaultClassLoader implements AWClassLoader
+public final class AWDefaultClassLoader extends AWClassLoader
 {
-    public Class getClass (String className) throws ClassNotFoundException
-    {
-        return ClassUtil.classForName(className, false);
-    }
-
-    public boolean isReloadable (String name)
-    {
-        return false; 
-    }
-
-    public String getComponentNameForClass (String className)
-    {
-        return className;
-    }
-        
-    /**
-        By default, don't compile
-    */
-    public boolean compile (Class cls, AWResource source)
-    {
-        return false;
-    }
-
-    public void checkForUpdates ()
-    {
-        // ignore
-    }
-    
-    /*
-        Return the File containing this class, or null if it cannot be found.
-    */
-    public File getClassFile (String className)
-    {
-        return null;
-    }
 }

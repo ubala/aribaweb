@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!--
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    $Id:  $
+ -->
+<project name="build-commands" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+    <description>
+        Build file for running aw commands
+    </description>
+
+    <import file="build-common.xml"/>
+
+    <target name="help">
+        <echo message="Help for AW commands:"/>
+        <echo message="    create-project"/>
+        <echo message="        Create a new AribaWeb project"/>
+        <echo message=""/>
+        <echo message="    help"/>
+        <echo message="        Display this message"/>
+        <echo message=""/>
+    </target>
+
+    <target name="create-project">
+        <!--
+        <pathconvert refid="classpath" property="classpath.string"/>
+        <echo message="Launching ${aw.home}/bin/createProject.groovy with classpath: ${classpath.string}"/>
+        -->
+        <groovy src="${aw.home}/bin/createProject.groovy" classpathref="classpath">
+            <arg value="${tools.dir}/templates"/>
+        </groovy>
+    </target>
+
+    <property name="greeting" value="This is a greeting from Ant!"/>
+    <target name="greeting">
+        <echo message="In greeting -- launching groovy..."/>
+        <groovy>
+            System.out.println "You can't stop me!"
+            def input = new Scanner(System.in)
+            ant.echo "An ant log..."
+            print "How old are you? "
+            println "${properties.greeting} -- In 10 years you will be ${input.nextInt() + 10}"
+        </groovy>
+    </target>
+
+</project>

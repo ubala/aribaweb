@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateCore.java#11 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateCore.java#12 $
 */
 
 package ariba.util.core;
@@ -234,6 +234,7 @@ public abstract class PerformanceStateCore
     
     /**
        the real data bearing instance
+       @aribaapi ariba
      */ 
     public static class Instance
     {        
@@ -340,6 +341,9 @@ public abstract class PerformanceStateCore
         }
     }
 
+    /**
+     * @aribaapi ariba
+     */
     public static class EventDetail
     {
         public static String getType (String type)
@@ -370,6 +374,9 @@ public abstract class PerformanceStateCore
         }
     }
     
+    /**
+     * @aribaapi ariba
+     */
     public interface MetricObserver
     {
         public void clear ();

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#44 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#47 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -57,6 +57,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.io.FileFilter;
 import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.util.BitSet;
@@ -91,7 +92,7 @@ public final class AWUtil extends AWBaseObject
     private static AWSizeLimitedHashtable HtmlEscapedStrings = new AWSizeLimitedHashtable(512);
     private static AWSizeLimitedHashtable HtmlUnsafeEscapedStrings = new AWSizeLimitedHashtable(512);
     private static GrowOnlyHashtable EncodedHtmlAttributes = new GrowOnlyHashtable();
-    private static AWClassLoader TheClassLoader = new AWDefaultClassLoader();
+    private static AWClassLoader TheClassLoader = new AWClassLoader();
     private static Map _environment = null;
     public static final char BeginQueryChar = '?';
     public static final String TokenizerDelim ="&";
@@ -108,6 +109,7 @@ public final class AWUtil extends AWBaseObject
 
     public synchronized static void setClassLoader (AWClassLoader loader)
     {
+        if (TheClassLoader != null) loader.setChainedClassLoader(TheClassLoader);
         TheClassLoader = loader;
     }
 
@@ -1540,6 +1542,36 @@ public final class AWUtil extends AWBaseObject
     {
         File directory = new File(directoryName);
         return filesWithExtension(directory, fileExtension);
+    }
+
+    public interface FileProcessor
+    {
+        void process (File file);
+    }
+
+    public static void eachFile (File dir, FileFilter filter, FileProcessor callback)
+    {
+        if (dir == null) return;
+
+        try {
+            if (!dir.isDirectory()) return;
+
+            File[] list = dir.listFiles(filter);
+            if (list != null) {
+                for (int i=0; i<list.length; ++i) {
+                    File file = list[i];
+                    if (!file.isDirectory()) {
+                        callback.process(file);
+                    }
+                    else {
+                        eachFile(file, filter, callback);
+                    }
+                }
+            }
+        }
+        catch (SecurityException se) {
+            // ignore
+        }
     }
 
     public static String lastComponent (String delimitedString, String separatorString)

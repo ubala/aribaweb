@@ -1,0 +1,65 @@
+<a:If notEqualNull="$api">
+    <h2>&lt;<a:String value="$title"/>&gt;</h2>
+    <w:Markdown value="$api.overview.bareStringContent"/>
+
+    <!-- ========= BINDING LIST ========= -->
+    <table width="100%" cellspacing="0" cellpadding="3" border="1" summary="">
+        <tr bgcolor="#ccccff" class="TableHeadingColor">
+            <th align="left" colspan="4"><font size="+2">
+                <b>Bindings</b></font></th>
+        </tr>
+        <a:For item="$currentBinding" list="$api.bindingApis">
+            <tr bgcolor="white" class="TableRowColor">
+                <td width="1%"><code><b>$currentBinding.key</b></code>
+                    <a:If ifTrue="$currentBinding.isRequired">*</a:If>
+                </td>
+                <td width="98%"><w:Markdown value="$currentBinding.description"/></td>
+                <td width="1%">\
+                    $currentBinding.typeString<br/>
+                    ($currentBinding.directionString)
+                </td>
+            </tr>
+        </a:For>
+    </table>
+
+    <a:If condition="$api.contentApis.size">
+        <p/>
+        <table width="100%" cellspacing="0" cellpadding="3" border="1" summary="">
+            <tr bgcolor="#ccccff" class="TableHeadingColor">
+                <th align="left" colspan="2"><font size="+2">
+                    <b>Named Content</b></font></th>
+            </tr>
+            <a:For item="$currentContent" list="$api.contentApis">
+                <tr bgcolor="white" class="TableRowColor">
+                    <td><code><b>$currentContent.name</b></code></td>
+                    <td><w:Markdown value="$currentContent.description"/></td>
+                </tr>
+            </a:For>
+        </table>
+    </a:If>
+
+</a:If>
+<!---
+<a:If notEqualNull="$empiricalApiTable">
+    <t:DataTable title="Empirical API" multiSelect="$false"
+                  batchSize="20" valign="middle"
+                  list="$empiricalApiBindingList"
+                  showOptionsMenu="$false"
+                  showBatchNavigation="$false">
+        <t:Column key="bindingName" label="Binding Name" align="left"/>
+        <t:Column key="printReferencedBy" label="Referenced By" align="left"/>
+    </t:DataTable>
+
+    <a:For list="$empiricalApiBindingList" item="$dict.currentItem" >
+        &lt;Binding key="$dict.currentItem.bindingName" direction="get" type="??" required="\$false"&gt;
+        <br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        TBD
+        <br/>
+        &lt;/Binding&gt;
+        <br/>
+        <br/>
+    </a:For>
+
+</a:If>
+-->

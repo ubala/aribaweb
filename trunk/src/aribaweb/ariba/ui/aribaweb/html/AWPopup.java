@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#50 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#51 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -202,7 +202,6 @@ public class AWPopup extends AWComponent
      * should behave like a Popupmenu item (ie AWHyperlink semantics).  The new mode
      * of operation approximates that better, and avoids many problems where
      * UI control flow and binding api's are broken by changes during takeValues.
-     * @return
      */
     protected boolean shouldDeferTakeValues ()
     {

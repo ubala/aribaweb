@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/BindingNames.java#34 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/BindingNames.java#35 $
 */
 
 package ariba.ui.table;
@@ -58,6 +58,8 @@ public final class BindingNames extends ariba.ui.widgets.BindingNames
     public static final String isOptional = "isOptional";
     public static final String isValueColumn = "isValueColumn";
     public static final String nowrap = "nowrap";
+    public static final String tableBodyCollapsible = "tableBodyCollapsible";
+    public static final String initialTableBodyExpanded = "initialTableBodyExpanded";
 
     public static final String layout = "layout";
     public static final String useXMLFieldPath = "useXMLFieldPath";

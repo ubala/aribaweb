@@ -1,0 +1,29 @@
+<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
+<idea-plugin url="">
+   <name>AribaPlugin</name>
+
+   <description>
+
+   </description>
+
+   <version>1.2</version>
+
+   <vendor url="" email="">Ariba Web Developement Framework</vendor>
+
+   <idea-version since-build="3000"/>
+   <project-components>
+       <component>
+           <implementation-class>ariba.ideplugin.idea.RemoteOpenComponent</implementation-class>
+       </component>
+   </project-components>
+
+    <actions>
+        <action id="Aribaweb.Plugin.GotoComponent" class="ariba.ideplugin.idea.GotoComponent" text="goto _awl" description="Goto AWL file">
+            <keyboard-shortcut first-keystroke="alt B" keymap="$default" />
+         </action>
+         <action id="Aribaweb.Plugin.ToggleAction" class="ariba.ideplugin.idea.ToggleAction" text="Toggle _awl" description="Toggle AWL et Java file">
+            <keyboard-shortcut first-keystroke="alt A" keymap="$default" />
+         </action>
+    </actions>
+
+</idea-plugin>

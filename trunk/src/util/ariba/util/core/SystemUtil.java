@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/SystemUtil.java#34 $
+    $Id: //ariba/platform/util/core/ariba/util/core/SystemUtil.java#35 $
 */
 
 package ariba.util.core;
@@ -1289,7 +1289,7 @@ public final class SystemUtil
      This is a low level check needed for internal testing.
      Where possible clients should use the higher level isProduction
      method defined in ServerInterface.
-     @ return true if development, false if production
+     @return true if development, false if production
      @aribaapi ariba
      @see ariba.util.core.ServerInterface#isProduction()
     */

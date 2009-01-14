@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSessionStatusManager.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSessionStatusManager.java#5 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -35,9 +35,6 @@ public class AWSessionStatusManager
         _sessionStatusTable = initSessionStatusTable();
     }
 
-    /**
-     * @return
-     */
     protected GrowOnlyHashtable initSessionStatusTable ()
     {
         // Dummy implementation, just used to convert from GrowOnlyHash to Map
@@ -47,7 +44,7 @@ public class AWSessionStatusManager
     }
 
     /**
-     * @return
+     * @return map of maps keyed by session instance
      * @aribaapi private
      */
     public GrowOnlyHashtable getSessionStatusTable ()
@@ -67,6 +64,7 @@ public class AWSessionStatusManager
     {
         return (Map)_sessionStatusTable.get(this);
     }
+
     protected void trackSessionConnect (AWSession session)
     {
         getSessionMap().put(session, "connected");

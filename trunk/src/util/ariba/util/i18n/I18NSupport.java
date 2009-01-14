@@ -55,7 +55,6 @@ public class I18NSupport
     /**
         Returns the file encoding string for the specified locale
 
-        @param locale the locale to get the encoding string of
         @return the encoding string
         @aribaapi documented
     */

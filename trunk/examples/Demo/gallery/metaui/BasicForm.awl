@@ -1,0 +1,25 @@
+<w:BasicPageWrapper hasForm="$true">
+    <w:FormTable showErrorFlags="$true">
+        <w:FormRow label="Title" errorFieldPath="project.title">
+            <a:TextField value="$project.title"/>
+        </w:FormRow>
+        <w:FormRow label="Deals">
+            <a:String value="$project.deals.size"/>
+        </w:FormRow>
+        <w:FormRow label="Team Members">
+            <w:GenericChooser object="$project" key="team" displayKey="name" multiSelect="$true"
+                              type="Chooser" destinationClass="busobj.User"/>
+        </w:FormRow>
+        <w:FormRow label="Deadline">
+            <a:TextField value="$project.deadline" formatter="$formatters.shortDate"/>
+                (<a:String value="$project.deadline" formatter="$formatters.longDate"/>)
+        </w:FormRow>
+        <w:FormRow label="Status">
+            <w:GenericChooser object="$project" key="status" displayKey="name"
+                              type="Chooser" destinationClass="busobj.Project$Status"/>
+        </w:FormRow>
+    </w:FormTable>
+    <br/>
+    <br/>
+    <w:TextButton action="$submit">Submit</w:TextButton>
+</w:BasicPageWrapper>

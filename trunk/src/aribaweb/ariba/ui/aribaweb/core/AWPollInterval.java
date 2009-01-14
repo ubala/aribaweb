@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPollInterval.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPollInterval.java#10 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -32,7 +32,6 @@ public class AWPollInterval extends AWComponent
      * So if there are any possibly active AWChangeNotifiers or if Notification is enabled
      * then render the AWPollInterval for possible use.
      * @aribaapi private
-     * @return
      */
     public boolean requiresChangeUpdate ()
     {
@@ -42,7 +41,6 @@ public class AWPollInterval extends AWComponent
     /**
      * Initiate the AWPollInterval on this page based on the flag in AWPage -- actually
      * kicks off the polling.
-     * @return
      */
     public boolean getInitiatePolling ()
     {

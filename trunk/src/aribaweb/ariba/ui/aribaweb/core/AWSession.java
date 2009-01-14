@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#75 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#76 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -932,7 +932,6 @@ public class AWSession extends AWBaseObject
     /**
      * session timeout in seconds
      * Note: this method can be called from an asynchronous non-UI thread
-     * @return
      */
     public final int getTimeout ()
     {
@@ -1006,7 +1005,6 @@ public class AWSession extends AWBaseObject
 
     /**
      * Note: this method can be called from an asynchronous non-UI thread
-     * @return
      * @aribaapi private
      */
     protected String debugIdentifier ()
@@ -1016,7 +1014,6 @@ public class AWSession extends AWBaseObject
 
     /**
      * Note: this method can be called from an asynchronous non-UI thread
-     * @return
      * @aribaapi private
      */
     public String debugDisconnectString ()

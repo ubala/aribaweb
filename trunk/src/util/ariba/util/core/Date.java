@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#27 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#28 $
 */
 
 package ariba.util.core;
@@ -589,7 +589,7 @@ public class Date extends java.util.Date implements Externalizable
         that might call this deprecated method will still get a reasonable
         implementation.
 
-        @deprecated, replaced by <code>toGMT</code>
+        @deprecated  replaced by <code>toGMT</code>
         @aribaapi private
     */
     public String toGMTString ()
@@ -743,7 +743,7 @@ public class Date extends java.util.Date implements Externalizable
     /*-- Time Zone ----------------------------------------------------------*/
 
     /**
-        @deprecated, replaced by <code>timezoneOffset</code>
+        @deprecated  replaced by <code>timezoneOffset</code>
         @aribaapi private
     */
     public int getTimezoneOffset ()
@@ -958,7 +958,7 @@ public class Date extends java.util.Date implements Externalizable
     /*-- Year ---------------------------------------------------------------*/
 
     /**
-        @deprecated, replaced by <code>static getYear</code>
+        @deprecated  replaced by <code>static getYear</code>
         @aribaapi private
     */
     public int getYear ()
@@ -968,7 +968,7 @@ public class Date extends java.util.Date implements Externalizable
     }
 
     /**
-        @deprecated, replaced by <code>static setYear(Date, int)</code>
+        @deprecated  replaced by <code>static setYear(Date, int)</code>
         @aribaapi private
     */
     public void setYear (int year)
@@ -1046,7 +1046,7 @@ public class Date extends java.util.Date implements Externalizable
     /*-- Month --------------------------------------------------------------*/
 
     /**
-        @deprecated, replaced by <code>static getMonth</code>
+        @deprecated  replaced by <code>static getMonth</code>
         @aribaapi private
     */
     public int getMonth ()
@@ -1055,7 +1055,7 @@ public class Date extends java.util.Date implements Externalizable
     }
 
     /**
-        @deprecated, replaced by <code>static setMonth(Date, int)</code>
+        @deprecated  replaced by <code>static setMonth(Date, int)</code>
         @aribaapi private
     */
     public void setMonth (int month)
@@ -1120,7 +1120,7 @@ public class Date extends java.util.Date implements Externalizable
     /*-- Day Of Month (Date) ------------------------------------------------*/
 
     /**
-        @deprecated, replaced by <code>static getDayOfMonth</code>
+        @deprecated  replaced by <code>static getDayOfMonth</code>
         @aribaapi private
     */
     public int getDate ()
@@ -1129,7 +1129,7 @@ public class Date extends java.util.Date implements Externalizable
     }
 
     /**
-        @deprecated, replaced by <code>static setDayOfMonth(Date, int)</code>
+        @deprecated  replaced by <code>static setDayOfMonth(Date, int)</code>
         @aribaapi private
     */
     public void setDate (int date)
@@ -1197,7 +1197,7 @@ public class Date extends java.util.Date implements Externalizable
     /*-- Day Of Week (Day) --------------------------------------------------*/
 
     /**
-        @deprecated, replaced by <code>static getDayOfWeek</code>
+        @deprecated  replaced by <code>static getDayOfWeek</code>
         @aribaapi private
     */
     public int getDay ()
@@ -1206,7 +1206,7 @@ public class Date extends java.util.Date implements Externalizable
     }
 
     /**
-        @deprecated, replaced by <code>static setDayOfWeek(Date, int)</code>
+        @deprecated  replaced by <code>static setDayOfWeek(Date, int)</code>
         @aribaapi private
     */
     public void setDay (int day)
@@ -1284,7 +1284,7 @@ public class Date extends java.util.Date implements Externalizable
     /*-- Hours --------------------------------------------------------------*/
 
     /**
-        @deprecated, replaced by <code>static getHours</code>
+        @deprecated  replaced by <code>static getHours</code>
         @aribaapi private
     */
     public int getHours ()
@@ -1293,7 +1293,7 @@ public class Date extends java.util.Date implements Externalizable
     }
 
     /**
-        @deprecated, replaced by <code>static setHours(Date, int)</code>
+        @deprecated  replaced by <code>static setHours(Date, int)</code>
         @aribaapi private
     */
     public void setHours (int hours)
@@ -1352,7 +1352,7 @@ public class Date extends java.util.Date implements Externalizable
     /*-- Hours --------------------------------------------------------------*/
 
     /**
-        @deprecated, replaced by <code>static getMinutes</code>
+        @deprecated  replaced by <code>static getMinutes</code>
         @aribaapi private
     */
     public int getMinutes ()
@@ -1361,7 +1361,7 @@ public class Date extends java.util.Date implements Externalizable
     }
 
     /**
-        @deprecated, replaced by <code>static setMinutes(Date, int)</code>
+        @deprecated  replaced by <code>static setMinutes(Date, int)</code>
         @aribaapi private
     */
     public void setMinutes (int minutes)
@@ -1408,7 +1408,7 @@ public class Date extends java.util.Date implements Externalizable
     /*-- Hours --------------------------------------------------------------*/
 
     /**
-        @deprecated, replaced by <code>static getSeconds</code>
+        @deprecated  replaced by <code>static getSeconds</code>
         @aribaapi private
     */
     public int getSeconds ()
@@ -1417,7 +1417,7 @@ public class Date extends java.util.Date implements Externalizable
     }
 
     /**
-        @deprecated, replaced by <code>static setSeconds(Date, int)</code>
+        @deprecated  replaced by <code>static setSeconds(Date, int)</code>
         @aribaapi private
     */
     public void setSeconds (int seconds)

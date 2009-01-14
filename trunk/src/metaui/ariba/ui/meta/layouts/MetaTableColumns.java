@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumns.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumns.java#2 $
 */
 package ariba.ui.meta.layouts;
 
@@ -26,10 +26,10 @@ import ariba.ui.meta.core.Context;
 /**
  * This class is used inside an AWTDataTable to cause meta-data-specified
  *  columns to be inserted in its place in the table.
- * e.g.    <AWTDataTable ...>
- *              <AWTColumn  > some normal column </AWTColumn>
+ * e.g.    <AWTDataTable>
+ *              <AWTColumn> some normal column </AWTColumn>
  *
- *              <MetaTableColumns/>     <--- columns from meta data inserted here
+ *              <MetaTableColumns/>     ... columns from meta data inserted here
  *
  *              <AWTColumn> some other column </AWTColumn>
  *         </AWTDataTable>

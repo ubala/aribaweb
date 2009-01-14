@@ -2,52 +2,52 @@
 <!DOCTYPE cXML SYSTEM "http://xml.cXML.org/schemas/cXML/1.2.014/cXML.dtd">
 <cXML payloadID="456778-198@premier.workchairs.com"
       xml:lang="en-US" timestamp="1999-03-12T18:39:09-08:00">
-    <w:Header>
-        <w:From>
+    <Header>
+        <From>
             <a:For list="$posr.Header.To.Credential[]" item="$item">
-                <w:Credential domain="$item.domain">
-                    <w:Identity>$item.Identity.text</w:Identity>
-                </w:Credential>
+                <Credential domain="$item.domain">
+                    <Identity>$item.Identity.text</Identity>
+                </Credential>
             </a:For>
-        </w:From>
-        <w:To>
-            <w:Credential domain="AribaNetworkUserId">
-                <w:Identity>$posr.Header.From.Credential.Identity.text</w:Identity>
-            </w:Credential>
-        </w:To>
-        <w:Sender>
+        </From>
+        <To>
+            <Credential domain="AribaNetworkUserId">
+                <Identity>$posr.Header.From.Credential.Identity.text</Identity>
+            </Credential>
+        </To>
+        <Sender>
             <a:For list="$posr.Header.To.Credential[]" item="$item">
-                <w:Credential domain="$item.domain">
-                    <w:Identity>$item.Identity.text</w:Identity>
-                </w:Credential>
+                <Credential domain="$item.domain">
+                    <Identity>$item.Identity.text</Identity>
+                </Credential>
             </a:For>
-            <w:UserAgent>Workchairs cXML V1.1</w:UserAgent>
-        </w:Sender>
-    </w:Header>
-    <w:Message>
-        <w:PunchOutOrderMessage>
-            <w:BuyerCookie>$posr.Request.PunchOutSetupRequest.BuyerCookie.text</w:BuyerCookie>
-            <w:PunchOutOrderMessageHeader operationAllowed="edit">
-                <w:Total>
-                    <w:Money currency="USD">100.23</w:Money>
-                </w:Total>
-            </w:PunchOutOrderMessageHeader>
-            <w:ItemIn quantity="$quantity">
-                <w:ItemID>
-                    <w:SupplierPartID>$posr.Request.PunchOutSetupRequest.SelectedItem.ItemID.SupplierPartID.text</w:SupplierPartID>
-                    <w:SupplierPartAuxiliaryID>$posr.Request.PunchOutSetupRequest.SelectedItem.ItemID.SupplierPartAuxiliaryID.text</w:SupplierPartAuxiliaryID>
-                </w:ItemID>
-                <w:ItemDetail>
-                    <w:UnitPrice>
-                        <w:Money currency="USD">$price</w:Money>
-                    </w:UnitPrice>AWXRC
-                    <w:Description xml:lang="en">$description</w:Description>
-                    <w:UnitOfMeasure>EA</w:UnitOfMeasure>
-                    <w:Classification domain="UNSPSC">43171803</w:Classification>
-                    <w:ManufacturerPartID>$mfgPartId</w:ManufacturerPartID>
-                    <w:ManufacturerName>$mfgName</w:ManufacturerName>
-                </w:ItemDetail>
-            </w:ItemIn>
-        </w:PunchOutOrderMessage>
-    </w:Message>
+            <UserAgent>Workchairs cXML V1.1</UserAgent>
+        </Sender>
+    </Header>
+    <Message>
+        <PunchOutOrderMessage>
+            <BuyerCookie>$posr.Request.PunchOutSetupRequest.BuyerCookie.text</BuyerCookie>
+            <PunchOutOrderMessageHeader operationAllowed="edit">
+                <Total>
+                    <Money currency="USD">100.23</Money>
+                </Total>
+            </PunchOutOrderMessageHeader>
+            <ItemIn quantity="$quantity">
+                <ItemID>
+                    <SupplierPartID>$posr.Request.PunchOutSetupRequest.SelectedItem.ItemID.SupplierPartID.text</SupplierPartID>
+                    <SupplierPartAuxiliaryID>$posr.Request.PunchOutSetupRequest.SelectedItem.ItemID.SupplierPartAuxiliaryID.text</SupplierPartAuxiliaryID>
+                </ItemID>
+                <ItemDetail>
+                    <UnitPrice>
+                        <Money currency="USD">$price</Money>
+                    </UnitPrice>AWXRC
+                    <Description xml:lang="en">$description</Description>
+                    <UnitOfMeasure>EA</UnitOfMeasure>
+                    <Classification domain="UNSPSC">43171803</Classification>
+                    <ManufacturerPartID>$mfgPartId</ManufacturerPartID>
+                    <ManufacturerName>$mfgName</ManufacturerName>
+                </ItemDetail>
+            </ItemIn>
+        </PunchOutOrderMessage>
+    </Message>
 </cXML>

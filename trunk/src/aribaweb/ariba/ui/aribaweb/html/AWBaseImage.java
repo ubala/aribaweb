@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBaseImage.java#22 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBaseImage.java#23 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -235,6 +235,15 @@ abstract public class AWBaseImage extends AWComponent
             }
         }
         return height;
+    }
+
+    public String alt ()
+    {
+        String alt = stringValueForBinding(_altBinding);
+        if (alt == null) {
+            alt = stringValueForBinding(_titleBinding);
+        }
+        return alt == null ? "" : alt;
     }
 
     private boolean useFullUrl ()

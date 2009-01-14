@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBase64.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBase64.java#6 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -121,9 +121,8 @@ public class AWBase64 extends AWBaseObject
 
     /**
      *
-     * @param longValue: a 32-bit value to be Base64 encoded.  We use long here to avoid
+     * @param longValue a 32-bit value to be Base64 encoded.  We use long here to avoid
      * issues with negative values.
-     * @return
      */
     public static String base64EncodeLong (long longValue)
     {
@@ -145,7 +144,6 @@ public class AWBase64 extends AWBaseObject
      *
      * @param encodedString
      * @param startPos this allows for a prefix ont he encodedString.  All elementIds start with '_'
-     * @return
      */
     public static long base64DecodeLong (String encodedString, int startPos)
     {

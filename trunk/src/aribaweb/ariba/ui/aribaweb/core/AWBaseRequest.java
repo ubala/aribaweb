@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#63 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#64 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -76,6 +76,7 @@ abstract public class AWBaseRequest extends AWBaseObject
     private AWEncodedString _responseId;
     private String _requestId;
     private String _sessionId;
+    private String _sessionSecureId;    
     private AWEncodedString _frameName;
     private boolean _isSessionRendevous = false;
     private String _contentType;
@@ -121,6 +122,7 @@ abstract public class AWBaseRequest extends AWBaseObject
         else {
             _requestId = AWBaseRequest.InitialRequestId;
         }
+        _sessionSecureId = formValueForKey(AWRequestContext.SessionSecureIdKey, false);
 
         //check for explicit session rendevous -- used to signal that the session
         // should not be explicitly terminated (see AWServletRequest.verifySessionIsValid)
@@ -494,6 +496,11 @@ abstract public class AWBaseRequest extends AWBaseObject
     public String sessionId ()
     {
         return _sessionId;
+    }
+
+    public String sessionSecureId ()
+    {
+        return _sessionSecureId;
     }
 
     public AWEncodedString frameName ()

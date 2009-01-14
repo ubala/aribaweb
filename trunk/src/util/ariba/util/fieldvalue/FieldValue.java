@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue.java#3 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue.java#4 $
 */
 
 package ariba.util.fieldvalue;
@@ -78,7 +78,7 @@ abstract public class FieldValue extends ClassExtension
     subclass will have its own classExtension implementation.  See ClassExtensionRegistry
     for details on this.
 
-    @param target the object for which a classExtension applies
+    @param targetClass the class for which a classExtension applies
     @return the classExtension which applies for the target
     */
     public static FieldValue get (Class targetClass)
@@ -99,7 +99,6 @@ abstract public class FieldValue extends ClassExtension
     @param fieldPathString the dotted fieldPath String from which a shared FieldPath
     instance will be obtained
     @param value see the FieldPath version of this method
-    @return see the FieldPath version of this method
     */
     public static void setFieldValue (Object target,
         String fieldPathString, Object value)
@@ -113,7 +112,7 @@ abstract public class FieldValue extends ClassExtension
     shared FieldPaths) and calls getFieldValue(FieldPath).
 
     @param target see the FieldPath version of this method
-    @param fieldName the dotted fieldPath String from which a shared FieldPath
+    @param fieldPathString the dotted fieldPath String from which a shared FieldPath
     instance will be obtained
     @return see the FieldPath version of this method
     */
@@ -161,7 +160,7 @@ abstract public class FieldValue extends ClassExtension
 
     @param target the object on which the value will be set for the field identiifed by
      fieldPath
-    @param the fieldPath node (which contains a candidate accessor) to be
+    @param fieldPath the fieldPath node (which contains a candidate accessor) to be
     used to set the value on target.
     @param value the value to set on the target
     */

@@ -916,7 +916,7 @@ ariba.Dom = function() {
             registerOverlayIframe : function (iframe)
             {
                 if (!AWOverlayIframeList) {
-                    AWOverlayIframeList = new Array();
+                    AWOverlayIframeList = new Object();
                 }
                 AWOverlayIframeList[iframe.id] = iframe;
             },

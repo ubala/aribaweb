@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Hashtable.java#17 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Hashtable.java#18 $
 */
 
 package ariba.util.core;
@@ -980,7 +980,7 @@ public class Hashtable extends AbstractMap
         @serialData iterates through entries, calling writeObject() on each key
                     followed by each value
 
-        @param out the stream to write the object to
+        @param output the stream to write the object to
         @exception IOException Includes any I/O exceptions that may occur
         @aribaapi private
     */
@@ -1005,7 +1005,7 @@ public class Hashtable extends AbstractMap
         Implementation of Externalizable interface.  Reads the contents into
         this Hashtable.
 
-        @param in the stream to read data from in order to restore the object
+        @param input the stream to read data from in order to restore the object
         @exception IOException if I/O errors occur
         @exception ClassNotFoundException If the class for an object being
                      restored cannot be found.

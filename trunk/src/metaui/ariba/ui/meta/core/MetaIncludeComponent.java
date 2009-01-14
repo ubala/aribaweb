@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaIncludeComponent.java#5 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaIncludeComponent.java#6 $
 */
 package ariba.ui.meta.core;
 
@@ -23,6 +23,8 @@ import ariba.ui.aribaweb.core.AWElement;
 import ariba.ui.aribaweb.core.AWIncludeComponent;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWElementIdPath;
+import ariba.ui.aribaweb.core.AWApplication;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.util.core.Assert;
 import ariba.util.core.Fmt;
@@ -59,6 +61,12 @@ public class MetaIncludeComponent extends AWIncludeComponent
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
+        // if in debugTracing mode, push context info
+        if (requestContext.componentPathDebuggingEnabled()) {
+            Context context = MetaContext.currentContext(component);
+            requestContext.debugTrace().pushMetadata(null, context.debugTracePropertyProvider(), true);
+        }
+
         try {
             super.renderResponse(requestContext, component);
         }
@@ -68,6 +76,19 @@ public class MetaIncludeComponent extends AWIncludeComponent
                     e);
         }
     }
+
+    public AWResponseGenerating invokeAction(AWRequestContext requestContext, AWComponent component)
+    {
+        AWResponseGenerating actionResults =  super.invokeAction(requestContext, component);
+
+        // ComponentPath inspection
+        if (actionResults != null && requestContext.isPathDebugRequest()) {
+            Context context = MetaContext.currentContext(component);
+            requestContext.debugTrace().pushMetadata(null, context.debugTracePropertyProvider(), true);
+        }
+
+        return actionResults;
+    }    
 
     protected String componentName (AWComponent component)
     {

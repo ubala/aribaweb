@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.java#24 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.java#25 $
 */
 
 package ariba.ui.table;
@@ -59,7 +59,8 @@ public final class AWTScrollTableWrapper extends AWComponent
         boolean isAccessibilityEnabled =
             session != null ? session.isAccessibilityEnabled() : false;
         // IE 6.0+ and anything else (assume Firefox)
-        return (!request.isBrowserMicrosoft() || !request.isBrowserIE55())
+        return request != null
+                    && (!request.isBrowserMicrosoft() || !request.isBrowserIE55())
                     && !isAccessibilityEnabled
                     && !requestContext.isPrintMode();
     }

@@ -1,0 +1,64 @@
+<w:HintMessage>
+    Example of Meta-Data derived form UI.  <b>Use the "Operation" menu below</b> to see how
+    contextual meta-data yields diffent results as context is changed. Try clicking
+    Save to see how the validation framework comes into play.
+</w:HintMessage>
+
+Operation:
+<w:GenericChooser list='${["create", "edit", "view"]}' key="op" type="Popup" action="$null"/>
+<hr/>
+
+<m:Context operation="$op">
+    <m:Rules>
+        /*
+            Custom OSS rules specific to this page
+            More rules come in from busobj/rules.oss, and from annotations on the Java classes
+        */
+        class=busobj.User {
+            /* Use a custom AWXRatingBar component for the "rating" field and put it at the top */
+            field=rating {
+                editable=false {component:AWXRatingBar;}
+                editable {
+                    bindings:{isRefresh:true}
+                    cueTip:"Try changing this to values above and below 50 -- notice how the 'bio' field editability changes!";
+                }
+                after:zTop;
+            }
+
+            /* Custom layout directives for email and phone: put in Right Zone ... */
+            field=(email, password) { after:zRight }
+            field=phoneNumber {after:email }
+            field=bio { after:zBottom }
+
+            operation=create {
+                /* Hide all fields other than firstName, lastName, email, and birthday */
+                field { after:zNone; }
+                field=(firstName, lastName) { after:zLeft }
+                field=(email, birthDay) { after:zRight }
+            }
+
+            /* Change them contextually... (when viewing) */
+            operation=view {
+                field=accountStatus { after:phoneNumber }
+                field=permissions { after:accountStatus }
+            }
+
+            field=accountStatus {
+                /* Tell the GenericChooser for this enum field to render as a PopupControl */
+                editable { bindings:{ type:PopupControl } }
+            }
+        }
+    </m:Rules>
+
+    <a:If ifTrue="$metaContext.properties.editing">
+        <div style="float:right">
+            <w:TextButton action="$save">Save</w:TextButton>
+        </div>
+    </a:If>
+    <m:Context object="$user" layout="Inspect">
+        <!-- The whole from comes from THIS!  The bindings (i.e. user, operation)
+             in its containing context dictate what gets generated here -->
+        <!--<pre>$metaContext.debugString</pre>-->
+        <m:IncludeComponent/>
+    </m:Context>
+</m:Context>

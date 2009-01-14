@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentApiManager.java#12 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentApiManager.java#13 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -192,7 +192,8 @@ public class AWComponentApiManager extends AWBaseObject
     public synchronized void addMissingAWApi (AWComponentDefinition componentDefinition)
     {
         String componentName = componentName(componentDefinition);
-        String packageName = componentDefinition.componentClass().getPackage().getName();
+        Package pkg = componentDefinition.componentClass().getPackage();
+        String packageName = (pkg != null) ? pkg.getName() : "unpackaged";
 
         List componentList = getMissingComponentApiList(packageName);
         if (!componentList.contains(componentName)) {

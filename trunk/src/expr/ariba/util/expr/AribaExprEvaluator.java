@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/AribaExprEvaluator.java#21 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/AribaExprEvaluator.java#22 $
 */
 package ariba.util.expr;
 
@@ -379,7 +379,7 @@ public class AribaExprEvaluator extends ExpressionEvaluator
          * returned is ordered based on the position of the element in the
          * path.  A path element can be a field or a method.  
          * @param path
-         * @return
+         * @return list of records
          */
         public List getSemanticRecordsInPath (String path)
         {

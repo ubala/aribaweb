@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuButton.awl#20 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuButton.awl#21 $
     </Copyright>
 
     <Overview>
@@ -23,24 +23,25 @@
 
         If the menuId binding is not defined, then the AWTOptionsMenuButton will
         automatically include the default AWTOptionMenuItems.
-        <t:HeadingArea>
-            <w:SectionHeading title="Title">
-                <t:OptionsMenuButton showOutlineExpansion="$false"/>
-            </w:SectionHeading>
-        </t:HeadingArea>
+
+                <t:HeadingArea>
+                    <w:SectionHeading title="Title">
+                        <t:OptionsMenuButton showOutlineExpansion="$false"/>
+                    </w:SectionHeading>
+                </t:HeadingArea>
 
         Alternatively, the menuId binding can be defined to provide an customized
         popup menu.
 
-        <t:HeadingArea>
-            <w:SectionHeading title="Title">
-                <t:OptionsMenuButton menuId="myMenu"/>
-            </w:SectionHeading>
-            <w:PopupMenu menuId="myMenu">
-                <w:PopupMenuItem action="$action">Custom menu item</w:PopupMenuItem>
-                <t:OptionsMenuItems/>\
-            </w:PopupMenu>
-        </t:HeadingArea>
+                <t:HeadingArea>
+                    <w:SectionHeading title="Title">
+                        <t:OptionsMenuButton menuId="myMenu"/>
+                    </w:SectionHeading>
+                    <w:PopupMenu menuId="myMenu">
+                        <w:PopupMenuItem action="$action">Custom menu item</w:PopupMenuItem>
+                        <t:OptionsMenuItems/>\
+                    </w:PopupMenu>
+                </t:HeadingArea>
 
     </Overview>
 

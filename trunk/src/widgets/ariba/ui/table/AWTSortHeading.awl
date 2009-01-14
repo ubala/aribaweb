@@ -13,17 +13,18 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTSortHeading.awl#12 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTSortHeading.awl#13 $
     </Copyright>
 
     <Overview>
-        \<t:SortHeading caseSensitiveSort="$caseSensitiveSort"
-                        disabled="$disableSort"
-                        displayGroup="$displayGroup"
-                        key="$sortKey"
-                        submitForm="$submitForm">
-            Heading Label
-        \</t:SortHeading>
+        Example:
+            <t:SortHeading caseSensitiveSort="$caseSensitiveSort"
+                           disabled="$disableSort"
+                           displayGroup="$displayGroup"
+                           key="$sortKey"
+                           submitForm="$submitForm">
+                Heading Label
+            </t:SortHeading>
 
         See Also:
             AWTDataTable

@@ -1,0 +1,160 @@
+<w:ModalPageWrapper title="A Big Panel">
+    <w:TabSet actionMenuLabel="Actions" actionMenuId="TabMenu">
+      <w:Tab label="Wide String">
+          <div style="width:450px">
+            <t:DataTable  list="$(1, 2)" title="Add to Currently Selected"
+                    enableScrolling="$true">
+
+                <t:Column label="Time">12:02</t:Column>
+                <t:Column label="Sender">Joe Smith</t:Column>
+                <t:Column label="Sender">
+                    Loose clusters of orange trumpet-like blooms are borne from mid-summer
+                    to fall on this upright to spreading woody perennial. Mulch deeply in
+                    winter. Will freeze down and come back up from the roots in 8B.
+                    Light: Sun to partial shade.
+                    Average Mature Plant Size: 6'H x 4'W, probably larger in mild climates.
+                    Loose clusters of orange trumpet-like blooms are borne from mid-summer
+                    to fall on this upright to spreading woody perennial. Mulch deeply in
+                    winter. Will freeze down and come back up from the roots in 8B.
+                    Light: Sun to partial shade.
+                    Average Mature Plant Size: 6'H x 4'W, probably larger in mild climates.
+                    Loose clusters of orange trumpet-like blooms are borne from mid-summer
+                    to fall on this upright to spreading woody perennial. Mulch deeply in
+                    winter. Will freeze down and come back up from the roots in 8B.
+                    Light: Sun to partial shade.
+                    Average Mature Plant Size: 6'H x 4'W, probably larger in mild climates.
+                </t:Column>
+            </t:DataTable>
+          </div>
+      </w:Tab>
+      <w:Tab label="Side by Side">
+        <table>
+            <tr>
+                <td valign="top" width="60%">
+                    <div class="flexContainer stWidthFixWrapper">
+                    <t:DataTable  enableScrolling="$true" multiSelect="$true"
+                        title="Add to Currently Selected">
+
+                        <t:Column key="Order ID" action="$null" nowrap/>
+                        <t:Column key="Title"/>
+                        <t:Column key="Total"/>
+                        <t:Column key="Amt Invoiced"/>
+                        <t:CSVData>
+                            Order ID, Title, Total, Amt Invoiced
+                            eipp.gen.Mach.2LI.tax.0001.po, JCN Technologies, "$1,344.11 USD",
+                            eipp.gen.qa.US100.2LI.tax.woProject.0001.po, JCN Technologies, "$1,344.11 USD",
+                            eipp.genUS100.0001.po, JCN Technologies, "$1,344.11 USD",
+
+                        </t:CSVData>
+                    </t:DataTable>
+                    </div>
+                </td>
+                <td>&nbsp;</td>
+                <td valign="top" width="40%">
+                    <div class="flexContainer stWidthFixWrapper">
+                    <t:DataTable enableScrolling="$true" multiSelect="$true"
+                        title="Currently Selected">
+
+                        <t:Column key="Order ID" action="$null" nowrap/>
+                        <t:Column key="Title"/>
+                        <t:Column key="Total"/>
+                        <t:Column key="Amt Invoiced"/>
+
+                        <t:CSVData>
+                            Name,           Email Address, Phone Number, IM Name
+                        </t:CSVData>
+                    </t:DataTable>
+                    </div>
+                </td>
+            </tr>
+        </table>
+      </w:Tab>
+      <w:Tab label="Side by Side 2">
+        <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top">
+                    <div class="flexContainer stWidthFixWrapper">
+                    <t:DataTable  enableScrolling="$true" multiSelect="$true"
+                        title="Groups">
+                        <t:HeadingArea>
+                            <table><tr>
+                                <td>Field Name:</td>
+                                <td><a:TextField value="$dict.someName"/></td>
+                                <td><w:TextButton action="$null">Search</w:TextButton></td>
+                            </tr></table>
+                        </t:HeadingArea>
+                        <t:Column key="Name" nowrap/>
+                        <t:CSVData>
+                            Name
+                            A/P - Expenses
+                            A/P - Supplier Payment
+                            Other
+                            More
+                            Stuff
+                            Hello?
+                            A/P - Expenses
+                            A/P - Supplier Payment
+                            Other
+                            More
+                            Stuff
+                            Hello?
+                            A/P - Expenses
+                            A/P - Supplier Payment
+                            Other
+                            More
+                            Stuff
+                            Hello?
+                            A/P - Expenses
+                            A/P - Supplier Payment
+                            Other
+                            More
+                            Stuff
+                            Hello?
+                            A/P - Expenses
+                            A/P - Supplier Payment
+                            Other
+                            More
+                            Stuff
+                            Hello?
+                            A/P - Expenses
+                            A/P - Supplier Payment
+                            Other
+                            More
+                            Stuff
+                            Hello?
+                        </t:CSVData>
+                    </t:DataTable>
+                    </div>
+                </td>
+                <td style="padding:0px 8px"></td>
+                <td valign="top">
+                    <div class="flexContainer stWidthFixWrapper">
+                    <t:DataTable enableScrolling="$true" multiSelect="$true"
+                        title="Current Groups Containing User Alan Fontaine">
+
+                        <t:Column key="Name" nowrap/>
+
+                        <t:CSVData>
+                            Name
+                            One
+                            Two
+                            Three
+                        </t:CSVData>
+                    </t:DataTable>
+                    </div>
+                </td>
+            </tr>
+        </table>
+      </w:Tab>
+
+      <w:Tab label="Simple Table">
+          <Include name="SimpleTable"/>
+      </w:Tab>
+      <w:Tab label="Advanced Table">
+          <Include name="AdvancedTable"/>
+      </w:Tab>
+      <w:Tab label="Grouping Table">
+          <Include name="GroupingTable"/>
+      </w:Tab>
+    </w:TabSet>
+</w:ModalPageWrapper>

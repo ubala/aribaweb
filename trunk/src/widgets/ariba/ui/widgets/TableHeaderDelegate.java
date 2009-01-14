@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TableHeaderDelegate.java#6 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TableHeaderDelegate.java#7 $
 */
 
 package ariba.ui.widgets;
@@ -36,7 +36,6 @@ public interface TableHeaderDelegate
         @param key The unique key identifying the selected column
                    as specified when the column was constructed.
         @param ascending True if the data should be sorted in ascending order.
-        @see TableColumn
         @aribaapi ariba
     */
     public void sort (Object key, boolean ascending);

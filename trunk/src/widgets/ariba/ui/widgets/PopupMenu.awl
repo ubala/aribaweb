@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.awl#20 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.awl#21 $
     </Copyright>
 
     <Overview>
@@ -23,25 +23,25 @@
         the menuId which will be used by PopupMenu to build a menuId from the concateation of the menuId and the index.
         For example:
 
-       <a:For list="$list" item="$currentItem" index="$currentIndex">
-           <w:PopupMenu menuId="Move" index="$currentIndex">
-               <w:PopupMenuItem action="$moveLeftClicked">\
-                   Move Left\
-               </w:PopupMenuItem>
-               <w:PopupMenuItem action="$moveRightClicked">\
-                   Move Right\
-               </w:PopupMenuItem>
-           </w:PopupMenu>
-               :
-        </a:For>
+                <a:For list="$list" item="$currentItem" index="$currentIndex">
+                    <w:PopupMenu menuId="Move" index="$currentIndex">
+                        <w:PopupMenuItem action="$moveLeftClicked">\
+                            Move Left\
+                        </w:PopupMenuItem>
+                        <w:PopupMenuItem action="$moveRightClicked">\
+                            Move Right\
+                        </w:PopupMenuItem>
+                    </w:PopupMenu>
+                        :
+                 </a:For>
 
         Of course, you will need to define a reference to the menu using a PopupMenuLink (or PopupMenuButton) and
         provide the same menuId (and optional index):
 
                :
-        <w:PopupMenuLink menuId="Move" index="$currentIndex">\
-            $currentItem\
-        </w:PopupMenuLink>
+                <w:PopupMenuLink menuId="Move" index="$currentIndex">\
+                    $currentItem\
+                </w:PopupMenuLink>
                :
 
         There are two modes in which you can use these menus -- shared or 1:1.  The above axample shows how to use the
@@ -64,8 +64,8 @@
         one where the left hand side of the binding expression is the name of a variable in your component.
         For example:
 
-            <w:PopupMenuLink menuId="Foo" actionSetup="$actionSetup"/>
-               :
+                <w:PopupMenuLink menuId="Foo" actionSetup="$actionSetup"/>
+                   :
 
         In this case, when this link is clicked, no action will be invoked, but the $currentItem will be evaluated
         and pushed into the "selectedItem" variable in your component and the same for $currentValue -> selectedValue.

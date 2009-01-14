@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentDefinition.java#43 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentDefinition.java#44 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -54,7 +54,6 @@ public class AWComponentDefinition extends AWBaseObject
     private int _componentDefinitionId = -1;
     private AW2DVector _localizedStrings;
     private boolean _isReloadable;
-    private boolean _sourceFileMightExist = true;
     private AWApi _componentApi;
 
     protected static final int UnsupportedBindingDefinition = 0;
@@ -224,25 +223,6 @@ public class AWComponentDefinition extends AWBaseObject
         return _componentNamePath;
     }
 
-    protected AWResource javaSourceFileResource ()
-    {
-        AWResource resource = null;
-        if (_sourceFileMightExist) {
-            AWSingleLocaleResourceManager resourceManager =
-                AWConcreteApplication.SharedInstance.resourceManager(Locale.US);
-            String origComponentName = AWUtil.getClassLoader().getComponentNameForClass(
-                    _componentClass.getName());
-            String origClassName = origComponentName.replace('.','/');
-            String sourceFileName = Fmt.S("%s.java",origClassName);
-
-            resource = resourceManager.resourceNamed(sourceFileName);
-            if (resource == null) {
-                _sourceFileMightExist = false;
-            }
-        }
-        return resource;
-    }
-
     /**
      * Check whether this component is classless.
      * A classless component only has an awl file - no java class.
@@ -402,22 +382,8 @@ public class AWComponentDefinition extends AWBaseObject
     */
     private void flushCacheIfClassChanged ()
     {
-        AWResource source = javaSourceFileResource();
-
-        String className = AWUtil.getClassLoader().getComponentNameForClass(_componentClass.getName());
-        File classFile = AWUtil.getClassLoader().getClassFile(className);
-        if (source != null && classFile != null && classFile.exists() &&
-            source.lastModified() > classFile.lastModified()) {
-            AWUtil.getClassLoader().compile(_componentClass, source);
-        }
-
-        try {
-            Class componentClass = AWUtil.getClassLoader().getClass(className);
-            if (componentClass != null) setComponentClass(componentClass);
-        }
-        catch (ClassNotFoundException cnfe) {
-            //swallow
-        }
+        Class componentClass = AWUtil.getClassLoader().checkReloadClass(_componentClass);
+        if (componentClass != null) setComponentClass(componentClass);
     }
 
     protected void setComponentClass(Class componentClass)

@@ -13,17 +13,18 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWJSListRepetition.awl#3 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWJSListRepetition.awl#4 $
     </Copyright>
 
     <Overview>
         Used to create a javascript array declaration.  E.g.
-            <a:ClientSideScript>
-                var arr = <a:JSListRepetition list="$list" item="$item" condition="$isRelevant">\
-                    $item.aMetric\
-                </a:JSListRepetition>;
-                ... use arr...
-            <a:ClientSideScript>
+
+                <a:ClientSideScript>
+                    var arr = <a:JSListRepetition list="$list" item="$item" condition="$isRelevant">\
+                        $item.aMetric\
+                    </a:JSListRepetition>;
+                    ... use arr...
+                </a:ClientSideScript>
 
         The value-add of this component (over using AWRepetition directly) is that it puts commas
         in the right places (i.e. only between items, taking account of omitted item (via condition binding)

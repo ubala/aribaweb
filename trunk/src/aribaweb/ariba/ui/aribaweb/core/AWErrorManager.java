@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#46 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#47 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1652,7 +1652,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     }
 
     /**
-     * @return
+     * @return whether a set has resulted in the need to re-validate
      */
     public boolean requiresRevalidation ()
     {

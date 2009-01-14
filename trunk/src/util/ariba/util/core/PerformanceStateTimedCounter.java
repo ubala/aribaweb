@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateTimedCounter.java#14 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateTimedCounter.java#15 $
 */
 
 package ariba.util.core;
@@ -138,7 +138,10 @@ public class PerformanceStateTimedCounter extends PerformanceStateCounter
         return obj;
     }
 
-    // the real instance
+    /**
+     * the real instance
+     * @aribaapi ariba
+     */
     public static class Instance extends PerformanceStateCounter.Instance
     {
         protected long elapsedTime = 0;

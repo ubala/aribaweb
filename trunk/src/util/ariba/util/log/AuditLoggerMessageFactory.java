@@ -12,12 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/AuditLoggerMessageFactory.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/log/AuditLoggerMessageFactory.java#3 $
 */
 package ariba.util.log;
 
 import ariba.util.core.ClassUtil;
 
+/**
+ * @aribaapi ariba
+ */
 public class AuditLoggerMessageFactory
 {
     private String className;

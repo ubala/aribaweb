@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/i18n/LocalizedJavaString.java#9 $
+    $Id: //ariba/platform/util/core/ariba/util/i18n/LocalizedJavaString.java#10 $
 */
 
 package ariba.util.i18n;
@@ -70,7 +70,7 @@ public final class LocalizedJavaString
 
     /**
         @param className name of the class in which the string is created
-        @param key String key unique within the class
+        @param keyString String key unique within the class
         @param originalString string in en_US
 
         @aribaapi ariba

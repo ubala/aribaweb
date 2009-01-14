@@ -1,0 +1,98 @@
+<!--- SearchFields sampleFor:PopupMenu PopupMenuItem PopupMenuLink PopupMenuButton PulldownButton -->
+<a:ClientSideScript filename="widg/prettify.js"/>
+<a:ClientSideScript>prettyPrint()</a:ClientSideScript>
+<w:Markdown>
+    PopupMenu Samples
+    =================
+
+    1) Basic Menus
+    ---------------
+    PopupMenus are declared separate from their links.  For instance, we can declare the
+    *contents* of a menu as follows:
+
+    <a:Ex>
+        <w:PopupMenu menuId="myMenu">
+            <w:PopupMenuHeading>The Heading</w:PopupMenuHeading>
+            <w:PopupMenuItem action="$null">First Item</w:PopupMenuItem>
+            <w:PopupMenuItem action="$null">Second Item</w:PopupMenuItem>
+        </w:PopupMenu>
+    </a:Ex>
+
+    The menu can then be made available from a number of different link / button styles:
+
+    <a:Ex>
+        <w:PopupMenuLink menuId="myMenu" position="this">The Menu</w:PopupMenuLink>
+    </a:Ex>
+
+    Note that the `menuId` must match between the link and the menu.  The `position="this"`
+    causes the menu to anchor under the link (as opposed to at the point of the mouse click).
+
+    <a:Ex>
+        <w:PulldownButton menuId="myMenu">The Menu</w:PulldownButton>
+    </a:Ex>
+
+    `PopupMenuButton` is generally used if we are simulating an HTML Select
+    (i.e. where are making a selection rather than triggering an action)
+
+    <a:Ex>
+        <w:PopupMenuButton menuId="myMenu">The Menu</w:PopupMenuButton>
+    </a:Ex>
+
+
+    2) Lists of Menu Links / Shared Menus
+    -------------------------------------
+
+    Menus often appear alongside objects in a list.  If every link has the same menu items, then
+    a single menu may be shared.  However, in this case the app will need to distinguish
+    between which item was clicked.  This is done by putting an `actionSetup` binding on the
+    *link* as well as on the PopupMenuItem.  The action on this link should stash which
+    item was clicked in a component variable, and to that it is known when the action on
+    the menu item is fired.  E.g.:
+
+    <a:Ex>
+        <a:For item="$obj" list="$(One, Two, Three)">
+            <p>
+                <a:String value="$obj"/>
+                <w:PopupMenuLink menuId="SharedMenu" position="this"
+                                 actionSetup="${clicked=obj; null}">Action</w:PopupMenuLink>
+            </p>
+        </a:For>
+        <w:PopupMenu menuId="SharedMenu">
+            <w:PopupMenuItem action='${message="You clicked: " + clicked; null}'>\
+                The Action\
+            </w:PopupMenuItem>
+            <w:PopupMenuItem action="$null">Empty Action</w:PopupMenuItem>
+        </w:PopupMenu>
+        Message: <a:String value="$message"/>
+    </a:Ex>
+
+    
+    3) Lists of Menu Links / Custom Menus
+    -------------------------------------
+
+    In many cases, the menu for each object in a list may need to vary by object.  For
+    instance, when a particular item is enabled could depend on something about the object.
+    In this case, each link must have its own menu.  *The trick here is to ensure that
+    every menu has a unique Id*.  The most robust way to do this is to use the
+    `requestContext.nextElementId` to get an ID for the menu that is unique for the current
+    position in the render tree:
+
+    <a:Ex>
+        <a:For item="$obj" list="$(One, Two, Three)">
+            <p>
+                <a:String value="$obj"/>
+                <a:SetValue mid="$requestContext.nextElementId"/>
+                <w:PopupMenuLink menuId="$mid" position="this"
+                                 actionSetup="${clicked=obj; null}">Action</w:PopupMenuLink>
+                <w:PopupMenu menuId="$mid">
+                    <w:PopupMenuItem action='${message="You clicked: " + obj; null}'
+                                     disabled="${obj.length == 3}">\
+                        The Action\
+                    </w:PopupMenuItem>
+                </w:PopupMenu>
+            </p>
+        </a:For>
+        Message: <a:String value="$message"/>
+    </a:Ex>
+    
+</w:Markdown>
