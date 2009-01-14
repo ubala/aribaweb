@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<!--
+    AtIssue application
+ -->
+
+<project name="appcore" default="default">
+
+    <description>
+        Core Application classes (User, Group, ...)
+    </description>
+
+    <property name="build.war" value="false"/>
+    <property name="final.name" value="ariba.${ant.project.name}"/>
+
+    <!-- Enable Compass text indexing -->
+    <property name="use.compass" value="true"/>
+    
+    <!-- figure out location of parent build file - more complicated
+         for this example, since we want to run out of ariba source structure -->
+    <property environment="env"/>
+    <property name="aw.home" location="${env.AW_HOME}"/>
+    <available file="../../tools" property="jpa.tools" value="../../tools"/>
+    <property name="jpa.tools" location="${aw.home}/tools"/>
+
+    <import file="${jpa.tools}/build-jpa-app.xml"/>
+</project>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.java#30 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.java#32 $
 */
 package ariba.ui.dev;
 
@@ -90,6 +90,13 @@ public final class AWDebugPane extends AWComponent implements PerformanceCheck.E
             PerformanceCheck checker;
             if (stats != null && (checker = stats.getPerformanceCheck()) != null) {
                 checker.checkAndRecord(stats, this);
+            }
+        }
+
+        if (requestContext.wasPathDebugRequest()){
+            Object type = request().formValueForKey("cpDebug");
+            if (type != null) {
+                getComponentInspector().setShowMeta("2".equals(type));
             }
         }
         super.renderResponse(requestContext, component);
@@ -356,12 +363,12 @@ public final class AWDebugPane extends AWComponent implements PerformanceCheck.E
     public String _url;
 
     public boolean isBookmarkable() {
-        return application().getBookmarker().isBookmarkable(requestContext());
+        return ((AWConcreteApplication)application()).getBookmarker().isBookmarkable(requestContext());
     }
 
     public AWResponseGenerating showURL ()
     {
-        _url = application().getBookmarker().getURLString(requestContext());
+        _url = ((AWConcreteApplication)application()).getBookmarker().getURLString(requestContext());
 
         Confirmation.showConfirmation(requestContext(), _urlId);
         return null;

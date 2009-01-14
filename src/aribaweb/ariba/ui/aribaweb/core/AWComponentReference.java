@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#59 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#61 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -165,7 +165,7 @@ public class AWComponentReference extends AWContainerElement
             }
             if (binding == null && _awbindingsDictionary != null && component != null) {
                 AWBindingDictionary dynamicBindingDictionary = (AWBindingDictionary)_awbindingsDictionary.value(component);
-                binding = dynamicBindingDictionary.get(bindingName);
+                if (dynamicBindingDictionary != null) binding = dynamicBindingDictionary.get(bindingName);
             }
         }
         return binding;
@@ -300,7 +300,8 @@ public class AWComponentReference extends AWContainerElement
             AWComponentDefinition componentDefinition = componentDefinition();
             String componentNamePath = componentDefinition == null ?
                     "no component definition" : componentDefinition.componentNamePath();
-            Assert.that(false, "Cannot rendezvous with stateful subcomponent: %s\nelement id trace %s\ncomponentNamePath: %s\nstateful components: %s",
+            Assert.that(requestContext.allowFailedComponentRendezvous(),
+                    "Cannot rendezvous with stateful subcomponent: %s\nelement id trace %s\ncomponentNamePath: %s\nstateful components: %s",
                     AWElementIdPath.debugElementIdPath(elementIdPath),
                     requestContext.currentElementIdTrace(), componentNamePath,
                     parentComponent.page()._debugSubcomponentString(componentNamePath));

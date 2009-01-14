@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowDetailRenderer.java#16 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowDetailRenderer.java#17 $
 */
 package ariba.ui.table;
 
@@ -47,6 +47,11 @@ public final class AWTRowDetailRenderer extends AWTDataTable.ColumnRenderer
         return _table.colsBeforeData() > 0;
     }
 
+    public int visibleLeadingCols ()
+    {
+        return _table.colsBeforeData() - (_table.hasInvisibleSelectionColumn() ? 1 : 0);
+    }
+    
     public boolean showRow ()
     {
         AWTRowDetail column = (AWTRowDetail)column();

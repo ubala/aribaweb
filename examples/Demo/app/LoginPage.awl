@@ -12,7 +12,7 @@
             <a:PasswordField value="$password"/>
         </w:FormRow>
         <w:FormRow >
-            <w:TextButton action="$login">Login</w:TextButton>
+            <w:TextButton action="$login" isDefault="true">Login</w:TextButton>
             <w:TextButton action="$cancel">Cancel</w:TextButton>
         </w:FormRow>
     </w:FormTable>

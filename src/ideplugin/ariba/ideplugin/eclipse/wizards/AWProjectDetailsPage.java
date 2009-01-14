@@ -12,41 +12,25 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/eclipse/wizards/AWProjectDetailsPage.java#1 $
+    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/eclipse/wizards/AWProjectDetailsPage.java#2 $
 */
 package ariba.ideplugin.eclipse.wizards;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TableEditor;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 public class AWProjectDetailsPage extends WizardPage
@@ -55,11 +39,8 @@ public class AWProjectDetailsPage extends WizardPage
     private ISelection _selection;
     private String _currProject;
     private List _data;
-    private TableViewer _tableViewer;
-    private TableEditor _tableEditor;
-    private Table _table;
+    private HashMap<String, Text> _values;
     private Text _projectName;
-    private ArrayList<TableItem> _items;
     private boolean _visible;
     private IWorkspaceRoot _wroot;
 
@@ -76,6 +57,8 @@ public class AWProjectDetailsPage extends WizardPage
 
     public void createControl (Composite parent)
     {
+        _data =((AWNewProjectWizard)getWizard()).getRequiredData();
+
         Composite container = new Composite(parent, SWT.NULL);
         GridLayout glayout = new GridLayout();
         glayout.numColumns = 2;
@@ -93,67 +76,28 @@ public class AWProjectDetailsPage extends WizardPage
         gdata.horizontalAlignment = GridData.FILL;
         gdata.grabExcessHorizontalSpace = true;
         _projectName.setLayoutData(gdata);
+        _values = new HashMap<String, Text>();
 
-        _tableViewer = new TableViewer(container, SWT.SINGLE);
-        _table = _tableViewer.getTable();
+        for(int i = 0; i<_data.size();i++){
+            Map entry = (Map)_data.get(i);
+            String slabel = (String) entry.get("description");
+            String dval = (String)entry.get("default");
 
-        _table.setHeaderVisible(true);
-        _table.setLinesVisible(true);
-        gdata = new GridData(GridData.FILL_BOTH);
-        gdata.horizontalSpan = 2;
-        _table.setLayoutData(gdata);
-
-        _table.addSelectionListener(new SelectionAdapter() {
-            public void widgetSelected (SelectionEvent e)
-            {
-                rowSelection(e);
-            }
-        });
-        TableColumn col1 = new TableColumn(_table, SWT.NULL);
-        col1.setText("Name");
-        col1.setWidth(200);
-        TableColumn col2 = new TableColumn(_table, SWT.NULL);
-        col2.setText("Value");
-        col2.setWidth(250);
-
-        _tableViewer.setLabelProvider(new TableLabelProvider());
-        _tableViewer.setContentProvider(new ArrayContentProvider());
-
-        _tableEditor = new TableEditor(_table);
-        _tableEditor.horizontalAlignment = SWT.LEFT;
-        _tableEditor.grabHorizontal = true;
-        _tableEditor.minimumWidth = 50;
+            Label slab = new Label(container, SWT.LEFT | SWT.WRAP);
+            slab.setText(slabel);
+            
+            Text txt = new Text(container, SWT.SINGLE | SWT.BORDER);
+            txt.setText(dval);
+            gdata = new GridData();
+            gdata.horizontalAlignment = GridData.FILL;
+            gdata.grabExcessHorizontalSpace = true;
+            txt.setLayoutData(gdata);
+            
+            _values.put((String)entry.get("key"), txt);
+        }
 
         initialize();
         setControl(container);
-    }
-
-    private void rowSelection (SelectionEvent e)
-    {
-        Control oldEditor = _tableEditor.getEditor();
-        if (oldEditor != null)
-            oldEditor.dispose();
-
-        // Identify the selected row
-        TableItem item = (TableItem)e.item;
-        if (item == null)
-            return;
-
-        // The control that will be the editor must be a child of the Table
-        Text newEditor = new Text(_table, SWT.NONE);
-        newEditor.setText(item.getText(_EditableColumn));
-        final int currRow = _table.getSelectionIndex();
-        newEditor.addModifyListener(new ModifyListener() {
-            public void modifyText (ModifyEvent e)
-            {
-                Text text = (Text)_tableEditor.getEditor();
-                _tableEditor.getItem().setText(_EditableColumn, text.getText());
-                ((Map)_data.get(currRow)).put("default", text.getText());
-            }
-        });
-        newEditor.selectAll();
-        newEditor.setFocus();
-        _tableEditor.setEditor(newEditor, item, _EditableColumn);
     }
 
     private void initialize ()
@@ -185,7 +129,8 @@ public class AWProjectDetailsPage extends WizardPage
         Map<String, String> map = new HashMap<String, String>();
         for (int i = 0; i < _data.size(); i++) {
             Map mdata = (Map)_data.get(i);
-            map.put((String)mdata.get("key"), (String)mdata.get("default"));
+            String key = (String)mdata.get("key");
+            map.put(key, _values.get(key).getText());
         }
         return map;
     }
@@ -198,16 +143,6 @@ public class AWProjectDetailsPage extends WizardPage
     public void setVisible (boolean visible)
     {
         _visible = visible;
-        if (visible) {
-            AWNewProjectWizard wiz = (AWNewProjectWizard)getWizard();
-            if (_currProject == null
-                || !_currProject.equals(wiz.getSelectedTemplate()))
-            {
-                _table.removeAll();
-                _data = wiz.getRequiredData();
-                _tableViewer.setInput(_data.toArray());
-            }
-        }
         super.setVisible(visible);
     }
 
@@ -226,25 +161,5 @@ public class AWProjectDetailsPage extends WizardPage
             return "Project with same name already exists";
         }
         return null;
-    }
-
-    class TableLabelProvider extends LabelProvider implements
-        ITableLabelProvider
-    {
-        public String getColumnText (Object element, int index)
-        {
-            switch (index) {
-            case 0:
-                return (String)((Map)element).get("description");
-            case 1:
-                return (String)((Map)element).get("default");
-            }
-            return "Unknown: " + index;
-        }
-
-        public Image getColumnImage (Object element, int columnIndex)
-        {
-            return null;
-        }
     }
 }

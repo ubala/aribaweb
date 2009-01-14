@@ -1,0 +1,22 @@
+<w:BasicPageWrapper omitWrapperFrame="$true" hasForm="$true">
+    <div style="height:400px;width:400px;margin:200px auto">
+        <w:RoundedBox roundStyle="$=ariba.ui.widgets.RoundedBox.All">
+            <div style="padding:5px 20px 20px 10px">
+                <a:Image filename="cmdbar_prod.gif"/>
+                <br/><br/>
+                <w:FormTable showErrorFlags="$true">
+                    <w:FormRow label="User Name" errorKey="username">
+                        <a:TextField value="$userName"/>
+                    </w:FormRow>
+                    <w:FormRow label="Password" errorKey="password">
+                        <a:PasswordField value="$password"/>
+                    </w:FormRow>
+                    <w:FormRow >
+                        <w:TextButton action="$login" isDefault="$true">Login</w:TextButton>
+                        <w:TextButton action="$cancel">Cancel</w:TextButton>
+                    </w:FormRow>
+                </w:FormTable>
+            </div>
+        </w:RoundedBox>
+    </div>
+</w:BasicPageWrapper>

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.awl#40 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.awl#41 $
     </Copyright>
 
     <Overview>
@@ -113,6 +113,11 @@
     <Binding key="behavior" direction="get" type="String" required="$false">
         TBD
     </Binding>
+
+    <Binding key="isDefault" direction="get" type="boolean" required="$false">
+        If true, this button will have its action fired when user hits return in
+        an AWForm (or other, more local, DefaultActionScope)
+    </Binding>
 </a:Api>\
 
 <table class="$wrapClassString" cellspacing="0" cellpadding="0" border="0" style="$appendStyleString">\
@@ -132,6 +137,7 @@
                 class="$buttonClassString"
                 _cl="$buttonClassString"
                 bh="$^behavior:$behaviorName"
+                _isDef="$^isDefault"
                 _cnf="$confirmationId"
                 awname="$^awname" _awname="$^action"
                 disableClick="$^disableClick"
@@ -163,6 +169,7 @@
                 title="$^title"
                 bh="$behaviorName"
                 _cnf="$confirmationId"
+                _isDef="$^isDefault"                    
                 tabIndex="$^tabIndex">\
                 <a:IncludeBlock name="wrapper">\
                     <a:IncludeContent/>\

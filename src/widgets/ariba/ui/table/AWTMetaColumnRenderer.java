@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTMetaColumnRenderer.java#16 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTMetaColumnRenderer.java#17 $
 */
 package ariba.ui.table;
 
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.table.AWTDataTable;
+import ariba.ui.widgets.HTMLActions;
 import ariba.util.fieldvalue.FieldPath;
 import ariba.util.core.Constants;
 import ariba.util.core.StringUtil;
@@ -140,12 +141,12 @@ public final class AWTMetaColumnRenderer extends AWTDataTable.ColumnRenderer
 
     public String directActionURL ()
     {
-        return AWTMetaColumnActions.directActionURL(actionString(), requestContext());
+        return HTMLActions.directActionURL(actionString(), requestContext());
     }
 
     public AWResponseGenerating actionClicked ()
     {
-        return AWTMetaColumnActions.handleAction(actionString(), actionTarget(), _table);
+        return HTMLActions.handleAction(actionString(), actionTarget(), _table);
     }
 
     public String columnVAlignment ()

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldInfo.java#1 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldInfo.java#2 $
 */
 package ariba.util.fieldvalue;
 
@@ -31,6 +31,24 @@ public class FieldInfo
     {
         Class _cls;
         Map<String, FieldInfo> _infoByName = MapUtil.map();
+        boolean _includeFields;
+        boolean _includeNonBeanStyleGetters;
+
+        public Collection (boolean includeFields, boolean includeNonBeanStyleGetters)
+        {
+            _includeFields = includeFields;
+            _includeNonBeanStyleGetters = includeNonBeanStyleGetters;
+        }
+
+        public boolean includeFields ()
+        {
+            return _includeFields;
+        }
+
+        public boolean includeNonBeanStyleGetters ()
+        {
+            return _includeNonBeanStyleGetters;
+        }
 
         // called by FieldValue implementations
         public void updateInfo (String name, Class type, boolean isPublic,
@@ -70,10 +88,11 @@ public class FieldInfo
         }
     }
 
-    public static Collection fieldInfoForClass (Class cls)
+    public static Collection fieldInfoForClass (Class cls, boolean includeFields,
+                                                           boolean includeNonBeanStyleGetters)
     {
         // could cache, but not for now...
-        Collection col = new Collection();
+        Collection col = new Collection(includeFields, includeNonBeanStyleGetters);
         col._cls = cls;
         FieldValue.get(cls).populateFieldInfo(cls, col);
 

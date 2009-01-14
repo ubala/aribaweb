@@ -1,0 +1,16 @@
+<w:ModalPageWrapper title="Mime Tree Inspector">
+    <w:FourZoneLayout>
+        <a:Content name="left">
+            <w:OutlineRepetition list="$messageRoot" item="$part" children="$partChildren"
+                    selectedObject="$selectedPart" expandAll="$true">
+                <w:OutlineFolderControl isFolder="$true" title="$partLabel" allowSelection="$true">
+                </w:OutlineFolderControl>
+            </w:OutlineRepetition>
+        </a:Content>
+        <a:Content name="right">
+            <div style="width:450px;overflow:scroll; margin-top:7px; padding:3px; border: 1px solid #9C9CB8;">\
+                <pre><code>$selectedPart.dataHandler.content</code></pre>
+            </div>\
+        </a:Content>
+    </w:FourZoneLayout>
+</w:ModalPageWrapper>

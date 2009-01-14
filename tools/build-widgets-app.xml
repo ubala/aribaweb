@@ -24,7 +24,11 @@
     </description>
 
     <property name="final.name" value="app.${ant.project.name}"/> <!-- -${version} -->
-    <property name="war.name" value="${ant.project.name}"/>
+
+    <property name="build.war" value="true"/>
+    <condition property="war.name" value="${ant.project.name}">
+        <equals arg1="${build.war}" arg2="true"/>
+    </condition>
 
     <!-- aribaweb.properties: defaults  -->
     <property name="needs.aribaweb.properties" value="true"/>
@@ -32,7 +36,6 @@
     <property name="aw.packagedResourceExtensions" value="awl"/>
     <property name="aw.namespaceIdentifier" value="x"/>
     <property name="aw.useNamespaceFromPackage" value="ariba.ui.widgets"/>
-    <property name="aw.dependsOn" value="ariba.widgets"/>
 
     <import file="${aw.home}/tools/build-common.xml"/>
 
@@ -41,7 +44,24 @@
         <resources refid="aw.resources"/>
     </resources>
 
-    <target name="init" depends="common.init">
+    <property name="dependsOn.jar" value="ariba.widgets"/>
+
+    <target name="init-groovy" if="enable.groovy">
+        <property name="compile.groovy" value="true"/>
+        <property name="aw.dependsOn" value="ariba.groovyloader,${dependsOn.jar}"/>
+
+        <fileset id="groovy.support.jars" dir="${ariba.jars.dir}">
+            <include name="ariba.groovyloader.jar"/>
+        </fileset>
+
+        <fileset id="module.libs2" dir="${lib-internal.dir}">
+            <include name="groovy-all.jar"/>
+        </fileset>
+    </target>
+
+    <target name="init" depends="common.init,init-groovy">
+        <property name="aw.dependsOn" value="${dependsOn.jar}"/>
+
         <!-- include our jar in the war -->
         <fileset id="app.war.jars" dir="${build.jars.dir}">
             <include name="${jar.name}"/>

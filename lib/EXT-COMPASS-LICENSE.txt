@@ -1,0 +1,22 @@
+LICENSES FOR THIRD-PARTY COMPONENTS in lib/ext-compass
+
+COMPASS (compass-*.jar)
+   "This product includes software developed by Compass
+   Project (http://www.opensymphony.com/compass)."
+
+   This product includes software developed by
+   the Apache Software Foundation (http://www.apache.org).
+
+   This product also includes software developed by
+   Clinton Begin (http://www.ibatis.com).
+
+    Distributed under the Apache License v2.0
+    Available at http://www.apache.org/licenses/LICENSE-2.0
+
+
+LUCENE (lucene-*.jar)
+    This product includes software developed by
+    The Apache Software Foundation (http://www.apache.org/).
+
+    Distributed under the Apache License v2.0
+    Available at http://www.apache.org/licenses/LICENSE-2.0

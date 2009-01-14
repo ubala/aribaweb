@@ -1,0 +1,5 @@
+email,name,password,memberOf.name
+craigf@ariba.com, Craig Federighi,ariba,AdminUsers
+mareddy@ariba.com, Mohan Reddy,ariba,DefaultUsers
+dfinlay@ariba.com, Dave Finlay,ariba,DefaultUsers
+kngan@ariba.com, Kingsley Ngan,ariba,DefaultUsers

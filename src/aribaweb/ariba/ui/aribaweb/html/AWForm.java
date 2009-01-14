@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.java#31 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.java#33 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -38,6 +38,7 @@ public class AWForm extends AWComponent implements AWHtmlForm
         BindingNames.action, BindingNames.method,  BindingNames.onSubmit,
         BindingNames.target, BindingNames.fragmentIdentifier, BindingNames.omitTags,
         BindingNames.submitFormDefault, // unused?
+        BindingNames.autocomplete,
         BindingNames.id, BindingNames.name, BindingNames.onKeyPress}; // deprecated?
 
     private static final AWEncodedString AWFormCR = new AWEncodedString("return ariba.Handlers.formCR(this, event);");
@@ -61,7 +62,7 @@ public class AWForm extends AWComponent implements AWHtmlForm
     {
         _frameName = AWUtil.UndefinedEncodedString;
         _emitTags = !booleanValueForBinding(BindingNames.omitTags);
-        _submitFormDefault = booleanValueForBinding(BindingNames.submitFormDefault);
+        _submitFormDefault = booleanValueForBinding(BindingNames.submitFormDefault, true);
     }
 
     protected void sleep ()

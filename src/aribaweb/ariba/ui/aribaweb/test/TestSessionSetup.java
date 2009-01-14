@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestSessionSetup.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestSessionSetup.java#6 $
     Responsible: ksaleh
 */
 
@@ -27,6 +27,8 @@ import java.util.Set;
 
 public interface TestSessionSetup
 {
+    public String getTestUserSetupComponentName ();
+
     public boolean activateTestLinks (AWRequestContext requestContext);
 
     public void initializeTestContext (AWRequestContext requestContext);
@@ -47,10 +49,12 @@ public interface TestSessionSetup
     public Object getSessionState ();
     public void restoreSessionStateIfNeeded (Object obj);
 
-    public List getTestCentralLinkList ();
-
     public List<TestInspectorLink> getApplicationValidators (Class c);
     public List<TestValidationParameter> invokeValidator (TestInspectorLink validator,
                                                      AWRequestContext requestContext);
+    public String getTestCentralLinkList (AWRequestContext requestContext);
     public String getCurrentTextCentralPageInfo (AWRequestContext requestContext);
+    public String getRemoteRealmName ();
+
+
 }

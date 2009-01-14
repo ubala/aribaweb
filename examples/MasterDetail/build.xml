@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<!--
+    AtIssue application
+ -->
+
+<project name="MasterDetail" default="launch">
+
+    <description>
+        Master detail appcore-based application
+    </description>
+
+    <!-- for persistence.xml generation: See build-jpa-app.xml for additional parameters -->
+    <!-- For HSQLDB file database (default is RAM) ...
+        <property name="database.dir" value="${java.io.tmpdir}/${ant.project.name}-hsqldb"/>
+        <property name="compass.dir" value="${java.io.tmpdir}/${ant.project.name}-lucene"/>
+    -->
+    <property name="database.dir" value="${java.io.tmpdir}/${ant.project.name}-db"/>
+    <property name="compass.dir" value="${java.io.tmpdir}/${ant.project.name}-lucene"/>
+
+    <property name="enable.groovy" value="true"/>
+
+    <!-- figure out location of parent build file - more complicated
+         for this example, since we want to run out of ariba source structure -->
+    <property environment="env"/>
+    <property name="aw.home" location="${env.AW_HOME}"/>
+    <available file="../../tools" property="jpa.tools" value="../../tools"/>
+    <property name="jpa.tools" location="${aw.home}/tools"/>
+    <import file="${jpa.tools}/build-appcore-app.xml"/>
+
+</project>

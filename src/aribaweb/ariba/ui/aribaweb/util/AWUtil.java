@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#47 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#50 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -67,8 +67,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.net.URL;
 
 public final class AWUtil extends AWBaseObject
 {
@@ -1337,6 +1341,27 @@ public final class AWUtil extends AWBaseObject
         }
     }
 
+    public static Map map (Object ...keysAndValues)
+    {
+        int c = keysAndValues.length;
+        Assert.that(c % 2 == 0, "Must have even number of args: key, value, ... : %s");
+        Map result = new HashMap(c/2);
+        for (int i=0; i < c; i += 2) {
+            result.put(keysAndValues[i], keysAndValues[i+1]);
+        }
+        return result;
+    }
+
+    public static List list (Object ...elements)
+    {
+        int c = elements.length;
+        List result = new ArrayList(c);
+        for (int i=0; i < c; i ++) {
+            result.add(elements[i]);
+        }
+        return result;
+    }
+
     public static Object[] keys (Map sourceHashtable, Class componentClass)
     {
         Object[] objectArray = (Object[])Array.newInstance(componentClass, sourceHashtable.size());
@@ -1411,11 +1436,10 @@ public final class AWUtil extends AWBaseObject
     }
 
     // return map of lists of items, keyed by the result of applying accessor to each item
-    public static Map groupBy (List items, ValueMapper accessor)
+    public static Map groupBy (Collection items, ValueMapper accessor)
     {
         Map result = MapUtil.map();
-        for (int i=0, count=items.size(); i < count; i++) {
-            Object o = items.get(i);
+        for (Object o : items) {
             Object key = accessor.valueForObject(o);
             if (key != null)
             {
@@ -1657,6 +1681,48 @@ public final class AWUtil extends AWBaseObject
         return filePath.substring(index + 1, dotIndex);
     }
 
+    // E.g. decamelize("firstName", ' ', true) --> "First Name"
+    public static String decamelize (String string, char separator, boolean initialCaps)
+    {
+        boolean allCaps = true;
+        FastStringBuffer buf = new FastStringBuffer();
+        int lastUCIndex = -1;
+        for (int i=0, len = string.length(); i < len; i++) {
+            char c = string.charAt(i);
+            if (Character.isUpperCase(c)) {
+                if (i-1 != lastUCIndex) buf.append(separator);
+                lastUCIndex = i;
+                if (!initialCaps) c = Character.toLowerCase(c);
+            }
+            else if (Character.isLowerCase(c)) {
+                if (i==0 && initialCaps) c = Character.toUpperCase(c);
+                allCaps = false;
+            }
+            else if (c == '_') {
+                c = separator;
+            }
+            buf.append(c);
+        }
+
+        // do mixed (initial word) case for all-caps strings
+        if (allCaps) {
+            boolean inWord = false;
+            for (int i=0, c=buf.length(); i < c; i++) {
+                char ch = buf.charAt(i);
+                if (Character.isLetter(ch)) {
+                    if (inWord && Character.isUpperCase(ch)) {
+                        buf.setCharAt(i, Character.toLowerCase(ch));
+                    }
+                    inWord = true;
+                } else {
+                    inWord = false;
+                }
+            }
+        }
+
+        return buf.toString();
+    }
+    
     /////////////////
     // Debugging
     /////////////////
@@ -2376,6 +2442,28 @@ public final class AWUtil extends AWBaseObject
             }
         }
         return null;
+    }
+
+    public static Properties loadProperties (URL url)
+    {
+        if (url == null) return null;
+        Properties properties = new Properties();
+        try {
+            properties.load(url.openStream());
+        } catch (IOException e) {
+            throw new AWGenericException(e);
+        }
+        return properties;
+    }
+
+    public static URL getResource (String name)
+    {
+        return Thread.currentThread().getContextClassLoader().getResource(name);
+    }
+
+    public static Properties loadProperties (String resourceName)
+    {
+        return loadProperties(getResource(resourceName));
     }
 }
 

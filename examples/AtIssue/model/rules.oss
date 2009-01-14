@@ -1,0 +1,53 @@
+/*
+    model rules.oss -- Meta-data rules
+
+    These are auto-loaded (lazily) when any component in this java package is
+    referenced in the rules
+*/
+
+class=model.Note {
+    field=sender #bold; 
+    field=date   { bindings:{formatter:$formatters.dateTime} }
+    field=parsedMessage {
+        after:zDetail;
+        bindings: { collapseQuoted:true;
+            style:"width:600px;margin-top:7px; padding:3px; border: 1px solid #9C9CB8; overflow:visible"}
+    }
+    zNone => subject;
+    
+    operation=list {
+        bindings: {
+             useRowDetailExpansionControl:true;
+             rowDetailAutoCollapse:true;
+             rowDetailInitialExpansion:2;
+             initialSortKey:date;
+        }
+    }
+}
+
+class=model.Issue {
+    zNone => subject => lastModified;
+    zLeft => created => priority#Popup => status#Popup => id;
+    zRight => category => submitter => owner;
+    Notes.zDetail => notes;
+
+    field=subject {
+        operation=edit  { trait:bold;  }
+        editable:false;
+    }
+    field=lastModified#noSearch { editable:false }
+    field=created#noSearch { editable:false }
+
+    operation=edit field=id { after:zNone;  }
+    operation=textSearch field=subject {
+        editable:true!;
+        bindings:{size:30};
+        after:keywords;
+    }
+    operation=list {
+        zNone => *;
+        zLeft => category => owner => priority => status => lastModified;
+        zDetail => subject#italic;
+    }
+    layout=Search class  { bindings:{initialSortKey:lastModified; initialSortDirection:descending};  }
+}

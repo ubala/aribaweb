@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Constants.java#21 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Constants.java#23 $
 */
 
 package ariba.util.core;

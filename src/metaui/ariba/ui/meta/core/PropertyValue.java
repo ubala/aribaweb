@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/PropertyValue.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/PropertyValue.java#5 $
 */
 package ariba.ui.meta.core;
 
@@ -53,10 +53,10 @@ public class PropertyValue
 
         public Object evaluate(Context context)
         {
-            // we lazily static evaluate our value and cace the result
+            // we lazily static evaluate our value and cache the result
             if (_cached == null) _cached = context.staticallyResolveValue(_orig);
 
-            return _cached;
+            return context.resolveValue(_cached);
         }
 
         public String toString()
@@ -75,6 +75,22 @@ public class PropertyValue
         {
             return (o != null) && (o instanceof StaticDynamicWrapper)
                     && _orig.equals(((StaticDynamicWrapper)o)._orig);
+        }
+    }
+
+    // Wrapper that marks a normally dynamic value (e.g. an Expr) as StaticallyResolvable 
+    public static class StaticallyResolvableWrapper implements StaticallyResolvable
+    {
+        Dynamic _orig;
+
+        public StaticallyResolvableWrapper (Dynamic orig)
+        {
+            _orig = orig;
+        }
+
+        public Object evaluate (Context context)
+        {
+            return _orig.evaluate(context);
         }
     }
 
@@ -129,7 +145,7 @@ public class PropertyValue
         */
     }
 
-    protected static class DeferredOperationChain implements Dynamic
+    protected static class DeferredOperationChain implements Dynamic, Meta.PropertyMapAwaking
     {
         Meta.PropertyMerger _merger;
         Object _orig;
@@ -162,5 +178,14 @@ public class PropertyValue
             return Fmt.S("Chain<%s>: %s => %s", _merger, _override, _orig);
         }
 
+        public Object awakeForPropertyMap (Meta.PropertyMap map)
+        {
+            Object orig = _orig;
+            Object over = _override;
+            if (orig instanceof Meta.PropertyMapAwaking) orig = ((Meta.PropertyMapAwaking)orig).awakeForPropertyMap(map);
+            if (over instanceof Meta.PropertyMapAwaking) over = ((Meta.PropertyMapAwaking)over).awakeForPropertyMap(map);
+            if (orig != _orig || over != _override) return new DeferredOperationChain(_merger, orig, over);
+            return this;
+        }
     }
 }

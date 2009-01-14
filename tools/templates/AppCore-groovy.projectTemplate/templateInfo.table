@@ -1,0 +1,23 @@
+{
+    title = "Master-Detail AppCore/MetaUI Groovy Database App (+ Compass search)";
+    description = "Starter template for a Master-Detail MetaUI database application\nusing AppCore for user management/login, and\nsupporting components and model classes written in Groovy.\nBy default this application will use Hibernate to connect\nto a local HSQLDB database.";
+    rank = 21;
+
+    parameters = (
+        {
+            key="MasterClass";
+            description="Class name for the Master persistent object class";
+            default="Master";
+        },
+        {
+            key="DetailClass";
+            description="Class name for the Detail persistent object class";
+            default="Detail";
+        },
+        {
+            key="ModelPkg";
+            description="Package to use for domain classes";
+            default="model";
+        }
+    );
+}

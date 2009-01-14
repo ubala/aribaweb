@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#179 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#180 $
 */
 
 package ariba.ui.table;
@@ -223,6 +223,10 @@ public final class AWTDataTable extends AWComponent
         // Overridden by columns (e.g. DynamicColumns) that want ability to be re-covered during
         // forceColumnUpdate
         public Object purgatoryKey () { return keyPathString(); }
+    }
+
+    public interface DetailColumn {
+        boolean renderBeforeRow (AWTDataTable table);
     }
 
     public static class SemanticKeyProvider_Column extends AWSemanticKeyProvider
@@ -500,6 +504,7 @@ public final class AWTDataTable extends AWComponent
             checkListChanges();
             prepareForIteration();
             checkGroupByColumn();
+            checkDetailExpandoEnabled();
             _rowToggleState = false;
 
             _showSelectionColumn = !hasBinding(BindingNames.showSelectionColumn)
@@ -867,6 +872,8 @@ public final class AWTDataTable extends AWComponent
         // set up the data source, possibly adding more columns
         initializeDataSource();
 
+        checkDetailExpandoEnabled();
+        
         if (createdDisplayGroup) {
             initializeDisplayGroupObjects();
             setValueForBinding(_displayGroup, BindingNames.displayGroup);
@@ -877,8 +884,11 @@ public final class AWTDataTable extends AWComponent
 
         AWTPivotState.checkPivotLayout(this);
 
-        Assert.that((_allColumns.size() > 0), "Table must have at least one column");
-
+        // Assert.that((_allColumns.size() > 0), "Table must have at least one column");
+        if (_allColumns.size() == 0) {
+            columns().add(BlankColumn);
+        }
+        
         // take care of the initialization of the display group, as needed
         if (setupDisplayGroup) {
             // we need to set the batch size even when the displayGroup already exists
@@ -1198,9 +1208,11 @@ public final class AWTDataTable extends AWComponent
     }
 
     protected boolean _wasPrimaryRow;
+    
     public boolean activateDetailColumn (boolean isTop)
     {
-        if ((_detailColumn != null) && (((AWTRowDetail)_detailColumn).renderBeforeRow(this) == isTop)) {
+        if ((_detailColumn != null) && (((DetailColumn)_detailColumn).renderBeforeRow(this) == isTop)
+                && displayGroup().currentDetailExpanded()) {
             setCurrentColumn(_detailColumn);
             _wasPrimaryRow = _renderingPrimaryRow;
             _renderingPrimaryRow = false;
@@ -1276,6 +1288,7 @@ public final class AWTDataTable extends AWComponent
     protected static Column BlankColumn = AWTColumn.createBlankColumn();
     protected static Column MultiSelectColumn = new AWTMultiSelectColumn();
     protected static Column SingleSelectColumn = new AWTSingleSelectColumn();
+    protected static Column RowDetailExpansionColumn = new AWTRowDetailExpandoColumn.Column();
 
     public void setCurrentColumnIndex (int index)
     {
@@ -1577,18 +1590,25 @@ public final class AWTDataTable extends AWComponent
         return _displayedColumns;
     }
 
+    protected boolean hasLeadingSelectColumn ()
+    {
+        _selectMode = selectionMode();
+        return _selectMode != SELECT_NONE && _pivotState == null;
+    }
+
     protected List computeVisibleColumns ()
     {
         if (_useParentLayout && _parentTable != null) return _computeBasedOnParentCols();
 
         List result = ListUtil.list();
-        _selectMode = selectionMode();
-        if (_selectMode != SELECT_NONE && _pivotState == null) {
+        if (hasLeadingSelectColumn()) {
             Column newColumn = (_selectMode == SELECT_MULTI)
                         ? MultiSelectColumn
                         : SingleSelectColumn;
             result.add(newColumn);
         }
+
+        if (_usingDetailRowExpando()) result.add(RowDetailExpansionColumn);
 
         boolean[] visibility = visibilityArray();
         List columns = columns();
@@ -1829,6 +1849,11 @@ public final class AWTDataTable extends AWComponent
     public boolean showSelectionColumn ()
     {
         return _showSelectionColumn;
+    }
+
+    public boolean hasInvisibleSelectionColumn ()
+    {
+        return hasLeadingSelectColumn() && !showSelectionColumn();
     }
 
     public boolean disableRowSelection ()
@@ -2265,6 +2290,27 @@ public final class AWTDataTable extends AWComponent
     {
         Assert.that(false, "Should never pull this binding");
         return null;
+    }
+
+    /*
+    ** Detail row show/hide support
+    */
+    protected void checkDetailExpandoEnabled ()
+    {
+        boolean enabled = (_pivotState == null && _detailColumn != null
+                && booleanValueForBinding(BindingNames.useRowDetailExpansionControl));
+        displayGroup().setDetailExpansionEnabled(enabled);
+
+        if (enabled) {
+            displayGroup().setDetailRowAutoCollapse(booleanValueForBinding("rowDetailAutoCollapse"));
+            displayGroup().setDetailInitialExpansionType(
+                    AWTDisplayGroup.InitialExpandType.values()[intValueForBinding("rowDetailInitialExpansion")]);
+        }
+    }
+
+    protected boolean _usingDetailRowExpando ()
+    {
+        return displayGroup().detailExpansionEnabled();
     }
 
     /*

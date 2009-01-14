@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaAction.java#34 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaAction.java#35 $
 */
 
 package ariba.ui.widgets;
@@ -131,7 +131,8 @@ public class AribaAction extends AWComponent
     {
         _submitForm = (requestContext().currentForm() != null ||
                 requestContext().get(PageWrapperForm.CurrentHtmlFormKey) != null) &&
-                target() == null;
+                target() == null &&
+                (handler() == null || !handler().useComponentAction(requestContext()) || handler().submitFormToComponentAction());
     }
 
     public AWResponseGenerating actionClicked ()

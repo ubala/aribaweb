@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPasswordField.java#20 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPasswordField.java#22 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -25,6 +25,9 @@ import ariba.ui.aribaweb.util.AWFormatting;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.Fmt;
+import ariba.util.core.StringUtil;
+import ariba.util.core.FastStringBuffer;
+import java.util.regex.Pattern;
 
 // subclassed for validation
 public class AWPasswordField extends AWComponent
@@ -35,6 +38,9 @@ public class AWPasswordField extends AWComponent
     public static final AWEncodedString CheckCapsLockFunction =
         new AWEncodedString("return ariba.Handlers.checkCapsLockError(event);");
 
+    private static final String MaskedValue = "**********";
+    private static final Pattern MaskeValuePattern = Pattern.compile("^\\*+$");
+
     protected static final String[] SupportedBindingNames = {
         BindingNames.value,
         BindingNames.name,
@@ -42,12 +48,15 @@ public class AWPasswordField extends AWComponent
         BindingNames.isRefresh,
         BindingNames.errorKey,
         BindingNames.onKeyDown,
+        BindingNames.classBinding,
+        BindingNames.size
     };
 
     private AWEncodedString _inputName = null;
     private Object _errorKey;
     public AWEncodedString _warnId = null;
-
+    private boolean _indicateLength = false;
+    
     // ** Thread Safety Considerations: see AWComponent.
 
     public String[] supportedBindingNames ()
@@ -90,12 +99,16 @@ public class AWPasswordField extends AWComponent
         else {
             formattedString = AWFormatting.get(formatter).format(formatter, objectValue);
         }
+        if (!StringUtil.nullOrEmptyString(formattedString)) {
+            formattedString = getMaskedValue(formattedString);
+        }
         return formattedString;
     }
 
     public void setFormValue (String formValueString)
     {
         Object objectValue = null;
+        boolean shouldSetValue = true;
         if (formValueString.length() == 0) {
             AWBinding emptyStringValueBinding =
                 bindingForName(BindingNames.emptyStringValue, true);
@@ -104,23 +117,30 @@ public class AWPasswordField extends AWComponent
             }
         }
         if (formValueString != null) {
-            Object formatter = valueForBinding(BindingNames.formatter);
-            if (formatter == null) {
-                objectValue = formValueString;
-            }
-            else {
-                try {
-                    objectValue =
-                        AWFormatting.get(formatter).parseObject(formatter,
-                            formValueString);
+            shouldSetValue = !isMaskedValue(formValueString);
+            if (shouldSetValue) {
+                // indicate length on next render since the user has changed the value
+                _indicateLength = true;
+                Object formatter = valueForBinding(BindingNames.formatter);
+                if (formatter == null) {
+                    objectValue = formValueString;
                 }
-                catch (RuntimeException exception) {
-                    recordValidationError(exception, errorKey(), formValueString);
-                    return;
+                else {
+                    try {
+                        objectValue =
+                            AWFormatting.get(formatter).parseObject(formatter,
+                                formValueString);
+                    }
+                    catch (RuntimeException exception) {
+                        recordValidationError(exception, errorKey(), formValueString);
+                        return;
+                    }
                 }
             }
         }
-        setValueForBinding(objectValue, BindingNames.value);
+        if (shouldSetValue) {
+            setValueForBinding(objectValue, BindingNames.value);
+        }
     }
 
     public AWEncodedString onKeyDownString ()
@@ -173,5 +193,29 @@ public class AWPasswordField extends AWComponent
             }
         }
         return _errorKey;
+    }
+
+    public String cssClass ()
+    {
+        String cls = stringValueForBinding(BindingNames.classBinding);
+        return (cls != null) ? cls : ((valueForBinding(BindingNames.size) == null) ? "tf tfW" : "tf");
+    }
+
+    private String getMaskedValue (String value)
+    {
+        if (_indicateLength) {
+            int length = value.length();
+            FastStringBuffer buffer = new FastStringBuffer(length);
+            for (int i = 0; i < length; i++) {
+                buffer.append("*");
+            }
+            return buffer.toString();
+        }
+        return MaskedValue;
+    }
+
+    private boolean isMaskedValue (String value)
+    {
+        return MaskeValuePattern.matcher(value).matches();
     }
 }

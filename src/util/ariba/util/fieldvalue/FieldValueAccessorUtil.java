@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValueAccessorUtil.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValueAccessorUtil.java#5 $
 */
 
 package ariba.util.fieldvalue;
@@ -300,7 +300,7 @@ public class FieldValueAccessorUtil extends Object
                 String name = field.getName();
                 boolean isPublic = (field.getModifiers() & Modifier.PUBLIC) != 0;
                 if (name.startsWith("_")) name = name.substring(1);
-                collection.updateInfo (name, field.getType(), isPublic, true, true,
+                collection.updateInfo (name, field.getType(), isPublic, isPublic, isPublic,
                                            null, null, field);
             }
         }
@@ -320,6 +320,8 @@ public class FieldValueAccessorUtil extends Object
                     if (name.startsWith("get") && name.length() > 3) {
                         name = String.valueOf(Character.toLowerCase(name.charAt(3))) + name.substring(4);
                     }
+                    else if (!collection.includeNonBeanStyleGetters()) continue;
+                    
                     collection.updateInfo (name, method.getReturnType(), isPublic, true, false,
                                                method, null, null);
                 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWLocalLoginSessionHandler.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWLocalLoginSessionHandler.java#7 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -72,17 +72,17 @@ public abstract class AWLocalLoginSessionHandler implements AWSessionValidator
         AWRequestContext requestContext, Exception exception)
     {
         // user not authenticated
-        return _handleValidationError(requestContext, true);
+        return _handleValidationError(requestContext, (exception instanceof AWSessionRestorationException));
     }
 
     public AWResponseGenerating handleComponentActionSessionValidationError (
         AWRequestContext requestContext, Exception exception)
     {
-        return _handleValidationError(requestContext, false);
+        return _handleValidationError(requestContext, (exception instanceof AWSessionRestorationException));
     }
 
-    public AWResponseGenerating _handleValidationError (
-        AWRequestContext requestContext, boolean showLogin)
+    AWResponseGenerating _handleValidationError (
+        AWRequestContext requestContext, boolean hadNoSession)
     {
         // if no session just create one and hit front door
         AWSession session = requestContext.session(false);
@@ -90,8 +90,13 @@ public abstract class AWLocalLoginSessionHandler implements AWSessionValidator
             HttpSession httpSession = requestContext.createHttpSession();
             session = AWSession.session(httpSession);
 
-            if (!showLogin) {
-                return AWComponentActionRequestHandler.SharedInstance.processFrontDoorRequest(requestContext);
+            if (hadNoSession) {
+                try {
+                    return AWComponentActionRequestHandler.SharedInstance.processFrontDoorRequest(requestContext);
+                }
+                catch (AWSessionValidationException e) {
+                    return _handleValidationError(requestContext, false);
+                }
             }
         }
 
@@ -109,7 +114,7 @@ public abstract class AWLocalLoginSessionHandler implements AWSessionValidator
         if (handlerResults instanceof AWComponent) {
             AWPage handlerPage = ((AWComponent)handlerResults).page();
             if (session != null && handlerPage.pageComponent().shouldCachePage()) {
-                session.savePage(handlerPage);
+                session.savePage(handlerPage, true);
                 requestContext.setPage(handlerPage);
                 response = requestContext.generateResponse();
             }
@@ -147,6 +152,8 @@ public abstract class AWLocalLoginSessionHandler implements AWSessionValidator
     /*
         Captures a request for replay (via a later form-post redirect
      */
+    static final String[] FormTrue = { "true" };
+
     static class ReplayInvocation
     {
         String _requestUrl;
@@ -158,7 +165,10 @@ public abstract class AWLocalLoginSessionHandler implements AWSessionValidator
         {
             AWBaseRequest req = (AWBaseRequest)requestContext.request();
             _formValues = MapUtil.cloneMap(requestContext.formValues());
+
             _requestUrl = req.uriForReplay(requestContext, _formValues);
+            // TODO: breaks ASN!
+
             AWSession session = requestContext.session(false);
             if (requestContext.page() != null && session != null) {
                 _prevPage = requestContext.pageComponent();
@@ -175,15 +185,26 @@ public abstract class AWLocalLoginSessionHandler implements AWSessionValidator
         public AWResponseGenerating proceed (AWRequestContext requestContext)
         {
             AWSession session = requestContext.session(false);
-            if (_pageMark != null) session.truncatePageCache(_pageMark, false);
 
-            // advance our request ID so this doesn't look like a backtrack / refresh
-            String[] rIDA = _formValues.get(AWRequestContext.ResponseIdKey);
-            if (rIDA != null && session != null) {
-                String origRequestId = rIDA[0];
+            if (session != null) {
+                // pop the login page off the page cache
+                if (_pageMark != null) session.truncatePageCache(_pageMark, false);
+
+                String[] rIDA = _formValues.get(AWRequestContext.ResponseIdKey);
+                if (rIDA != null) {
+                    String origRequestId = rIDA[0];
+                }
+
+                // advance our request ID so this doesn't look like a backtrack / refresh
                 int nextId = session.nextResponseId();
+                rIDA = new String[1];
                 rIDA[0] = Integer.toString(nextId);
                 _formValues.put(AWRequestContext.ResponseIdKey, rIDA);
+
+                // In case this was a front door request, force session rendezvous
+                // so we don't kill the session on replay
+                _formValues.put(AWBaseRequest.IsSessionRendezvousFormKey, FormTrue);
+                _formValues.put(AWBaseRequest.AllowFailedComponentRendezvousFormKey, FormTrue);
             }
             // If this was an incremental request, it's not anymore...
             _formValues.remove(AWRequestContext.IncrementalUpdateKey);

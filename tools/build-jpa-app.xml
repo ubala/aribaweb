@@ -26,9 +26,13 @@
         and war (and generates persistence.xml, web.xml, if necessary)
     </description>
 
+    <!-- Apps can set this in their build.xml to enable Compass free text search
+        <property name="use.compass" value="true"/>
+    -->
+
     <!-- aribaweb.properties: defaults  -->
-    <property name="aw.dependsOn" value="ariba.metaui-jpa"/>
     <property name="aw.useNamespaceFromPackage" value="ariba.ui.meta"/>
+    <property name="dependsOn.jar" value="ariba.metaui-jpa"/>
 
     <import file="${aw.home}/tools/build-metaui-app.xml"/>
 
@@ -37,6 +41,8 @@
 
     <available file="${jpa.tools.dir}/../lib/ext-jpa" property="lib.jpa.dir" value="${jpa.tools.dir}/../lib/ext-jpa"/>
     <property name="lib.jpa.dir" location="${aw.home}/lib/ext-jpa"/>
+    <available file="${jpa.tools.dir}/../lib/ext-compass" property="lib.compass.dir" value="${jpa.tools.dir}/../lib/ext-compass"/>
+    <property name="lib.compass.dir" location="${aw.home}/lib/ext-compass"/>
 
     <!--
         for persistence.xml generation
@@ -45,15 +51,16 @@
     <property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect"/>
     <property name="hibernate.connection.username" value="sa"/>
 
+
     <!-- file
     <property name="database.dir" value="${java.io.tmpdir}/${ant.project.name}-db"/>
-    <property name="hibernate.connection.url" value="jdbc:hsqldb:file://${database.dir}/db"/>
     -->
-
+    <condition property="hibernate.connection.url" value="jdbc:hsqldb:file://${database.dir}/db">
+        <isset property="database.dir"/>
+    </condition>
     <!-- server ...
     <property name="hibernate.connection.url" value="jdbc:hsqldb:hsql://localhost"/>
     -->
-
     <!-- local - in-memory ... -->
     <property name="hibernate.connection.url" value="jdbc:hsqldb:mem:aname"/>
 
@@ -62,18 +69,11 @@
     -->
 
     <!-- Create schema on every run -->
-    <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+    <property name="hibernate.hbm2ddl.auto" value="update"/>
 
-    <target name="init" depends="widgets-app.init">
+    <target name="init" depends="widgets-app.init, compass-init">
         <fileset id="war.jars" dir="${ariba.jars.dir}">
             <include name="ariba.metaui-jpa.jar"/>
-        </fileset>
-
-        <fileset id="war.resource.jars" dir="${ariba.jars.dir}">
-            <include name="ariba.aribaweb.jar"/>
-            <include name="ariba.widgets.jar"/>
-            <include name="ariba.metaui.jar"/>
-            <include name="ariba.demoshell.jar"/>
         </fileset>
     </target>
 
@@ -82,9 +82,25 @@
         <include name="**/*.zip"/>
     </fileset>
 
+    <!--- Compass support -->
+    <target name="compass-init" if="use.compass">
+        <condition property="compass.engine.connection" value="file://${compass.dir}">
+            <isset property="compass.dir"/>
+        </condition>
+        <property name="compass.engine.connection" value="ram://metaui-compass-index"/>
+
+        <fileset id="module.libs3" dir="${lib.compass.dir}">
+            <include name="**/*.jar"/>
+            <include name="**/*.zip"/>
+        </fileset>
+    </target>
+
     <!-- Use concrete aribaweb.properties in src directory or generate one, if none -->
     <target name="explicit-persistence-xml">
         <available file="${src.dir}/persistence.xml" property="persistence.xml" value="${src.dir}/persistence.xml"/>
+        <condition property="persistence.xml" value="">
+            <not><isset property="war.name"/></not>
+        </condition>
     </target>
 
     <target name="check-persistence-xml" depends="explicit-persistence-xml" unless="persistence.xml">
@@ -92,7 +108,7 @@
         <evaluate-template templateFile="${jpa.templates.dir}/persistence.xml" outputFile="${persistence.xml}"/>
     </target>
 
-    <target name="copy-resources" depends="common.copy-resources, check-persistence-xml">
+    <target name="copy-resources" depends="common.copy-resources, check-persistence-xml" if="war.name">
         <copy file="${persistence.xml}" todir="${build.classes.dir}/META-INF" failonerror="true"/>
 
         <copy todir="${build.classes.dir}" failonerror="false">

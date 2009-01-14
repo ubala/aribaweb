@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWUrlRedirect.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWUrlRedirect.java#11 $
 */
 package ariba.ui.aribaweb.core;
 import ariba.ui.aribaweb.core.AWRedirect;
@@ -51,7 +51,7 @@ public class AWUrlRedirect extends AWRedirect
         response.appendContent(RedirectStringStart);
         response.appendContent(AWCurrWindowDecl.currWindowDecl(requestContext));
         response.appendContent(RedirectStmt);
-        response.appendContent(escapeJavascript(url()));
+        response.appendContent(escapeJavascript(getRedirectUrl(requestContext)));
         response.appendContent(RedirectStringFinish);
     }
 }

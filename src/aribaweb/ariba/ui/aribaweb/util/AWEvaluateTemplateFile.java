@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWEvaluateTemplateFile.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWEvaluateTemplateFile.java#3 $
 */
 package ariba.ui.aribaweb.util;
 
 import ariba.util.core.Assert;
+import ariba.util.core.ListUtil;
 import ariba.util.fieldvalue.FieldValue_Object;
 import ariba.util.fieldvalue.FieldPath;
 import ariba.util.fieldvalue.FieldValueException;
@@ -31,6 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.Map;
+import java.util.List;
+import java.net.MalformedURLException;
 
 /**
     Command line task for evaluating an template file (.awl) in terms of a
@@ -42,7 +45,8 @@ import java.util.Map;
 public class AWEvaluateTemplateFile extends AWComponent
 {
     static File _templateFile;
-    Map _properties;
+    public Map <String, Object>_properties;
+    public String propName;
 
     public static void main (String[] args)
     {
@@ -73,6 +77,7 @@ public class AWEvaluateTemplateFile extends AWComponent
         Assert.that(_templateFile.exists(), "Can't find: %s", _templateFile);
         AWEvaluateTemplateFile page = (AWEvaluateTemplateFile)AWComponent.createPageWithName(AWEvaluateTemplateFile.class.getName());
         page._properties = properties;
+
         return page;
     }
     
@@ -93,6 +98,16 @@ public class AWEvaluateTemplateFile extends AWComponent
         return parseTemplate(fileInputStream);
     }
 
+    protected String fullTemplateResourceUrl ()
+    {
+        try {
+            return _templateFile.toURL().toString();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return _templateFile.getAbsolutePath();
+        }
+    }
+
     // to prevent whitespace compression
     public boolean useXmlEscaping()
     {
@@ -102,6 +117,21 @@ public class AWEvaluateTemplateFile extends AWComponent
     protected void validate (AWValidationContext validationContext)
     {
         // no op, so we don't get complaints about missing bindings for property keys
+    }
+
+    public List propertiesMatchingPrefix (String prefix)
+    {
+        List matches = ListUtil.list();
+        for (String name : _properties.keySet()) {
+            if (name.startsWith(prefix)) matches.add(name);
+        }
+
+        return matches;
+    }
+
+    public String decamelize (String string)
+    {
+        return AWUtil.decamelize(string, '-', false);
     }
 
     /*

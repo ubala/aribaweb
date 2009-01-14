@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWIncludeComponent.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWIncludeComponent.java#10 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -134,7 +134,39 @@ public class AWIncludeComponent extends AWContainerElement
     {
         AWBindable element;
         Map newBindingsHashtable = bindingsForNewReference(component);
+
+        // create content first so it can remove bindings
+        AWElement contentElement = createContentElement(component, newBindingsHashtable, application);
+
+        element = createElement(componentName, component, application, newBindingsHashtable);
+        if (element instanceof AWElementContaining && contentElement != null) {
+            ((AWElementContaining)element).add(contentElement);
+        }
+        return element;
+    }
+
+    protected AWElement createContentElement (AWComponent component, Map newBindingsHashtable,
+                                              AWApplication application)
+    {
+        AWElement contentElement = contentElement();
         AWBinding awContentBinding = (AWBinding)newBindingsHashtable.remove(AWBindingNames.awcontent);
+        AWBinding awContentElementBinding = (AWBinding)newBindingsHashtable.remove(AWBindingNames.awcontentElement);
+        // see if we have a binding for our component content
+        if (awContentBinding != null || awContentElementBinding != null) {
+            Map valueBindingMap = new HashMap();
+            if (awContentBinding != null) valueBindingMap.put("value", awContentBinding);
+            String elementName = (awContentElementBinding != null)
+                    ? awContentElementBinding.stringValue(component) : null;
+            if (elementName == null) elementName = "AWString";
+            contentElement = createElement(elementName, component, application, valueBindingMap);
+        }
+        return contentElement;
+    }
+
+    protected AWBindable createElement (String componentName, AWComponent component,
+                                      AWApplication application, Map newBindingsHashtable)
+    {
+        AWBindable element;
         AWComponentDefinition componentDefinition = ((AWConcreteApplication)application)._componentDefinitionForName(componentName, component);
         if (componentDefinition != null) {
             element = AWComponentReference.create(componentDefinition);
@@ -160,20 +192,6 @@ public class AWIncludeComponent extends AWContainerElement
                                             templateName(), String.valueOf(lineNumber()));
                 throw new AWGenericException(errorMessage, instantiationException);
             }
-        }
-        if (element instanceof AWElementContaining) {
-            AWElement contentElement = contentElement();
-            // see if we have a binding for our component content
-            if (awContentBinding != null) {
-                Map valueBindingMap = new HashMap();
-                valueBindingMap.put("value", awContentBinding);
-                contentElement = new AWString();
-                ((AWString)contentElement).init("AWString", valueBindingMap);
-                setTemplateName(templateName());
-                setLineNumber(lineNumber());
-            }
-            // To Do -- consider fabricating a dynamic (binding-based) body
-            ((AWElementContaining)element).add(contentElement);
         }
         return element;
     }
@@ -260,7 +278,8 @@ public class AWIncludeComponent extends AWContainerElement
             return index;
         }
 
-        Assert.that(canCreate, "IncludeComponent failed to rendezvous with existing element "
+        Assert.that(canCreate || component.requestContext().allowFailedComponentRendezvous(),
+                "IncludeComponent failed to rendezvous with existing element "
                 + "-- likely cause: illegal change between phases that shouldn't:  New ComponentReference: %s",
                 element);
 

@@ -1,0 +1,14 @@
+module=model.Issue {
+    rank:0;
+    trait:SearchDetail!;
+    layout=InspectStack {
+        object {
+            @layout#Tabs {
+                bindings: { contentClass:"tabContentWrapper noPadding"; }
+                @layout=Notes#Form { zonePath:Notes; }
+                @layout=Watchers#Stack { }
+            }
+        }
+    }
+    field=notes { label:null; class { bindings: {class:"noBox scrollTableWrapper"} } }
+}

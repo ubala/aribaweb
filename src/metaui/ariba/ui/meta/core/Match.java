@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Match.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Match.java#5 $
 */
 package ariba.ui.meta.core;
 
@@ -25,20 +25,22 @@ class Match
 {
     static final int[] EmptyMatchArray = {0};
 
-    int _keysMatchedMask;
+    long _keysMatchedMask;
     int[] _matches;
+    long _matchPathCRC = 0;
 
     protected Match () {}
 
-    protected Match (int[] matches, int keysMatchedMask)
+    protected Match (int[] matches, long keysMatchedMask, long matchPathCRC)
     {
         _keysMatchedMask = keysMatchedMask;
         _matches = matches;
+        _matchPathCRC = matchPathCRC;
     }
 
     // Hash implementation so we can cache properties by MatchResult
     public int hashCode() {
-        long ret = _keysMatchedMask;
+        long ret = _keysMatchedMask * 31 + _matchPathCRC;
         if (_matches != null) {
             for (int i=0, c=_matches[0]; i<c; i++) {
                 ret = AWChecksum.crc32(ret, _matches[i+1]);
@@ -50,6 +52,7 @@ class Match
     public boolean equals(Object o) {
         Match other = (Match)o;
         return (_keysMatchedMask == other._keysMatchedMask) &&
+                 _matchPathCRC == other._matchPathCRC &&
                  _arrayEq(_matches, other._matches);
     }
 
@@ -100,7 +103,7 @@ class Match
         public Match immutableCopy ()
         {
             _invalidateIfStale();
-            return new Match(matches(), _keysMatchedMask);
+            return new Match(matches(), _keysMatchedMask, _matchPathCRC);
         }
 
         void _invalidateIfStale ()
@@ -141,7 +144,7 @@ class Match
                 _matches = intersect(_meta._rules, newArr, prevMatches,
                         keyMask, _prevMatch._keysMatchedMask);
 
-                /* NOT NEEDED: now we use the property key as the *value* in the declare predicate
+                /* NOT NEEDED: now we use the property key as the *value* in the declare selector
                 // if this is a Declare match, then force match on the last property
                 if (keyMask == _meta.declareKeyMask()) {
                     MatchResult prev = _prevMatch;
@@ -160,6 +163,14 @@ class Match
                 */
                 _keysMatchedMask =  keyMask | _prevMatch._keysMatchedMask;
             }
+
+            // compute path CRC
+            _matchPathCRC = -1;
+            for (MatchResult mr = this; mr != null; mr = mr._prevMatch) {
+                _matchPathCRC = AWChecksum.crc32(_matchPathCRC, mr._keyData._key);
+                if (mr._value != null) _matchPathCRC = AWChecksum.crc32(_matchPathCRC, mr._value.hashCode());
+            }
+            if (_matchPathCRC == 0) _matchPathCRC = 1;
         }
 
         void _logMatchDiff(int[] a, int[] b)
@@ -223,7 +234,7 @@ class Match
     }
 
     // only rules that use only the activated (queried) keys
-    static int[] filter (List<Rule> rules, int[] arr, int notQueriedMask)
+    static int[] filter (List<Rule> rules, int[] arr, long notQueriedMask)
     {
         if (arr == null) return null;
         int[] result = null;
@@ -232,7 +243,8 @@ class Match
             int r = arr[i+1];
             Rule rule = rules.get(r);
             if ((rule._keyMatchesMask & notQueriedMask) == 0
-                    && (rule._keyAntiMask & ~notQueriedMask) == 0 ) {
+                    && (rule._keyAntiMask & ~notQueriedMask) == 0
+                    && !rule.disabled()) {
                 result = addInt(result, r);
             }
         }
@@ -255,13 +267,13 @@ class Match
         return result;
     }
 
-    static int[] intersect (List<Rule> rules, int[] a, int[] b, int aMask, int bMask) {
+    static int[] intersect (List<Rule> rules, int[] a, int[] b, long aMask, long bMask) {
         if (a == null) return b;
         int[] result = null;
         int iA = 1, sizeA = a[0], iB = 1, sizeB = b[0];
         while (iA <= sizeA || iB <=sizeB) {
-            int iAMask = (iA <= sizeA) ? rules.get(a[iA])._keyMatchesMask : 0;
-            int iBMask = (iB <= sizeB) ? rules.get(b[iB])._keyMatchesMask : 0;
+            long iAMask = (iA <= sizeA) ? rules.get(a[iA])._keyMatchesMask : 0;
+            long iBMask = (iB <= sizeB) ? rules.get(b[iB])._keyMatchesMask : 0;
             int c = (iA > sizeA ? 1 : (iB > sizeB ? -1
                     : (a[iA] - b[iB])));
             if (c == 0) {

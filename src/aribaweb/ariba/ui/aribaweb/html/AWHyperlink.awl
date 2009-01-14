@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.awl#31 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.awl#32 $
     </Copyright>
 
     <Overview>
@@ -101,7 +101,7 @@
     <a:If ifFalse="$^omitTags">\
         <a:MetaTemplateConditional>\
             <a elementId="$elementId" href="#" id="$elementId" bh="$^behavior:HL"
-                    _t="$frameName" _w="$^windowAttributes"
+                    _t="$frameName" _w="$^windowAttributes" _sf="false"
                     onKeyPress="$^onKeyPress" onClick="$^onClick"
                     invokeAction="$invokeAction" isSender="$isSender" omitTags="$^omitTags" otherBindings="$otherBindingsValues">\
                 <a:IncludeContent/>\
@@ -121,7 +121,7 @@
         <!--- isSubmit: this href is *only* thing we found that works on IE, NS, and IE/Mac
             which has proper link coloring and does not adversely affect backtracking -->\
         <a href="#" elementId="$elementId" id="$elementId" bh="$^behavior:HL"
-                _t="$frameName" _w="$^windowAttributes" _sf="true"
+                _t="$frameName" _w="$^windowAttributes"
                 onKeyPress="$^onKeyPress" onClick="$^onClick"
                 isSender="$isHiddenFieldSender" invokeAction="$invokeAction" otherBindings="$otherBindingsValues">\
             <a:IncludeContent/>\

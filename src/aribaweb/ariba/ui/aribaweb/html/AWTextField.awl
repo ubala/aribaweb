@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#32 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#33 $
     </Copyright>
 
     <Overview>
@@ -94,6 +94,14 @@
         For internal use: Allow for override of text field behavior.
     </Binding>
 
+    <Binding key="class" direction="get" type="String" required="$false">
+        CSS class
+    </Binding>
+
+    <Binding key="size" direction="get" type="int" required="$false">
+        INPUT size (if not specified tfW class applied, resulting in 156px wide field)
+    </Binding>
+
 </a:Api>\
 <a:If ifTrue="$isEditable">\
     <input type="text" elementId="$elementId" id="$textFieldId" name="$textFieldName"
@@ -101,7 +109,8 @@
         _tf="$tfActionType" invokeAction="$invokeAction" isSender="$isSender"
         awautoselect="$allowAutoFocus"
         disabled="$isDisabled"
-        style="$style"
+        size="$^size"
+        class="$cssClass"
         bh="$^behavior:TF"
         otherBindings="$otherBindingsValues"/>\
     <a:RefreshRegion>\

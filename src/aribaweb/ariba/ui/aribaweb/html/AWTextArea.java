@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.java#30 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.java#31 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -52,12 +52,12 @@ public class AWTextArea extends AWComponent
          BindingNames.showMaxLength
     };
     public AWEncodedString _elementId;
+    public AWEncodedString _textAreaId;
     private AWEncodedString _textAreaName;
     private Object _errorKey;
     private Object _formatter;
     private boolean _formatterHandlesNulls;
     private boolean _disabled;
-    private AWEncodedString _maxLengthIndicatorId;
 
     private static final String LimitTextLengthFmt =
         "ariba.Dom.limitTextLength(document.%s.%s,%s);";
@@ -81,12 +81,12 @@ public class AWTextArea extends AWComponent
     protected void sleep ()
     {
         _elementId = null;
+        _textAreaId = null;
         _textAreaName = null;
         _errorKey = null;
         _formatter = null;
         _formatterHandlesNulls = false;
         _disabled = false;
-        _maxLengthIndicatorId = null;
     }
 
     public AWEncodedString limitTextJavaScriptString ()
@@ -107,7 +107,7 @@ public class AWTextArea extends AWComponent
         return _textAreaName;
     }
 
-    private Object maxLength ()
+    public Object maxLength ()
     {
         Object objectValue = valueForBinding(BindingNames.maxLength);
         if (objectValue instanceof Integer) {
@@ -176,11 +176,13 @@ public class AWTextArea extends AWComponent
 
     public AWEncodedString textAreaId ()
     {
-        AWEncodedString textAreaId = AWInputId.getAWInputId(requestContext());
-        if (textAreaId == null) {
-            textAreaId = textAreaName();
+        if (_textAreaId == null) {
+            _textAreaId = AWInputId.getAWInputId(requestContext());
+            if (_textAreaId == null) {
+                _textAreaId = textAreaName();
+            }
         }
-        return textAreaId;
+        return _textAreaId;
     }
 
     public AWEncodedString onKeyDownString ()
@@ -239,12 +241,8 @@ public class AWTextArea extends AWComponent
 
     public AWEncodedString maxLengthIndicatorId ()
     {
-        if (_maxLengthIndicatorId == null) {
-            _maxLengthIndicatorId =
-                AWEncodedString.sharedEncodedString(
+        return AWEncodedString.sharedEncodedString(
                     StringUtil.strcat(textAreaId().toString(), "MLI"));            
-        }
-        return _maxLengthIndicatorId;
     }
 
     public int maxLengthIndicatorString ()

@@ -1,0 +1,11 @@
+<w:BasicPageWrapper hasForm="$true">\
+    <m:Context operation="edit" object="$params">
+        <br/><br/><br/>
+        This is a parametrized stager that can invoked with the following parameters:
+        <br/> <br/>
+        <m:Form/>
+        &nbsp;
+        <w:TextButton action="$null">Run Stager </w:TextButton>
+        <w:TextButton action="$null">Cancel </w:TextButton>
+    </m:Context>
+</w:BasicPageWrapper>

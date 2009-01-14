@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#24 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#25 $
 */
 package ariba.ui.validation;
 
@@ -30,6 +30,7 @@ import ariba.util.core.StringUtil;
 import ariba.util.formatter.DateFormatter;
 import ariba.util.formatter.IntegerFormatter;
 import ariba.util.formatter.DoubleFormatter;
+import ariba.util.formatter.LongFormatter;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -40,6 +41,7 @@ public final class AWVFormatterFactory
 {
     public static final String RequiredStringFormatterKey = "requiredString";
     public static final String IntegerFormatterKey = "integer";
+    public static final String LongFormatterKey = "long";
     public static final String DoubleFormatterKey = "double";
     public static final String MoneyFormatterKey = "money";
     public static final String ShortDateFormatterKey = "shortDate";
@@ -53,6 +55,7 @@ public final class AWVFormatterFactory
     public static final String HiddenPassword = "hiddenPassword";
     public static final String Identifier = "identifier";
     public static final String XMLFormattersKey = "xml";
+    public static final String BlankNullFormattersKey = "blankNull";
 
     public static final Object CanonicalDateFormatter;
     public static final Object JavaFormatDateFormatter;
@@ -164,14 +167,12 @@ public final class AWVFormatterFactory
 
     public static Map createFormattersForSession (Locale locale, TimeZone timeZone)
     {
-        Map formatters = MapUtil.map();
+        Map<String, Object> formatters = MapUtil.map();
 
         // $formatters.xml.<xxx> returns a formatter that will convert from a canonical string
         // represenation of a date or number, to whatever <xxx> does..
-        Map xml = MapUtil.map();
-        formatters.put(XMLFormattersKey, xml);
-
         formatters.put(RequiredStringFormatterKey, new NonBlankString());
+        Map xml = MapUtil.map();
 
         // Because of component dependency, we cannot reference the money formatter
         // directly.  Instead, it is registered dynamically.  If none has been register,
@@ -209,6 +210,11 @@ public final class AWVFormatterFactory
         Object intXML = new AWVBigDecimalFormatter("#,###", 0, locale);
         xml.put(IntegerFormatterKey, new PipedFormatter(CanonicalNumberFormatter, intXML));
 
+        Object longFormatter = new LongFormatter();
+        formatters.put(LongFormatterKey, longFormatter);
+        Object longXML = new AWVBigDecimalFormatter("#,###", 0, locale);
+        xml.put(LongFormatterKey, new PipedFormatter(CanonicalNumberFormatter, longXML));
+
         // Todo:  Should use either CanonicalDateFormatter, or JavaFormatDateFormatter, but not both!
         Object shortDate = new AWVShortDateFormatter(locale, timeZone);
         formatters.put(ShortDateFormatterKey, shortDate);
@@ -240,6 +246,15 @@ public final class AWVFormatterFactory
         formatters.put(HiddenPassword, new HiddenPasswordFormatter());
 
         formatters.put(Identifier, new AWVIdentifierFormatter(locale));
+
+        Map blankNull = MapUtil.map();
+        for (Map.Entry<String, Object> e : formatters.entrySet()) {
+            blankNull.put(e.getKey(), new BlankNullChainedFormatter(e.getValue()));
+        }
+
+        formatters.put(BlankNullFormattersKey, blankNull);
+        formatters.put(XMLFormattersKey, xml);
+
         return formatters;
     }
 
@@ -278,6 +293,28 @@ public final class AWVFormatterFactory
         {
             if (StringUtil.nullOrEmptyOrBlankString(stringToParse)) throw new ParseException("Value required", 0);
             return stringToParse;
+        }
+    }
+
+    static public final class BlankNullChainedFormatter extends AWFormatter
+    {
+        /* AWFormatting */ Object formatter;
+
+        public BlankNullChainedFormatter (Object otherFormatter)
+        {
+            formatter = otherFormatter;
+        }
+
+        public String format (Object value)
+        {
+            return (value == null) ? "" : AWFormatting.get(formatter).format(formatter, value);
+        }
+
+        public Object parseObject (String stringToParse) throws ParseException
+        {
+            return (StringUtil.nullOrEmptyOrBlankString(stringToParse))
+                ? null
+                : AWFormatting.get(formatter).parseObject(formatter,  stringToParse);
         }
     }
 

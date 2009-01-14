@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#66 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#69 $
 */
 package ariba.ui.table;
 
@@ -28,6 +28,8 @@ import ariba.util.fieldvalue.FieldPath;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;
+import java.util.IdentityHashMap;
+import java.util.ArrayList;
 
 public final class AWTDisplayGroup
 {
@@ -163,11 +165,7 @@ public final class AWTDisplayGroup
         _allObjects = allObjects;
         _origAllObjects = allObjects.toArray();
 
-        // clear our state associated with the old objects -- arguably we should be
-        // calling validateSelection() to attempt to preseve any compatible portions
-        // of the selection...
-        _selectedObjects = ListUtil.list();
-        _selectedObject = null;
+        // clear our state associated with the old objects
         _currentItemExtras = null;
         if (_grouper != null) _grouper.invalidate();
         _groupingValueState = null;
@@ -176,6 +174,10 @@ public final class AWTDisplayGroup
         // invalidate dependent values
         updateDisplayedObjects();
 
+        // Use validateSelection() to attempt to preseve any compatible portions
+        // of the selection...
+        _validateSelection();
+        
         if (itemListener != null) {
             itemListener.rowsReset(_owningTable);
         }
@@ -325,6 +327,7 @@ public final class AWTDisplayGroup
         if (_filteredObjects == null) {
             _filteredObjects = sortedChildList(_allObjects);
             if (_grouper != null) _grouper.validateFilteredList(_filteredObjects);
+            detailExpansionPrepareForObjects(_filteredObjects);
         }
         return _filteredObjects;
     }
@@ -609,6 +612,76 @@ public final class AWTDisplayGroup
         setGroupingExpanded(_currentItem, expanded);
     }
 
+    protected Map<Object, Boolean>_detailRowExpansions;
+    protected boolean _detailRowAutoCollapse;
+    public enum InitialExpandType { None, First, Last };
+    protected InitialExpandType _detailInitialExpansionType = InitialExpandType.None;
+
+    public InitialExpandType detailInitialExpansionType ()
+    {
+        return _detailInitialExpansionType;
+    }
+
+    public void setDetailInitialExpansionType (InitialExpandType detailInitialExpansionType)
+    {
+        _detailInitialExpansionType = detailInitialExpansionType;
+    }
+
+    public boolean detailRowAutoCollapse ()
+    {
+        return _detailRowAutoCollapse;
+    }
+
+    public void setDetailRowAutoCollapse (boolean detailRowAutoCollapse)
+    {
+        _detailRowAutoCollapse = detailRowAutoCollapse;
+    }
+
+    boolean detailExpansionEnabled ()
+    {
+        return _detailRowExpansions != null;
+    }
+
+    void setDetailExpansionEnabled (boolean yn)
+    {
+        if (yn != detailExpansionEnabled()) {
+            _detailRowExpansions = (yn) ? new IdentityHashMap() : null;
+        }
+    }
+
+    void detailExpansionPrepareForObjects (List objects) {
+        if (detailExpansionEnabled() && detailInitialExpansionType() != InitialExpandType.None
+                && !ListUtil.nullOrEmptyList(objects)) {
+
+            // If any of our old expansions apply, no need to auto expand
+            for (Object o : _detailRowExpansions.keySet()) {
+                if (ListUtil.indexOfIdentical(objects, o) != -1) return;
+            }
+
+            _detailRowExpansions.clear();
+            Object o = (detailInitialExpansionType() == InitialExpandType.First)
+                            ? objects.get(0) : ListUtil.lastElement(objects);
+            _detailRowExpansions.put(o, true);
+        }
+    }
+
+    public boolean currentDetailExpanded ()
+    {
+        return (_detailRowExpansions == null) || _detailRowExpansions.get(currentItem()) != null;
+    }
+
+    public void toggleCurrentDetailExpanded ()
+    {
+        boolean expanded = !currentDetailExpanded();
+        if (_detailRowAutoCollapse) _detailRowExpansions.clear();
+        if (expanded) {
+            _detailRowExpansions.put(currentItem(), true);
+        } else {
+            _detailRowExpansions.remove(currentItem());
+        }
+    }
+
+
     /**
      * Use with care -- causes array to get created.
      * This is the list of objects that will be displayed between batchStartIndex() and batchEndIndex().
@@ -722,6 +795,8 @@ public final class AWTDisplayGroup
     {
         // remove anything that's not part of the filteredObjects
         List filteredObjects = filteredObjects();
+        if (_selectedObjects == null) _selectedObjects = ListUtil.list();
+
         int i = _selectedObjects.size();
         while (i-- > 0) {
             if (indexOf(filteredObjects, _selectedObjects.get(i)) < 0) {
@@ -730,6 +805,10 @@ public final class AWTDisplayGroup
         }
         if (_forceSingleSelection && (_selectedObjects.isEmpty())) {
             _selectFirst();
+        }
+
+        if (_selectedObject != null && indexOf(_selectedObjects, _selectedObject) < 0) {
+            _selectedObject = ListUtil.firstElement(_selectedObjects);
         }
     }
 
@@ -751,16 +830,23 @@ public final class AWTDisplayGroup
     public void _setItemToForceVisible (Object rootItem, Object leafItem)
     {
         _itemToForceVisible = leafItem;
-
-        // try to place 40% down list, but make sure still in bounds
-         // if we get -1, the code below will fix it to 0
         int index = ListUtil.indexOfIdentical(filteredObjects(), rootItem);
-        int topIndex = (int)(index - (_numberOfObjectsPerBatch * 0.4));
-        if (topIndex + _numberOfObjectsPerBatch > filteredObjects().size()) {
-            topIndex = filteredObjects().size() - _numberOfObjectsPerBatch;
+        int topIndex = 0;
+        if (_useBatching) {
+            // find the closest batch top index
+            int batchIndex = (int)index / _numberOfObjectsPerBatch;
+            topIndex = batchIndex *  _numberOfObjectsPerBatch;                               
         }
-        if (topIndex < 0) {
-            topIndex = 0;
+        else {
+            // try to place 40% down list, but make sure still in bounds
+             // if we get -1, the code below will fix it to 0            
+            topIndex = (int)(index - (_numberOfObjectsPerBatch * 0.4));
+            if (topIndex + _numberOfObjectsPerBatch > filteredObjects().size()) {
+                topIndex = filteredObjects().size() - _numberOfObjectsPerBatch;
+            }
+            if (topIndex < 0) {
+                topIndex = 0;
+            }
         }
         setBatchStartIndex(topIndex);
         _isResetScrollTop = true;
@@ -1241,7 +1327,19 @@ public final class AWTDisplayGroup
     // "sortDataSource" comments in AWTDataTable
     public void fetch ()
     {
+        _didInitialFetch = false;
         updateDisplayedObjects();
+    }
+
+    public Object insert ()
+    {
+        if (_dataSource == null) return null;  // Assert?
+        Object obj = _dataSource.insert();
+        List newAllObjs = new ArrayList(allObjects());
+        newAllObjs.add(obj);
+        setObjectArray(newAllObjs);
+        setSelectedObject(obj);
+        return obj;
     }
 
     /**

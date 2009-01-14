@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#8 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -201,11 +201,11 @@ public class TestContext
 
     public String getReturnUrlName ()
     {
-       return _returnUrl != null ? _returnUrl[0] : null;
+       return _returnUrl != null ? _returnUrl[1] : null;
     }
 
     public String getReturnUrl ()
     {
-        return _returnUrl != null ? _returnUrl[1] : null;
+        return _returnUrl != null ? _returnUrl[0] : null;
     }
 }

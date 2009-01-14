@@ -10,10 +10,12 @@
                             editable="$metaContext.properties.editing"
                             okAction="$save">\
             <!--- Todo: ActionCategory PageActions in button bar -->
+            <!--- $ariba.ui.meta.persistence.ObjectContext.get ($ariba.ui.meta.persistence.ObjectContext.get.groupName_debug) -->
             <a:IncludeContent/>
         </w:ModalPageWrapper>\
     <a:Else/>\
         <w:BasicPageWrapper hasForm="$true">\
+            <!--- $ariba.ui.meta.persistence.ObjectContext.get ($ariba.ui.meta.persistence.ObjectContext.get.groupName_debug) -->
             <a:If ifTrue="$metaContext.properties.title">\
                 <h1>$metaContext.properties.title</h1>
             </a:If>\

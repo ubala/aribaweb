@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+<!--
+    AtIssue application
+ -->
+
+<project name="AtIssue" default="launch">
+
+    <description>
+        MetaUI Issue tracking sample application
+    </description>
+
+    <!-- for persistence.xml generation: See build-jpa-app.xml for additional parameters -->
+    <!-- File for HSQLDB database
+    <property name="database.dir" value="${java.io.tmpdir}/${ant.project.name}-db"/>
+    <property name="compass.dir" value="${java.io.tmpdir}/${ant.project.name}-lucene"/>
+    -->
+    <property name="database.dir" value="${java.io.tmpdir}/${ant.project.name}-db"/>
+    <property name="compass.dir" value="${java.io.tmpdir}/${ant.project.name}-lucene"/>
+
+    <property name="enable.groovy" value="true"/>
+
+    <!-- Non-lazy app startup (so we start reading mail even before our first user request)
+    <property name="servlet.init.onstartup" value="true"/>
+    -->
+
+    <!-- figure out location of parent build file - more complicated
+         for this example, since we want to run out of ariba source structure -->
+    <property environment="env"/>
+    <property name="aw.home" location="${env.AW_HOME}"/>
+    <available file="../../tools" property="jpa.tools" value="../../tools"/>
+    <property name="jpa.tools" location="${aw.home}/tools"/>
+    <import file="${jpa.tools}/build-appcore-app.xml"/>
+
+</project>

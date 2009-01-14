@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBookmarkFormatter.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBookmarkFormatter.java#2 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -39,8 +39,8 @@ public abstract class AWBookmarkFormatter extends ClassExtension
     public static String format (Object val)
     {
         AWBookmarkFormatter bformatter = (AWBookmarkFormatter)ClassExtensionRegistry.get(val.getClass());
-        if(bformatter != null){
-            bformatter.formatObject(val);
+        if (bformatter != null) {
+            return bformatter.formatObject(val);
         }
 
         return Formatter.getFormatterForObject(val).getFormat(val);
@@ -49,8 +49,8 @@ public abstract class AWBookmarkFormatter extends ClassExtension
     public static Object parse (String val, Class<?> type) throws ParseException
     {
         AWBookmarkFormatter bformatter = (AWBookmarkFormatter)ClassExtensionRegistry.get(type);
-        if(bformatter != null){
-            bformatter.parseString(val);
+        if (bformatter != null) {
+            return bformatter.parseString(val);
         }
         return Formatter.parseString(val,type.getName());
     }

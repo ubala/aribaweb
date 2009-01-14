@@ -101,12 +101,14 @@
         </java>
     </target>
 
-    <target name="groovysh">
-        <pathconvert refid="groovy.script.classpath" property="classpath.string"/>
+    <target name="groovysh" depends="init, check-debug">
+        <pathconvert refid="groovysh.classpath" property="classpath.string"/>
         <echo message="Launching groovy shell with classpath: ${classpath.string}"/>
+        <echo message="transport=${env.JPDA_TRANSPORT}, address=${env.JPDA_ADDRESS}"/>
         <exec dir="." executable="groovyConsole">
             <arg value="-cp"/>
             <arg value="${classpath.string}"/>
+            <env key="JAVA_OPTS" value="-Xdebug -Xrunjdwp:transport=${env.JPDA_TRANSPORT},address=${env.JPDA_ADDRESS},server=y,suspend=n"/>
         </exec>
     </target>
 
@@ -359,6 +361,8 @@
                 <property name="build.jars.dir" value="${build.jars.dir}"/>
                 <property name="use.shared.webapps.base" value="true"/>
                 <fileset dir="${src.dir}" includes="build.xml" erroronmissingdir="false"/>
+                <fileset dir="${src.ui.dir}" includes="metaui-jpa/examples/appcore/build.xml" erroronmissingdir="true"/>
+                <fileset dir="${src.samples.dir}" includes="**/appcore/build.xml"/>
                 <fileset dir="${src.samples.dir}" includes="**/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="*/examples/*/build.xml" erroronmissingdir="false"/>
             </subant>

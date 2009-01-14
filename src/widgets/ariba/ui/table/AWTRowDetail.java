@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowDetail.java#13 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowDetail.java#14 $
 */
 package ariba.ui.table;
 
@@ -20,7 +20,7 @@ import java.util.Map;
 import ariba.ui.aribaweb.core.AWBinding;
 import ariba.ui.aribaweb.core.AWBindingNames;
 
-public final class AWTRowDetail extends AWTColumn
+public final class AWTRowDetail extends AWTColumn implements AWTDataTable.DetailColumn
 {
     public AWBinding      _isVisibleBinding;
     public AWBinding      _nestedTableLayout;

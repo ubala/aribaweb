@@ -1,0 +1,35 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableDetailColumnRenderer.awl#1 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+</a:Api>\
+<a:For list="$fields" item="$fieldName">
+    <m:Context field="$fieldName" object="$_currentItem">\
+        <a:If ifTrue="$metaContext.properties.visible">
+            <a:RefreshRegion tagName="tr" class="$rowClass" forceRenderRows="$table.forceRenderRows">
+                <td _ifTrue="$table.hasInvisibleSelectionColumn" width="1px"></td>
+                <td _ifTrue="$visibleLeadingCols" class="$tdClass" colspan="$visibleLeadingCols" width="1px">&nbsp;</td>
+                <td class="$tdClass" colspan="$table.colsAfterFirstDataColumn" style="padding-left:20px">\
+                    <m:IncludeComponent/>\
+                </td>
+            </a:RefreshRegion>
+        </a:If>
+    </m:Context>
+</a:For>

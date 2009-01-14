@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#21 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#22 $
     </Copyright>
 
     <Overview>
@@ -82,7 +82,7 @@
             <table cellspacing="0" cellpadding="0" awmenuId="$menuId" class="chWrap">
                 <tr>
                     <td class="chWrapLeft">
-                        <a:TextField class="chText"
+                        <a:TextField class="$cssClass"
                                      value="$displayValue"
                                      behavior="$behavior"
                                      onFOcus="return ariba.Chooser.chooserFocus(this, event);"

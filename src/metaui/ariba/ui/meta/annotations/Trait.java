@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Trait.java#5 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Trait.java#7 $
 */
 package ariba.ui.meta.annotations;
 
@@ -64,9 +64,9 @@ public class Trait
     static public void registerAnnotation (final Class annotationClass, final String name, ObjectMeta meta)
     {
         meta.registerAnnotationListener(annotationClass, new ObjectMeta.AnnotationProcessor(){
-            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List predicateList, Map propertyMap, boolean isAction)
+            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List selectorList, Map propertyMap, boolean isAction)
             {
-                ObjectMeta.addTrait(name, propertyMap);
+                if (!isAction) ObjectMeta.addTrait(name, propertyMap);
             }
         });
     }

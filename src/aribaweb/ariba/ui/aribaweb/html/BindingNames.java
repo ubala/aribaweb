@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/BindingNames.java#20 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/BindingNames.java#21 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -21,6 +21,7 @@ import ariba.ui.aribaweb.core.AWBindingNames;
 
 abstract public class BindingNames extends AWBindingNames
 {
+    public static final String autocomplete               = "autocomplete";
     public static final String errorKey                   = "errorKey";
     public static final String errorKeys                  = "errorKeys";
     public static final String errorValueSource           = "errorValueSource";

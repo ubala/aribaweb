@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#115 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#117 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -166,6 +166,9 @@ abstract public class AWConcreteApplication
             application._PostInitCallbacks = null;
             application._didCompleteInit = true;
         }
+
+        application.awake();
+
         return application;
     }
 
@@ -1228,16 +1231,6 @@ abstract public class AWConcreteApplication
     public AWBookmarker getBookmarker ()
     {
         return _bookmarker;
-    }
-
-    public String encryptString (String val)
-    {
-        return val;
-    }
-
-    public String decryptString (String encVal)
-    {
-        return encVal;
     }
 
     //////////////////////

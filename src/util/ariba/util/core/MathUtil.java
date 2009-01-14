@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MathUtil.java#10 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MathUtil.java#11 $
 */
 
 package ariba.util.core;
@@ -31,6 +31,8 @@ import java.util.List;
 */
 public final class MathUtil
 {
+	private static final long Offset = power2(32);
+	
     /* prevent people from creating instances of this class */
     private MathUtil ()
     {
@@ -645,4 +647,61 @@ public final class MathUtil
     {
         return value < lower ? lower : (value > upper ? upper : value);
     }
+    
+    /**
+	    Private method that calculates the hash code for the char[]
+	    <b>val</b> according to the sun's unique implementation which
+	    they say will be standard in 1.2 (love those standards)
+    */
+	public static final int sunHashCode (char[] val)
+	{
+	    int i1 = 0;
+	    int j = 0;
+	    char ach[] = val;
+	    int k = val.length;
+	    for (int i2 = 0; i2 < k; i2++)
+	        i1 = 31 * i1 + ach[j++];
+	    return i1;
+	}
+    
+    /**
+        Private method that calculates the hash code for the char[]
+        <b>val</b> according to the java spec.
+    */
+	public static final int normalHashCode (char[] val)
+	{
+	    int h = 0;
+	    int off = 0;
+	    int len = val.length;
+	
+	    if (len < 16) {
+	        for (int i = len ; i > 0; i--) {
+	            h = (h * 37) + val[off++];
+	        }
+	    }
+	    else {
+	            // only sample some characters
+	        int skip = len / 8;
+	        for (int i = len ; i > 0; i -= skip, off += skip) {
+	            h = (h * 39) + val[off];
+	        }
+	    }
+	    return h;
+	}
+	
+	/**
+     * @param s
+     * @return int
+     * <br> A convenience method to return an unsigned hash for a given 
+     * String. If a hash code generated is negative, it is offset by 
+     * adding <code>2 ^ 32</code> 
+     */
+    public static final long unsignedUniqueId (String s)
+    {
+    	int jdkHash = sunHashCode(s.toCharArray());
+    	long unsignedId = jdkHash < 0 ? jdkHash + Offset :
+    		jdkHash;
+    	return unsignedId;
+    }
+
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaSearchForm.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaSearchForm.java#5 $
 */
 
 package ariba.ui.meta.layouts;
@@ -20,8 +20,10 @@ package ariba.ui.meta.layouts;
 import ariba.ui.meta.persistence.Predicate;
 import ariba.ui.meta.persistence.ObjectContext;
 import ariba.ui.meta.persistence.QuerySpecification;
+import ariba.ui.meta.persistence.PersistenceMeta;
 import ariba.ui.meta.core.MetaContext;
 import ariba.ui.meta.core.UIMeta;
+import ariba.ui.meta.core.Context;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWBindingNames;
 import ariba.ui.aribaweb.core.AWRequestContext;
@@ -32,33 +34,42 @@ import java.util.List;
 
 public class MetaSearchForm extends AWComponent
 {
-    public Map _searchMap = new HashMap();
-    ObjectContext.ChangeWatch _changeWatch;
+    public Map _searchMap = new PersistenceMeta.SearchMap();
+    public String _searchOperation;
+    public boolean _supportsTextSearch;
+    public Object _mid;
 
     public boolean isStateless()
     {
         return false;
     }
 
-    public void renderResponse(AWRequestContext requestContext, AWComponent component)
+    public void init ()
     {
-        // Issue search on first time, or upon changes in our group
-        boolean firstTime = false;
-        if (_changeWatch == null) {
-            _changeWatch = ObjectContext.get().createChangeWatch();
-            firstTime = true;
-        }
-        if (firstTime || _changeWatch.hasChanged()) search();
+        super.init();
+        Context context = MetaContext.currentContext(this);
+        _searchOperation = (String)context.propertyForKey("searchOperation");
+        _supportsTextSearch = context.booleanPropertyForKey("textSearchSupported", false);
+    }
 
-        super.renderResponse(requestContext, component);
+    public boolean showSearchTypeChooser ()
+    {
+        return _supportsTextSearch;
     }
 
     public void search ()
     {
         Predicate pred = Predicate.fromKeyValueMap(_searchMap);
-        String className = (String)MetaContext.currentContext(this).values().get(UIMeta.KeyClass);
-        List result =
-            ObjectContext.get().executeQuery(new QuerySpecification(className, pred));
-        setValueForBinding(result, AWBindingNames.list);
+        Context context = MetaContext.currentContext(this);
+        String className = (String)context.values().get(UIMeta.KeyClass);
+        QuerySpecification spec = new QuerySpecification(className, pred);
+
+        context.push();
+        context.setContextKey(UIMeta.KeyClass);
+        spec.setUseTextIndex(pred != null
+                && context.booleanPropertyForKey(PersistenceMeta.PropUseTextSearch, false));
+        context.pop();
+        
+        setValueForBinding(spec, "querySpecification");
     }
 }

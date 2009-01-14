@@ -1,6 +1,6 @@
 <w:BasicPageWrapper hasForm="$true">
     <w:FormTable showErrorFlags="$true">
-        <w:FormRow label="Title" errorFieldPath="project.title">
+        <w:FormRow label="Title" errorKey="project.title">
             <a:TextField value="$project.title"/>
         </w:FormRow>
         <w:FormRow label="Deals">
@@ -22,4 +22,8 @@
     <br/>
     <br/>
     <w:TextButton action="$submit">Submit</w:TextButton>
+    <br/>
+    <br/>
+    <w:TextButton action="$p1">ParamClass1</w:TextButton>
+    <w:TextButton action="$p2">ParamClass2</w:TextButton>
 </w:BasicPageWrapper>

@@ -1,0 +1,14 @@
+/*
+    @ModelPkg@ rules.oss -- Meta-data rules
+
+    These are auto-loaded (lazily) when any component in this java package is
+    referenced in the rules
+*/
+
+class=@ModelPkg@.@MasterClass@ {
+    /* Put field or action rules (possibly scoped by operation, etc) here */
+}
+
+class=@ModelPkg@.@DetailClass@ {
+    /* Put field or action rules (possibly scoped by operation, etc) here */
+}

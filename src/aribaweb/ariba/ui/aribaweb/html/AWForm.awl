@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.awl#24 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.awl#26 $
     </Copyright>
 
     <Overview>
@@ -78,13 +78,18 @@
     <Binding key="onKeyPress" direction="get" type="String" default="" deprecated="$true">
         Not supported?
     </Binding>
+
+    <Binding key="autocomplete" direction="get" type="string" required="$false">
+        You can specify that the "autocomplete=off" HTML attribute will be
+        included in the form HTML tag.
+    </Binding>
 </a:Api>\
 
 <a:If ifTrue="$emitTags">\
 <a:MetaTemplateConditional>\
 <form action="$formActionUrl" method="$^method:POST" onSubmit="$^onSubmit"
       onKeyDown="$keyPressString" target="$frameName" id="$formId" name="$formName"
-      otherBindings="$otherBindingsValues" class="relocdest">\
+      otherBindings="$otherBindingsValues" class="relocdest" autocomplete="$^autocomplete" bh="DTBS">\
     <a:IncludeContent/>\
 
     <a:RefreshRegion>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#51 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#56 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -39,6 +39,7 @@ import ariba.util.core.PerformanceChecker;
 import ariba.util.core.PerformanceState;
 import ariba.util.core.HTML;
 import ariba.util.core.StringUtil;
+import ariba.util.core.SystemUtil;
 
 import java.util.List;
 import java.util.Locale;
@@ -163,6 +164,12 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         PerformanceState.registrationComplete();
     }
 
+    // Called post init (and init callbacks) to begin processing
+    protected void awake ()
+    {
+
+    }
+
     /**
      * Get the base that we should use for generating semantic keys.
      * @return the base, either 64 or 32
@@ -253,16 +260,16 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         }
         resourceManager.registerPackageName("ariba.ui.aribaweb.html", true);
         resourceManager.registerPackageName("ariba.ui.aribaweb.core", true);
-        resourceManager.registerPackageName("ariba.ui.aribaweb.test", true);
         
-        // force the class file to load so it registers with the annotation listener
-        String cls = "ariba.ui.aribaweb.test.TestLinkManager";
-        if (allowTestLinkInvokation() && ClassUtil.classForName(cls, false) != null) {
-            ClassUtil.invokeStaticMethod(cls, "forceClassLoad",
-                new Class[]{},
-                new Object[]{});
+        if (AWConcreteServerApplication.IsDebuggingEnabled) {
+            // force the class file to load so it registers with the annotation listener
+            String cls = "ariba.ui.aribaweb.test.TestLinkManager";
+            if (ClassUtil.classForName(cls, false) != null) {
+                ClassUtil.invokeStaticMethod(cls, "forceClassLoad",
+                        new Class[]{},
+                        new Object[]{});
+            }
         }
-
         // Register Elements -- this helps the resourceManager find these
         // classes and avoids our having to scan through all registered packages.
         resourceManager.registerClass(AWAction.class);
@@ -317,18 +324,23 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         if (def != null) AWRequestContext.UseXmlHttpRequests = Boolean.parseBoolean(def);
     }
 
+    static String _AppName = null;
+
     // Invoked by aribaweb.properties to set defaults if we're in an Open Source AW (jar) application
     static public void initializeForJarApplication ()
     {
         // we default to true for OSAW apps, false for Ariba apps (unless overridded by ARIBA_AW_USE_XMLHTTP)
         AWRequestContext.UseXmlHttpRequests = true;
+
+        // Set util temp dir (used, for instance, in storing file uploads)
+        _AppName = (String)AWClasspathResourceDirectory.aribawebPropertyValue("app-name");
+        if (_AppName == null) _AppName = "AWApp";
+        String tempName = System.getProperty("java.io.tmpdir");
+        SystemUtil.setSharedTempDirectory(new File(tempName, _AppName).getAbsolutePath());
+        // todo: unique local directory (using PID equivalent?)
+        SystemUtil.setLocalTempDirectory(new File(tempName, _AppName).getAbsolutePath());
     }
 
-    protected boolean allowTestLinkInvokation ()
-    {
-        return true;
-    }
-    
     private static void registerAWSourcePath (AWMultiLocaleResourceManager resourceManager)
     {
         String awSearchPath = AWUtil.getenv("ARIBA_AW_SEARCH_PATH");
@@ -354,7 +366,7 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
     static Set<String> _awJarNameSuffixes ()
     {
         Set<String> result = new HashSet();
-        for (String fullName : AWClasspathResourceDirectory.awJarUrlsByName().keySet()) {
+        for (String fullName : AWClasspathResourceDirectory.referencedAWJarNames()) {
             int index = fullName.indexOf('.');
             String shortName = (index != -1) ? fullName.substring(index+1) : fullName;
             result.add(shortName);

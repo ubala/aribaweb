@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#8 $
 */
 package ariba.ui.meta.persistence;
 
 import ariba.util.core.ClassUtil;
 import ariba.util.core.Assert;
+import ariba.util.core.ListUtil;
 import ariba.ui.aribaweb.util.AWUtil;
 
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Iterator;
 public abstract class ObjectContext
 {
     ContextGroup _contextGroup;
+    Map _userMap;
 
     protected abstract void persist(Object o);
 
@@ -45,18 +47,28 @@ public abstract class ObjectContext
         return ctx;
     }
 
-    public Object create (String className)
+    public <T> T create (String className)
     {
         // Would be nice to use AWUtil classForName for reloading support,
         // but hibernate doesn't seem to like us swapping the class...
-        return create(ClassUtil.classForName(className));
+        return (T)create(ClassUtil.classForName(className));
     }
 
-    public Object create (Class tClass)
+    public <T> T create (Class<T> tClass)
     {
-        Object o = ClassUtil.newInstance(tClass);
+        T o = (T)ClassUtil.newInstance(tClass);
+        Assert.that(o != null, "Unable to create instance of class: %s", tClass.getName());
         persist(o);
         return o;
+    }
+
+    /**
+        Map for storage of additional state associated with this context
+     */
+    public Map userMap ()
+    {
+        if (_userMap == null) _userMap = new HashMap();
+        return _userMap;
     }
     
     public abstract <T> T merge(T t);
@@ -64,6 +76,12 @@ public abstract class ObjectContext
     public abstract void remove(Object o);
 
     public abstract <T> T find(java.lang.Class<T> tClass, Object primaryKey);
+
+    public <T> T findOne (java.lang.Class<T> tClass, Map<String, Object>fieldValues)
+    {
+        List<T> results = ObjectContext.get().executeQuery(tClass, fieldValues);
+        return ListUtil.nullOrEmptyList(results) ? null : results.get(0);
+    }
 
     public abstract Object getPrimaryKey (Object o);
 
@@ -77,11 +95,21 @@ public abstract class ObjectContext
 
     public abstract boolean contains(Object o);
 
-    public abstract List executeQuery(QuerySpecification spec);
+    public List executeQuery (QuerySpecification spec)
+    {
+        return processorForQuery(spec).executeQuery(this, spec);
+    }
 
-    public abstract List executeNamedQuery(java.lang.String s, Map <String, Object> params);
+    public abstract List executeNamedQuery (java.lang.String s, Map <String, Object> params);
 
     public abstract Object getDelegate();
+
+    public <T> List<T> executeQuery (java.lang.Class<T> tClass, Map<String, Object>fieldValues)
+    {
+        return executeQuery(new QuerySpecification(tClass.getName(), Predicate.fromKeyValueMap(fieldValues)));
+    }
+
+    public abstract QueryProcessor processorForQuery (QuerySpecification spec);
 
     /*
         ThreadLocal context binding
@@ -126,6 +154,11 @@ public abstract class ObjectContext
     protected void notifyGroupOfSave ()
     {
         if (_contextGroup != null) _contextGroup._saveCount++;
+    }
+
+    public String groupName_debug ()
+    {
+        return _contextGroup != null ? _contextGroup._name : null;
     }
 
     /*

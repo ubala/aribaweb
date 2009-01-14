@@ -9,6 +9,29 @@ actionCategory=Create {
 
 class {
     displayKey:toString;
+
+    searchOperation:search;
+
+    trait=Searchable {
+        textSearchSupported:true;
+        searchOperation:keywordSearch;
+    }
+
+
+    operation=keywordSearch {
+        useTextIndex:true;
+
+        field { visible:false; }
+        @field=keywords#SearchableProperty { visible:true!; type:java.lang.String; rank:0; after:zTop; bindings: { size:30 } }
+    }
+    
+    operation=textSearch {
+        field {
+            trait=SearchableProperty {
+                visible:true!;
+            }
+        }
+    }
 }
 
 field {
@@ -35,34 +58,52 @@ field {
             }
         }
     }
-    trait=toManyRelationship {
-        editable {
-            component:GenericChooser;
-            bindings:{
-                object:${object};
-                key:${field};
-                destinationClass:${elementType};
-                multiSelect:true;
-                displayKey:${ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(elementType)};
+
+    trait=toManyChooser {
+        component:GenericChooser;
+    }
+
+    trait=toManyTable {
+        component:MetaDetailTable;
+    }
+
+    trait=toManyLink {
+        component:AWHyperlink;
+        bindings: {
+            action: ${
+                set("object", value);
+                set("actionCategory", "Manage");
+                set("action", "Inspect");
+                ariba.ui.meta.core.UIMeta.getInstance().fireAction(this, requestContext)
             };
-            trait=ownedToMany {
-                component:MetaDetailTable;
-            }
-        }
-        editable=false {
-            component:AWHyperlink;
-            bindings: {
-                action: ${
-                    set("object", value);
-                    set("actionCategory", "Manage");
-                    set("action", "Inspect");
-                    ariba.ui.meta.core.UIMeta.getInstance().fireAction(this, requestContext)
-                };
-                omitTags:${!value || value.size() ==0};
-                awcontent: ${value ? ("" + value.size() + " items") : (none)};
-            }
+            omitTags:${!value || value.size() ==0};
+            awcontent: ${value ? ("" + value.size() + " items") : "(none)"};
         }
     }
+    
+    trait=(toManyChooser, toManyTable) {
+        bindings:{
+            object:${object};
+            key:${field};
+            destinationClass:${elementType};
+            multiSelect:true;
+            displayKey:${ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(elementType)};
+        }
+    }
+
+    trait=toManyRelationship {
+        editable {
+            trait:toManyChooser;
+        }
+        editable=false  { trait: toManyLink }
+        trait=ownedToMany { trait: toManyTable }
+    }
+}
+
+@traitGroup=RelViewers {
+    @trait=toManyChooser;
+    @trait=toManyTable;
+    @trait=toManyLink;
 }
 
 action {
@@ -74,7 +115,7 @@ action {
 
 action=Create {
     visible:true;
-    traits:pageAction, newContext;
+    trait:pageAction;
     pageName:MetaContentPage;
     pageBindings: {
         /* Should bind a new session */
@@ -86,8 +127,13 @@ action=Create {
 
     displayGroup dataSourceType {
         pageBindings: {
-            object:${displayGroup.dataSource.insert()};
+            object:${displayGroup.insert()};
         }
+    }
+
+    displayGroup dataSourceType="ariba.ui.meta.persistence.DetailDataSource" {
+        label:"Add";
+        visible:${displayGroup.dataSource.parentObject != null}
     }
 }
 
@@ -100,7 +146,7 @@ layout=Global {
 @actionCategory=Manage {
     layout=(SelectionButtonArea, TableRow) {
         @action=Inspect {
-            traits:instance, pageAction, newContext;
+            trait:instance, pageAction;
             visible:true;
             component:TextButton;
             bindings: {
@@ -115,15 +161,8 @@ layout=Global {
             }
         }
 
-        actionType=Detail {
-            @action=BlowUp {
-                traits:instance;
-                actionResults:${ariba.ui.meta.core.UIMeta.getInstance().throwSampleException()};
-            }
-        }
-
         @action=Delete {
-            traits:instance;
+            trait:instance;
             actionResults:${
                 ctx = ariba.ui.meta.persistence.ObjectContext.get();
                 ctx.remove(object);
@@ -131,7 +170,8 @@ layout=Global {
                 ariba.ui.widgets.AribaPageContent.setMessage("Item Deleted", requestContext.session());
                 null};
 
-            displayGroup dataSourceType {
+            displayGroup dataSourceType="ariba.ui.meta.persistence.DetailDataSource" {
+                label:"Remove";
                 actionResults:${
                     displayGroup.dataSource.delete(object);
                     null};
@@ -139,7 +179,7 @@ layout=Global {
         }
     }
     layout=ButtonArea {
-        @action=Create { }
+        @action=Create {}
     }
 }
 
@@ -163,16 +203,29 @@ operation=list {
 }
 
 module {
-    trait=ModuleClassPage {
+    @trait=ModuleClassPage {
+        layout:SearchPage;
         homePage:MetaContentPage;
         pageBindings: {
             class:${properties.moduleClassName};
-            module:Search;
+            module:$module;
+            contextKey:layout;
+        }
+    }
+
+    @trait=SearchDetail {
+        layout:SearchDetailPage;
+        homePage:MetaContentPage;
+        pageBindings: {
+            class:${properties.moduleClassName};
+            module:$module;
+            contextKey:layout;
         }
     }
 }
 
-module=Search {
+layout=SearchPage {
+    component:MetaDashboardLayout;
     @layout=SearchTOC {
        label:"Actions";
        component:MetaActionList;
@@ -185,4 +238,60 @@ module=Search {
        component:MetaSearch;
        after:zTop;
     }
+}
+
+module_trait=SearchDetail {
+    layout=SearchDetailPage {
+        component:MetaDashboardLayout;
+        visible:true;
+        widthLeft:"450px";
+        widthRight:auto;
+        label:${pushAndResolve([module:"*"], "label")};
+
+        @layout=Search {
+            label:"Search";
+            component:MetaSearch;
+            bindings: { selectedObject:$requestContext.pageComponent.dict.selectedObject }
+            after:zLeft;
+        }
+
+        @layout=Detail {
+            after:zRight;
+            component:MetaContext;
+            wrapperComponent:AWTNullWrapper;
+            bindings: {
+                object:$requestContext.pageComponent.dict.selectedObject;
+                layout:InspectStack;
+                operation:${requestContext.pageComponent.dict.selectedObject ? "edit" : "view"};
+                awcontentElement:MetaIncludeComponent;
+            }
+        }
+
+        layout=Actions#ActionButtons {
+            elementStyle:"padding-top:10px";
+            @actionCategory=Data {
+                @action=Save {
+                    actionResults:${ariba.ui.meta.persistence.PersistenceMeta.validateAndSave(this)};
+                    visible:${properties.editing}
+                }
+            }
+        }
+    }
+
+    displayGroup dataSourceType="ariba.ui.meta.persistence.ObjectContextDataSource" {
+        action=Create {
+            label:"New";
+            actionResults:${displayGroup.insert(); null}
+        }
+        action=Inspect {
+            visible:false;
+        }
+    }
+
+    component=MetaForm {
+        wrapperComponent:AWGenericContainer;
+        wrapperBindings: { tagName:div; class:smallForm; }
+    }
+
+    field=ActionCol { after:zNone }
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#20 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#25 $
 */
 package ariba.ui.meta.core;
 
@@ -37,14 +37,15 @@ public class Meta
 {
     public static final String KeyAny = "*";
     public static final String KeyDeclare = "declare";
+    public static final String KeyTrait = "trait";
     public static final int LowRulePriority = -100000;
     public static final int SystemRulePriority = -200000;
     public static final int ClassRulePriority = -100000;
     public static final int TemplateRulePriority = 100000;
     public static final int EditorRulePriority = 200000;
-    static final int MaxKeyDatas = 32;
+    static final int MaxKeyDatas = 64;
     static final Object NullMarker = new Object();
-    protected static final String ScopeKeySuffix = "_p";
+    protected static final String ScopeKey = "scopeKey";
 
     Map <String, KeyData> _keyData = new HashMap();
     KeyData[] _keyDatasById = new KeyData[MaxKeyDatas];
@@ -58,43 +59,54 @@ public class Meta
     IdentityHashMap _identityCache = new IdentityHashMap();
     RuleSet _currentRuleSet;
     Map <String, PropertyManager> _managerForProperty = new HashMap();
-    int _declareKeyMask;
+    long _declareKeyMask;
 
     public Meta ()
     {
         _declareKeyMask = keyData(KeyDeclare).maskValue();
+        registerPropertyMerger(KeyTrait, PropertyMerger_Traits);        
     }
 
     public void addRule (Rule rule)
     {
-        List <Rule.Predicate> predicates =  rule._predicates;
-        if (predicates.size() > 0 && predicates.get(predicates.size()-1)._isDecl) {
+        List <Rule.Selector> selectors =  rule._selectors;
+        if (selectors.size() > 0 && selectors.get(selectors.size()-1)._isDecl) {
             Rule decl = rule.createDecl();
-            addRule(decl);
+            _addRule(decl, true);
         }
 
-        // After we've captured the decl, do the collapse
-        predicates = rule._predicates = rule.collapseKeyOverrides(rule._predicates);
-
         // we allow null to enable creation of a decl, but otherwise this rule has no effect
-        if (rule._properties == null) return;
+        if (rule._properties != null) {
+            // After we've captured the decl, do the collapse
+            rule._selectors = rule.collapseKeyOverrides(rule._selectors);
+
+            _addRule(rule, true);
+        }
+    }
+
+    public void _addRule (Rule rule, boolean checkPropScope)
+    {
+        List <Rule.Selector> selectors =  rule._selectors;
 
         int entryId = _rules.size();
+        rule._id = entryId;
         if (rule._rank == 0) rule._rank = allocateNextRuleRank();
         rule._ruleSet = _currentRuleSet;
+        _rules.add(rule);
+
         Log.meta_detail.debug("Add Rule, rank=%s: %s", Integer.toString(rule._rank), rule);
 
         // index it
-        String lastScopeKey = null;
-        int mask = 0, antiMask = 0;
-        int count = predicates.size();
+        KeyData lastScopeKeyData = null;
+        long mask = 0, antiMask = 0;
+        int count = selectors.size();
         for (int i=0; i < count; i++) {
-            Rule.Predicate p = predicates.get(i);
+            Rule.Selector p = selectors.get(i);
 
-            // See if overridded by same key later in predicate
+            // See if overridded by same key later in selector
             boolean overridden = false;
             for (int j=count-1; j>i; j--) {
-                if (predicates.get(j)._key.equals(p._key)) { overridden=true; break; }
+                if (selectors.get(j)._key.equals(p._key)) { overridden=true; break; }
             }
             if (overridden) continue;
 
@@ -110,29 +122,88 @@ public class Meta
                 }
                 mask |= (1 << data._id);
 
-                String scopeKey = data.propertyScopeKey();
-                if (scopeKey != null) lastScopeKey = scopeKey;
+                if (data.isPropertyScope()) lastScopeKeyData = data;
             } else {
                 antiMask |= (1 << data._id);
             }
         }
 
         // all non-decl rules don't apply outside decl context
-        int declMask = declareKeyMask();
+        long declMask = declareKeyMask();
         if ((mask & declMask) == 0) antiMask |= declMask;
 
-        if (lastScopeKey != null) {
-            rule._predicates = ListUtil.copyList(predicates);
-            rule._predicates.add(new Rule.Predicate(lastScopeKey, true));
-            KeyData data = keyData(lastScopeKey);
-            data.addEntry(true, entryId);
-            mask |= (1 << data._id);
+        if (lastScopeKeyData != null  && checkPropScope) {
+            Object traitVal = rule._properties.get(KeyTrait);
+            if (traitVal != null) {
+                String traitKey = lastScopeKeyData._key + "_trait";
+                Rule traitRule = new Rule(rule._selectors, AWUtil.map(traitKey, traitVal), rule._rank, rule._lineNumber);
+                _addRule(traitRule, false);
+            }
+            rule._selectors = ListUtil.copyList(selectors);
+            rule._selectors.add(new Rule.Selector(ScopeKey, lastScopeKeyData._key));
+            KeyData data = keyData(ScopeKey);
+            data.addEntry(lastScopeKeyData._key, entryId);
+            mask |= (1L << data._id);
         }
 
-        rule._id = entryId;
         rule._keyMatchesMask = mask;
         rule._keyAntiMask = antiMask;
-        _rules.add(rule);
+    }
+
+    // if addition of this rule results in addition of extra rules, those are returned
+    // (null otherwise)
+    public List<Rule> _addRuleAndReturnExtras (Rule rule)
+    {
+        int start = _rules.size();
+        List<Rule> extras = null;
+
+        addRule(rule);
+
+        // Return any extra rules created by addition of this one
+        for (int i=start, c=_rules.size(); i < c; i++) {
+            Rule r = _rules.get(i);
+            if (r != rule) {
+                if (extras == null) extras = ListUtil.list();
+                extras.add(r);
+            }
+        }
+
+        return extras;
+    }
+
+    // Icky method to replace an exited rule in place
+    public List<Rule> _updateEditedRule (Rule rule, List<Rule>extras)
+    {
+        // in place replace existing rule with NoOp
+        Rule nooprule = new Rule(null, null, 0, 0);
+        nooprule.disable();
+        _rules.set(rule._id, nooprule);
+
+        if (extras != null) {
+            for (Rule r : extras) r.disable();
+        }
+
+        // Since this rule has already been mutated (the first time it was added) we need to reverse the
+        // addition of the scopeKey
+        List<Rule.Selector> preds = rule.getSelectors();
+        if (!ListUtil.nullOrEmptyList(preds) && ListUtil.lastElement(preds).getKey().equals(ScopeKey)) {
+            ListUtil.removeLastElement(preds);
+        }
+        
+        // now (re)-add it and invalidate
+        extras = _addRuleAndReturnExtras(rule);
+        invalidateRules();
+        return extras;
+    }
+
+    public String scopeKeyForSelector (List<Rule.Selector> preds)
+    {
+        for (int i=preds.size()-1; i>=0; i--) {
+            Rule.Selector pred = preds.get(i);
+            KeyData data = keyData(pred._key);
+            if (data.isPropertyScope()) return pred._key;
+        }
+        return null;
     }
 
     protected int allocateNextRuleRank ()
@@ -143,24 +214,24 @@ public class Meta
         return _rules.size();
     }
 
-    public void addRule (Map predicateMap, Map propertyMap)
+    public void addRule (Map selectorMap, Map propertyMap)
     {
-        addRule(predicateMap, propertyMap,  0);
+        addRule(selectorMap, propertyMap,  0);
     }
 
-    public void addRule (Map predicateMap, Map propertyMap, int rank)
+    public void addRule (Map selectorMap, Map propertyMap, int rank)
     {
-        Rule rule = new Rule(predicateMap, propertyMap);
+        Rule rule = new Rule(selectorMap, propertyMap);
         if (rank != 0) rule._rank = rank;
         addRule(rule);
     }
 
-    public void addRules (Map <String, Object> ruleSet, List predicates)
+    public void addRules (Map <String, Object> ruleSet, List selectors)
     {
-        // Special keys:  "props, "rules".  Everthing else is a predicate
+        // Special keys:  "props, "rules".  Everthing else is a selector
         Map props = null;
         List <Map <String, Object>> rules = null;
-        predicates = (predicates == null) ? new ArrayList() : new ArrayList(predicates);
+        selectors = (selectors == null) ? new ArrayList() : new ArrayList(selectors);
         for (Map.Entry <String, Object> entry : ruleSet.entrySet()) {
             String key = entry.getKey();
             if (key.equals("props")) {
@@ -170,15 +241,15 @@ public class Meta
                 rules = (List)entry.getValue();
             }
             else {
-                predicates.add(new Rule.Predicate(key, entry.getValue()));
+                selectors.add(new Rule.Selector(key, entry.getValue()));
             }
         }
         if (props != null) {
-            addRule(new Rule(predicates, props));
+            addRule(new Rule(selectors, props));
         }
         if (rules != null) {
             for (Map <String, Object> r : rules) {
-                addRules(r, predicates);
+                addRules(r, selectors);
             }
         }
     }
@@ -254,6 +325,14 @@ public class Meta
         _identityCache = new IdentityHashMap();
     }
 
+    boolean isTraitExportRule (Rule rule)
+    {
+        if (MapUtil.nullOrEmptyMap(rule._properties) || rule._properties.size() == 1) {
+            return ((String)rule._properties.keySet().toArray()[0]).endsWith("_trait");
+        }
+        return false;
+    }
+
     public class RuleSet
     {
         String _filePath;
@@ -280,9 +359,18 @@ public class Meta
                     : _start;
             for ( ; i<_end; i++) {
                 Rule r = _rules.get(i);
-                if (!r.disabled()) result.add(r);
+                if (!r.disabled() && !isTraitExportRule(r)) {
+                    result.add(r);
+                }
             }
             return result;
+        }
+
+        public int startRank ()
+        {
+            return (_start < _rules.size())
+                    ? _rules.get(_start)._rank
+                    : _rank - (_end - _start); 
         }
     }
 
@@ -302,8 +390,10 @@ public class Meta
 
     public void beginReplacementRuleSet (RuleSet orig)
     {
+        int origRank = orig.startRank();
+        orig.disableRules();
         beginRuleSet(orig.filePath());
-        _currentRuleSet._rank = orig._rank - (orig._end - orig._start);
+        _currentRuleSet._rank = origRank;
     }
 
     public RuleSet endRuleSet ()
@@ -338,7 +428,7 @@ public class Meta
         return new Context(this);
     }
 
-    int declareKeyMask ()
+    long declareKeyMask ()
     {
         return _declareKeyMask;
     }
@@ -364,7 +454,7 @@ public class Meta
     {
         KeyData keyData = _keyData.get(key);
         if (keyData == null) return intermediateResult;
-        int keyMask = 1 << keyData._id;
+        long keyMask = 1L << keyData._id;
 
         // Does our result already include this key?  Then no need to join again
         if (intermediateResult != null && (intermediateResult._keysMatchedMask & keyMask) != 0) return intermediateResult;
@@ -436,7 +526,7 @@ public class Meta
             }
         });
 
-        int modifiedMask = 0;
+        long modifiedMask = 0;
         boolean isDeclare = (_declareKeyMask & matchResult._keysMatchedMask) != 0;
         for (Rule r : rules) {
             if (recorder != null && r._rank != Integer.MIN_VALUE) {
@@ -509,7 +599,7 @@ public class Meta
         List <ValueQueriedObserver> _observers;
         _ValueMatches _any;
         KeyValueTransformer _transformer;
-        String _propertyScopeKey;
+        boolean _isPropertyScope;
 
         public KeyData (String key, int id)
         {
@@ -520,9 +610,9 @@ public class Meta
 
         }
 
-        public int maskValue ()
+        public long maskValue ()
         {
-            return 1 << _id;
+            return 1L << _id;
         }
 
         private _ValueMatches get (Object value)
@@ -586,16 +676,16 @@ public class Meta
         }
 
         // If this key defines a scope for properties (e.g. field, class, action)
-        // this this returns the name of the predicate key for those properties
+        // this this returns the name of the selector key for those properties
         // (e.g. field_p, class_p)
-        String propertyScopeKey ()
+        boolean isPropertyScope ()
         {
-            return _propertyScopeKey;
+            return _isPropertyScope;
         }
 
-        public void setPropertyScopeKey (String propertyScopeKey)
+        public void setIsPropertyScope (boolean yn)
         {
-            _propertyScopeKey = propertyScopeKey;
+            _isPropertyScope = yn;
         }
     }
 
@@ -703,12 +793,16 @@ public class Meta
     public void defineKeyAsPropertyScope (String contextKey)
     {
         KeyData keyData = keyData(contextKey);
-        keyData.setPropertyScopeKey(contextKey.concat(ScopeKeySuffix));
+        keyData.setIsPropertyScope(true);
+
+        String traitKey = contextKey + "_trait";
+        mirrorPropertyToContext(traitKey, traitKey);
+        registerPropertyMerger(traitKey, PropertyMerger_Traits);
     }
 
     public static boolean isPropertyScopeKey (String key)
     {
-        return key.endsWith(ScopeKeySuffix);
+        return ScopeKey.equals(key);
     }
 
     public interface PropertyMerger
@@ -790,6 +884,67 @@ public class Meta
         }
     };
 
+    public PropertyMerger PropertyMerger_Traits =  new Context.PropertyMergerDeclareList()
+    {
+        public Object merge(Object orig, Object override, boolean isDeclare) {
+            if (isDeclare) return super.merge(orig, override, isDeclare);
+
+            // if we're override a single element with itself, don't go List...
+            if (!(orig instanceof List) && !(override instanceof List)
+                    && objectEquals(orig, override)) {
+                return orig;
+            }
+
+            List<Object> origL = toList(orig);
+            List<Object> overrideL = toList(override);
+            List result = ListUtil.list();
+            for (Object trait : origL) {
+                if (trait instanceof OverrideValue) trait = ((OverrideValue)trait).value();
+                boolean canAdd = true;
+                String group = groupForTrait((String)trait);
+                if (group != null) {
+                    for (Object overrideTrait: overrideL) {
+                        if (overrideTrait instanceof OverrideValue) overrideTrait = ((OverrideValue)overrideTrait).value();
+                        if (group.equals(groupForTrait((String)overrideTrait))) {
+                            canAdd = false;
+                            break;
+                        }
+                    }
+                }
+                if (canAdd) result.add(trait);
+            }
+            ListUtil.addElementsIfAbsent(result, overrideL);
+            return result;
+        }
+    };
+
+    // overridden by ObjectMeta
+    String groupForTrait (String trait)
+    {
+        return "default";
+    }
+
+    public static void addTraits(List traits, Map map)
+    {
+        List current = (List)map.get(KeyTrait);
+        if (current == null) {
+            map.put(KeyTrait, new ArrayList(traits));
+        } else {
+            current.addAll(traits);
+        }
+    }
+
+    public static void addTrait(String trait, Map map)
+    {
+        List current = (List)map.get(KeyTrait);
+        if (current == null) {
+            map.put(KeyTrait, AWUtil.list(trait));
+        } else {
+            current.add(trait);
+        }
+    }
+
+    
     /*
         A few handy utilities (for which we probably already have superior versions elsewhere)
      */

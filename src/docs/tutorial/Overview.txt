@@ -13,6 +13,7 @@ Overview of AribaWeb
     <li><a href="http://www.vimeo.com/1773123">Building GuestBook</a></li>
     <li><a href="http://www.vimeo.com/1827249">Rich Widgets and AJAX</a></li>
     <li><a href="http://www.vimeo.com/2239096">Live UI Editing</a></li>
+    <li><a href="http://www.vimeo.com/2685671">Real App in 20 min</a></li>
     <li><a href="http://www.vimeo.com/1844030">Building Database app</a></li>
     <li><a href="http://www.vimeo.com/1826564">Auto-AJAX Explained</a></li>
     </ul>

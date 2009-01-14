@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#124 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#125 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -928,10 +928,20 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     public void ensureAwake (AWRequestContext requestContext)
     {
         _hasBeenHibernated = false;
-        if (_requestContext != requestContext) {
+        boolean shouldAwake = _requestContext != requestContext;
+        if (shouldAwake) {
             setRequestContext(requestContext);
-            awake();
         }
+
+        // pageWillAwake() notification
+        // TODO: the metaui ContextBinder requires this gets called even on already awake pages
+        // so we're going it even when !shouldSleep.  Needs investigation...
+        if (_LifecycleListeners != null) {
+            for (LifecycleListener l : _LifecycleListeners) l.pageWillAwake(this);
+        }
+
+        if (shouldAwake) awake();
+
         // Check here if our page instance is out of date (due to dynamic class reloading)
         if (AWConcreteApplication.IsRapidTurnaroundEnabled
                     && requestContext != null
@@ -941,10 +951,6 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
                 AWComponent component = AWComponentReference.refreshedComponent(componentDefinition,
                         null, _pageComponent, AWElementIdPath.emptyPath());
                 setPageComponent(component);}
-        }
-        // pageWillAwake() notification
-        if (_LifecycleListeners != null) {
-            for (LifecycleListener l : _LifecycleListeners) l.pageWillAwake(this);
         }
 
         _pageComponent.ensureAwake(this);
@@ -966,10 +972,13 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
                     currentSubcomponent.ensureAsleep();
                 }
             }
+
+            sleep();
+
             if (_LifecycleListeners != null) {
                 for (LifecycleListener l : _LifecycleListeners) l.pageWillSleep(this);
             }
-            sleep();
+
             setRequestContext(null);
         }
     }

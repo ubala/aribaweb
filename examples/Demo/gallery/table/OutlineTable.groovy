@@ -19,8 +19,8 @@ class OutlineTable extends AWComponent
 
     void init () {
         // prevent the sort!
-        users = ariba.ui.demoshell.XMLFactory.xmlNamed("Users.xml", this);
-        users = ListUtil.arrayToList(FieldValue.getFieldValue(users, "children"));
+        URL url = ariba.ui.table.ResourceLocator.urlForRelativePath("Users.xml", this);
+        users = ListUtil.arrayToList(FieldValue.getFieldValue(XMLUtil.document(url, false, false, null).documentElement, "children"));
 
         displayGroup = new AWTDisplayGroup();
         displayGroup.setSortOrderings(ListUtil.list());

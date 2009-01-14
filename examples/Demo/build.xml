@@ -23,13 +23,12 @@
         AW Demo -- Demo app and widget gallery
     </description>
 
-    <property name="compile.groovy" value="true"/>
-    <property name="servlet.class" value="ariba.ui.servletadaptor.AWDispatcherServlet"/>
-    <property name="aw.initializer" value="ariba.ui.groovy.AWGroovyLoader.initialize"/>
+    <property name="enable.groovy" value="true"/>
+    <property name="aw.packagedResourceExtensions" value="awl,oss,csv,xml"/>
 
     <property environment="env"/>
     <property name="aw.home" location="${env.AW_HOME}"/>
-    <import file="${aw.home}/tools/build-demoshell-app.xml"/>
+    <import file="${aw.home}/tools/build-metaui-app.xml"/>
 
     <fileset id="module.libs3" dir="${lib-demo.dir}">
         <include name="lucene-core.jar"/>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/editor/EditManager.java#11 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/editor/EditManager.java#16 $
 */
 package ariba.ui.meta.editor;
 
@@ -105,6 +105,13 @@ public class EditManager
         }
     }
 
+    public void setSelectedParentRecord (Context.AssignmentRecord selectedRecord)
+    {
+        Context context = _meta.newContext();
+        prepareContext(context, Context.staticContext(_meta, selectedRecord, true), null, true);
+        setSelectedRecord((Context.AssignmentRecord)context.debugTracePropertyProvider());
+    }
+
     public boolean isCurrentFieldSelected (Context context)
     {
         if (_selectedRecord != null) {
@@ -152,7 +159,7 @@ public class EditManager
     public EditSet editSetForRule (Rule r)
     {
         for (EditSet e : editableRuleSets()) {
-            if (e._ruleSet == r.getRuleSet()) return e;
+            if (e.ruleSet() == r.getRuleSet()) return e;
         }
         return null;
     }
@@ -174,7 +181,7 @@ public class EditManager
 
     static String packageNameForContext (Context.Info contextInfo)
     {
-        String className = (String)contextInfo.contextMap.get(UIMeta.KeyClass);
+        String className = (String)contextInfo.getSingleValue(UIMeta.KeyClass);
         return (className != null) ? AWUtil.pathToLastComponent(className, ".") : null;
     }
 
@@ -236,8 +243,8 @@ public class EditManager
 
     public void handleDrop (Object dragRec, Object dropRec)
     {
-        Context.Info dragContext = Context.staticContext(_meta, (Context.AssignmentRecord)dragRec);
-        Context.Info dropContext = Context.staticContext(_meta, (Context.AssignmentRecord)dropRec);
+        Context.Info dragContext = Context.staticContext(_meta, (Context.AssignmentRecord)dragRec, true);
+        Context.Info dropContext = Context.staticContext(_meta, (Context.AssignmentRecord)dropRec, true);
         String draggedItem = (String)dragContext.contextMap.get(dragContext.scopeKey);
         String dropItem = (String)dropContext.contextMap.get(dropContext.scopeKey);
         EditSet editSet = editSetForContext(dragContext);
@@ -248,7 +255,7 @@ public class EditManager
         // Need to find all fields with `draggedItem` as predecessor and give them
         // its predecessor
         Context context = _meta.newContext();
-        prepareContext(context, dragContext, dragContext.scopeKey);
+        prepareContext(context, dragContext, dragContext.scopeKey, false);
         List<String> zones = (List)context.propertyForKey("zones");
         String[] zoneArr = (zones != null) ? zones.toArray(new String[zones.size()]) : UIMeta.ZonesTLRB;
         String defaultZone = zoneArr[0];
@@ -294,6 +301,7 @@ public class EditManager
         AWFileResource _resource;
         Meta.RuleSet _ruleSet;
         List <Rule> _editRules;
+        Map <Rule, List<Rule>> _extrasForRule = MapUtil.map();
         boolean _dirty;
 
         public EditSet (AWFileResource resource)
@@ -317,6 +325,7 @@ public class EditManager
                     }
                 }
                 _editRules = null;
+                _extrasForRule.clear();
             }
             return _ruleSet;
         }
@@ -331,7 +340,7 @@ public class EditManager
             return _editRules;
         }
 
-        protected List<Rule.Predicate> predicateForContext (Context.Info contextInfo,
+        protected List<Rule.Selector> selectorForContext (Context.Info contextInfo,
                                                             Collection<String> useKeys)
         {
             // Sort keys: propertyContext key last, EditorContextKeys first (in order)
@@ -352,31 +361,37 @@ public class EditManager
                 }
             });
 
-            List<Rule.Predicate> preds = ListUtil.list();
+            List<Rule.Selector> preds = ListUtil.list();
             for (String key : sortedKeys) {
                 Object val = contextInfo.contextMap.get(key);
                 if (val != null) {
-                    preds.add(new Rule.Predicate(key, val));
+                    preds.add(new Rule.Selector(key, val));
                 }
             }
             return preds;
         }
 
-        protected List<Rule.Predicate> predicateForContext (Context.Info contextInfo)
+        protected List<Rule.Selector> selectorForContext (Context.Info contextInfo)
         {
-            List<String> useKeys = ("field".equals(contextInfo.scopeKey))
-                    ? FieldDefaultContextKeys : EditorContextKeys;
-            return predicateForContext(contextInfo, useKeys);
+            List<String> useKeys = UIMeta.KeyModule.equals(contextInfo.scopeKey) ? AWUtil.list(UIMeta.KeyModule) 
+                        : (("field".equals(contextInfo.scopeKey))
+                             ? FieldDefaultContextKeys : EditorContextKeys);
+            if (contextInfo.scopeKey != null && !useKeys.contains(contextInfo.scopeKey)) {
+                useKeys = new ArrayList(useKeys);
+                useKeys.add(contextInfo.scopeKey);
+            }
+            return selectorForContext(contextInfo, useKeys);
         }
 
-        public Rule addRule (List<Rule.Predicate> predicates, Map<String, Object> properties)
+        public Rule addRule (List<Rule.Selector> selectors, Map<String, Object> properties)
         {
             _dirty = true;
             _meta._setCurrentRuleSet(ruleSet());
             Rule prevLast = ListUtil.lastElement(ruleSet().rules(false));
             int rank = Math.max(((prevLast != null) ? prevLast.getRank() + 1 : 0), Meta.EditorRulePriority);
-            Rule rule = new Rule(predicates, properties, rank);
-            UIMeta.getInstance().addRule(rule);
+            Rule rule = new Rule(selectors, properties, rank);
+            List<Rule> extras = UIMeta.getInstance()._addRuleAndReturnExtras(rule);
+            if (extras != null) _extrasForRule.put(rule, extras);
             getEditRules().add(rule);
             _meta._setCurrentRuleSet(null);
             return rule;
@@ -384,7 +399,7 @@ public class EditManager
 
         public Rule addRule (Context.Info contextInfo)
         {
-            return addRule(predicateForContext(contextInfo), new HashMap());
+            return addRule(selectorForContext(contextInfo), new HashMap());
         }
 
         boolean ruleMatchesContext (Rule rule, Context.Info contextInfo)
@@ -393,14 +408,14 @@ public class EditManager
             Object notFoundClassVal = contextInfo.contextMap.get(ObjectMeta.KeyClass);
             Object scopeVal = contextInfo.contextMap.get(contextInfo.scopeKey);
             // Inadequate test: will match a field with the same name on *another class*!
-            for (Rule.Predicate p : rule.getPredicates()) {
+            for (Rule.Selector p : rule.getSelectors()) {
                 String key = p.getKey();
                 Object val = p.getValue();
                 if (key.equals(contextInfo.scopeKey) && val.equals(scopeVal)) {
                     match = true;
                 }
                 else if (!Meta.isPropertyScopeKey(key) && !val.equals(contextInfo.contextMap.get(key))) {
-                    // if predicate matches on key not in the context, we can't use it
+                    // if selector matches on key not in the context, we can't use it
                     return false;
                 }
 
@@ -427,7 +442,7 @@ public class EditManager
             Rule rule = existingEditableRuleMatchingContext(contextInfo);
             return (rule != null)
                     ? rule
-                    : addRule(predicateForContext(contextInfo), new HashMap());
+                    : addRule(selectorForContext(contextInfo), new HashMap());
         }
 
         // Rule for context, but swapping the value of the context scope key
@@ -441,6 +456,10 @@ public class EditManager
         public void updateRule (Rule rule, Map<String, Object> props)
         {
             _dirty = true;
+
+            // need to force grabbing our edit rule list before mutating
+            getEditRules();
+            
             // FIXME!  Bogus to mutate map in place
             rule.getProperties().putAll(props);
 
@@ -448,16 +467,22 @@ public class EditManager
             for (Map.Entry e : props.entrySet()) {
                 if (e.getValue() == null) rule.getProperties().remove(e.getKey());
             }
-            
-            _meta.invalidateRules();
+
+            // Disable this slot (and it's extras) and add a new copy
+            _meta._setCurrentRuleSet(ruleSet());
+            List<Rule>extras =  _extrasForRule.get(rule);
+            _extrasForRule.remove(rule);
+            extras = _meta._updateEditedRule(rule, extras);
+            if (extras != null) _extrasForRule.put(rule, extras);
+            _meta._setCurrentRuleSet(null);
         }
 
-        public void updateRulePredicates (Context.Info contextInfo,
+        public void updateRuleSelectors (Context.Info contextInfo,
                                           Rule rule, Collection<String>keys)
         {
             _dirty = true;
-            List<Rule.Predicate> preds = predicateForContext(contextInfo, keys);
-            rule.setPredicates(preds);
+            List<Rule.Selector> preds = selectorForContext(contextInfo, keys);
+            rule.setSelectors(preds);
             _meta.invalidateRules();
         }
 
@@ -478,44 +503,48 @@ public class EditManager
         {
             if (!_dirty) return;
 
+            List<Rule>editRules = getEditRules();
             try {
                 File file = URLUtil.file(new URL(_resource.fullUrl()), true);
-                OSSWriter.updateEditorRules(file, getEditRules());
+                OSSWriter.updateEditorRules(file, editRules);
             } catch (MalformedURLException e) {
                 throw new AWGenericException(e);
             }
 
             // disable our edit rules -- they're covered by what's in the file now
-            for (Rule rule : getEditRules()) {
+            for (Rule rule : editRules) {
                 rule.disable();
             }
+            
             _meta.reloadRuleFile(_resource);
 
             _dirty = false;
         }
     }
 
-    void prepareContext (Context context, Context.Info contextInfo, String stopBefore)
+    void prepareContext (Context context, Context.Info contextInfo, String stopBefore, boolean omitChained)
     {
-        List<String> keys = contextInfo.contextKeys;
-        int last = keys.size();
+        List<Context.AssignmentInfo> recs = contextInfo.assignmentStack;
+        int last = recs.size();
         if (stopBefore != null) {
             while (last-- > 0) {
-                if (keys.get(last).equals(stopBefore)) {
-                    if (last > 0 && keys.get(last-1).equals(stopBefore)) last--; 
+                if (recs.get(last).key.equals(stopBefore)) {
+                    if (last > 0 && recs.get(last-1).key.equals(stopBefore)) last--;
                     break;
                 }
             }
         }
         for (int i=0; i < last; i++) {
-            String key = keys.get(i);
+            Context.AssignmentInfo rec = recs.get(i);
+            String key = rec.key;
             // Don't want to put down boolean for object
-            if (key.equals(UIMeta.KeyObject)) continue;
+            if (key.equals(UIMeta.KeyObject) || (omitChained && rec.fromChaining) || rec.overridden) continue;
 
-            context.set(key, contextInfo.contextMap.get(key));
+            context.set(key, rec.value);
         }
 
         if (stopBefore == null && contextInfo.scopeKey != null) {
+            context.setContextKey(contextInfo.scopeKey);
             context.setContextKey(contextInfo.scopeKey);
         }
     }
@@ -523,12 +552,13 @@ public class EditManager
     static List<String>PropertyContextMirrorKeys = Arrays.asList(UIMeta.KeyElementType,
             UIMeta.KeyType, UIMeta.KeyEditing, UIMeta.KeyEditable);
 
-    class EditorProperties
+    public class EditorProperties
     {
         Context.Info _contextInfo;
         Context _originalContext;
         Context _propertyContext;
         Context _parentContext;
+        public List <Context.AssignmentInfo> activeAssignments;
 
         public EditorProperties (Context.Info contextInfo)
         {
@@ -536,9 +566,14 @@ public class EditManager
             _originalContext = _meta.newContext();
             _propertyContext = _meta.newContext();
             _parentContext = _meta.newContext();
-            prepareContext(_originalContext, contextInfo, null);
+            prepareContext(_originalContext, contextInfo, null, false);
             preparePropertyContext(_propertyContext, contextInfo);
-            prepareContext(_parentContext, contextInfo, contextInfo.scopeKey);
+            prepareContext(_parentContext, contextInfo, contextInfo.scopeKey, false);
+
+            activeAssignments = ListUtil.list();
+            for (Context.AssignmentInfo ai : _contextInfo.assignmentStack){
+                if (!ai.overridden && !ai.key.endsWith("_trait")) activeAssignments.add(ai);
+            }
         }
 
         void preparePropertyContext (Context context, Context.Info contextInfo)
@@ -569,8 +604,8 @@ public class EditManager
         List<String> compatibleTraits ()
         {
             _originalContext.push();
-            _originalContext.set(UIMeta.KeyTrait, UIMeta.KeyAny);
-            List<String> names = _meta.itemNames(_originalContext, UIMeta.KeyTrait);
+            _originalContext.set(Meta.KeyTrait, UIMeta.KeyAny);
+            List<String> names = _meta.itemNames(_originalContext, Meta.KeyTrait);
             _originalContext.pop();
             return names;
         }

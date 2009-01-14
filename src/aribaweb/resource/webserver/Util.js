@@ -7,6 +7,7 @@ if (!this.ariba) this.ariba = { awCurrWindow : null };
 
 // Null logging implementation if Debug.js is not loaded
 ariba.Debug = {
+    // XXX remove this after transition to onRefreshRequestBegin
     _requestComplete : false,
     log : function () {},
     debugEvent : function () {}

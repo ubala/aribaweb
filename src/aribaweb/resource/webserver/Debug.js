@@ -367,7 +367,7 @@ ariba.Util.extend(ariba.Debug, function() {
                 target = target.parentNode;
             }
             if (senderId) {
-                senderId = senderId + "&cpDebug=1";
+                senderId = senderId + "&cpDebug=" + ((evt.shiftKey) ? "2" : "1");
                 this.log("** Component Path this.log, id=" + senderId);
 
                 // pop window to foreground
@@ -510,14 +510,17 @@ ariba.Util.extend(ariba.Debug, function() {
             }
         },
 
+        // XXX remove this after transition to onRefreshRequestBegin
         isRequestComplete : function () {
             return ariba.Debug._requestComplete;
         },
         
+        // XXX remove this after transition to onRefreshRequestBegin
         resetRequestComplete : function () {
             ariba.Debug._requestComplete = false;
         },
 
+        // XXX remove this after transition to onRefreshRequestBegin
         requestCompleteNotification : function () {
             ariba.Debug._requestComplete = true;
             if (typeof aribaDebugRequestCompleteCallback != "undefined") {

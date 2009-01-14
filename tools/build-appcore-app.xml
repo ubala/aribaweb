@@ -18,29 +18,28 @@
 
     $Id:  $
  -->
-<project name="groovy-jpa-app" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+<project name="appcore-app" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
     <description>
-        Build file for apps depending on metaui-jpa (and metaui, widgets, aribaweb) ...
+        Build file for apps depending on appcore.jar (and metaui-jpa, and metaui, widgets, aribaweb) ...
 
         Generates jar (and generates aribaweb.properties, if necessary)
         and war (and generates persistence.xml, web.xml, if necessary)
+
+        The appcore.jar will be *inlined* into the app jar.
     </description>
 
-    <property name="compile.groovy" value="true"/>
-    <property name="aw.initializer" value="ariba.ui.groovy.AWGroovyLoader.initialize"/>
+    <property name="aw.packagedResourceExtensions" value="awl,oss,csv,xml"/>
+    
+    <property name="aw.preInitializer" value="ariba.appcore.Initialization.initialize"/>
+    <property name="aw.allowAccessWithoutLogin" value="true"/>
+
+    <!-- Enable Compass text indexing -->
+    <property name="use.compass" value="true"/>
 
     <import file="build-jpa-app.xml"/>
 
-    <target name="init" depends="jpa-app.init">
-        <!-- Must include demoshell for AWGroovyLoader rapid turnaround -->
-        <fileset id="war.jars" dir="${ariba.jars.dir}">
-            <include name="ariba.metaui-jpa.jar"/>
-            <include name="ariba.groovyloader.jar"/>
-        </fileset>
-    </target>
-
-    <fileset id="module.libs2" dir="${lib-internal.dir}">
-        <include name="groovy-all.jar"/>
+    <fileset id="merge.jars" dir="${ariba.jars.dir}">
+        <include name="ariba.appcore.jar"/>
     </fileset>
 
 </project>

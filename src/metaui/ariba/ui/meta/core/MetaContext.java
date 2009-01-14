@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#7 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#9 $
 */
 package ariba.ui.meta.core;
 
@@ -57,17 +57,17 @@ public class MetaContext extends AWContainerElement
         ComponentClassExtension.init();
     }
     
-    public static Context currentContext (AWComponent component)
+    public static UIMeta.UIContext currentContext (AWComponent component)
     {
-        Context context = peekContext(component);
+        UIMeta.UIContext context = peekContext(component);
         Assert.that(context != null, "Meta context not available on environment");        
         return context;
     }
 
-    public static Context peekContext (AWComponent component)
+    public static UIMeta.UIContext peekContext (AWComponent component)
     {
         AWEnvironmentStack env = component.env();
-        return (Context)env.peek(EnvKey);
+        return (UIMeta.UIContext)env.peek(EnvKey);
     }
 
     public void init (String tagName, Map bindingsHashtable)
@@ -120,7 +120,8 @@ public class MetaContext extends AWContainerElement
         AWBindingDictionary bindings = _bindings;
         if (isPush) {
             context.push();
-
+            String contextKey = (_contextKeyBinding != null)
+                                    ? (String)_contextKeyBinding.value(component) : null;
             Map <String, Object> values;
             if (_valueMapBinding != null && ((values = (Map)_valueMapBinding.value(component)) != null)) {
                 // ToDo: sort based on Meta (KeyData) defined rank (e.g. module -> class -> operation ...)
@@ -128,7 +129,11 @@ public class MetaContext extends AWContainerElement
                 List<String> sortedKeys = new ArrayList(values.keySet());
                 Collections.sort(sortedKeys);
                 for (String key : sortedKeys) {
-                    context.set(key, values.get(key));
+                    if (key.equals(ContextKeyBindingKey)) {
+                        contextKey = (String)values.get(key);
+                    } else {
+                        context.set(key, values.get(key));
+                    }
                 }
             }
 
@@ -139,10 +144,7 @@ public class MetaContext extends AWContainerElement
                 context.set(key, value);
             }
 
-            if (_contextKeyBinding != null) {
-                String key = (String)_contextKeyBinding.value(component);
-                context.setContextKey(key);
-            }
+            if (contextKey != null) context.setContextKey(contextKey);
         } else {
             context.pop();
         }
@@ -193,7 +195,7 @@ public class MetaContext extends AWContainerElement
         if (shouldPushSemanticKeyPrefix) {
             requestContext._debugPushSemanticKeyPrefix();
             Context context = MetaContext.currentContext(component);
-            String key = context._currentPropertyScopeKey(true);
+            String key = context._currentPropertyScopeKey();
             if (key != null) {
                 Object value = context.values().get(key);
                 if (value != null) {

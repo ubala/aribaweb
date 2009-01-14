@@ -27,6 +27,23 @@
               <property name="use_sql_comments" value="true"/>
           </a:If>
 
+          <a:If ifTrue="$compass.engine.connection">
+              <property name="compass.engine.connection" value="$compass.engine.connection"/>
+
+              <property name="hibernate.ejb.event.post-insert"
+                 value="org.compass.gps.device.hibernate.embedded.CompassEventListener" />
+              <property name="hibernate.ejb.event.post-update"
+                 value="org.compass.gps.device.hibernate.embedded.CompassEventListener" />
+              <property name="hibernate.ejb.event.post-delete"
+                 value="org.compass.gps.device.hibernate.embedded.CompassEventListener" />
+              <property name="hibernate.ejb.event.post-collection-recreate"
+                 value="org.compass.gps.device.hibernate.embedded.CompassEventListener" />
+              <property name="hibernate.ejb.event.post-collection-remove"
+                 value="org.compass.gps.device.hibernate.embedded.CompassEventListener" />
+              <property name="hibernate.ejb.event.post-collection-update"
+                 value="org.compass.gps.device.hibernate.embedded.CompassEventListener" />
+          </a:If>
+
           <property name="hibernate.connection.driver_class"
                     value="$hibernate.connection.driver_class"/>
           <property name="hibernate.connection.url"

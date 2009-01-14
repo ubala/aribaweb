@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#118 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#123 $
     </Copyright>
 
     <Overview>
@@ -49,19 +49,19 @@
 
         Scrolling is used if all the following are true:
 
-        -	the developer turned it on for that table (enableScrolling="$true"
+        -    the developer turned it on for that table (enableScrolling="$true"
 
-        -	the browser is IE on Windows
+        -    the browser is IE on Windows
 
-        -	ADA accessibility is not enabled
+        -    ADA accessibility is not enabled
 
         When scrolling is enabled:
 
-        -	If the data won't fit in the current view (i.e. the scrollbar is visible) then the maximize control will appear.
-        	*Note:* the appearance of the maximize control is tied to the presence of the AWTOptionsMenuButton ( )  If the
+        -    If the data won't fit in the current view (i.e. the scrollbar is visible) then the maximize control will appear.
+            *Note:* the appearance of the maximize control is tied to the presence of the AWTOptionsMenuButton ( )  If the
             page is not configured to show this, it will also not show the min/max control.
 
-        -	If the result set is large (i.e. the number of rows is greater that 40), then a technique called
+        -    If the result set is large (i.e. the number of rows is greater that 40), then a technique called
             "scroll faulting" is used to bring data is.  I.e. the first 40 rows are initially shown, but the scrollbar
             is sized as it all of the data is there.  The user can then scroll to anywhere in the larger data set (past
             the first 40, to the end, etc) and the missing rows will be faulted in to the client.  Thus, the scrollbar
@@ -69,11 +69,11 @@
 
         When scrolling is not enabled (Netscape, Accessibility, etc):
 
-        -	There's no scrollbar, and thus no min/max control
+        -    There's no scrollbar, and thus no min/max control
 
-        -	The number of rows per page is set by the "batchSize"
+        -    The number of rows per page is set by the "batchSize"
 
-        -	If the result set is large (i.e. the number of rows is greater that the batch size), then the traditional
+        -    If the result set is large (i.e. the number of rows is greater that the batch size), then the traditional
             pagination control will display, and can be used to move to subsequent pages.
 
     </Overview>
@@ -527,7 +527,15 @@
         to true and initially hiding detail for "items"
     </Binding>
 
-    <Binding key="showColumnAttributeLableOnRow" type="boolean" default="$false" required="$false" direction="get">
+    <Binding key="rowDetailInitialExpansion" type="int" default="0" direction="get">
+        Should pre-expand?  0: no, 1: first, 2:last
+    </Binding>
+
+    <Binding key="rowDetailAutoCollapse" type="boolean" default="$false" direction="get">
+        Should auto collapse last when opening next?
+    </Binding>
+
+    <Binding key="showColumnAttributeLabelOnRow" type="boolean" default="$false" required="$false" direction="get">
         Whether to display a label to the right of the value columns (after the row field
         columns) identifying the column attribute being rendered to its right.
         This can be useful if the column attribute is being varied dynamically per row
@@ -564,7 +572,7 @@
     <NamedContent name="optionsMenu" required="$false">
         Enable override of optionsMenu without needing to build entire header area.
         For example, the following has an options menu with only the excel export menu items.
-        
+
             <t:DataTable list="$data" showOptionsMenu="$true">
                <t:Column key="key1"/>
                <t:Column key="key2"/>
@@ -616,7 +624,7 @@
                 <a:If ifTrue="$tableBodyCollapsible">
                     <td><w:ToggleImage isExternal="$true" state="$tableBodyExpanded"/></td>
                 </a:If>
-                <td>\
+                <td width="99%">\
                     <a:If ifTrue="$showHeadingArea">
                             <a:MethodInvocation invoke="$makeHeadingAreaColumnCurrent"/>\
                             <a:IncludeComponent awcomponentName="$headingAreaColumn.rendererComponentName" table="$this"/>\
@@ -625,8 +633,8 @@
                     </a:If>
                     <a:IncludeBlock name="Buttons" isTop="$true" showTotalItems="$^showTotalItems"/>
                 </td>
-                <td width="1px" nowrap style="white-space:nowrap" align="right">\
-                    <nobr><a:IncludeBlock name="BatchNavRow" isTop="$true" showTotalItems="$^showTotalItems"/></nobr>\
+                <td width="1%" align="right">\
+                    <a:IncludeBlock name="BatchNavRow" isTop="$true" showTotalItems="$^showTotalItems"/>\
                 </td>
             </tr></table>
         </a:Content>
@@ -731,7 +739,9 @@
                 <a:IncludeComponent awcomponentName="$rightButtonArea.rendererComponentName" table="$this"/>\
             </a:If>\
             <a:IncludeContent name="footerAreaRight" required="$false"/>
-            <a:IncludeBlock name="BatchNavRow" isTop="$false" showTotalItems="$^showTotalItems"/>
+            <div style="float:right;padding:0px 5px 0px;">\
+                <a:IncludeBlock name="BatchNavRow" isTop="$false" showTotalItems="$^showTotalItems"/>
+            </div>
         </a:Content>
     </t:ScrollTableWrapper>\
 <a:Else/>
@@ -846,14 +856,14 @@
         <table cellspacing="0" cellpadding="0">
             <tr>
             <a:If ifTrue="$showSelectionButtonArea">\
-                <td style="padding-left:7px">\
+                <td style="padding-left:7px" _ifTrue="$showSelectionColumn">\
                     <a:Image filename="$cornerImage"/>\
                 </td>\
                 <td nowrap>\
                     <a:IncludeComponent awcomponentName="$selectionButtonArea.rendererComponentName" table="$this"/>\
                 </td>\
                 <a:If ifTrue="$showGlobalButtonArea">\
-                    <td nowrap>\
+                    <td nowrap _ifTrue="$showSelectionColumn">\
                         &nbsp; | &nbsp;\
                     </td>\
                 </a:If>\
@@ -870,21 +880,24 @@
 \
 <a:Block name="BatchNavRow">\
     <a:SetValue isTopBar="$^isTop"/>\
-    <a:If ifTrue="$showOptionsMenu">\
-        <a:If ifTrue="$^isTop">\
-            <div style="float:right;padding-left:5px">\
-                <a:If ifTrue="$hasOptionsMenuTemplate">
-                    <a:IncludeContent name="optionsMenu" required="$false" context="$this"/>\
-                <a:Else/>
-                    <t:OptionsMenuButton/>\
-                </a:If>
-            </div>\
-        </a:If>\
-    </a:If>\
-\
-    <a:If condition="$showNavigationBar">\
-        <div style="float:right;">
-            <t:BatchNavigationBar displayGroup="$displayGroup" showTotalItems="$^showTotalItems" submitForm="$multiSelectOrSubmitForm"/>\
-        </div>
-    </a:If>\
+    <table cellspacing="0" cellpadding="0">\
+        <tr>\
+            <td nowrap>\
+                <a:If condition="$showNavigationBar">\
+                        <t:BatchNavigationBar displayGroup="$displayGroup" showTotalItems="$^showTotalItems" submitForm="$multiSelectOrSubmitForm"/>\
+                </a:If>\
+            </td>\
+            <a:If ifTrue="$showOptionsMenu">\
+                <a:If ifTrue="$^isTop">\
+                    <td width="1%" style="padding-left:5px">\
+                        <a:If ifTrue="$hasOptionsMenuTemplate">
+                            <a:IncludeContent name="optionsMenu" required="$false" context="$this"/>\
+                        <a:Else/>
+                            <t:OptionsMenuButton/>\
+                        </a:If>
+                    </td>\
+                </a:If>\
+            </a:If>\
+        </tr>\
+    </table>\
 </a:Block>

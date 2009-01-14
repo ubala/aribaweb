@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkManager.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkManager.java#8 $
 */
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.util.AWJarWalker;
 import ariba.ui.aribaweb.util.AWUtil;
+import ariba.ui.aribaweb.core.AWConcreteServerApplication;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.test.TestPageLink;
@@ -25,6 +26,7 @@ import ariba.util.test.TestStager;
 import ariba.util.test.TestValidator;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,7 +50,7 @@ public class TestLinkManager
     Set<String> _classesWithAnnotations = new HashSet();
     Set<String> _classesWithValidatorAnnotations = new HashSet();
 
-    Map <String, Map<Class, Object>> _annotationMapByClassName = new HashMap();
+    Map <String, Map<Annotation, AnnotatedElement>> _annotationMapByClassName = new HashMap();
     Map <Class, List<TestInspectorLink>> _testInspectorMap = new HashMap();
     Map <Class, List<TestInspectorLink>> _allTestInspectorMap = new HashMap();
 
@@ -77,23 +79,26 @@ public class TestLinkManager
 
     public TestLinkManager()
     {
-        for (Class annotationClass : _AnnotationClasses) {
-            AWJarWalker.registerAnnotationListener(annotationClass,
-                    new AWJarWalker.AnnotationListener() {
-                public void annotationDiscovered(String className, String annotationType)
-                {
-                    _classesWithAnnotations.add(className);
-                }
-            });
-        }
-        for (Class annotationClass : _AnnotationValidatorClasses) {
-            AWJarWalker.registerAnnotationListener(annotationClass,
-                    new AWJarWalker.AnnotationListener() {
-                public void annotationDiscovered(String className, String annotationType)
-                {
-                    _classesWithValidatorAnnotations.add(className);
-                }
-            });
+        if (AWConcreteServerApplication.IsDebuggingEnabled) {
+            // only register the annotations if we are runnign in debug mode.
+            for (Class annotationClass : _AnnotationClasses) {
+                AWJarWalker.registerAnnotationListener(annotationClass,
+                        new AWJarWalker.AnnotationListener() {
+                            public void annotationDiscovered(String className, String annotationType)
+                            {
+                                _classesWithAnnotations.add(className);
+                            }
+                        });
+            }
+            for (Class annotationClass : _AnnotationValidatorClasses) {
+                AWJarWalker.registerAnnotationListener(annotationClass,
+                        new AWJarWalker.AnnotationListener() {
+                            public void annotationDiscovered(String className, String annotationType)
+                            {
+                                _classesWithValidatorAnnotations.add(className);
+                            }
+                        });
+            }
         }
     }
 
@@ -102,10 +107,10 @@ public class TestLinkManager
         return _instance;
     }
     
-    public Map<Class, Object> annotationsForClass (String className)
+    public Map<Annotation, AnnotatedElement> annotationsForClass (String className)
     {
         // lazily get annotations for known annotation bearing class
-        Map<Class, Object> annotationMap = _annotationMapByClassName.get(className);
+        Map<Annotation, AnnotatedElement> annotationMap = _annotationMapByClassName.get(className);
         if (annotationMap == null) {
             annotationMap = AWJarWalker.annotationsForClassName(className,
                     _allTestAnnotationClasses);
@@ -214,7 +219,7 @@ public class TestLinkManager
     {
         _allTestLinks = ListUtil.list();
         for (String className  :_classesWithAnnotations) {
-            Map<Class, Object> annotations = annotationsForClass(className);
+            Map<Annotation, AnnotatedElement> annotations = annotationsForClass(className);
             Set keys = annotations.keySet();
             for (Object key : keys) {
                 Annotation annotation = (Annotation)key;
@@ -235,10 +240,8 @@ public class TestLinkManager
             }
         }
         for (String className  :_classesWithValidatorAnnotations) {
-            Map<Class, Object> annotations = annotationsForClass(className);
-            Set keys = annotations.keySet();
-            for (Object key : keys) {
-                Annotation annotation = (Annotation)key;
+            Map<Annotation, AnnotatedElement> annotations = annotationsForClass(className);
+            for (Annotation annotation : annotations.keySet()) {
                 if (annotation.annotationType().isAssignableFrom(TestValidator.class)) {
                     TestValidator testValidator = (TestValidator)annotation;
                     Object annotationRef = annotations.get(annotation);

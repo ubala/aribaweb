@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBookmarker.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBookmarker.java#4 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -20,6 +20,8 @@ package ariba.ui.aribaweb.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +41,8 @@ public class AWBookmarker
 {
     private static String PageName = "page";
     private static Class<?>[] BookmarkType = {AWBookmarkState.class};
+
+    protected BookmarkEncrypter _encrypter = new DefaultEncrypterImpl();
 
     public boolean isBookmarkable (AWRequestContext requestContext)
     {
@@ -79,8 +83,7 @@ public class AWBookmarker
         }
         String urlString = 
             AWDirectActionUrl.fullUrlForDirectAction("restore", requestContext);
-        urlString = Fmt.S("%s&enc=true&pl=%s", urlString, 
-            AWUtil.encodeString(requestContext.application().encryptString(queryBuff.toString())));
+        urlString = _encrypter.getEncryptedUrl(urlString, queryBuff.toString());
         return urlString;
     }
 
@@ -89,11 +92,10 @@ public class AWBookmarker
         Class<?> currClass = aclass;
 
         while (currClass != null && !currClass.getName().equals(AWComponent.class.getName())) {
-            Map<Class, Object> annotations = AWJarWalker.annotationsForClassName(
+            Map<Annotation, AnnotatedElement> annotations = AWJarWalker.annotationsForClassName(
                 currClass.getName(), BookmarkType);
 
-            for (Iterator<Object> it = annotations.values().iterator(); it.hasNext();) {
-                Object element = it.next();
+            for (AnnotatedElement element : annotations.values()) {
                 String fname = FieldValueAccessorUtil.normalizedFieldPathForMember((Member)element);
                 Class<?> type = null;
 
@@ -140,5 +142,55 @@ public class AWBookmarker
             requestContext.application().handleException(requestContext, e);
         }
         return compRet;
+    }
+    
+    /**
+     * Returns the current encrypter i.e. the implementation of BookmarkEncrypter
+     * 
+     * @return BookmarkEncrypter 
+     */
+    public BookmarkEncrypter getEncrypter ()
+    {
+        return _encrypter;
+    }
+
+    /**
+     * Set the encrypter to be used for encrypting and decrypting urls. 
+     * 
+     * @param encryptor concrete implementation of BookmarkEncrypter.
+     */
+    public void setEncrypter (BookmarkEncrypter encryptor)
+    {
+        this._encrypter = encryptor;
+    }
+
+    /**
+     * This interface is intended to be implemented by the Application.
+     * It should provide a way to encrypt the query string of the urls to prevent hacking.
+     * 
+     */
+    public static interface BookmarkEncrypter
+    {
+        public boolean isEncrypted(AWRequestContext requestContext);
+        public String getEncryptedUrl (String url, String queryToAppend);
+        public String getDecryptedUrl (AWRequestContext requestContext);
+    }
+
+    class DefaultEncrypterImpl implements BookmarkEncrypter
+    {
+        public boolean isEncrypted (AWRequestContext requestContext)
+        {
+            return false;
+        }
+
+        public String getEncryptedUrl (String url, String query)
+        {
+            return Fmt.S("%s&%s", url, query);
+        }
+
+        public String getDecryptedUrl (AWRequestContext requestContext)
+        {
+            return null;
+        }
     }
 }

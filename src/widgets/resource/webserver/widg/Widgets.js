@@ -82,7 +82,22 @@ ariba.Widgets = function() {
 
         btnMouseOut : function (divObject, styleName)
         {
-            divObject.className = styleName;
+            // if a request is in progress we defer changing the button style until the request is complete
+            var cb = function() {
+                if (Request.isRequestInProgress()) {
+                    Event.registerUpdateCompleteCallback(function () {
+                        if (Dom.elementInDom(divObject)) {
+                            divObject.className = styleName;
+                        }                        
+                    }.bind(this));
+                } else {
+                    if (Dom.elementInDom(divObject)) {
+                        divObject.className = styleName;
+                    }
+                }
+            }.bind(this);
+            setTimeout(cb, 1);
+            return true;
         },
 
         applyFilterToImages : function (divObject, filterName)
@@ -1268,7 +1283,7 @@ ariba.Widgets = function() {
     Event.registerBehaviors({
         // TextButton - no click handling (used when button has own onclick handler)
         TBc : {
-            mouseover : function (elm, evt) {
+            mousedown : function (elm, evt) {
                 // Add "Over" if it's not already there
                 var s = elm.getAttribute('_cl');
                 s = s + "Over";
@@ -1277,6 +1292,12 @@ ariba.Widgets = function() {
 
             focus : function (elm, evt) {
                 return Event.behaviors.TBc.mouseover(elm, evt);
+            },
+
+            mouseup : function (elm, evt) {
+                // Strip "Over"
+                var s = elm.getAttribute('_cl');
+                return Widgets.btnMouseOut(elm, s);
             },
 
             mouseout : function (elm, evt) {

@@ -12,19 +12,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/opensourceui/examples/Demo/gallery/metaui/BasicForm.java#3 $
+    $Id: //ariba/platform/ui/opensourceui/examples/Demo/gallery/metaui/BasicForm.java#4 $
 */
 package gallery.metaui;
 
 import ariba.ui.aribaweb.core.AWComponent;
-import ariba.ui.aribaweb.core.AWErrorManager;
-import ariba.ui.aribaweb.core.AWResponseGenerating;
-import busobj.User;
+import ariba.ui.meta.annotations.Trait;
+import ariba.ui.meta.annotations.Properties;
 import busobj.Project;
-import busobj.Deal;
 
 import java.util.List;
-import java.util.ArrayList;
 
 public final class BasicForm extends AWComponent
 {
@@ -46,4 +43,45 @@ public final class BasicForm extends AWComponent
         errorManager().checkErrorsAndEnableDisplay();
         return null;
     }
+
+    public AWComponent p1 ()
+    {
+        TestFormPage page = (TestFormPage)pageWithName(TestFormPage.class.getName());
+        page.params = new ParamClass1();
+        return page;
+    }
+
+    public AWComponent p2 ()
+    {
+        TestFormPage page = (TestFormPage)pageWithName(TestFormPage.class.getName());
+        page.params = new ParamClass2();
+        return page;
+    }
+
+    public static class ParamClass1
+    {
+        public ParamClass1 ()
+        {
+
+        }
+
+        public String paramStringOption;
+
+        public boolean paramBoolean;
+
+        public int paramInt;
+
+    }
+
+
+    public static class ParamClass2
+    {
+        public String pString;
+
+        public String anotherOne;
+
+        public int andAnInt;
+    }
+
+
 }

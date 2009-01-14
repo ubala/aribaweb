@@ -1,8 +1,10 @@
 package gallery.table
 
 import ariba.ui.aribaweb.core.AWComponent
+import ariba.ui.widgets.*;
 import ariba.ui.table.*
 import ariba.util.core.*
+import ariba.util.fieldvalue.*
 
 class AdvancedTable extends AWComponent
 {
@@ -26,7 +28,7 @@ class AdvancedTable extends AWComponent
         list = AWTCSVDataSource.dataSourceForPath("SampleSpend.csv", this).fetchObjects()
 
         URL url = ariba.ui.table.ResourceLocator.urlForRelativePath("Users.xml", this);
-        users = new XmlSlurper().parseText(url.text)
+        users = ListUtil.arrayToList(FieldValue.getFieldValue(XMLUtil.document(url, false, false, null).documentElement, "children"));
 
         displayGroup = new ariba.ui.table.AWTDisplayGroup()
     }
@@ -87,7 +89,7 @@ class AdvancedTable extends AWComponent
     }
 
     def currentNotMoved () {
-        return displayGroup.currentItemExtras().moved
+        return !displayGroup.currentItemExtras().moved
     }
 
     def setTableConfig (config)

@@ -1,10 +1,10 @@
 <a:SetValue title="$metaContext.properties.label"/>
 <m:Context class="$metaContext.properties.elementType" object="$false">
-    <m:Context displayGroup="$displayGroup" dataSourceType="$dataSourceType"
-               field="*" operation="list"
-               layout="TableRow">\
+    <m:Context displayGroup="$displayGroup" dataSourceType="${displayGroup.dataSource.class.getName()}" layout="DetailTable"
+               operation="list" contextKey="class">\
         <t:DataTable enableScrolling="$true" displayGroup="$displayGroup" title="$title"
-                     singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true">
+                     singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                     awbindingsDictionary="$metaContext.properties.bindingsDictionary">
             <m:TableColumns/>
             <t:SelectionButtonArea>\
                 <m:Context object="$displayGroup.selectedObject" layout="SelectionButtonArea" filterActions="instance">\

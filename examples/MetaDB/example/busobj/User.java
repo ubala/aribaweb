@@ -22,7 +22,7 @@ public class User extends Person
 
     @Secret String password;
     BigDecimal accountBalance;
-    @Properties("traits:enumeration; choices: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];")
+    @Properties("trait:enumeration; choices: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];")
     int rating;
     @RichText String bio;
     AccountStatus accountStatus = AccountStatus.Active;

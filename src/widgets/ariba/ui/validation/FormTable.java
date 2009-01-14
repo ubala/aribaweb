@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormTable.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormTable.java#8 $
 */
 package ariba.ui.validation;
 
@@ -22,11 +22,24 @@ public class FormTable extends AWComponent
 {
     public boolean _omitOuterTable;
     public boolean _omitPaddingRow;
+    public boolean _hasTop, _hasLeft, _hasRight, _hasBottom, _hasLR;
+
+    public boolean alreadyInFormTable ()
+    {
+        // Don't need to support nested FormTable's yet
+        // return env().peek("inFormTable") != null;
+        return false;
+    }
 
     protected void awake ()
     {
         super.awake();
-        _omitOuterTable = (env().peek("inFormTable") != null) || booleanValueForBinding("omitTable");
+        _omitOuterTable = booleanValueForBinding("omitTable");  // env().peek("inFormTable") != null)
         _omitPaddingRow = _omitOuterTable || booleanValueForBinding("omitLabelPadding");
+        _hasTop = hasContentNamed("top");
+        _hasLeft = hasContentNamed("left");
+        _hasRight = hasContentNamed("right");
+        _hasBottom = hasContentNamed("bottom");
+        _hasLR = _hasLeft || _hasRight;
     }
 }

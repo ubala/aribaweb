@@ -16,7 +16,7 @@
     (by <a href="mailto:bill@burkecentral.com">Bill Burke</a>)
     also licensed under Apache v 2.0.
     
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWJarWalker.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWJarWalker.java#8 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -40,6 +40,7 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.AnnotatedElement;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -581,18 +583,33 @@ public class AWJarWalker
         void annotationDiscovered (String className, String annotationType);
     }
 
+    public static Map<Annotation, AnnotatedElement> annotationsForClasses (Collection<String> classNames, Class[] types)
+    {
+        Map<Annotation, AnnotatedElement> annotationMap = new IdentityHashMap();
+        for (String className : classNames) {
+            annotationsForClassName(className, types, annotationMap);
+        }
+        return annotationMap;
+    }
+
     /**
      * Lookup all annotations on the given class.  Should be called late/lazily
      * to avoid class instantiation until absolutely necessary
-     * @param className class name to search
+     * @param className name of class to search
+     * @param types the annotation classes to filter for
      * @return map from Annotation class to introspection Field, Method, or Class
      */
-    public static Map<Class, Object> annotationsForClassName (String className, Class[] types)
+    public static Map<Annotation, AnnotatedElement> annotationsForClassName (String className, Class[] types)
+    {
+        Map<Annotation, AnnotatedElement> annotationMap = new IdentityHashMap();
+        return annotationsForClassName(className, types, annotationMap);
+    }
+
+    public static Map<Annotation, AnnotatedElement> annotationsForClassName (String className, Class[] types,
+                                                              Map<Annotation, AnnotatedElement> annotationMap)
     {
         Class cls = ClassUtil.classForName(className);
         Assert.that(cls != null, "Unable to find class: %s", className);
-
-        Map<Class, Object> annotationMap = new IdentityHashMap();
 
         for (Method method : cls.getDeclaredMethods()) {
             _addToMap(annotationMap, method.getAnnotations(), method, types);
@@ -607,7 +624,7 @@ public class AWJarWalker
         return annotationMap;
     }
 
-    static void _addToMap (Map map, Annotation[] annotations, Object ref, Class[] types)
+    static void _addToMap (Map map, Annotation[] annotations, AnnotatedElement ref, Class[] types)
     {
         if (annotations == null) return;
         for (Annotation a : annotations) {

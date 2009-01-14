@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionBody.awl#11 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionBody.awl#13 $
     </Copyright>
 
     <Overview>
@@ -25,6 +25,9 @@
         TBD
     </Binding>
     <Binding key="showBottomSpace" direction="get" type="boolean" default="$true">
+        TBD
+    </Binding>
+    <Binding key="leftMargin" direction="get" type="int" default="20">
         TBD
     </Binding>
 </a:Api>\
@@ -41,4 +44,3 @@
     </tr>
 </table>\
 <div _ifTrue="$^showBottomSpace:$true" class="sectionPadBot"></div>\
-</a:If>\

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#30 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#31 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -25,6 +25,7 @@ import ariba.util.core.ListUtil;
 import ariba.util.core.PerformanceState;
 import ariba.util.core.StringUtil;
 import ariba.util.core.URLUtil;
+import ariba.util.core.Fmt;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -42,9 +43,9 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
     private static String AppHost;
     private static String AppPort;
     private static final AWEncodedString RedirectStringStart =
-        new AWEncodedString("<script id='AWRefreshComplete'>top.location.href = '");
+        new AWEncodedString("<script id='AWRefreshComplete'>");
     private static final AWEncodedString RedirectStringFinish =
-        new AWEncodedString("'</script>");
+        new AWEncodedString("</script>");
     private static final AWEncodedString FullPageRedirectStringStart =
         new AWEncodedString("<a id='AWRedirect' href='");
     private static final AWEncodedString FullPageRedirectStringMiddle =
@@ -159,7 +160,10 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
     {
         AWResponse redirectResponse = requestContext.application().createResponse();
         redirectResponse.appendContent(RedirectStringStart);
-        redirectResponse.appendContent(escapeJavascript(url));
+        redirectResponse.appendContent(AWCurrWindowDecl.currWindowDecl(requestContext));
+        redirectResponse.appendContent(Fmt.S("var url = '%s'; if (ariba.Request) ariba.Request.redirect(url); "
+                                                + "else top.location.href = url;",
+                                        escapeJavascript(url)));
         redirectResponse.appendContent(RedirectStringFinish);
         requestContext.setXHRRCompatibleResponse(redirectResponse);
     }

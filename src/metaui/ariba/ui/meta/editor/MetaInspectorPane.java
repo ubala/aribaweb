@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/editor/MetaInspectorPane.java#9 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/editor/MetaInspectorPane.java#13 $
 */
 package ariba.ui.meta.editor;
 
@@ -88,7 +88,7 @@ public class MetaInspectorPane extends AWComponent
     public void init ()
     {
         _compactMode = booleanValueForBinding("compactMode");
-        selectedView = (_compactMode) ? "Properties" : "Assignments";
+        selectedView = "Properties";
     }
 
     public boolean editing ()
@@ -126,7 +126,7 @@ public class MetaInspectorPane extends AWComponent
             _activeAssignments = ListUtil.list();
             for (List<Assignment>assignments : _assignmentMap.values()) {
                 for (Assignment assignment : assignments) {
-                    if (!assignment.isOverridden()) _activeAssignments.add(assignment);
+                    if (!assignment.isOverridden() && !assignment.getKey().endsWith("_trait")) _activeAssignments.add(assignment);
                 }
             }
             
@@ -147,7 +147,7 @@ public class MetaInspectorPane extends AWComponent
     public String scopePropertyValue ()
     {
         return (_contextInfo.scopeKey != null)
-                ? (String)_contextInfo.contextMap.get(_contextInfo.scopeKey)
+                ? (String)_contextInfo.getSingleValue(_contextInfo.scopeKey)
                 : null;
     }
 
@@ -156,37 +156,37 @@ public class MetaInspectorPane extends AWComponent
         return _contextInfo.contextMap.get(_contextKey);
     }
 
-    public boolean predicateUsesContextKey ()
+    public boolean selectorUsesContextKey ()
     {
-        for (Rule.Predicate p : currentRule().getPredicates()) {
+        for (Rule.Selector p : currentRule().getSelectors()) {
             if (p.getKey().equals(_contextKey)) return true;
         }
         return false;
     }
 
-    public void togglePredicate ()
+    public void toggleSelector ()
     {
         // add/remove _contextKey : _contextValue
         Set<String> predKeys = new HashSet();
         Rule rule = currentRule();
-        for (Rule.Predicate p : rule.getPredicates()) {
+        for (Rule.Selector p : rule.getSelectors()) {
             predKeys.add(p.getKey());
         }
 
-        if (predicateUsesContextKey()) {
+        if (selectorUsesContextKey()) {
             predKeys.remove(_contextKey);
         } else {
             predKeys.add(_contextKey);
         }
 
         EditManager.EditSet editSet = _editManager.editSetForRule(rule);
-        editSet.updateRulePredicates(_contextInfo, rule, predKeys);
+        editSet.updateRuleSelectors(_contextInfo, rule, predKeys);
         invalidateForEdit();
     }
 
     public Object activeTraits ()
     {
-        return _contextInfo.properties.get(UIMeta.KeyTraits);
+        return _contextInfo.properties.get(Meta.KeyTrait);
     }
 
     public boolean hasTrait ()
@@ -202,7 +202,7 @@ public class MetaInspectorPane extends AWComponent
         boolean adding = !hasTrait();
         EditManager.EditSet editSet = _editManager.editSetForContext(_contextInfo);
         Rule rule = editSet.editableRuleForContext(_contextInfo);
-        Map newProp = _editManager.updatedListProperty(rule.getProperties(), UIMeta.KeyTraits,
+        Map newProp = _editManager.updatedListProperty(rule.getProperties(), Meta.KeyTrait,
                             _trait, _editManager.newListForVal(activeTraits()),
                             adding, true);
 
@@ -219,6 +219,11 @@ public class MetaInspectorPane extends AWComponent
     public void selectItem ()
     {
         _editManager.setSelectedRecord(_editorProperties.recordForPeerItem(_itemName));
+    }
+
+    public void selectAssignment ()
+    {
+        _editManager.setSelectedParentRecord(_assignmentInfo.rec);
     }
 
     public boolean canShowAssignments ()
@@ -392,7 +397,7 @@ public class MetaInspectorPane extends AWComponent
     }
 
     /*
-        Deal out unique colors for different rule predicates
+        Deal out unique colors for different rule selectors
      */
     protected static String[] RuleColors = new String [] {
         "#9999FF", "#CCFF66", "#666699", "#FFCC66",
@@ -425,7 +430,7 @@ public class MetaInspectorPane extends AWComponent
     static String colorForRule (Rule rule)
     {
         List<String> keys = new ArrayList(4);
-        for (Rule.Predicate pred : rule.getPredicates()) {
+        for (Rule.Selector pred : rule.getSelectors()) {
             if (!Meta.isPropertyScopeKey(pred.getKey())) keys.add(pred.getKey());
         }
         return colorForKeyList(keys);

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/BigDecimalFormatter.java#12 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/BigDecimalFormatter.java#13 $
 */
 
 package ariba.util.formatter;
@@ -491,9 +491,31 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
             else if (Character.isDigit(curChar)) {
 
                     // If we found a suffix yet there's still digits,
-                    // then we've got an invalid number
+                    // then we've got exponential notation or an invalid number
                 if (suffix.length() > 0 || negSuffixFound) {
-                    throw makeParseException(InvalidCharacterInNumberKey, 1);
+
+                    // if we have exponential notation then process
+                    char prevChar = string.charAt(i-1);
+                    if (prevChar == 'E' || prevChar == 'e') {
+
+                        // try to create a BigDecimal, convert to plain string
+                        // and recall this same function with the plain string
+                        try {
+                            BigDecimal parsedBigDecimal = new BigDecimal(string);
+                            String parsedString = parsedBigDecimal.toPlainString();
+                            return BigDecimalFormatter.parseBigDecimal(parsedString, fmt);
+                        }
+                        catch (ParseException e) {
+                            throw e;
+                        }
+                        catch (NumberFormatException e) {
+                            throw makeParseException(NumberFormatErrorKey, 1);
+                        }
+                    }
+                    else {
+                        // we have an invalid string
+                        throw makeParseException(InvalidCharacterInNumberKey, 1);
+                    }
                 }
 
                 number.append(curChar);

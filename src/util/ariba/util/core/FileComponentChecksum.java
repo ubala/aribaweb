@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/FileComponentChecksum.java#9 $
+    $Id: //ariba/platform/util/core/ariba/util/core/FileComponentChecksum.java#10 $
 */
 package ariba.util.core;
 
@@ -162,7 +162,7 @@ public class FileComponentChecksum extends ComponentChecksum
     public void addFileList (List v)
       throws ComponentChecksumException
     {
-        addFileList(v, false);
+        addFileList(v, true);
     }
 
     /**
@@ -223,6 +223,7 @@ public class FileComponentChecksum extends ComponentChecksum
         int bufSize = 16 * 1024;
         byte[] buff = new byte[bufSize];
         File[] list = dir.listFiles();
+        Sort.objects(list, FileCompare.self);
         for (int i = 0; i < list.length; i++) {
             if (list[i].exists()) {
                 if (list[i].isFile()) {

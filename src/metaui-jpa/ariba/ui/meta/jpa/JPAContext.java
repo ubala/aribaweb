@@ -12,17 +12,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#1 $
+    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#2 $
 */
 package ariba.ui.meta.jpa;
-
-import org.hibernate.Session;
-import org.hibernate.FlushMode;
-import org.hibernate.EntityMode;
-import org.hibernate.engine.EntityKey;
-import org.hibernate.persister.entity.EntityPersister;
-import org.hibernate.impl.SessionImpl;
-import org.hibernate.metadata.ClassMetadata;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -33,17 +25,18 @@ import javax.persistence.Query;
 import ariba.ui.meta.persistence.ObjectContext;
 import ariba.ui.meta.persistence.QuerySpecification;
 import ariba.ui.meta.persistence.QueryGenerator;
+import ariba.ui.meta.persistence.QueryProcessor;
+import ariba.util.core.ClassUtil;
+import ariba.util.core.ListUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.io.Serializable;
 
-public class JPAContext extends ObjectContext
+abstract public class JPAContext extends ObjectContext
 {
+    static List<QueryProcessor> _queryProcessors = ListUtil.list();
     EntityManager _entityManager;
     Map<Object, Object> _updatedObjects = new HashMap();
 
@@ -54,7 +47,61 @@ public class JPAContext extends ObjectContext
     {
         if (_DidInit) return;
         _DidInit = true;
-        JPAContext.setProvider(new Provider());
+
+        // if hibernate is present then init the Hibernate Context
+        if (ClassUtil.classForName("org.hibernate.Session") != null) {
+            ClassUtil.classTouch("ariba.ui.meta.jpa.HibernateContext");
+
+            // And Compass...
+            if (ClassUtil.classForName("org.compass.core.Compass") != null) {
+                ClassUtil.classTouch("ariba.ui.meta.jpa.CompassQueryProcessor");
+            }
+        }
+
+        registerQueryProcessor(new JPAQueryProcessor());
+    }
+
+    static EntityManagerFactory _DefaultFactory;
+
+    public static EntityManagerFactory getDefaultFactory()
+    {
+        return _DefaultFactory;
+    }
+
+    public static void setDefaultFactory(EntityManagerFactory defaultFactory)
+    {
+        _DefaultFactory = defaultFactory;
+    }
+
+    static class JPAQueryProcessor implements QueryProcessor
+    {
+        public boolean isProcessorForQuery (QuerySpecification spec)
+        {
+            return spec.getPredicate() == null || !spec.useTextIndex();
+        }
+
+        public List executeQuery (ObjectContext context, QuerySpecification spec)
+        {
+            QueryGenerator generator = new QueryGenerator(spec);
+            String queryString = generator.generate();
+            Map queryParams = generator.queryParams();
+
+            JPAContext jpa = (JPAContext)context;
+            return jpa.executeQuery(jpa._entityManager.createQuery(queryString), queryParams);
+        }
+    }
+
+    public static void registerQueryProcessor (QueryProcessor processor)
+    {
+        _queryProcessors.add(processor);
+    }
+
+    public QueryProcessor processorForQuery (QuerySpecification spec)
+    {
+        for (QueryProcessor p : _queryProcessors) {
+            if (p.isProcessorForQuery(spec)) return p;
+        }
+        return null;
     }
 
     protected JPAContext (EntityManager entityManager)
@@ -115,22 +162,6 @@ public class JPAContext extends ObjectContext
         return q.getResultList();
     }
 
-    /*
-    public List executeQuery(java.lang.String s, Map <String, Object> params)
-    {
-        return executeQuery(_entityManager.createQuery(s), params);
-    }
-    */
-
-    public List executeQuery(QuerySpecification spec)
-    {
-        QueryGenerator generator = new QueryGenerator(spec);
-        String queryString = generator.generate();
-        Map queryParams = generator.queryParams();
-
-        return executeQuery(_entityManager.createQuery(queryString), queryParams);
-    }
-
     public List executeNamedQuery(java.lang.String s, Map <String, Object> params)
     {
         return executeQuery(_entityManager.createNamedQuery(s), params);
@@ -147,6 +178,12 @@ public class JPAContext extends ObjectContext
     protected void recordObjectUpdate (Object o)
     {
         _updatedObjects.put(o, getPrimaryKey(o));
+    }
+
+    protected <T> T getIfAlreadyLoaded(java.lang.Class<T> tClass, Object primaryKey)
+    {
+        // Todo: how do we do this in pure JPA?  (This will *always* FETCH)
+        return find(tClass, primaryKey);
     }
 
     protected void objectUpdatedInPeerContext (Object key, Object o)
@@ -173,74 +210,5 @@ public class JPAContext extends ObjectContext
             }
         }
         _updatedObjects.clear();
-    }
-
-
-    protected static class Provider implements ObjectContext.Provider
-    {
-        public ObjectContext create()
-        {
-            return new JPAContext(createEntityManager(_DefaultFactory));
-        }
-    }
-
-    static EntityManagerFactory _DefaultFactory;
-
-    public static EntityManagerFactory getDefaultFactory()
-    {
-        return _DefaultFactory;
-    }
-
-    public static void setDefaultFactory(EntityManagerFactory defaultFactory)
-    {
-        _DefaultFactory = defaultFactory;
-    }
-
-
-    /*
-           Hibernate-specific
-     */
-
-    protected Session getSession ()
-    {
-        return (Session)_entityManager.getDelegate();
-    }
-
-    // Hibernate-specific
-    public Object getPrimaryKey (Object o)
-    {
-        Session session = getSession();
-        ClassMetadata classMeta = session.getSessionFactory().getClassMetadata(o.getClass());
-        return classMeta.getIdentifier(o, EntityMode.POJO);
-    }
-
-    /*
-        session change detection:
-            http://www.hibernate.org/hib_docs/v3/api/org/hibernate/Interceptor.html
-
-            http://www.hibernate.org/hib_docs/v3/api/org/hibernate/SessionFactory.html#openSession(org.hibernate.Interceptor)
-
-            <property name="hibernate.ejb.interceptor" value="ariba.ui.meta.hibernate.Interceptor"/>
-     */
-
-    protected <T> T getIfAlreadyLoaded(java.lang.Class<T> tClass, Object primaryKey)
-    {
-        SessionImpl session = (SessionImpl)getSession();
-        ClassMetadata classMeta = session.getSessionFactory().getClassMetadata(tClass);
-        String entityName = classMeta.getEntityName();
-        EntityPersister persister = session.getFactory().getEntityPersister(entityName);
-        EntityKey entityKey = new EntityKey((Serializable)primaryKey, persister, EntityMode.POJO);
-
-        return (T)((SessionImpl)getSession()).getPersistenceContext().getEntity(entityKey);
-        //  return find(tClass, primaryKey);
-        // return (T)getSession().get(tClass, (Serializable)primaryKey);
-    }    
-
-    protected static EntityManager createEntityManager (EntityManagerFactory factory)
-    {
-        EntityManager em = factory.createEntityManager();
-        Session session = (Session)em.getDelegate();
-        session.setFlushMode(FlushMode.MANUAL);
-        return em;
     }
 }

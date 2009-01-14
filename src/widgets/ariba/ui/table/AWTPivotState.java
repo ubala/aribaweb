@@ -8,7 +8,6 @@ import ariba.util.core.ArrayUtil;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.core.Assert;
-import ariba.util.core.MapUtil;
 import ariba.util.fieldvalue.FieldValue;
 import ariba.util.fieldvalue.OrderedList;
 import ariba.ui.table.AWTDataTable.Column;
@@ -19,7 +18,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Iterator;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 
@@ -148,7 +146,7 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
         _overrideAttributeBinding = _dataTable.bindingForName(BindingNames.overrideAttribute);
         _filteredColumnAttributesBinding = _dataTable.bindingForName(BindingNames.filteredColumnAttributes);
         _useRowDetailExpansionControlBinding = _dataTable.bindingForName(BindingNames.useRowDetailExpansionControl);
-        _showColumnAttributeLabelOnRowBinding = _dataTable.bindingForName(BindingNames.showColumnAttributeLableOnRow);
+        _showColumnAttributeLabelOnRowBinding = _dataTable.bindingForName(BindingNames.showColumnAttributeLabelOnRow);
 
         _showingRowAttributes = _dataTable.booleanValueForBinding(BindingNames.showRowAttributes);
         _columnEdgeRoot = new EdgeCell(null, null, rootColumn, null, null);

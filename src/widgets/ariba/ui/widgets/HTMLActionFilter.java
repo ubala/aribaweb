@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.java#7 $
 */
 
 package ariba.ui.widgets;
@@ -28,9 +28,10 @@ import java.util.regex.Pattern;
 public final class HTMLActionFilter extends AWComponent
 {
     private static final Pattern EmbeddedActionPattern
-            = java.util.regex.Pattern.compile("(?:HREF|href)=\"([^#][^\"]+)\"");
+            = java.util.regex.Pattern.compile("(?:(?:HREF|href)=\"([^#][^\"]+)\")(?: *target=\"([^\"]+)\")?|(?:(?:SRC|src)=\"([^\"]+)\")");
     protected Matcher _matcher;
     protected String _input;
+    public String _staticUrl;
     protected int _readPos;
 
     public Object nextAction ()
@@ -51,19 +52,44 @@ public final class HTMLActionFilter extends AWComponent
         return _input.substring(oldPos, _matcher.start());
     }
 
+    public boolean matchIsHref ()
+    {
+        return _matcher.group(1) != null;
+    }
+
     public String remainderString ()
     {
         return _input.substring(_readPos);
     }
 
+    public boolean useStaticUrl ()
+    {
+        String orig = _matcher.group(3);
+        setValueForBinding(orig, "resourceUrl");
+
+        _staticUrl = stringValueForBinding("replacementUrl");
+        if (_staticUrl == null && !hasBinding("resourceResponse")) _staticUrl = orig;
+
+        return _staticUrl != null;
+    }
+
     public AWResponseGenerating currentClicked ()
     {
         String url = _matcher.group(1);
+        String target = _matcher.group(2);
         setValueForBinding(url, "actionUrl");
         AWResponseGenerating response = (AWResponseGenerating)valueForBinding(AWBindingNames.action);
-        return (response != null)
-                ? response
-                : AWRedirect.getRedirect(requestContext(), url);
+        if (response == null) {
+            response = HTMLActions.handleAction(url, target, this);
+        }
+        return response;
+    }
+
+    public AWResponseGenerating resourceRequest ()
+    {
+        String orig = _matcher.group(3);
+        setValueForBinding(orig, "resourceUrl");
+        return (AWResponseGenerating)valueForBinding("resourceResponse");
     }
 
     protected void sleep ()
@@ -72,5 +98,4 @@ public final class HTMLActionFilter extends AWComponent
         _matcher = null;
         _input = null;
     }
-
 }

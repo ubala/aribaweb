@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#26 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#27 $
 */
 
 
@@ -550,5 +550,10 @@ public class Chooser extends AWComponent
     public boolean isDisabled ()
     {
         return _disabled;
+    }
+
+    public String cssClass ()
+    {
+        return (valueForBinding(ariba.ui.aribaweb.html.BindingNames.size) == null) ? "chText chTW" : "chText";
     }
 }

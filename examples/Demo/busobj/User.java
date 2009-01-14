@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.ArrayList;
+import java.io.File;
 
 public class User extends Person
 {
@@ -18,11 +19,12 @@ public class User extends Person
 
     @Secret String password;
     BigDecimal accountBalance;
-    @Properties("traits:enumeration; choices: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];")
+    @Properties("trait:enumeration; choices: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];")
     int rating;
     @RichText String bio;
     AccountStatus _accountStatus = AccountStatus.Active;
     List <Permission> _permissions;
+    public File fullProfile;
     @Traits("ownedToMany") List<Project>_projects;
 
     public User () {}

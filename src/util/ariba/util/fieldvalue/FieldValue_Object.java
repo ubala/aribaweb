@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue_Object.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue_Object.java#5 $
 */
 
 package ariba.util.fieldvalue;
@@ -215,7 +215,9 @@ public class FieldValue_Object extends FieldValue
     {
         Class superCls = targetClass.getSuperclass();
         if (superCls != null) populateFieldInfo(superCls, collection);
-        FieldValueAccessorUtil.popuplateFromFields(targetClass, collection);
+        if (collection.includeFields()) {
+            FieldValueAccessorUtil.popuplateFromFields(targetClass, collection);
+        }
         FieldValueAccessorUtil.popuplateFromMethods(targetClass, collection);
     }
 

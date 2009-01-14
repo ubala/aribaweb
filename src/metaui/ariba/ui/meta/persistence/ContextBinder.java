@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ContextBinder.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ContextBinder.java#3 $
 */
 package ariba.ui.meta.persistence;
 
 import ariba.ui.aribaweb.core.AWPage;
 import ariba.ui.aribaweb.core.AWSession;
+import ariba.util.core.StringUtil;
 
 /*
     Binds ObjectContext to current thread via association with page.
@@ -60,12 +61,13 @@ public class ContextBinder implements AWPage.LifecycleListener
         }
         else {
             // pick up previous context and bind it to this page
-            if (ObjectContext.peek() == null) {
+            if (ObjectContext.peek() == null || StringUtil.nullOrEmptyString(ObjectContext.get().groupName_debug())) {
                 AWSession session = page.requestContext().session(false);
                 String id = (session != null) ? session.sessionId() : null;
                 ObjectContext.bindNewContext(id);
             }
             ctx = ObjectContext.get();
+
             setPageContext(page, ctx);
         }
     }

@@ -82,6 +82,10 @@
                                 <AribaCondition ifTrue="needsWrapperActionDelimiter">&nbsp;|&nbsp;</AribaCondition>\
                                 <AribaAction name="logout"><AribaString name="Logout"/></AribaAction>\
                             </AribaCondition>\
+                            <AribaCondition ifTrue="showLoginAction">\
+                                <AribaCondition ifTrue="needsWrapperActionDelimiter">&nbsp;|&nbsp;</AribaCondition>\
+                                <AribaAction name="login"><AribaString name="Login"/></AribaAction>\
+                            </AribaCondition>\
                         </span>
                     </td>
                 </tr>

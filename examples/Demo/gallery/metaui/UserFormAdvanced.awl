@@ -6,7 +6,6 @@
 
 Operation:
 <w:GenericChooser list='${["create", "edit", "view"]}' key="op" type="Popup" action="$null"/>
-<hr/>
 
 <m:Context operation="$op">
     <m:Rules>
@@ -29,7 +28,7 @@ Operation:
                 after:zTop;
             }
  
-            field=(rating, bio) { after:Details.zBottom }
+            field=(rating, fullProfile, fileDesc, bio) { after:Details.zBottom }
             field=password { visible:false }
 
             field=accountStatus {
@@ -52,26 +51,35 @@ Operation:
             /* Replace the default Inspect layout with something nested */
             operation=(view, edit)
             layout=Inspect#Stack {
-                @layout#ActionMenu;
-                @layout#Form { elementClass:marginBottom8; }
+                @layout=Main#OutlineBox {
+                    bindings: {
+                        title:"Primary Information";
+                    };
+
+                    @layout=Content#Form {}
+                    @layout=Actions#ActionButtons {}
+                }
                 @layout#Tabs {
+                    bindings: { contentClass:"tabContentWrapper noPadding"; }
                     @layout=Overview#Form { zonePath:Overview }
                     @layout=Details#Form { zonePath:Details }
-                    @layout=Projects#Form { zonePath:Projects }
+                    @layout=Projects#Form {
+                        class { bindings:{ width:"100%" } }
+                        zonePath:Projects;
+                        field { label:null; }
+                    }
                 }
             }
+            actionCategory=Manage {
+                @action=Save#instance { actionResults:${requestContext.currentComponent.errorManager.checkErrorsAndEnableDisplay(); null} }
+            }
         }
+        field=projects { class { bindings: {class:"noBox scrollTableWrapper"} } }
     </m:Rules>
     
-    <a:If ifTrue="$metaContext.properties.editing">
-        <div style="float:right">
-            <w:TextButton action="$save">Save</w:TextButton>
-        </div>
-    </a:If>
     <m:Context object="$user" layout="Inspect" filterActions="instance">
-        <!-- The whole from comes from THIS!  The bindings (i.e. user, operation)
+        <!--- The whole from comes from THIS!  The bindings (i.e. user, operation)
              in its containing context dictate what gets generated here -->
-        <!--<pre>$metaContext.debugString</pre>-->
         <m:IncludeComponent/>
     </m:Context>
 </m:Context>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#78 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#80 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.ArrayList;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
@@ -1099,7 +1100,7 @@ public class AWSession extends AWBaseObject
         return requestHistory(frameName).requestType();
     }
 
-    protected void savePage (AWPage page, boolean isExceptionPage)
+    public void savePage (AWPage page, boolean isExceptionPage)
     {
         if (page.pageComponent().shouldCachePage()) {
             AWRequestContext requestContext = requestContext();
@@ -1339,6 +1340,23 @@ public class AWSession extends AWBaseObject
         // default is to do nothing -- subclasses needn't call super.
     }
 
+    public interface LifecycleListener
+    {
+        // called before awake
+        void sessionWillAwake (AWSession session);
+
+        // called before sleep (and before requestContext removed)
+        void sessionWillSleep (AWSession session);
+    }
+
+    private static List<LifecycleListener> _LifecycleListeners = null;
+
+    public static void registerLifecycleListener (LifecycleListener listener)
+    {
+        if (_LifecycleListeners == null) _LifecycleListeners = new ArrayList();
+        _LifecycleListeners.add(listener);
+    }
+
     protected void ensureAwake (AWRequestContext requestContext)
     {
         if (requestContext != _requestContext) {
@@ -1369,6 +1387,10 @@ public class AWSession extends AWBaseObject
             _lastAccessedTime = _httpSession.getLastAccessedTime();
             _updateLatestPerformanceStats = true;
 
+            if (_LifecycleListeners != null) {
+                for (LifecycleListener l : _LifecycleListeners) l.sessionWillAwake(this);
+            }
+
             awake();
             //logString("***** Session awake environmentStack:\n" + environmentStack().topOfStacks());
         }
@@ -1392,6 +1414,10 @@ public class AWSession extends AWBaseObject
                 }
             }
 
+            if (_LifecycleListeners != null) {
+                for (LifecycleListener l : _LifecycleListeners) l.sessionWillSleep(this);
+            }
+            
             sleep();
             setHttpSession(null);
             _requestContext = null;

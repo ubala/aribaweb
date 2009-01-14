@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaIncludeComponent.java#8 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaIncludeComponent.java#10 $
 */
 package ariba.ui.meta.core;
 
@@ -26,9 +26,16 @@ import ariba.ui.aribaweb.core.AWElementIdPath;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWApplication;
 import ariba.ui.aribaweb.core.AWComponentReference;
+import ariba.ui.aribaweb.core.AWBindingNames;
+import ariba.ui.aribaweb.core.AWConcreteTemplate;
+import ariba.ui.aribaweb.core.AWContent;
+import ariba.ui.aribaweb.core.AWElementContaining;
+import ariba.ui.aribaweb.core.AWBaseElement;
 import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.Assert;
 import ariba.util.core.Fmt;
+import ariba.util.core.MapUtil;
 import ariba.util.fieldvalue.FieldPath;
 
 import java.util.Map;
@@ -93,16 +100,27 @@ public class MetaIncludeComponent extends AWIncludeComponent
 
     protected String componentName (AWComponent component)
     {
-        Object name = properties(component).get(UIMeta.KeyComponentName);
-        return (name instanceof String)
-                ? (String)name 
+        return componentName(component, UIMeta.KeyComponentName);
+    }
+
+    protected String componentName (AWComponent component, String poropertyKey)
+    {
+        Object name = properties(component).get(poropertyKey);
+        return (name == null) ? null
+            : (name instanceof String)
+                ? (String)name
                 : ((String)MetaContext.currentContext(component).resolveValue(name));
     }
 
     protected Map bindingsForNewReference (AWComponent component)
     {
-        Map result = super.bindingsForNewReference(component);
         Map <String, Object> more = (Map)properties(component).get(UIMeta.KeyBindings);
+        return addBindingsForNewReference(component,
+                super.bindingsForNewReference(component), more);
+    }
+
+    protected Map addBindingsForNewReference (AWComponent component, Map result, Map <String, Object> more)
+    {
         if (more != null) {
             for (Map.Entry <String, Object> entry : more.entrySet()) {
                 AWBinding binding;
@@ -169,11 +187,57 @@ public class MetaIncludeComponent extends AWIncludeComponent
                                                     AWApplication application)
     {
         AWBindable element = super._createComponentReference(componentName, component, application);
+
+        String wrapperName = componentName(component, "wrapperComponent");
+        if (wrapperName != null) {
+            Map wrapperBindings = addBindingsForNewReference(component, MapUtil.map(),
+                                                    (Map)properties(component).get("wrapperBindings"));
+            AWBindable wrapperElement = createElement(wrapperName, component, application, wrapperBindings);
+            Assert.that((wrapperElement instanceof AWElementContaining),
+                    "Wrapper component not instance of AWElementContaining: %s", wrapperName);
+            ((AWElementContaining)wrapperElement).add(element);
+            element = wrapperElement;
+        }
+
         if (element instanceof AWComponentReference) {
             ((AWComponentReference)element).setUserData(properties(component));
         }
         return element;
     }
+
+    protected AWElement createContentElement (AWComponent component, Map newBindingsHashtable,
+                                              AWApplication application)
+    {
+        AWBinding contentLayoutsBinding = (AWBinding)newBindingsHashtable.remove("awcontentLayouts");
+        if (contentLayoutsBinding != null) {
+            Map<String, String> contentToLayout = (Map)contentLayoutsBinding.value(component);
+            if (!MapUtil.nullOrEmptyMap(contentToLayout)) {
+                // Template -*> AWContent (name:key) --> MetaContext (layout:value) --> MetaInclude
+                AWConcreteTemplate concreteTemplate = new AWConcreteTemplate();
+                concreteTemplate.init();
+                for (Map.Entry e : contentToLayout.entrySet()) {
+                    AWContent content = new AWContent();
+                    content.init("AWContent", AWUtil.map(AWBindingNames.name,
+                            AWBinding.bindingWithNameAndConstant(AWBindingNames.name, e.getKey())));
+                    content.setTemplateName(templateName());
+
+                    MetaContext metaContext = new MetaContext();
+                    metaContext.init("MetaContext", AWUtil.map(UIMeta.KeyLayout,
+                            AWBinding.bindingWithNameAndConstant(UIMeta.KeyLayout, e.getValue())));
+                    metaContext.setTemplateName(templateName());
+                    content.add(metaContext);
+                    MetaIncludeComponent metaInclude = new MetaIncludeComponent();
+                    metaInclude.setTemplateName(templateName());
+                    metaInclude.init("MetaIncludeComponent", MapUtil.map());
+                    metaContext.add(metaInclude);
+                    concreteTemplate.add(content);
+                }
+                return concreteTemplate;
+            }
+        }
+        return super.createContentElement(component, newBindingsHashtable, application);
+    }
+
 
     protected boolean _elementsAreCompatible (AWComponent component, AWBindable orig, AWBindable element)
     {

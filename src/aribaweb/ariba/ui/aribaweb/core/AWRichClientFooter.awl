@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientFooter.awl#22 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientFooter.awl#24 $
     </Copyright>
 
     <Overview>
@@ -24,7 +24,7 @@
 <a:RefreshRegion alwaysRender="$true">\
     <a:If ifFalse="$requestContext.isPollUpdateRequest">\
         <a:ClientSideScript globalScope="$true" executeOn="onRefreshRequestComplete">\
-            parent.ariba.Input.registerActiveElementId();
+            ariba.Input.registerActiveElementId();
         </a:ClientSideScript>
         <a:ClientSideScript>\
             <a:PrimitiveString value="$page.appendPageScrollingScript"/>\
@@ -35,5 +35,9 @@
 <a:RefreshCompleteScript>
     <!--- if we're in the refresh iframe, then update the response id and
     initiate the refresh -->
+  <a:If ifTrue="$^sessionless">
+    ariba.Refresh.completeRequest(null,null,ariba_IR);
+  <a:Else/>
     ariba.Refresh.completeRequest($historyPosition,$historyLength,ariba_IR);
+  </a:If>
 </a:RefreshCompleteScript>

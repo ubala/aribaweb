@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/Predicate.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/Predicate.java#2 $
 */
 package ariba.ui.meta.persistence;
 
@@ -62,6 +62,16 @@ abstract public class Predicate implements QueryGenerator.Visitor
         {
             generator.add(_key, _value, _operator);
         }
+
+        public String getKey ()
+        {
+            return _key;
+        }
+
+        public Object getValue ()
+        {
+            return _value;
+        }
     }
 
     abstract public static class Junction extends Predicate
@@ -86,6 +96,11 @@ abstract public class Predicate implements QueryGenerator.Visitor
         }
 
         protected abstract String operatorString ();
+
+        public List<Predicate> getPredicates ()
+        {
+            return _predicates;
+        }
     }
 
     public static class And extends Junction
