@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TruncateString.java#13 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TruncateString.java#14 $
 */
 
 package ariba.ui.widgets;
@@ -59,6 +59,7 @@ public final class TruncateString extends AWComponent
                     }
                     else {
                         // end
+                        _front = null;
                         _end = _value.substring(len - size, len);
                     }
                 }

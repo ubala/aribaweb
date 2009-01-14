@@ -15,8 +15,6 @@
         <t:ButtonArea>
             <w:TextButton action="$add">Add</w:TextButton>
             <w:TextButton action="$massAdd">Mass Add</w:TextButton>
-            <w:TextButton action='$modalPage'>Modal Page...</w:TextButton>
-            Details: <a href="TETestPanel">Page</a> <a href="TETestPanel#panel">Panel</a>
         </t:ButtonArea>
     </t:DataTable>
     <br/>

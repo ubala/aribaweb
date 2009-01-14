@@ -154,7 +154,7 @@ ariba.Widgets = function() {
             var panelWrapper = Dom.findParentUsingPredicate(target, function (e) {
                 return Dom.hasClass(e, "panelContainer");
             });
-            var container = Dom.getDocumentElement();
+            var container = Dom.getPageScrollElement();
             function position() {
                 if (panelWrapper) {
                     // using width/height:100% in CSS doesn't work in IE6, so we have to do this
@@ -858,7 +858,7 @@ ariba.Widgets = function() {
         {
             var errorPanel = Dom.getElementById('PageErrorPanel');
             if (errorPanel) {
-                errorPanel.style.top = document.documentElement.scrollTop + 'px';
+                errorPanel.style.top = Dom.getPageScrollTop() + 'px';
                 Dom.overlay(errorPanel, true);
             }
         },

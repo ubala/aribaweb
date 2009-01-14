@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue.java#5 $
 */
 
 package ariba.util.fieldvalue;
@@ -205,4 +205,19 @@ abstract public class FieldValue extends ClassExtension
     @return the value obtained from the last object in the chain
     */
     abstract public Object getFieldValue (Object target, FieldPath fieldPath);
+
+    /**
+    Called by FieldInfo.fieldInfoForClass() to populate FieldInfo.Collection with
+    information on available fields.
+
+    Implementing FieldValue extensions should callback with
+    FieldInfo.Collection.updateFieldInfo() to provide information for all usable
+    fields.  Fields should be populated in a first-declaration-first manner -- i.e.
+    super class before class, fields in java declaraion order where possible --
+    registration order is used to determine the "rank" recorded on the field.
+
+    @param targetClass class for which info should be provided.
+    @param collection repository to populate
+    */
+    public void populateFieldInfo (Class targetClass, FieldInfo.Collection collection) {}
 }

@@ -1,5 +1,5 @@
 <a:SetValue title="$metaContext.properties.label"/>
-<m:Context class="$metaContext.properties.elementType" object="$null">
+<m:Context class="$metaContext.properties.elementType" object="$false">
     <m:Context displayGroup="$displayGroup" dataSourceType="$dataSourceType"
                field="*" operation="list"
                layout="TableRow">\

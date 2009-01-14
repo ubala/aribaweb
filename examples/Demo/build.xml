@@ -17,7 +17,7 @@
     $Id:  $
  -->
 
-<project name="Demo" default="build-and-run">
+<project name="Demo" default="launch">
 
     <description>
         AW Demo -- Demo app and widget gallery

@@ -12,14 +12,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValueAccessorUtil.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValueAccessorUtil.java#4 $
 */
 
 package ariba.util.fieldvalue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
 Several static methods which are used in various places within the FieldValue subsystem to
@@ -287,5 +289,77 @@ public class FieldValueAccessorUtil extends Object
         catch (IllegalAccessException illegalAccessException) {
             throw new FieldValueException(illegalAccessException);
         }
+    }
+
+    static protected void popuplateFromFields(Class targetClass, FieldInfo.Collection collection)
+    {
+        Field fieldArray[] = FieldValueAccessorUtil.getDeclaredFields(targetClass);
+        for (int i=0, c=fieldArray.length; i < c; i++) {
+            Field field = fieldArray[i];
+            if ((field.getModifiers() & Modifier.STATIC) == 0) {
+                String name = field.getName();
+                boolean isPublic = (field.getModifiers() & Modifier.PUBLIC) != 0;
+                if (name.startsWith("_")) name = name.substring(1);
+                collection.updateInfo (name, field.getType(), isPublic, true, true,
+                                           null, null, field);
+            }
+        }
+    }
+
+    static protected void popuplateFromMethods(Class targetClass, FieldInfo.Collection collection)
+    {
+        Method methodArray[] = getDeclaredMethods(targetClass);
+        for (int i=0, c=methodArray.length; i < c; i++) {
+            Method method = methodArray[i];
+            if ((method.getModifiers() & Modifier.STATIC) == 0) {
+                String name = method.getName();
+                boolean isPublic = (method.getModifiers() & Modifier.PUBLIC) != 0;
+                Class[] params = method.getParameterTypes();
+                int pCount = params.length;
+                if (pCount == 0) {
+                    if (name.startsWith("get") && name.length() > 3) {
+                        name = String.valueOf(Character.toLowerCase(name.charAt(3))) + name.substring(4);
+                    }
+                    collection.updateInfo (name, method.getReturnType(), isPublic, true, false,
+                                               method, null, null);
+                }
+                else if ((pCount == 1) && name.startsWith("set") && (name.length() > 3)) {
+                    name = String.valueOf(Character.toLowerCase(name.charAt(3))) + name.substring(4);
+                    collection.updateInfo (name, params[0], isPublic, false, true,
+                                               null, method, null);
+                }
+            }
+        }
+    }
+    
+    /**
+        Determines the generic field path for the member.
+
+        @param element the class element can be a field or method
+        @return String 
+    */
+    public static String normalizedFieldPathForMember (Member element)
+    {
+        String fieldPath = null;
+        if (Modifier.isPublic(element.getModifiers())) {
+            if (element instanceof Method) {
+                Method mtd = (Method)element;
+                if (mtd.getName().startsWith("get")) {
+                    fieldPath = mtd.getName().substring(3);
+                }
+                else if (mtd.getGenericParameterTypes().length == 0) {
+                    fieldPath = mtd.getName();
+                }
+            }
+            else if (element instanceof Field) {
+                if (((Field)element).getName().startsWith("_")) {
+                    fieldPath = ((Field)element).getName().substring(1);
+                }
+                else {
+                    fieldPath = ((Field)element).getName().substring(1);
+                }
+            }
+        }
+        return fieldPath;
     }
 }

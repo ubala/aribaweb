@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#36 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#37 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -118,6 +118,12 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
             bufferStack();
         }
         return _currentBuffer;
+    }
+
+    public boolean currentRegionIsScope ()
+    {
+        AWResponseBuffer buffer = currentBuffer();
+        return (buffer != null && buffer.isScope());
     }
 
     protected HashMap scopeChildren ()

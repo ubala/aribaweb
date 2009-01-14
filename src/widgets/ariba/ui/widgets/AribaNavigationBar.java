@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaNavigationBar.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaNavigationBar.java#4 $
 */
 
 package ariba.ui.widgets;
@@ -23,7 +23,12 @@ public final class AribaNavigationBar extends BrandingComponent
 
     public static void setGlobalNavigationBar (String globalNavigationBar)
     {
-        _globalNavigationBar = globalNavigationBar;
+        setGlobalNavigationBar(globalNavigationBar, true);
+    }
+
+    public static void setGlobalNavigationBar (String globalNavigationBar, boolean override)
+    {
+        if (override || _globalNavigationBar == null) _globalNavigationBar = globalNavigationBar;
     }
 
     public String content ()

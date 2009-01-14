@@ -12,17 +12,38 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowAttributeLabelColumnRenderer.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowAttributeLabelColumnRenderer.java#6 $
 */
 package ariba.ui.table;
 
+import ariba.util.core.StringUtil;
+
 public final class AWTRowAttributeLabelColumnRenderer extends AWTDataTable.ColumnRenderer
 {
+    static final String CHECKED_NULL = "_NULL";
+
+    public String _label;
+
+    public void sleep ()
+    {
+        _label = null;
+        super.sleep();
+    }
+
     public String label ()
     {
-        AWTDataTable.Column column = _table._pivotState._rowOverrideColumn;
-        column.prepare(_table);
-        return column.label(_table);
+        if (_label == null) {
+            AWTDataTable.Column column = _table._pivotState._rowOverrideColumn;
+            column.prepare(_table);
+            _label = column.label(_table);
+            if (_label == null) _label = CHECKED_NULL;
+        }
+        return _label == CHECKED_NULL ? null : _label;
+    }
+
+    public boolean renderLabel ()
+    {
+        return !StringUtil.nullOrEmptyOrBlankString(label());
     }
 
     public String indentationStyle ()

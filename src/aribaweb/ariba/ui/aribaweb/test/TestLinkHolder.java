@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#7 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -22,8 +22,12 @@ import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.util.SemanticKeyProvider;
 import ariba.util.core.ClassUtil;
+import ariba.util.core.MapUtil;
 import ariba.util.core.StringUtil;
-import ariba.util.test.TestLink;
+import ariba.util.test.StagerArgs;
+import ariba.util.test.TestPageLink;
+import ariba.util.test.TestParam;
+import ariba.util.test.TestStager;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -33,6 +37,8 @@ import java.util.Set;
 public class TestLinkHolder implements SemanticKeyProvider
 {
     private static String _DefaultFirstLevelCategory = "General";
+    private static Map _badCategoryNames = MapUtil.map();
+
 
     Annotation _annotation;
     Object _annotatedItem;
@@ -45,7 +51,13 @@ public class TestLinkHolder implements SemanticKeyProvider
     String _secondLevelCategory;
 
     boolean _hidden = false;
-    
+
+    static {
+        _badCategoryNames.put("ariba","ariba");
+        _badCategoryNames.put("htmlui","htmlui");
+        _badCategoryNames.put("test","test");
+    }
+
     public TestLinkHolder ()
     {
         _hidden = true;
@@ -110,6 +122,10 @@ public class TestLinkHolder implements SemanticKeyProvider
         else {
             name = _type;
         }
+        String description = getDescription();
+        if (!StringUtil.nullOrEmptyOrBlankString(description)) {
+            name = name + ": " + description;
+        }
         return name;
     }
     private String computeDisplayName ()
@@ -154,7 +170,7 @@ public class TestLinkHolder implements SemanticKeyProvider
         String categoryName = null;
         String[] strings = className.split("\\.");
         for (String name : strings) {
-            if (!"ariba".equals(name) && !"htmlui".equals(name)) {
+            if (_badCategoryNames.get(name) == null) {
                 categoryName = name;
                 break;
             }
@@ -167,7 +183,12 @@ public class TestLinkHolder implements SemanticKeyProvider
 
     public boolean isTestLink ()
     {
-        return TestLink.class.isAssignableFrom(_annotation.annotationType());
+        return TestPageLink.class.isAssignableFrom(_annotation.annotationType());
+    }
+
+    public boolean isTestStager ()
+    {
+        return TestStager.class.isAssignableFrom(_annotation.annotationType());
     }
 
     public boolean isTestLinkParam ()
@@ -175,6 +196,10 @@ public class TestLinkHolder implements SemanticKeyProvider
         return TestParam.class.isAssignableFrom(_annotation.annotationType());
     }
 
+    public String getDescription ()
+    {
+        return AnnotationUtil.getDescription(_annotation);
+    }
     public boolean isActive (AWRequestContext requestContext)
     {
         TestContext testContext = TestContext.getTestContext(requestContext);
@@ -200,19 +225,51 @@ public class TestLinkHolder implements SemanticKeyProvider
         return active;    
     }
 
+    public boolean hasDynamicArgument()
+    {
+        return getStagerDynamicArgumentClass() != null;
+    }
+
+    public Class getStagerDynamicArgumentClass()
+    {
+        Class dynamicClass = null;
+        if (_annotatedItem.getClass() == Method.class) {
+            Method method = (Method)_annotatedItem;
+            Class[] types = method.getParameterTypes();
+            for (Class type : types) {
+                if (StagerArgs.class.isAssignableFrom(type)) {
+                    dynamicClass = type;
+                    break;
+                }
+            }
+        }
+        return dynamicClass;
+    }
+
     private boolean canInvokeMethod(Method method, TestContext testContext)
     {
         boolean canInvoke = true;
         Class[] methodTypes = method.getParameterTypes();
         for (int i=0; i<methodTypes.length; i++) {
-            if (!AWRequestContext.class.equals(methodTypes[i]) && testContext.get(methodTypes[i]) == null) {
+            if (!isInternalParameter(methodTypes[i]) && testContext.get(methodTypes[i]) == null) {
                 canInvoke = false;
                 break;
             }
         }
         return canInvoke;
     }
-    
+
+    private boolean isInternalParameter (Class parameter)
+    {
+        if (parameter == AWRequestContext.class ||
+                parameter == TestContext.class || 
+                StagerArgs.class.isAssignableFrom(parameter)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
     /*
        Check to see if all of the methods that are annotated with TestLinkParam
        can be invoked with the current state of the TestContext.
@@ -272,9 +329,21 @@ public class TestLinkHolder implements SemanticKeyProvider
         if (_annotatedItem.getClass() == Method.class) {
             Method method = (Method) _annotatedItem;
             Class[] methodTypes = method.getParameterTypes();
-            requiresParam = methodTypes.length > 0;
+
+            requiresParam = !allInternalParameters(methodTypes);
         }
         return requiresParam;
+    }
+
+    private boolean allInternalParameters (Class[] params)
+    {
+        boolean allInternal = true;
+        for (Class c : params) {
+            if (!isInternalParameter(c)) {
+                allInternal = false;
+            }
+        }
+        return allInternal;
     }
 
     private boolean useAnnotationType (AWRequestContext requestContext, Method method)
@@ -296,16 +365,57 @@ public class TestLinkHolder implements SemanticKeyProvider
 
     public AWResponseGenerating click (AWRequestContext requestContext)
     {
-        TestContext testContext = TestContext.getTestContext(requestContext);
+        AWResponseGenerating page = null;
         if (isTestLink()) {
-            // If this is a test link, then either call pageForName
-            // otherwise, call pageForName, invoke the method specified.
+            page = testLinkClick(requestContext);
+        }
+        else if (isTestStager()) {
+            page = testStagerClick(requestContext);
+        }
+        return page;
+    }
 
-            // After that set any @TestLinkParams that are specified on the page.
-            AWResponseGenerating page = null;
-            if (_annotatedItem.getClass() == Method.class) {
-                Method m = (Method) _annotatedItem;
-                Object obj = AnnotationUtil.getObjectToInvoke(requestContext, m);
+    private AWResponseGenerating testStagerClick (AWRequestContext requestContext)
+    {
+        AWResponseGenerating page = null;
+
+        TestContext testContext = TestContext.getTestContext(requestContext);
+        TestSessionSetup testSessionSetup = TestLinkManager.instance().getTestSessionSetup();
+        TestStager annotation = (TestStager)_annotation;
+
+        if (_annotatedItem.getClass() == Method.class) {
+            Method m = (Method) _annotatedItem;
+            Object obj = AnnotationUtil.getObjectToInvoke(requestContext, m);
+            Object sessionState = testSessionSetup.getSessionState();
+            try {
+                Object res = AnnotationUtil.invokeMethod(requestContext, testContext, m, obj);
+                if (res != null) {
+                    testContext.put(res);
+                }
+            }
+            finally {
+                testSessionSetup.restoreSessionStateIfNeeded(sessionState);
+            }
+//            }
+        }
+        return page;
+    }
+
+    private AWResponseGenerating testLinkClick (AWRequestContext requestContext)
+    {
+        AWResponseGenerating page = null;
+
+        TestContext testContext = TestContext.getTestContext(requestContext);
+        TestSessionSetup testSessionSetup = TestLinkManager.instance().getTestSessionSetup();
+        // If this is a test link, then either call pageForName
+        // otherwise, call pageForName, invoke the method specified.
+
+        // After that set any @TestLinkParams that are specified on the page.
+        if (_annotatedItem.getClass() == Method.class) {
+            Method m = (Method) _annotatedItem;
+            Object obj = AnnotationUtil.getObjectToInvoke(requestContext, m);
+            Object sessionState = testSessionSetup.getSessionState();
+            try {
                 if (useAnnotationType(requestContext, m)) {
                     Class typeOnAnnotation = ClassUtil.classForName(_type);
                     Object[] args = new Object[1];
@@ -316,51 +426,17 @@ public class TestLinkHolder implements SemanticKeyProvider
                     page = (AWResponseGenerating)AnnotationUtil.invokeMethod(requestContext, testContext, m, obj);
                 }
             }
-            else {
-                String name = ClassUtil.stripPackageFromClassName(((Class) _annotatedItem).getName());
-                page = requestContext.pageWithName(name);
+            finally {
+                testSessionSetup.restoreSessionStateIfNeeded(sessionState);
             }
+        }
+        else {
+            String name = ClassUtil.stripPackageFromClassName(((Class) _annotatedItem).getName());
+            page = requestContext.pageWithName(name);
             if (page != null) {
-                initializeTestLinkParams(requestContext, testContext, page);
+                AnnotationUtil.initializePageTestParams(requestContext, page);
             }
-            return page;
         }
-        else {
-            if (_annotatedItem.getClass() == Method.class) {
-                Method m = (Method) _annotatedItem;
-                Object obj = AnnotationUtil.getObjectToInvoke(requestContext, m);
-                Object res = AnnotationUtil.invokeMethod(requestContext, testContext, m, obj);
-                if (res != null) {
-                    testContext.put(res);
-                }
-            }
-            return null;
-        }
+        return page;
     }
-    
-    private void initializeTestLinkParams (AWRequestContext requestContext, TestContext testContext, Object page)
-    {
-        Class testClass;
-        if (_annotatedItem.getClass() == Method.class) {
-            Method m = (Method) _annotatedItem;
-            testClass = m.getDeclaringClass();
-        }
-        else {
-            testClass = _annotatedItem.getClass();
-        }
-        // loop through all of the methods with TestLinkParam Annotation and invoke
-        // the with method passing the proper needed argument to the method.
-        Map<Class, Object> annotations = TestLinkManager.instance().annotationsForClass(testClass.getName());
-        Set keys = annotations.keySet();
-        for (Object key : keys) {
-            Annotation annotation = (Annotation)key;
-            if (TestParam.class.isAssignableFrom(annotation.annotationType())) {
-                Object ref = annotations.get(key);
-                if (ref.getClass() == Method.class) {
-                    AnnotationUtil.invokeMethod(requestContext, testContext, (Method)ref, page);
-                }
-            }
-        }
-    }
-
 }

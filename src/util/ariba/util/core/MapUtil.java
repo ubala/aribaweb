@@ -1,5 +1,8 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2008 Ariba, Inc.
+    All rights reserved. Patents pending.
+
+    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#25 $
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +15,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#22 $
 */
 
 package ariba.util.core;
@@ -869,6 +871,31 @@ public final class MapUtil
         }
     }
 
+    private static final char Dot = '.';
+    /**
+     * Fetch the object (if any) in the designated Map, at the
+     * coordinates specified by the path, using dot notation.
+     *
+     * @param map The map to search
+     * @param path The dotted path to traverse
+     * @return The Object at the location specified by path, if any. If no
+     * such object exists, returns null.
+     */
+    public static Object getPath (Map map, String path)
+    {
+        Object value = map;
+        String[] segments = StringUtil.delimitedStringToArray(path, Dot);
+        for (int i=0; i<segments.length; i++) {
+            if (value instanceof Map) {
+                value = ((Map)value).get(segments[i]);
+            }
+            else {
+                return null;
+            }
+        }
+        return value;
+    }
+
     private static final int MaxStringLen = 254;
 
     /**
@@ -995,6 +1022,96 @@ public final class MapUtil
         }
         return isImmutable(m) ? m : Collections.unmodifiableMap(m);
     }
+
+
+    /**
+        Make a map immutable at all levels.
+
+        If the incoming map (aMap) contains maps and is fully mutable at all levels, it will be changed so that its contained maps
+        are now immutable while the top level map is still mutable.  Callers cannot keep references to aMap and use it as fully
+        mutable map.
+
+        @param aMap - the Map to be made immutable.
+        @return An immutable Map wrapping the original map, any subMaps of which have been replaced by immutable Maps
+        wrapping the originals.
+        @aribaapi ariba
+    */
+    public static Map makeImmutable (Map aMap)
+    {
+        if (aMap == null || isImmutable(aMap)) {
+            return aMap;
+        }
+        Iterator keys = aMap.keySet().iterator();
+        while (keys.hasNext()) {
+            Object key = keys.next();
+            Object element = aMap.get(key);
+            if (element instanceof Map) {
+                Map immutableElement = makeImmutable((Map)element);
+                aMap.put(key, immutableElement);
+            }
+        }
+        return immutableMap(aMap);
+    }
+
+    public interface Transformer <V,W>
+    {
+        public W transform (V v);
+    }
+
+    public static <K,X,Y> Map<K,Y> transformValues (Map<K,X> m, Transformer<X,Y> t)
+    {
+        Map<K,Y> newMap = MapUtil.map(m.size());
+        Iterator<K> keys = m.keySet().iterator();
+        K key = null;
+        while (keys.hasNext()) {
+            key = keys.next();
+            X x = m.get(key);
+            newMap.put(key, t.transform(x));
+        }
+        return newMap;
+    }
+
+
+    public static Map diff (Map change, Map baseline)
+    {
+        Map delta = MapUtil.map();
+        if (MapUtil.nullOrEmptyMap(baseline)) {
+            delta = change;
+        }
+        else {
+            Iterator keys = change.keySet().iterator();
+            while (keys.hasNext()) {
+                Object key = keys.next();
+                if (baseline.containsKey(key)) {
+                    Object baselineValue = baseline.get(key);
+                    Object changeValue = change.get(key);
+                    if (baselineValue != null) {
+                        if (changeValue != null) {
+                            if (!changeValue.equals(baselineValue)) {
+                                if (   changeValue instanceof Map
+                                        && baselineValue instanceof Map) {
+                                    delta.put(key, diff((Map)changeValue,(Map)baselineValue));
+                                    continue;
+                                }
+                                if (   changeValue instanceof List
+                                        && baselineValue instanceof List) {
+                                    delta.put(key, ListUtil.diff((List)changeValue,(List)baselineValue));
+                                    continue;
+                                }
+                                if (!changeValue.equals(baselineValue)) {
+                                    delta.put(key, changeValue);
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    delta.put(key, change.get(key));
+                }
+            }
+        }
+        return delta;
+    }
 }
 
 class WrappedEnumeration implements Enumeration
@@ -1033,5 +1150,6 @@ class WrappedIterator implements Iterator
     {
         throw new UnsupportedOperationException();
     }
+
 }
 

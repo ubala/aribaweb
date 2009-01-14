@@ -95,6 +95,7 @@ ariba.Refresh = function() {
         AWBackTrackUrl : '',
         AWForwardTrackUrl : '',
         AWMarkRefreshRegions : false,
+        AWAllowParentFrame : false,
 
         _refreshTable : function (sourceHandle, poTarget)
         {
@@ -291,15 +292,14 @@ ariba.Refresh = function() {
 
                 getId : function (handle) { return handle.id; },
 
+                getHandleForId : function (id) { return refreshFrame.contentWindow.document.getElementById(id); },
+
                 getNodeName : function (handle) { return handle.nodeName; },
 
                 getInnerHtml : function (handle) { return handle.innerHTML; },
 
                 getOuterHtml : function (handle) {
-                    if (this.getNodeName(handle) == "TABLE" && !(Dom.IsIE)) {
-                        return '<table id="' + handle.id + '">' + handle.innerHTML + '</table>';
-                    }
-                    return handle.outerHTML;
+                    return Dom.getOuterHTML(handle);
                 }
             }
         },
@@ -353,6 +353,8 @@ ariba.Refresh = function() {
                 getHandles : function () { return ids; },
 
                 getId : function (handle) { return handle; },
+
+                getHandleForId : function (id) { return id; },
 
                 getNodeName : function (handle) { return info[handle].nodeName; },
 
@@ -524,6 +526,10 @@ ariba.Refresh = function() {
         windowOnLoad : function ()
         {
             AWWindowOnLoad = true;
+
+            if (!this.AWAllowParentFrame && top != self) {
+                top.location=self.location;
+            }
 
             AWWindowLoadStartTime = (new Date()).getTime();
 
@@ -739,16 +745,21 @@ ariba.Refresh = function() {
 
             Request.simpleXMLHTTP(url, httpSuccess.bind(this));
         },
-        // Creates a form in the current script context which is a copy of the iframeForm
-        // argument and submits the form.  Used to work around issue with form submits
-        // inside iframes that have display:none set.
-        iFrameFormSubmit : function (iframeForm)
+        
+        // Called from AWFormRedirect during an incremental refresh (either XHR or IFrame)
+        // We extract the form from the current response submit it (within our main window)
+        iFrameFormSubmit : function (iframeFormName)
         {
-            var realForm = document.createElement("form");
-            document.body.appendChild(realForm);
-            realForm.method = iframeForm.method;
-            realForm.action = iframeForm.action;
-            realForm.innerHTML = iframeForm.innerHTML;
+            ariba.Request.prepareRedirectRequest();
+            // in the case of XHR, the _currentUpdateSource is set before eval-ing the
+            // inline JS that calls us (but not so for IFrame)
+            var us = _currentUpdateSource ||  new this.IFrameUpdateSource();
+            var handle = us.getHandleForId(iframeFormName);
+            var formHtml = us.getOuterHtml(handle);
+            var div = document.createElement("div");
+            document.body.appendChild(div);
+            div.innerHTML = formHtml;
+            var realForm = div.firstChild;
             realForm.submit();
         },
         

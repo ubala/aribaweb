@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.java#5 $
 */
 
 package ariba.ui.validation;
@@ -21,15 +21,34 @@ import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.core.AWBindingNames;
 import ariba.ui.aribaweb.core.AWInputId;
+import ariba.ui.aribaweb.core.AWDragContainer;
+import ariba.util.core.Fmt;
 
 public final class FormRow extends AWComponent
 {
     private static final AWEncodedString RequiredFieldIndicator = new AWEncodedString("*");
     public AWEncodedString _elementId;
+    public String _dragType;
+    public String _dragClass;
+
+
+    /////////////
+    // Awake
+    /////////////
+    protected void awake ()
+    {
+        _dragType = stringValueForBinding("dragType");
+        _dragClass = (_dragType != null)
+                ? Fmt.S("awDrp_%s awDrgCnt_%s%s", _dragType, _dragType,
+                    (booleanValueForBinding("highlightRow") ? " selReg" : ""))
+                : null;
+    }
 
     protected void sleep ()
     {
         _elementId = null;
+        _dragType = null;
+        _dragClass = null;
     }
 
     public AWEncodedString isRequiredString ()
@@ -37,6 +56,16 @@ public final class FormRow extends AWComponent
         Boolean isEditing = (Boolean)env().peek("isEditing");
         return ((isEditing != null) && isEditing.booleanValue()
                 && booleanValueForBinding(AWBindingNames.required)) ? RequiredFieldIndicator : null;
+    }
+
+    public String rowBlockName ()
+    {
+        return (_dragType != null) ? "DragRow" : "Row";
+    }
+
+    public String cueTipBH ()
+    {
+        return (valueForBinding("cueTip") != null) ? "ROV" : null;
     }
 
     public AWInputId getInputId ()

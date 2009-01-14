@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumns.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumns.java#3 $
 */
 package ariba.ui.meta.layouts;
 
@@ -50,12 +50,22 @@ public final class MetaTableColumns extends AWTDataTable.Column
         table.setWrapperColumn(this);
 
         Context context = MetaContext.currentContext(table);
-        List <ItemProperties> fields = ((UIMeta)context.meta()).fieldList(context);
+        // get cached field list
+        context.push();
+        context.setContextKey(UIMeta.KeyClass);
+        List <ItemProperties> fields = (List <ItemProperties>)context.propertyForKey("fieldPropertyList");
 
         for (ariba.ui.meta.core.ItemProperties field : fields) {
-            ariba.ui.meta.layouts.MetaTableColumn column = new ariba.ui.meta.layouts.MetaTableColumn();
-            column.init(table, field);
-            table.registerColumn(column);
+            // evaluate visibility (without object in context)
+            context.push();
+            context.set(UIMeta.KeyField, field.name());
+            if (context.booleanPropertyForKey(UIMeta.KeyVisible, false)) {
+                ariba.ui.meta.layouts.MetaTableColumn column = new ariba.ui.meta.layouts.MetaTableColumn();
+                column.init(table, field);
+                table.registerColumn(column);
+            }
+            context.pop();
         }
+        context.pop();
     }
 }

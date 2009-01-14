@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#65 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#67 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -518,6 +518,24 @@ abstract public class AWBaseRequest extends AWBaseObject
         return _isSessionRendevous;
     }
 
+    /**
+     Produce a URI which can be sent to the client and used later
+     to replay the request.
+     
+     This method should decorate the URI or mutate the form values as necessary
+     to ensure the request will be associated back to the same application instance
+     and session (not necessary when cookies are used for this purpose).
+
+     @param requestContext from the original request
+     @param formValues form values from the original request (which will also be included in
+     the replayed request); may be changed by this method
+     @return URI for client
+     */
+    protected String uriForReplay (AWRequestContext requestContext, Map formValues)
+    {
+        return AWRequestUtil.getRequestUrlMinusQueryString(requestContext);
+    }
+
     ///////////////
     // Form Values
     ///////////////
@@ -935,6 +953,11 @@ abstract public class AWBaseRequest extends AWBaseObject
         return request;
     }
 
+    
+    public AWBaseRequest getBaseRequest ()
+    {
+        return this;
+    }
     /*
         A request object for dispatching requests internally.
         This supports internal dispatch of DirectActions by providing an overlay URL (for the direct action
@@ -1011,6 +1034,11 @@ abstract public class AWBaseRequest extends AWBaseObject
 
         public AWFileData fileDataForKey(String formValueKey) {
             return null;
+        }
+
+        public AWBaseRequest getBaseRequest ()
+        {
+            return _baseRequest;
         }
 
         public String headerForKey(String requestHeaderKey) {

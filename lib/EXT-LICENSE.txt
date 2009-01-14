@@ -217,8 +217,11 @@ JAVACC
     the design, construction, operation or maintenance of any nuclear facility.
 
 
-JAVAX SERVLET
-    Sun Microsystems, Inc. ?Binary Code License Agreement
+JAVAX ACTIVATION (activation.jar)
+JAVA MAIL (mail.jar, Sun JAVAMAIL, VERSION 1.2)
+JAVAX SERVLET (javax.servlet.jar)
+
+    Sun Microsystems, Inc. Binary Code License Agreement
 
     1.Ê LICENSE TO USE.Ê Sun grants you a non-exclusive and non-transferable
     license for the internal use only of the accompanying software and
@@ -350,12 +353,6 @@ JAVAX SERVLET
     For inquiries please contact: Sun Microsystems, Inc.Ê 901 San Antonio Road,
     Palo Alto, California 94303 ?(LFI#95907/Form ID#011801)
 
-JS (Rhino)
-    Distributed under the Mozilla Public License
-        http://www.mozilla.org/MPL/NPL-1.1.txt
-    Source code available:
-        http://www.mozilla.org/rhino/download.html
-
 LOG4J:
     This product includes software developed by
     The Apache Software Foundation (http://www.apache.org/).
@@ -369,9 +366,6 @@ LUCENE
 
     Distributed under the Apache License v2.0
     Available at http://www.apache.org/licenses/LICENSE-2.0
-
-MAIL (Sun JAVAMAIL, VERSION 1.2)
-    See licence above for JAVAX SERVLET for licensing terms
 
 MARKDOWNJ
     Copyright (c) 2005, Martian Software

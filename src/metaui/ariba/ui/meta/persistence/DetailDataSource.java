@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/DetailDataSource.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/DetailDataSource.java#2 $
 */
 package ariba.ui.meta.persistence;
 
@@ -20,6 +20,7 @@ import ariba.ui.table.AWTDataSource;
 import ariba.ui.table.AWTEntity;
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.Context;
+import ariba.ui.meta.core.ObjectMeta;
 import ariba.util.fieldvalue.FieldPath;
 
 import java.util.List;
@@ -49,11 +50,11 @@ public class DetailDataSource extends AWTDataSource
 
     String detailClassName ()
     {
-        UIMeta meta = UIMeta.getInstance();
+        ObjectMeta meta = UIMeta.getInstance();
         Context context = meta.newContext();
-        context.set(UIMeta.KeyClass, _parentObject.getClass().getName());
-        context.set(UIMeta.KeyField, _detailFieldPath.fieldPathString());
-        return (String)context.propertyForKey(UIMeta.KeyElementType);
+        context.set(ObjectMeta.KeyClass, _parentObject.getClass().getName());
+        context.set(ObjectMeta.KeyField, _detailFieldPath.fieldPathString());
+        return (String)context.propertyForKey(ObjectMeta.KeyElementType);
     }
 
     List listForUpdate ()

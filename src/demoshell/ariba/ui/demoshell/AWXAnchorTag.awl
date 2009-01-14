@@ -1,1 +1,0 @@
-<a:Hyperlink target="$^target" action="$linkClicked" class="$^class" style="$^style" onMouseOut="$^onMouseOut" onMouseOver="$^onMouseOver"><a:IncludeContent/></a:Hyperlink>\

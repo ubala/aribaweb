@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#30 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#31 $
 */
 
 package ariba.util.core;
@@ -1571,6 +1571,19 @@ public abstract class ListUtil
 
         return new WrappedListEnumeration(list);
     }
+
+	public static List diff(List change, List baseline)
+	{
+		List delta = ListUtil.list();
+		Iterator items = change.iterator();
+		while (items.hasNext()) {
+			Object item = items.next();
+			if (!baseline.contains(item)) {
+				delta.add(item);
+			}
+		}
+		return delta;
+	}
 }
 
 /**

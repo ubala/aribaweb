@@ -28,8 +28,15 @@
 <t:DataTable list="$rootList" displayGroup="$displayGroup" children="$displayGroup.currentItem.children" hasChildren="$hasChildren"
         enableScrolling="$true" showOptionsMenu="$true" title="Bid Data!" multiSelect="$showSelection"
         pivotLayout="$layout.c" columnFields="$layout.c" rowFields="$layout.r" columnAttributes="$layout.a"
-        overrideAttribute="$answerColumnName" filteredColumnAttributes="$filteredAttributeColumns" shouldCollapseColumnLevel="$collapseSingleColumnLevel"
+        overrideAttribute="$answerColumnName"
+        filteredColumnAttributes="$filteredAttributeColumns"
         forceColumnUpdate="$layoutChangeLatch"
+
+        showRowAttributes="$true"
+        shouldCollapseColumnLevel="$true"
+        showColumnAttributeLabelOnRow="$isItem"
+        useRowDetailExpansionControl="$isItem"
+
         rowClass="$rowClass" detailRowClass=""
         tableConfig="$layout.userConfig">
 
@@ -58,6 +65,8 @@
         </div>
     </t:HeadingArea>
 
+    <t:Column key="Delete" label="" initiallyVisible="$false"><a:Hyperlink action="$delete">X</a:Hyperlink></t:Column>
+    
     <t:Column key="Item" pivotMoveType="None" minWidthPx="300">
         <w:OutlineControl>\
             $displayGroup.currentItem.Item $displayGroup.currentItem.ItemDesc\

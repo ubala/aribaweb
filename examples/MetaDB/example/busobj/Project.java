@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/MetaDB/example/busobj/Project.java#2 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/MetaDB/example/busobj/Project.java#3 $
 */
 package example.busobj;
 
@@ -152,27 +152,5 @@ public class Project
     public static int archiveProjects ()
     {
         return 37;
-    }
-    
-    /**
-     * Example program convenience methods
-     */
-    static Project _instance;
-    static public Project sharedInstance ()
-    {
-        if (_instance == null) {
-            _instance = new Project();
-            _instance.title = "Project X";
-
-            _instance.team.add(new User("Boss", "Hogg", 32));
-            _instance.team.add(new User("Roscoe P.", "Coltrain", 33));
-            _instance.team.add(new User("Daisy", "Duke", 87));
-            _instance.team.add(new User("Bo", "Duke", 74));
-            _instance.team.add(new User("Luke", "Duke", 91));
-            _instance.team.add(new User("Cooter", "", 43));
-            _instance.team.add(new User("Uncle Jessy", "Duke", 61));
-            _instance.deadline = new Date(2002, 3, 15);
-        }
-        return _instance;
     }
 }

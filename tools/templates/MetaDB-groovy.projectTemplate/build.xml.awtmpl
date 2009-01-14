@@ -4,7 +4,7 @@
     @ProjectName@ application
  -->
 
-<project name="@ProjectName@" default="build-and-run">
+<project name="@ProjectName@" default="launch">
 
     <description>
         MetaUI Database application

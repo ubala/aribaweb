@@ -12,14 +12,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.java#28 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.java#30 $
 */
 package ariba.ui.dev;
 
 import ariba.ui.widgets.AribaPageContent;
+import ariba.ui.widgets.Confirmation;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWBaseResponse;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWSession;
 import ariba.ui.aribaweb.core.AWConstants;
 import ariba.ui.aribaweb.core.AWValidationContext;
@@ -27,6 +29,7 @@ import ariba.ui.aribaweb.core.AWComponentDefinition;
 import ariba.ui.aribaweb.core.AWComponentApiManager;
 import ariba.ui.aribaweb.core.AWComponentActionRequestHandler;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
+import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWNamespaceManager;
 import ariba.util.core.PerformanceChecker;
 import ariba.util.core.Constants;
@@ -53,6 +56,7 @@ public final class AWDebugPane extends AWComponent implements PerformanceCheck.E
     public boolean _showValidationData = false;
     public List /*PerfRec*/ _warningList = null;
     public PerfRec _curWarning;
+    public boolean _forceRefreshInspector;
 
     public static boolean perfWarningsEnabled ()
     {
@@ -197,6 +201,13 @@ public final class AWDebugPane extends AWComponent implements PerformanceCheck.E
         return page;
     }
 
+    public AWComponent refreshPageAndInspector ()
+    {
+        requestContext().stopComponentPathRecording();
+        _forceRefreshInspector = true;
+        return null;
+    }
+
     public boolean isSessionKeepAliveDebuggingEnabled ()
     {
         AWSession session = requestContext().session(false);
@@ -339,5 +350,26 @@ public final class AWDebugPane extends AWComponent implements PerformanceCheck.E
             }
             return tname;
         }
+    }
+
+    public AWEncodedString _urlId;
+    public String _url;
+
+    public boolean isBookmarkable() {
+        return application().getBookmarker().isBookmarkable(requestContext());
+    }
+
+    public AWResponseGenerating showURL ()
+    {
+        _url = application().getBookmarker().getURLString(requestContext());
+
+        Confirmation.showConfirmation(requestContext(), _urlId);
+        return null;
+    }
+
+    public AWResponseGenerating closeDialog ()
+    {
+        Confirmation.hideConfirmation(requestContext());
+        return null;
     }
 }

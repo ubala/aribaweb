@@ -1,4 +1,4 @@
-AribaWeb README file, August 2008
+AribaWeb README file, November 2008
 
 INTRODUCTION
 
@@ -10,17 +10,17 @@ as a higher level library of ui components (ariba.widgets, ariba.metaui, ...)
 
 INTENDED AUDIENCE
     Presently documentation and tutorials are limited.  This situation will be
-    remedied soon.  Until then, if you don't already know how to use AribaWeb, 
-    you may get discouraged if you don't have access to an experienced AW user.
+    remedied soon.  Until then, make sure to check out the online tutorials
+    (search vimeo.com for "aribaweb") and step through the bundled examples.
 
-Version 0.8.3 (BETA)
+Version 5.0b6 (BETA)
     Although most of the libraries in this distribution has been incorporated in a
     variety of Ariba commercial application releases over as many as 9 years, this
     is its first release in OpenSource form and there are, therefore, likely issues
     that will arise from its use in non-Ariba contexts.  Also, the documentation
-    is not ready for release and the samples are limited.  As such, we're calling it
-    beta for the time being...  (That said, the majority of aribaweb and widgets APIs
-    are likely to be very stable from here foreward)
+    is not ready for release and the metaui (and especially metaui-jpa) layers
+    are new.  As such, we're calling it beta for the time being...  (That said, the
+    majority of aribaweb and widgets APIs are likely to be very stable from here foreward)
 
 LEARNING MORE
     See docs/Tutorial/Getting_Started.html for more information!

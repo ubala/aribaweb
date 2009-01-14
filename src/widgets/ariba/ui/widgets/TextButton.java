@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.java#44 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.java#45 $
 */
 
 package ariba.ui.widgets;
@@ -22,6 +22,7 @@ import ariba.util.core.StringUtil;
 import ariba.ui.aribaweb.core.AWBinding;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.util.AWEncodedString;
+import ariba.ui.aribaweb.core.AWEditableRegion;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponse;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
@@ -80,8 +81,8 @@ public final class TextButton extends AWComponent
 
     protected void awake ()
     {
-        _isDisabled = booleanValueForBinding(_disabledBinding);
-
+        _isDisabled = booleanValueForBinding(_disabledBinding) ||
+            AWEditableRegion.disabled(requestContext());
     }
 
     protected void sleep ()

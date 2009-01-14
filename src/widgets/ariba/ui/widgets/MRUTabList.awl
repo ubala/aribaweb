@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MRUTabList.awl#3 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MRUTabList.awl#4 $
     </Copyright>
 
     <Overview>
@@ -81,6 +81,10 @@
         a class like "pageTabWrapper"
     </Binding>
 
+    <Binding key="vertical" type="boolean" direction="get" default="$false">
+        Render as a vertical stack
+    </Binding>
+
     <Binding key="dropType" type="String" direction="get">
         see AWDropContainer's "type" binding.
     </Binding>
@@ -97,5 +101,5 @@
 <w:TabList list="$all" visibles="$visibles" item="$currentTab" selection="$selectedTab"
            label="$currentTabLabel" action="$tabSelected" disabled="$^disabled"
            class="$^class:pageTabWrapper" dropType="$^dropType" dropAction="$^dropAction"
-           actionMenuId="$^actionMenuId" actionMenuLabel="$^actionMenuLabel"/>
+           vertical="$^vertical" actionMenuId="$^actionMenuId" actionMenuLabel="$^actionMenuLabel"/>
 \

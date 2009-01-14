@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/WizardPage.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/WizardPage.java#4 $
 */
 
 package ariba.ui.wizard.component;
@@ -68,15 +68,11 @@ public class WizardPage extends AWComponent implements ActionInterceptor
             frameDelegate.prepareForResponse(_frame);
         }
 
-        // For wizards we record the current step content class as the "Page" (even though
-        // it's not) so we can record any sub tab-set or sub-step as the "area"
+        // For wizards we record the wizard label as the "Page" (even though
+        // it's not) so we can record any frame as the "area"
         if (PerformanceState.threadStateEnabled()) {
-            PerformanceState.getThisThreadHashtable().setDestinationPage(_frame.getName());
-            WizardStep step = _frame.getStep();
-            // step could be null if it is the exit confirmation page.
-            if (step != null && !step.isTopLevelStep()) {
-                PerformanceState.getThisThreadHashtable().setDestinationArea(step.getName());
-            }
+            PerformanceState.getThisThreadHashtable().setDestinationPage(_wizard.getName());
+            PerformanceState.getThisThreadHashtable().setDestinationArea(_frame.getName());
         }
 
         super.renderResponse(requestContext, component);

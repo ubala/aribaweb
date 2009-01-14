@@ -115,43 +115,10 @@ public class User extends Person
         return false;
     }
 
-    /* Bogus test example of a chooser source */
-    static List<User> _AllUsers = Arrays.asList(
-                new User("Fred", "Flintstone", 98),
-                new User("Barney", "Rubble", 58),
-                new User("Betty", "Rubble", 88),
-                new User("Wilma", "Flintstone", 78),
-                new User("Bam Bam", "Rubble", 32),
-                new User("Dino", "Flintstone", 13)
-        );
-
-    static {
-        ChoiceSourceRegistry.registerProvider(User.class.getName(),
-                new ChoiceSourceRegistry.Provider() {
-                    public Object choiceSourceForParams (String className, Map context) {
-                        return _AllUsers;
-                    }
-                });
-    }
-
     public enum Permission {
         UserAdmin,
         SourcingCreate,
         SourcingSearch
     }
-
-    // Would normally be thread local...
-    static User _EffectiveUser;
-
-    static {
-        _EffectiveUser = new User("Test", "User", 100);
-        _EffectiveUser.setPermissions(Arrays.asList(Permission.UserAdmin, Permission.SourcingSearch));
-    }
-
-    public static User getEffectiveUser()
-    {
-        return _EffectiveUser;
-    }
-
 }
  

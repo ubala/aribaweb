@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWFileResource.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWFileResource.java#11 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -138,9 +138,9 @@ public final class AWFileResource extends AWResource
      */
     public static void notifyNewRequest ()
     {
-        // invalidate if we haven't done so in 10 seconds
+        // invalidate if we haven't done so in 5 seconds
         long currentTime = System.currentTimeMillis();
-        if (currentTime -_StatsLastInvalidatedTime > 10000) {
+        if (currentTime -_StatsLastInvalidatedTime > 5000) {
             _FileStatCache = null;
             _StatsLastInvalidatedTime = currentTime;
         }

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaContactBox.awl#11 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaContactBox.awl#12 $
     </Copyright>
 
     <Overview>
@@ -47,7 +47,7 @@
                 If you need help on how to use this product, click <a href="javascript:void(0);" onMOusedown="$helpURL">Help</a> at the top right of any product page to access documentation and tutorials.
             </a:Local>
             <br/>
-            <AribaString useBR="$true" escapeHtml="$false" name="contactInfo"/>\
+            <AribaString useBR="$true" escapeUnsafeHtml="$true" name="contactInfo"/>\
         </span>
     </div>\
 </a:Block>

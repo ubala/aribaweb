@@ -3,6 +3,7 @@ package ariba.ui.meta.jpa;
 import ariba.ui.meta.persistence.ContextBinder;
 import ariba.ui.meta.persistence.PersistenceMeta;
 import ariba.ui.meta.core.UIMeta;
+import ariba.ui.meta.core.ObjectMeta;
 import ariba.ui.aribaweb.util.AWJarWalker;
 
 import javax.persistence.EntityManagerFactory;
@@ -11,7 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.Embeddable;
 import javax.persistence.OneToMany;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 import java.util.Map;
 
@@ -51,10 +52,10 @@ public class Initialization
                     }
                 });
 
-        UIMeta.getInstance().registerAnnotationListener(OneToMany.class, new UIMeta.AnnotationProcessor() {
-            public void processAnnotation(Annotation annotation, AccessibleObject prop, List predicateList, Map propertyMap, boolean isAction)
+        UIMeta.getInstance().registerAnnotationListener(OneToMany.class, new ObjectMeta.AnnotationProcessor() {
+            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List predicateList, Map propertyMap, boolean isAction)
             {
-                UIMeta.addTrait("ownedToMany", propertyMap);
+                ObjectMeta.addTrait("ownedToMany", propertyMap);
             }
         });
 

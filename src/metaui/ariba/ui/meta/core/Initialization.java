@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Initialization.java#7 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Initialization.java#9 $
 */
 package ariba.ui.meta.core;
 
@@ -49,6 +49,7 @@ public class Initialization
             // resourceManager.registerResourceDirectory("./ariba/ui/meta", resourceUrl+"ariba/ui/meta/");
             resourceManager.registerPackageName("ariba.ui.meta.core", true);
             resourceManager.registerPackageName("ariba.ui.meta.layouts", true);
+            resourceManager.registerPackageName("ariba.ui.meta.editor", true);
 
             // Namespace Imports -----------------------------------------------
             AWNamespaceManager ns = AWNamespaceManager.instance();
@@ -70,8 +71,8 @@ public class Initialization
             // register our formatter support
             AWVFormatterFactory.init();  // force registration of class extension
 
-            AribaNavigationBar.setGlobalNavigationBar(ariba.ui.meta.layouts.MetaNavTabBar.class.getName());
-            AribaCommandBar.setGlobalCommandBar(ariba.ui.meta.layouts.MetaNavCommandBar.class.getName());
+            AribaNavigationBar.setGlobalNavigationBar(ariba.ui.meta.layouts.MetaNavTabBar.class.getName(), false);
+            AribaCommandBar.setGlobalCommandBar(ariba.ui.meta.layouts.MetaNavCommandBar.class.getName(), false);
 
             ariba.ui.meta.core.Log.meta.setLevel(ariba.util.log.Log.DebugLevel);
             // ariba.ui.meta.core.Log.meta_detail.setLevel(ariba.util.log.Log.DebugLevel);

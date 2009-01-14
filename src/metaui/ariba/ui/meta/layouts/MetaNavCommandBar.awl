@@ -1,3 +1,4 @@
+<m:Context pushNewContext="$true" module="$moduleInfo.moduleNames" class="$moduleInfo.classNames">
 <table border="0" cellPadding="2" cellSpacing="0" width="100%">\
     <tr>\
      <a:If ifTrue="$showMenus">
@@ -10,7 +11,7 @@
                 &nbsp;\
             </a:If>\
         </td>
-         <a:For list="$actionCategories" item="$actionCategory">\
+         <a:For list="$moduleInfo.actionCategories" item="$actionCategory">\
             <m:Context actionCategory="$actionCategory.name">
             <a:If ifTrue="$showCurrentCategory">\
                 <td align="left" class="mastCmd" width="1%">\
@@ -69,5 +70,7 @@
             </td>
         </a:Environment>
     </a:If>\
+        <td _ifTrue="$metaEditorMenuName" align="right"><a:IncludeComponent name="$metaEditorMenuName"/></td>
     </tr>\
 </table>\
+</m:Context>

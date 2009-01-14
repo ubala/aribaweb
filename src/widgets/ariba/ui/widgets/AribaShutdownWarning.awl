@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaShutdownWarning.awl#9 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaShutdownWarning.awl#10 $
     </Copyright>
 
     <Overview>
@@ -50,7 +50,11 @@
                 <td>
                     <w:TextButton action="$redirect"
                                 buttonClass="btnSpecial1">
-                        <a:Local key="a004">Redirect Now</a:Local>
+                        <a:If ifTrue="$showRefreshSession">
+                            <a:Local key="a003">Refresh Session</a:Local>
+                        <a:Else/>
+                            <a:Local key="a004">Return To Home</a:Local>
+                        </a:If>
                     </w:TextButton>
                 </td>
             </tr>

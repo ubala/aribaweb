@@ -1,6 +1,6 @@
 <w:HintMessage showTopLine="$false">
     Example of the <i>AWTDataTable!</i>...  This is a very long hint message with all
-    kinds of great information that is sure to peak the attention of out more inquisitive
+    kinds of great information that is sure to peak the attention of our more inquisitive
     users.  They will surely find the process of getting to this information rewarding!
 </w:HintMessage>
 <t:DataTable title="Wide Table With Scrolling!" enableScrolling="$true"
@@ -8,7 +8,7 @@
         initialSortDirection="descending" initialSortKey="Category"
         tableConfigName="SimpleTable" showOptionsMenu="$true">
 
-    <t:Column key="Department" label="Big D!" action='${pageWithName("ERPage")}' nowrap/>
+    <t:Column key="Department" label="Big D!" action='${pageWithName("ProtectedPage")}' nowrap/>
 
     <t:Column key="Category"/>
 
@@ -25,3 +25,11 @@
 <a:RefreshRegion>
     <b>Selected Object:</b> <a:String value="$displayGroup.selectedObject"/><br/>
 </a:RefreshRegion>
+ 
+<groovy>
+    AWTDisplayGroup displayGroup = null
+ 
+    def isBig () {
+        return displayGroup.currentItem().Amount.intValue() > 1000000
+    }
+</groovy>

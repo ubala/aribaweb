@@ -1,5 +1,5 @@
-<w:BasicPageWrapper>
-    <m:Context module="$currentModule.name">\
+<m:Context module="$currentModule.name">\
+    <w:BasicPageWrapper hasForm="$metaContext.properties.needsForm">
         <m:IncludeComponent/>\
-    </m:Context>\
-</w:BasicPageWrapper>\
+    </w:BasicPageWrapper>\
+</m:Context>\

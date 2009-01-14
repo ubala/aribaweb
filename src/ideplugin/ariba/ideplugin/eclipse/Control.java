@@ -12,15 +12,37 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/eclipse/Control.java#2 $
+    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/eclipse/Control.java#3 $
 */
 package ariba.ideplugin.eclipse;
 
+import java.io.File;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IStartup;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 
 public class Control implements IStartup {
 
-	public void earlyStartup() {
-	    //Dummy method
-	}
+    public void earlyStartup ()
+    {
+        Preferences pref = Activator.getDefault().getPluginPreferences();
+        if (pref.getBoolean(Activator.PrefAutoCheck)) {
+            String awhome = pref.getString(Activator.PrefAWPath);
+            if (awhome == null || awhome.length() == 0 || !new File(awhome).exists()) {
+                Display.getDefault().asyncExec(new Runnable() {
+                    public void run ()
+                    {
+                        PreferenceDialog pd = PreferencesUtil.createPreferenceDialogOn(
+                            PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell(),
+                            "ariba.ideplugin.eclipse.preferences.AWPreferencesPage",
+                            new String[0], null);
+                        pd.open();
+                    }
+                });
+            }
+        }
+    }
 }

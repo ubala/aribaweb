@@ -51,30 +51,18 @@ Operation:
 
             /* Replace the default Inspect layout with something nested */
             operation=(view, edit)
-            layout=Inspect {
-                traits:Stack!;
-
+            layout=Inspect#Stack {
                 @layout#ActionMenu;
-                @layout#Form;
+                @layout#Form { elementClass:marginBottom8; }
                 @layout#Tabs {
-                    contentClass:tabContentWrapper;
-                    @layout=Overview {
-                        traits:Form;
-                        class { zonePath:Overview }
-                    }
-                    @layout=Details {
-                        traits:Form;
-                        class { zonePath:Details }
-                    }
-                    @layout=Projects {
-                        traits:Form;
-                        class { zonePath:Projects }
-                    }
+                    @layout=Overview#Form { zonePath:Overview }
+                    @layout=Details#Form { zonePath:Details }
+                    @layout=Projects#Form { zonePath:Projects }
                 }
             }
         }
     </m:Rules>
-
+    
     <a:If ifTrue="$metaContext.properties.editing">
         <div style="float:right">
             <w:TextButton action="$save">Save</w:TextButton>

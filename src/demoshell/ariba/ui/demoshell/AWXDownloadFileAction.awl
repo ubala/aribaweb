@@ -1,6 +1,0 @@
-<a:Hyperlink action="$downloadFile"><a:IncludeContent/></a:Hyperlink>\
-<a:If ifTrue="$openNewWindow">\
-    <a:ClientSideScript isSingleton="$false">
-        window.open("<a:String value="$openWindowUrl"/>","", "");
-    </a:ClientSideScript>
-</a:If>\

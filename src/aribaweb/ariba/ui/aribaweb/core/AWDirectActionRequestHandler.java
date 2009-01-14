@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#59 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#60 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -419,7 +419,7 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
        handler of redirect request, it returns the page that was saved on
        the request.
     */
-    private AWResponse clearBrowserHistory (AWRequestContext requestContext,
+    protected AWResponse clearBrowserHistory (AWRequestContext requestContext,
                                             AWComponent actionResultsComponent)
     {
         AWPage actionResultsPage = actionResultsComponent.page();

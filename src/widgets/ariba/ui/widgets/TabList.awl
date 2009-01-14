@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#6 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#7 $
     </Copyright>
 
     <Overview>
@@ -35,6 +35,10 @@
     <Binding key="class" type="String" direction="get">
         Note: it appears the value of this binding is ignored -- only used to determine if
         using classic look or square tabs?
+    </Binding>
+
+    <Binding key="vertical" type="boolean" direction="get" default="$false">
+        Render as a vertical stack
     </Binding>
 
     <Binding key="dropType" type="String" direction="get">
@@ -99,6 +103,7 @@
         </a:If>
     </a:For>
 <a:Else/>\
+  <a:If ifFalse="$^vertical">
     <div class="tabListWrapper">
     <table class="tabBox" cellpadding="0" cellspacing="0" border="0">
         <tr>
@@ -176,4 +181,64 @@
         </tr>
     </table>
     </div>
+  <a:Else/>\
+    <!--- Vertically stacked tabs --->
+    <div class="vTabs">
+        <a:For list="$visibleTabDefinitions" item="$currentTabDefinition" index="$currentIndex">\
+            <a:If notEqualNull="$currentTabDefinition">\
+                <a:DropContainer type="$^dropType" omitTags="$isNotDropTarget" dropAction="$^dropAction">
+                        <a:IncludeBlock name="BucketItem"
+                                        label="$currentLabel"
+                                        isSelected="$currentTabSelected"
+                                        action="$tabClicked"
+                                        popupMenu="$null"/>\
+                </a:DropContainer>
+            </a:If>\
+        </a:For>\
+        <a:If ifTrue="$hasHiddenTabs">
+            <a:SetValue allTabsMenuId="$requestContext.nextElementId"/>
+            <a:IncludeBlock templateName="BucketItem"
+                            label="$[a002]More..."
+                            isSelected="$false"
+                            action="$null"
+                            class="tocItem"
+                            popupMenu="$allTabsMenuId"/>\
+
+            <w:PopupMenu menuId="$allTabsMenuId">
+                <a:For list="$tabDefinitions" item="$currentTabDefinition">
+                    <w:PopupMenuItem action="$tabClicked"
+                                   style="$currentTabMenuItemStyle">\
+                        $currentLabel
+                    </w:PopupMenuItem>
+                </a:For>
+            </w:PopupMenu>
+        </a:If>
+    </div>
+  </a:If>\
 </a:If>\
+\
+<a:Block name="BucketItem">\
+    <a:If ifTrue="$^isSelected">\
+        <div class="tocItemCurrent">\
+            <w:RoundedBox roundStyle="$ariba.ui.widgets.RoundedBox.Left" hideGradient="$true">\
+                <div class="searchItemLink">\
+                    <a:Hyperlink action="$^action">\
+                        <a:String value="$^label"/>\
+                    </a:Hyperlink>\
+                </div>\
+            </w:RoundedBox>\
+        </div>\
+    <a:Else/>\
+        <div style="padding:10px 5px 10px 10px">\
+            <a:If ifTrue="$^popupMenu">\
+                <w:PopupMenuLink menuId="$^popupMenu" position="this">\
+                    <a:String value="$^label"/>\
+                </w:PopupMenuLink>\
+            <a:Else/>\
+                <a:Hyperlink action="$^action">\
+                    <a:String value="$^label"/>\
+                </a:Hyperlink>\
+            </a:If>\
+        </div>\
+    </a:If>\
+</a:Block>

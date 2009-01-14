@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabSet.awl#3 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabSet.awl#4 $
     </Copyright>
 
     <Overview>
@@ -67,6 +67,10 @@
         If you want a box around the content of the tab, then use "tabContentWrapper".
     </Binding>
 
+    <Binding key="vertical" type="boolean" direction="get" default="$false">
+        Render as a vertical stack
+    </Binding>
+
     <Binding key="actionMenuId" type="String" required="$false" direction="get">
         If specified, a type of PulldownButton will be rendered within the
         tab bar.
@@ -76,7 +80,8 @@
     </Binding>
 </a:Api>\
 <w:BaseTabSet list="$tabs" item="$currentTab" index="$currentIndex" label="$currentTabLabel" selection="$selectedTab"
-        submitForm="$^submitForm" awname="$^awname" class="$^class:pageTabWrapper" contentClass="$^contentClass"
+        submitForm="$^submitForm" awname="$^awname"
+        class="$^class:pageTabWrapper" contentClass="$^contentClass" vertical="$^vertical"
         dropType="$currentTabDropType" dropAction="$currentTabDropAction" action="$^action"
         actionMenuId="$^actionMenuId" actionMenuLabel="$^actionMenuLabel">\
     <!---AWDropContainer tagName="div" omitTags="$isSelectedTabNotDropTarget"

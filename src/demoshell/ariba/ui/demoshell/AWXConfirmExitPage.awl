@@ -1,7 +1,0 @@
-You are in the process of creating a document.
-Please choose what you would like to do next.
-<ul>
-  <li><a:Hyperlink action="$gotoHome">Save</a:Hyperlink> this request
-  <li><a:Hyperlink action="$gotoHome">Delete</a:Hyperlink> this request
-  <li><w:WizardAction name="ok">Continue</w:WizardAction> working on this request
-</ul>

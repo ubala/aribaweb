@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#11 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#12 $
 */
 
 package ariba.ui.servletadaptor;
@@ -200,6 +200,12 @@ public class AWServletApplication extends AWConcreteApplication
     protected int initSessionTimeout ()
     {
         return 3600;
+    }
+
+    protected Class sessionClass ()
+    {
+        Class cls = AWUtil.classForName("app.Session");
+        return (cls != null) ? cls : super.sessionClass();
     }
     
     public String name ()

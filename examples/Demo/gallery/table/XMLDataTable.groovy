@@ -1,7 +1,6 @@
 package gallery.table
 
 import ariba.ui.aribaweb.core.AWComponent
-import ariba.ui.demoshell.XMLFactory
 
 class XMLDataTable extends AWComponent
 {
@@ -11,9 +10,10 @@ class XMLDataTable extends AWComponent
     public boolean isStateless() { false }
     
     void init () {
-        pos = [XMLFactory.xmlNamed("POs/PO1.xml", this),
-               XMLFactory.xmlNamed("POs/PO2.xml", this),
-               XMLFactory.xmlNamed("POs/PO3.xml", this)]
+        pos = ["POs/PO1.xml", "POs/PO2.xml", "POs/PO3.xml"].collect {
+            URL url = ariba.ui.table.ResourceLocator.urlForRelativePath(it, this);
+            new XmlSlurper().parseText(url.text)
+        }
         po = pos[0]
     }
 }

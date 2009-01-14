@@ -1,0 +1,95 @@
+AribaWeb Release History
+========================
+
+AribaWeb has been a commercially deployed component of Ariba, Inc's network services
+(e.g. [Ariba Supplier Network](http://supplier.ariba.com),
+[Ariba Discovery](http://discovery.ariba.com))
+and On Demand [Spend Management application suite](http://www.ariba.com/solutions/) since
+late 1999.  The framework evolved steadily in dozens of releases over that time,
+and was first released as Open Source in May 2008.
+
+Below is a brief history of the major releases of the framework:
+
+AribaWeb 5
+----------
+
+The first Open Source release of AribaWeb.  Initially released in beta form in May 1999,
+AW5 was the first release packaged for external consumption.  Major enhancements included:
+
+  - Ant build system
+
+  - Zero configuration initialization (jar scanning based resource registration)
+
+  - MetaUI and MetaDB frameworks
+    (Ariba has employed a related metadata-driven UI framework, called "fieldsui",
+    since 1999, but MetaUI is a new design).
+
+
+AribaWeb 4
+----------
+
+AribaWeb 4 premiered as part of Ariba's next generation On Demand applications in 2006.
+Key new capabilities included:
+
+  - Cross-page Incremental Refresh
+    (Incremental refresh was now employed for essentially all responses, even those
+    crossing server page boundaries)
+
+  - PivotTables (multi-dimensional data display)
+
+  - Client-side modal panels
+
+  - Enhanced validation error display and navigation
+
+  - AWPoll (simulated push) support
+
+  - RichText editor integration
+
+  - Component Inspector
+
+
+AribaWeb 3
+----------
+
+First released as part of Ariba Analysis in 2003, AW 3 included major steps forward
+in client-side richness, including:
+
+  - Drag and drop support
+
+  - Scrolling Data Tables (with incremental data fetching)
+
+  - Outline trees (and tables)
+
+  - Pervasive refresh regions (all requests were JavaScript-based and could result
+    in incremental page updates)
+
+  - LazyDiv (lazy fetching popup menus)
+
+
+AribaWeb 2
+----------
+
+Released as part of Sourcing 4.0 (and later Buyer 8.0), AW 2.0 was the first release
+to include formally packaged "widgets" (and wizard) frameworks.  New capabilities included:
+
+  - Many widgets: TabSet, PopupMenu, TextButton, Section
+
+  - Wizard framework (and ActionInterceptor model)
+
+  - Branding framework (including custom page wrappers session-scoped resource managers)
+
+  - Support for subtemplates (inner components)
+
+
+AribaWeb 1
+----------
+
+First commercially deployed in October 1999 as part of the AribaNetwork 13 release,
+and subsequently in ANME (then IBX) and Ariba Buyer 7.0 releases, AW 1.0 included:
+
+  - Full component framework, including stateful and stateless components
+
+  - Initial "refresh region" (auto AJAX) support for incrementally refreshing
+    portions of a DOM in response to specifically flagged action elements.
+
+  - Proper back-button support (via server-maintained page history)

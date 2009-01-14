@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUpload.awl#13 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUpload.awl#15 $
     </Copyright>
 
     <Overview>
@@ -100,23 +100,8 @@
     </Binding>
 
 </a:Api>\
-
-<a:If ifTrue="$hasMaxLength">
-    <!--- Note: this refresh region is necessary since we set the maxlength into the session
-          during append and clear it out during take.  If the AWFileUpload happens to be on
-          a page that has proper refresh regions and the file upload action is an incremental
-          update, then we need to make sure we rerun append on this control so the value is
-          reestablished in the session -->
-    <a:RefreshRegion alwaysRender="$true">
-        <!--- Note: the voodoo for "formValue" is to indicate that this is never evaluated.
-        However, we must indicate to AWGenericElement that it is a form element, otherwise
-        this will be skipped during take values -->\
-        <a:FileUploadInternals inputStream="$^inputStream" bytes="$^bytes" file="$^file"
-            filename="$^filename" mimeType="$^mimeType" fileSizeExceeded="$^fileSizeExceeded"
-            name="$^name" newMode="$^newMode" maxLength="$^maxLength"
-            otherBindings="$otherBindingsValues"/>
-    </a:RefreshRegion>
-<a:Else/>
+<!--- Bogus conditional to deal elementId cross-phase mismatch in AWFileUploadInternals -->
+<a:If ifTrue="$true">
     <a:FileUploadInternals inputStream="$^inputStream" bytes="$^bytes" file="$^file"
         filename="$^filename" mimeType="$^mimeType" fileSizeExceeded="$^fileSizeExceeded"
         name="$^name" newMode="$^newMode" maxLength="$^maxLength"

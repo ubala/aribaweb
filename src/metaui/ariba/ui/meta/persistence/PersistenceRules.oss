@@ -45,6 +45,9 @@ field {
                 multiSelect:true;
                 displayKey:${ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(elementType)};
             };
+            trait=ownedToMany {
+                component:MetaDetailTable;
+            }
         }
         editable=false {
             component:AWHyperlink;
@@ -86,11 +89,6 @@ action=Create {
             object:${displayGroup.dataSource.insert()};
         }
     }
-}
-
-layout=Inspect {
-    component:MetaForm;
-    modal:true;
 }
 
 layout=Global {

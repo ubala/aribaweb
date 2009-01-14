@@ -3,7 +3,7 @@
 <w:HintMessage showTopLine="$true">
     A side-by-side master-detail layout with type-specific detail panels!
 </w:HintMessage>
-<w:FourZoneLayout widthRight="30%">
+<w:FourZoneLayout widthLeft="auto" widthRight="300px">
     <a:Content name="left">
         <t:DataTable displayGroup="$displayGroup" csvPath="ER.csv" item="$currentItem"
                      multiSelect="$true" showSelectionColumn="$false" initialSortKey=""
@@ -24,9 +24,8 @@
                     Running Action</w:TextButton>\
                 <w:TextButton action="$secureAction">Secure Action</w:TextButton>\
             </t:ButtonArea>
-
         </t:DataTable>
-
+        <br/>
         <w:PopupMenu menuId="AddItem">
             <w:PopupMenuHeading showSeparator="$false">\
                 Create New Expense\
@@ -47,25 +46,17 @@
                       index="$tabIndex">
                 <w:Tab label="Expense Items" dropType="Expense" dropAction="$null">
                     <a:If notEqualNull="$displayGroup.selectedObject">
-                        <table width="100%">
-                            <tr>
-                                <td width="99%">
-                                    <h1><a:String
-                                            value="$displayGroup.selectedObject.Type"/>
-                                    </h1>
-                                </td>
-                                <td width="1%">
-                                    <w:TextButton action="$save">Save</w:TextButton>
-                                </td>
-                            </tr>
-                            <tr>\
-                                <td colspan="2" style="padding:5px">
-                                    <a:IncludeComponent
-                                            awcomponentName="$viewerForSelectedItem"
-                                            currentItem="$displayGroup.selectedObject"/>
-                                </td>
-                            </tr>
-                        </table>
+                        <div style="padding:5px">
+                            <h1 class="flL">\
+                                <a:String value="$displayGroup.selectedObject.Type"/>\
+                            </h1>
+                            <div class="flR"><w:TextButton action="$save">Save</w:TextButton></div>
+                            <div style="clear:both">
+                                <a:IncludeComponent
+                                        awcomponentName="$viewerForSelectedItem"
+                                        currentItem="$displayGroup.selectedObject"/>
+                            </div>
+                        </div>
                     <a:Else/>
                         <div style="padding:5px">
                             <h1>Add Expense Line</h1>

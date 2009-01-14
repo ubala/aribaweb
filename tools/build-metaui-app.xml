@@ -28,7 +28,7 @@
 
     <property name="aw.packagedResourceExtensions" value="awl,oss"/>
     <property name="aw.useNamespaceFromPackage" value="ariba.ui.meta"/>
-    <property name="aw.dependsOn" value="ariba.metaui"/>
+    <property name="aw.dependsOn" value="ariba.metaui,ariba.groovyloader"/>
 
     <import file="build-widgets-app.xml"/>
 

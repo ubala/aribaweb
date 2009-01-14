@@ -32,16 +32,22 @@ operation=(view, list) {
 }
 
 class {
-    trait=fourZones {
+    @trait=fourZones {
         zones: zLeft, zRight, zTop, zBottom, zDetail;
         fourZoneLayout:true;
     }
-    trait=oneZone {
+    @trait=oneZone {
         zones: [zLeft, zDetail];
     }
 
     traits: fourZones;
 }
+
+@traitGroup=FormZones {
+    @trait=fourZones;
+    @trait=oneZone;
+}
+
 
 field {
     type                    { component:AWString; bindings:{value:$value} }
@@ -81,7 +87,7 @@ field {
     }
 
     type=java.util.List {
-        trait=enum editable {
+        @trait=enum editable {
             component:GenericChooser;
             bindings:{
                 object:${object};
@@ -92,80 +98,108 @@ field {
                 formatter:$component.formatters.identifier;
             };
         }
+
         operation=(search, list)        { visible:false }
+
+        @trait=ownedToMany {
+            after:zDetail;
+            component:MetaDetailTable;
+        }
     }
+
     type=(java.math.Integer, int) {
         bindings:{formatter:$component.formatters.integer};
         editable                { component:AWTextField; bindings:{style:"text-align:right"; size:13} }
     }
+
     type=java.lang.String {
         editable                { component:AWTextField }
-        trait=(longtext,LongText) {
+        @trait=longtext {
             after:zBottom;
             editable            { component:AWTextArea;
                                   bindings:{cols:60; rows:10} }
             operation=(search, list)  { visible:false }
         }
-        trait=(richtext,RichText) {
+        @trait=richtext {
             after:zBottom;
             bindings:{escapeUnsafeHtml:true}
             editable            { component:RichTextArea;
                                   bindings:{cols:60; rows:10} }
             operation=(search, list)  { visible:false }
         }
-        trait=(secret, Secret)  {
+        @trait=secret {
             bindings:{formatter:$component.formatters.hiddenPassword};
             editable   { component:AWPasswordField; bindings:{formatter:null} }
             operation=(search, list) { visible: false; }
         }
-        trait=(truncated, Truncated) { component:TruncateString; bindings:{size:10} }
+        trait=truncated { component:TruncateString; bindings:{size:10} }
     }
 
-    trait=derived {
+    @trait=derived {
         editable:false;
         visible:false;
         editing { visible:false; }
     }
 
-    trait=(required, Required) editable {
+    @trait=required {
         required:true;
-        valid: ${(value != null && value !="") ? true : "Answer required"}
+        object {
+            valid: ${(value != null && value !="") ? true : "Answer required"}
+        }
     }
 
-    trait=enumeration {
+    @trait=enumeration {
         editable { component:GenericChooser; bindings:{
                     object:${object}; key:${properties.field}; list:${properties.choices};
                 }
         }
     }
 
-    trait=noCreate operation=create { visible:false }
+    @trait=noCreate { operation=create { visible:false } }
+    @trait=noSearch { operation=search { visible:false } }
 
-    trait=ownedToMany {
-        after:zDetail;
-        component:MetaDetailTable;
+    component=GenericChooser {
+        @trait=Popup        { bindings:{type:Popup} }
+        @trait=PopupControl { bindings:{type:PopupControl} }
+        @trait=Chooser      { bindings:{type:Chooser} }
+
+        @trait=PostOnChange { bindings:{action:null} }
     }
 }
 
+@traitGroup=FieldType {
+    @trait=longtext;
+    @trait=richtext;
+    @trait=secret;
+}
+
+@traitGroup=ChooserType {
+    @trait=Popup;
+    @trait=PopupControl;
+    @trait=Chooser;
+}
+
+/* Why would *field* have an action?!?
 field {
-    trait=(action, pageAction) {
+    @trait=(action, pageAction) {
         bindings: { action: [${meta().fireAction(this, component.requestContext)}] }
     }
 
-    trait=pageAction {
+    @trait=pageAction {
         actionResults:${requestContext.pageWithName(properties.pageName)}
     }
 }
+*/
 
 action {
     visible:true;
     enabled:true;
 
-    trait=pageAction {
+    @trait=pageAction {
         actionResults:${requestContext.pageWithName(properties.pageName)}
     }
 
-    trait=modalComponentPage {
+    @trait=modalComponentPage {
         actionResults:${requestContext.pageWithName("MetaModalPage")};
         pageBindings:{
             componentName:${properties.componentName};
@@ -173,7 +207,7 @@ action {
         }
     }
     
-    trait=modalComponentPanel {
+    @trait=modalComponentPanel {
         actionResults:${requestContext.pageWithName("MetaModalPage")};
         pageBindings:{
             componentName:${properties.componentName};
@@ -182,7 +216,7 @@ action {
         }
     }
 
-    trait=messageResults {
+    @trait=messageResults {
         message:"Action Performed: %s";
         actionResults:${
             def o = (properties.isInstanceAction) ? object : ariba.ui.aribaweb.util.AWUtil.classForName(properties.class);
@@ -192,7 +226,7 @@ action {
             null};
     }
 
-    trait=instance {
+    @trait=instance {
     	enabled:${object != null};
     	isInstanceAction:true;
     }
@@ -207,21 +241,29 @@ action {
 
 layout {
     zones: [zMain];
-    trait=ActionMenu { visible:true; component:MetaActionList bindings:{renderAsMenu:true} elementClass:flR }
-    trait=InstanceActionButtons { visible:true; component:MetaActionList
+    @trait=ActionMenu { visible:true; component:MetaActionList bindings:{renderAsMenu:true} elementClass:flR }
+    @trait=InstanceActionButtons { visible:true; component:MetaActionList
                 bindings:{renderAsButtons:true;filterActions:instance} elementClass:flR }
-    trait=StaticActionButtons { visible:true; component:MetaActionList
+    @trait=StaticActionButtons { visible:true; component:MetaActionList
                 bindings:{renderAsButtons:true;filterActions:static} elementClass:flR }
-    trait=Tabs { visible:true; component:MetaTabs }
-    trait=Sections { visible:true; component:MetaSections }
-    trait=Form { visible:true; component:MetaForm }
-    trait=Stack { visible:true; component:MetaElementList }
+    @trait=Tabs { visible:true; component:MetaTabs }
+    @trait=Sections { visible:true; component:MetaSections }
+    @trait=Form { visible:true; component:MetaForm }
+    @trait=Stack { visible:true; component:MetaElementList }
 
-    trait=OwnZone class {
+    @trait=OwnZone {
         zonePath:${layout}
     }
 }
-layout=Inspect { traits:Form }
+
+@traitGroup=LayoutGrouping {
+    @trait=Tabs;
+    @trait=Sections;
+    @trait=Form;
+    @trait=Stack;
+}
+
+layout=Inspect { traits:Form; label:${ariba.ui.meta.core.UIMeta.beautifyClassName(values.class)}; }
 layout=InspectWithActions {
     traits:Stack;
     @layout#ActionMenu;
@@ -230,10 +272,10 @@ layout=InspectWithActions {
 layout=ButtonArea { traits:StaticActionButtons }
 layout=SelectionButtonArea { traits:InstanceActionButtons }
 
-/* Support @Trait("LabelField") to identity label field */
+/* Support @Trait("labelField") to identity label field */
 layout=LabelField field {
     visible:false;
-    trait=LabelField { visible:true! }
+    @trait=labelField { visible:true! }
 }
 
 module {
@@ -242,7 +284,7 @@ module {
     component:MetaDashboardLayout;
     layout { visible:true }
 
-    trait=ActionTOC {
+    @trait=ActionTOC {
         @layout=Actions {
            label:"Actions";
            component:"MetaActionList";
@@ -254,7 +296,7 @@ module {
 actionCategory {
     visible:true;
 }
-@actionCategory=Manage {}
+@actionCategory=Manage { after:Search; }
 
 
 /* For groovy */

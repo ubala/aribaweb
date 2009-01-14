@@ -12,13 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavCommandBar.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavCommandBar.java#7 $
 */
 package ariba.ui.meta.layouts;
 
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.widgets.ActionHandler;
 import ariba.ui.widgets.PageWrapper;
 import ariba.ui.widgets.AribaAction;
@@ -26,6 +27,9 @@ import ariba.ui.widgets.ModalPageWrapper;
 import ariba.ui.widgets.BrandingComponent;
 import ariba.ui.meta.core.ItemProperties;
 import ariba.ui.meta.core.UIMeta;
+import ariba.ui.meta.core.Context;
+import ariba.ui.meta.core.MetaContext;
+import ariba.ui.meta.editor.MetaNavEditorMenu;
 // import ariba.dashboard.component.GroupItemSelectionPage;
 
 import java.util.List;
@@ -42,6 +46,12 @@ public class MetaNavCommandBar extends BrandingComponent
         return false;
     }
 
+    public UIMeta.ModuleInfo moduleInfo ()
+    {
+        return MetaNavTabBar.getState(session()).moduleInfo();
+    }
+
+    /*
     public List<ItemProperties> actionCategories ()
     {
         return MetaNavTabBar.getState(session()).getActionCategories();
@@ -49,7 +59,13 @@ public class MetaNavCommandBar extends BrandingComponent
 
     public List<ItemProperties> actions ()
     {
-        return MetaNavTabBar.getState(session()).getActionsByCategory().get(_actionCategory.name());
+        return MetaNavTabBar.getState(session()).getActionsByCategory().get(_actionCategory);
+    }
+    */
+
+    public List<ItemProperties> actions ()
+    {
+        return moduleInfo().actionsByCategory.get(_actionCategory.name());
     }
 
     public boolean showMenus ()
@@ -97,7 +113,7 @@ public class MetaNavCommandBar extends BrandingComponent
     public AWResponseGenerating currentItemClicked ()
     {
         ActionHandler handler = ActionHandler.resolveHandlerInComponent(
-                AribaAction.GlobalNavAction, this, new NavActionHandler(_action));
+                AribaAction.GlobalNavAction, this, new NavActionHandler(MetaContext.currentContext(this)));
 
         return handler.actionClicked(requestContext());
     }
@@ -153,16 +169,26 @@ public class MetaNavCommandBar extends BrandingComponent
 
     public static class NavActionHandler extends ActionHandler
     {
-        ItemProperties _action;
+        Context.Snapshot _contextSnapshot;
+        // ItemProperties _action;
 
-        public NavActionHandler (ItemProperties action)
+        public NavActionHandler (Context context)
         {
-            _action = action;
+            _contextSnapshot = context.snapshot();
         }
 
         public AWResponseGenerating actionClicked (AWRequestContext requestContext)
         {
-            return MetaNavTabBar.getState(requestContext.session()).fireAction(_action, requestContext);
+            UIMeta.UIContext context = (UIMeta.UIContext)_contextSnapshot.hydrate();
+            context.setRequestContext(requestContext);
+            UIMeta meta = (UIMeta)context.meta();
+            return meta.fireAction(context, requestContext);
         }
+    }
+
+    public String metaEditorMenuName ()
+    {
+        return (AWConcreteApplication.IsDebuggingEnabled)
+                ? MetaNavEditorMenu.class.getName() : null;
     }
 }

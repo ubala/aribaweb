@@ -12,17 +12,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.java#20 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.java#21 $
 */
 
 package ariba.ui.widgets;
 
 import ariba.ui.aribaweb.core.AWComponent;
-import ariba.ui.aribaweb.core.AWSession;
+import ariba.ui.aribaweb.core.AWEditableRegion;
 import ariba.ui.aribaweb.core.AWRequestContext;
+import ariba.ui.aribaweb.core.AWSession;
+import ariba.ui.aribaweb.util.AWDateFactory;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWFormatter;
-import ariba.ui.aribaweb.util.AWDateFactory;
 import ariba.ui.validation.AWVDateFormatter;
 import ariba.util.core.Fmt;
 import ariba.util.core.StringUtil;
@@ -147,5 +148,11 @@ public class DateField extends AWComponent
             _exampleDate = Fmt.S(localizedJavaString(1, "Enter date: %s" /* example date format */), formattedDate);
         }
         return _exampleDate;
+    }
+    
+    public boolean isDisabled ()
+    {
+        return  booleanValueForBinding(BindingNames.disabled) || 
+            AWEditableRegion.disabled(requestContext());
     }
 }

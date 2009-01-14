@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSubcomponentScope.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSubcomponentScope.java#4 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -56,7 +56,7 @@ public class AWSubcomponentScope extends AWContainerElement
         AWElementIdPath path = requestContext.currentElementIdPath();
         boolean reset = _resetLatch.booleanValue(component);
         if (reset) {
-            requestContext.page()._clearSubcomponentsWithParentPath(path);
+            requestContext.page()._clearSubcomponentsWithParentPath(path, false);
             _resetLatch.setValue(false, component);
         }
         super.renderResponse(requestContext, component);

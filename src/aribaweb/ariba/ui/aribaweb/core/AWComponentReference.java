@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#57 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#59 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -339,7 +339,7 @@ public class AWComponentReference extends AWContainerElement
             } else {
                     // force creation of a new component
                 subcomponentInstance = replacement;
-                subcomponentInstance.requestContext().page()._clearSubcomponentsWithParentPath(elementIdPath);
+                subcomponentInstance.requestContext().page()._clearSubcomponentsWithParentPath(elementIdPath, true);
                 if (parentComponent != null) {
                     subcomponentInstance.saveInPage(elementIdPath);
                 }
@@ -355,8 +355,9 @@ public class AWComponentReference extends AWContainerElement
 
     protected AWElementIdPath statefulSubcomponentId (AWRequestContext requestContext)
     {
-        requestContext.pushElementIdLevel();
-        return requestContext.currentElementIdPath();
+        // requestContext.pushElementIdLevel();
+        // return requestContext.currentElementIdPath();
+        return requestContext.nextElementIdPath();
     }
 
     public AWComponent _statelessSubcomponentInstanceInComponent (AWRequestContext requestContext, AWComponent parentComponent)
@@ -434,6 +435,10 @@ public class AWComponentReference extends AWContainerElement
      */
     public void applyValues(AWRequestContext requestContext, AWComponent component)
     {
+        if (LogComponentEvaluation) {
+            logPhase(requestContext, "applyValues", true);
+        }
+
         AWComponent subcomponentInstance = _isStateless ?
                 _statelessSubcomponentInstanceInComponent(requestContext, component) :
                 rendezvousWithStatefulComponent(requestContext, component);
@@ -444,9 +449,6 @@ public class AWComponentReference extends AWContainerElement
         if (subcomponentInstance == null)
             return;
 
-        if (LogComponentEvaluation) {
-            logPhase(requestContext, subcomponentInstance, "applyValues", true);
-        }
         requestContext.pushCurrentComponent(subcomponentInstance);
         try {
             subcomponentInstance.applyValues(requestContext, component);
@@ -462,11 +464,11 @@ public class AWComponentReference extends AWContainerElement
         if (_isStateless) {
             _checkInSharedComponentInstance(subcomponentInstance);
         } else {
-            requestContext.popElementIdLevel();
+            // requestContext.popElementIdLevel();
         }
         
         if (LogComponentEvaluation) {
-            logPhase(requestContext, subcomponentInstance, "applyValues", false);
+            logPhase(requestContext, "applyValues", false);
         }
     }
 
@@ -476,6 +478,10 @@ public class AWComponentReference extends AWContainerElement
      */
     public AWResponseGenerating invokeAction(AWRequestContext requestContext, AWComponent component)
     {
+        if (LogComponentEvaluation) {
+            logPhase(requestContext, "invokeAction", true);
+        }
+
         AWResponseGenerating actionResults = null;
         AWComponent subcomponentInstance = _isStateless ?
                 _statelessSubcomponentInstanceInComponent(requestContext, component) :
@@ -487,9 +493,6 @@ public class AWComponentReference extends AWContainerElement
         if (subcomponentInstance == null)
             return null;
 
-        if (LogComponentEvaluation) {
-            logPhase(requestContext, subcomponentInstance, "invokeAction", true);
-        }
         requestContext.pushCurrentComponent(subcomponentInstance);
         try {
             actionResults = subcomponentInstance.invokeAction(requestContext, component);
@@ -505,11 +508,11 @@ public class AWComponentReference extends AWContainerElement
         if (_isStateless) {
             _checkInSharedComponentInstance(subcomponentInstance);
         } else {
-            requestContext.popElementIdLevel();
+            // requestContext.popElementIdLevel();
         }
 
         if (LogComponentEvaluation) {
-            logPhase(requestContext, subcomponentInstance, "invokeAction", false);
+            logPhase(requestContext, "invokeAction", false);
         }
         if (actionResults != null && requestContext.isPathDebugRequest()) {
             requestContext.debugTrace().pushComponentPathEntry(this);
@@ -520,12 +523,13 @@ public class AWComponentReference extends AWContainerElement
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
+        if (LogComponentEvaluation) {
+            logPhase(requestContext, "renderResponse", true);
+        }
+
         AWComponent subcomponentInstance = _isStateless ?
                 _statelessSubcomponentInstanceInComponent(requestContext, component) :
                 statefulSubcomponentInstanceInComponent(requestContext, component);
-        if (LogComponentEvaluation) {
-            logPhase(requestContext, subcomponentInstance, "renderResponse", true);
-        }
         requestContext.pushCurrentComponent(subcomponentInstance);
 
         // Disable old-style component inspector support in favor of new alt-click debug trace mechanism
@@ -559,13 +563,13 @@ public class AWComponentReference extends AWContainerElement
         if (_isStateless) {
             _checkInSharedComponentInstance(subcomponentInstance);
         } else {
-            requestContext.popElementIdLevel();
+            // requestContext.popElementIdLevel();
         }
 
         if (LogComponentEvaluation) {
-            logPhase(requestContext, subcomponentInstance, "renderResponse", false);
+            logPhase(requestContext, "renderResponse", false);
         }
-    }
+        }
 
     private void throwException (Throwable re)
     {
@@ -751,10 +755,14 @@ public class AWComponentReference extends AWContainerElement
         }
     }
 
-    public void logPhase (AWRequestContext requestContext, AWComponent component, String phase, boolean entering)
-    {
-        boolean logRequestBanner = requestContext.get("hasLoggedBanner") == null;
+    // Uncomment this at the code at buttom of method below to do unbalanced elementId checking
+    // private AWElementIdPath _debug_elementIdPath;
 
+    public void logPhase (AWRequestContext requestContext, String phase, boolean entering)
+    {
+        if (requestContext.session(false) == null) return;
+
+        boolean logRequestBanner = requestContext.get("hasLoggedBanner") == null;
         if (logRequestBanner) {
             requestContext.put("hasLoggedBanner", Boolean.TRUE);
             Integer count = (Integer)requestContext.httpSession().getAttribute("RequestCount");
@@ -790,12 +798,23 @@ public class AWComponentReference extends AWContainerElement
         requestContext.put(phase, indent);
 
         logString(entering ? "> " : "< ");
-        String componentDesc = component.toString();
+        String componentDesc = _componentDefinition.componentName();
         int lastDot = componentDesc.lastIndexOf(".");
         if (lastDot != -1) {
             componentDesc = componentDesc.substring(lastDot + 1);
         }
         logString(componentDesc);
+
+        /*
+        if (entering) {
+            _debug_elementIdPath = requestContext.nextElementIdPath();
+        } else {
+            AWElementIdPath afterPath = requestContext.nextElementIdPath();
+            if (!_isStateless && _debug_elementIdPath.privatePath().length != afterPath.privatePath().length) {
+                logString("MISMATCHED ELEMENT ID LENGTHS ON ENTRY/EXIT");
+            }
+        }
+        */
     }
 
     protected boolean hasNamedTemplate (AWComponent component, String templateName)
@@ -840,6 +859,9 @@ public class AWComponentReference extends AWContainerElement
         protected AWComponent statefulSubcomponentInstanceInComponent (AWRequestContext requestContext,
                                                                        AWComponent parentComponent)
         {
+            // force ID push to balance with susequent pop by parent class
+            statefulSubcomponentId(requestContext);
+
             AWPage page = parentComponent.page();
             _instance.setupForNextCycle(this, parentComponent, page);
             _instance.ensureAwake(page);
@@ -849,6 +871,9 @@ public class AWComponentReference extends AWContainerElement
 
         protected AWComponent rendezvousWithStatefulComponent (AWRequestContext requestContext, AWComponent parentComponent)
         {
+            // force ID push to balance with susequent pop by parent class
+            statefulSubcomponentId(requestContext);
+
             return _instance;
         }
 

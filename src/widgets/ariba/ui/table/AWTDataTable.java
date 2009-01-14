@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#177 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#179 $
 */
 
 package ariba.ui.table;
@@ -716,7 +716,7 @@ public final class AWTDataTable extends AWComponent
             }
 
             for (int ii=0; ii<cmLen; ii++) {
-                ((AWTColumnManager)_columnManagers.get(ii)).postInvoke(this);
+                ((AWTColumnManager)_columnManagers.get(ii)).postInvoke(this, response);
             }
 
             _exportState = EXPORT_NONE;
@@ -2676,6 +2676,7 @@ public final class AWTDataTable extends AWComponent
         if (!_didRenderCurrentRow) {
             _didRenderCurrentRow = true;
             _renderingPrimaryRow = true;
+            if (_pivotState != null) return _pivotState.preparePrimaryRow(this);            
             return Boolean.TRUE;
         }
         _renderingPrimaryRow = false;

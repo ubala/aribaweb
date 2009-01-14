@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormTable.awl#5 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormTable.awl#15 $
     </Copyright>
 
     <Overview>
@@ -37,6 +37,22 @@
         Should embedded rows emit AWErrorIndicators
     </Binding>
 
+    <Binding key="omitTable" direction="get" type="boolean" default="$false">
+        Should omit wrapper table tags
+    </Binding>
+
+    <Binding key="width" direction="get" type="String">
+        Table width attribute
+    </Binding>
+
+    <Binding key="editable" direction="get" type="boolean" default="$true">
+        Should use editing layout (i.e. larger row pad style)
+    </Binding>
+
+    <Binding key="omitLabelPadding" direction="get" type="boolean" default="$false">
+        Should omit the minimum label padding used to create alignment across forms
+    </Binding>
+
     <NamedContent name="top" required="$false">
         top zone rows (assuming useFourZones=true)
     </NamedContent>
@@ -54,48 +70,51 @@
     </NamedContent>
 
 </a:Api>\
-
-<table border="0" cellspacing="0" cellpadding="0" omitTags="$alreadyInFormTable">
-    <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags" inFormTable="$true">
-        <a:If ifTrue="$^useFourZones">\
-            <tr>\
-                <td style="padding-right:130px"></td>
-                <td></td>
-                <td style="padding-right:200px"></td>
-                <td></td>
-            </tr>\
-            <a:Environment formRowTrailingColspan="2">
-                <a:IncludeContent name="top" required="$false"/>\
-            </a:Environment>
+<span class="ftRO" omitTags="$^editable:$true">\
+<a:If ifTrue="$^useFourZones">\
+    <a:RefreshRegion tagName="table" class="ftL " isScope="$true" omitTags="$omitOuterTable"
+                     border="0" cellspacing="0" cellpadding="0" width="$^width">
+        <tr _ifFalse="$omitPaddingRow"><td class="fflS"></td><td class="ffiS"></td><td class="ffpS"></td></tr>
+        <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags" inFormTable="$true">
+            <a:IncludeContent name="top" required="$false"/>\
+        </a:Environment>
+    </a:RefreshRegion>
 \
-            <tr>
-                <td colspan="3" valign="top">\
-                    <table border="0" cellspacing="0" cellpadding="0">
-                        <tr>\
-                            <td style="padding-right:130px"></td>
-                            <td></td>
-                        </tr>\
-                        <a:IncludeContent name="left" required="$false"/>\
-                    </table>
-                </td>
+    <a:RefreshRegion tagName="table" isScope="$true" omitTags="$omitOuterTable"
+                     border="0" cellspacing="0" cellpadding="0" width="$^width">
+        <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags" inFormTable="$true">
+            <a:RefreshRegion tagName="tr">
                 <td valign="top">\
-                    <table border="0" cellspacing="0" cellpadding="0">
-                        <tr>\
-                            <td style="padding-right:130px"></td>
-                            <td></td>
-                        </tr>\
-                        <a:IncludeContent name="right" required="$false"/>\
-                    </table>
+                    <a:RefreshRegion tagName="table" class="ftL" isScope="$true" border="0" cellspacing="0" cellpadding="0">
+                        <tr _ifFalse="$^omitLabelPadding"><td class="fflS"></td><td class="ffiS"></td><td class="ffpS"></td></tr>
+                        <a:IncludeContent name="left" required="$false"/>\
+                    </a:RefreshRegion>
                 </td>
-            </tr>
+                <td class="ftAs"></td>
+                <td valign="top">\
+                    <a:RefreshRegion tagName="table" class="ftR" isScope="$true" border="0" cellspacing="0" cellpadding="0">
+                        <tr _ifFalse="$^omitLabelPadding"><td class="fflS"></td><td class="ffiS"></td><td class="ffpS"></td></tr>
+                        <a:IncludeContent name="right" required="$false"/>\
+                    </a:RefreshRegion>
+                </td>
+            </a:RefreshRegion>
+        </a:Environment>
+    </a:RefreshRegion>
 \
-            <a:Environment formRowTrailingColspan="2">
-                <a:IncludeContent name="bottom" required="$false"/>\
-            </a:Environment>
-        <a:Else/>\
-            <a:Environment formRowTrailingColspan="2">
-                <a:IncludeContent/>
-            </a:Environment>
-        </a:If>
-    </a:Environment>
-</table>
+    <a:RefreshRegion tagName="table" class="ftL" isScope="$true" omitTags="$omitOuterTable"
+                     border="0" cellspacing="0" cellpadding="0" width="$^width">
+        <tr _ifFalse="$omitPaddingRow"><td class="fflS"></td><td class="ffiS"></td><td class="ffpS"></td></tr>
+        <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags" inFormTable="$true">
+            <a:IncludeContent name="bottom" required="$false"/>\
+        </a:Environment>
+    </a:RefreshRegion>
+<a:Else/>\
+    <a:RefreshRegion tagName="table" class="ftL" isScope="$true" omitTags="$omitOuterTable"
+                     border="0" cellspacing="0" cellpadding="0" width="$^width">
+        <tr _ifFalse="$omitPaddingRow"><td class="fflS"></td><td class="ffiS"></td><td class="ffpS"></td></tr>
+        <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags" inFormTable="$true">
+            <a:IncludeContent/>
+        </a:Environment>
+    </a:RefreshRegion>
+</a:If>\
+</span>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#121 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#124 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -112,6 +112,7 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     }
 
     public static boolean AllowCrossPageRefresh = true;
+    public static boolean AllowParentFrame = false;
     public static boolean AllowIncrementalScriptLoading () { return AllowCrossPageRefresh; }
     public static boolean DeferGlobalScopeScript () { return true; }
 
@@ -933,6 +934,7 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
         }
         // Check here if our page instance is out of date (due to dynamic class reloading)
         if (AWConcreteApplication.IsRapidTurnaroundEnabled
+                    && requestContext != null
                     && requestContext.currentPhase() == AWRequestContext.Phase_Render) {
             AWComponentDefinition componentDefinition = _pageComponent.componentDefinition();
             if (componentDefinition != null) {
@@ -1140,15 +1142,17 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
         }
     }
 
-    protected void _clearSubcomponentsWithParentPath (AWElementIdPath parentPath)
+    protected void _clearSubcomponentsWithParentPath (AWElementIdPath parentPath,
+                                                      boolean clearLaterSiblings)
     {
         Iterator iter = _subcomponents.entrySet().iterator();
         while (iter.hasNext()) {
             Map.Entry entry = (Map.Entry)iter.next();
             AWElementIdPath componentPath = (AWElementIdPath)entry.getKey();
-            if (componentPath.hasPrefix(parentPath)) {
-                iter.remove();
-            }
+            boolean remove = (clearLaterSiblings) 
+                ? componentPath.isParentOrSiblingPredecessor(parentPath)
+                : componentPath.hasPrefix(parentPath);
+            if (remove) iter.remove();
         }
     }
 

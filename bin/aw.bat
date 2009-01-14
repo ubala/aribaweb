@@ -32,7 +32,7 @@ echo     set PATH=%%AW_HOME%%\bin;%%PATH%%
 echo.
 
 :check_ANT_HOME
-if not "%ANT_HOME%" == "" goto check_CATALINA_HOME
+if not "%ANT_HOME%" == "" goto init
 set ANT_HOME=%AW_HOME%\tools\ant
 set PATH=%ANT_HOME%\bin;%PATH%
 echo Setting ANT_HOME to: %ANT_HOME%

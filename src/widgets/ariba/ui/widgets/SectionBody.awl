@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionBody.awl#9 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionBody.awl#11 $
     </Copyright>
 
     <Overview>
@@ -34,14 +34,11 @@
         <td width="1%">\
             <a:Image filename="cleardot.gif" class="block" width="$leftMargin" height="1px"/>\
         </td>
-        <td>\
-            <a:If ifTrue="$^showTopSpace:$true">\
-                <br/>\
-            </a:If>\
+        <td class="sectionBody">\
+            <div _ifTrue="$^showTopSpace:$true" class="sectionPadTop"></div>\
             <a:IncludeContent/>\
         </td>
     </tr>
 </table>\
-<a:If ifTrue="$^showBottomSpace:$true">\
-<br/>\
+<div _ifTrue="$^showBottomSpace:$true" class="sectionPadBot"></div>\
 </a:If>\

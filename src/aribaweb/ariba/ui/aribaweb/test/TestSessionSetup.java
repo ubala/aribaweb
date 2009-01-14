@@ -12,24 +12,45 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestSessionSetup.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestSessionSetup.java#4 $
+    Responsible: ksaleh
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWSession;
+import ariba.util.test.TestValidationParameter;
 
+import java.util.List;
 import java.util.Set;
 
 public interface TestSessionSetup
 {
     public boolean activateTestLinks (AWRequestContext requestContext);
 
-    public void initializeSession (AWRequestContext requestContext, TestContext testContext);
     public void initializeTestContext (AWRequestContext requestContext);
-    public void registerTestContextDataProvider (TestContext testContext, AWSession session);
+    public void registerTestContextDataProvider (TestContext testContext,
+                                                 AWSession session);
     public Set<String> resolveSuperType (String classname);
 
     public String getObjectDisplayName (Object obj);
+
+    // the session state will be saved before data stagers are called
+    // use getSessionState, and then a call to restore the session state
+    // is made after the stager is invoked.
+    // The restore method can check if the stager modified the state
+    // and restore if it needs.
+    // This is being added so we can support reuse of junit tests as
+    // data stagers.  Some of these unit tests replace the context
+    // they run with and they don't restore.
+    public Object getSessionState ();
+    public void restoreSessionStateIfNeeded (Object obj);
+
+    public List getTestCentralLinkList ();
+
+    public List<TestInspectorLink> getApplicationValidators (Class c);
+    public List<TestValidationParameter> invokeValidator (TestInspectorLink validator,
+                                                     AWRequestContext requestContext);
+    public String getCurrentTextCentralPageInfo (AWRequestContext requestContext);
 }

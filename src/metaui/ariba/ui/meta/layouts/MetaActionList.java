@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.java#8 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.java#9 $
 */
 package ariba.ui.meta.layouts;
 
@@ -96,7 +96,7 @@ public class MetaActionList extends AWComponent
 
     public AWResponseGenerating actionClicked ()
     {
-        if (_isGlobal) return MetaNavTabBar.getState(session()).fireAction(_action, requestContext());
+        // if (_isGlobal) return MetaNavTabBar.getState(session()).fireAction(_action, requestContext());
         Context context = MetaContext.currentContext(this);
         UIMeta meta = (UIMeta)context.meta();
         return meta.fireAction(_action, context, requestContext());

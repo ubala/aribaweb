@@ -1,0 +1,258 @@
+<table border="0" class='${compactMode ? "" : "scrollTableWrapper"}'
+       cellpadding="0" cellspacing="0" width="100%">\
+    <tr><td class="tableHeader" style="padding:2px 2px 4px 2px">\
+        <div class="flR">
+            <a:SetValue menuId="$requestContext.nextElementId"/>\
+            <i><w:PopupMenuLink class="hoverLink hoverArrow" menuId="$menuId" position="this" omitTags="$!editing">\
+                #<w:TruncateString value="$activeTraits" size="${compactMode ? 20 : 40}" truncationStyle="2"/>\
+            </w:PopupMenuLink></i>
+            <w:PopupMenu menuId="$menuId">
+                <a:For item="$trait" list="$compatibleTraits">
+                    <w:PopupMenuItem action="$toggleTrait" showCheck="$hasTrait">$trait</w:PopupMenuItem>
+                </a:For>
+            </w:PopupMenu>
+        </div>
+        <h2>\
+            <w:PopupMenuLink menuId="mipIL" class="hoverArrow hoverLink" position="this">\
+                <b>$scopePropertyValue</b>
+                <span style="font-weight:normal">($scopePropertyKey)</span>\
+            </w:PopupMenuLink>\
+        </h2>
+        <w:PopupMenu menuId="mipIL">
+            <a:For item="$itemName" list="$peerItems">\
+                <w:PopupMenuItem action="$selectItem"><b emitTags="$itemVisible">$itemName</b></w:PopupMenuItem>
+            </a:For>
+        </w:PopupMenu>
+        <a:If ifFalse="$compactMode">
+            <hr/>
+            <div _ifFalse="$compactMode" class="flL" style="padding-left:3px">
+                <w:ComplexRepetition item="$currentView" list="$(Context, Assignments, Properties)">
+                    <a:Content name="separator"> | </a:Content>
+                    <a:Content name="body">
+                        <a:If ifTrue="${currentView == selectedView}">
+                            <b>$currentView</b>
+                        <a:Else/>
+                            <a:Hyperlink action="${selectedView=currentView; null}">$currentView</a:Hyperlink>
+                        </a:If>
+                    </a:Content>
+                </w:ComplexRepetition>
+            </div>
+            <div class="flR">\
+                <a:If ifTrue='${selectedView != "Context" && editing}'>
+                    <w:PulldownButton menuId="mipGEdit">Edit</w:PulldownButton>
+                    <w:PopupMenu menuId="mipGEdit">
+                        <a:If ifFalse="$isPropertiesPanel">
+                            <w:PopupMenuItem action="$addRule">Add Rule</w:PopupMenuItem>
+                        </a:If>
+                        <a:IncludeBlock name="AddPropertyMenuItems"/>
+                    </w:PopupMenu>
+                    <a:If ifTrue="$editSet.isDirty">\
+                        <w:TextButton action="$saveChanges" isBrandStyle="$true">Save</w:TextButton>\
+                    </a:If>\
+                </a:If>\
+            </div>\
+        </a:If>
+    </td></tr>
+    <tr><td>
+        <a:SwitchTemplate currentTemplateName="$selectedView">
+            <a:Content name="Context">
+                <t:DataTable class="noBox scrollTableWrapper" enableScrolling="true"
+                             showColumnHeader="$false" initialSortKey=""
+                             item="$assignmentInfo"
+                             list="$contextInfo.assignmentStack">
+                    <t:Column label="Assignment" key="key" style='${"padding-left:" + assignmentInfo.level*16 + "px"}'>
+                        <b emitTags="$assignmentInfo.scopeKeyAssignment">\
+                            <i emitTags="$assignmentInfo.fromChaining">\
+                                <span emitTags="$assignmentInfo.overridden" style="text-decoration:line-through">
+                                    <span style="color:#555580">$assignmentInfo.key: </span>
+                                    <span style="color:black">$assignmentInfo.value</span>
+                                </span>\
+                            </i>\
+                        </b>\
+                    </t:Column>
+                </t:DataTable>
+            </a:Content>
+            <a:Content name="Assignments">
+                <t:DataTable class="noBox scrollTableWrapper" enableScrolling="true" showColumnHeader="$false"
+                             initialSortKey="rank" initialSortDirection="descending"
+                             item="$assignmentSource" list="$assignmentLocations">
+
+                    <t:Column key="description">
+                        <a:IncludeBlock name="RuleMenuLink">\
+                            <a:Content name="Link">$assignmentSource.description</a:Content>
+                        </a:IncludeBlock>
+                    </t:Column>
+
+                    <t:Column key="location" align="right">\
+                        <a:DebugRemoteOpen value="$assignmentSource.location">\
+                            $assignmentSource.locationShortName\
+                        </a:DebugRemoteOpen>\
+                        <div class="flR" style="padding-left:3px" _ifTrue="${editing && assignmentSource.rule.isEditable}">\
+                            <a:SetValue menuId="$requestContext.nextElementId"/>\
+                            <w:PulldownButton class="hoverArrow" menuId="$menuId"></w:PulldownButton>\
+                            <w:PopupMenu menuId="$menuId">
+                                <w:PopupMenuItem action="$deleteRule">Delete Rule</w:PopupMenuItem>
+                                <a:IncludeBlock name="AddPropertyMenuItems"/>
+                            </w:PopupMenu>\
+                        </div>\
+                    </t:Column>
+
+                    <t:RowDetail>
+                        <div style='float:left;padding-left:5px;font:normal 11px/15px "Courier New", Courier, mono'>
+                            <a:For item="$assignment"
+                                   list="${assignmentMap.get(assignmentSource)}">
+                                <a:If ifFalse="$editingCurrentAssignment">\
+                                    <a:If ifTrue="$editing">
+                                        <a:GenericActionTag tagName="div" action="$editCurrentAssignment" style="clear:both">
+                                            <div bh="ROV" roClass="hov">
+                                                <div class="flL hovVis" style="width:25px">\
+                                                    <a:Hyperlink class="hoverLink" action="$deleteCurrentProperty">[X]</a:Hyperlink>\
+                                                </div>
+                                                <div class="flL">
+                                                    <span emitTags="$assignment.isOverridden" style="text-decoration:line-through">
+                                                        <span style="color:green">$assignment.key: </span>
+                                                        <span style="color:blue">$assignment.value</span>
+                                                    </span>\
+                                                    <span _ifFalse="$assignmentSource.rule.isEditable" class="hovVis">\
+                                                        &nbsp;(override)\
+                                                    </span>\
+                                                </div>
+                                            </div>
+                                         </a:GenericActionTag>
+                                     <a:Else/>
+                                        <div style="padding-left:25px">
+                                            <span emitTags="$assignment.isOverridden" style="text-decoration:line-through">
+                                                <span style="color:green">$assignment.key: </span>
+                                                <span style="color:blue">$assignment.value</span>
+                                            </span>\
+                                        </div>
+                                     </a:If>
+                                <a:Else/>
+                                    <div style="clear:both; padding:4px 0px 3px 0px">
+                                        <div style="float:left;width:25px"><w:ErrorIndicator errorKey="property"/></div>
+                                        <a:TextField style="margin:-3px" autoselect="$true" size="50"
+                                                     value="$editableAssignmentString" action="$doneEditing"/>
+                                        <a:ClientSideScript>
+                                            ariba.Input.selectFirstText();
+                                        </a:ClientSideScript>
+                                    </div>
+                                </a:If>
+                            </a:For>
+                        </div>
+                    </t:RowDetail>
+                </t:DataTable>
+            </a:Content>
+            <a:Content name="Properties">
+                <a:SetValue assignmentSource="$null"/>
+                <t:DataTable class="noBox scrollTableWrapper" enableScrolling="true"
+                             item="$assignment"
+                             list="$activeAssignments">
+
+                    <t:Column label="" width="20px" isVisible="$editing">\
+                        <a:IncludeBlock name="RuleMenuLink">\
+                            <a:Content name="Link">\
+                                <a:Image style="$ruleIndicatorStyle" filename="cleardot.gif"
+                                         width="6" height="6"
+                                         title="$assignment.source.description"/>\
+                            </a:Content>
+                            <a:Content name="MenuItems">\
+                                <w:PopupMenuHeading>Rule</w:PopupMenuHeading>
+                                <w:PopupMenuItem action="$deleteCurrentProperty">Delete Override</w:PopupMenuItem>
+                            </a:Content>
+                        </a:IncludeBlock>
+                    </t:Column>
+
+                    <t:Column class="label" align="right" label="Property" key="key" width="1px" nowrap>\
+                        <a:String value="$assignment.key"/>:\
+                    </t:Column>
+                    <t:Column class="ffp" style="padding-top:4px" label="Value" key="value">\
+                        <a:If ifFalse="$editingCurrentAssignment">\
+                            <a:GenericActionTag tagName="span" action="$editCurrentAssignment" disableClick="$!editing">\
+                                <a:If ifTrue="$compactMode">\
+                                    <w:TruncateString value="$assignment.value" size="20"/>
+                                <a:Else/>\
+                                    <a:String value="$assignment.value"/>\
+                                </a:If>
+                            </a:GenericActionTag>
+                        <a:Else/>
+                            <a:If ifTrue="$compactMode">\
+                                <a:TextField style="margin-top:1px" autoselect="$true" size="17"
+                                             value="$editableAssignmentString" action="$doneEditing"/>
+                            <a:Else/>\
+                                <a:TextField style="margin:-3px" autoselect="$true" size="50"
+                                             value="$editableAssignmentString" action="$doneEditing"/>
+                                <w:ErrorIndicator errorKey="property"/>\
+                            </a:If>
+                            <a:ClientSideScript>
+                                ariba.Input.selectFirstText();
+                            </a:ClientSideScript>
+                        </a:If>
+                    </t:Column>
+                </t:DataTable>
+            </a:Content>
+        </a:SwitchTemplate>
+    </td></tr>
+</table>
+<a:If ifTrue="$compactMode">
+    <table cellpadding="0" cellspacing="0" class="scrollTableWrapper" style="border-width:1px 0px 0px 0px" width="100%"><tr>
+        <td class="tableFooter" style="padding-left:3px">\
+            <w:PulldownButton menuId="mipGEdit">Edit</w:PulldownButton>
+            <w:PopupMenu menuId="mipGEdit">
+                <w:PopupMenuItem action="$addRule">Add Rule</w:PopupMenuItem>
+                <a:IncludeBlock name="AddPropertyMenuItems"/>
+            </w:PopupMenu>
+            <a:If ifTrue="$editSet.isDirty">\
+                <w:TextButton action="$saveChanges" isBrandStyle="$true">Save</w:TextButton>\
+            </a:If>\
+        </td>
+        <td class="tableFooter" width="1px" style="padding-right:3px">\
+            <a:ActiveImage filename="portletCloseAW.gif" action="$^closeAction"/>
+        </td>
+    </tr></table>
+<a:Else/>
+    <a:RefreshRegion alwaysRender="$true">
+        <a:If ifTrue="$refreshMainWindowActionId">
+            <a:ClientSideScript>
+                ariba.Debug.fireMainWindowAction(<a:PrimitiveString value="$refreshMainWindowActionId"/>);
+            </a:ClientSideScript>
+            <a:SetValue refreshMainWindowActionId="$null"/>
+        </a:If>
+    </a:RefreshRegion>
+</a:If>        
+\
+<w:Confirmation id="AddPropertyPanel" okAction="$addProperty">
+    <a:Content name="header">Add Property</a:Content>\
+    <a:Content name="content">
+        <w:FormTable showErrorFlags="$true">
+            <w:FormRow label="Property Key"><a:TextField value="$propertyKey"/></w:FormRow>
+        </w:FormTable>
+    </a:Content>\
+</w:Confirmation>
+\
+<a:Block name="AddPropertyMenuItems">
+    <w:PopupMenuHeading>Edit Property</w:PopupMenuHeading>
+    <a:For item="$propertyKey" list="$compatibleProperties">\
+        <w:PopupMenuItem action="$addProperty">$propertyKey</w:PopupMenuItem>
+    </a:For>
+    <a:SetValue propertyKey="$null"/>
+    <w:PopupMenuItem action="$addProperty">Other...</w:PopupMenuItem>
+</a:Block>
+<a:Block name="RuleMenuLink">
+    <a:SetValue menuId="$requestContext.nextElementId"/>\
+    <w:PopupMenuLink omitTags="$!currentRule.isEditable"
+                     position="this"
+                     menuId="$menuId" class="hoverLink hoverArrow">\
+        <a:IncludeContent name="Link"/>
+    </w:PopupMenuLink>\
+    <w:PopupMenu menuId="$menuId">
+        <a:LazyDiv>
+            <a:IncludeContent name="MenuItems" required="$false"/>
+            <w:PopupMenuHeading>Rule Selectors</w:PopupMenuHeading>
+            <a:For item="$contextKey" list="$contextInfo.contextKeys">\
+                <w:PopupMenuItem action="$togglePredicate" showCheck="$predicateUsesContextKey">\
+                    $contextKey = $contextValue\
+                </w:PopupMenuItem>
+            </a:For>
+        </a:LazyDiv>
+    </w:PopupMenu>\
+</a:Block>

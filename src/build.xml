@@ -38,6 +38,7 @@
                 <fileset dir="${src.ui.dir}" includes="metaui/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="metaui-jpa/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="demoshell/build.xml"/>
+                <fileset dir="${src.ui.dir}" includes="groovyloader/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="ideplugin/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="awreload/build.xml"/>
             </subant>

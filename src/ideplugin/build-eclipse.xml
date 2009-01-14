@@ -24,9 +24,6 @@
     </description>
 
     <property name="src.resource.path" value=""/>
-    <patternset id="metainf.includes">
-        <include name="project/idea/META-INF/plugin.xml"/>
-    </patternset>
 
     <property environment="env"/>
     <property name="aw.home" location="${env.AW_HOME}"/>
@@ -63,7 +60,7 @@
             description="Packages the JAR file">
         <mkdir dir="${build.plugin.dir}"/>
         <antcall target="build-jar">
-            <param name="build.jar.file" value="${build.plugin.dir}/aribawebEclipsePlugin.jar"/>
+            <param name="build.jar.file" value="${build.plugin.dir}/ariba.ideplugin.eclipse.5.0b6.jar"/>
             <param name="javac.excludes" value="**/idea/**/*"/>
         </antcall>
     </target>
@@ -88,11 +85,12 @@
                 <attribute name="Bundle-ManifestVersion-Version" value="2"/>
                 <attribute name="Bundle-Name" value="Remote Open plugin"/>
                 <attribute name="Bundle-SymbolicName" value="ariba.ideplugin.eclipse;singleton:=true"/>
-                <attribute name="Bundle-Version" value="1.0.0"/>
+                <attribute name="Bundle-Version" value="5.0b6"/>
                 <attribute name="Bundle-Activator" value="ariba.ideplugin.eclipse.Activator"/>
                 <attribute name="Bundle-Localization" value="plugin"/>
-                <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.ui.ide, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.ui.workbench.texteditor, org.eclipse.core.runtime"/>
+                <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.ui.ide, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.ui.editors, org.eclipse.core.runtime, org.eclipse.jdt.core, org.eclipse.ant.core"/>
                 <attribute name="Eclipse-LazyStart" value="true"/>
+            	<attribute name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.5"/>
             </manifest-attributes>
         </jarify>
     </target>

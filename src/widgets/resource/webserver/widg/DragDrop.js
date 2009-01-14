@@ -235,8 +235,9 @@ ariba.DragDrop = function() {
                 return n.className && n.className.indexOf(AWDragPrefix) != -1;
             }, true);
 
-            if (this.MouseDownEvtHandler == window.document.onmousedown && div) {
-                //debug("drag div found " + div.id);
+
+            if (this.MouseDownEvtHandler == Event.getDocHandler("mousedown") && div) {
+                //ariba.Debug.log("drag div found " + div.id);
 
                 // save off the id in case we're swapping in our parent container as the
                 // drag div
@@ -273,8 +274,15 @@ ariba.DragDrop = function() {
                     }
                 }
 
-            // capture the page height for drag scroll
+                // capture the page height for drag scroll
                 AWDragDiv.pageHeight = Dom.documentElement().scrollHeight;
+                // Non-safari browsers takes the newly created div client height
+                // into account, so making Safari consistent.
+                // This browser side effect makes us able to drag scroll
+                // below the original page scroll height.
+                if (Dom.isSafari) {
+                    AWDragDiv.pageHeight += AWDragDiv.clientHeight;                        
+                }
                 AWDragDiv.pageWidth = Dom.documentElement().scrollWidth;
 
                 this.clearPreviousDrop();
@@ -673,14 +681,33 @@ ariba.DragDrop = function() {
             click  :  function (elm, evt) {
                 return DragDrop.onClickEvtHandler(evt);
             }
+        },
+
+        DrGP : {
+            // need to assign handler directly to avoid text selection on IE
+            mouseover : function (elm, evt) {
+                elm.onmousedown = DragDrop.mouseDownEvtHandlerDrag.bindEventHandler(DragDrop);
+            },
+
+            mouseup : function (elm, evt) {
+                return DragDrop.mouseUpEvtHandlerDrag(evt);
+            },
+
+            mousemove : function (elm, evt) {
+                return DragDrop.mouseMoveEvtHandlerDrag(evt);
+            },
+
+            click  :  function (elm, evt) {
+                return DragDrop.onClickEvtHandler(evt);
+            }
         }
     });
 
     // Initialization
-    DragDrop.MouseDownEvtHandler = DragDrop.mouseDownEvtHandler.bindDocHandler(DragDrop);
-    document.onmousedown = DragDrop.MouseDownEvtHandler;
-    document.onmouseup = DragDrop.mouseUpEvtHandler.bindDocHandler(DragDrop);
-    document.onmousemove = DragDrop.mouseMoveEvtHandler.bindDocHandler(DragDrop);
+    DragDrop.MouseDownEvtHandler = DragDrop.mouseDownEvtHandler.bindEventHandler(DragDrop);
+    Event.updateDocHandler("mousedown", DragDrop.MouseDownEvtHandler);
+    Event.updateDocHandler("mouseup", DragDrop.mouseUpEvtHandler.bindEventHandler(DragDrop));
+    Event.updateDocHandler("mousemove", DragDrop.mouseMoveEvtHandler.bindEventHandler(DragDrop));
 
     return DragDrop;
 }();

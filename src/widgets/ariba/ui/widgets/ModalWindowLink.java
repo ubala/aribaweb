@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalWindowLink.java#9 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalWindowLink.java#10 $
 */
 
 package ariba.ui.widgets;
@@ -217,11 +217,5 @@ public final class ModalWindowLink extends AWComponent
         return booleanValueForBinding("tile");
     }
 
-    public String onClick ()
-    {
-        return Fmt.S("ariba.ModalWindow.openModalWindow('%s',%s,%s,%s);",
-                     _elementId, tile() ? True : False,
-                     width(), height());
-    }
 }
 

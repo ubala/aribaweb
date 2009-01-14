@@ -8,6 +8,7 @@ import ariba.util.core.ArrayUtil;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.core.Assert;
+import ariba.util.core.MapUtil;
 import ariba.util.fieldvalue.FieldValue;
 import ariba.util.fieldvalue.OrderedList;
 import ariba.ui.table.AWTDataTable.Column;
@@ -18,6 +19,9 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.IdentityHashMap;
 
 /*
     Pivot Support:
@@ -56,7 +60,12 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
     Column[] _rowAttributeFields;
     private AWBinding _overrideAttributeBinding;
     private AWBinding _filteredColumnAttributesBinding;
+    private AWBinding _useRowDetailExpansionControlBinding;
+    private AWBinding _showColumnAttributeLabelOnRowBinding;
+    boolean _showColumnAttributeLabelOnRow ;
+    boolean _useRowDetailExpansionControl;
     public int _firstAttributeColumnIndex = 0;
+    public int _lastRowFieldColumnIndex = 0;
     public AWEncodedString pivotPanelId = null;
     Object[] _originalConfig;
     public boolean _showingRowAttributes;
@@ -138,6 +147,9 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
 
         _overrideAttributeBinding = _dataTable.bindingForName(BindingNames.overrideAttribute);
         _filteredColumnAttributesBinding = _dataTable.bindingForName(BindingNames.filteredColumnAttributes);
+        _useRowDetailExpansionControlBinding = _dataTable.bindingForName(BindingNames.useRowDetailExpansionControl);
+        _showColumnAttributeLabelOnRowBinding = _dataTable.bindingForName(BindingNames.showColumnAttributeLableOnRow);
+
         _showingRowAttributes = _dataTable.booleanValueForBinding(BindingNames.showRowAttributes);
         _columnEdgeRoot = new EdgeCell(null, null, rootColumn, null, null);
 
@@ -160,7 +172,20 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
         // Any other visible column is a rowAttribute
 
         List result = ListUtil.list();
+
         ListUtil.addToCollection(result, _rowFields);
+        _lastRowFieldColumnIndex = result.size();
+
+        // Check for magic column to introduce between the row fields and
+        // column fields (used by S4 for RowDetailAttribute expansion toggle)
+        if (_showColumnAttributeLabelOnRowBinding != null || _useRowDetailExpansionControlBinding != null) {
+            result.add(_RowAttributeExpandoColumn);
+        }
+        else {
+            Column extra = _dataTable.findColumnForKey("PostRowFieldColumn");
+            if (extra != null) result.add(extra);
+        }
+
         _firstAttributeColumnIndex = result.size();
 
         Set visibleColumns = _dataTable.visibleColumnSet();
@@ -620,6 +645,7 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
 
         // if we added columns, or a column went unused, force a recompute
         if (beforeGroupSize < groupSize()) _dataTable.invalidateColumnData();
+        _detailAttributeExpansionMapInvalidated = true;
 
         return groupedObjects;
     }
@@ -758,7 +784,7 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
 
     public int preEdgeColSpan ()
     {
-        return _rowFields.length;
+        return _firstAttributeColumnIndex;
     }
 
     public int columnEdgeLevels ()
@@ -829,8 +855,13 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
     // Called from While around data row to potentially render detail rows for "RowAttributes"
     protected List _rowAttributeList;
     protected int _rowAttrPos = -1;
+    protected int _currentVisibleRowAttrPos = 0;
     protected Column _rowOverrideColumn = null;
+    protected LVal _primaryColAttributeLVal = new LVal();
     protected AWTDynamicDetailAttributes.DetailIterator _rowDetailIterator;
+    boolean _currentRowHasDetailAttributes;
+    Map <PivotGroup, Boolean> _detailAttributesExpanded = new IdentityHashMap();
+    boolean _detailAttributeExpansionMapInvalidated;
 
     public void prepareForIteration () {
         _dataTable._renderingPrimaryRow = true;
@@ -838,21 +869,126 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
         _rowOverrideColumn = null;
         _skippingSlot = -1;
         _rowAttrPos = -1;
+        _currentVisibleRowAttrPos = 0;        
         _skippingProperty = null;
         _rowDetailIterator = null;
     }
 
+    public boolean showDetailAttributesExpando ()
+    {
+        return _showingRowAttributes && _useRowDetailExpansionControl && _currentRowHasDetailAttributes;
+    }
+
+    public boolean detailAttributesExpanded ()
+    {
+        PivotGroup group = (PivotGroup)_dataTable._displayGroup.currentGroupingState();
+        Boolean expanded = detailAttributeExpansionMap().get(group);
+        return expanded != null;
+    }
+
+    public void setDetailAttributesExpanded (Object item, boolean expanded)
+    {
+        PivotGroup group = (PivotGroup)_dataTable._displayGroup.groupingState(item);
+        if (group != null) {
+            if (expanded) {
+                detailAttributeExpansionMap().put(group, true);
+            } else {
+                detailAttributeExpansionMap().remove(group);
+            }
+        }
+    }
+
+    public boolean getDetailAttributesExpanded (Object item)
+    {
+        PivotGroup group = (PivotGroup)_dataTable._displayGroup.groupingState(item);
+        return (group != null) && detailAttributeExpansionMap().get(group) != null;
+    }
+
+    Map<PivotGroup, Boolean>detailAttributeExpansionMap ()
+    {
+        if (_detailAttributeExpansionMapInvalidated) {
+            _detailAttributeExpansionMapInvalidated = false;
+            // Since _detailAttributesExpanded is an IdentityHashMap, on regroup,
+            // we need to remap to the new group instances
+            if (_detailAttributesExpanded.size() > 0) {
+                Collection<PivotGroup> newGroups = _dataTable._displayGroup.groupingValueState().values();
+                Set<PivotGroup> expanded = new HashSet(_detailAttributesExpanded.keySet());
+                _detailAttributesExpanded = new IdentityHashMap();
+                for (PivotGroup g : newGroups) {
+                    if (expanded.contains(g)) _detailAttributesExpanded.put(g, true);
+                }
+            }
+        }
+        return _detailAttributesExpanded;
+    }
+
+    public void toggleDetailAttributesExpanded ()
+    {
+        PivotGroup group = (PivotGroup)_dataTable._displayGroup.currentGroupingState();
+        boolean expanded = !detailAttributesExpanded();
+        if (expanded) {
+            _detailAttributesExpanded.put(group, true);
+        } else {
+            _detailAttributesExpanded.remove(group);
+        }
+    }
+
+    class LVal { public Object val; }
+
+    String primaryAttributeColumnLabel (LVal colLVal)
+    {
+        String label = null;
+        if (colLVal != null) colLVal.val = null;
+        if (_dataTable._renderingPrimaryRow && _showColumnAttributeLabelOnRow) {
+            // calculate the actual column used to render our column attribute
+            List columns = _dataTable.displayedColumns();
+            for (int i = _firstAttributeColumnIndex, count = columns.size(); i < count; i++) {
+                Column column = (Column)columns.get(i);
+                if (column instanceof PivotEdgeColumn) {
+                    column = column.prepareAndReplace(_dataTable);
+                    label = column.label(_dataTable);
+                    _resetDetailRowIteration();
+                    if (!StringUtil.nullOrEmptyOrBlankString(label)) {
+                        if (colLVal != null) colLVal.val = column;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return label;
+    }
+
+    public boolean preparePrimaryRow (AWTDataTable table)
+    {
+        _showColumnAttributeLabelOnRow = _dataTable.booleanValueForBinding(_showColumnAttributeLabelOnRowBinding);
+        _useRowDetailExpansionControl = _dataTable.booleanValueForBinding(_useRowDetailExpansionControlBinding);
+        primaryAttributeColumnLabel(_primaryColAttributeLVal);
+        if (_useRowDetailExpansionControl) {
+            _currentRowHasDetailAttributes = _prepareDetailRow(table);
+            if (_currentRowHasDetailAttributes) {
+                _resetDetailRowIteration();
+            }
+        }
+        return true;
+    }
+
     public boolean prepareDetailRow (AWTDataTable table)
+    {
+        if (_useRowDetailExpansionControl && !detailAttributesExpanded()) return false;
+        return _prepareDetailRow(table);
+    }
+
+    public boolean _prepareDetailRow (AWTDataTable table)
     {
         _currentGroupObject = null;
         _rowOverrideColumn = null;
         _skippingSlot = -1;
-        _skippingProperty = null;
+        _skippingProperty = AWTDataTable.NeverEqualValue;
         if (!_showingRowAttributes || _rowAttributeFields == null || _rowAttributeFields.length == 0) return false;
         if (_rowAttrPos == -1) {
             _rowAttrPos = 0;
         }
-
 
         while (_rowAttrPos < _rowAttributeFields.length) {
             _rowOverrideColumn =_rowAttributeFields[_rowAttrPos];
@@ -880,11 +1016,25 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
                 continue;
             }
             _rowAttrPos++;
+            if (_rowOverrideColumn == _primaryColAttributeLVal.val) continue;
+
+            _currentVisibleRowAttrPos++;
             if (!_allInGroupBlank(table(), (PivotGroup) _dataTable._displayGroup.currentGroupingState(), _rowOverrideColumn)) return true;
         }
+        _resetDetailRowIteration();
+        return false;
+    }
+
+    protected void _resetDetailRowIteration ()
+    {
         _rowOverrideColumn = null;
         _rowAttrPos = -1;
-        return false;
+        _currentVisibleRowAttrPos = 0;
+        _rowDetailIterator = null;
+        _currentGroupObject = null;
+        _rowOverrideColumn = null;
+        _skippingSlot = -1;        
+        _skippingProperty = null;        
     }
 
     protected boolean _allInGroupBlank (AWTDataTable table, PivotGroup group, Column column)
@@ -907,6 +1057,11 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
         return allBlank;
     }
 
+    public int currentVisibleRowAttrPos ()
+    {
+        return _currentVisibleRowAttrPos;
+    }
+
     // Called when determining what to render for next data column
     // We blank rendering of leading columns to reflect row edge nesting, and leading cols
     // when rendering detail attributes.
@@ -918,7 +1073,7 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
                     _dataTable._displayGroup.currentItem(), Integer.toString(_dataTable._displayGroup.groupingValueState().size()));
         }
         if (_rowOverrideColumn != null) {
-            if (_dataTable._currentColumnIndex == _firstAttributeColumnIndex - 1) {
+            if (_dataTable._currentColumnIndex == _lastRowFieldColumnIndex - 1) {
                 // Make sure that we indent the label (or value)
                 _dataTable.indentNextColumn();
                 if (_rowOverrideColumn.renderValueInLabelColumn(_dataTable)) {
@@ -1080,6 +1235,37 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
             public void remove () {
                 Assert.that(false, "not implemented");
             }
+        }
+
+        public int hashCode ()
+        {
+            // ordered hash of non-null object (which preserves match for extra trailing nulls)
+            int hash = 1;
+            for (int i=0, c=_objects.length; i < c; i++) {
+                if (_objects[i] != null) hash = hash*31 + _objects[i].hashCode();
+            }
+            return hash;
+        }
+
+        public boolean equals (Object o)
+        {
+            if ((o == null) || !(o instanceof PivotGroup)) return false;
+            Object[] oA1 = _objects, oA2 = ((PivotGroup)o)._objects;
+            int c = Math.min(oA1.length, oA2.length);
+            for (int i=0; i < c; i++) {
+                Object o1 = oA1[i], o2 = oA2[i];
+                if (o1 != o2 && (o1 == null || o2 == null || !o1.equals(o2))) return false;
+            }
+            // if the two arrays are of different length, but the longer is empty
+            // in its extra elements, then they're still equal
+            int d = oA1.length - oA2.length;
+            if (d != 0) {
+                Object[] longer = (d < 0) ? oA2 : oA1;
+                for (int i=c; i < longer.length; i++) {
+                    if (longer[i] != null) return false;
+                }
+            }
+            return true;
         }
     }
 
@@ -1738,6 +1924,26 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
         // we will render as a value the *label* of the _pivotState._rowOverrideColumn
         public String rendererComponentName() {
             return "AWTRowAttributeLabelColumnRenderer";
+        }
+
+        public boolean wantsSpan (AWTDataTable sender)
+        {
+            return true;
+        }
+    }
+
+    public static Column _RowAttributeExpandoColumn = new RowAttributeExpandoColumn();
+
+    public static class RowAttributeExpandoColumn extends Column
+    {
+        // we will render as a value the *label* of the _pivotState._rowOverrideColumn
+        public String rendererComponentName() {
+            return "AWTRowAttributeExpandoColumnRenderer";
+        }
+
+        public boolean isBlank (AWTDataTable table)
+        {
+            return !table._renderingPrimaryRow;
         }
     }
 

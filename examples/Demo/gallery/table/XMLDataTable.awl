@@ -12,8 +12,8 @@
     <br/>
     <w:FormTable>
         <w:FormRow label="Sender">$po.Header.Sender.Credential.Identity.text</w:FormRow>
-        <w:FormRow label="Total"><a:TextField value="$po.Request.OrderRequest.OrderRequestHeader.Total.Money.text"/></w:FormRow>
-        <w:FormRow label="Time"><a:TextField value="$po.timestamp"/></w:FormRow>
+        <w:FormRow label="Total"><a:String value="$po.Request.OrderRequest.OrderRequestHeader.Total.Money.text"/></w:FormRow>
+        <w:FormRow label="Time"><a:String value="$po.timestamp"/></w:FormRow>
     </w:FormTable>
     <a:SubmitButton action="$null"/>
 <br/><br/>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#125 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#127 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -79,7 +79,6 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     private AWSession _awsession;
     private AWResponse _response;
     private AWEncodedString _responseId;
-    private String _sessionSecureId;
     private AWEncodedString _frameName;
     private Map _userState;
     private AWHtmlForm _currentForm;
@@ -246,14 +245,6 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     public AWPage requestPage ()
     {
         return _requestPage;
-    }
-
-    public String sessionSecureId ()
-    {
-        if (_sessionSecureId == null) {
-            _sessionSecureId = _application.getSessionSecureId(this);
-        }
-        return _sessionSecureId;
     }
 
     public AWEncodedString responseId ()
@@ -439,14 +430,18 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     remoteHostsMatch = checkHostsAgainstMask(sessionRemoteIPAddress, remoteHostAddress, remoteHostMask);
                 }
                 if (!remoteHostsMatch) {
-             	       // the session will be accessed when rendering the error page.
-             	       // set the remotehostaddress so the same error does not get triggered.
+                	   // the session will be accessed when rendering the error page.
+                	   // set the remotehostaddress so the same error does not get triggered.
                     session.setRemoteHostAddress(remoteHostAddress);
                     checkInExistingHttpSession();
                     String message = Fmt.S("Unable to restore session with sessionId: '%s'.  The remote address of the current request '%s' does not match the remote address of the initial request '%s' with mask '%s'.",
                         sessionId, remoteHostAddress, sessionRemoteIPAddress.getHostAddress(), String.valueOf(remoteHostMask));
                     Log.aribaweb_session.debug(message);
-                    throw new AWGenericException(message);
+                       // the two generic exceptions below are intentional. This will be
+                       // removed and the SessionValidationException will be processed.
+                    AWSessionValidationException sve = new AWSessionValidationException(message);
+                    AWGenericException ae = new AWGenericException(sve);
+                    throw new AWGenericException(ae);
                 }
             }
         }

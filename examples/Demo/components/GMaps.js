@@ -30,7 +30,7 @@ ariba.GMaps = function() {
             return {
                 // our args are what gets passed to registerObj, except with the first arg
                 // swapped to be the mapDAta instance
-                initialize : function (mapData, address, latitude, longitude, autoCenterMap, clickId, dragId) {
+                initialize : function (mapData, address, latitude, longitude, autoCenterMap, clickId, dragId, infoHtml) {
                     function addMarker (point)
                     {
                         if (autoCenterMap) map.panTo(point);
@@ -50,7 +50,9 @@ ariba.GMaps = function() {
                             });
                         }
 
-                        // marker.openInfoWindowHtml(address);
+                        if (infoHtml && infoHtml != "") {
+                            map.openInfoWindowHtml(point, infoHtml);
+                        }
                     }
 
                     map = mapData.map();

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowAttributeLabelColumnRenderer.awl#8 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowAttributeLabelColumnRenderer.awl#9 $
     </Copyright>
 
     <Overview>
@@ -28,9 +28,11 @@
         </b>\
     </td>
 <a:Else/>\
-    <td class="$table.tdClass" valign="top" style="$indentationStyle" colspan="$^colspan">\
+    <td class="tableBody pivDA" valign="top" align="right" colspan="$^colspan">\
         <a:OutputRangeCheck contentIterator="$table.iteratorForTDContentCheck">\
-            <a:String value="$label" escapeUnsafeHtml="$true"/>\
-        </a:OutputRangeCheck>
+            <a:If ifTrue="$renderLabel">\
+                <a:String value="$label" escapeUnsafeHtml="$true"/>:\
+            </a:If>\
+        </a:OutputRangeCheck>\
     </td>\
 </a:If>

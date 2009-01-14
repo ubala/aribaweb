@@ -33,6 +33,16 @@ and Google Maps integration.
 </div><div class="clearboth vertspc"></div>
 
 
+<div class="movThumb"><a href="http://www.vimeo.com/2239096"><img src="screencasts/AW-MetaUI-Editor.gif"/></a></div>
+<div class="movBlurb">
+<h2>MetaUI Live Editing</h2>
+AribaWeb's (alpha) MetaUI Live Editor enables drag and drop editing from *within* your live application
+user interface!  See how a vanilla MetaUI-JPA application is rapidly tailored through
+dragging of fields, applying traits from menus, and even assigning simple visibility and
+validity expressions.
+</div><div class="clearboth vertspc"></div>
+
+
 <div class="movThumb"><a href="http://www.vimeo.com/1826564"><img src="screencasts/AW-AutoAJAX.gif"/></a></div>
 <div class="movBlurb">
 <h2>Auto-AJAX Explained</h2>

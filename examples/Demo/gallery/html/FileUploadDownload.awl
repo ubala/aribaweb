@@ -1,28 +1,17 @@
-<w:BasicPageWrapper hasForm="$false">
-    <a:Form enctype="multipart/form-data">
-        <w:FormTable>
-            <w:FormRow label="Title">
-                <a:TextField value="$newUpload.title"/>
-            </w:FormRow>
-            <w:FormRow label="File"errorFieldPath="file">
-                <a:FileUpload filename="$newUpload.fileName"
-                    inputStream="$inputStream"
-                    mimeType="$newUpload.mimeType"
-                    maxLength="100000"
-                    fileSizeExceeded="$fileSizeExceeded"/>\
-            </w:FormRow>
-            <w:FormRow>
-                <w:TextButton action="$doUpload">Submit</w:TextButton>
-            </w:FormRow>
-        </w:FormTable>
-    </a:Form>
-    <br/>
-    <br/>
-    <t:DataTable title="Uploads" list="$uploads" item="$currentUpload">
-        <t:Column key="title"/>
+<w:BasicPageWrapper hasForm="$true">
+    <t:DataTable title="Uploads" list="$uploads" item="$currentUpload"
+                 multiSelect="$true" displayGroup="$displayGroup">
         <t:Column key="fileName"/>
         <t:Column key="mimeType" label="Type"/>
         <t:Column key="bytes.length" label="Size"/>
-        <t:Column><w:TextButton action="$doDownload">Download</w:TextButton></t:Column>
+        <t:Column width="1px">\
+            <w:TextButton action="$update">Update</w:TextButton>
+            <w:TextButton action="$doDownload">Download</w:TextButton>
+        </t:Column>
+        <t:RowDetail style="padding-left:30px">\
+            <w:RichTextArea value="$currentUpload.description"/>\
+        </t:RowDetail>
+        <t:SelectionButtonArea><w:TextButton action="$remove">Remove</w:TextButton></t:SelectionButtonArea>
+        <t:ButtonArea><w:TextButton action="$add">Add</w:TextButton></t:ButtonArea>
     </t:DataTable>
 </w:BasicPageWrapper>

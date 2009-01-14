@@ -7,7 +7,7 @@
 
 <a:SetValue descMinWidth="$intZero"/>
 
-    <t:DataTable enableScrolling="$true" multiSelect="$isMultiSelect" singleSelect="$!isMultiSelect" 
+    <t:DataTable enableScrolling="$true" multiSelect="$isMultiSelect" singleSelect="$!isMultiSelect"
                  showSelectionColumn="$showSelectionControl" submitOnSelectionChange="$true"
                  forceColumnUpdate="$layoutChanged"
                  batchSize="30"  submitForm="$true"
@@ -18,19 +18,21 @@
 
         <t:HeadingArea>
             <w:SectionHeading title="Critical Information">
-                <div style="float:right">
-                    <div style="float:left">
-                        $displayGroup.batchStartIndex - $displayGroup.batchEndIndex of $displayGroup.filteredObjects.size
-                        <a:TextField value="$rowNum" formatter="$formatters.integer" size="3"/>
-                    </div>
-                    <w:TextButton action="$gotoRow">Go</w:TextButton>\
-                    <w:PulldownButton menuId="MyMenu">Selection Type...</w:PulldownButton>\
+            <div style="float:right">
+                <div style="float:left">
+                    $displayGroup.batchStartIndex - $displayGroup.batchEndIndex of $displayGroup.filteredObjects.size
+                    <a:TextField value="$rowNum" formatter="$formatters.integer" size="3"/>
+                </div>
+                <w:TextButton action="$gotoRow">Go</w:TextButton>\
+                <w:PulldownButton menuId="MyMenu">Selection Type...</w:PulldownButton>\
+                <div style="float:left">
                     <t:OptionsMenuButton>\
                         <span style="padding-left:5px">\
                             <b>Some Label</b>\
                         </span>\
                     </t:OptionsMenuButton>\
                 </div>
+            </div>
             </w:SectionHeading>
         </t:HeadingArea>
 

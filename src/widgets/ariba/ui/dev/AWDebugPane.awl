@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.awl#36 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.awl#38 $
     </Copyright>
 
     <Overview>
@@ -68,9 +68,12 @@
     </a:RefreshRegion>
     <a:RefreshRegion alwaysRender="$true">
         <a:ClientSideScript>
-            ariba.Debug.updateComponentInspector('$request.sessionId', '<a:ActionId action="$updateComponentInspector"/>',
-                ( $isComponentPathDebuggingEnabled || $requestContext.wasPathDebugRequest ));
+            ariba.Debug.updateComponentInspector('$request.sessionId',
+            '<a:ActionId action="$updateComponentInspector"/>',
+            '<a:ActionId action="$refreshPageAndInspector"/>',
+                ( $isComponentPathDebuggingEnabled || $requestContext.wasPathDebugRequest || $forceRefreshInspector ));
         </a:ClientSideScript>
+        <a:SetValue forceRefreshInspector="$false"/>
     </a:RefreshRegion>
     <w:PopupMenu menuId="awDebugPane">
         <a:LazyDiv>
@@ -117,10 +120,36 @@
                                     <td>
                                         <span onMouseDown="ariba.Debug.viewSource();">
                                             <w:PopupMenuItem>\
-                                                View Source
+                                                View Source - some
                                             </w:PopupMenuItem>
                                         </span>
                                     </td>
+                                    <a:If ifTrue="$isBookmarkable">
+                                        <td>
+                                            <a:SetValue urlId="$requestContext.nextElementId"/>
+                                            <w:PopupMenuItem action="$showURL">Current bookmark</w:PopupMenuItem>
+                                            <w:Confirmation id="$urlId">
+                                                <a:Content name="content">\
+                                                    <table>
+                                                        <tr>
+                                                        <td>URL:<a:String value="$url"/></td>
+                                                        </tr>
+                                                    </table>
+                                                </a:Content>\
+                                                <a:Content name="buttons">
+                                                    <table>
+                                                        <tr>
+                                                        <td>
+                                                            <w:TextButton action="$closeDialog" buttonClass="btnSpecial1">
+                                                            <a:Local key="a003">Done</a:Local>
+                                                            </w:TextButton>
+                                                        </td>
+                                                        </tr>
+                                                    </table>
+                                                </a:Content>
+                                            </w:Confirmation>
+                                        </td>
+                                    </a:If>
                                     <td colspan="2">
                                         <w:PopupMenuItem action="$reRender">\
                                             Re-Render $rerenderCount times ($rerenderMode)

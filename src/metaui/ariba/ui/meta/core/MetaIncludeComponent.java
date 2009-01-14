@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaIncludeComponent.java#6 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaIncludeComponent.java#8 $
 */
 package ariba.ui.meta.core;
 
@@ -23,8 +23,9 @@ import ariba.ui.aribaweb.core.AWElement;
 import ariba.ui.aribaweb.core.AWIncludeComponent;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWElementIdPath;
-import ariba.ui.aribaweb.core.AWApplication;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.aribaweb.core.AWApplication;
+import ariba.ui.aribaweb.core.AWComponentReference;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.util.core.Assert;
 import ariba.util.core.Fmt;
@@ -116,14 +117,14 @@ public class MetaIncludeComponent extends AWIncludeComponent
                         ((ContextFieldPathBinding)binding).init(entry.getKey(), (FieldPath)value);
                     }
                 }
-                else if (value instanceof Context.DynamicPropertyValue) {
+                else if (value instanceof PropertyValue.Dynamic) {
                     binding = new DynamicValueBinding();
-                    ((DynamicValueBinding)binding).init(entry.getKey(), (Context.DynamicPropertyValue)value);
+                    ((DynamicValueBinding)binding).init(entry.getKey(), (PropertyValue.Dynamic)value);
                 }
                 // Todo: ack!  Need a more formal packaging of deferred bindings...
-                else if (value instanceof List && ((List)value).size() == 1 && (((List)value).get(0) instanceof Context.DynamicPropertyValue)) {
+                else if (value instanceof List && ((List)value).size() == 1 && (((List)value).get(0) instanceof PropertyValue.Dynamic)) {
                     binding = new DynamicValueBinding();
-                    ((DynamicValueBinding)binding).init(entry.getKey(), (Context.DynamicPropertyValue)((List)value).get(0));
+                    ((DynamicValueBinding)binding).init(entry.getKey(), (PropertyValue.Dynamic)((List)value).get(0));
                 }
                 else {
                     binding = AWBinding.bindingWithNameAndConstant(entry.getKey(), value);
@@ -156,13 +157,6 @@ public class MetaIncludeComponent extends AWIncludeComponent
         componentReferenceMap(component).put(properties, componentReference);
     }
 
-    /*
-    protected int elementReferenceId(AWBindable componentReference, AWComponent component, boolean canCreate)
-    {
-        return pageScopedReferenceId(componentReference, component);
-    }
-*/
-
     protected int computeIndexForElement (AWBindable element, AWComponent component)
     {
         // for stability, our id is based on the contents of our property map
@@ -171,11 +165,38 @@ public class MetaIncludeComponent extends AWIncludeComponent
         return index;
     }
 
+    protected AWBindable _createComponentReference (String componentName, AWComponent component,
+                                                    AWApplication application)
+    {
+        AWBindable element = super._createComponentReference(componentName, component, application);
+        if (element instanceof AWComponentReference) {
+            ((AWComponentReference)element).setUserData(properties(component));
+        }
+        return element;
+    }
+
+    protected boolean _elementsAreCompatible (AWComponent component, AWBindable orig, AWBindable element)
+    {
+        // stash away our properties map for use in _elementsAreCompatible check
+        if (element instanceof AWComponentReference) {
+            ((AWComponentReference)element).setUserData(properties(component));
+        }
+
+        if (element instanceof AWComponentReference) {
+            Map origProperties = (Map)((AWComponentReference)element).userData();
+            Map properties = properties(component);
+            if (origProperties != null && origProperties.equals(properties)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     static class DynamicValueBinding extends AWBinding
     {
-        private Context.DynamicPropertyValue _dynamicValue;
+        private PropertyValue.Dynamic _dynamicValue;
 
-        public void init (String bindingName, Context.DynamicPropertyValue value)
+        public void init (String bindingName, PropertyValue.Dynamic value)
         {
             this.init(bindingName);
             _dynamicValue = value;

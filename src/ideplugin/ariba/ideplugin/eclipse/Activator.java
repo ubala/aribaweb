@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/eclipse/Activator.java#2 $
+    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/eclipse/Activator.java#5 $
 */
 package ariba.ideplugin.eclipse;
 
@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Display;
@@ -33,41 +34,55 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.osgi.framework.BundleContext;
+
 import ariba.ideplugin.core.RemoteOpen;
 import ariba.ideplugin.core.RemoteOpen.Opener;
 
 /**
  * The activator class controls the plug-in life cycle
  */
-public class Activator extends AbstractUIPlugin  implements Opener{
+public class Activator extends AbstractUIPlugin implements Opener
+{
 
-	// The plug-in ID
-	public static final String PLUGIN_ID = "ariba.ui.ci.cilisten";
+    // The plug-in ID
+    public static final String PLUGIN_ID = "ariba.ideplugin.eclipse";
 
-	// The shared instance
-	private static Activator plugin;
-	private RemoteOpen ropen;
-	/**
-	 * The constructor
-	 */
-	public Activator() {
-		plugin = this;
-	}
+    public static final String PrefAWPath = "AWPath";
+    public static final String PrefAutoCheck = "AutoCheck";
+    public static final String ClasspathAWHome = "AW_HOME";
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		ropen = new RemoteOpen(this);
-		ropen.start();
-	}
+    // The shared instance
+    private static Activator plugin;
+    private RemoteOpen ropen;
 
-	public boolean open (String name, int line)
+    public Activator ()
+    {
+        plugin = this;
+    }
+
+    public void start (BundleContext context) throws Exception
+    {
+        super.start(context);
+        ropen = new RemoteOpen(this);
+        ropen.start();
+    }
+
+    public void stop (BundleContext context) throws Exception
+    {
+        plugin = null;
+        ropen.stop();
+        super.stop(context);
+    }
+
+    public boolean open (String name, int line)
     {
         Display.getDefault().asyncExec(new OpenAction(name, line));
         return true;
+    }
+
+    public String getAWHome ()
+    {
+        return getPluginPreferences().getString(PrefAWPath);
     }
 
     public class OpenAction implements Runnable
@@ -87,18 +102,22 @@ public class Activator extends AbstractUIPlugin  implements Opener{
             IProject[] projects = root.getProjects();
             try {
                 IFile file = recurseFind(projects);
-                if(file !=null){
-                    IWorkbenchWindow window = PlatformUI.getWorkbench().getWorkbenchWindows()[0];
-                    IEditorPart editor = IDE.openEditor(window.getActivePage(), file, true);
-                    if(editor instanceof AbstractTextEditor){
-                        AbstractTextEditor te = (AbstractTextEditor) editor;
-                        IDocument document = te.getDocumentProvider().getDocument(te.getEditorInput());
-                        try{
+                if (file != null) {
+                    IWorkbenchWindow window = PlatformUI.getWorkbench()
+                        .getWorkbenchWindows()[0];
+                    IEditorPart editor = IDE.openEditor(window.getActivePage(),
+                                                        file, true);
+                    if (editor instanceof AbstractTextEditor) {
+                        AbstractTextEditor te = (AbstractTextEditor)editor;
+                        IDocument document = te.getDocumentProvider()
+                            .getDocument(te.getEditorInput());
+                        try {
                             int start = document.getLineOffset(_line - 1);
                             te.selectAndReveal(start, 0);
                             te.getSite().getPage().activate(te);
-                        }catch(BadLocationException ble){
-                            
+                        }
+                        catch (BadLocationException ble) {
+
                         }
                     }
                 }
@@ -117,13 +136,15 @@ public class Activator extends AbstractUIPlugin  implements Opener{
                             continue;
                         }
                     }
-                    IFile ret = recurseFind(((IContainer)resources[i]).members());
-                    if(ret != null)
+                    IFile ret = recurseFind(((IContainer)resources[i])
+                        .members());
+                    if (ret != null)
                         return ret;
                 }
                 else if (resources[i] instanceof IFile) {
                     if (resources[i].exists()) {
-                        if (((IFile)resources[i]).getFullPath().toString().indexOf(_file) > -1)
+                        if (((IFile)resources[i]).getFullPath().toString()
+                            .indexOf(_file) > -1)
                         {
                             return (IFile)resources[i];
                         }
@@ -134,24 +155,25 @@ public class Activator extends AbstractUIPlugin  implements Opener{
         }
     }
 
-	/*
-     * (non-Javadoc)
+    /**
+     * Returns the shared instance
      * 
-     * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+     * @return the shared instance
      */
-	public void stop(BundleContext context) throws Exception {
-		plugin = null;
-		ropen.stop();
-		super.stop(context);
-	}
+    public static Activator getDefault ()
+    {
+        return plugin;
+    }
 
-	/**
-	 * Returns the shared instance
-	 *
-	 * @return the shared instance
-	 */
-	public static Activator getDefault() {
-		return plugin;
-	}
-
+    /**
+     * Returns an image descriptor for the image file at the given plug-in
+     * relative path
+     * 
+     * @param path the path
+     * @return the image descriptor
+     */
+    public static ImageDescriptor getImageDescriptor (String path)
+    {
+        return imageDescriptorFromPlugin(PLUGIN_ID, path);
+    }
 }

@@ -12,14 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#3 $
 */
 package ariba.ui.meta.persistence;
 
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.Meta;
 import ariba.ui.meta.core.Log;
-import ariba.ui.meta.layouts.MetaHomePage;
+import ariba.ui.meta.core.ObjectMeta;
 import ariba.ui.validation.ChoiceSourceRegistry;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWConcreteServerApplication;
@@ -43,8 +43,8 @@ public class PersistenceMeta
         if (!_DidInit) {
             _DidInit = true;
 
-            UIMeta.getInstance().registerKeyInitObserver(UIMeta.KeyType, new TypeToOneMetaProvider());
-            UIMeta.getInstance().registerKeyInitObserver(UIMeta.KeyElementType, new TypeToManyMetaProvider());
+            UIMeta.getInstance().registerKeyInitObserver(ObjectMeta.KeyType, new TypeToOneMetaProvider());
+            UIMeta.getInstance().registerKeyInitObserver(ObjectMeta.KeyElementType, new TypeToManyMetaProvider());
 
             AWConcreteApplication application = (AWConcreteApplication) AWConcreteServerApplication.sharedInstance();
             application.registerDidInitCallback(new AWConcreteApplication.DidInitCallback() {
@@ -85,9 +85,9 @@ public class PersistenceMeta
             Log.meta.debug("PersistenceMeta field Type listener notified of first use of field type: %s - isEntity: %s", value, isEntity);
             if (isEntity) {
                 Map predicate = new HashMap();
-                predicate.put(UIMeta.KeyType, value);
+                predicate.put(ObjectMeta.KeyType, value);
                 Map properties = new HashMap();
-                properties.put(UIMeta.KeyTraits, Arrays.asList(KeyToOneRelationship));
+                properties.put(ObjectMeta.KeyTraits, Arrays.asList(KeyToOneRelationship));
                 meta.addRule(predicate, properties, Meta.ClassRulePriority);
             }
         }
@@ -105,9 +105,9 @@ public class PersistenceMeta
             Log.meta.debug("PersistenceMeta field Type listener notified of first use of field type: %s - isEntity: %s", value, isEntity);
             if (isEntity) {
                 Map predicate = new HashMap();
-                predicate.put(UIMeta.KeyElementType, value);
+                predicate.put(ObjectMeta.KeyElementType, value);
                 Map properties = new HashMap();
-                properties.put(UIMeta.KeyTraits, Arrays.asList(KeyToManyRelationship));
+                properties.put(ObjectMeta.KeyTraits, Arrays.asList(KeyToManyRelationship));
                 meta.addRule(predicate, properties, Meta.ClassRulePriority);
             }
         }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#55 $
+    $Id$
 */
 
 package ariba.ui.aribaweb.core;
@@ -60,6 +60,7 @@ abstract public class AWDirectAction extends AWBaseObject
     public static final String AWResTestActionName = "test_awres";
     public static final String PingActionName = "ping";
     public static final String ProgressCheckActionName = "progressCheck";
+    public static final String ProgressCheckSessionKeyName = "awpcid";
 
     private static GrowOnlyHashtable ActionMethodNames = new GrowOnlyHashtable();
     // ** This is the abstract superclass for all DirectAction classes.  The default class is DirectAction, which must be provided by the user's application if DirectActions are to be used.
@@ -494,7 +495,7 @@ abstract public class AWDirectAction extends AWBaseObject
 
     public AWResponseGenerating progressCheckAction ()
     {
-        String key = ((AWBaseRequest)request()).initSessionId();
+        String key = request().formValueForKey(ProgressCheckSessionKeyName);
         ProgressMonitor progress = ProgressMonitor.getInstanceForKey(key);
         AWApplication application = application();
         AWResponse newResponse = application.createResponse(request());
@@ -548,6 +549,19 @@ abstract public class AWDirectAction extends AWBaseObject
             actionResults = application().handleMalformedRequest(request(), message);
         }
         return actionResults;
+    }
+
+    public AWResponseGenerating restoreAction () {
+        String enc = request().formValueForKey("enc");
+        if (!StringUtil.nullOrEmptyOrBlankString(enc) && enc.equals("true")) {
+            String pl = request().formValueForKey("pl");
+            pl = requestContext().application().decryptString(pl);
+
+            String redirectUrl = Fmt.S("%s&%s",
+               AWDirectActionUrl.fullUrlForDirectAction("restore", requestContext()), pl);
+            return AWRedirect.getRedirect(requestContext(), redirectUrl);
+        }
+        return application().getBookmarker().getComponent(requestContext());
     }
 
     protected AWResponseGenerating handleSessionRestorationException (
@@ -662,6 +676,7 @@ abstract public class AWDirectAction extends AWBaseObject
         return response;
     }
 
+    /*
     public AWResponse awpreloadAction ()
     {
         AWResponse response = application().createResponse(request());
@@ -698,6 +713,7 @@ abstract public class AWDirectAction extends AWBaseObject
         }
         return response;
     }
+    */
 
     public interface DirectActionObserver {
         // Observers can peek at form values

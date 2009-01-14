@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabSet.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabSet.java#3 $
 */
 
 package ariba.ui.widgets;
@@ -46,7 +46,6 @@ public class TabSet extends AWComponent
         super.init();
 
         _indexBinding =  bindingForName(AWBindingNames.index, true);
-        _tabs = tabArray().newTabList();
         /*
         if (pageComponent() != this) {  // (pageComponent() == this) tests whether we are being instantiated for validation
         }
@@ -176,7 +175,10 @@ public class TabSet extends AWComponent
             Assert.that(allTabs != null && allTabs.length > 0,  "No tabs found");
             tabArray = new TabArray(allTabs);
             componentReference().setUserData(tabArray);
+            _tabs = null;
         }
+        if (_tabs == null) _tabs = tabArray.newTabList();
+
         return tabArray;
     }
 
@@ -202,7 +204,7 @@ final class TabArray
     protected TabArray(AWComponentReference[] tabs)
     {
         _allTabs = tabs;
-        _hasVisibleBindings = initHashVisibleBindings(tabs);
+        _hasVisibleBindings = initHasVisibleBindings(tabs);
     }
 
     protected AWComponentReference[] newTabList ()
@@ -210,7 +212,7 @@ final class TabArray
         return (AWComponentReference[])_allTabs.clone();
     }
 
-    private boolean initHashVisibleBindings (AWComponentReference[] tabs)
+    private boolean initHasVisibleBindings (AWComponentReference[] tabs)
     {
         for (int index = tabs.length - 1; index > -1; index--) {
             if (tabs[index].bindingForName(AWBindingNames.isVisible) != null) {

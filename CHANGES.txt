@@ -1,7 +1,54 @@
-CHANGES.txt
+Release Change History
+======================
+
+New in Version 5.0b6 (11/13/2008)
+---------------------------------
+
+- New version numbering
+    - "5.0" - to reflect the 10 year internal release history of the framework)
+      (See the [AribaWeb release history](Release_History.html))
+
+- MetaUI Editor
+    - Component Inspector-based rule editor, context stack display
+    - Drag and Drop field ordering
+    - Inline Property editor
+
+- Eclipse Plug-in Update: Create Project wizard
+    - Plus slick automatic AW_HOME / Ant setup
+
+- Embedded Groovy in .awl files
+    - Support single file component definition via `groovy` tag
+      (support migrated from demoshell)
+
+- Groovy support factored into ariba.groovyloader.jar
+    - demoshell component dropped from distribution
+    
+- Build system: (much) faster incremental rebuild
+    - build *unpacked* wars by default
+
+- PivotTable enhancements
+    - now supports per-item expand / collapse of row detail attribute display
+
+- Examples
+    - XK terseness shootout (http://www.zkoss.org/smalltalks/gwtZk/)
+        - AW requires *half* the code of XK for Google Maps and Master-Detail examples   
+    - IMAP mail reader     
+    - Multi-file Upload examples
+    - Examples of AWLocalLoginSessionHandler (on actions, DirectActions, and page rendering)
+    - Package SearchSource doc app into own package, multiple files
+
+- Bug Fixes
+    - MetaUI
+        - DataTable column and cell visibility
+        - global (static) class-scoped action firing
+    - AWLocalLoginSessionHandler fixes: support for direct actions
+    - XHR-compatible FormPostRedirect
+    - Tighten up security (html escape various possible XSS vectors)    
+
 
 New in Version 0.8.5 (9/29/2008)
 --------------------------------
+
 - Higher performance AJAX
     - XMLHTTP for incremental requests (instead of IFrames)
 
@@ -27,8 +74,10 @@ New in Version 0.8.5 (9/29/2008)
 - Component Inspector (x-ray) bug fixes
     - More reliably uses incremental refresh, fewer JS errors, works for modal panels
 
+
 New in Version 0.8.4 (9/1/2008)
 -------------------------------
+
 - Documentation
     - JavaDoc, including inlined AWApi (binding doc)
     - SourceSearch documentation browse / search application
@@ -78,6 +127,7 @@ New in Version 0.8.4 (9/1/2008)
 
 New in Version 0.8.2 (6/25/2008)
 ---------------------------------
+
 - Ant build file cleanup
     - Top level ant file!
     - Much faster incremental builds (no rebuilding jars/wars that didn't change)
@@ -117,3 +167,9 @@ New in Version 0.8.2 (6/25/2008)
     - Fix look of (modally) disabled Nav tabs and actions
     - Fix drag/mouse behavior in PortletWrapper
     ...
+
+Version 0.8.0 / 0.8.1 (5/13/2008)
+------------------------------------
+
+First opensource release of AribaWeb
+

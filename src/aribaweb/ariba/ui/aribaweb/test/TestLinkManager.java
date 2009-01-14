@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkManager.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkManager.java#6 $
 */
 package ariba.ui.aribaweb.test;
 
@@ -20,11 +20,14 @@ import ariba.ui.aribaweb.util.AWJarWalker;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
-import ariba.util.test.TestLink;
+import ariba.util.test.TestPageLink;
 import ariba.util.test.TestStager;
-import ariba.util.test.TestInspector;
+import ariba.util.test.TestValidator;
+
 import java.lang.annotation.Annotation;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,12 +36,13 @@ import java.util.Set;
 
 public class TestLinkManager
 {
-    static final Class _AnnotationClasses[] = {TestLink.class, ariba.util.test.TestStager.class};
-    static final Class _AnnotationValidatorClasses[] = {TestInspector.class};
+    static final Class _AnnotationClasses[] = {TestPageLink.class,
+            ariba.util.test.TestStager.class};
+    static final Class _AnnotationValidatorClasses[] = {TestValidator.class};
 
     static final Class _allTestAnnotationClasses[] =
-            {TestLink.class, TestStager.class, TestParam.class,
-             TestInspector.class};
+            {TestPageLink.class, TestStager.class, ariba.util.test.TestParam.class,
+             TestValidator.class};
     
     static TestLinkManager _instance = new TestLinkManager();
     Set<String> _classesWithAnnotations = new HashSet();
@@ -46,7 +50,8 @@ public class TestLinkManager
 
     Map <String, Map<Class, Object>> _annotationMapByClassName = new HashMap();
     Map <Class, List<TestInspectorLink>> _testInspectorMap = new HashMap();
-    
+    Map <Class, List<TestInspectorLink>> _allTestInspectorMap = new HashMap();
+
     private TestSessionSetup _testSessionSetup = null;
 
     public static void forceClassLoad()
@@ -73,7 +78,8 @@ public class TestLinkManager
     public TestLinkManager()
     {
         for (Class annotationClass : _AnnotationClasses) {
-            AWJarWalker.registerAnnotationListener(annotationClass, new AWJarWalker.AnnotationListener() {
+            AWJarWalker.registerAnnotationListener(annotationClass,
+                    new AWJarWalker.AnnotationListener() {
                 public void annotationDiscovered(String className, String annotationType)
                 {
                     _classesWithAnnotations.add(className);
@@ -81,7 +87,8 @@ public class TestLinkManager
             });
         }
         for (Class annotationClass : _AnnotationValidatorClasses) {
-            AWJarWalker.registerAnnotationListener(annotationClass, new AWJarWalker.AnnotationListener() {
+            AWJarWalker.registerAnnotationListener(annotationClass,
+                    new AWJarWalker.AnnotationListener() {
                 public void annotationDiscovered(String className, String annotationType)
                 {
                     _classesWithValidatorAnnotations.add(className);
@@ -100,7 +107,8 @@ public class TestLinkManager
         // lazily get annotations for known annotation bearing class
         Map<Class, Object> annotationMap = _annotationMapByClassName.get(className);
         if (annotationMap == null) {
-            annotationMap = AWJarWalker.annotationsForClassName(className, _allTestAnnotationClasses);
+            annotationMap = AWJarWalker.annotationsForClassName(className,
+                    _allTestAnnotationClasses);
             _annotationMapByClassName.put(className,  annotationMap);
         }
         return annotationMap;
@@ -108,13 +116,38 @@ public class TestLinkManager
 
     public boolean hasObjectInspectors (Object object)
     {
-        List list = _testInspectorMap.get(object);
-        return list != null && list.size() > 0;
+        List list = getObjectInspectors (object);
+        return list.size() > 0;
     }
 
     public List<TestInspectorLink> getObjectInspectors (Object object)
     {
-        return _testInspectorMap.get(object);
+        if (_allTestInspectorMap.get((Class)object) != null) {
+            return _allTestInspectorMap.get((Class)object);
+        }
+
+        List<TestInspectorLink> appValidators =
+                _testSessionSetup.getApplicationValidators((Class)object);
+        List<TestInspectorLink> validators = _testInspectorMap.get((Class)object);
+
+        if (appValidators == null && validators == null) {
+            List<TestInspectorLink> emptyList = ListUtil.list();
+            _allTestInspectorMap.put((Class)object, emptyList);
+            return emptyList;
+        }
+        else if (validators == null) {
+            _allTestInspectorMap.put((Class)object, appValidators);
+            return appValidators;
+        }
+        else if (appValidators == null) {
+            _allTestInspectorMap.put((Class)object, validators);
+            return validators;
+        }
+        else {
+            validators.addAll(appValidators);
+            _allTestInspectorMap.put((Class)object, validators);
+            return validators;
+        }
     }
     
     private List _allTestLinks = null;
@@ -147,11 +180,26 @@ public class TestLinkManager
                 _categoryList.add(category);
                 Set<String> testUnitKeys = secondCategoryMap.keySet();
                 for (String testUnitKey : testUnitKeys ) {
-                    TestUnit testUnit = new TestUnit(testUnitKey, secondCategoryMap.get(testUnitKey));
+                    TestUnit testUnit =
+                        new TestUnit(testUnitKey, secondCategoryMap.get(testUnitKey));
                     category.add(testUnit);
                 }
+                category.sort();
             }
         }
+        Collections.sort(_categoryList,
+                new Comparator () {
+                    public int compare (Object object1, Object object2)
+                    {
+                        Category c1 = (Category)object1;
+                        Category c2 = (Category)object2;
+                        return c1.getName().compareTo(c2.getName());
+                    }
+                    public boolean equals (Object o1, Object o2)
+                    {
+                        return compare(o1, o2) == 0;
+                    }
+                });
     }
 
     public List<Category> getTestCategoryList ()
@@ -170,15 +218,18 @@ public class TestLinkManager
             Set keys = annotations.keySet();
             for (Object key : keys) {
                 Annotation annotation = (Annotation)key;
-                if (annotation.annotationType().isAssignableFrom(TestLink.class) ||
-                        annotation.annotationType().isAssignableFrom(ariba.util.test.TestStager.class)) {
+                if (annotation.annotationType().isAssignableFrom(TestPageLink.class) ||
+                    annotation.annotationType().isAssignableFrom(
+                            ariba.util.test.TestStager.class)) {
                     Object annotationRef = annotations.get(annotation);
                     if (shouldExpandTestLink((Annotation)annotation)) {
-                        List<TestLinkHolder> testLinks = expandTestLink((Annotation)annotation, annotationRef);
+                        List<TestLinkHolder> testLinks =
+                                expandTestLink((Annotation)annotation, annotationRef);
                         _allTestLinks.addAll(testLinks);
                     }
                     else {
-                        _allTestLinks.add(new TestLinkHolder((Annotation)annotation, annotationRef));
+                        _allTestLinks.add(new TestLinkHolder((Annotation)annotation,
+                                                             annotationRef));
                     }
                 }
             }
@@ -188,12 +239,23 @@ public class TestLinkManager
             Set keys = annotations.keySet();
             for (Object key : keys) {
                 Annotation annotation = (Annotation)key;
-                if (annotation.annotationType().isAssignableFrom(TestInspector.class)) {
-                    TestInspector testInspector = (TestInspector)annotation;
+                if (annotation.annotationType().isAssignableFrom(TestValidator.class)) {
+                    TestValidator testValidator = (TestValidator)annotation;
                     Object annotationRef = annotations.get(annotation);
-                    TestInspectorLink inspectorLink = new TestInspectorLink(testInspector, annotationRef);
-                    if (inspectorLink.isValid()) {
-                        addTestInspectorToMap(inspectorLink);
+                    if (shouldExpandTestLink((Annotation)annotation)) {
+                        List<TestInspectorLink> validatorLinks =
+                                expandTestValidatorLink(testValidator, annotationRef);
+                        for (TestInspectorLink link : validatorLinks) {
+                            if (link.isValid()) {
+                                addTestInspectorToMap(link);
+                            }
+                        }
+                    }
+                    else {
+                        TestInspectorLink inspectorLink = new TestInspectorLink(testValidator, annotationRef);
+                        if (inspectorLink.isValid()) {
+                            addTestInspectorToMap(inspectorLink);
+                        }
                     }
                 }
             }
@@ -219,6 +281,26 @@ public class TestLinkManager
                 ? true : false;
     }
 
+
+    private List expandTestValidatorLink (TestValidator annotation, Object ref)
+    {
+        List testLinks = ListUtil.list();
+        String typeList = AnnotationUtil.getAnnotationTypeList(annotation) ;
+        if (!StringUtil.nullOrEmptyOrBlankString(typeList)) {
+            String[] types = typeList.split(";");
+            for (String type : types) {
+                testLinks.add(new TestInspectorLink(annotation, ref, type));
+            }
+        }
+        String superType = AnnotationUtil.getAnnotationSuperType(annotation);
+        if (!StringUtil.nullOrEmptyOrBlankString(superType)) {
+            Set<String> subTypes = getTestSessionSetup().resolveSuperType(superType);
+            for (String subType : subTypes) {
+                testLinks.add(new TestInspectorLink(annotation, ref, subType));
+            }
+        }
+        return testLinks;
+    }
     private List expandTestLink (Annotation annotation, Object ref)
     {
         List testLinks = ListUtil.list();

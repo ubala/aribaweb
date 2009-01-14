@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentInspector.java#14 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentInspector.java#15 $
 */
 package ariba.ui.dev;
 
@@ -72,12 +72,6 @@ public class AWComponentInspector extends AWComponent
     public int _fileContentsTabIndexLastChosen = -1;
     AWDebugTrace _debugTrace;
     public boolean _showingMeta;
-
-    public boolean _showProperties;
-    public String _propertyKey;
-    public AssignmentRecorder _recorder;
-    public AssignmentSource _assignmentSource;
-    public Assignment _assignment;
 
     public static boolean isComponentPathDebuggingEnabled (AWRequestContext requestContext)
     {
@@ -307,17 +301,6 @@ public class AWComponentInspector extends AWComponent
         return (meta != null)
                 ? Fmt.S("%s (%s)", meta.title(_traceNode.element()), name)
                 : name;
-    }
-
-    public boolean canShowAssignments ()
-    {
-        Map assignments = _traceNode.associatedMetadataAssignmentMap();
-        return (assignments != null && assignments.size() > 1);
-    }
-
-    public boolean showProperties ()
-    {
-        return !canShowAssignments() || _showProperties;
     }
 
     public String componentName ()

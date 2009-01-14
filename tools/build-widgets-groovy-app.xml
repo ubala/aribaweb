@@ -26,7 +26,7 @@
 
     <!-- aribaweb.properties: defaults  -->
     <property name="compile.groovy" value="true"/>
-    <property name="aw.initializer" value="ariba.ui.groovy.AWGroovyLoader.initialize"/>
+    <property name="aw.dependsOn" value="ariba.groovyloader,ariba.widgets"/>
 
     <import file="build-widgets-app.xml"/>
 
@@ -34,7 +34,7 @@
     <target name="init" depends="widgets-app.init">
         <!-- include our jar in the war -->
         <fileset id="war.jars" dir="${ariba.jars.dir}">
-            <include name="ariba.demoshell.jar"/>
+            <include name="ariba.groovyloader.jar"/>
         </fileset>
     </target>
 

@@ -13,18 +13,18 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.awl#6 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.awl#11 $
     </Copyright>
 
     <Overview>
         TBD
     </Overview>
 
-    <Binding key="label" direction="get" type="String" required="$false">
+    <Binding key="label" direction="get" type="String">
         Field label string
     </Binding>
 
-    <Binding key="cueTip" direction="get" type="String" required="$false">
+    <Binding key="cueTip" direction="get" type="String">
         String to appear in help text (CueTip) popup with field
     </Binding>
 
@@ -32,15 +32,19 @@
         Is this field required (marked with the required asterisk)
     </Binding>
 
-    <Binding key="errorValueSource" direction="get" type="Object" default="$false">
+    <Binding key="errorKey" direction="get" type="Object">
         For validation: See AWHighLightedErrorScope
     </Binding>
     
-    <Binding key="errorFieldPath" direction="get" type="String" default="$false">
+    <Binding key="errorValueSource" direction="get" type="Object">
         For validation: See AWHighLightedErrorScope
     </Binding>
 
-    <Binding key="errorGroupName" direction="get" type="String" default="$false">
+    <Binding key="errorFieldPath" direction="get" type="String">
+        For validation: See AWHighLightedErrorScope
+    </Binding>
+
+    <Binding key="errorGroupName" direction="get" type="String">
         For validation: See AWHighLightedErrorScope
     </Binding>
 
@@ -49,55 +53,112 @@
         (in form table, even hidden rows should lay down a FormRow in order to
         balance the number of TRs in the left and right zones of the four-zone FormTable)
     </Binding>
+
+    <Binding key="labelNowrap" direction="get" type="boolean" default="$false">
+        Should force nowrap on labels
+    </Binding>
+
+    <Binding key="dragType" direction="get" type="String">
+        If non-null, then field drag / drop is enabled, with this as the drag/drop type
+    </Binding>
+
+    <Binding key="dragAction" direction="get" type="void">
+        Action to invoke.
+    </Binding>
+
+    <Binding key="dropAction" direction="get" type="AWResponseGenerating">
+        Action to invoke.
+    </Binding>
+
+    <Binding key="dragHandleClickAction" direction="get" type="AWResponseGenerating">
+        Action invoked upon clicks (rather than drags) of the dragHandle.
+    </Binding>
+
+    <Binding key="highlightRow" direction="get" type="boolean">
+        For draggable rows, should a highlight style be applied.
+        (Used by the form editor).
+    </Binding>
 </a:Api>\
+<a:IncludeBlock name="$rowBlockName"
+                dragAction="$^dragAction" dropAction="$^dropAction">
+    <a:If ifFalse="$^hidden">
+        <td class="ffl">\
+            <a:If ifTrue="$dragType">\
+                <div class="flL">
+                    <a:DragContainer dragAction="$^dragAction" type="$dragType"
+                                     showParent="$true" class="flL">\
+                        <a:ActiveImage filename="field_grabber.gif" class="hovDrag"
+                                action="$^dragHandleClickAction"/>\
+                    </a:DragContainer>
+                </div>
+            </a:If>
+            <a:If notEqualNull="$^label">
+                <label elementId="$elementId" for="$elementId">\
+                    <a:String value="$^label"/>\
+                    :\
+                </label>\
+            </a:If>\
+        </td>
 
-<tr valign="middle">
-  <a:If ifFalse="$^hidden">
-    <td class="ffl">\
-        <a:If notEqualNull="$^label">
-            <label elementId="$elementId" for="$elementId">\
-                <a:String value="$^label"/>\
-                :\
-            </label>\
-        </a:If>\
-        <a:If notEqualNull="$^cueTip">
-            <w:CueTip value="$^cueTip"/>
-        </a:If>\
-    </td>
-
-    <a:If ifTrue="$env.showErrorFlags">
-        <a:HighLightedErrorScope errorValueSource="$^errorValueSource"
-                                 errorFieldPath="$^errorFieldPath"
-                                 errorGroupName="$^errorGroupName">
-            <td class="top">\
-                <w:ErrorIndicator showRequired="$^required"/>
+        <a:If ifTrue="$env.showErrorFlags">
+            <a:HighLightedErrorScope errorKey="$^errorKey"
+                                     errorValueSource="$^errorValueSource"
+                                     errorFieldPath="$^errorFieldPath"
+                                     errorGroupName="$^errorGroupName">
+                <td class="ffi">\
+                    <w:ErrorIndicator showRequired="$^required"/>
+                </td>
+                <td class="ffp" nowrap="$^nowrap" colspan="$env.formRowTrailingColspan">\
+                    <!--- the environment variable "awinputId" is used to associate an input element with a label
+          all input elements use this value to make this association --->
+                    <a:AppendEnvironment awinputId="$inputId">\
+                        <a:If notEqualNull="$^cueTip">
+                          <table class="cueT" cellpadding="0"><tr>
+                                    <td><a:IncludeContent/></td>
+                                    <td><w:CueTip value="$^cueTip"/></td>
+                          </tr></table>
+                            <a:Else/>
+                            <a:IncludeContent/>\
+                        </a:If>\
+                    </a:AppendEnvironment>\
+                </td>
+            </a:HighLightedErrorScope>
+            <a:Else/>
+            <td class="ffi">\
+                <a:If ifTrue="$^required">\
+                    <div class="required"
+                         style="display:inline;">\
+                        <a:Image filename="reqd_green.gif"
+                                 style="margin-top:2px;"
+                                 alt="$[a001]Required Field"/>\
+                  </div>\
+                </a:If>
             </td>
-            <td class="top label" style="padding-right:25px" nowrap="$^nowrap" colspan="$env.formRowTrailingColspan">\
+            <td class="ffp" nowrap="$^nowrap" colspan="$env.formRowTrailingColspan">\
                 <!--- the environment variable "awinputId" is used to associate an input element with a label
-                      all input elements use this value to make this association --->
+      all input elements use this value to make this association --->
                 <a:AppendEnvironment awinputId="$inputId">\
-                    <a:IncludeContent/>\
+                    <a:If notEqualNull="$^cueTip">
+                      <table class="cueT" cellpadding="0"><tr>
+                                <td><a:IncludeContent/></td>
+                                <td><w:CueTip value="$^cueTip"/></td>
+                      </tr></table>
+                        <a:Else/>
+                        <a:IncludeContent/>\
+                    </a:If>\
                 </a:AppendEnvironment>\
             </td>
-        </a:HighLightedErrorScope>
-    <a:Else/>
-        <td>\
-            <a:If ifTrue="$^required">\
-                <div class="required"
-                     style="display:inline;">\
-                    <a:Image filename="requiredAsterisk.gif"
-                             style="margin-top:2px;"
-                             alt="$[a001]Required Field"/>\
-                </div>\
-            </a:If>
-        </td>
-        <td class="top label" style="padding-right:25px" nowrap="$^nowrap" colspan="$env.formRowTrailingColspan">\
-            <!--- the environment variable "awinputId" is used to associate an input element with a label
-                  all input elements use this value to make this association --->
-            <a:AppendEnvironment awinputId="$inputId">\
-                <a:IncludeContent/>\
-            </a:AppendEnvironment>\
-        </td>
+        </a:If>
     </a:If>
-  </a:If>
-</tr>
+</a:IncludeBlock>
+<a:Block name="DragRow">
+    <a:RefreshRegion tagName="tr" valign="middle"
+                     bh="DrP" class="$dragClass" dropAction="$^dropAction">
+        <a:IncludeContent/>
+    </a:RefreshRegion>
+</a:Block>
+<a:Block name="Row">
+    <a:RefreshRegion tagName="tr" valign="middle" bh="$cueTipBH">
+        <a:IncludeContent/>
+    </a:RefreshRegion>
+</a:Block>

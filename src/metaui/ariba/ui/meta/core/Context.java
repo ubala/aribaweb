@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#12 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#23 $
 */
 package ariba.ui.meta.core;
 
@@ -24,18 +24,18 @@ import ariba.util.core.Fmt;
 import ariba.util.core.ListUtil;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.Constants;
-import ariba.util.expr.AribaExprEvaluator;
-import ariba.util.fieldvalue.Expression;
+import ariba.util.core.MapUtil;
 import ariba.util.fieldvalue.Extensible;
-import ariba.util.fieldvalue.FieldPath;
 import ariba.util.fieldvalue.FieldValue;
 import ariba.util.fieldvalue.FieldValue_Object;
+import ariba.util.fieldvalue.FieldPath;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
@@ -128,12 +128,13 @@ public class Context implements Extensible
     {
         String requested = meta().keyData(key).propertyScopeKey();
         Assert.that(requested != null, "%s is not a valid context key", key);
-        String current = _currentPropertyScopeKey();
+        String current = _currentPropertyScopeKey(false);
         // Assert.that(current != null, "Can't set %s as context key when no context key on stack", key);
 
         if (!requested.equals(current)) {
             Object val = values().get(key);
-            Assert.that(val != null, "Can't set %s as context key when it has no value already on the context", key);
+            // Assert.that(val != null, "Can't set %s as context key when it has no value already on the context", key);
+            if (val == null) val = Meta.KeyAny;
             set(key, val);
         }
     }
@@ -185,7 +186,7 @@ public class Context implements Extensible
     public Meta.PropertyMap allProperties ()
     {
         if (_currentProperties == null) {
-            Meta.MatchResult m = lastMatch();
+            Match.MatchResult m = lastMatch();
             if (m != null) {
                 _currentProperties = m.properties();
             }
@@ -195,19 +196,38 @@ public class Context implements Extensible
 
     public Object resolveValue (Object value)
     {
-        return (value != null && value instanceof DynamicPropertyValue)
-                ? ((DynamicPropertyValue)value).evaluate(this)
+        return (value != null && value instanceof PropertyValue.Dynamic)
+                ? ((PropertyValue.Dynamic)value).evaluate(this)
                 : value;
     }
 
     public Object staticallyResolveValue (Object value)
     {
         Object lastValue = null;
-        while (value != lastValue && value != null && value instanceof StaticallyResolvable) {
+        while (value != lastValue && value != null && value instanceof PropertyValue.StaticallyResolvable) {
             lastValue = value;
-             value = ((DynamicPropertyValue)value).evaluate(this);
+             value = ((PropertyValue.Dynamic)value).evaluate(this);
         }
         return value;
+    }
+
+    public Object pushAndResolve (Map<String,Object> contextVals, String propertyKey)
+    {
+        String scopeKey = null;
+        push();
+        for (Map.Entry<String,Object> e : contextVals.entrySet()) {
+            Object val = e.getValue();
+            if ("*".equals(val)) {
+                scopeKey = e.getKey();
+            } else {
+                set(e.getKey(),val);
+            }
+        }
+        if (scopeKey != null) setContextKey(scopeKey);
+        Object val = propertyForKey(propertyKey);
+        pop();
+
+        return val;
     }
 
     private Map resolvedProperties ()
@@ -420,7 +440,7 @@ public class Context implements Extensible
             _applyActivation(propActivation, Meta.NullMarker);
             applyDeferredAssignments(propActivation.deferredAssignments);
             rec._propertyLocalValues = _values;
-            rec._propertyLocalMatches = ListUtil.lastElement(_entries).srec.match;
+            rec._propertyLocalSrec = ListUtil.lastElement(_entries).srec;
             _values = new HashMap();  // hack -- empty map so that undo is noop
             pop();
             _values = origValues;
@@ -428,7 +448,7 @@ public class Context implements Extensible
         else {
             // can use static versions
             rec._propertyLocalValues = propActivation._nestedValues;
-            rec._propertyLocalMatches = ListUtil.lastElement(propActivation._recs).match;
+            rec._propertyLocalSrec = ListUtil.lastElement(propActivation._recs);
         }
     }
 
@@ -508,9 +528,9 @@ public class Context implements Extensible
         String scopeKey;
         boolean matchingPropKeyAssignment = !isNewValue && !isChaining
                 && (((scopeKey = meta().keyData(key).propertyScopeKey()) != null)
-                        && !scopeKey.equals(_currentPropertyScopeKey()));
+                        && !scopeKey.equals(_currentPropertyScopeKey(false)));
         if (isNewValue || matchingPropKeyAssignment) {
-            Meta.MatchResult lastMatch;
+            Match.MatchResult lastMatch;
             int salience = _frameStarts.size();
             int lastAssignmentIdx = -1;
             if (oldVal == null) {
@@ -536,9 +556,17 @@ public class Context implements Extensible
                     // but it would then break invariants when searching back to mask a key (we wouldn't
                     // realize that we need to go further back to find the original one).
                     _ContextRec oldRec = _entries.get(lastAssignmentIdx);
-                    if (isChaining && (oldRec.srec.salience >= salience || !oldRec.srec.fromChaining)) {
-                        Log.meta_detail.debug("Set of key '%s' -> '%s' skipped -- salience %s <= %s)",
-                            key, value, salience, oldRec.srec.salience);
+                    if (oldRec.srec.salience == salience) {
+                        int prev = findLastAssignmentOfKey(key, value);
+                        if (prev != -1 && _entries.get(prev).srec.salience == salience) {
+                            Log.meta_detail.debug("Set of key '%s': '%s' -> '%s' skipped (found previous assignment of same value with same salience)",
+                                key, oldVal, value);
+                            return false;
+                        }
+                    }
+                    if (isChaining && (oldRec.srec.salience > salience || !oldRec.srec.fromChaining)) {
+                        Log.meta_detail.debug("Set of key '%s': '%s' -> '%s' skipped (salience %s <= %s)",
+                            key, oldVal, value, salience, oldRec.srec.salience);
                         return false;
                     }
                     int firstAssignmentIdx = _prepareForOverride(recIdx, lastAssignmentIdx);
@@ -616,10 +644,10 @@ public class Context implements Extensible
         return lastAssignmentIdx;
     }
 
-    private Meta.MatchResult _rematchForOverride (int overrideIndex, int firstAssignmentIdx)
+    private Match.MatchResult _rematchForOverride (int overrideIndex, int firstAssignmentIdx)
     {
         // start from the top down looking for that last unmasked record
-        Meta.MatchResult lastMatch = null;
+        Match.MatchResult lastMatch = null;
         int i=0;
         for (; i<firstAssignmentIdx; i++) {
             _ContextRec rec = _entries.get(i);
@@ -658,9 +686,9 @@ public class Context implements Extensible
         }
     }
     
-    void _checkMatch (Meta.MatchResult match, String key, Object value)
+    void _checkMatch (Match.MatchResult match, String key, Object value)
     {
-        _meta._checkMatch(match, _values);
+        match._checkMatch(_values, _meta);
     }
 
     int findLastAssignmentOfKey (String key)
@@ -671,6 +699,16 @@ public class Context implements Extensible
         }
         return -1;
     }
+
+    int findLastAssignmentOfKey (String key, Object value)
+    {
+        for (int i=_entries.size()-1; i >= 0; i--) {
+            _ContextRec rec = _entries.get(i);
+            if (rec.srec.key.equals(key) && !_isNewValue(rec.val, value)) return i;
+        }
+        return -1;
+    }
+
 
     // Check if we have value mirroring (property to context) to do
     // Dynamic property mirroring will be added to the currentActivation deferredAssignment list
@@ -711,9 +749,9 @@ public class Context implements Extensible
                             || (_currentActivation._parent.hasDeferredAssignmentForKey(key)
                                 /* && _values.containsKey(key) */);
                     if (!suppress) {
-                        if (newVal instanceof DynamicPropertyValue) {
+                        if (newVal instanceof PropertyValue.Dynamic) {
                             Log.meta_detail.debug("(deferred) chaining key: %s", propMgr._keyDataToSet._key);
-                            _currentActivation.addDeferredAssignment(propMgr._keyDataToSet._key, (DynamicPropertyValue)newVal);
+                            _currentActivation.addDeferredAssignment(propMgr._keyDataToSet._key, (PropertyValue.Dynamic)newVal);
                         } else {
                             // compare this value to the value from the end of the last frame
                             Log.meta_detail.debug("chaining key: %s", propMgr._keyDataToSet._key);
@@ -735,7 +773,7 @@ public class Context implements Extensible
         }
     }
 
-    String _currentPropertyScopeKey ()
+    String _currentPropertyScopeKey (boolean returnContextKey)
     {
         String foundKey = null;
         Activation foundActivation = null;
@@ -745,7 +783,7 @@ public class Context implements Extensible
             if (foundActivation != null && rec.srec.activation != foundActivation) break;
             String scopeKey = meta().keyData(rec.srec.key).propertyScopeKey();
             if (scopeKey != null) {
-                if (!rec.srec.fromChaining) return scopeKey;
+                if (!rec.srec.fromChaining) return (returnContextKey) ? rec.srec.key : scopeKey;
                 // for chaining assignments, we keep looking until we exhaust the first non-chaining activation
                 // Todo: broken -- disabling set of context key from chaining 
                 // if (foundKey == null) foundKey = scopeKey;
@@ -759,10 +797,9 @@ public class Context implements Extensible
     boolean _checkPropertyContext ()
     {
         Assert.that(_values instanceof NestedMap, "Property assignment on base map?");
-        String scopeKey = _currentPropertyScopeKey();
+        String scopeKey = _currentPropertyScopeKey(false);
         if (scopeKey != null) {
-            _set(scopeKey, true, true, false, false);
-            return true;
+            return _set(scopeKey, true, true, false, false);
         }
         return false;
     }
@@ -802,35 +839,44 @@ public class Context implements Extensible
                 out.println(Fmt.S("%s : %s%s", r.key, r.val, (r.fromChaining ? "" : " !")));
             }
         }
-        Meta.MatchResult match = lastMatch();
+        Match.MatchResult match = lastMatch();
         if (match != null) out.println("  " + lastMatch().debugString());
         out.println("  Props:  " + allProperties());
         out.println("  Values:  " + values());
     }
 
-    Meta.MatchResult lastMatchWithoutContextProps ()
+    Match.MatchResult lastMatchWithoutContextProps ()
     {
         return _entries.isEmpty() ? null : _entries.get(_entries.size()-1).srec.match;
     }
 
-    Meta.MatchResult lastMatch ()
+    Match.MatchResult lastMatch ()
     {
         if (_entries.isEmpty()) return null;
-        Meta.MatchResult match = ListUtil.lastElement(_entries).propertyLocalMatches(this);
+        Match.MatchResult match = ListUtil.lastElement(_entries).propertyLocalMatches(this);
         return (match != null) ? match : lastMatchWithoutContextProps();
     }
 
+    _StaticRec lastStaticRec ()
+    {
+        if (_entries.isEmpty()) return null;
+        _StaticRec rec = ListUtil.lastElement(_entries).propertyLocalStaticRec(this);
+        return (rec != null) ? rec : ListUtil.lastElement(_entries).srec;
+    }
 /*
     public String toString ()
     {
         return "Context values: " + _values; // + ", props: " + allProperties();
     }
 */
-    static class _StaticRec {
+    // Interface for editor calls
+    public interface AssignmentRecord {} 
+
+    static class _StaticRec implements AssignmentRecord {
         Activation activation;
         String key;
         Object val;
-        Meta.MatchResult match;
+        Match.MatchResult match;
         int salience;
         boolean fromChaining;
         int lastAssignmentIdx;
@@ -847,13 +893,19 @@ public class Context implements Extensible
 
         int maskedByIdx;
         boolean _didInitPropContext;
-        Meta.MatchResult _propertyLocalMatches;
+        _StaticRec _propertyLocalSrec;
         Map _propertyLocalValues;
 
-        Meta.MatchResult propertyLocalMatches (Context context)
+        Match.MatchResult propertyLocalMatches (Context context)
         {
             if (!_didInitPropContext) initPropContext(context);
-            return _propertyLocalMatches;
+            return (_propertyLocalSrec != null) ? _propertyLocalSrec.match : null;
+        }
+
+        _StaticRec propertyLocalStaticRec (Context context)
+        {
+            if (!_didInitPropContext) initPropContext(context);
+            return _propertyLocalSrec;
         }
 
         Map propertyLocalValues (Context context)
@@ -881,7 +933,7 @@ public class Context implements Extensible
             val = null;
             maskedByIdx = 0;
             _didInitPropContext = false;
-            _propertyLocalMatches = null;
+            _propertyLocalSrec = null;
             _propertyLocalValues = null;
         }
     }
@@ -930,7 +982,7 @@ public class Context implements Extensible
             byVal.put(value, activation);
         }
 
-        void addDeferredAssignment (String key, DynamicPropertyValue value) {
+        void addDeferredAssignment (String key, PropertyValue.Dynamic value) {
             _DeferredAssignment a = new _DeferredAssignment();
             a.key = key;
             a.value = value;
@@ -961,7 +1013,7 @@ public class Context implements Extensible
 
     static class _DeferredAssignment {
         String key;
-        DynamicPropertyValue value;
+        PropertyValue.Dynamic value;
     }
 
 
@@ -969,135 +1021,6 @@ public class Context implements Extensible
     public class PropertyAccessor {
         Object get (String key) { return propertyForKey(key); }
         public String toString () { return allProperties().toString(); }
-    }
-
-    public interface DynamicPropertyValue
-    {
-        public Object evaluate (Context context);
-    }
-
-    // "marker" interface for DynamicPropertyValues that depend only on their
-    // match context and therefore can be computed and cached statically in the
-    // Context Activation tree
-    public interface StaticallyResolvable extends DynamicPropertyValue
-    {
-    }
-
-    public static class StaticDynamicWrapper implements StaticallyResolvable, Meta.PropertyMapAwaking
-    {
-        StaticallyResolvable _orig;
-        Object _cached;
-
-        public StaticDynamicWrapper (StaticallyResolvable value) { _orig = value; }
-
-        public StaticallyResolvable getDynamicValue () { return _orig; }
-
-        public Object awakeForPropertyMap(Meta.PropertyMap map)
-        {
-            // copy ourselves so there's a fresh copy for each context in which is appears
-            return new StaticDynamicWrapper(_orig);
-        }
-
-        public Object evaluate(Context context)
-        {
-            // we lazily static evaluate our value and cace the result
-            if (_cached == null) _cached = context.staticallyResolveValue(_orig);
-
-            return _cached;
-        }
-
-        public String toString()
-        {
-            return Fmt.S("(StaticDynamicWrapper) %s%s", 
-                    ((_cached != null) ? _cached : _orig),
-                    ((_cached == null) ? " (unevaluated)" : ""));
-        }
-    }
-
-    static class ContextFieldPath extends FieldPath implements DynamicPropertyValue
-    {
-        public ContextFieldPath (String path)
-        {
-            super(path);
-        }
-
-        public Object evaluate(Context context)
-        {
-            return getFieldValue(context);
-        }
-    }
-
-    static class ExprValue implements DynamicPropertyValue
-    {
-        private Expression _expression;
-
-        public ExprValue (String expressionString)
-        {
-            _expression = AribaExprEvaluator.instance().compile(expressionString);
-
-        }
-
-        public Object evaluate(Context context)
-        {
-            try {
-                return _expression.evaluate(context, null);
-            } catch (Exception e) {
-                throw new AWGenericException(Fmt.S("Exception evaluating expression '%s' in context: %s --\n",
-                        _expression, context), e);
-            }
-        }
-
-        public String toString()
-        {
-            return Fmt.S("${%s}", _expression.toString());
-        }
-
-        /*
-            public void setValue (Object value, Object object)
-            {
-                assertExpression();
-                if (_substituteBinding != null) {
-                    _substituteBinding.setValue(value, object);
-                } else {
-                    ((AribaExprEvaluator.Expression)_expression).evaluateSet(object, value, null);
-                }
-            }
-        */
-    }
-
-    protected static class DeferredOperationChain implements DynamicPropertyValue
-    {
-        Meta.PropertyMerger _merger;
-        Object _orig;
-        Object _override;
-
-        public DeferredOperationChain (Meta.PropertyMerger merger, Object orig, Object override)
-        {
-            _merger = merger;
-            _orig = orig;
-            _override = override;
-        }
-
-        public Object evaluate(Context context)
-        {
-            return _merger.merge(context.resolveValue(_override), context.resolveValue(_orig),
-                                        context.isDeclare());
-        }
-
-        public boolean equals(Object other)
-        {
-            if (!(other instanceof DeferredOperationChain)) return false;
-            DeferredOperationChain o = (DeferredOperationChain)other;
-            return (_merger == o._merger)
-                && Meta.objectEquals(_orig, o._orig)
-                && Meta.objectEquals(_override, o._override);
-        }
-
-        public String toString()
-        {
-            return Fmt.S("Chain<%s>: %s => %s", _merger, _override, _orig);
-        }
-
     }
 
     // Merge lists
@@ -1118,59 +1041,7 @@ public class Context implements Extensible
             return result;
         }
     };
-/*
-    static class MergeIfDeclare implements StaticallyResolvable, Meta.PropertyMapAwaking
-    {
-        MergeIfDeclare _prev;
-        Object _head;
-        Object _cache;
-        boolean canCache;
 
-        public MergeIfDeclare (Object value, MergeIfDeclare prev)
-        {
-            _head = value;
-            _prev = prev;
-            canCache = (!(value instanceof DynamicPropertyValue) || (value instanceof StaticallyResolvable))
-                    && (prev == null || prev.canCache);
-        }
-
-        public Object awakeForPropertyMap(Meta.PropertyMap map)
-        {
-            // copy ourselves so there's a fresh copy for each context in which is appears
-            return new MergeIfDeclare(_head, _prev);
-        }
-
-        public Object evaluate(Context context) {
-            Object result;
-            if (_cache == null) {
-                if (context.values().containsKey(Meta.KeyDeclare)) {
-                    result = new ArrayList();
-                    populate(context, (List)result);
-                } else {
-                    result = _head;
-                }
-                if (canCache) _cache = result;
-            } else {
-                result = _cache;
-            }
-            return result;
-        }
-
-        void populate (Context context, List result)
-        {
-            if (_prev != null) _prev.populate(context, result);
-            Object value = (context != null) ? context.resolveValue(_head): _head;
-            ListUtil.addElementsIfAbsent(result, Meta.toList(value));
-        }
-
-        public String toString ()
-        {
-            List result = new ArrayList();
-            populate(null, result);
-            return "<MergeIfDeclare: " + result + ">";
-        }
-    }
-*/
     public static Object newInnerInstance(Class innerClass, Object outerInstance)
     {
         try {
@@ -1190,8 +1061,118 @@ public class Context implements Extensible
 
         public Object getFieldValuePrimitive (Object target, FieldPath fieldPath)
         {
-            return ((Context.PropertyAccessor)target).get(fieldPath.car());
+            return ((PropertyAccessor)target).get(fieldPath.car());
         }
+    }
+    
+    public static class Info
+    {
+        public Map<String, Object> contextMap = new HashMap();
+        public List<String> contextKeys = ListUtil.list();
+        public Map properties;
+        public String scopeKey;
+        public boolean scopeKeyFromChaining;
+        public List <AssignmentInfo> assignmentStack;
+
+        public Info () {}
+
+        // Copy, overriding scope key value
+        public Info (Info orig, Object overrideScopeValue)
+        {
+            contextKeys = ListUtil.cloneList(contextKeys);
+            contextMap = MapUtil.cloneMap(orig.contextMap);
+            properties = MapUtil.cloneMap(orig.properties);  // BOGUS
+            scopeKey = orig.scopeKey;
+            scopeKeyFromChaining = orig.scopeKeyFromChaining;
+
+            contextMap.put(scopeKey,  overrideScopeValue);
+        }
+    }
+
+    public static class AssignmentInfo
+    {
+        public String key;
+        public Object value;
+        public int level;
+        public boolean overridden;
+        public boolean fromChaining;
+        public boolean scopeKeyAssignment;
+    }
+
+    public static Map<Rule.AssignmentSource, List<AWDebugTrace.Assignment>> assignmentMap (AssignmentRecord arec)
+    {
+        AWDebugTrace.AssignmentRecorder recorder = new AWDebugTrace.AssignmentRecorder();
+        Match.MatchResult match = ((_StaticRec)arec).match;
+        match._meta.propertiesForMatch(match, recorder);
+        return (Map<Rule.AssignmentSource, List<AWDebugTrace.Assignment>>)((Map)recorder.getAssignments());
+    }
+
+    public static Info staticContext (Meta meta, AssignmentRecord arec)
+    {
+        return staticContext(meta, arec, false);
+    }
+
+    public static Info staticContext (Meta meta, AssignmentRecord arec, boolean includeSetInfo)
+    {
+        Info result = new Info();
+        result.properties = ((_StaticRec)arec).properties();
+        Activation activation = ((_StaticRec)arec).activation;
+        int level = 0;
+        if (includeSetInfo) {
+            result.assignmentStack = ListUtil.list();
+            for (Activation aP = activation; aP._parent != null; aP = aP._parent) { level++; }
+        }
+
+        addStaticContextForActivation(meta, activation, result, level);
+
+        Collections.reverse(result.contextKeys);
+
+        if (includeSetInfo) {
+            for (AssignmentInfo si : result.assignmentStack) {
+                if (result.scopeKey != null && result.scopeKey.equals(si.key)
+                            && result.contextMap.get(si.key).equals(si.value)) {
+                    si.scopeKeyAssignment = true;
+                    break;
+                }
+            }
+            Collections.reverse(result.assignmentStack);
+        }
+
+        return result;
+    }
+
+    private static void addStaticContextForActivation (Meta meta, Activation activation, Info info, int level)
+    {
+        List<_StaticRec> recs = activation._recs;
+        for (int i=recs.size()-1; i >= 0; i--) {
+            _StaticRec srec = recs.get(i);
+            if (!Meta.isPropertyScopeKey(srec.key)) {
+                boolean overridden = true;
+                if (!info.contextMap.containsKey(srec.key)) {
+                    overridden = false;
+                    info.contextKeys.add(srec.key);
+                    info.contextMap.put(srec.key, srec.val);
+                    if (info.scopeKey == null || (info.scopeKeyFromChaining && !srec.fromChaining)) {
+                        String scopeKey = meta.keyData(srec.key).propertyScopeKey();
+                        if (scopeKey != null) {
+                            info.scopeKey = srec.key;
+                            info.scopeKeyFromChaining = srec.fromChaining;
+                        }
+                    }
+                }
+
+                if (info.assignmentStack != null) {
+                    AssignmentInfo assignmentInfo = new AssignmentInfo();
+                    assignmentInfo.key = srec.key;
+                    assignmentInfo.value = srec.val;
+                    assignmentInfo.overridden = overridden;
+                    assignmentInfo.fromChaining = srec.fromChaining;
+                    assignmentInfo.level = level;
+                    info.assignmentStack.add(assignmentInfo);
+                }
+            }
+        }
+        if (activation._parent != null) addStaticContextForActivation(meta, activation._parent, info, --level);
     }
 
     /**
@@ -1217,13 +1198,7 @@ public class Context implements Extensible
         public void recordAssignments (Object receiver, AWDebugTrace.AssignmentRecorder recorder,
                                        AWBindableElement element)
         {
-/*            if (element instanceof MetaContext) {
-                super.recordAssignments(receiver, recorder, element);
-            }
-            else {
-            }
-*/
-            Meta.MatchResult match = ((_StaticRec)receiver).match;
+            Match.MatchResult match = ((_StaticRec)receiver).match;
             match._meta.propertiesForMatch(match, recorder);
         }
 
@@ -1270,7 +1245,7 @@ public class Context implements Extensible
             Activation propertyActivation = findPropertyActivation(srec);
             String propertyScopeKey = (propertyActivation != null)
                     ? propertyActivation._recs.get(0).key : null;
-            Assert.that(propertyScopeKey != null && propertyScopeKey.endsWith(Meta.ScopeKeySuffix),
+            Assert.that(propertyScopeKey != null && Meta.isPropertyScopeKey(propertyScopeKey),
                     "Did not find propertyScopeKey where expected: %s", propertyScopeKey);
             String propertyKey = propertyScopeKey.substring(0, propertyScopeKey.length()-2);
 
@@ -1284,7 +1259,10 @@ public class Context implements Extensible
         {
             Activation activation = srec.activation;
             while (activation != null) {
-                if (activation._propertyActivation != null) return activation._propertyActivation;
+                if (activation._propertyActivation != null
+                        && !ListUtil.nullOrEmptyList(activation._propertyActivation ._recs)) {
+                    return activation._propertyActivation;
+                }
                 activation = activation._parent;
             }
             return null;
@@ -1301,18 +1279,42 @@ public class Context implements Extensible
             }
             return null;
         }
+
+        public String inspectorComponentName (Object receiver, AWBindableElement element)
+        {
+            return "MetaInspectorPane";
+        }
     }
 
     static {
         AWDebugTrace.MetaProvider.registerClassExtension(_StaticRec.class, new MetaProvider_Context());
     }
 
-    protected Object debugTracePropertyProvider ()
+    public Object debugTracePropertyProvider ()
     {
-        Activation activation = currentActivation();
-        Activation propActivation = activation.propertyActivation(this);
-        if (propActivation != null) activation = propActivation;
-        return ListUtil.lastElement(activation._recs);
+        return lastStaticRec();
+    }
+
+    /*
+        Context records are considered to match if they're scopeKeys match and
+        have matching values
+     */
+    public boolean currentRecordPathMatches (AssignmentRecord rec)
+    {
+        // horribly inefficient implementation -- maybe okay because only used in dev editor
+        return currentRecordPathMatches(staticContext(_meta, rec));
+    }
+
+    public boolean currentRecordPathMatches (Info other)
+    {
+        // horribly inefficient implementation -- maybe okay because only used in dev editor
+        Info current = staticContext(_meta, lastStaticRec());
+
+        for (String key : current.contextKeys) {
+            if (_meta.keyData(key).propertyScopeKey() != null) {
+                if (!current.contextMap.get(key).equals(other.contextMap.get(key))) return false;
+            }
+        }
+        return true;
     }
 }
-

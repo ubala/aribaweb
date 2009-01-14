@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentApiManager.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentApiManager.java#14 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -192,8 +192,8 @@ public class AWComponentApiManager extends AWBaseObject
     public synchronized void addMissingAWApi (AWComponentDefinition componentDefinition)
     {
         String componentName = componentName(componentDefinition);
-        Package pkg = componentDefinition.componentClass().getPackage();
-        String packageName = (pkg != null) ? pkg.getName() : "unpackaged";
+        String packageName = componentDefinition.componentPackageName();
+        if (packageName == null) packageName = "unpackaged";
 
         List componentList = getMissingComponentApiList(packageName);
         if (!componentList.contains(componentName)) {
@@ -227,17 +227,8 @@ public class AWComponentApiManager extends AWBaseObject
 
     public static String packageNameForComponent (AWComponentDefinition componentDefinition)
     {
-        String packageName = null;
-        if (componentDefinition.componentClass() == AWComponent.ClassObject) {
-            // classless component so now we need to figure out where the
-            // template for this component reside to determine its "package"
-            String templateName = componentDefinition.templateName();
-            packageName = templateName.substring(0,templateName.lastIndexOf('/')).replace('/','.');
-        }
-        else {
-            Package pkg = componentDefinition.componentClass().getPackage();
-            packageName = (pkg != null) ? pkg.getName() : "No Package";
-        }
+        String packageName = componentDefinition.componentPackageName();
+        if (packageName == null) packageName = "No Package";
         return packageName;
     }
 

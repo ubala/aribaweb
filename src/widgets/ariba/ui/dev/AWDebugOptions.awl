@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugOptions.awl#27 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugOptions.awl#28 $
     </Copyright>
 
     <Overview>
@@ -110,6 +110,13 @@
             Show Drop Regions
         </a:Label>
     </w:SectionBody>
+
+    <w:Section title="Test Automation">
+        <a:Label>
+            <a:Checkbox value="$ariba.ui.aribaweb.core.AWConcreteServerApplication.IsAutomationTestModeEnabled"/>
+            Enable generation of awName semantic keys
+        </a:Label>
+    </w:Section>
 
     <w:SectionHeading title="Performance State Capture"/>
     <w:SectionBody>

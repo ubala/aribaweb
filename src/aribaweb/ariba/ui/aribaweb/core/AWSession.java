@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#76 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#78 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -538,6 +538,7 @@ public class AWSession extends AWBaseObject
     private AWApplication _application;
     private HttpSession _httpSession;
     private String _sessionId;
+    private String _sessionSecureId;
     private AWRequestContext _requestContext;
     private AWCharacterEncoding _characterEncoding;
     private TimeZone _clientTimeZone;
@@ -578,6 +579,11 @@ public class AWSession extends AWBaseObject
     private boolean _markForTermination = false;
     // specifies whether to update the performance stats in ensureAsleep
     private boolean _updateLatestPerformanceStats;
+
+    // session scoped URL's
+    public String _refreshURL;
+    public String _backTrackURL;
+    public String _forwardTrackURL;
 
     // ** Thread Safety Considerations: sessions are never shared by multiple threads -- no locking required.
 
@@ -699,6 +705,11 @@ public class AWSession extends AWBaseObject
         return _sessionId;
     }
 
+    public String sessionSecureId ()
+    {
+        return _sessionSecureId;
+    }
+
     protected static String requestTypeString (int requestType)
     {
         String requestTypeString = null;
@@ -759,10 +770,9 @@ public class AWSession extends AWBaseObject
 
         _notificationsLock = new Object();
         _notifications = ListUtil.list();
-
+        _sessionSecureId = initSessionSecureId();
         this.init();
-        initEnvironmentStack();
-
+        initEnvironmentStack();        
         awake();
 
         Log.aribaweb_session.debug(
@@ -776,6 +786,11 @@ public class AWSession extends AWBaseObject
             _dict = MapUtil.map();
         }
         return _dict;
+    }
+
+    protected String initSessionSecureId ()
+    {
+        return null;
     }
 
     protected void initEnvironmentStack ()
@@ -1189,6 +1204,36 @@ public class AWSession extends AWBaseObject
     {
         AWEncodedString frameName = requestContext().request().frameName();
         requestHistory(frameName).markAppBoundary();
+    }
+
+    public void setRefreshURL (String url)
+    {
+        _refreshURL = url;
+    }
+
+    public String getRefreshURL ()
+    {
+        return _refreshURL;
+    }
+
+    public void setBackTrackURL (String url)
+    {
+        _backTrackURL = url;
+    }
+
+    public String getBackTrackURL ()
+    {
+        return _backTrackURL;
+    }
+
+    public void setForwardTrackURL (String url)
+    {
+        _forwardTrackURL = url;
+    }
+
+    public String getForwardTrackURL ()
+    {
+        return _forwardTrackURL;
     }
 
     ////////////////////

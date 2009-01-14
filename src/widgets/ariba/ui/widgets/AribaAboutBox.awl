@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaAboutBox.awl#15 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaAboutBox.awl#16 $
     </Copyright>
 
     <Overview>
@@ -23,7 +23,7 @@
 <w:DialogBox id="AWAboutDiv" class="panel" wrapperClass="dialogWrapper about" >\
 <a:LazyDiv>
     <div class="info">\
-        <AribaString useBR="$true" escapeHtml="$false" name="userInfo"/>\
+        <AribaString useBR="$true" escapeUnsafeHtml="$true" name="userInfo"/>\
         <!--constant -->\
         <div style="text-align:justify; color:#666699; margin-top:10px;">
             <a:Local key="a010">

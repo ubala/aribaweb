@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#10 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#13 $
 */
 package ariba.ui.meta.layouts;
 
@@ -50,6 +50,7 @@ public class MetaNavTabBar extends AWComponent
 
     public static class State
     {
+        UIMeta.ModuleInfo _moduleInfo;
         public List<ModuleProperties> _modules;
         protected ModuleProperties _selectedModule;
         protected List<String> _selectedModuleClassNames;
@@ -67,7 +68,8 @@ public class MetaNavTabBar extends AWComponent
             UIMeta meta = UIMeta.getInstance();
             if (_modules == null || _ruleSetGeneration < meta.ruleSetGeneration()) {
                 Context context = meta.newContext();
-                _modules = meta.modules(context);
+                _moduleInfo = meta.computeModuleInfo(context);
+                _modules = _moduleInfo.modules;
                 _ruleSetGeneration = meta.ruleSetGeneration();
             }
         }
@@ -98,7 +100,13 @@ public class MetaNavTabBar extends AWComponent
 
         public ItemProperties getSelectedModule()
         {
+            if (_selectedModule == null && !_modules.isEmpty()) _selectedModule = _modules.get(0);
             return _selectedModule;
+        }
+
+        public UIMeta.ModuleInfo moduleInfo()
+        {
+            return _moduleInfo;
         }
 
         public List<ItemProperties> getActionCategories()
@@ -159,9 +167,12 @@ public class MetaNavTabBar extends AWComponent
         {
             // ToDo -- figure out how to fire Action
             UIMeta meta = UIMeta.getInstance();
-            Context context = meta.newContext();
+            UIMeta.UIContext context = (UIMeta.UIContext)meta.newContext();
+            context.setRequestContext(requestContext);
             context.push();
             context.set(UIMeta.KeyModule, _selectedModule.name());
+            String className = (String)action.properties().get(UIMeta.KeyClass);
+            if (className != null) context.set(UIMeta.KeyClass, className);
             AWResponseGenerating response =  meta.fireAction(action, context, requestContext);
             context.pop();
             return response;
