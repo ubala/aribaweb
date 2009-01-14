@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaDetailTable.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaDetailTable.java#4 $
 */
 package ariba.ui.meta.layouts;
 
@@ -23,6 +23,7 @@ import ariba.ui.meta.core.Context;
 import ariba.ui.meta.core.MetaContext;
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWRequestContext;
 
 public class MetaDetailTable extends AWComponent
 {
@@ -38,23 +39,19 @@ public class MetaDetailTable extends AWComponent
     {
         super.init();
         _displayGroup = new AWTDisplayGroup();
-        _displayGroup.setDataSource(dataSource());
-    }
 
-    public AWTDataSource dataSource ()
-    {
         Context context = MetaContext.currentContext(this);
-        Object object = context.values().get(UIMeta.KeyObject);
-        if (object != null) {
-            String field = (String)context.values().get(UIMeta.KeyField);
-            return new DetailDataSource (object, field);
-        }
-        return null;
+        String field = (String)context.values().get(UIMeta.KeyField);
+        DetailDataSource dataSource =  new DetailDataSource (null, field);
+
+        _displayGroup.setDataSource(dataSource);
     }
 
-    public String dataSourceType ()
+    public void renderResponse (AWRequestContext requestContext, AWComponent component)
     {
-        AWTDataSource dataSource = _displayGroup.dataSource();
-        return dataSource != null ? dataSource.getClass().getName() : null;
+        DetailDataSource dataSource = (DetailDataSource)_displayGroup.dataSource();
+        dataSource.setParentObject(MetaContext.currentContext(this).values().get(UIMeta.KeyObject));
+
+        super.renderResponse(requestContext, component);
     }
 }

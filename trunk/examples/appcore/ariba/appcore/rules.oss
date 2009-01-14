@@ -1,0 +1,32 @@
+/*
+    appcore rules.oss -- Meta-data rules
+
+    These are auto-loaded (lazily) when any component in this java package is
+    referenced in the rules
+*/
+
+/* Enforce module visibility*/
+module {
+    requiredPermissionIds:$${ariba.appcore.Initialization.moduleClassViewPermissions(this)}
+    visible:${ariba.appcore.User.currentUser().hasPermissions(properties.requiredPermissionIds, false)}
+}
+
+/* Tab ordering: after app tabs */
+module=ariba.appcore.User  { rank:1000 }
+module=ariba.appcore.Group { after:ariba.appcore.User }
+module=ariba.appcore.Permission { after:ariba.appcore.Group }
+
+class=ariba.appcore.User {
+    field=permissions { trait:toManyTable; after:zDetail; }
+}
+
+class operation {
+    action=(Delete, Create) { visible:$${ariba.appcore.Initialization.userClassOperationPermissionCheck(this, "edit")}; }
+}
+
+class operation=edit {
+    layout { editing:$${ariba.appcore.Initialization.userClassOperationPermissionCheck(this, "edit")}; }
+    class { editing:$${ariba.appcore.Initialization.userClassOperationPermissionCheck(this, "edit")}; }
+    action { editing:$${ariba.appcore.Initialization.userClassOperationPermissionCheck(this, "edit")}; }
+    field { editing:$${ariba.appcore.Initialization.userClassOperationPermissionCheck(this, "edit")}; }
+}

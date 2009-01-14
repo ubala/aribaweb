@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#8 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -32,6 +32,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Map;
 import java.util.Set;
 
@@ -173,7 +174,7 @@ public class AnnotationUtil
         TestContext testContext = TestContext.getTestContext(requestContext); 
         // loop through all of the methods with TestParam Annotation and invoke
         // the with method passing the proper needed argument to the method.
-        Map<Class, Object> annotations = TestLinkManager.instance().annotationsForClass(page.getClass().getName());
+        Map<Annotation, AnnotatedElement> annotations = TestLinkManager.instance().annotationsForClass(page.getClass().getName());
         Set keys = annotations.keySet();
         for (Object key : keys) {
             Annotation annotation = (Annotation)key;

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ActionHandler.java#17 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ActionHandler.java#18 $
 */
 
 package ariba.ui.widgets;
@@ -138,6 +138,11 @@ public class ActionHandler extends BaseHandler
     }
 
     public boolean submitFormToUrl ()
+    {
+        return true;
+    }
+
+    public boolean submitFormToComponentAction ()
     {
         return true;
     }

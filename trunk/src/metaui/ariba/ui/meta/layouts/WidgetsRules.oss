@@ -23,12 +23,19 @@ operation=search {
 }
 
 operation=(edit, create, search) {
-    editing:true;
-    field="*" { editable:true; }
+    class { editing:true; }
+    field { editing:true; }
+    action { editing:true; }
 }
 operation=(view, list) {
-    editing:false;
-    field="*" { editable:false; }
+    class { editing:false; }
+    field { editing:false; }
+    action { editing:false; }
+}
+
+field {
+    editing=true  { editable:true; }
+    editing=false { editable:false; }
 }
 
 class {
@@ -39,10 +46,17 @@ class {
     @trait=oneZone {
         zones: [zLeft, zDetail];
     }
+    @trait=tableZones {
+        zones: [zMain, zLeft, zRight, zTop, zBottom, zDetail];
+    }
 
-    traits: fourZones;
+    operation=(create,edit,view,search) {
+        trait: fourZones;
+    }
+    operation=(list) {
+        trait: tableZones;
+    }
 }
-
 @traitGroup=FormZones {
     @trait=fourZones;
     @trait=oneZone;
@@ -52,15 +66,15 @@ class {
 field {
     type                    { component:AWString; bindings:{value:$value} }
     type=boolean { 
-        bindings:{formatter:$component.formatters.boolean};
+        bindings:{formatter:$formatters.boolean};
         editable { component:AWCheckbox }
     }
     type=ariba.util.core.Date   {
-        bindings:{formatter:$component.formatters.shortDate};
+        bindings:{formatter:$formatters.shortDate};
         editable                { component:DateField }
     }
     type=java.math.BigDecimal   {
-        bindings:{formatter:$component.formatters.money};
+        bindings:{formatter:$formatters.money};
         editable                {
             component:AWTextField;
             bindings:{
@@ -77,7 +91,7 @@ field {
                 key:${field};
                 destinationClass:${type};
                 displayKey:"name";
-                formatter:$component.formatters.identifier;
+                formatter:$formatters.identifier;
             };
 
             operation=(search, list) {
@@ -95,7 +109,7 @@ field {
                 multiSelect:true;
                 destinationClass:${properties.enumClass};
                 displayKey:"name";
-                formatter:$component.formatters.identifier;
+                formatter:$formatters.identifier;
             };
         }
 
@@ -107,8 +121,15 @@ field {
         }
     }
 
-    type=(java.math.Integer, int) {
-        bindings:{formatter:$component.formatters.integer};
+    type=(java.lang.Integer, int) {
+        bindings:{formatter:$formatters.integer};
+        operation=search { bindings:{formatter:$formatters.blankNull.integer} }
+        editable                { component:AWTextField; bindings:{style:"text-align:right"; size:13} }
+    }
+
+    type=(java.lang.Long, long) {
+        bindings:{formatter:$formatters.long};
+        operation=search { bindings:{formatter:$formatters.blankNull.long} }
         editable                { component:AWTextField; bindings:{style:"text-align:right"; size:13} }
     }
 
@@ -125,26 +146,66 @@ field {
             bindings:{escapeUnsafeHtml:true}
             editable            { component:RichTextArea;
                                   bindings:{cols:60; rows:10} }
-            operation=(search, list)  { visible:false }
+            operation=(search)  { after:zNone }
+            operation=(list)  { editable:false; after:zDetail; }
         }
         @trait=secret {
-            bindings:{formatter:$component.formatters.hiddenPassword};
+            bindings:{formatter:$formatters.hiddenPassword};
             editable   { component:AWPasswordField; bindings:{formatter:null} }
             operation=(search, list) { visible: false; }
         }
         trait=truncated { component:TruncateString; bindings:{size:10} }
     }
 
+    type="[B" {
+        after:zNone;
+        @trait=imageData {
+            component:AWImageData;
+            after:null;
+            contentType:"image/jpeg";
+            bindings:{
+                bytes:$value;
+                contentType:${ariba.ui.aribaweb.util.AWContentType.contentTypeNamed(properties.contentType)}
+            }
+        }
+    }
+
+    type="java.io.File" {
+        editable {
+            component:FileUploadChooser; bindings:{ file:$value };
+        }
+        editable=false {
+            bindings: {value:${value ? value.name : "(none)"}}
+        }
+    }
+
+    type=javax.mail.internet.MimeMessage {
+        component:MimeMessageView;
+        bindings:{ mimeMessage:$value }
+    }
+
+    type=ariba.ui.aribaweb.util.AWMimeParsedMessage {
+        component:MimeMessageView;
+        bindings:{ parsedMessage:$value }
+    }
+
     @trait=derived {
         editable:false;
-        visible:false;
-        editing { visible:false; }
+        editing { after:zNone; }
+
+        @trait=searchable {
+            operation=search {
+                visible:true; editable:true!; after:null!;
+            }
+        }
     }
 
     @trait=required {
-        required:true;
-        object {
-            valid: ${(value != null && value !="") ? true : "Answer required"}
+        operation=(edit, create) {
+            required:true;
+            object {
+                valid: ${(value != null && value !="") ? true : "Answer required"}
+            }
         }
     }
 
@@ -165,6 +226,29 @@ field {
 
         @trait=PostOnChange { bindings:{action:null} }
     }
+
+    component=(AWString,AWHyperlink,PopupMenuLink) {
+        @trait=bold {
+            wrapperComponent:AWGenericContainer;
+            wrapperBindings: { tagName:b; }
+        }
+        @trait=italic {
+            wrapperComponent:AWGenericContainer;
+            wrapperBindings: { tagName:i; }
+        }
+        @trait=heading1 {
+            wrapperComponent:AWGenericContainer;
+            wrapperBindings: { tagName:h1; }
+        }
+        @trait=heading2 {
+            wrapperComponent:AWGenericContainer;
+            wrapperBindings: { tagName:h2; }
+        }
+        @trait=heading3 {
+            wrapperComponent:AWGenericContainer;
+            wrapperBindings: { tagName:h3; }
+        }
+    }
 }
 
 @traitGroup=FieldType {
@@ -177,6 +261,14 @@ field {
     @trait=Popup;
     @trait=PopupControl;
     @trait=Chooser;
+}
+
+@traitGroup=WrapperStyle {
+    @trait=bold;
+    @trait=italic;
+    @trait=heading1;
+    @trait=heading2;
+    @trait=heading3;
 }
 
 /* Why would *field* have an action?!?
@@ -242,6 +334,7 @@ action {
 layout {
     zones: [zMain];
     @trait=ActionMenu { visible:true; component:MetaActionList bindings:{renderAsMenu:true} elementClass:flR }
+    @trait=ActionButtons { visible:true; component:MetaActionList bindings:{renderAsButtons:true} elementClass:flR }
     @trait=InstanceActionButtons { visible:true; component:MetaActionList
                 bindings:{renderAsButtons:true;filterActions:instance} elementClass:flR }
     @trait=StaticActionButtons { visible:true; component:MetaActionList
@@ -254,6 +347,25 @@ layout {
     @trait=OwnZone {
         zonePath:${layout}
     }
+
+    @trait=OutlineBox {
+        visible:true;
+        wrapperComponent:AWGenericContainer;
+        wrapperBindings: { tagName:div; style:"padding-bottom:10px"; }
+        component:OutlineBox;
+        bindings: {
+            showExpandoCollapso:true;
+            verboseCollapsedContent:false;
+            awcontentLayouts:{body:Content; buttonArea:Actions};
+        };
+    }
+}
+
+@traitGroup=ActionGrouping {
+    @trait=ActionMenu;
+    @trait=ActionButtons;
+    @trait=InstanceActionButtons;
+    @trait=StaticActionButtons;
 }
 
 @traitGroup=LayoutGrouping {
@@ -263,20 +375,47 @@ layout {
     @trait=Stack;
 }
 
-layout=Inspect { traits:Form; label:${ariba.ui.meta.core.UIMeta.beautifyClassName(values.class)}; }
+layout=(Inspect, SearchForm) { trait:Form; label:${ariba.ui.meta.core.UIMeta.beautifyClassName(values.class)}; }
 layout=InspectWithActions {
-    traits:Stack;
-    @layout#ActionMenu;
-    @layout#Form;
+    trait:Stack;
+    @layout=Actions#ActionMenu;
+    @layout=Inspect#Form;
 }
-layout=ButtonArea { traits:StaticActionButtons }
-layout=SelectionButtonArea { traits:InstanceActionButtons }
+layout=InspectStack {
+    trait:Stack;
+    @layout=ISMain {
+        visible:true;
+        component:OutlineBox;
+        bindings: {
+            title:"No item selected";
+            showExpandoCollapso:true;
+            verboseCollapsedContent:false;
+            awcontentLayouts:{body:Inspect; buttonArea:Actions};
+        };
+        object { bindings: { title:$properties.objectTitle; } }
+
+        wrapperComponent:AWGenericContainer;
+        wrapperBindings: { tagName:div; style:"padding-bottom:10px;padding-top:3px"; }
+
+        @layout=Inspect {}
+        @layout=Actions#ActionButtons {}
+    }
+    @layout=ObjectDetail#Form { zonePath:ObjectDetail; }
+    }
+
+layout=ButtonArea { trait:StaticActionButtons }
+layout=SelectionButtonArea { trait:InstanceActionButtons }
 
 /* Support @Trait("labelField") to identity label field */
 layout=LabelField field {
     visible:false;
     @trait=labelField { visible:true! }
 }
+
+object class  { objectTitle:${ariba.util.fieldvalue.FieldValue.getFieldValue(object,
+                    ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(values.class))}; }
+object layout { objectTitle:${ariba.util.fieldvalue.FieldValue.getFieldValue(object,
+                    ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(values.class))}; }
 
 module {
     visible:true;

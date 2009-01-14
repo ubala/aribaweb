@@ -221,7 +221,10 @@ ariba.Event = function() {
                 // Debug.log ("Invoking Handlers: " + eventName);
                 for (var id in map) {
                     var func = map[id];
-                    if (typeof(func) == 'function') func(); else this.evalJSSpan(id);
+                    // Use func.call(this) instead of func(); otherwise a callback registered
+                    // from a plugin in FF2 generates a security exception ("Permission denied
+                    // to get property Function.__parent__").
+                    if (typeof(func) == 'function') func.call(this); else this.evalJSSpan(id);
                 }
             }
         },
@@ -844,6 +847,7 @@ ariba.Event = function() {
         StopPropagation : {
             click: bh,
             keydown: bh,
+            keyup: bh,
             keypress: bh,
             mousedown : bh,
             mouseup : bh,
@@ -893,6 +897,7 @@ ariba.Event = function() {
             d.onmousemove = bHandler;
             d.onclick = bHandler;
             d.onkeydown = bHandler;
+            d.onkeyup = bHandler;
             d.onkeypress = bHandler;
             d.ondeactivate = bHandler;
             window.onfocus = function(e) {
@@ -913,6 +918,7 @@ ariba.Event = function() {
             d.addEventListener("mousemove", bHandler, false);
             d.addEventListener("click", bHandler, false);
             d.addEventListener("keydown", bHandler, false);
+            d.addEventListener("keyup", bHandler, false);
             d.addEventListener("keypress", bHandler, false);
             d.addEventListener("blur", bHandler, false);
             d.addEventListener("focus", bHandler, false);

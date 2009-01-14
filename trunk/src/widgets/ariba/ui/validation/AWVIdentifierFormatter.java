@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVIdentifierFormatter.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVIdentifierFormatter.java#3 $
 */
 package ariba.ui.validation;
 
 import ariba.ui.aribaweb.util.AWFormatter;
+import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.Assert;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.FastStringBuffer;
@@ -54,49 +55,14 @@ public class AWVIdentifierFormatter extends AWFormatter
     }
 
     final static GrowOnlyHashtable _LabelForIdentifier = new GrowOnlyHashtable();
+
     public static String decamelize (String string)
     {
         String result = (String)_LabelForIdentifier.get(string);
         if (result == null) {
-            boolean allCaps = true;
-            FastStringBuffer buf = new FastStringBuffer();
-            int lastUCIndex = -1;
-            for (int i=0, len = string.length(); i < len; i++) {
-                char c = string.charAt(i);
-                if (Character.isUpperCase(c)) {
-                    if (i-1 != lastUCIndex) buf.append(' ');
-                    lastUCIndex = i;
-                }
-                else if (Character.isLowerCase(c)) {
-                    if (i==0) c = Character.toUpperCase(c);
-                    allCaps = false;
-                }
-                else if (c == '_') {
-                    c = ' ';
-                }
-                buf.append(c);
-            }
-
-            // do mixed (initial word) case for all-caps strings
-            if (allCaps) {
-                boolean inWord = false;
-                for (int i=0, c=buf.length(); i < c; i++) {
-                    char ch = buf.charAt(i);
-                    if (Character.isLetter(ch)) {
-                        if (inWord && Character.isUpperCase(ch)) {
-                            buf.setCharAt(i, Character.toLowerCase(ch));
-                        }
-                        inWord = true;
-                    } else {
-                        inWord = false;
-                    }
-                }
-            }
-
-            result = buf.toString();
+            result = AWUtil.decamelize(string, ' ', true);
             _LabelForIdentifier.put(string, result);
         }
         return result;
     }
-
 }

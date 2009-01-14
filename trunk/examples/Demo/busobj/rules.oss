@@ -6,7 +6,7 @@
 */
 
 class=busobj.User {
-    field=(firstName, lastName, email, password) { traits:required }
+    field=(firstName, lastName, email, password) { trait:required }
     field=email { label:"E-mail" }
     field=bio {
         editing {
@@ -28,6 +28,8 @@ class=busobj.User {
             editable:${!object.isSuspended};
         }
     }
+    @field=fileDesc#derived { type:java.lang.String; value:${ object.fullProfile ? object.fullProfile.path : "nope" }
+                              after:fullProfile; visible:true; }
 }
 
 class=busobj.Project {

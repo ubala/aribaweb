@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Rule.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Rule.java#9 $
 */
 package ariba.ui.meta.core;
 
@@ -28,39 +28,46 @@ import java.util.HashMap;
 public class Rule
 {
     int _id;
-    int _keyMatchesMask;
-    int _keyAntiMask;
-    List<Predicate> _predicates;
+    long _keyMatchesMask;
+    long _keyAntiMask;
+    List<Selector> _selectors;
     Map<String, Object> _properties;
     int _rank;
     Meta.RuleSet _ruleSet;
     int _lineNumber;
 
-    public Rule (List<Predicate> predicates, Map<String, Object> properties, int rank, int lineNumber)
+    public Rule (List<Selector> selectors, Map<String, Object> properties, int rank, int lineNumber)
     {
-        _predicates = predicates; // scopeNestedContraints(predicates);
+        _selectors = selectors; // scopeNestedContraints(selectors);
         _properties = properties;
+
+        // Todo: Temporary transition support (some Test Automation stagers are using the old "traits" property).  Will remove...
+        if (_properties != null && _properties.get("traits") != null) {
+            _properties.put("trait", _properties.get("traits"));
+            _properties.remove("traits");
+        }
+
         _rank = rank;
         _lineNumber = lineNumber;
     }
 
-    public Rule (List<Predicate> predicates, Map<String, Object> properties, int rank)
+    public Rule (List<Selector> selectors, Map<String, Object> properties, int rank)
     {
-        this(predicates, properties, rank, -1);
+        this(selectors, properties, rank, -1);
     }
 
-    public Rule (List<Predicate> predicates, Map<String, Object> properties)
+    public Rule (List<Selector> selectors, Map<String, Object> properties)
     {
-        this(predicates, properties, 0, -1);
+        this(selectors, properties, 0, -1);
     }
 
-    public Rule (Map predicateValues, Map properties)
+    public Rule (Map selectorValues, Map properties)
     {
-        this(Predicate.fromMap(predicateValues), properties, 0, -1);
+        this(Selector.fromMap(selectorValues), properties, 0, -1);
     }
 
     // returns context keys modified
-    public int apply (Meta meta, Meta.PropertyMap properties,
+    public long apply (Meta meta, Meta.PropertyMap properties,
                       boolean isDeclare, AWDebugTrace.AssignmentRecorder recorder)
     {
         if (_rank == Integer.MIN_VALUE) return 0;
@@ -69,10 +76,10 @@ public class Rule
         return merge(meta, _properties, properties, isDeclare, recorder);
     }
 
-    public static int merge (Meta meta, Map<String, Object> src, Map<String, Object> dest,
+    public static long  merge (Meta meta, Map<String, Object> src, Map<String, Object> dest,
                       boolean isDeclare, AWDebugTrace.AssignmentRecorder recorder)
     {
-        int updatedMask = 0;
+        long updatedMask = 0;
 
         /* Should use Property Meta to determine merge policy... */
         for (Map.Entry entry : src.entrySet()) {
@@ -88,7 +95,7 @@ public class Rule
                 dest.put(key, newVal);
                 Meta.KeyData keyData = propManager._keyDataToSet;
                 if (keyData != null) {
-                    int keymask = (1 << keyData._id);
+                    long keymask = (1L << keyData._id);
                     if ((keymask & updatedMask) == 0 && (dest instanceof Meta.PropertyMap)) {
                         updatedMask |= keymask;
                         ((Meta.PropertyMap)dest).addContextKey(propManager);
@@ -126,14 +133,14 @@ public class Rule
         return (_lineNumber >= 0) ? Fmt.S("%s:%s", path, _lineNumber) : path;
     }
 
-    public List<Predicate> getPredicates ()
+    public List<Selector> getSelectors ()
     {
-        return _predicates;
+        return _selectors;
     }
 
-    public void setPredicates (List<Predicate> preds)
+    public void setSelectors (List<Selector> preds)
     {
-        _predicates = preds;
+        _selectors = preds;
     }
 
     public Map<String, Object> getProperties ()
@@ -165,52 +172,52 @@ public class Rule
             field=dyno { field:dyno; value:${ some expr} }
         */
         // add rule for declaration
-        List <Predicate> predicates =  _predicates;
-        Predicate declPred = predicates.get(predicates.size()-1);
+        List <Selector> selectors = _selectors;
+        Selector declPred = selectors.get(selectors.size()-1);
 
         // see if we have a colliding preceding contraint assignment
-        Predicate matchPred = null;
-        for (int i=predicates.size()-2; i >=0; i--) {
-            Predicate p = predicates.get(i);
+        Selector matchPred = null;
+        for (int i= selectors.size()-2; i >=0; i--) {
+            Selector p = selectors.get(i);
             if (p._key.equals(declPred._key)) {
                 matchPred = p;
                 break;
             }
         }
-        if (matchPred == null) matchPred = new Predicate(declPred._key, Meta.KeyAny);
+        if (matchPred == null) matchPred = new Selector(declPred._key, Meta.KeyAny);
 
-        // Mutate the predicates list to scope overrides
-        predicates = collapseKeyOverrides(predicates);
-        List <Predicate> prePreds = new ArrayList(predicates.subList(0, predicates.size()-1));
-        declPred = predicates.get(predicates.size()-1);
+        // Mutate the selectors list to scope overrides
+        selectors = collapseKeyOverrides(selectors);
+        List <Selector> prePreds = new ArrayList(selectors.subList(0, selectors.size()-1));
+        declPred = selectors.get(selectors.size()-1);
 
         // Add property decl to main rule
         if (_properties == null) _properties = new HashMap();
-        for (Predicate p : predicates) {
-            _properties.put(p._key, p._value);
+        for (Selector p : selectors) {
+            if (!(p._value instanceof  List)) _properties.put(p._key, p._value);
         }
 
         // The decl rule...
         prePreds.add(matchPred);
-        prePreds.add(new Predicate(Meta.KeyDeclare, declPred._key));
+        prePreds.add(new Selector(Meta.KeyDeclare, declPred._key));
         Map m = new HashMap();
         m.put(declPred._key, declPred._value);
         return new Rule(prePreds, m);
     }
     
-    // rewrite any predicate of the form "layout=l1, class=c, layout=l2" to
+    // rewrite any selector of the form "layout=l1, class=c, layout=l2" to
     // "class=c, layout=l1_l2"
-    List <Predicate> collapseKeyOverrides (List<Predicate> orig)
+    List <Selector> collapseKeyOverrides (List<Selector> orig)
     {
         List result = orig;
         int count = orig.size();
         int collapsed = 0;
         for (int i=0; i < count; i++) {
-            Predicate p = orig.get(i);
+            Selector p = orig.get(i);
             boolean hide = false;
-            // See if overridded by same key later in predicate
+            // See if overridded by same key later in selector
             for (int j = i + 1; j < count; j++) {
-                Predicate pNext = orig.get(j);
+                Selector pNext = orig.get(j);
                 if (pNext._key.equals(p._key)) {
                     // if we're overridden, we drop ours, and replace the next collision
                     // with one with our prefix
@@ -230,17 +237,17 @@ public class Rule
     // Alias values scoped by a parent assignment on the same key
     //  E.g. "layout=l1, class=c, layout=l2" to
     // "layout=l1, class=c, layout=l1_l2"
-    List <Predicate> scopeNestedContraints (List<Predicate> orig)
+    List <Selector> scopeNestedContraints (List<Selector> orig)
     {
         List result = orig;
         int count = orig.size();
         for (int i=count-1; i > 0; i--) {
-            Predicate p = orig.get(i);
+            Selector p = orig.get(i);
             if (p._value instanceof String) {
                 String newVal = (String)p._value;
-                // See if overridded by same key later in predicate
+                // See if overridded by same key later in selector
                 for (int j = i - 1; j >= 0; j--) {
-                    Predicate pPrev = orig.get(j);
+                    Selector pPrev = orig.get(j);
                     if (pPrev._key.equals(p._key) && pPrev._value instanceof String) {
                         newVal = newVal.equals(Meta.KeyAny)
                             ? (String)pPrev._value
@@ -250,7 +257,7 @@ public class Rule
                 if (newVal != p._value) {
                     // make a copy if we haven't already
                     if (result == orig) result = new ArrayList(orig);
-                    Predicate pReplacement = new Predicate(p._key, newVal, p._isDecl);
+                    Selector pReplacement = new Selector(p._key, newVal, p._isDecl);
                     result.set(i, pReplacement);
                 }
             }
@@ -261,12 +268,12 @@ public class Rule
 
     public String toString ()
     {
-        return Fmt.S("<Rule %s -> %s>", _predicates.toString(), _properties.toString());
+        return Fmt.S("<Rule [%s] %s -> %s>", _rank, _selectors.toString(), _properties.toString());
     }
 
     void _checkRule (Map values, Meta meta)
     {
-        for (Predicate p : _predicates) {
+        for (Selector p : _selectors) {
             Object contextValue = values.get(p._key);
             Meta.KeyData keyData = meta.keyData(p._key);
 
@@ -280,25 +287,25 @@ public class Rule
             {
                 // okay
             } else {
-                Log.meta_detail.debug("Possible bad rule match!  Rule: %s; predicate: %s, context val: %s",
+                Log.meta_detail.debug("Possible bad rule match!  Rule: %s; selector: %s, context val: %s",
                         this, p, contextValue);
             }
         }
     }
 
-    public static class Predicate
+    public static class Selector
     {
         String _key;
         Object _value;
         boolean _isDecl;
 
-        public Predicate (String key, Object value)
+        public Selector (String key, Object value)
         {
             _key = key;
             _value = value;
         }
 
-        public Predicate (String key, Object value, boolean isDecl)
+        public Selector (String key, Object value, boolean isDecl)
         {
             this(key, value);
             _isDecl = isDecl;
@@ -308,7 +315,7 @@ public class Rule
         {
             List result = new ArrayList();
             for (Map.Entry <String, Object> entry : values.entrySet()) {
-                result.add(new Predicate(entry.getKey(), entry.getValue()));
+                result.add(new Selector(entry.getKey(), entry.getValue()));
             }
             return result;
         }
@@ -338,10 +345,10 @@ public class Rule
         {
             _rule = r;
 
-            // for description, use predicate list, minus any propertyScope (_p) key
-            _description = (Meta.isPropertyScopeKey(ListUtil.lastElement(r._predicates)._key))
-                    ? r._predicates.subList(0, r._predicates.size()-1).toString()
-                    : r._predicates.toString();
+            // for description, use selector list, minus any propertyScope (_p) key
+            _description = (Meta.isPropertyScopeKey(ListUtil.lastElement(r._selectors)._key))
+                    ? r._selectors.subList(0, r._selectors.size()-1).toString()
+                    : r._selectors.toString();
 
         }
 
@@ -363,6 +370,11 @@ public class Rule
         public String getLocation ()
         {
             return _rule.location();  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public String toString ()
+        {
+            return Fmt.S("Rule[%s: %s]", _rule._rank, _rule.getSelectors());
         }
     }
 }

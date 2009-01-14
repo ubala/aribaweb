@@ -32,6 +32,10 @@ import java.util.Map;
 import java.util.List;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.File;
@@ -221,34 +225,34 @@ public class OSSWriter
 
     static class RuleNode
     {
-        Rule.Predicate _predicate;
+        Rule.Selector _selector;
         Map<String, Object> _properties;
         List<RuleNode> _children;
 
-        RuleNode nodeForPredicate (Rule.Predicate pred)
+        RuleNode nodeForSelector (Rule.Selector pred)
         {
             if (Meta.isPropertyScopeKey(pred.getKey())) return this;
 
             if (_children == null) _children = ListUtil.list();
             for (RuleNode node : _children) {
-                Rule.Predicate nodeP = node._predicate;
+                Rule.Selector nodeP = node._selector;
                 if (nodeP.getKey().equals(pred.getKey()) && nodeP.getValue().equals(pred.getValue())) return node;
             }
             RuleNode node = new RuleNode();
-            node._predicate = pred;
+            node._selector = pred;
             _children.add(node);
             return node;
         }
 
         void addRule (Rule rule)
         {
-            addRule(rule.getPredicates().listIterator(), rule);
+            addRule(rule.getSelectors().listIterator(), rule);
         }
 
-        void addRule (Iterator<Rule.Predicate> preds, Rule rule)
+        void addRule (Iterator<Rule.Selector> preds, Rule rule)
         {
             if (preds.hasNext()) {
-                nodeForPredicate(preds.next()).addRule(preds, rule);
+                nodeForSelector(preds.next()).addRule(preds, rule);
             } else {
                 if (_properties == null) _properties = new HashMap();
                 Rule.merge(UIMeta.getInstance(), rule.getProperties(), _properties, false, null);
@@ -257,27 +261,51 @@ public class OSSWriter
 
         void write (PrintWriter writer, int level, boolean isRoot)
         {
-            if (_predicate != null) {
-                if (_predicate.getValue().equals(Meta.KeyAny) || _predicate.getValue().equals(true)) {
-                    writer.printf("%s ", _predicate.getKey());
+            int childCount = (_children == null) ? 0 : _children.size();
+            boolean hasBlock = !isRoot && ((childCount > 1)
+                    || (_properties != null && (!shouldInlineProperties(_properties) || childCount > 0)));
+
+            if (_selector != null) {
+                if (_selector.getValue().equals(Meta.KeyAny) || _selector.getValue().equals(true)) {
+                    writer.printf("%s ", _selector.getKey());
                 } else {
-                    writer.printf("%s=%s ", _predicate.getKey(), _predicate.getValue());
+                    writer.printf("%s=%s ", _selector.getKey(), _selector.getValue());
                 }
             }
 
-            boolean hasBlock = !isRoot && (((_children != null && _children.size() > 1) || _properties != null));
             if (hasBlock) {
                 writer.println("{");
                 level++;
             }
             if (_children != null) {
-                for (RuleNode child : _children) {
-                    if (hasBlock) indent(writer, level);
-                    child.write(writer, level, false);
+                List <RuleNode> children = _children;
+                boolean shouldWriteSeparatorNewLine = false;
+                if (children.size() > 1) {
+                    List<RuleNode>predNodes = ListUtil.list();
+                    List<RuleNode>strippedChildren = ListUtil.list();
+                    factorPredecessorRules(_children, predNodes, strippedChildren);
+                    if (predNodes.size() > 1) {
+                        writePredecessorChain(writer, predNodes, level);
+                        // write the stripped children
+                        children = strippedChildren;
+                        shouldWriteSeparatorNewLine = true;
+                    }
+                }
+                for (RuleNode child : children) {
+                    if (child._properties != null || child._children != null) {
+                        if (shouldWriteSeparatorNewLine) {
+                            writer.println();
+                            shouldWriteSeparatorNewLine = false;                            
+                        }
+                        if (hasBlock) indent(writer, level);
+                        child.write(writer, level, false);                        
+                    }
                 }
             }
             if (_properties != null) {
-                writeProperties (writer, _properties, level);
+                if (!hasBlock) writer.print(" { ");
+                writeProperties (writer, _properties, level, !hasBlock);
+                if (!hasBlock) writer.println(" }");
             }
             if (hasBlock) {
                 level--;
@@ -286,19 +314,137 @@ public class OSSWriter
             }
         }
 
-        void indent (PrintWriter writer, int level) {
+        void indent (PrintWriter writer, int level)
+        {
             while (level-- > 0) {
                 writer.print("    ");
             }
         }
 
-        void writeProperties (PrintWriter writer, Map<String, Object> properties, int level) {
+        boolean shouldInlineProperties (Map<String, Object> properties) {
+            int count = properties.size();
+            if (count <= 1) return true;
+            if (count == 2) {
+                for (Object v : properties.values()) {
+                    if (v instanceof Collection) return false;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        void writeProperties (PrintWriter writer, Map<String, Object> properties, int level, boolean singleLine)
+        {
             for (Map.Entry<String,Object> e : properties.entrySet()) {
-                indent(writer, level);
+                if (!singleLine) indent(writer, level);
                 writer.printf("%s:", e.getKey());
                 OSSWriter.write(e.getValue(), writer);
-                writer.print(";\n");
+                writer.print( singleLine ? "; " : ";\n");
             }
+        }
+
+        void writePredecessorChain (PrintWriter writer, List<RuleNode>predNodes, int level)
+        {
+            Map<String, List<RuleNode>> predecessors = AWUtil.groupBy(predNodes,
+                    new AWUtil.ValueMapper() {
+                        public Object valueForObject(Object o) {
+                            return ((RuleNode)o)._properties.get(UIMeta.KeyAfter);
+                        }
+                    });
+            Map<String, List<RuleNode>> nodesByKey = AWUtil.groupBy(predNodes,
+                    new AWUtil.ValueMapper() {
+                        public Object valueForObject(Object o) {
+                            return ((RuleNode)o)._selector.getValue();
+                        }
+                    });
+
+            for (String key : ListUtil.collectionToList(predecessors.keySet())) {
+                if (predecessors.containsKey(key)) {
+                    List<RuleNode>newList = ListUtil.list();
+                    collapseInto(predecessors, key, newList);
+                    if (!newList.isEmpty()) predecessors.put(key, newList);
+                }
+            }
+
+            List<String>predKeys = new ArrayList(predecessors.keySet());
+            Collections.sort(predKeys, new Comparator() {
+                public int compare (Object o1, Object o2)
+                {
+                    int o1Rank = rankForKey(o1);
+                    int o2Rank = rankForKey(o2);
+                    return (o1Rank < 99 || o2Rank < 99) ? (o1Rank - o2Rank) : ((Comparable)o1).compareTo(o2);
+                }
+            });
+
+            for (String predKey : predKeys) {
+                indent(writer, level);
+                RuleNode pred = (RuleNode)nodesByKey.get(predKey);
+                String predTrait = (pred != null) ? (String)pred._properties.get(Meta.KeyTrait) : null;
+                writer.print(formatKeyAndTrait(predKey, predTrait));
+                for (RuleNode node : predecessors.get(predKey)) {
+                    writer.printf(" => %s", formatKeyAndTrait((String)node._selector.getValue(),
+                            node._properties.get(Meta.KeyTrait)));
+                }
+                writer.println(";");
+            }
+        }
+
+        static void factorPredecessorRules (List<RuleNode> children, List<RuleNode>predNodes,
+                                            List<RuleNode>otherNodes)
+        {
+            for (RuleNode node : children) {
+                if (node._properties != null && node._properties.containsKey(UIMeta.KeyAfter)) {
+                    Map predProps = AWUtil.map(UIMeta.KeyAfter, node._properties.get(UIMeta.KeyAfter));
+                    Map otherProps = MapUtil.cloneMap(node._properties);
+                    otherProps.remove(UIMeta.KeyAfter);
+                    Object trait = node._properties.get(Meta.KeyTrait);
+                    if (trait != null) {
+                        predProps.put(Meta.KeyTrait, trait);
+                        otherProps.remove(Meta.KeyTrait);
+                    }
+
+                    RuleNode predNode = new RuleNode();
+                    predNode._selector = node._selector;
+                    predNode._properties = predProps;
+                    predNodes.add(predNode);
+
+                    RuleNode otherNode = new RuleNode();
+                    otherNode._selector = node._selector;
+                    otherNode._properties = (otherProps.size() > 0) ? otherProps : null;
+                    otherNode._children = node._children;
+                    otherNodes.add(otherNode);
+                } else {
+                    otherNodes.add(node);
+                }
+            }
+        }
+
+        static Map _PredKeyRank = AWUtil.map("zNone", 0, "zMain", 1, "zTop", 2,
+                              "zLeft", 3, "zRight", 4, "zBottom", 5, "zDetail", 6);
+        static int rankForKey (Object k)
+        {
+            Object r = _PredKeyRank.get(k);
+            return (r == null) ? 1000 : ((Number)r).intValue();
+        }
+
+        void collapseInto (Map<String, List<RuleNode>> predecessors,  String key, List<RuleNode> result)
+        {
+            List<RuleNode> followers = predecessors.get(key);
+            if (followers != null) {
+                predecessors.remove(key);
+                for (RuleNode node : followers) {
+                    result.add(node);
+                    String followerKey = (String)node._selector.getValue();
+                    collapseInto(predecessors, followerKey, result);
+                }
+            }
+        }
+        static String formatKeyAndTrait (String key, Object traits)
+        {
+            if (traits == null) return key;
+            String traitString = (traits instanceof String) ? (String)traits
+                    : StringUtil.join((List)traits,",");
+            return Fmt.S("%s#%s", key, traitString);
         }
     }
 }

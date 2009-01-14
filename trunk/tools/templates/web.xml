@@ -7,6 +7,7 @@
   <servlet>
     <servlet-name>$servlet.name</servlet-name>
     <servlet-class>$servlet.class</servlet-class>
+    <load-on-startup _ifTrue="$servlet.init.onstartup">100</load-on-startup>
   </servlet>
   <servlet-mapping>
     <servlet-name>$servlet.name</servlet-name>

@@ -26,11 +26,12 @@
                             </w:PopupMenu>
                         </a:If> </td></tr>
                         <tr>
-                            <td><a:TextField value="$queryString" action="$searchAction" size="28"/>\
-                            <w:ErrorIndicator errorKey="query"/></td>
-                            <td><w:TextButton action="$searchAction">Search</w:TextButton></td>
+                            <td width="1px"><a:TextField value="$queryString" size="28"/></td>\
+                            <td width="1px"><w:ErrorIndicator errorKey="query"/></td>
+                            <td width="1px"><w:TextButton action="$searchAction" isDefault="$true">Search</w:TextButton></td>
+                            <td width="100%"></td>
                         </tr>
-                        <tr><td colspan="2">\
+                        <tr><td colspan="4">\
                             <a:For list="$fileTypeList" item="$fileType">
                                 <nobr><a:Label>\
                                     <a:Checkbox action="$fileTypesChanged" value="$fileTypeEnabled"/>
@@ -58,12 +59,14 @@
                             singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
                             enableScrolling="$true" showOptionsMenu="$true" title="$message" showColumnHeader="$false">
                         <a:Content name="optionsMenu">
+                            <nobr>
                             <a:If ifTrue="$showingDetails">
                                 <a:Hyperlink action="${showingDetails=false;null}">&lt; Hide Details</a:Hyperlink>
                             <a:Else/>
                                 <a:Hyperlink action="${showingDetails=true;null}">Show Details &gt;</a:Hyperlink>
                             </a:If>
                             &nbsp;
+                            </nobr>
                         </a:Content>
                         <t:Column label="Class" isValueColumn="$true">
                             <b><a:String value='$doc.fileName'/></b> <a:String value='$doc.directory'/>

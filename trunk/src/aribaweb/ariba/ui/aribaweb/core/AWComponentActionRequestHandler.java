@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#76 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#77 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -538,11 +538,23 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                     if (actionResults instanceof AWComponent) {
                         AWComponent actionResultsComponent = (AWComponent)actionResults;
                         AWPage actionResultsPage = actionResultsComponent.page();
-                        actionResultsPage.ensureAwake(requestContext);
                         if (actionResultsPage != currentPage) {
+                            // check if user is allowed to see this page
+                            // If not, record it before propagating exception so that post
+                            // auth they proceed to new page
+                            if (actionResultsComponent.shouldValidateSession()) {
+                                try {
+                                    actionResultsComponent.validateSession(requestContext);
+                                } catch (AWSessionValidationException e) {
+                                    session.savePage(actionResultsPage, true);
+                                    throw e;
+                                }
+                            }
+
                             currentPage.truncateBacktrackState();
                         }
 
+                        actionResultsPage.ensureAwake(requestContext);
                         formPostFilter(request,  requestContext, actionResultsComponent);
                         session.savePage(actionResultsPage);
 
@@ -583,17 +595,11 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         AWApplication application = requestContext.application();
         AWSession session = requestContext.session();
 
-        // ### possible location to determine session restoration exception?
         AWResponseGenerating mainPage = application.mainPage(requestContext);
         if (mainPage instanceof AWComponent) {
             AWComponent mainPageComponent = (AWComponent)mainPage;
-            AWPage newPage = mainPageComponent.page();
-            if (mainPageComponent.shouldValidateSession()) {
-                mainPageComponent.validateSession(requestContext);
-            }
-            if (mainPageComponent.shouldValidateRequest()) {
-                mainPageComponent.validateRequest(requestContext);
-            }
+            // We don't check for a session restoration exception here -- it will be checked
+            // when the redirect causing a new incoming request
             return AWDirectActionRequestHandler.SharedInstance.clearBrowserHistory(requestContext, mainPageComponent);
         }
         else {

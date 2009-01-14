@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBindingNames.java#28 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBindingNames.java#29 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -88,6 +88,7 @@ abstract public class AWBindingNames extends AWBaseObject
     public static final String awcomponentName        = "awcomponentName";
     public static final String awcomponentReference   = "awcomponentReference";
     public static final String awcontent              = "awcontent";
+    public static final String awcontentElement       = "awcontentElement";
     public static final String awbindingsDictionary   = "awbindingsDictionary";
     public static final String disabled               = "disabled";
     public static final String type                   = "type";

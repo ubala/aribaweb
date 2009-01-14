@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDynamicColumns.java#21 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDynamicColumns.java#22 $
 */
 
 package ariba.ui.table;
@@ -66,6 +66,9 @@ public final class AWTDynamicColumns extends AWTDataTable.Column
     public AWBinding      _isValueColumnBinding;
     public AWBinding      _nowrapBinding;
     public AWBinding      _wantsSpanBinding;
+    public AWBinding      _actionBinding;
+    public AWBinding      _isVisibleBinding;
+    public AWBinding      _formatterBinding;
     public AWBinding      _uniquingKeyPathBinding;
 
     public void init (String tagName, Map bindingsHashtable)
@@ -88,6 +91,9 @@ public final class AWTDynamicColumns extends AWTDataTable.Column
             BindingNames.isValueColumn);
         _nowrapBinding = (AWBinding)bindingsHashtable.remove(BindingNames.nowrap);
         _wantsSpanBinding = (AWBinding)bindingsHashtable.remove(BindingNames.wantsSpan);
+        _actionBinding = (AWBinding)bindingsHashtable.remove(BindingNames.action);
+        _isVisibleBinding = (AWBinding)bindingsHashtable.remove(BindingNames.isVisible);
+        _formatterBinding = (AWBinding)bindingsHashtable.remove(BindingNames.formatter);
         _uniquingKeyPathBinding = (AWBinding)bindingsHashtable.remove("uniquingKeyPath");
 
         super.init(tagName, bindingsHashtable);
@@ -134,6 +140,9 @@ public final class AWTDynamicColumns extends AWTDataTable.Column
                 col._isValueColumnBinding = _isValueColumnBinding;
                 col._nowrapBinding = _nowrapBinding;
                 col._wantSpanBinding = _wantsSpanBinding;
+                col._actionBinding = _actionBinding;
+                col._isVisibleBinding = _isVisibleBinding;
+                col._formatterBinding = _formatterBinding;
                 col.setUniquingKeyPath(table.stringValueForBinding(_uniquingKeyPathBinding));
             }
             table.registerColumn(col);                

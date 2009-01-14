@@ -12,17 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#3 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#10 $
 */
 package ariba.ui.meta.persistence;
 
-import ariba.ui.meta.core.UIMeta;
-import ariba.ui.meta.core.Meta;
-import ariba.ui.meta.core.Log;
-import ariba.ui.meta.core.ObjectMeta;
+import ariba.ui.meta.core.*;
 import ariba.ui.validation.ChoiceSourceRegistry;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWConcreteServerApplication;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -37,6 +35,9 @@ public class PersistenceMeta
     static Set<String> _EmbeddableClasses = new HashSet();
     public static final String KeyToOneRelationship = "toOneRelationship";
     public static final String KeyToManyRelationship = "toManyRelationship";
+    public static final String PropUseTextSearch = "useTextIndex";
+    public static final String PropTextSearchSupported = "textSearchSupported";
+    public static final String KeywordsField = "keywords";
 
     public static void initialize ()
     {
@@ -68,6 +69,11 @@ public class PersistenceMeta
                 });
     }
 
+    public static Set<String> getEntityClasses ()
+    {
+        return _EntityClasses;
+    }
+
     public static void registerEmbeddableClass (String className)
     {
         _EmbeddableClasses.add(className);
@@ -84,11 +90,11 @@ public class PersistenceMeta
             boolean isEntity = _EntityClasses.contains(value);
             Log.meta.debug("PersistenceMeta field Type listener notified of first use of field type: %s - isEntity: %s", value, isEntity);
             if (isEntity) {
-                Map predicate = new HashMap();
-                predicate.put(ObjectMeta.KeyType, value);
+                Map selector = new HashMap();
+                selector.put(ObjectMeta.KeyType, value);
                 Map properties = new HashMap();
-                properties.put(ObjectMeta.KeyTraits, Arrays.asList(KeyToOneRelationship));
-                meta.addRule(predicate, properties, Meta.ClassRulePriority);
+                properties.put(Meta.KeyTrait, Arrays.asList(KeyToOneRelationship));
+                meta.addRule(selector, properties, Meta.ClassRulePriority);
             }
         }
     }
@@ -104,12 +110,35 @@ public class PersistenceMeta
             boolean isEntity = _EntityClasses.contains(value);
             Log.meta.debug("PersistenceMeta field Type listener notified of first use of field type: %s - isEntity: %s", value, isEntity);
             if (isEntity) {
-                Map predicate = new HashMap();
-                predicate.put(ObjectMeta.KeyElementType, value);
+                Map selector = new HashMap();
+                selector.put(ObjectMeta.KeyElementType, value);
                 Map properties = new HashMap();
-                properties.put(ObjectMeta.KeyTraits, Arrays.asList(KeyToManyRelationship));
-                meta.addRule(predicate, properties, Meta.ClassRulePriority);
+                properties.put(Meta.KeyTrait, Arrays.asList(KeyToManyRelationship));
+                meta.addRule(selector, properties, Meta.ClassRulePriority);
             }
+        }
+    }
+
+    public static AWResponseGenerating validateAndSave (UIMeta.UIContext ctx)
+    {
+        if (!ctx.requestContext().getCurrentComponent().errorManager().checkErrorsAndEnableDisplay()) {
+            ariba.ui.meta.persistence.ObjectContext.get().save();
+        }
+        return null;
+    }
+
+    // Simple Map wrapper that implements identity equals / hashCode for stability when used
+    // as key (e.g. as valueSource in AWErrorManager)
+    public static class SearchMap extends HashMap
+    {
+        public int hashCode ()
+        {
+            return System.identityHashCode(this);
+        }
+
+        public boolean equals (Object o)
+        {
+            return (o instanceof SearchMap) && (o == this);
         }
     }
 }

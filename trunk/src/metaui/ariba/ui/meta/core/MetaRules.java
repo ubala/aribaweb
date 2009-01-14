@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaRules.java#7 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaRules.java#8 $
 */
 package ariba.ui.meta.core;
 
@@ -81,8 +81,8 @@ public class MetaRules extends AWContainerElement implements AWHtmlTemplateParse
         if (ruleSet == null) {
             meta.beginRuleSet(Meta.TemplateRulePriority, template.templateName());
             try {
-                new Parser(meta, contentString()).addRulesWithPredicate(
-                        Arrays.asList(new Rule.Predicate(TemplateId, templateId)));
+                new Parser(meta, contentString()).addRulesWithSelector(
+                        Arrays.asList(new Rule.Selector(TemplateId, templateId)));
             } catch (Error e) {
                 meta.endRuleSet().disableRules();
                 throw new AWGenericException(Fmt.S("Error reading rules in <m:Rules> tag in %s -- %s", template.templateName(), e));

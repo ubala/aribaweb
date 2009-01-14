@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/InternCharToString.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/core/InternCharToString.java#5 $
 */
 
 package ariba.util.core;
@@ -62,23 +62,7 @@ public class InternCharToString extends GrowOnlyHashtable
     */
     private static final int normalHashCode (char[] val)
     {
-        int h = 0;
-        int off = 0;
-        int len = val.length;
-
-        if (len < 16) {
-            for (int i = len ; i > 0; i--) {
-                h = (h * 37) + val[off++];
-            }
-        }
-        else {
-                // only sample some characters
-            int skip = len / 8;
-            for (int i = len ; i > 0; i -= skip, off += skip) {
-                h = (h * 39) + val[off];
-            }
-        }
-        return h;
+        return MathUtil.normalHashCode(val);
     }
 
     /**
@@ -88,14 +72,7 @@ public class InternCharToString extends GrowOnlyHashtable
     */
     private static final int sunHashCode (char[] val)
     {
-        int i1 = 0;
-        int j = 0;
-        char ach[] = val;
-        int k = val.length;
-        for (int i2 = 0; i2 < k; i2++)
-            i1 = 31 * i1 + ach[j++];
-        return i1;
-
+        return MathUtil.sunHashCode(val);
     }
 
     /*
@@ -108,7 +85,6 @@ public class InternCharToString extends GrowOnlyHashtable
         return sunHashCode(s.toCharArray());
     }
     
-
     /**
         Private method that calculates the hash code for the char[]
         <b>val</b> using the appropriate hash function. Love those

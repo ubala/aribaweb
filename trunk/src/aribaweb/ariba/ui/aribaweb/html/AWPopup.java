@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#51 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#52 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -236,7 +236,8 @@ public class AWPopup extends AWComponent
                 setSelection(selection);                }
             catch (NumberFormatException numberFormatException) {
                 if ("".equals(formValue)) {
-                    Assert.that(false, "AWPopup: Bad form value received (\"\").  " +
+                    Assert.that(requestContext().allowFailedComponentRendezvous(), 
+                            "AWPopup: Bad form value received (\"\").  " +
                             "This usually occurs when an AWIf or AWFor was altered" +
                             " during applyValues or invokeAction.");
                 }

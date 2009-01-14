@@ -17,6 +17,7 @@
 
 package ariba.ui.aribaweb.core;
 
+import ariba.ui.aribaweb.util.AWBookmarker;
 import ariba.ui.aribaweb.util.AWBaseObject;
 import ariba.ui.aribaweb.util.AWBrand;
 import ariba.ui.aribaweb.util.AWContentType;
@@ -40,8 +41,6 @@ import ariba.util.fieldvalue.FieldValueException;
 import ariba.util.shutdown.ShutdownManager;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpSession;
@@ -552,16 +551,15 @@ abstract public class AWDirectAction extends AWBaseObject
     }
 
     public AWResponseGenerating restoreAction () {
-        String enc = request().formValueForKey("enc");
-        if (!StringUtil.nullOrEmptyOrBlankString(enc) && enc.equals("true")) {
-            String pl = request().formValueForKey("pl");
-            pl = requestContext().application().decryptString(pl);
-
-            String redirectUrl = Fmt.S("%s&%s",
-               AWDirectActionUrl.fullUrlForDirectAction("restore", requestContext()), pl);
-            return AWRedirect.getRedirect(requestContext(), redirectUrl);
+        AWBookmarker bm = ((AWConcreteApplication)application()).getBookmarker();
+        AWBookmarker.BookmarkEncrypter benc = bm.getEncrypter();
+        AWRequestContext requestContext = requestContext();
+        if (benc.isEncrypted(requestContext)) {
+                // this will be an internal redirect
+            return AWRedirect.getRedirect(requestContext, 
+                benc.getDecryptedUrl(requestContext));
         }
-        return application().getBookmarker().getComponent(requestContext());
+        return bm.getComponent(requestContext);
     }
 
     protected AWResponseGenerating handleSessionRestorationException (

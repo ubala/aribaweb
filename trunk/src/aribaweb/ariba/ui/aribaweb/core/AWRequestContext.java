@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#127 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#129 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -63,13 +63,15 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         new ThreadDebugKey("RequestContext");
     public static final String RefreshRequestKey = "awrr";
     public static boolean UseXmlHttpRequests = false;
-    
+
     private AWApplication _application;
     private AWRequest _request;
     private List _requestSenderIds;
     private String _currentRequestSenderId;
     private AWElementIdPath _currentRequestSenderIdPath;
+    private boolean _isBrowserFirefox;
     private boolean _isBrowserMicrosoft;
+    private boolean _isBrowserSafari;
     private boolean _isMetaTemplateMode;
     private String _browserMinWidth;
     private String _browserMaxWidth;
@@ -141,7 +143,9 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         _application = application;
         _request = request;
         if (_request != null) {
+            _isBrowserFirefox = _request.isBrowserFirefox();
             _isBrowserMicrosoft = _request.isBrowserMicrosoft();
+            _isBrowserSafari = _request.isBrowserSafari();
             _frameName = request.frameName();
             _debugIsInPlaybackMode = AWRecordingManager.isInPlaybackMode(_request);
             _debugIsInRecordingMode = AWRecordingManager.isInRecordingMode(_request);
@@ -576,7 +580,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     {
         _response = response;
     }
-    
+
     public void setXHRRCompatibleResponse (AWResponse response)
     {
         _response = response;
@@ -592,9 +596,19 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         return _response;
     }
 
+    public boolean isBrowserFirefox ()
+    {
+        return _isBrowserFirefox;
+    }
+
     public boolean isBrowserMicrosoft ()
     {
         return _isBrowserMicrosoft;
+    }
+
+    public boolean isBrowserSafari ()
+    {
+        return _isBrowserSafari;
     }
 
     public String browserMinWidth ()
@@ -1397,7 +1411,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     {
         return _currentPhase;
     }
-    
+
     public AWDebugTrace lastDebugTrace ()
     {
         return (AWDebugTrace)session().dict().get("_AWLastDebugTrace");
@@ -1426,7 +1440,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     {
         if (_componentPathDebuggingEnabled) debugTrace().suppressTraceForCurrentScopingElement();
     }
-    
+
     public void markNextComponentAsMainInTrace ()
     {
         if (_componentPathDebuggingEnabled) debugTrace().markNextComponentAsMainInTrace();
@@ -1453,7 +1467,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     {
         _isPathDebugRequest = -2;
     }
-    
+
         //////////////////////
         // Record and Playback
         ///////////////////////
@@ -1658,6 +1672,13 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     + "</script>\n");
             throw new RetryRequestException();
         }
+    }
+
+    // Whether this request has been flagged as allowing non-strict component rendezvous
+    // e.g. on reply of an action request that resulted in login (and thus expected change in page structure)
+    public boolean allowFailedComponentRendezvous ()
+    {
+        return request().formValueForKey(AWBaseRequest.AllowFailedComponentRendezvousFormKey) != null;
     }
 
     public boolean isContentGeneration ()

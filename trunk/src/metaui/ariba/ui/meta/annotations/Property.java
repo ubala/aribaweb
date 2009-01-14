@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Property.java#3 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Property.java#4 $
 */
 package ariba.ui.meta.annotations;
 
@@ -58,11 +58,11 @@ public class Property
     static public void registerProperty (final Class annotationClass, final ObjectMeta meta)
     {
         meta.registerAnnotationListener(annotationClass, new ObjectMeta.AnnotationProcessor(){
-            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List predicateList, Map propertyMap, boolean isAction)
+            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List selectorList, Map propertyMap, boolean isAction)
             {
                 String propertyDecl = Fmt.S("%s:%s", annotationClass.getSimpleName().toLowerCase(),
                         FieldValue.getFieldValue(annotation,  "value"));
-                meta.processPropertiesAnnotation(propertyDecl, prop, predicateList);
+                meta.processPropertiesAnnotation(propertyDecl, prop, selectorList);
             }
         });
     }

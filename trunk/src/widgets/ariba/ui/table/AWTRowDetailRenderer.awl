@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowDetailRenderer.awl#14 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowDetailRenderer.awl#15 $
     </Copyright>
 
     <Overview>
@@ -36,7 +36,8 @@
         <a:IncludeContent template="$column.contentElement" context="$parent.this"/>\
     <a:Else/>\
         <a:RefreshRegion tagName="tr" class="$table.rowClass" forceRenderRows="$table.forceRenderRows">
-            <td _ifTrue="$hasLeadingCols" class="$tdClass" colspan="$table.colsBeforeData">&nbsp;</td>
+            <td _ifTrue="$table.hasInvisibleSelectionColumn" width="1px"></td>
+            <td _ifTrue="$visibleLeadingCols" class="$tdClass" colspan="$visibleLeadingCols" width="1px">&nbsp;</td>
             <td class="$tdClass" style="$cc_style" colspan="$table.colsAfterFirstDataColumn">\
                 <a:IncludeContent template="$column.contentElement" context="$parent.this"/>\
             </td>

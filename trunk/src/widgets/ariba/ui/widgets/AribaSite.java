@@ -12,13 +12,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaSite.java#1 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaSite.java#2 $
 */
 
 package ariba.ui.widgets;
 
 import java.util.List;
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.aribaweb.core.AWFormRedirect;
+import ariba.util.core.Fmt;
 
 public class AribaSite extends AWComponent
 {
@@ -43,7 +46,14 @@ public class AribaSite extends AWComponent
     {
         requestContext().put(RealmSite, _currentSite);
         ActionHandler handler = handler();
-        return handler.onClick(requestContext());
+        String url = handler.url(requestContext());
+        return Fmt.S("javascript:window.location='%s';ariba.Event.cancelBubble(event);",
+                url);
+    }
+
+    public String siteLabel ()
+    {
+        return handler().siteLabel(_currentSite);
     }
 
     private SiteActionHandler handler ()

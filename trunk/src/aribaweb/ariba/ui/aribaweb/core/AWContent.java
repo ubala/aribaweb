@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWContent.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWContent.java#4 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -25,12 +25,14 @@ import java.lang.reflect.Field;
 public final class AWContent extends AWContainerElement
 {
     private AWBinding _templateName;
+    private AWBinding _disabled;
 
     // ** Thread Safety Considerations: This is shared but all immutable ivars.
 
     public void init (String tagName, Map bindingsHashtable)
     {
         _templateName = (AWBinding)bindingsHashtable.remove(AWBindingNames.templateName);
+        _disabled = (AWBinding)bindingsHashtable.remove(AWBindingNames.disabled);
         if (_templateName == null) _templateName = (AWBinding)bindingsHashtable.remove(AWBindingNames.name);
         Assert.that(_templateName != null,
                     "AWContent missing 'name' binding.");
@@ -63,6 +65,11 @@ public final class AWContent extends AWContainerElement
     public String nameInComponent (AWComponent component)
     {
         return _templateName.stringValue(component);
+    }
+
+    public boolean enabled (AWComponent component)
+    {
+        return (_disabled == null) || !(component.booleanValueForBinding(_disabled));
     }
 
     protected Object getFieldValue (Field field)

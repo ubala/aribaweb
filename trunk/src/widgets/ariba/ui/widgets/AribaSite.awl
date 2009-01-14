@@ -3,6 +3,6 @@
 </w:PopupMenuLink>
 <w:PopupMenu menuId="site">
     <a:For list="$sites" item="$currentSite">
-        <w:PopupMenuItem clientTrigger="$siteScript"><AribaString name="$currentSite"/></w:PopupMenuItem>\
+        <w:PopupMenuItem clientTrigger="$siteScript"><a:String value="$siteLabel"/></w:PopupMenuItem>\
     </a:For>
 </w:PopupMenu>

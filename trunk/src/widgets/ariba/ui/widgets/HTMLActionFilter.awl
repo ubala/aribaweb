@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.awl#6 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.awl#7 $
     </Copyright>
 
     <Overview>
@@ -39,9 +39,27 @@
     <Binding key="actionUrl" type="String" direction="set">
         Push of the url that was just clicked.
     </Binding>
+
+    <Binding key="resourceUrl" type="String" direction="set">
+        Push of the url that was/will be just fetched.
+    </Binding>
+
+    <Binding key="replacementUrl" type="String" direction="get">
+        Url to use in place of the pushed resource URL (if null, will fire action)
+    </Binding>
+
+    <Binding key="resourceResponse" type="AWResponseGenerating" direction="get">
+        Fired to dynamically provide resource data back
+    </Binding>
 </a:Api>\
 <a:While notEqualNull="$nextAction">\
     <a:PrimitiveString value="$currentPrefix"/>\
-    href="#" id="<a:ActionId action='$currentClicked'/>" bh="GAT"\
+    <a:If ifTrue="$matchIsHref">\
+        href="#" id="<a:ActionId action='$currentClicked'/>" bh="GAT"\
+    <a:Else ifTrue="$useStaticUrl"/>\
+        src="$staticUrl"\
+    <a:Else/>
+        src="<a:ActionUrl action='$resourceRequest'/>"\
+    </a:If>
 </a:While>\
 <a:PrimitiveString value="$remainderString"/>\

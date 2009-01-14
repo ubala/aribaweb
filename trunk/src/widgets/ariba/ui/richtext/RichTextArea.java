@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.java#20 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.java#21 $
 */
 
 package ariba.ui.richtext;
@@ -129,7 +129,7 @@ public class RichTextArea extends AWComponent
     private static final Pattern RemoveNewlinePattern =
         Pattern.compile("\r?\n", Pattern.MULTILINE);
     private static final Pattern RemoveUnbalancedPattern =
-        Pattern.compile("^ *</[^>]*>", Pattern.MULTILINE);
+        Pattern.compile("^ *</[^>]*>");
     private static final Pattern RemoveMouseAttrPattern =
         Pattern.compile(" awmouse(up|down)=\"true\"", Pattern.MULTILINE);
     private static final Pattern RemoveLeadingLISpacePattern =
@@ -141,7 +141,7 @@ public class RichTextArea extends AWComponent
     private static final Pattern ConvertBRPattern =
         Pattern.compile("<br ?/>", Pattern.MULTILINE);
     private static final Pattern RemoveTralingSpacesPattern =
-        Pattern.compile("\\s*$", Pattern.MULTILINE);
+        Pattern.compile("\\s*$");
 
     private String convertWhitespaces (String string)
     {

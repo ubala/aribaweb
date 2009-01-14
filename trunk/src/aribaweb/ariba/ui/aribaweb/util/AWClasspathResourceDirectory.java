@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResourceDirectory.java#14 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResourceDirectory.java#17 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -220,6 +220,7 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
     static final String _ZipMarker = ".zip!";
 
     static Map<String, URL> _AWJarUrlsByName = null;
+    static Map<String, Properties> _AWJarPropertiesByName = MapUtil.map();
 
     /**
         Returns list of aribaweb-savvy jars (those containing an aribaweb.properties file)
@@ -248,6 +249,50 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
             }
         }
         return _AWJarUrlsByName;
+    }
+
+    public static Properties aribawebPropertiesForName (String jarName)
+    {
+
+        Properties properties = _AWJarPropertiesByName.get(jarName);
+        if (properties == null) {
+            properties = new Properties();
+            URL url = awJarUrlsByName().get(jarName);
+            Assert.that(url != null, "Lookup of aribawebPropertiesForName for unknown name: %s", jarName);
+            try {
+                properties.load(url.openStream());
+                _AWJarPropertiesByName.put(jarName, properties);
+            } catch (IOException e) {
+                throw new AWGenericException(e);
+            }
+        }
+        return properties;
+    }
+
+    public static Set<String>referencedAWJarNames ()
+    {
+        Set<String> result = new HashSet();
+        for (String fullName : AWClasspathResourceDirectory.awJarUrlsByName().keySet()) {
+            result.add(fullName);
+            Properties props = aribawebPropertiesForName(fullName);
+            String referenced = (String)props.get("inlined-jars");
+            if (referenced != null) {
+                for (String name : referenced.split(",")) {
+                    result.add(name.replaceAll("\\.(jar|zip)$", ""));
+                }
+            }
+        }
+        return result;
+    }
+
+    public static Object aribawebPropertyValue (String key)
+    {
+        for (String name : AWClasspathResourceDirectory.awJarUrlsByName().keySet()) {
+            Properties props = AWClasspathResourceDirectory.aribawebPropertiesForName(name);
+            Object val = props.get(key);
+            if (val != null) return val;
+        }
+        return null;
     }
 
     /**
@@ -307,8 +352,7 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
         processedJars.add(jarName);
 
         try {
-            Properties properties = new Properties();
-            properties.load(url.openStream());
+            Properties properties = aribawebPropertiesForName(jarName);
 
             boolean isZip = url.toExternalForm().contains(_ZipMarker);
             boolean shouldRunInitializers = !isZip || Boolean.valueOf((String)properties.get("run-in-zip"));

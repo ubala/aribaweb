@@ -550,6 +550,9 @@ ariba.Input = function() {
         return {
             disableInput : function (showWaitAlert)
             {
+                // Wait cursor is broken in Safari (only changes on mouse move) -- disabling...
+                if (Dom.isSafari) return;
+
                 var docBody = document.body;
                 if (showWaitAlert) {
                     docBody.addEventListener("mousedown", showWaitAlertNS, true);

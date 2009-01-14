@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWImageData.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWImageData.java#5 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -31,6 +31,12 @@ public final class AWImageData extends AWComponent
     public String[] supportedBindingNames ()
     {
         return SupportedBindingNames;
+    }
+
+    protected void sleep ()
+    {
+        _elementId = null;
+        super.sleep();
     }
 
     public String url ()

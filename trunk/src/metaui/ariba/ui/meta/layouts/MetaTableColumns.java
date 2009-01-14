@@ -12,16 +12,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumns.java#3 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumns.java#4 $
 */
 package ariba.ui.meta.layouts;
 
 import java.util.List;
+import java.util.Map;
+
 import ariba.ui.table.AWTDataTable;
 import ariba.ui.meta.core.ItemProperties;
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.MetaContext;
 import ariba.ui.meta.core.Context;
+import ariba.util.core.ListUtil;
 
 /**
  * This class is used inside an AWTDataTable to cause meta-data-specified
@@ -49,23 +52,27 @@ public final class MetaTableColumns extends AWTDataTable.Column
         // set this column as a "wrapper column"
         table.setWrapperColumn(this);
 
-        Context context = MetaContext.currentContext(table);
+        UIMeta.UIContext context = MetaContext.currentContext(table);
         // get cached field list
         context.push();
         context.setContextKey(UIMeta.KeyClass);
-        List <ItemProperties> fields = (List <ItemProperties>)context.propertyForKey("fieldPropertyList");
+        Map<String, List> fieldsByZone = (Map)context.propertyForKey(UIMeta.PropFieldsByZone);
 
-        for (ariba.ui.meta.core.ItemProperties field : fields) {
+        for (String fieldName : context.uiMeta().flattenVisible(fieldsByZone, UIMeta.ZonesMTLRB,
+                UIMeta.KeyField, context)) {
             // evaluate visibility (without object in context)
-            context.push();
-            context.set(UIMeta.KeyField, field.name());
-            if (context.booleanPropertyForKey(UIMeta.KeyVisible, false)) {
-                ariba.ui.meta.layouts.MetaTableColumn column = new ariba.ui.meta.layouts.MetaTableColumn();
-                column.init(table, field);
-                table.registerColumn(column);
-            }
-            context.pop();
+            ariba.ui.meta.layouts.MetaTableColumn column = new ariba.ui.meta.layouts.MetaTableColumn();
+            column.init(table, fieldName);
+            table.registerColumn(column);
         }
+
+        // detail columns
+        List<String>visibleFields = context.uiMeta().flattenVisible(fieldsByZone, UIMeta.ZonesDetail,
+                UIMeta.KeyField, context);
+        if (!ListUtil.nullOrEmptyList(visibleFields)) {
+            table.setDetailColumn(new MetaTableDetailColumnRenderer.Column(visibleFields, false));
+        }
+
         context.pop();
     }
 }

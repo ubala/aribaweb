@@ -197,7 +197,8 @@ ariba.Refresh = function() {
             while (i < sourceRows.length) {
                 var sourceRow = sourceRows[i];
             //debug("replace: " + sourceRow.nodeName + " " + sourceRow.id);
-                if (sourceRow.nodeName == "TR") {
+                // rows with no id are not refresh regions
+                if (sourceRow.nodeName == "TR" && sourceRow.id) {                
                     var targetRow = Dom.findRow(targetTBody, sourceRow.id);
                     if (targetRow == null) {
                         //debug("could not find row for: " + sourceRow.nodeName + " " + sourceRow.id);
@@ -415,7 +416,7 @@ ariba.Refresh = function() {
                             + "<h2>Attaching full response content below...</h2>"
                             + response);
                 }
-            }, 3000);
+            }, 1);
         },
 
         _markRR : function (target) {
@@ -425,6 +426,10 @@ ariba.Refresh = function() {
                 _MarkedRRs.push(target);
                 // target.style.backgroundColor = "#FFE080";
             }
+        },
+
+        clearPendingCompleteRequestRun : function () {
+            _pendingCompleteRequestRun = false;
         },
 
         domRefreshContentCallback : function ()
@@ -548,7 +553,6 @@ ariba.Refresh = function() {
                 Dom.removeClass(document.body, "rrVis");
             }
 
-            Event.eventEnqueue(Request.requestComplete.bind(Request), null, true);
             Event.notifyRefreshComplete();
         },
 
@@ -745,7 +749,7 @@ ariba.Refresh = function() {
 
             Request.simpleXMLHTTP(url, httpSuccess.bind(this));
         },
-        
+
         // Called from AWFormRedirect during an incremental refresh (either XHR or IFrame)
         // We extract the form from the current response submit it (within our main window)
         iFrameFormSubmit : function (iframeFormName)
@@ -771,7 +775,18 @@ ariba.Refresh = function() {
         // clean up / post load calls for full page refreshes.
         // NOTE: for responses with a different mime type (file download), neither
         //       awCompleteRequest nor awWindowOnLoad will be called.
-        completeRequest : function (current, length, isRefreshRequest)
+        completeRequest : function (current, length, isRefreshRequest) {
+            if (!_isXMLHttpResponse && Dom.isSafari) {
+                // Todo: Conditionalize for Safari < v4
+                // defer so that we're out of the IFrame's script context when we are processing
+                // (fixes image refresh issue in Safari 3)
+                ariba.awCurrWindow.setTimeout(function() {this._completeRequest(current, length, isRefreshRequest);}.bind(this), 1);
+            } else {
+                this._completeRequest(current, length, isRefreshRequest);
+            }
+        },
+
+        _completeRequest : function (current, length, isRefreshRequest)
         {
             _pendingCompleteRequestRun = false;
 
@@ -803,19 +818,26 @@ ariba.Refresh = function() {
                 }
                 _currentUpdateSource = null;
 
-                Event.registerUpdateCompleteCallback(function() {
-                    Refresh.updateHistory(current, length);
-                    if (Input.AWAutomationTestModeEnabled) {
+                if (current != null && length != null) {
+                    Event.registerUpdateCompleteCallback(function() {
+                        Refresh.updateHistory(current, length);
+                    });
+                }
+                if (Input.AWAutomationTestModeEnabled) {
+                    Event.registerUpdateCompleteCallback(function() {
                         setTimeout(Request.setStatusDone.bind(Request), 0);
-                    }
-                });
+                    });
+                }
 
             // execute all user registered callbacks
                 this.refreshComplete();
             }
             else {
                 Debug.log("*** full page update");
-                Event.registerUpdateCompleteCallback(this.updateHistory.bind(this), [current, length]);
+                if (current != null && length != null) {
+                    Event.registerUpdateCompleteCallback(this.updateHistory.bind(this), [current, length]);
+                }
+                Event.registerRefreshCallback(Request.requestComplete.bind(Request));
             }
 
         // Show / hide FPR alert
@@ -936,7 +958,7 @@ ariba.Refresh = function() {
         {
             if (this.divNeedsLoading(divObject)) {
 
-                Input.showWaitCursor();
+                Request.prepareForRequest();
                 var divId = divObject.id;
                 var url = Request.formatSenderUrl(divId);
 

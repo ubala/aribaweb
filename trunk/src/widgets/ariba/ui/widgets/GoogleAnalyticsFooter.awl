@@ -1,8 +1,9 @@
 <a:RefreshRegion>
     <a:ClientSideScript>
-        google.pageTracker._trackPageview('$trackPageName');            
+        google.pageTracker._trackPageview('$trackPageName');
+        <a:If ifTrue="$=ariba.ui.aribaweb.core.AWConcreteServerApplication.IsDebuggingEnabled">
+            var windowTitle = '<a:String value="$trackPageName"/>';
+            ariba.Debug.setWindowTitle(windowTitle);
+        </a:If>        
     </a:ClientSideScript>
-    <a:If ifTrue="$=ariba.ui.aribaweb.core.AWConcreteServerApplication.IsDebuggingEnabled">
-        <div style="position:absolute;top:0;left:0"><b>Google Analytics page name:</b> $trackPageName</div>
-    </a:If>
 </a:RefreshRegion>

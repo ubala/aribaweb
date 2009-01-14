@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.java#8 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.java#11 $
 */
 package ariba.ui.meta.layouts;
 
@@ -29,6 +29,7 @@ import ariba.ui.meta.editor.EditManager;
 import ariba.ui.meta.editor.MetaSideInspector;
 import ariba.ui.widgets.AribaPageContent;
 import ariba.util.core.Fmt;
+import ariba.util.core.ListUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ public class MetaForm extends AWComponent implements AWFullValidationHandler
     public String _className;
     public String _zonePath;
     public String _zone;
+    public boolean renderedFirst;
 
     public boolean isStateless() {
         return false;
@@ -72,6 +74,11 @@ public class MetaForm extends AWComponent implements AWFullValidationHandler
     public Object currentProperties ()
     {
         return MetaContext.currentContext(this).properties();
+    }
+
+    public boolean shouldHideZone (String zone)
+    {
+        return dragType() == null && (_fieldsByZone == null || ListUtil.nullOrEmptyList(_fieldsByZone.get(zone)));
     }
 
     public void evaluateValidity(AWComponent pageComponent)

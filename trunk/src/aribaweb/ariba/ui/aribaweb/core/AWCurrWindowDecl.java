@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWCurrWindowDecl.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWCurrWindowDecl.java#6 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -22,7 +22,7 @@ import ariba.util.core.Fmt;
 public final class AWCurrWindowDecl extends AWComponent
 {
     private static final String TopWindowDecl = "if (!window.ariba) ariba= parent.ariba || {}; ariba.awCurrWindow = parent;";
-    private static final String CurrWindowDecl = "var awCW = top.%s || top; ariba=awCW.ariba || {}; ariba.awCurrWindow = awCW;";
+    private static final String CurrWindowDecl = "var awCW = (window.name == 'AWRefreshFrame') ? parent : window; ariba = awCW.ariba || {}; ariba.awCurrWindow = awCW;";
 
     public String getCurrWindowDecl ()
     {

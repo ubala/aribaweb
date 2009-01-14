@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SiteActionHandler.java#1 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SiteActionHandler.java#2 $
 */
 
 package ariba.ui.widgets;
@@ -29,6 +29,7 @@ import java.util.Collections;
 */
 public class SiteActionHandler extends ActionHandler
 {
+    protected static final String KeySites = "SiteActions.Sites";
     
     public List<String> getSites (AWRequestContext requestContext)
     {
@@ -45,5 +46,10 @@ public class SiteActionHandler extends ActionHandler
     public boolean isEnabled (AWRequestContext requestContext)
     {
         return false;
+    }
+
+    public String siteLabel (String site)
+    {
+        return null;
     }
 }

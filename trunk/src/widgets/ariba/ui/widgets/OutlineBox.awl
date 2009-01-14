@@ -13,31 +13,31 @@
     limitations under the License.
 -->
 \
-<table border="0" class="$^tableClass:scrollTableWrapper" cellpadding="2" cellspacing="0" width="100%">\
+<div class="$^tableClass:scrollTableWrapper" style="overflow:visible">
+<table border="0" cellspacing="0" width="100%">\
     <tr>\
         <td class="$^headingClass:tableHeader">\
             <div >
                  <table border="0" cellspacing="0" cellpadding="0" width="100%">\
                     <tr>\
+                        <td _ifTrue="$showExpandoCollapsoControl" width="1px" style="padding-left:5px">\
+                            <a:Hyperlink action="$toggleExpandoCollapsoAction" submitForm="$true">\
+                                <a:Image filename="$expandoCollapsoImage" title="$expandoCollapsoToolTip" style="$expandoCollapsoStyle"/>\
+                            </a:Hyperlink>\
+                        </td>\
                         <td align="$languageLeft"
                             class="$^titleClass:sectionHead"
-                            style="$^headingStyle:padding:3px 0px 3px 5px;"
-                            width="99%"
-                            nowrap="true">\
-                            <a:If ifTrue="$showExpandoCollapsoControl">\
-                                <a:Hyperlink action="$toggleExpandoCollapsoAction" submitForm="$true">\
-                                    <a:Image filename="$expandoCollapsoImage" title="$expandoCollapsoToolTip" style="$expandoCollapsoStyle"/>\
-                                </a:Hyperlink>\
-                            </a:If>\
+                            style="$^headingStyle:padding:3px 0px 3px 0px;">\
                             <a:Hyperlink omitTags="$!showExpandoCollapsoControl"
                                          action="$toggleExpandoCollapsoAction"
                                          submitForm="$true"
+                                         class="hoverLink"
                                          title="$expandoCollapsoToolTip">\
-                                <a:String value="$^title"/>&nbsp;\
+                                <a:String value="$^title"/>\
                             </a:Hyperlink>\
                         </td>\
                         <td nowrap="true" align="right">\
-                            <a:IncludeContent required="$false" templateName="buttonArea"/>\
+                            <div class="flR"><a:IncludeContent required="$false" templateName="buttonArea"/></div>\
                         </td>\
                     </tr>\
                     <a:If notEqualNull="$^hint:$null">\
@@ -51,15 +51,16 @@
             </div>
         </td>\
     </tr>
-    <tr style="background:#FFFFFF">\
-        <td>\
-            <a:If ifTrue="$isExpanded">
-                <a:IncludeContent required="$false" templateName="body"/>\
-            <a:Else/>
-                <div style="padding:5px 5px 5px 12px">\
-                    <a:Local key="a001">Expand to view the contents of this section.</a:Local>\
-                </div>\
-            </a:If>\
-        </td>\
-    </tr>\
+    <a:If ifTrue="$isExpanded">
+        <tr style="background:#FFFFFF">\
+            <td><a:IncludeContent required="$false" templateName="body"/></td>\
+        </tr>\
+    <a:Else ifTrue="$^verboseCollapsedContent:$true"/>
+        <tr>\
+            <td style="padding:5px 5px 5px 12px;background:#FFFFFF">\
+                <a:Local key="a001">Expand to view the contents of this section.</a:Local>\
+            </td>\
+        </tr>\
+    </a:If>\
 </table>\
+</div>

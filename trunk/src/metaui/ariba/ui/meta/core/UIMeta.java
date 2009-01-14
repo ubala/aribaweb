@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#32 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#43 $
 */
 package ariba.ui.meta.core;
 
@@ -21,6 +21,8 @@ import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWPage;
+import ariba.ui.aribaweb.core.AWBindingDictionary;
+import ariba.ui.aribaweb.core.AWBinding;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWResourceManager;
@@ -57,6 +59,9 @@ public class UIMeta extends ObjectMeta
     public final static String KeyBindings = "bindings";
     public final static String KeyHomePage = "homePage";
     public final static String KeyZonePath = "zonePath";
+    public final static String PropFieldsByZone = "fieldsByZone";
+    public final static String PropFieldPropertyList = "fieldPropertyList";
+    public final static String PropLayoutsByZone = "layoutsByZone";
 
     static UIMeta _Instance;
 
@@ -85,6 +90,7 @@ public class UIMeta extends ObjectMeta
         registerKeyInitObserver(KeyModule, new ModuleMetaProvider());
 
         // These keys define scopes for their properties
+        // defineKeyAsPropertyScope(KeyArea);
         defineKeyAsPropertyScope(KeyLayout);
         defineKeyAsPropertyScope(KeyModule);
 
@@ -97,6 +103,7 @@ public class UIMeta extends ObjectMeta
         registerDefaultLabelGeneratorForKey(KeyActionCategory);
 
         // policies for chaining certain well known properties
+        registerPropertyMerger(KeyArea, Context.PropertyMerger_DeclareList);
         registerPropertyMerger(KeyLayout, Context.PropertyMerger_DeclareList);
         registerPropertyMerger(KeyModule, Context.PropertyMerger_DeclareList);
 
@@ -104,28 +111,52 @@ public class UIMeta extends ObjectMeta
         mirrorPropertyToContext(KeyLayout, KeyLayout);
         mirrorPropertyToContext(KeyComponentName, KeyComponentName);
 
+        registerPropertyMerger(KeyEditing, new PropertyMerger_And());
+
         registerValueTransformerForKey("requestContext", Transformer_KeyPresent);
         registerValueTransformerForKey("displayGroup", Transformer_KeyPresent);
 
-        registerDerivedValue("fieldsByZone", new PropertyValue.StaticDynamicWrapper(new PropertyValue.StaticallyResolvable() {
+        // define operation hierarchy
+        keyData(KeyOperation).setParent("view", "inspect");
+        keyData(KeyOperation).setParent("edit", "inspect");
+        keyData(KeyOperation).setParent("edit", "inspect");
+        keyData(KeyOperation).setParent("search", "inspect");
+        keyData(KeyOperation).setParent("keywordSearch", "search");
+        keyData(KeyOperation).setParent("textSearch", "keywordSearch");
+
+        registerStaticallyResolvable(PropFieldsByZone, new PropertyValue.StaticallyResolvable() {
                 public Object evaluate(Context context) {
-                    Map m = ((UIMeta)context.meta()).itemNamesByZones(context, KeyField);
+                    Map m = ((UIMeta)context.meta()).itemNamesByZones(context, KeyField, zones(context));
                     String zonePath = zonePath(context);
-                    return (zonePath == null) ? m : FieldValue.getFieldValue(m, zonePath);
+                    if (zonePath != null) {
+                        m = (Map)FieldValue.getFieldValue(m, zonePath);
+                        if (m == null) m = Collections.EMPTY_MAP;
+                    }
+                    return m;
                 }
-            }), KeyClass, "*");
+            }, KeyClass);
         
-        registerDerivedValue("fieldPropertyList", new PropertyValue.StaticDynamicWrapper(new PropertyValue.StaticallyResolvable() {
+        registerStaticallyResolvable(PropFieldPropertyList, new PropertyValue.StaticallyResolvable() {
                 public Object evaluate(Context context) {
                     return ((UIMeta)context.meta()).fieldList(context);
                 }
-            }), KeyClass, "*");
+            }, KeyClass);
 
-        registerDerivedValue("layoutsByZone", new PropertyValue.StaticDynamicWrapper(new PropertyValue.StaticallyResolvable() {
+        registerStaticallyResolvable(PropLayoutsByZone, new PropertyValue.StaticallyResolvable() {
                 public Object evaluate(Context context) {
-                    return ((UIMeta)context.meta()).itemNamesByZones(context, KeyLayout);
+                    return ((UIMeta)context.meta()).itemNamesByZones(context, KeyLayout, zones(context));
                 }
-            }), KeyLayout, "*");
+            }, KeyLayout);
+
+        PropertyValue.StaticallyResolvable dyn = new PropertyValue.StaticallyResolvable() {
+                public Object evaluate(Context context) {
+                    return bindingDictionaryForValueMap((Map)context.propertyForKey("bindings"));
+                }
+            };
+        registerStaticallyResolvable("bindingsDictionary", dyn, KeyField);
+        registerStaticallyResolvable("bindingsDictionary", dyn, KeyLayout);
+        registerStaticallyResolvable("bindingsDictionary", dyn, KeyClass);
+        registerStaticallyResolvable("bindingsDictionary", dyn, KeyModule);
 
         AWPage.registerLifecycleListener(new AWPage.LifecycleListener() {
             // Listen for new page activations and check for rule file changes
@@ -137,6 +168,12 @@ public class UIMeta extends ObjectMeta
             public void pageWillAwake (AWPage page) { }
             public void pageWillSleep (AWPage page) { }
         });
+    }
+
+    public List<String> zones (Context context)
+    {
+        List<String> zones = (List)context.propertyForKey("zones");
+        return (zones == null) ? Arrays.asList(ZoneMain) : zones;
     }
 
     public String zonePath (Context context)
@@ -156,7 +193,7 @@ public class UIMeta extends ObjectMeta
         return new UIContext(this);
     }
 
-    public static class UIContext extends ObjectContext
+    public static class UIContext extends ObjectMetaContext
     {
         AWRequestContext _requestContext;
 
@@ -178,6 +215,11 @@ public class UIMeta extends ObjectMeta
         public AWComponent getComponent ()
         {
             return _requestContext.getCurrentComponent();
+        }
+
+        public UIMeta uiMeta ()
+        {
+            return (UIMeta)_meta;
         }
     }
 
@@ -229,7 +271,7 @@ public class UIMeta extends ObjectMeta
         Meta.RuleSet ruleSet = _loadedResources.get(resource);
         Assert.that(ruleSet != null, "Attempt to reload not previously loaded resource");
         Log.meta.debug("Reloading modified rule file: %s", resource.name());
-        ruleSet.disableRules();
+        invalidateRules();
         beginReplacementRuleSet(ruleSet);
         _loadRuleFile(resource);
     }
@@ -264,8 +306,16 @@ public class UIMeta extends ObjectMeta
     {
         Map m = new HashMap();
         m.put(propKey, dynamicValue);
-        addRule(new Rule(Arrays.asList(new Rule.Predicate(contextKey, contextValue)),
+        addRule(new Rule(Arrays.asList(new Rule.Selector(contextKey, contextValue)),
                           m, SystemRulePriority));
+    }
+
+    public void registerStaticallyResolvable (String propKey,
+                                              PropertyValue.StaticallyResolvable dynamicValue,
+                                              String contextKey)
+    {
+        registerDerivedValue (propKey, new PropertyValue.StaticDynamicWrapper(dynamicValue),
+                                         contextKey, KeyAny);
     }
 
     public void registerDefaultLabelGeneratorForKey (String key)
@@ -284,10 +334,8 @@ public class UIMeta extends ObjectMeta
         return itemsByZones(context, KeyField, ZonesTLRB);
     }
 
-    public Map<String, Object> itemNamesByZones (Context context, String key)
+    public Map<String, Object> itemNamesByZones (Context context, String key, List<String> zones)
     {
-        List<String> zones = (List)context.propertyForKey("zones");
-        if (zones == null) zones = Arrays.asList("main");
         Map<String, Object>itemsByZones = itemsByZones(context, key, zones.toArray(new String[zones.size()]));
         return mapItemPropsToNames(itemsByZones);
     }
@@ -312,12 +360,16 @@ public class UIMeta extends ObjectMeta
     }
 
     private static String RootPredecessorKey = "_root";
+    public static final String ZoneMain = "zMain";
     public static final String ZoneTop = "zTop";
     public static final String ZoneLeft = "zLeft";
     public static final String ZoneRight = "zRight";
     public static final String ZoneBottom = "zBottom";
+    public static final String ZoneDetail = "zDetail";
 
-    public static String[] ZonesTLRB = {ZoneLeft, ZoneRight, ZoneTop, ZoneBottom };
+    public static String[] ZonesTLRB = {ZoneTop, ZoneLeft, ZoneRight, ZoneBottom };
+    public static String[] ZonesMTLRB = {ZoneMain, ZoneTop, ZoneLeft, ZoneRight, ZoneBottom };
+    public static String[] ZonesDetail = {ZoneDetail};
 
     public Map<String, List> predecessorMap (Context context, String key, final String defaultPredecessor)
     {
@@ -386,6 +438,8 @@ public class UIMeta extends ObjectMeta
             public int compare(ItemProperties o1, ItemProperties o2) {
                 Integer r1 = (Integer)o1.properties().get(KeyRank);
                 Integer r2 = (Integer)o2.properties().get(KeyRank);
+                if (r1 == null) r1 = 100;
+                if (r2 == null) r2 = 100;
                 return (r1 == r2) ? 0
                         : (r1 == null) ? 1
                             : (r2 == null) ? -1
@@ -400,16 +454,53 @@ public class UIMeta extends ObjectMeta
         }
     }
 
+    // Called by Parser to handle decls like "zLeft => lastName#required"
+    public Rule addPredecessorRule(String itemName, List<Rule.Selector>contextPreds,
+                                   String predecessor, Object traits, int lineNumber)
+    {
+        if (predecessor == null && traits == null) return null;
+
+        // Determine key being used.  If selector scope key is "class" use "field"
+        String key = scopeKeyForSelector(contextPreds);
+        if (key == null || key.equals(KeyClass)) key = KeyField;
+        List<Rule.Selector> selector = new ArrayList(contextPreds);
+        selector.add(new Rule.Selector(key, itemName));
+        Map props = MapUtil.map();
+        if (predecessor != null) props.put(KeyAfter, predecessor);
+        if (traits != null) props.put(KeyTrait, traits);
+        Rule rule = new Rule(selector, props, 0, lineNumber);
+        addRule(rule);
+        return rule;
+    }
+
+    public List<String>flattenVisible (Map<String, List> fieldsByZones, String[] zoneList,
+                                       String key, Context context)
+    {
+        List<String>result = ListUtil.list();
+        for (String zone : zoneList) {
+            List<String>fields = fieldsByZones.get(zone);
+            if (fields == null) continue;
+            for (String field : fields) {
+                context.push();
+                context.set(key, field);
+                if (context.booleanPropertyForKey(KeyVisible, false)) result.add(field);
+                context.pop();
+            }
+        }
+        return result;
+    }
+
+
     public String displayKeyForClass (String className)
     {
-        // performance: should use registerDerivedValue("fieldsByZone", new Context.StaticDynamicWrapper
+        // performance: should use registerDerivedValue("...", new Context.StaticDynamicWrapper
         // to get cached resolution here...
         Context context = newContext();
         context.set(KeyClass, className);
         context.set(KeyLayout, "LabelField");
         List<ItemProperties> fields = itemProperties(context, KeyField, true);
 
-        return fields.isEmpty() ? null : fields.get(0).name();
+        return fields.isEmpty() ? "toString" : fields.get(0).name();
     }
 
 
@@ -473,22 +564,22 @@ public class UIMeta extends ObjectMeta
         public Map<String, List<ItemProperties>> actionsByCategory;
     }
 
-    public ModuleInfo computeModuleInfo (Context context)
+    public ModuleInfo computeModuleInfo (Context context, boolean checkVisibility)
     {
         ModuleInfo moduleInfo = new ModuleInfo();
         // List<ItemProperties> items = itemList(context, KeyModule, ActionZones);
         moduleInfo.modules = ListUtil.list();
         Set<String> classesSet = new HashSet();
-        List<String> allModuleNames = itemNames(context, KeyModule);
+        List<ItemProperties> allModuleProps = itemList(context, KeyModule, ActionZones);
         moduleInfo.moduleNames = ListUtil.list();
 
-        for (String moduleName : allModuleNames) {
+        for (ItemProperties module : allModuleProps) {
             context.push();
-            context.set(KeyModule, moduleName);
+            context.set(KeyModule, module.name());
 
-            if (!context.booleanPropertyForKey(KeyVisible, true)) continue;
+            if (checkVisibility && !context.booleanPropertyForKey(KeyVisible, true)) continue;
 
-            moduleInfo.moduleNames.add(moduleName);
+            moduleInfo.moduleNames.add(module.name());
 
             context.push();
             context.set("homeForClasses", true);
@@ -500,11 +591,12 @@ public class UIMeta extends ObjectMeta
             List<String> showsClasses = itemNames(context, KeyClass);
             context.pop();
 
-            moduleInfo.modules.add(new ModuleProperties(moduleName, context.allProperties(), false,
+            moduleInfo.modules.add(new ModuleProperties(module.name(), context.allProperties(), false,
                     homeClasses, showsClasses));
 
             classesSet.addAll(homeClasses);
             classesSet.addAll(showsClasses);
+            context.pop();
         }
         moduleInfo.classNames = ListUtil.list();
         moduleInfo.classNames.addAll(classesSet);
@@ -665,6 +757,25 @@ public class UIMeta extends ObjectMeta
         return AWVIdentifierFormatter.decamelize(className);
     }
 
+    AWBindingDictionary bindingDictionaryForValueMap (Map<String, Object> map)
+    {
+        if (MapUtil.nullOrEmptyMap(map)) return null;
+        Map <String, AWBinding> bindingMap = new HashMap(map.size());
+        for (Map.Entry<String, Object> e : map.entrySet()) {
+            String name = e.getKey();
+            Object val = e.getValue();
+            AWBinding binding = null;
+            if (val instanceof PropertyValue.Dynamic) {
+                binding = new MetaIncludeComponent.DynamicValueBinding();
+                ((MetaIncludeComponent.DynamicValueBinding)binding).init(name, (PropertyValue.Dynamic)val);
+            } else {
+                binding = AWBinding.bindingWithNameAndConstant(name, val);
+            }
+            bindingMap.put(name, binding);
+        }
+        return new AWBindingDictionary(bindingMap);
+    }
+    
     Set<String> _loadedNames = new HashSet();
 
     public void loadRuleFromResourceNamed (String name)
@@ -692,21 +803,21 @@ public class UIMeta extends ObjectMeta
         Log.meta.debug("Auto declaring modules for classes: %s ", moduleClasses);
         for (String className : moduleClasses) {
             beginRuleSet(className);
-            List <Rule.Predicate>predicates = Arrays.asList(new Rule.Predicate(KeyModule, className));
-            ListUtil.lastElement(predicates)._isDecl = true;
+            List <Rule.Selector> selectors = Arrays.asList(new Rule.Selector(KeyModule, className));
+            ListUtil.lastElement(selectors)._isDecl = true;
 
             Map properties = new HashMap();
             addTrait("ModuleClassPage", properties);
             properties.put("moduleClassName", className);
-            Rule r = new Rule(predicates, properties, ClassRulePriority);
+            Rule r = new Rule(selectors, properties, ClassRulePriority);
 
             addRule(r);
 
             // Add decl rule for this module being home for this class
             addRule(new Rule(
-                    Arrays.asList(new Rule.Predicate(KeyModule, className),
-                          new Rule.Predicate("homeForClasses", true),
-                          new Rule.Predicate(KeyClass, className, true)),
+                    Arrays.asList(new Rule.Selector(KeyModule, className),
+                          new Rule.Selector("homeForClasses", true),
+                          new Rule.Selector(KeyClass, className, true)),
                     new HashMap(),
                     ClassRulePriority));
             endRuleSet();

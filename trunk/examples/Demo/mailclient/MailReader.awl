@@ -7,36 +7,33 @@
         </a:Content>\
     </w:Confirmation>
 
-    <w:FourZoneLayout widthLeft="100px">
+    <w:FourZoneLayout widthLeft="200px" widthRight="auto">
         <a:Content name="left">
+            <div style="padding-top:7px"></div>\
             <w:RoundedBox>
-                <w:OutlineRepetition list="$folderNames" item="$folderName" children="$null"
+                <w:OutlineRepetition list="$folders" item="$folder" children="$null"
                                      hasChildren="$false" selectedObject="$selFolder">
                     <div style="padding-top:4px">\
-                        <w:OutlineFolderControl title="$folderName.name" allowSelection="$true"
+                        <w:OutlineFolderControl title="$folder.name" allowSelection="$true"
                             isFolder="$true"/>\
                     </div>
                 </w:OutlineRepetition>
                 <br/>
             </w:RoundedBox>
+            <br/><a:If ifTrue="$displayGroup.selectedObject"><a:Hyperlink action="$inspectMime">Inspect Mime</a:Hyperlink></div></a:If>
+            
         </a:Content>
         <a:Content name="right">
             <t:DataTable list="$messages" item="$message" displayGroup="$displayGroup"
-                         initialSortKey=""
-                         multiSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
-                         enableScrolling="$true">
+                         initialSortKey="" enableScrolling="$true"
+                         multiSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true">
                 <t:Column key="sentDate" label="Sent" formatter="$formatters.shortDate"/>
                 <t:Column key="from" label="From"/>
                 <t:Column key="subject" label="Subject"/>
             </t:DataTable>
 
-            <div style="width:625px; height:450px; overflow:scroll; margin-top:7px; padding:3px; border: 1px solid #9C9CB8;">\
-                <a:If notEqualNull="$displayGroup.selectedObject.html">
-                    <a:PrimitiveString value="$displayGroup.selectedObject.html"/>
-                <a:Else/>
-                    <pre>$displayGroup.selectedObject.plainText</pre>
-                </a:If>
-            </div>\
+            <w:MimeMessageView parsedMessage="$displayGroup.selectedObject"
+                style="width:auto; height:550px; overflow:scroll; margin-top:7px; padding:3px; border:1px solid #9C9CB8"/>
             <br/>
         </a:Content>
     </w:FourZoneLayout>

@@ -26,6 +26,8 @@
         for standalone use.
     </description>
 
+    <!-- <echo message=" - -  In ${basedir} - -"/> -->
+    
     <property environment="env"/>
     <property name="aw.home" location="${env.AW_HOME}"/>
 
@@ -59,6 +61,9 @@
     </condition>
     <property name="lib.dir" location="${common.dir}/lib/ext"/>
 
+    <available file="${aw.home}/lib-ext" property="lib2.dir" value="${aw.home}/lib-ext"/>
+    <property name="lib2.dir" location="${common.dir}/lib/ext"/>
+
     <condition property="lib-build.dir" value="${env.ARIBA_INSTALL_ROOT}/classes">
         <not><equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/></not>
     </condition>
@@ -73,7 +78,7 @@
         <not><equals arg1="${env.ARIBA_BUILD_ROOT}" arg2="NOT_SET"/></not>
     </condition>
     <property name="build.dir" location="${basedir}/build"/>
-
+    
     <condition property="dist.root.dir" value="${env.ARIBA_INSTALL_ROOT}/internal/opensource">
         <not><equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/></not>
     </condition>
@@ -214,13 +219,16 @@
 
     <!-- Dependencies classpath -->
     <fileset id="build.deps" dir="${lib.dir}">
-        <include name="log4j.jar"/>
         <include name="jakarta-oro.jar"/>
         <include name="asm.jar"/>
         <include name="bcel.jar"/>
-        <include name="mail.jar"/>
         <include name="activation.jar"/>
         <include name="markdownj.jar"/>
+    </fileset>
+
+    <fileset id="build.deps2" dir="${lib2.dir}">
+        <include name="mail.jar"/>
+        <include name="log4j*.jar"/>
     </fileset>
 
     <fileset id="build-only.deps" dir="${lib-build.dir}">
@@ -243,7 +251,7 @@
         <include name="ariba.metaui.jar"/>
     </fileset>
 
-    <fileset id="java.src.files" dir="${src.dir}" includes="**/*.java"/>
+    <fileset id="java.src.files" dir="${src.dir}" includes="**/*.java,**/*.groovy"/>
     <resources id="source.files">
         <fileset refid="java.src.files"/>
         <fileset dir="${src.resource.path}" includes="resource/**/*" erroronmissingdir="false"/>
@@ -253,6 +261,8 @@
 
     <!--- placeholders -->
     <fileset id="war.jars" dir="." excludes="**"/>
+    <fileset id="groovy.support.jars" dir="." excludes="**"/>
+    <fileset id="merge.jars" dir="." excludes="**"/>
     <fileset id="app.war.jars" dir="." excludes="**"/>
     <fileset id="module.libs" dir="." excludes="**"/>
     <fileset id="module.libs2" dir="." excludes="**"/>
@@ -264,6 +274,7 @@
     <path id="aw.tools.classpath">
         <resources refid="build-only.deps"/>
         <resources refid="build.deps"/>
+        <resources refid="build.deps2"/>
         <resources refid="build.jars"/>
     </path>
 
@@ -271,11 +282,14 @@
     <path id="classpath">
         <resources refid="build-only.deps"/>
         <resources refid="build.deps"/>
+        <resources refid="build.deps2"/>
         <resources refid="build.jars"/>
         <resources refid="module.libs"/>
         <resources refid="module.libs2"/>
         <resources refid="module.libs3"/>
         <resources refid="war.jars"/>
+        <resources refid="groovy.support.jars"/>
+        <resources refid="merge.jars"/>
         <resources refid="app.war.jars"/>
         <pathelement location="${build.dir}/classes/java"/>
     </path>
@@ -289,16 +303,14 @@
 
     <!-- For launched groovy scripts -->
     <path id="groovy.script.classpath">
-        <fileset dir="${lib-internal.dir}">
-            <include name="groovy-all.jar"/>
-        </fileset>
-        
+        <path refid="groovy.classpath"/>
+
         <!-- minimal set of AW / Widgets jars -->
         <fileset dir="${lib-build.dir}">
             <include name="javax.servlet.zip"/>
         </fileset>
         <fileset dir="${lib.dir}">
-            <include name="log4j.jar"/>
+            <include name="log4j*.jar"/>
             <include name="jakarta-oro.jar"/>
             <include name="asm.jar"/>
             <include name="bcel.jar"/>
@@ -318,6 +330,11 @@
         </fileset>
     </path>
 
+    <path id="groovysh.classpath">
+        <path refid="groovy.classpath"/>
+        <path refid="classpath"/>
+    </path>
+
     <taskdef name="groovy"
              classname="org.codehaus.groovy.ant.Groovy"
              classpathref="groovy.classpath"/>
@@ -332,6 +349,7 @@
         <pathelement location="${ant.home}/lib/ant.jar"/>
 
         <fileset refid="build.deps"/>
+        <fileset refid="build.deps2"/>
 
         <fileset dir="${lib-internal.dir}">
             <include name="groovy-all.jar"/>
@@ -339,11 +357,11 @@
     </path>
 
     <patternset id="jar.resource.patterns"
-                includes="**/*.awl,**/*.htm,**/*.oss,**/*.awz,**/*.afr,**/*.csv,**/*.xml"
-                excludes="build.xml,install.csv"
+                includes="**/*.awl,**/*.htm,**/*.oss,**/*.awz,**/*.afr,**/*.csv,**/*.xml,**/*.properties"
+                excludes="build.*,install.csv"
             />
 
-    <fileset id="jar.resources" dir="${basedir}">
+    <fileset id="jar.resources" dir="${basedir}" excludes="build/">
         <patternset refid="jar.resource.patterns"/>
     </fileset>
 
@@ -484,9 +502,11 @@
     </target>
 
     <target name="jar-check" depends="init-js-resources">
+        <pathconvert property="merge.jars.echo" refid="merge.jars" pathsep=";"/>
         <dependset>
             <sources>
                 <resources refid="source.files"/>
+                <resources refid="merge.jars"/>
             </sources>
             <targets>
                 <path location="${build.jar.file}"/>
@@ -495,7 +515,28 @@
         <available file="${build.jar.file}" property="jar.uptodate"/>
     </target>
 
-    <target name="build-jar" depends="compile, copy-resources, check-aribaweb-properties">
+    <target name="merge-jars">
+        <pathconvert property="merge.jars.path" refid="merge.jars" pathsep=";"/>
+        <groovy>
+            def dest = properties["build.classes.dir"]
+            File tsFile = new File(properties["src.derived.dir"], "merge-jars.timestamp")
+            boolean didWrite
+            def path = properties['merge.jars.path']
+            if (!path || path == "") return
+            path.split(";").each {
+                File jar = new File(it)
+                if (!tsFile.exists() || (tsFile.lastModified() &lt; jar.lastModified())) {
+                    ant.unzip(src:jar, dest: dest)
+                    didWrite = true
+                } else {
+                    println "Skipping ${jar} -- uptodate"
+                }
+            }
+            if (didWrite) tsFile.write("")
+        </groovy>
+    </target>
+
+    <target name="build-jar" depends="compile, copy-resources, check-aribaweb-properties, merge-jars">
         <jarify/>
     </target>
 
@@ -516,7 +557,6 @@
             properties['war.resource.jars.path']?.split(";").each {
                 File jar = new File(it)
                 if (!tsFile.exists() || (tsFile.lastModified() &lt; jar.lastModified())) {
-                    println "Unzipping ${jar.path} to ${dest}..."
                     ant.unzip(src:jar, dest: dest) {
                         patternset { include(name:"docroot/**/*") }
                     }
@@ -562,6 +602,16 @@
     </target>
 
     <target name="check-aribaweb-properties" depends="explicit-aribaweb-properties" if="needs.aribaweb.properties" unless="aribaweb.properties">
+        <!-- compute inlinedJars list of jar *names* -->
+        <pathconvert property="merge.jars.path" refid="merge.jars" pathsep=";"/>
+        <groovy>
+            def path = properties['merge.jars.path']
+            if (!path || path == "") return
+            properties['aw.inlinedJars'] = path.split(";").collect { new File(it).name }.join(",")
+        </groovy>
+        <condition property="aw.appName" value="${war.name}"><isset property="war.name"/></condition>
+
+        <!-- generate aribaweb.properties file -->
         <property name="aribaweb.properties" location="${src.derived.dir}/aribaweb.properties"/>
         <evaluate-template templateFile="${tools.dir}/templates/aribaweb.properties" outputFile="${aribaweb.properties}"/>
     </target>
@@ -569,8 +619,10 @@
     <target name="webapp" depends="init, war-resources, check-web-xml" if="war.name">
         <resources id="war.all.libs">
             <resources refid="build.deps"/>
+            <resources refid="build.deps2"/>
             <resources refid="build.jars"/>
             <resources refid="war.jars"/>
+            <resources refid="groovy.support.jars"/>
             <resources refid="app.war.jars"/>
             <resources refid="module.libs"/>
             <resources refid="module.libs2"/>
@@ -581,7 +633,6 @@
         <groovy>
             def warDir = new File(properties["build.war.dir"])
             def libDir = new File(warDir, "WEB-INF/lib")
-            // ["build.deps", "build.jars", "war.jars, "app.war.jars", "module.libs", "module.libs2", "module.libs3"]
             properties["war.all.libs.path"].split(";").each {
                 def src = new File(it), dest = new File(libDir, src.name)
                 if (!dest.exists() || (dest.lastModified() &lt; src.lastModified())) {
@@ -907,8 +958,9 @@
                 <env key="ARIBA_AWRELOAD" value="${aw.reload}"/>
                 <env key="AW_RELOAD_CLASSES_ROOT" value="${build.dir}/classes"/>
                 <env key="ANT_HOME" value="${ant.home}"/>
+                <jvmarg value="-Xmx256m"/>
                 <jvmarg value="${tomcat.jvmarg}"/>
-                
+
                 <jvmarg value="-Dcatalina.home=${catalina.home.dir}"/>
                 <jvmarg value="-Dcatalina.base=${catalina.base.dir}"/>
 
@@ -917,22 +969,29 @@
         </sequential>
     </macrodef>
 
+    <target name="evaluate-template">
+        <tempfile destdir="${java.io.tmpdir}" property="x.propertiesFile" suffix=".properties"/>
+        <echoproperties destfile="${x.propertiesFile}"/>
+        <java classname="ariba.ui.aribaweb.util.AWEvaluateTemplateFile" outputproperty="x.out">
+            <arg value="${templateFile}"/>
+            <arg value="${x.propertiesFile}"/>
+            <arg value="${outputFile}"/>
+            <classpath>
+                <path refid="aw.tools.classpath"/>
+            </classpath>
+        </java>
+        <echo message="Output: ${x.out}"/>
+        <delete file="${x.propertiesFile}" quiet="true"/>
+    </target>
+
     <macrodef name="evaluate-template">
         <attribute name="templateFile"/>
         <attribute name="outputFile"/>
         <sequential>
-            <tempfile destdir="${java.io.tmpdir}" property="x.propertiesFile" suffix=".properties"/>
-            <echoproperties destfile="${x.propertiesFile}"/>
-            <java classname="ariba.ui.aribaweb.util.AWEvaluateTemplateFile" outputproperty="x.out">
-                <arg value="@{templateFile}"/>
-                <arg value="${x.propertiesFile}"/>
-                <arg value="@{outputFile}"/>
-                <classpath>
-                    <path refid="aw.tools.classpath"/>
-                </classpath>
-            </java>
-            <echo message="Output: ${x.out}"/>
-            <delete file="${x.propertiesFile}" quiet="true"/>
+            <antcall target="evaluate-template">
+                <param name="templateFile" value="@{templateFile}"/>
+                <param name="outputFile" value="@{outputFile}"/>                
+            </antcall>
         </sequential>
     </macrodef>
 

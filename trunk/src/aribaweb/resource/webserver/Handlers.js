@@ -203,7 +203,9 @@ ariba.Handlers = function() {
 
         textNoSubmit : function (mevent, textField)
         {
-            if (Event.keyCode(mevent) == 13 && !Event.hasHandler(textField.form, "keypress"))
+            if (Event.keyCode(mevent) == 13
+                    && !Dom.findParentUsingPredicate(textField, function(e) { 
+                            return e.tagName && Event.hasHandler(e, "keypress") }))
             {
                 Event.cancelBubble(mevent);
                 return false;
@@ -343,6 +345,36 @@ ariba.Handlers = function() {
             }
             return true;
         },
+
+        fakeClick : function (elm, evt)
+        {
+            if (elm) {
+                Event.elementInvoke(elm, "mousein");
+                Event.elementInvoke(elm, "mousedown");
+
+                var result = Event.elementInvoke(elm, "click");
+                Event.cancelBubble(evt);
+                var cb = function () {
+                    if (Dom.elementInDom(elm)) Event.elementInvoke(elm, "mouseout");
+                }.bind(this);
+                
+                if (Request.isRequestInProgress()) {
+                    Event.registerUpdateCompleteCallback(cb);
+                } else {
+                    setTimeout(cb, 1000);
+                }
+
+                return result;
+            }
+            return true;
+        },
+
+        fireDefaultActionButton : function (elm, evt)
+        {
+            var actionElm = Dom.findChildUsingPredicate(elm, function (e) { return e.tagName && Dom.boolAttr(e, "_isDef", false) });
+            return this.fakeClick(actionElm, evt);
+        },
+
         ////////////////
         // Disable Input
         ////////////////
@@ -405,6 +437,25 @@ ariba.Handlers = function() {
                 return (type == "AC") ? ariba.Handlers.hTagKeyDown(elm, formId, null, null, evt, false, null)
                      : (type == "ROKP") ? ariba.Handlers.hTagRefreshKeyDown(elm, formId, null, null, evt, false, null)
                      : ariba.Handlers.textRefresh(evt, elm);
+            }
+        },
+
+        TA : {
+            // onKeyUp="$limitTextJavaScriptString" onKeyDown="$onKeyDownString"
+            keyup : function (elm, evt) {
+                ariba.Dom.limitTextLength(elm, elm.getAttribute("_mL"));
+            },
+
+            keydown : function (elm, evt) {
+                return Dom.boolAttr(elm, "_isRF", false) ? ariba.Handlers.textRefresh(evt,elm) : true;
+            }
+        },
+
+        // Default TextButton Scope
+        DTBS : {
+            keypress : function (elm, evt) {
+                var target = (evt.srcElement) ? evt.srcElement : evt.target;
+                return (evt.keyCode == 13 && target.tagName != "TEXTAREA") ? ariba.Handlers.fireDefaultActionButton(elm, evt) : true;
             }
         },
 

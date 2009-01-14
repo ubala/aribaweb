@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#13 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#15 $
 */
 package ariba.ui.meta.layouts;
 
@@ -46,6 +46,11 @@ public class MetaNavTabBar extends AWComponent
         return state;
     }
 
+    public static void invalidateState (AWSession session)
+    {
+        session.dict().remove("_MNBSessState");
+    }
+
     public static String[] Zones = { "Main" };
 
     public static class State
@@ -68,8 +73,9 @@ public class MetaNavTabBar extends AWComponent
             UIMeta meta = UIMeta.getInstance();
             if (_modules == null || _ruleSetGeneration < meta.ruleSetGeneration()) {
                 Context context = meta.newContext();
-                _moduleInfo = meta.computeModuleInfo(context);
+                _moduleInfo = meta.computeModuleInfo(context, true);
                 _modules = _moduleInfo.modules;
+                _selectedModule = null;
                 _ruleSetGeneration = meta.ruleSetGeneration();
             }
         }

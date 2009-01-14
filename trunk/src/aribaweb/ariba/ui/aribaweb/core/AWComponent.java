@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#109 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#110 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -704,16 +704,26 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         return false;
     }
 
-    public boolean hasSubTemplateNamed (String templateName)
+    public boolean hasContentNamed (String name)
     {
         AWElement contentElement = componentReference().contentElement();
         if (contentElement instanceof AWTemplate) {
             AWTemplate template = (AWTemplate)contentElement;
-            if (template.indexOfNamedSubtemplate(templateName, this) != -1) {
-                return true;
+            int index = template.indexOfNamedSubtemplate(name, this);
+            if (index != -1) {
+                AWContent content = template.subtemplateAt(index);
+                return content.enabled(this);
             }
         }
         return false;
+    }
+
+    /**
+     * @deprecated  Use hasContentNamed()
+     */
+    public boolean hasSubTemplateNamed (String templateName)
+    {
+        return hasContentNamed(templateName);
     }
 
     protected boolean doesReferenceHaveNamedTemplate (String templateName)

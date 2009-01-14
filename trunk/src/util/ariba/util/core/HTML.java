@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#22 $
+    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#23 $
 */
 
 package ariba.util.core;
@@ -20,6 +20,8 @@ package ariba.util.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ariba.util.log.Log;
@@ -109,6 +111,14 @@ public class HTML
         "nbsp;",
         "reg;",
     };
+
+    static Map<String, String>safeHtmlCharacterMap = map (
+            "&nbsp;", " ",
+            "&lt;", "<",
+            "&gt;", ">",
+            "&amp;", "&",
+            "&quot;", "\"",
+            "&apos;", "\'");
 
     public static final String TagMeta = "meta";
     public static final String TagEndOfHead = "/head";
@@ -865,14 +875,39 @@ public class HTML
 
 
     private static final Pattern RemoveTagsPattern =
-        Pattern.compile("<[^<]*>", Pattern.MULTILINE);
+        Pattern.compile("<[^<]*?>", Pattern.MULTILINE);
 
     public static String convertToPlainText (String richText)
     {
-	    // ToDo:  This method should unescape &nbsp, &amp, &gt, etc...
         if (richText == null) {
             return null;
         }
         return RemoveTagsPattern.matcher(richText).replaceAll("");
     }
+
+    public static String fullyConvertToPlainText (String text)
+    {
+        String converted = text.replaceAll("(<br/>)|(<br>)|(</div>)","\n");
+        converted = converted.replaceAll(">>",">&gt;");
+        converted = RemoveTagsPattern.matcher(converted).replaceAll("");
+
+        // Todo: Fix slow, multi-match, impl!  (Should create one (precomputed) combo regex)
+        for (Map.Entry<String,String> e : safeHtmlCharacterMap.entrySet()) {
+            converted = converted.replaceAll(e.getKey(), e.getValue());
+        }
+
+        return converted;
+    }
+
+    // todo: move to MapUtil
+    static <K,V> Map<K,V> map (Object ...keysAndValues)
+    {
+        int c = keysAndValues.length;
+        Assert.that(c % 2 == 0, "Must have even number of args: key, value, ... : %s");
+        Map<K,V> result = new HashMap<K,V>(c/2);
+        for (int i=0; i < c; i += 2) {
+            result.put((K)keysAndValues[i], (V)keysAndValues[i+1]);
+        }
+        return result;
+    }       
 }

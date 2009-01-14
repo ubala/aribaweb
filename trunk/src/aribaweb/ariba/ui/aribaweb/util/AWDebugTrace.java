@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#11 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -20,6 +20,7 @@ import ariba.util.core.MapUtil;
 import ariba.util.core.ListUtil;
 import ariba.util.core.ClassExtension;
 import ariba.util.core.ClassExtensionRegistry;
+import ariba.util.core.Fmt;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWComponentDefinition;
 import ariba.ui.aribaweb.core.AWComponentReference;
@@ -603,6 +604,11 @@ public class AWDebugTrace
         public boolean isOverridden()
         {
             return isOverridden;
+        }
+
+        public String toString ()
+        {
+            return Fmt.S("%s : %s", key, value);
         }
     }
 

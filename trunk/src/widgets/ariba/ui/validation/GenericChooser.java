@@ -38,7 +38,7 @@ import java.text.ParseException;
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.java#6 $
 */
 public class GenericChooser extends AWComponent implements ChooserSelectionState
 {
@@ -228,6 +228,7 @@ public class GenericChooser extends AWComponent implements ChooserSelectionState
 
         protected String formatObject(Object object, Locale locale) {
             Object value = _fieldPath.getFieldValue(object);
+            if (value == null) return null;
             return (_chainedFormatter == null) ? value.toString()
                     : AWFormatting.get(_chainedFormatter).format(_chainedFormatter, value, locale);
         }

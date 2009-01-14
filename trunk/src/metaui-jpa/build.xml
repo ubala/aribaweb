@@ -32,11 +32,19 @@
     <available file="${basedir}/lib/ext-jpa" property="lib.jpa.dir" value="${basedir}/lib/ext-jpa"/>
     <property name="lib.jpa.dir" location="${aw.home}/lib/ext-jpa"/>
 
+    <available file="${basedir}/lib/ext-compass" property="lib.compass.dir" value="${basedir}/lib/ext-compass"/>
+    <property name="lib.compass.dir" location="${aw.home}/lib/ext-compass"/>
+
     <fileset id="jar.resources" dir="${basedir}" excludes="examples/**">
         <patternset refid="jar.resource.patterns"/>
     </fileset>
 
     <fileset id="module.libs" dir="${lib.jpa.dir}">
+        <include name="**/*.jar"/>
+        <include name="**/*.zip"/>
+    </fileset>
+
+    <fileset id="module.libs3" dir="${lib.compass.dir}">
         <include name="**/*.jar"/>
         <include name="**/*.zip"/>
     </fileset>

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#26 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#27 $
     </Copyright>
 
     <Overview>
@@ -109,7 +109,7 @@
 </a:If>\
 <a:Block name="Input">
     <textarea name="$textAreaName" formValue="$formValue" elementId="$elementId"
-              onKeyUp="$limitTextJavaScriptString" onKeyDown="$onKeyDownString"
+              bh="TA" _mL="$maxLength" _isRF="$^isRefresh"
               otherBindings="$otherBindingsValues" id="$textAreaId" disabled="$disabled">\
         <a:String value="$formattedString" escapeHtml="$^escapeHtml:$true"/>\
     </textarea>\

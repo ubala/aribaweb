@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/DetailDataSource.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/DetailDataSource.java#4 $
 */
 package ariba.ui.meta.persistence;
 
@@ -37,9 +37,19 @@ public class DetailDataSource extends AWTDataSource
         _detailFieldPath = new FieldPath(keyPath);
     }
 
+    public Object parentObject ()
+    {
+        return _parentObject;
+    }
+
+    public void setParentObject (Object parentObject)
+    {
+        _parentObject = parentObject;
+    }
+
     public List fetchObjects()
     {
-        return (List)_detailFieldPath.getFieldValue(_parentObject);
+        return (_parentObject != null) ? (List)_detailFieldPath.getFieldValue(_parentObject) : null;
     }
 
     public AWTEntity entity()
@@ -71,6 +81,7 @@ public class DetailDataSource extends AWTDataSource
 
     public Object insert()
     {
+        if (_parentObject == null) return null;
         Object instance = ObjectContext.get().create(detailClassName());
         listForUpdate().add(instance);
         return instance;
@@ -78,6 +89,7 @@ public class DetailDataSource extends AWTDataSource
 
     public void delete(Object object)
     {
+        if (_parentObject == null) return;
         listForUpdate().remove(object);
     }
 }

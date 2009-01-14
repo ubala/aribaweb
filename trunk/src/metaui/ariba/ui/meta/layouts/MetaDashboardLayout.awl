@@ -5,7 +5,7 @@
     </td>
 </tr></table>
 <table cellspacing="0" width="100%"><tr>
-    <td class="dbTOC">\
+    <td _ifTrue="$layoutsByZones.zToc" class="dbTOC">\
         <div class="flexContainer">\
             <div class="dbTOC">\
                 <a:IncludeBlock name="portlets" list="$layoutsByZones.zToc" portletWidth="narrow"/>
@@ -14,7 +14,7 @@
     </td>
     <td width="99%" valign="top">\
         <div class="flexContainer">\
-            <w:FourZoneLayout>
+            <w:FourZoneLayout widthLeft="$metaContext.properties.widthLeft" widthRight="$metaContext.properties.widthRight">
                 <a:Content name="top">
                     <a:IncludeBlock name="portlets" list="$layoutsByZones.zTop" portletWidth="wide"/>
                 </a:Content>

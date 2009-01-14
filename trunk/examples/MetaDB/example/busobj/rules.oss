@@ -6,7 +6,7 @@
 */
 
 class=example.busobj.User {
-    field=(firstName, lastName, email, password) { traits:required }
+    field=(firstName, lastName, email, password) { trait:required }
     field=email { label:"E-mail" }
     field=bio {
         editing {

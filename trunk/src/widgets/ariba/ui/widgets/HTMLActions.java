@@ -12,9 +12,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTMetaColumnActions.java#6 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActions.java#1 $
 */
-package ariba.ui.table;
+package ariba.ui.widgets;
 
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWComponent;
@@ -22,9 +22,8 @@ import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWDirectAction;
 import ariba.ui.aribaweb.core.AWRequest;
 import ariba.ui.aribaweb.core.AWDirectActionUrl;
-import ariba.ui.widgets.ActionHandler;
 
-public final class AWTMetaColumnActions extends AWDirectAction
+public final class HTMLActions extends AWDirectAction
 {
     private static final String RequestContextKey = "AWTMetaColumnActionsURL";
     private static final String ActionTargetKey = "AWTMetaColumnActionsTarget";
@@ -55,7 +54,7 @@ public final class AWTMetaColumnActions extends AWDirectAction
 
         ActionHandler handler = ActionHandler.resolveHandlerInComponent(actionName, component);
         if (handler == null) {
-            Log.table.debug("Unknown handler key: %s", actionUrlString);
+            ariba.ui.table.Log.table.debug("Unknown handler key: %s", actionUrlString);
             return null;
         }
 
@@ -83,7 +82,7 @@ public final class AWTMetaColumnActions extends AWDirectAction
     {
         public String url (AWRequestContext requestContext)
         {
-            return AWTMetaColumnActions.actionURLForRequest(requestContext);
+            return actionURLForRequest(requestContext);
         }
 
         public boolean isInterrupting (AWRequestContext requestContext)
@@ -98,7 +97,7 @@ public final class AWTMetaColumnActions extends AWDirectAction
         if (action.startsWith("http://") || action.startsWith("https://")) {
             return action;
         }
-        return AWDirectActionUrl.fullUrlForDirectAction("direct/AWTMetaColumnActions",
+        return AWDirectActionUrl.fullUrlForDirectAction("direct/HTMLActions",
                 requestContext, "action", action);
     }
 

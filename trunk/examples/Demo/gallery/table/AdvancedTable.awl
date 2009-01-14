@@ -14,6 +14,7 @@
                  displayGroup="$displayGroup" list="$list" item="$item"
                  isItemSelectable="$currentNotMoved"
                  tableConfig="$tableConfig"
+                 useRowDetailExpansionControl="$true" rowDetailAutoCollapse="$true" rowDetailInitialExpansion="2"
                  dragAction="$itemDragged" dragType="lineItem" dropAction="$null" dropType="lineItem">
 
         <t:HeadingArea>
@@ -35,10 +36,6 @@
             </div>
             </w:SectionHeading>
         </t:HeadingArea>
-
-        <t:Column valign="middle">
-            <w:ToggleImage align="absmiddle" state="$displayGroup.currentItemExtras.expando"/>
-        </t:Column>
 
         <t:Column label="Department!" key="Department" nowrap>
             <a:SetValue menuId="$requestContext.nextElementId"/>
@@ -85,8 +82,8 @@
         </t:Column>
 
         <!--- Nested table as conditional detail -->
-        <t:RowDetail isVisible="$displayGroup.currentItemExtras.expando" showRowLine="$false">
-            <t:DataTable multiSelect="$true" batchSize="9999" list="$users.children" item="$item"
+        <t:RowDetail showRowLine="$false">
+            <t:DataTable multiSelect="$true" batchSize="9999" list="$users" item="$item"
                     children="$item.manages.children">
 
                 <t:Column key="name.text" label="Name" valign="bottom">\

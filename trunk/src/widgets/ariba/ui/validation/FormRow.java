@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.java#6 $
 */
 
 package ariba.ui.validation;
@@ -58,6 +58,11 @@ public final class FormRow extends AWComponent
                 && booleanValueForBinding(AWBindingNames.required)) ? RequiredFieldIndicator : null;
     }
 
+    public String labelClass ()
+    {
+        return booleanValueForBinding("labelNowrap") ? "ffl noWrap" : "ffl";
+    }
+
     public String rowBlockName ()
     {
         return (_dragType != null) ? "DragRow" : "Row";
@@ -71,5 +76,5 @@ public final class FormRow extends AWComponent
     public AWInputId getInputId ()
     {
         return AWInputId.getAWInputId(_elementId);
-    }    
+    }
 }

@@ -39,6 +39,29 @@ INPUT {
     padding-right: 4px;
 }
 
+INPUT.tf {
+    border: 1px solid #7F9DB9 !important;
+    padding:2px;
+}
+.IsIE INPUT.tf {
+    margin-right:6px;
+}
+.IsMoz INPUT.tf {
+    margin-right:2px;
+}
+.IsMoz SELECT {
+    border: 1px solid #7F9DB9 !important;
+    padding:1px;
+}
+
+INPUT.tfW {
+    width:156px;
+}
+
+INPUT.tfDis {
+    background-color:#EEEEEE;
+}
+
 SELECT {
     color:#000000;
     font:normal 11px Verdana, Arial, Helvetica, sans-serif;
@@ -47,7 +70,7 @@ SELECT {
 TEXTAREA {
     color:#000000;
     font:normal 11px Verdana, Arial, Helvetica, sans-serif;
-    padding-right: 4px;
+    border: 1px solid #7F9DB9;
 }
 
 .IsMoz LI {
@@ -312,6 +335,11 @@ IMG.block {
 .disabled {
     color:#999999 !important;
     font:normal 11px Verdana, Arial, Helvetica, sans-serif;
+}
+
+.disabled A:visited,
+.disabled A:link {
+    color:#999999;
 }
 
 .bigBody {
@@ -1006,11 +1034,6 @@ DIV.nowrap SELECT, DIV.nowrap INPUT, DIV.nowrap TEXTAREA {
     padding:2px 0px 2px 0px;
 }
 
-.accentBox {
-    background-color:#FFEAAA;
-    border:1px solid #9999CC;
-}
-
 .vertline {
     border-left:1px solid #999999;
 }
@@ -1391,7 +1414,7 @@ b.rtop b.r4, b.rbottom b.r4 {
 td.fflS                  { padding-right:160px; }
 td.ffiS                  { padding-right:10px; }
 td.ffpS                  { padding-right:175px; }
-td.ftAs                  { width:30px; }
+td.ftAs                  { padding-right:30px; }
 
 td.ffl, td.ffp, td.ffi {
     vertical-align:top;
@@ -1417,6 +1440,8 @@ td.ffi {
 
 td.ffp        { padding-left:5px; }
 td.ffp td.ffp { padding:0px; }
+div.ffpNF     { margin:-6px 5px 0px -5px }
+td.ffp div.ffpNF td.ffp { padding-top:6px; }
 
 .ftRO td.ffl { height:15px;}
 .ftRO td.ffi { height:18px;}
@@ -1424,9 +1449,8 @@ td.ffp td.ffp { padding:0px; }
 
 .smallForm td.fflS     { padding-right:95px; }
 .smallForm td.ffpS     { padding-right:125px; }
-.smallForm td.ftAs     { padding-right:20px; }
+.smallForm td.ftAs     { padding-right:10px; }
 .smallForm td.ffl {
-    font:normal 9px Verdana, Arial, Helvetica, sans-serif !important;
     height:16px;
     padding-left:0px;
 }
@@ -2073,7 +2097,7 @@ img.pivAttIcon, .hov img.pivAttIconOver {
 }
 
 .smallFont {
-    font:9px Verdana, Arial, Helvetica, sans-serif;
+    font:9px Verdana, Arial, Helvetica, sans-serif !important;
     padding:2px 2px 1px 2px;
 }
 
@@ -3534,9 +3558,13 @@ div.dbTOC {
     border-left: 0px;
 }
 
-.chText {
+INPUT.chText {
     border: 0px;
-    padding: 1px;
+    padding: 2px;
+}
+
+INPUT.chTW {
+    width:134px;
 }
 
 .chNoSelection {
@@ -3598,8 +3626,8 @@ div.dbTOC {
     padding: 1px;
 }
 
-.chMultiSpacer {
-    height:2px;
+tr.chMultiSpacer td {
+    padding-top:2px;
 }
 
 /*** Footer Links ***/

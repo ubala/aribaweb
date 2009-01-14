@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MessagesList.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MessagesList.java#4 $
 */
 
 package ariba.ui.widgets;
@@ -180,6 +180,8 @@ public class MessagesList extends AWComponent
     */
     private String addMessageWrapperTo (String message)
     {
+        return message;
+        /* todo: Move wrapper message to imge tooltip
         String messageWrapperKey;
         switch (messageKind()) {
         case ConfirmKind:
@@ -197,5 +199,6 @@ public class MessagesList extends AWComponent
                        "ariba.htmlui.widgets",
                        messageWrapperKey,
                        message);
+        */
     }
 }

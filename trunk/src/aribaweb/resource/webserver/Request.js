@@ -14,7 +14,7 @@ ariba.Request = function() {
     var Dom = ariba.Dom;
 
     // private vars
-    var AWRequestInProgress = false;
+    var AWRequestInProgress = true;
     var AWSenderClickedCallbackList = null;
     var AWPollEnabled = true;
     var AWPollTimeoutId, AWPollSenderId, AWPollUpdateSenderId, AWPollInterval;
@@ -331,6 +331,7 @@ ariba.Request = function() {
                 }
             }
             if (shouldSubmit) {
+                // XXX remove this after transition to onRefreshRequestBegin
                 ariba.Debug.resetRequestComplete();
                 Event.invokeRegisteredHandlers("onsubmit");
                 this.addAWFormFields(formObject);
@@ -354,7 +355,18 @@ ariba.Request = function() {
                 else {
                     this.prepareForRequest(async);
                     try {
-                        if (this.UseXmlHttpRequests && !this.hasPopulatedFileInputContol(formObject)) {
+                        var fileUpload = this.hasPopulatedFileInputContol(formObject, true);
+                        var origEncType = null;
+                        if (fileUpload) {
+                            origEncType = formObject.enctype;
+                            if (!origEncType || (origEncType.indexOf("multipart") != 0)) {
+                                formObject.enctype = "multipart/form-data";
+                            } else {
+                                origEncType = null;
+                            }
+                        }
+
+                        if (this.UseXmlHttpRequests && !fileUpload) {
                             Debug.log("<--- Incremental post: XMLHTTP");
                             Dom.addFormField(formObject, 'awii', "xmlhttp");
                             var postBody = this.encodedFormValueString(formObject)
@@ -370,6 +382,7 @@ ariba.Request = function() {
                             formObject.target = iframe.name;
                             Dom.addFormField(formObject, 'awii', iframe.name);
                             formObject.submit();
+                            if (origEncType) formObject.enctype = origEncType;
                         }
                     }
                     catch (e) {
@@ -567,13 +580,19 @@ ariba.Request = function() {
 
         redirectRefresh : function ()
         {
-            this.prepareRedirectRequest();
             var url = this.appendFrameName(this.AWRefreshUrl);
+            this.redirect(url);
+        },
+
+        // Called from an AWRedirect (either XHR or IFrame)
+        redirect : function (url)
+        {
+            this.prepareRedirectRequest();
 
             // need to do it twice on Netscape?!?  (with the backtrack hash stuff in place)
             // if (!Dom.IsIE) window.location.href = url;
             window.location.href = url;
-            // in somes cases, we are trying to redirect while the download “Save/Open” dialog is up.
+            // in somes cases, we are trying to redirect while the download ï¿½Save/Openï¿½ dialog is up.
             // We need to retry in those cases.
             if (Dom.IsIE6Only || Dom.isSafari) {
                 function retry() {
@@ -596,6 +615,7 @@ ariba.Request = function() {
         // initiate content retrieval
         getContent : function (url, forceIFrame)
         {
+            // XXX remove this after transition to onRefreshRequestBegin
             ariba.Debug.resetRequestComplete();
             // Debug.log("--- awGetContent --> " + url + "  [windowName:" + window.name + ", this.AWReqUrl:" + AWReqUrl + "]");
             this.prepareForRequest();
@@ -626,6 +646,7 @@ ariba.Request = function() {
         {
             this.requestComplete();
             AWRequestInProgress = true;
+            Event.invokeRegisteredHandlers("onRefreshRequestBegin");
             if (!noWaitCursor) Input.showWaitCursor();
         // start timer to make sure something comes back in the iframe
             setTimeout(this.startRefreshTimer.bind(this), 1);
@@ -633,11 +654,22 @@ ariba.Request = function() {
             this.initProgressCheck(this.AWProgressUrl, Input.AWWaitAlertMillis + 2000, Input.AWWaitAlertMillis);
         },
 
+        isRequestInProgress : function ()
+        {
+            return AWRequestInProgress;
+        },
+
         requestComplete : function ()
         {
             AWRequestInProgress = false;
             Input.hideWaitCursor();
         },
+
+        isRequestInProgress : function ()
+        {
+            return AWRequestInProgress;
+        },
+
         // clear all server pings, but keep UI locked.
         prepareRedirectRequest : function ()
         {
@@ -817,6 +849,7 @@ ariba.Request = function() {
             AWRefreshCount = 0;
             clearTimeout(AWRefreshCompleteTimeout);
             clearTimeout(AWDocumentLoadTimeout);
+            ariba.Refresh.clearPendingCompleteRequestRun();
         },
 
         handleRequestError : function ()
@@ -960,12 +993,12 @@ ariba.Request = function() {
         // File Upload Status
         //****************************************************
 
-        hasPopulatedFileInputContol : function (form) {
+        hasPopulatedFileInputContol : function (form, includeUnpopulated) {
             var elements = form.getElementsByTagName('input');
             for (var i = 0; i < elements.length; i++) {
                 var e = elements.item(i);
                 if (e.type == "file") {
-                    if (e.value.length > 0) return true;
+                    if (includeUnpopulated || e.value.length > 0) return true;
                 }
             }
             return false;

@@ -1,0 +1,6 @@
+/*
+    Application.oss -- application global rules
+*/
+module=@ModelPkg@.@MasterClass@ {
+
+}

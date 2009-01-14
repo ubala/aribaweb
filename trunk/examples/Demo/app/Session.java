@@ -4,7 +4,7 @@ import ariba.ui.aribaweb.core.AWSession;
 import ariba.ui.aribaweb.core.AWSessionValidationException;
 
 /**
-    Sessopm class
+    Session class
 
     We provide a subclass to simulate tracking user login.
     A real world implementation would associate a user object (and

@@ -80,6 +80,7 @@ aribaAuditCommitNow.realmPurge, ariba.app.audit.AuditLoggerFactory
 aribaAuditCommitNow.reportTimeout, ariba.app.audit.AuditLoggerFactory
 aribaAuditCommitNow.schemaRealmMapping, ariba.app.audit.AuditLoggerFactory
 aribaAuditCommitNow.cdsSyncVerifier, ariba.app.audit.AuditLoggerFactory
+aribaAuditCommitNow.apputil, ariba.app.audit.AuditLoggerFactory
 aribaInternalDev,
 aribaweb,
 aribawebexec.elementId,

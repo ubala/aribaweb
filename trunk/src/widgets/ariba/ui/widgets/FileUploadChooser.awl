@@ -1,0 +1,80 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FileUploadChooser.awl#1 $
+    </Copyright>
+
+    <Overview>
+        FileUploadChooser wraps AWFileUpload, providing better behavior post upload.  In particular
+        with a standard upload control, after an upload, if the user is on the same form (validation
+        error, etc) then the upload control is cleared.  With FileUploadChooser, post upload the uploaded
+        file name is displayed *read-only* (but with a Clear button) so that subsequent form posts
+        will not clear the file.
+
+        In addition, FileUploadChooser keeps the uploaded file around (in /tmp) until the app deletes it
+        or the server process exits (unlike AWFileUpload which will delete it upon end of request).
+
+        Note that the app *must* initialize ariba.ui.aribaweb.util.AWMimeReader.setFileUploadDirectory(...)
+        so that file writing to disk is enabled.
+    </Overview>
+
+    <Binding key="file" type="java.io.File" direction="both" alternates="inputStream,bytes">
+        This file will be stored in a subdirectory of AWMimeReader.fileUploadDirectory() and its
+        name will match the user's original file name.
+
+        This file is set with File.deleteOnExit(), so the app must move it if the file contents are
+        to be retained.
+    </Binding>
+
+    <Binding key="filename" type="String" direction="both" required="$false">
+        The name of the file.  On upload, the name from the user's machine is pushed.  The binding is
+        also *pulled* to get the label to be displayed post upload.  (If not bound, the name() of the
+        pull of the file binding will be used).
+    </Binding>
+
+    <Binding key="mimeType" type="String" direction="set" required="$false">
+        When the request is processed, if you provide this binding, the mime type
+        of the uploaded data will be set.
+    </Binding>
+
+
+    <Binding key="fileSizeExceeded" type="boolean" direction="set" required="$false">
+        Returns true (during applyValues) if the size of the file uploaded exceeds
+        the maximum allowed.
+    </Binding>
+
+    <Binding key="maxLength" type="int" direction="get" required="$false">
+        Override the maximum length.
+
+        This binding can be used whether or not there is a static max length currently set
+        so the maxlength can be used to
+        a) ensure that at a certain file upload has does not exceed a certain length while
+           allowing all standard file uploads to be unlimited in length
+        b) (more common) allow a particular file upload control to specify a max length
+           which is greater than the global (system wide) max length
+
+        If there are multiple AWFileUpload controls on a page, the max length for each
+        AWFileUpload can be set independently.  Any AWFileUpload without this binding
+        will have a maxlength based on the global setting for the system.
+    </Binding>
+
+</a:Api>\
+<a:If ifTrue="$displayName">
+    $displayName
+    [<a:Hyperlink action="$clear" submitForm="$false">Clear</a:Hyperlink>]
+<a:Else/>
+    <a:FileUpload file="$file" filename="$filename" mimeType="$^mimeType" fileSizeExceeded="$^fileSizeExceeded"
+        maxLength="$^maxLength"/>
+</a:If>

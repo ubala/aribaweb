@@ -104,6 +104,17 @@ Step 5) Experiment with making changes!
       (Assuming you've set an AW_HOME variable to point at the root directory of your
        AribaWeb installation)
 
+Troubleshooting
+---------------
+If you attempt to rebuild the full AribaWeb distribution from source you
+may run into an "java.lang.OutOfMemoryError: PermGen space" error.  You
+can solve this problem by giving Ant more Perm space, as follows:
+
+    export ANT_OPTS=-XX:MaxPermSize=256m
+
+
+Support
+-------
 
 For the time being, if you have questions about aribaweb, contact:
     craigf (at) ariba dot com

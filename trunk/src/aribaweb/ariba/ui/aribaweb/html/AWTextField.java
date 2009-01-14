@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#49 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#50 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -52,7 +52,9 @@ public class AWTextField extends AWComponent
         BindingNames.errorKey,
         BindingNames.onKeyDown,
         BindingNames.disabled,
-        BindingNames.behavior
+        BindingNames.behavior,
+        BindingNames.size,
+        BindingNames.classBinding
     };
     public AWEncodedString _elementId;
     private AWEncodedString _textFieldName;
@@ -64,7 +66,6 @@ public class AWTextField extends AWComponent
     private boolean _disabled;
 
     private static final String EmptyString = "";
-    private static final String DisabledStyle = "background-color:#DDDDDDD;";
 
     // ** Thread Safety Considerations: see AWComponent.
 
@@ -292,9 +293,12 @@ public class AWTextField extends AWComponent
                 !requestContext.isPrintMode() && !requestContext.isExportMode());
     }
 
-    public String style ()
+    public String cssClass ()
     {
-        return _disabled ? DisabledStyle : null;
+        String cls = stringValueForBinding(BindingNames.classBinding);
+        if (cls == null) cls = (valueForBinding(BindingNames.size) == null) ? "tf tfW" : "tf";
+        if (_disabled) cls += " tfDis";
+        return cls;
     }
 
     public boolean isInHighLightedErrorScope ()

@@ -51,18 +51,40 @@ public class NestedMap<K, V> extends AbstractMap<K, V>
     public V put(K key, V value)
     {
         V orig = _map.get(key);
-        if (orig == null && _parent.containsKey(key)) _overrideCount++;
+        if (orig == null && _parent.containsKey(key)) {
+            _overrideCount += (_map.containsKey(key) ? -1: 1);
+        }
         _map.put(key, value);
         return orig;
     }
 
     public V remove(Object key)
     {
+        V orig = null;
         if (_map.containsKey(key)) {
-            V orig = _map.remove(key);
-            if (_parent.containsKey(key)) _overrideCount--;
+            orig = _map.remove(key);
+            if (_parent.containsKey(key)) {
+                _map.put((K)key, null);
+                // _overrideCount--;
+                _overrideCount++;
+            }
         }
-        return null;
+        else if (_parent.containsKey(key)) {
+            // we're "removing" a value we don't have (but that our parent does)
+            // we need to store a null override
+            orig = _parent.get(key);
+            _map.put((K)key, null);
+            _overrideCount += 2;
+        }
+        return orig;
+    }
+
+    public Map dup ()
+    {
+        NestedMap dup = new NestedMap(_parent);
+        dup._map = new HashMap(_map);
+        dup._overrideCount = _overrideCount;
+        return dup;
     }
 
     private static class EntrySet extends AbstractSet
@@ -105,11 +127,14 @@ public class NestedMap<K, V> extends AbstractMap<K, V>
 
         void advanceToNext()
         {
-            if (_nestedIterator.hasNext()) {
-                _fromNested = true;
+            _fromNested = false;
+            // Note: we need to skip nulls (masked values)
+            while (!_fromNested && _nestedIterator.hasNext()) {
                 _nextEntry = _nestedIterator.next();
-            } else {
-                _fromNested = false;
+                if (_nextEntry.getValue() != null) _fromNested = true;
+            }
+
+            if (!_fromNested) {
                 while (_parentIterator.hasNext()) {
                     _nextEntry = _parentIterator.next();
                     if (!_nestedMap._map.containsKey(_nextEntry.getKey())) return;

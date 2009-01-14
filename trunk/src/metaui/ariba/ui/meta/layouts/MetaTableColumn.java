@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumn.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumn.java#3 $
 */
 package ariba.ui.meta.layouts;
 
@@ -28,7 +28,7 @@ import java.util.Map;
 
 public final class MetaTableColumn extends AWTDataTable.Column
 {
-    protected ItemProperties _fieldInfo;
+    protected String _fieldName;
 
     protected FieldPath _fieldPath;
     protected String _label;
@@ -51,13 +51,13 @@ public final class MetaTableColumn extends AWTDataTable.Column
 
     /** Convenience for initing a dynamic column */
      public void init (AWTDataTable table,
-                       ItemProperties field)
+                       String fieldName)
     {
         Context context = MetaContext.currentContext(table);
         context.push();
-        context.set(UIMeta.KeyField, field.name());
+        context.set(UIMeta.KeyField, fieldName);
 
-        _fieldInfo = field;
+        _fieldName = fieldName;
         _fieldPath = ((UIMeta.UIContext)context).fieldPath();
 
         _label = (String) context.propertyForKey(UIMeta.KeyLabel);
@@ -71,9 +71,9 @@ public final class MetaTableColumn extends AWTDataTable.Column
         context.pop();
     }
 
-    public ariba.ui.meta.core.ItemProperties fieldInfo ()
+    public String fieldName ()
     {
-        return _fieldInfo;
+        return _fieldName;
     }
 
     public FieldPath fieldPath ()

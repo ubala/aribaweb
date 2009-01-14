@@ -88,7 +88,7 @@
                 <attribute name="Bundle-Version" value="5.0b6"/>
                 <attribute name="Bundle-Activator" value="ariba.ideplugin.eclipse.Activator"/>
                 <attribute name="Bundle-Localization" value="plugin"/>
-                <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.ui.ide, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.ui.editors, org.eclipse.core.runtime, org.eclipse.jdt.core, org.eclipse.ant.core"/>
+                <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.ui.ide, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.ui.editors, org.eclipse.core.runtime, org.eclipse.jdt.core, org.eclipse.wst.sse.ui, org.eclipse.ant.core"/>
                 <attribute name="Eclipse-LazyStart" value="true"/>
             	<attribute name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.5"/>
             </manifest-attributes>

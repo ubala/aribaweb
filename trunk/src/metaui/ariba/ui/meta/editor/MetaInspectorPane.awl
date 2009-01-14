@@ -1,6 +1,6 @@
-<table border="0" class='${compactMode ? "" : "scrollTableWrapper"}'
-       cellpadding="0" cellspacing="0" width="100%">\
-    <tr><td class="tableHeader" style="padding:2px 2px 4px 2px">\
+<div class='${compactMode ? "" : "noTopLine scrollTableWrapper"}'>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">\
+    <tr><td class="tableHeader" style='${compactMode ? "padding:0px 0px 4px 2px" : "padding:4px 4px 4px 2px"}'>\
         <div class="flR">
             <a:SetValue menuId="$requestContext.nextElementId"/>\
             <i><w:PopupMenuLink class="hoverLink hoverArrow" menuId="$menuId" position="this" omitTags="$!editing">\
@@ -20,7 +20,11 @@
         </h2>
         <w:PopupMenu menuId="mipIL">
             <a:For item="$itemName" list="$peerItems">\
-                <w:PopupMenuItem action="$selectItem"><b emitTags="$itemVisible">$itemName</b></w:PopupMenuItem>
+                <w:PopupMenuItem action="$selectItem" showBullet="$itemVisible"><b emitTags="$itemVisible">$itemName</b></w:PopupMenuItem>
+            </a:For>
+            <w:PopupMenuHeading showSeparator="$true">Parent Context</w:PopupMenuHeading>
+            <a:For item="$assignmentInfo" list="$editorProperties.activeAssignments">\
+                <w:PopupMenuItem action="$selectAssignment">$assignmentInfo.key = $assignmentInfo.value</w:PopupMenuItem>
             </a:For>
         </w:PopupMenu>
         <a:If ifFalse="$compactMode">
@@ -193,6 +197,8 @@
         </a:SwitchTemplate>
     </td></tr>
 </table>
+</div>
+
 <a:If ifTrue="$compactMode">
     <table cellpadding="0" cellspacing="0" class="scrollTableWrapper" style="border-width:1px 0px 0px 0px" width="100%"><tr>
         <td class="tableFooter" style="padding-left:3px">\
@@ -249,7 +255,7 @@
             <a:IncludeContent name="MenuItems" required="$false"/>
             <w:PopupMenuHeading>Rule Selectors</w:PopupMenuHeading>
             <a:For item="$contextKey" list="$contextInfo.contextKeys">\
-                <w:PopupMenuItem action="$togglePredicate" showCheck="$predicateUsesContextKey">\
+                <w:PopupMenuItem action="$toggleSelector" showCheck="$selectorUsesContextKey">\
                     $contextKey = $contextValue\
                 </w:PopupMenuItem>
             </a:For>

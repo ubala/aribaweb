@@ -11,12 +11,8 @@
     </description>
 
     <!-- for persistence.xml generation: See build-jpa-app.xml for additional parameters -->
-    <!-- File for HSQLDB database
-        <property name="database.dir" value="${java.io.tmpdir}/${ant.project.name}-db"/>
-    -->
-
-    <!-- Create schema on every run
-        <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+    <!-- For HSQLDB file database (default is RAM) ...
+        <property name="database.dir" value="${java.io.tmpdir}/${ant.project.name}-hsqldb"/>
     -->
 
     <!-- jar name, war name, defaulted by project name.

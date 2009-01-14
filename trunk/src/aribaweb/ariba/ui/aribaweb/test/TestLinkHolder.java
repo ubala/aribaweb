@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#9 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -31,6 +31,7 @@ import ariba.util.test.TestStager;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.AnnotatedElement;
 import java.util.Map;
 import java.util.Set;
 
@@ -285,9 +286,8 @@ public class TestLinkHolder implements SemanticKeyProvider
         else {
             testClass = _annotatedItem.getClass();
         }
-        Map<Class, Object> annotations = TestLinkManager.instance().annotationsForClass(testClass.getName());
-        Set keys = annotations.keySet();
-        for (Object key : keys) {
+        Map<Annotation, AnnotatedElement> annotations = TestLinkManager.instance().annotationsForClass(testClass.getName());
+        for (Object key : annotations.keySet()) {
             Annotation annotation = (Annotation)key;
             if (TestParam.class.isAssignableFrom(annotation.annotationType())) {
                 Object ref = annotations.get(key);
@@ -316,7 +316,7 @@ public class TestLinkHolder implements SemanticKeyProvider
             }
         }
         else {
-            if (AWComponent.class.isAssignableFrom(_annotatedItem.getClass())) {
+            if (AWComponent.class.isAssignableFrom((Class)_annotatedItem)) {
                 isInteractive = true;
             }
         }

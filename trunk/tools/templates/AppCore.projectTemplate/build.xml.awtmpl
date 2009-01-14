@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+
+<!--
+    @ProjectName@ application
+ -->
+
+<project name="@ProjectName@" default="launch">
+
+    <description>
+        MetaUI Database application
+    </description>
+
+    <!-- for persistence.xml generation: See build-jpa-app.xml for additional parameters -->
+    <!-- For HSQLDB file database (default is RAM) ...
+        <property name="database.dir" value="${java.io.tmpdir}/${ant.project.name}-hsqldb"/>
+        <property name="compass.dir" value="${java.io.tmpdir}/${ant.project.name}-lucene"/>
+    -->
+
+    <property name="aw.allowAccessWithoutLogin" value="true"/>
+
+    <!-- jar name, war name, defaulted by project name.
+         web.xml and aribaweb.properties automatically generated -->
+    <property environment="env"/>
+    <property name="aw.home" location="${env.AW_HOME}"/>
+    <import file="${aw.home}/tools/build-appcore-app.xml"/>
+</project>

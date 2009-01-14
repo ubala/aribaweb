@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ObjectMeta.java#5 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ObjectMeta.java#15 $
 */
 package ariba.ui.meta.core;
 
@@ -22,16 +22,17 @@ import ariba.util.core.ListUtil;
 import ariba.util.core.Fmt;
 import ariba.util.core.StringUtil;
 import ariba.util.core.Assert;
+import ariba.util.formatter.DateFormatter;
 import ariba.ui.aribaweb.util.AWNotificationCenter;
 import ariba.ui.aribaweb.util.AWClassLoader;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWGenericException;
-import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.meta.annotations.Action;
 import ariba.ui.meta.annotations.Traits;
 import ariba.ui.meta.annotations.Properties;
 import ariba.ui.meta.annotations.Trait;
 import ariba.ui.meta.annotations.Property;
+import ariba.ui.validation.AWVFormatterFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -46,6 +47,7 @@ import java.util.HashMap;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 
 public class ObjectMeta extends Meta
 {
@@ -57,13 +59,12 @@ public class ObjectMeta extends Meta
     public final static String KeyValue = "value";
     public final static String KeyType = "type";
     public final static String KeyElementType = "elementType";
-    public final static String KeyTrait = "trait";
-    public final static String KeyTraits = "traits";
     public static final String KeyTraitGroup = "traitGroup";
     public final static String KeyVisible = "visible";
     public final static String KeyEditable = "editable";
     public final static String KeyValid = "valid";
     public final static String KeyRank = "rank";
+    
     Map<Class, List<AnnotationProcessor>> _annotationProcessors = new HashMap();
     Map<String, String> _traitToGroup;
     int _traitToGroupGeneration = -1;
@@ -87,8 +88,6 @@ public class ObjectMeta extends Meta
 
         registerPropertyMerger(KeyClass, Context.PropertyMerger_DeclareList);
         registerPropertyMerger(KeyField, Context.PropertyMerger_DeclareList);
-        registerPropertyMerger(KeyTraits, PropertyMerger_Traits);
-        registerPropertyMerger(KeyTrait, Context.PropertyMerger_DeclareList);
         registerPropertyMerger(KeyAction, Context.PropertyMerger_DeclareList);
         registerPropertyMerger(KeyActionCategory, Context.PropertyMerger_DeclareList);
         registerPropertyMerger(KeyTraitGroup, Context.PropertyMerger_DeclareList);
@@ -96,29 +95,29 @@ public class ObjectMeta extends Meta
         mirrorPropertyToContext(KeyClass, KeyClass);
         mirrorPropertyToContext(KeyType, KeyType);
         mirrorPropertyToContext(KeyElementType, KeyElementType);
-        mirrorPropertyToContext(KeyTraits, KeyTrait);
+        mirrorPropertyToContext(KeyTrait, KeyTrait);
         mirrorPropertyToContext(KeyEditable, KeyEditable);
 
         registerValueTransformerForKey(KeyObject, Transformer_KeyPresent);
 
         registerAnnotationListener(Traits.class, new AnnotationProcessor(){
-            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List predicateList, Map propertyMap, boolean isAction)
+            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List selectorList, Map propertyMap, boolean isAction)
             {
                 processTraitsAnnotation((Traits)annotation, prop, propertyMap);
             }
         });
 
         registerAnnotationListener(Properties.class, new AnnotationProcessor(){
-            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List predicateList, Map propertyMap, boolean isAction)
+            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List selectorList, Map propertyMap, boolean isAction)
             {
-                processPropertiesAnnotation((Properties)annotation, prop, predicateList);
+                processPropertiesAnnotation((Properties)annotation, prop, selectorList);
             }
         });
 
         registerAnnotationListener(Action.class, new AnnotationProcessor(){
-            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List predicateList, Map propertyMap, boolean isAction)
+            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List selectorList, Map propertyMap, boolean isAction)
             {
-                if (isAction) processActionAnnotation((Action)annotation, prop, predicateList);
+                if (isAction) processActionAnnotation((Action)annotation, prop, selectorList);
             }
         });
 
@@ -131,14 +130,14 @@ public class ObjectMeta extends Meta
      */
     public Context newContext()
     {
-        return new ObjectContext(this);
+        return new ObjectMetaContext(this);
     }
     
-    public static class ObjectContext extends Context
+    public static class ObjectMetaContext extends Context
     {
-        AWRequestContext _requestContext;
+        Map _formatters;
 
-        public ObjectContext(ObjectMeta meta)
+        public ObjectMetaContext (ObjectMeta meta)
         {
             super(meta);
         }
@@ -177,6 +176,15 @@ public class ObjectMeta extends Meta
         {
             values().put(KeyObject, object);
         }
+
+        public Map getFormatters ()
+        {
+            if (_formatters == null) {
+                _formatters = AWVFormatterFactory.formattersForLocaleTimeZone(Locale.US, DateFormatter.getDefaultTimeZone());
+            }
+            return _formatters;
+        }
+
     }
 
     // Use a special map subsclass for our Properties
@@ -204,7 +212,7 @@ public class ObjectMeta extends Meta
     public static abstract class AnnotationProcessor
     {
         abstract public void processAnnotation(Annotation annotation, AnnotatedElement prop,
-                                               List predicateList, Map propertyMap, boolean isAction);
+                                               List selectorList, Map propertyMap, boolean isAction);
     }
 
     public void registerAnnotationListener (Class annotationClass, AnnotationProcessor listener)
@@ -217,12 +225,12 @@ public class ObjectMeta extends Meta
         listeners.add(listener);
     }
 
-    void invokeAnnotationListeners (Annotation annotation, AnnotatedElement prop, List predicateList, Map propertyMap, boolean isAction)
+    void invokeAnnotationListeners (Annotation annotation, AnnotatedElement prop, List selectorList, Map propertyMap, boolean isAction)
     {
         List<AnnotationProcessor> listeners = _annotationProcessors.get(annotation.annotationType());
         if (listeners != null) {
             for (AnnotationProcessor l : listeners) {
-                l.processAnnotation(annotation, prop, predicateList, propertyMap, isAction);
+                l.processAnnotation(annotation, prop, selectorList, propertyMap, isAction);
             }
         }
     }
@@ -299,40 +307,6 @@ public class ObjectMeta extends Meta
         }
     }
         
-    public PropertyMerger PropertyMerger_Traits =  new PropertyMergerDynamic()
-    {
-        public Object merge(Object orig, Object override, boolean isDeclare) {
-
-            // if we're override a single element with itself, don't go List...
-            if (!(orig instanceof List) && !(override instanceof List)
-                    && objectEquals(orig, override)) {
-                return orig;
-            }
-
-            List<Object> origL = toList(orig);
-            List<Object> overrideL = toList(override);
-            List result = ListUtil.list();
-            for (Object trait : origL) {
-                if (trait instanceof OverrideValue) trait = ((OverrideValue)trait).value();
-                boolean canAdd = true;
-                String group = groupForTrait((String)trait);
-                if (group != null) {
-                    for (Object overrideTrait: overrideL) {
-                        if (overrideTrait instanceof OverrideValue) overrideTrait = ((OverrideValue)overrideTrait).value();
-                        if (group.equals(groupForTrait((String)overrideTrait))) {
-                            canAdd = false;
-                            break;
-                        }
-                    }
-                }
-                if (canAdd) result.add(trait);
-            }
-            ListUtil.addElementsIfAbsent(result, overrideL);
-            return result;
-        }
-    };
-
-
     String groupForTrait (String trait)
     {
         if (_traitToGroup == null || _traitToGroupGeneration < ruleSetGeneration()) {
@@ -340,33 +314,15 @@ public class ObjectMeta extends Meta
             _traitToGroup = new HashMap();
             Context context = newContext();
             for (String group : itemNames(context, KeyTraitGroup)) {
+                context.push();
                 context.set(KeyTraitGroup, group);
-                for (String name : itemNames(context, ObjectMeta.KeyTrait)) {
+                for (String name : itemNames(context, KeyTrait)) {
                     _traitToGroup.put(name, group);
                 }
+                context.pop();
             }
         }
         return _traitToGroup.get(trait);
-    }
-
-    public static void addTraits(List traits, Map map)
-    {
-        List current = (List)map.get(KeyTraits);
-        if (current == null) {
-            map.put(KeyTraits, new ArrayList(traits));
-        } else {
-            current.addAll(traits);
-        }
-    }
-
-    public static void addTrait(String trait, Map map)
-    {
-        List current = (List)map.get(KeyTraits);
-        if (current == null) {
-            map.put(KeyTraits, Arrays.asList(trait));
-        } else {
-            current.add(trait);
-        }
     }
 
     public void processTraitsAnnotation (Traits fs, AnnotatedElement prop, Map propertyMap)
@@ -382,10 +338,10 @@ public class ObjectMeta extends Meta
         Log.meta_detail.debug("---- annotation for field %s -- traits: %s", prop, traits);
     }
 
-    public void processPropertiesAnnotation (String propString, AnnotatedElement prop, List predicateList)
+    public void processPropertiesAnnotation (String propString, AnnotatedElement prop, List selectorList)
     {
         try {
-            new Parser(ObjectMeta.this, propString).processRuleBody(predicateList, null);
+            new Parser(ObjectMeta.this, propString).processRuleBody(selectorList, null);
         } catch (Error e) {
             throw new AWGenericException(Fmt.S("Error parsing @Properties annotation \"%s\" on %s:%s -- %s",
                     propString, prop.getClass().getName(), prop, e));
@@ -396,12 +352,12 @@ public class ObjectMeta extends Meta
         Log.meta_detail.debug("---- annotation for field %s -- @Properites: %s", prop, propString);
     }
 
-    public void processPropertiesAnnotation (Properties propInfo, AnnotatedElement prop, List predicateList)
+    public void processPropertiesAnnotation (Properties propInfo, AnnotatedElement prop, List selectorList)
     {
-        processPropertiesAnnotation(propInfo.value(), prop, predicateList);
+        processPropertiesAnnotation(propInfo.value(), prop, selectorList);
     }
 
-    public void processActionAnnotation (Action annotation, AnnotatedElement prop, List predicateList)
+    public void processActionAnnotation (Action annotation, AnnotatedElement prop, List selectorList)
     {
         Method method = (Method)prop;
         boolean isStatic = (method.getModifiers() & Modifier.STATIC) != 0;
@@ -413,14 +369,14 @@ public class ObjectMeta extends Meta
         }
         Map properties = new HashMap();
 
-        List predicates = new ArrayList(predicateList);
-        predicates.add(predicateList.size()-1, new Rule.Predicate(KeyActionCategory, annotation.category()));
-        if (!isStatic) predicates.add(new Rule.Predicate(KeyObject, KeyAny));
+        List selectors = new ArrayList(selectorList);
+        selectors.add(selectorList.size()-1, new Rule.Selector(KeyActionCategory, annotation.category()));
+        if (!isStatic) selectors.add(new Rule.Selector(KeyObject, KeyAny));
         properties.put(KeyActionCategory, annotation.category());
 
         if (!isStatic) addTraits(Arrays.asList("instance"), properties);
 
-        // Todo:  Category part of predicate!
+        // Todo:  Category part of selector!
         addTraits(Arrays.asList(annotation.ResponseType().name()), properties);
 
         String message = annotation.message();
@@ -428,7 +384,7 @@ public class ObjectMeta extends Meta
 
         String pageName = annotation.pageName();
         if (!StringUtil.nullOrEmptyString(pageName)) properties.put("pageName", pageName);
-        addRule(new Rule(predicates, properties, ClassRulePriority));
+        addRule(new Rule(selectors, properties, ClassRulePriority));
     }
 
     static protected ParameterizedType _parameterizedTypeForProperty (Class src, FieldInfo p)
@@ -530,11 +486,11 @@ public class ObjectMeta extends Meta
 
             beginRuleSet(cls.getName().replace(".", "/") + ".java");
 
-            List predicateList = Arrays.asList(new Rule.Predicate(KeyClass, className));
+            List selectorList = Arrays.asList(new Rule.Selector(KeyClass, className));
             Map properties = newPropertiesMap();
-            processAnnotations(cls, predicateList, properties, false);
+            processAnnotations(cls, selectorList, properties, false);
             if (!properties.isEmpty()) {
-                Rule r = new Rule(predicateList, properties, ClassRulePriority);
+                Rule r = new Rule(selectorList, properties, ClassRulePriority);
                 addRule(r);
             }
 
@@ -552,39 +508,39 @@ public class ObjectMeta extends Meta
                 if (annotations != null && annotations.length > 0) {
                     String name = method.getName();
                     Map properties = new HashMap();
-                    List <Rule.Predicate>predicates = Arrays.asList(new Rule.Predicate(KeyClass, key),
-                                                new Rule.Predicate(KeyAction, name));
-                    ListUtil.lastElement(predicates)._isDecl = true;
-                    processAnnotations(method, predicates, properties, true);
+                    List <Rule.Selector> selectors = Arrays.asList(new Rule.Selector(KeyClass, key),
+                                                new Rule.Selector(KeyAction, name));
+                    ListUtil.lastElement(selectors)._isDecl = true;
+                    processAnnotations(method, selectors, properties, true);
                     if (!properties.isEmpty()) {
-                        Rule r = new Rule(predicates, properties, ClassRulePriority);
+                        Rule r = new Rule(selectors, properties, ClassRulePriority);
                         addRule(r);
                     }
                 }
             }
         }
 
-        void processAnnotations(AnnotatedElement prop, List predicateList, Map map, boolean isAction)
+        void processAnnotations(AnnotatedElement prop, List selectorList, Map map, boolean isAction)
         {
             Annotation[] annotations = prop.getAnnotations();
             if (annotations != null) {
                 for (Annotation annotation : annotations) {
-                    invokeAnnotationListeners(annotation,  prop,  predicateList, map, isAction);
+                    invokeAnnotationListeners(annotation,  prop,  selectorList, map, isAction);
                 }
             }
         }
 
         void _registerFieldsForClass (String key, Class cls)
         {
-            FieldInfo.Collection infos =  FieldInfo.fieldInfoForClass(cls);
+            FieldInfo.Collection infos =  FieldInfo.fieldInfoForClass(cls, true, false);
             for (FieldInfo p :  infos.allFieldInfos()) {
                 String name = p.getName();
                 Class type = p.getType();
                 Method getter = p.getGetterMethod();
 
                 if (type == null || "void".equals(type.getName())
-                        || (getter != null && (getter.getAnnotation(Action.class) != null)
-                                            ||(getter.getDeclaringClass() == Object.class)))
+                        || (getter != null && ((getter.getAnnotation(Action.class) != null)
+                                            ||(getter.getDeclaringClass() == Object.class))))
                     continue;
 
                 // add a rule for Class + Field -> type
@@ -599,30 +555,30 @@ public class ObjectMeta extends Meta
                 m.put(KeyField, name);
                 m.put(KeyVisible, true);
 
-                List<Rule.Predicate> predicateList = Arrays.asList(new Rule.Predicate(KeyClass, key),
-                                                new Rule.Predicate(KeyField, name));
-                ListUtil.lastElement(predicateList)._isDecl = true;
+                List<Rule.Selector> selectorList = Arrays.asList(new Rule.Selector(KeyClass, key),
+                                                new Rule.Selector(KeyField, name));
+                ListUtil.lastElement(selectorList)._isDecl = true;
 
                 if (p.getSetterMethod() != null) {
-                    processAnnotations(p.getSetterMethod(), predicateList, m, false);
+                    processAnnotations(p.getSetterMethod(), selectorList, m, false);
                 }
 
                 if (!p.isWritable()) {
-                    m.put(UIMeta.KeyEditable, false);
+                    // m.put(UIMeta.KeyEditable, false);
                     addTraits(Arrays.asList("derived"), m);
                 }
 
                 if (getter != null) {
-                    processAnnotations(getter, predicateList, m, false);
+                    processAnnotations(getter, selectorList, m, false);
                 }
 
                 if (p.getField() != null) {
-                    processAnnotations(p.getField(), predicateList, m, false);
+                    processAnnotations(p.getField(), selectorList, m, false);
                 }
 
                 m.put(KeyRank, (p.getRank() + 1) * 10);
 
-                Rule r = new Rule(predicateList, m, ClassRulePriority);
+                Rule r = new Rule(selectorList, m, ClassRulePriority);
                 addRule(r);
             }
         }

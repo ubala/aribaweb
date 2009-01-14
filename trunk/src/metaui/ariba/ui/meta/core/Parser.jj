@@ -67,10 +67,10 @@ void addRules () : {
     Rule r;
 }
 {
-    addRulesWithPredicate(null)
+    addRulesWithSelector(null)
 }
 
-void addRulesWithPredicate (List contextPreds) : {
+void addRulesWithSelector (List contextPreds) : {
     Rule r;
 }
 {
@@ -80,17 +80,17 @@ void addRulesWithPredicate (List contextPreds) : {
 /* one rule */
 void rule (List contextPreds) : {
     List preds = null;
-    Token t;
+    Object traits;
     Map props = null;
 }
 {
-    preds=predicateList() { if (contextPreds != null) preds.addAll(0, contextPreds); }
-    [ ("#" t=<IDENT>)
+    preds=selectorList() { if (contextPreds != null) preds.addAll(0, contextPreds); }
+    [ ("#" traits=traitList())
         {
             props = new HashMap();
-            props.put("traits", t.image);
-            Rule.Predicate p = (Rule.Predicate)ListUtil.lastElement(preds);
-            if (p._value == Meta.KeyAny) p._value = t.image;
+            props.put("trait", traits);
+            Rule.Selector p = (Rule.Selector)ListUtil.lastElement(preds);
+            if (p._value == Meta.KeyAny) p._value = (traits instanceof List) ? ((List)traits).get(0) : traits;
         }
     ]
     (
@@ -121,8 +121,37 @@ void processRuleBody(List preds, Map props) : {
         /* flush any current rule to preserve rank */
         { _meta.addRule( new Rule(preds, props, 0, token.beginLine)); props = null; }
         rule(preds)
+      |
+        /* flush any current rule to preserve rank */
+        { _meta.addRule( new Rule(preds, props, 0, token.beginLine)); props = null; }
+        precedenceChain(preds)
     )*
     { _meta.addRule(new Rule(preds, props, 0, token.beginLine)); }
+}
+
+String predecessorChainNode (List contextPreds, String predecessor) : {
+    List preds = null;
+    Token k, t;
+    Object traits = null;
+}
+{
+    (k=<KEYPATH> | k=<IDENT> | k="*") [ ("#" traits=traitList()) ]
+    {
+        if (predecessor != null || traits != null) {
+            ((UIMeta)_meta).addPredecessorRule(k.image, contextPreds, predecessor, traits, token.beginLine);
+        }
+        return k.image;
+    }
+}
+
+void precedenceChain (List contextPreds) : {
+    List preds = null;
+    Token t;
+    Map props = null;
+    String predKey;
+}
+{
+    predKey=predecessorChainNode(contextPreds, null) ( "=>" predKey=predecessorChainNode(contextPreds, predKey))+ ";"
 }
 
 void processProperty (Map props) : {
@@ -137,13 +166,13 @@ void processProperty (Map props) : {
     [ ";" ]
 }
 
-List predicateList () : {
+List selectorList () : {
     List preds = new ArrayList();
-    Rule.Predicate p;
+    Rule.Selector p;
 }
 {
     (
-        p=predicate()
+        p=selector()
         {
             preds.add(p);
         }
@@ -151,7 +180,7 @@ List predicateList () : {
     { return preds; }
 }
 
-Rule.Predicate predicate () : {
+Rule.Selector selector () : {
     Token t;
     Object value = Meta.KeyAny;
     boolean isDecl = false;
@@ -161,14 +190,28 @@ Rule.Predicate predicate () : {
     (
         t=<IDENT> ["=" (value=simpleValue() | ( "(" value=valueOrList() ")") )]
         {
-            return new Rule.Predicate(t.image, value, isDecl);
+            return new Rule.Selector(t.image, value, isDecl);
         }
       |
         "~" t=<IDENT>
         {
-            return new Rule.Predicate(t.image, Meta.NullMarker, isDecl);
+            return new Rule.Selector(t.image, Meta.NullMarker, isDecl);
         }
     )
+}
+Object traitList() : {
+    Token t;
+    Object traits = null;
+}
+{
+    t=<IDENT> { traits = t.image; }
+    (","  t=<IDENT> {
+        if (!(traits instanceof List)) traits = ListUtil.list(traits);
+        ((List)traits).add(t.image);
+    })*
+    {
+        return traits;
+    }
 }
 
 /* Should add support for Lists and sub-maps */
@@ -322,7 +365,11 @@ Object exprValue() : {
         {
             String exprString = (String)token_source.literalValue;
             try {
-                return new PropertyValue.Expr(exprString);
+                final PropertyValue.Dynamic exprVal = new PropertyValue.Expr(exprString);
+                return (token_source.isStaticDynamicExpr)
+                    ? new PropertyValue.StaticDynamicWrapper(
+                            new PropertyValue.StaticallyResolvableWrapper(exprVal))
+                    : exprVal;
             } catch (Exception e) {
                 ParseException pe = new ParseException(
                     Fmt.S("Expression parsing embedded expression, line: %s:\nExpr Message - %s",
@@ -346,6 +393,8 @@ TOKEN_MGR_DECLS:
     private char charLiteralStartQuote;
       /** Holds the last string literal parsed. */
     private StringBuffer stringBuffer;
+      /** Indicates whether last EXPR_LITERAL is of the "$${" variety **/
+    boolean isStaticDynamicExpr;
 
     int braceNestingDepth;
 
@@ -530,7 +579,11 @@ TOKEN:
 
 /* Parsing of AribaExpr literal in ${ ... } form -- fancy because of nested {} */
 MORE: { "${"
-    { stringBuffer = new StringBuffer(); }: WithinExprLiteral
+    { isStaticDynamicExpr = false; stringBuffer = new StringBuffer(); }: WithinExprLiteral
+}
+
+MORE: { "$${"
+    { isStaticDynamicExpr = true; stringBuffer = new StringBuffer(); }: WithinExprLiteral
 }
 
 <WithinExprLiteral> MORE: {

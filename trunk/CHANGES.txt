@@ -1,6 +1,52 @@
 Release Change History
 ======================
 
+New in Version 5.0b7 (12/2008)
+---------------------------------
+
+- AtIssue: a new full-featured demo app
+    - email integrated lightweight bug/task tracker
+
+- Full Text Search support via Compass/Lucene (JPA / Hibernate integration)
+    - automatically used in choosers and search panels
+
+- New *AppCore* framework:
+    - Basic User, Group, Permission support
+    - Login (local auth)
+    - MailMonitor
+
+- New CSV Data Loader
+    - Automatically initializes new schemas by loading integration/pkg.ClassName.csv files
+    - Support relationship initialization (automatic foreign key lookup)
+
+- New project template for Master Detail apps
+    - Creates app set up for AppCore, Compass, ...
+
+- New mail parsing / viewing support (AWMimeParsedMessage, MimeMessageViewer)
+    - Mail Client example updated to use it
+
+- MetaUI: many enhancements
+    - New *compact field ordering* (and trait application) syntax:  e.g. 
+          zLeft => firstName => lastName;    zRight => email#required => phone;
+    - New wrapper style traits (bold, italic, heading, ...)
+    - OulineBox layout
+    - DataTable detail row rendering support
+    - Generic support in MetaIncludeComponent for wrappers, named contents
+        - Also, easily propagate full bag of bindings to subcomponents (awbindingDictionary binding support)
+    - Merge of "traits" and "trait" property (only "trait" lives on)
+    - Support for using parent context traits in rules affecting nested keys. e.g.:
+          module-trait=CoolMode { field { editing: false } }
+
+- Bug Fixes:
+    - Build fix: re-builds were creating nested build directories (and breaking app re-launch)
+    - Some metaui Context exceptions (on nested value override chaining)
+    - MetaUI rapid-turnaround (reloading) fixes
+    - Rebuild of groovy app not rebuilding groovy classes
+
+- Updated Dependencies
+    - Updated to Hibernate 3.3.1, JavaMail 1.4.1, log4j-1.2.15
+    
+
 New in Version 5.0b6 (11/13/2008)
 ---------------------------------
 

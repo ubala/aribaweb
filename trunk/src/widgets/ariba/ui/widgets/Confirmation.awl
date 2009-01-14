@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#30 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#31 $
     </Copyright>
 
     <Overview>
@@ -278,7 +278,7 @@
                                 <a:If ifTrue="$hasButtonsTemplate">\
                                     <a:IncludeContent name="buttons" required="$true"/>\
                                 <a:Else/>
-                                    <w:TextButton action="$okAction"><a:Local key="a003">OK</a:Local></w:TextButton>\
+                                    <w:TextButton action="$okAction" isDefault="$true"><a:Local key="a003">OK</a:Local></w:TextButton>\
                                     <a:If ifTrue="$isClientSideConfirmation">
                                         <w:TextButton onClick="ariba.Widgets.cancelConfirmation();"><a:Local key="a004">Cancel</a:Local></w:TextButton>\
                                     <a:Else/>

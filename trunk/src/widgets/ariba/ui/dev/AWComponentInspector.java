@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentInspector.java#15 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentInspector.java#16 $
 */
 package ariba.ui.dev;
 
@@ -66,8 +66,9 @@ public class AWComponentInspector extends AWComponent
     public MetadataTraceNode _metadataNode;
     public int _tabIndex = -1;
     public AWTDisplayGroup _traceDisplayGroup = new AWTDisplayGroup();
-    public AWTDisplayGroup _pathDisplayGroup = new AWTDisplayGroup();
     public AWTDisplayGroup _metadataDisplayGroup = new AWTDisplayGroup();
+    public AWTDisplayGroup _pathDisplayGroup = new AWTDisplayGroup();
+    public AWTDisplayGroup _pathMetaDisplayGroup = new AWTDisplayGroup();
     public int _fileContentsTabIndex;
     public int _fileContentsTabIndexLastChosen = -1;
     AWDebugTrace _debugTrace;
@@ -113,6 +114,7 @@ public class AWComponentInspector extends AWComponent
         
         List<ComponentTraceNode> path = debugTrace.componentPathList();
         _pathDisplayGroup.setObjectArray(path);
+        _pathMetaDisplayGroup.setObjectArray(filterMeta(path));
 
         ComponentTraceNode traceRoot = debugTrace.componentTraceRoot().collapseChildren();
         if (traceRoot == null) traceRoot = debugTrace.componentTraceRoot();
@@ -137,6 +139,11 @@ public class AWComponentInspector extends AWComponent
         }
     }
 
+    public void setShowMeta (boolean yn)
+    {
+        _showingMeta = yn;
+    }
+
     void setUpTraceDisplayGroup (AWTDisplayGroup displayGroup, ComponentTraceNode traceRoot,
                                  List<ComponentTraceNode> path)
     {
@@ -158,6 +165,16 @@ public class AWComponentInspector extends AWComponent
         else {
             displayGroup.setObjectArray(null);
         }
+    }
+
+    List<ComponentTraceNode> filterMeta (List<ComponentTraceNode> list)
+    {
+        if (list == null) return list;
+        List<ComponentTraceNode> result = ListUtil.list();
+        for (ComponentTraceNode node : list) {
+            if (node.associatedMetadataProvider() != null) result.add(node);
+        }
+        return result;
     }
 
     List<ComponentTraceNode> translatePath (ComponentTraceNode root, List<ComponentTraceNode>path)
@@ -221,7 +238,7 @@ public class AWComponentInspector extends AWComponent
     public AWTDisplayGroup currentDisplayGroup ()
     {
         return (_tabIndex == 0) ? currentTraceDisplayGroup()
-                                : _pathDisplayGroup;
+                                : currentPathDisplayGroup();
     }
 
     public AWBindableElement currentElement()
@@ -265,6 +282,11 @@ public class AWComponentInspector extends AWComponent
     public AWTDisplayGroup currentTraceDisplayGroup ()
     {
         return (_showingMeta) ? _metadataDisplayGroup : _traceDisplayGroup;
+    }
+
+    public AWTDisplayGroup currentPathDisplayGroup ()
+    {
+        return (_showingMeta) ? _pathMetaDisplayGroup : _pathDisplayGroup;
     }
 
     public void makeSelectionCurrentItem ()
@@ -480,9 +502,10 @@ public class AWComponentInspector extends AWComponent
     public void renderResponse(AWRequestContext requestContext, AWComponent component) {
         // auto-select first item if we're showing details
         if (showingFileContents() && currentDisplayGroup().selectedObject() == null) {
-            if (currentDisplayGroup() == _pathDisplayGroup) {
-                if (_pathDisplayGroup.filteredObjects().size() > 0) {
-                    _pathDisplayGroup.setSelectedObject(currentDisplayGroup().displayedObjects().get(0));
+            AWTDisplayGroup currentDisplayGroup = currentDisplayGroup();
+            if (currentDisplayGroup == _pathDisplayGroup || currentDisplayGroup == _pathMetaDisplayGroup) {
+                if (currentDisplayGroup.filteredObjects().size() > 0) {
+                    currentDisplayGroup.setSelectedObject(currentDisplayGroup().displayedObjects().get(0));
                 }
                 _fileContentsTabIndex = 0;
             } else if (_debugTrace != null && _debugTrace.componentTraceRoot() != null) {

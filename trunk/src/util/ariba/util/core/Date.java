@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#28 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#29 $
 */
 
 package ariba.util.core;
@@ -408,6 +408,30 @@ public class Date extends java.util.Date implements Externalizable
         long offset = timezoneOffsetInMillis(this);
         return new Date(this.getTime() - offset, true);
     }
+    
+    /**
+     Added this helper method because ariba.util.core.Date.makeCalendarDate
+    does not strip off the time before converting the date to a calendar date.
+    Fixing CR 1-9GIM3D -adding an api makeCalendarDateWithoutTime() which
+    will strip the time off of the date.
+
+    @aribaapi documented
+    */
+
+    public static Date makeCalendarDateWithoutTime (Date date)
+    {        
+        if (date != null && !date.calendarDate()) {    
+            Date newDate = new Date(date);    
+            if (!Date.timeIsMidnight(newDate)) {    
+                Date.setTimeToMidnight(newDate);    
+            }    
+            newDate = newDate.makeCalendarDate();    
+            return newDate;    
+        }    
+        return date;    
+    }
+
+
 
     /*-----------------------------------------------------------------------
         Formatting

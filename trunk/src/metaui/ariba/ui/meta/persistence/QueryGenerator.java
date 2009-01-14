@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QueryGenerator.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QueryGenerator.java#2 $
 */
 package ariba.ui.meta.persistence;
 
@@ -107,10 +107,19 @@ public class QueryGenerator
 
     void add (String keyPath, Object value, Predicate.Operator operator)
     {
-        appendToWhere(Fmt.S("%s %s %s",
-                formatKeyPath(keyPath),
-                formatOperator(operator),
-                formatValue(value)));
+        if (operator == Operator.Eq && (value instanceof String) && ((String)value).endsWith("*")) {
+            // Todo: proper escaping (of "%" and "_")
+            String likePattern = ((String)value).replace("*", "%");
+            appendToWhere(Fmt.S("%s LIKE %s",
+                    formatKeyPath(keyPath),
+                    formatOperator(operator),
+                    formatValue(likePattern)));
+        } else {
+            appendToWhere(Fmt.S("%s %s %s",
+                    formatKeyPath(keyPath),
+                    formatOperator(operator),
+                    formatValue(value)));
+        }
     }
 
     protected String aliasForEntity (String name)

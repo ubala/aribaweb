@@ -50,12 +50,14 @@
                     </t:HeadingArea>
 
                     <a:Content name="optionsMenu">
+                        <nobr>
                         <a:If ifTrue="$showingFileContents">
                             <a:Hyperlink action="${showingFileContents=false;null}">&lt; Hide Contents</a:Hyperlink>
                         <a:Else/>
                             <a:Hyperlink action="${showingFileContents=true;null}">Show File Contents &gt;</a:Hyperlink>
                         </a:If>
                         &nbsp;
+                        </nobr>
                     </a:Content>
 
                     <t:Column label="Component" isValueColumn="$true">\
@@ -86,17 +88,34 @@
 
         <w:Tab label="Click Path">
             <a:If ifTrue="$pathDisplayGroup.filteredObjects.size">
-                <t:DataTable item="$traceNode" displayGroup="$pathDisplayGroup"
+                <t:DataTable item="$traceNode" displayGroup="$currentPathDisplayGroup"
                               singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
-                              title="Component Path" showColumnHeader="$false" enableScrolling="$true" showOptionsMenu="$true"
+                              showColumnHeader="$false" enableScrolling="$true" showOptionsMenu="$true"
                               class="scrollTableWrapper smallFont noTopLine" minHeight="400">
+                    <t:HeadingArea>
+                        <div class="flL" _ifTrue="$metadataDisplayGroup">
+                            Show:
+                            <a:If ifTrue="$showingMeta">
+                                <a:Hyperlink action="${showingMeta=!showingMeta; null}">All</a:Hyperlink>
+                                |
+                                <b>Meta</b>
+                            <a:Else/>
+                                <b>All</b>
+                                |
+                                <a:Hyperlink action="${showingMeta=!showingMeta; null}">Meta</a:Hyperlink>
+                            </a:If>
+                        </div>
+                    </t:HeadingArea>
+
                     <a:Content name="optionsMenu">
+                        <nobr>
                         <a:If ifTrue="$showingFileContents">
                             <a:Hyperlink action="${showingFileContents=false;null}">&lt; Hide Contents</a:Hyperlink>
                         <a:Else/>
                             <a:Hyperlink action="${showingFileContents=true;null}">Show File Contents &gt;</a:Hyperlink>
                         </a:If>
                         &nbsp;
+                        </nobr>
                     </a:Content>
 
                     <t:Column label="Component" isValueColumn="$true">

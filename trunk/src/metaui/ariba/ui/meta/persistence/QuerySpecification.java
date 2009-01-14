@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QuerySpecification.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QuerySpecification.java#2 $
 */
 package ariba.ui.meta.persistence;
 
@@ -20,6 +20,7 @@ public class QuerySpecification
 {
     String _entityName;
     Predicate _predicate;
+    boolean _useTextIndex;
 
     public QuerySpecification (String rootEntity)
     {
@@ -45,5 +46,15 @@ public class QuerySpecification
     public void setPredicate(Predicate predicate)
     {
         _predicate = predicate;
+    }
+
+    public boolean useTextIndex ()
+    {
+        return _useTextIndex;
+    }
+
+    public void setUseTextIndex (boolean useTextIndex)
+    {
+        _useTextIndex = useTextIndex;
     }
 }

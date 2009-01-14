@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#67 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#71 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -63,6 +63,9 @@ abstract public class AWBaseRequest extends AWBaseObject
     public static final String ContentLengthKey = "content-length";
     public static final String ContentTypeKey = "content-type";
     public static final String DefaultBrowserLanguage = "en-US";
+    public static final String IsSessionRendezvousFormKey = "awsso_ar";
+    public static final String AllowFailedComponentRendezvousFormKey = "aw_afcr";
+
 
     private static final String DefaultSecureHttpPort =
         AWConcreteRequestHandler.DefaultSecureHttpPort;
@@ -76,13 +79,15 @@ abstract public class AWBaseRequest extends AWBaseObject
     private AWEncodedString _responseId;
     private String _requestId;
     private String _sessionId;
-    private String _sessionSecureId;    
+    private String _sessionSecureId;
     private AWEncodedString _frameName;
     private boolean _isSessionRendevous = false;
     private String _contentType;
     private int _contentLength;
+    private boolean _isBrowserFirefox;
     private boolean _isBrowserMicrosoft;
     private boolean _isBrowserIE55;
+    private boolean _isBrowserSafari;
     private boolean _isMacintosh;
     private byte[] _content;
 
@@ -92,7 +97,7 @@ abstract public class AWBaseRequest extends AWBaseObject
     private boolean _isQueued = false;
 
     private static final String ComponentName = "AWBaseRequest";
-    
+
     public static final String AWLogFilterListKey = "AWLogFilter";
     abstract protected int applicationNumberInt ();
     abstract public InputStream inputStream ();
@@ -129,14 +134,16 @@ abstract public class AWBaseRequest extends AWBaseObject
         // AWSSOConstants.SSOAuthReturnKey = "awsso_ar" -- can't use constant b/c of
         // packaging and can't add SessionRendevousKey to SSO process or else backward
         // compatibility between our applications will be be broken.
-        if (formValueForKey("awsso_ar") != null) {
+        if (formValueForKey(IsSessionRendezvousFormKey) != null) {
             _isSessionRendevous = true;
         }
 
         // always set up the session id
         _sessionId = initSessionId();
 
+        _isBrowserFirefox = initIsBrowserFirefox();
         _isBrowserMicrosoft = initIsBrowserMicrosoft();
+        _isBrowserSafari = initIsBrowserSafari();
         _isMacintosh = initisMacintosh();
         String frameName = formValueForKey(AWRequestContext.FrameNameKey, false);
         if (frameName != null) {
@@ -369,6 +376,16 @@ abstract public class AWBaseRequest extends AWBaseObject
     public abstract String remoteHost ();
     public abstract String remoteHostAddress ();
 
+    public boolean initIsBrowserFirefox ()
+    {
+        boolean isBrowserFirefox = false;
+        String userAgent = userAgent();
+        if ((userAgent != null) && (userAgent.indexOf("Firefox") != -1)) {
+            isBrowserFirefox = true;
+        }
+        return isBrowserFirefox;
+    }
+
     public boolean initIsBrowserMicrosoft ()
     {
         boolean isBrowserMicrosoft = false;
@@ -380,6 +397,17 @@ abstract public class AWBaseRequest extends AWBaseObject
             }
         }
         return isBrowserMicrosoft;
+    }
+
+    public boolean initIsBrowserSafari ()
+    {
+        boolean isBrowserSafari = false;
+        String userAgent = userAgent();
+        if ((userAgent != null) && (userAgent.indexOf("Safari") != -1)
+            && (userAgent.indexOf("Version/") != -1)) {
+            isBrowserSafari = true;
+        }
+        return isBrowserSafari;
     }
 
     public boolean initisMacintosh ()
@@ -442,6 +470,11 @@ abstract public class AWBaseRequest extends AWBaseObject
         return _applicationNumber;
     }
 
+    public boolean isBrowserFirefox()
+    {
+        return _isBrowserFirefox;
+    }
+
     public boolean isBrowserMicrosoft ()
     {
         return _isBrowserMicrosoft;
@@ -450,6 +483,11 @@ abstract public class AWBaseRequest extends AWBaseObject
     public boolean isBrowserIE55 ()
     {
         return _isBrowserIE55;
+    }
+
+    public boolean isBrowserSafari ()
+    {
+        return _isBrowserSafari;
     }
 
     public boolean isMacintosh ()
@@ -691,6 +729,7 @@ abstract public class AWBaseRequest extends AWBaseObject
     {
         Parameters parameters = null;
         String contentString = null;
+        String queryStringForPost = null;
         String contentType = request.contentType();
         if (!StringUtil.nullOrEmptyOrBlankString(contentType)) {
             String[] values = StringUtil.delimitedStringToArray(contentType, ';');
@@ -711,10 +750,36 @@ abstract public class AWBaseRequest extends AWBaseObject
             if (contentBytes != null && contentBytes.length > 0) {
                 contentString = new String(contentBytes);
             }
+            //sometimes we need parameters in the query string for POST also.
+            //add query string parameters also to form values
+            //if they don't exist already
+            queryStringForPost = request.queryString();
+            Log.aribaweb_request.debug("queryStringForPost:%s", queryStringForPost);
+            if (queryStringForPost != null
+                    && queryStringForPost.equals("null")) {
+                queryStringForPost = null;
+            }
+
         }
         if (!StringUtil.nullOrEmptyOrBlankString(contentString)) {
-            parameters = parametersFromUrlEncodedString(contentString);
+            parameters = parametersFromUrlEncodedString(contentString);            
         }
+        if (!StringUtil.nullOrEmptyOrBlankString(queryStringForPost) &&
+                parameters != null) {
+            Parameters queryParameters = parametersFromUrlEncodedString(queryStringForPost);
+            Iterator itr = queryParameters.getParameterNames();
+            while(itr.hasNext()) {
+                String name = (String)itr.next();
+                //add to parameters if it is not already exist.
+                if (parameters.getParameterValues(name) == null) {
+                    Log.aribaweb_request.debug("Adding query string parameter to form:%s",
+                                                        name);
+                    parameters.putParameter(name,
+                            queryParameters.getParameter(name));
+                }
+            }
+        }
+
         return parameters;
     }
 

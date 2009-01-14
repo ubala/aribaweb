@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/eclipse/wizards/AWNewProjectWizard.java#2 $
+    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/eclipse/wizards/AWNewProjectWizard.java#3 $
 */
 package ariba.ideplugin.eclipse.wizards;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -65,6 +66,15 @@ public class AWNewProjectWizard extends Wizard implements INewWizard
             _page2 = new AWProjectDetailsPage(selection);
             addPage(_page2);
         }
+    }
+
+    public IWizardPage getNextPage(IWizardPage page) {
+        if (page == _page1) {
+            _page2 = new AWProjectDetailsPage(selection);
+            _page2.setWizard(this);
+            return _page2;
+        }
+        return super.getNextPage(page);
     }
 
     public Map getSelectedTemplate ()

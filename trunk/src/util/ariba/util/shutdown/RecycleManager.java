@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/RecycleManager.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/RecycleManager.java#9 $
 */
 
 package ariba.util.shutdown;
@@ -90,19 +90,19 @@ public class RecycleManager
                     return;
                 }
             }
+            // Since some agents can be long running, check again if we can auto recycle.
+            if (!canAutoRecycle(doWindowCheck)) {
+                return;
+            }
+            // Starting auto recycle shutdown.
+            Log.shutdown.info(9831);
+            ShutdownManager.setNodeStatus(ShutdownManager.StatusNodeAutoRecycle);
         }
         finally {
             if ( lock != null && lock.isValid()) {
                 releaseLock(lock);
             }
         }
-        // Since some agents can be long running, check again if we can auto recycle.
-        if (!canAutoRecycle(doWindowCheck)) {
-            return;
-        }
-        // Starting auto recycle shutdown.
-        Log.shutdown.info(9831);
-        ShutdownManager.setNodeStatus(ShutdownManager.StatusNodeAutoRecycle);
 
         for (int i = 0; i < agents.size(); i++) {
             if (((RecycleIfc)agents.get(i)).initiateRecycle() == false) {

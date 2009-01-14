@@ -1,6 +1,7 @@
 <m:Context contextKey="layout">\
     <a:SetValue tabLayoutNames="$metaContext.properties.layoutsByZone.zMain"/>
-    <w:BaseTabSet class="pageTabWrapper" vertical="$metaContext.properties.bindings.vertical"
+    <w:BaseTabSet class="pageTabWrapper"
+               awbindingsDictionary="$metaContext.properties.bindingsDictionary"
                list="$tabLayoutNames" item="$currentTabName"
                label="$currentTabLabel" selection="$selectedTabName">\
         <m:Context layout="$selectedTabName">

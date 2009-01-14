@@ -1,8 +1,26 @@
-<m:Context operation="search" object="$searchMap">
-    <div style="float:left">\
-        <m:Form/>
-    </div>
-    <div style="float:right">\
-        <w:TextButton action="$search">Search</w:TextButton>\
+<m:Context operation="$searchOperation" layout="SearchForm" object="$searchMap">
+    <div bh="DTBS">
+        <div style="float:right">\
+            <w:TextButton action="$search" isDefault="$true">Search</w:TextButton>\
+        </div>
+        <a:SetValue mid="$requestContext.nextElementId"/>
+        <div _ifTrue="$showSearchTypeChooser" style="float:right">
+            <w:PopupMenuLink menuId="$mid" position="this">Options</w:PopupMenuLink>
+            <w:PopupMenu menuId="$mid">
+                <w:PopupMenuHeading>Search Type</w:PopupMenuHeading>
+                <w:PopupMenuItem showBullet='${searchOperation=="keywordSearch"}' action='${searchOperation="keywordSearch"; null}'>\
+                    Keyword Search
+                </w:PopupMenuItem>
+                <w:PopupMenuItem showBullet='${searchOperation=="textSearch"}' action='${searchOperation="textSearch"; null}'>\
+                    Advanced Search
+                </w:PopupMenuItem>
+                <w:PopupMenuItem showBullet='${searchOperation=="search"}' action='${searchOperation="search"; null}'>\
+                    Structured Search
+                </w:PopupMenuItem>
+            </w:PopupMenu>
+        </div>
+        <div style="float:left">\
+            <m:IncludeComponent/>
+        </div>
     </div>
 </m:Context>

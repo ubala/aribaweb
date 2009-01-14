@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Section.awl#3 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Section.awl#4 $
     </Copyright>
 
     <Overview>
@@ -28,6 +28,14 @@
         class on table containg section heading
     </Binding>
 
+    <Binding key="style" direction="get" type="String">
+        Style on wrapper div
+    </Binding>
+
+    <Binding key="leftMargin" direction="get" type="int">
+        Left margin indent for body (in px)
+    </Binding>
+
     <Binding key="showTopSpace" direction="get" type="boolean" default="$true">
         TBD
     </Binding>
@@ -36,7 +44,9 @@
         TBD
     </Binding>
 </a:Api>\
-<w:SectionHeading title="$^title" class="$^class"/>
-<w:SectionBody showTopSpace="$^showTopSpace" showBottomSpace="$^showBottomSpace">\
-    <a:IncludeContent/>\
-</w:SectionBody>
+<div style="$^style" emitTags="$^style">\
+    <w:SectionHeading title="$^title" class="$^class"/>
+    <w:SectionBody showTopSpace="$^showTopSpace" showBottomSpace="$^showBottomSpace" leftMargin="$^leftMargin">\
+        <a:IncludeContent/>\
+    </w:SectionBody>
+</div>
