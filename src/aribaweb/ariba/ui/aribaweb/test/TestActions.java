@@ -12,16 +12,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestActions.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestActions.java#2 $
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWDirectAction;
+import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 
 public class TestActions extends AWDirectAction
 {
+    public final static String CentralPage = "centralPage";
+
     public AWResponseGenerating centralPageAction ()
     {
         return requestContext().pageWithName(AWTestCentralPage.Name);
@@ -30,5 +33,9 @@ public class TestActions extends AWDirectAction
     protected boolean shouldValidateSession ()
     {
         return false;
+    }
+
+    protected void validateRequest (AWRequestContext requestContext)
+    {
     }
 }

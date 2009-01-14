@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugOptions.awl#26 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugOptions.awl#27 $
     </Copyright>
 
     <Overview>
@@ -82,6 +82,10 @@
         <i>\
             To make this permanent, define the environment variable <b>"ARIBA_DIFF_TOOL_COMMAND"</b>
         </i>
+        <br/>
+        <a:Label>
+            <a:Checkbox value="$ariba.ui.aribaweb.core.AWRequestContext.UseXmlHttpRequests"/> Use XMLHTTP for requests (instead of IFrames)
+        </a:Label>
         <br/>
         <a:Label>
             <a:Checkbox value="$ariba.ui.aribaweb.core.AWPage.AllowCrossPageRefresh"/> Allow cross page incremental refresh

@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApplication.java#29 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApplication.java#30 $
 */
 
 package ariba.ui.aribaweb.core;
 
+import ariba.ui.aribaweb.util.AWBookmarker;
 import ariba.ui.aribaweb.util.AWBrand;
 import ariba.ui.aribaweb.util.AWBrandManager;
 import ariba.ui.aribaweb.util.AWNodeManager;
@@ -110,6 +111,11 @@ public interface AWApplication extends AWServerApplication
     public AWResponseGenerating monitorStatsPage (AWRequestContext requestContext);
     public Map customKeyValueStats ();
     public boolean isValidRemoteHost (AWRequest request);
+
+    //////////////////////
+    // Bookmarking Support
+    //////////////////////
+    public AWBookmarker getBookmarker ();
 
     //////////////////////
     // Shutdown Support

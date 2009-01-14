@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/OrderedList.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/OrderedList.java#3 $
 */
 
 package ariba.util.fieldvalue;
@@ -150,8 +150,6 @@ abstract public class OrderedList extends ClassExtension
 
     abstract public void insertElementAt (Object receiver, Object element, int elementIndex);
 
-    abstract public Object sublist (Object receiver, int beginIndex, int endIndex);
-
     abstract public Object mutableInstance (Object receiver);
 
     /*
@@ -159,6 +157,17 @@ abstract public class OrderedList extends ClassExtension
         However, these implementations will suffice given implementations of the abstract
         methods above.
      */
+
+    public Object sublist (Object receiver, int beginIndex, int endIndex)
+    {
+        Object result = mutableInstance(receiver);
+        OrderedList resultExtension = get(result);
+        for (int i = beginIndex; i < endIndex; i++) {
+            resultExtension.addElement(result, elementAt(receiver, i));
+        }
+        return result;
+    }
+
     public java.util.Iterator elements (Object receiver)
     {
         return new OrderedListIterator(receiver);

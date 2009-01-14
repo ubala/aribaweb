@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#7 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#10 $
 */
 package ariba.ui.meta.layouts;
 
@@ -31,6 +31,7 @@ import ariba.ui.meta.core.Context;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 public class MetaNavTabBar extends AWComponent
 {
@@ -51,6 +52,7 @@ public class MetaNavTabBar extends AWComponent
     {
         public List<ModuleProperties> _modules;
         protected ModuleProperties _selectedModule;
+        protected List<String> _selectedModuleClassNames;
         protected List<ItemProperties> _actionCategories;
         protected Map<String, List<ariba.ui.meta.core.ItemProperties>> _actionsByCategory;
         protected ModuleProperties _lastSelectedModule;
@@ -114,16 +116,35 @@ public class MetaNavTabBar extends AWComponent
             _lastSelectedModule = selectedModule;
         }
 
+        static Object listOrSingleton (Object val)
+        {
+            return ((val instanceof List) && ((List)val).size() == 1)
+                    ? ((List)val).get(0)
+                    : val;
+        }
+
+        // Used by page content areas to re-push the module context onto the meta context
+        public void assignCurrentModuleContext (Context context)
+        {
+            context.set(UIMeta.KeyModule, _selectedModule.name());
+            context.set(UIMeta.KeyClass, listOrSingleton(_selectedModule.getAllTypes()));
+        }
+
         public void selectModule(ModuleProperties selectedModule)
         {
             if (_selectedModule == selectedModule) return;
             _selectedModule = selectedModule;
             UIMeta meta = UIMeta.getInstance();
             Context context = meta.newContext();
+
             context.push();
-            context.set(UIMeta.KeyModule, _selectedModule.name());
+
+            assignCurrentModuleContext(context);
             _actionCategories = meta.itemList(context, UIMeta.KeyActionCategory, Zones);
-            _actionsByCategory = meta.navActionsByCategory(context);
+
+            _actionsByCategory = new HashMap();
+            meta.actionsByCategory(context, _actionsByCategory);
+
             context.pop();
         }
 
@@ -135,7 +156,6 @@ public class MetaNavTabBar extends AWComponent
         }
 
         public AWResponseGenerating fireAction (ItemProperties action, AWRequestContext requestContext)
-
         {
             // ToDo -- figure out how to fire Action
             UIMeta meta = UIMeta.getInstance();

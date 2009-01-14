@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#50 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#52 $
     </Copyright>
 
     <Overview>
@@ -76,6 +76,14 @@
         TBD
     </Binding>
 
+    <Binding key="okButtonClass" direction="get" type="String">
+        TBD
+    </Binding>
+
+    <Binding key="okButtonWrapperStyle" direction="get" type="String">
+        TBD
+    </Binding>
+
     <Binding key="cancelHint" direction="get" type="String" default="Cancel BUtton">
         TBD
     </Binding>
@@ -84,11 +92,24 @@
         TBD
     </Binding>
 
+    <Binding key="okButtonRight" direction="get" type="boolean" default="$false">
+        By default, the ok button is on the left of the cancel button.
+        Set this to true to layout the ok button on the right of the cancel button.
+    </Binding>
+
     <Binding key="cancelAction" direction="get" type="AWResponseGenerating" required="$false">
         TBD
     </Binding>
 
     <Binding key="cancelTitle" direction="get" type="String" default="Cancel">
+        TBD
+    </Binding>
+
+    <Binding key="cancelButtonClass" direction="get" type="String">
+        TBD
+    </Binding>
+
+    <Binding key="cancelButtonWrapperStyle" direction="get" type="String">
         TBD
     </Binding>
 
@@ -269,10 +290,23 @@
 
             <a:Content name="buttons">
                 <a:If ifTrue="$^editable">\
-                    <w:TextButton action="$okClicked" title="$^okHint:$[a001]OK Button"><a:String value="$^okTitle:$[a002]OK"/></w:TextButton>\
-                    <w:TextButton action="$cancelClicked" title="$^cancelHint:$[a003]Cancel Button"><a:String value="$^cancelTitle:$[a004]Cancel"/></w:TextButton>\
+                    <a:If ifFalse="$^okButtonRight">
+                        <w:TextButton action="$okClicked" title="$^okHint:$[a001]OK Button"
+                                      buttonClass="$^okButtonClass" buttonWrapperStyle="$^okButtonWrapperStyle">\
+                            <a:String value="$^okTitle:$[a002]OK"/></w:TextButton>\
+                    </a:If>
+                    <w:TextButton action="$cancelClicked" title="$^cancelHint:$[a003]Cancel Button"
+                                  buttonClass="$^cancelButtonClass" buttonWrapperStyle="$^cancelButtonWrapperStyle">\
+                        <a:String value="$^cancelTitle:$[a004]Cancel"/></w:TextButton>\
+                    <a:If ifTrue="$^okButtonRight">
+                        <w:TextButton action="$okClicked" title="$^okHint:$[a001]OK Button"
+                                      buttonClass="$^okButtonClass" buttonWrapperStyle="$^okButtonWrapperStyle">\
+                            <a:String value="$^okTitle:$[a002]OK"/></w:TextButton>\
+                    </a:If>
                 <a:Else/>\
-                    <w:TextButton action="$okClicked" title="$^doneHint:$[a005]Done Button" submitForm="$^submitForm"><a:String value="$^doneTitle:$[a006]Done"/></w:TextButton>\
+                    <w:TextButton action="$okClicked" title="$^doneHint:$[a005]Done Button" submitForm="$^submitForm"
+                            buttonClass="$^okButtonClass" buttonWrapperStyle="$^okButtonWrapperStyle">\
+                        <a:String value="$^doneTitle:$[a006]Done"/></w:TextButton>\
                 </a:If>\
                 <a:IncludeContent name="buttons" required="$false"/>\
             </a:Content>

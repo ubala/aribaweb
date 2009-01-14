@@ -17,7 +17,7 @@ Operation:
         class=busobj.User {
             /* Use a custom AWXRatingBar component for the "rating" field and put it at the top */
             field=rating {
-                editable=false {component:AWXRatingBar;}
+                editable=false {component:RatingBar;}
                 editable {
                     bindings:{isRefresh:true}
                     cueTip:"Try changing this to values above and below 50 -- notice how the 'bio' field editability changes!";

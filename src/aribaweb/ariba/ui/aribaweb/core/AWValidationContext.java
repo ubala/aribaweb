@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWValidationContext.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWValidationContext.java#11 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -20,14 +20,45 @@ package ariba.ui.aribaweb.core;
 import ariba.ui.aribaweb.util.AWBaseObject;
 import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
+import ariba.util.core.SystemUtil;
+import ariba.util.core.Fmt;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.TreeMap;
 
 public class AWValidationContext extends AWBaseObject
 {
+    //--------------------------------------------------------------------------
+    // nested class
+
+    /**
+        @aribaapi ariba
+    */
+    public static class ValidationError
+    {
+        public String message;
+        public Throwable exception;
+
+        public ValidationError (String message, Throwable exception)
+        {
+            this.exception = exception;
+            this.message = message;
+        }
+
+        public String getStackTrace ()
+        {
+            if (exception != null) {
+                return SystemUtil.stackTrace(exception);
+            }
+            return null;
+        }
+    }
+
     private List _packagesWithErrors;
     private Map _packageErrorTable;
-    private List _generalErrors;
+    private Map<String,List<ValidationError>> _generalErrors = new TreeMap();
 
     ///////////////////////
     // Constructor
@@ -81,17 +112,59 @@ public class AWValidationContext extends AWBaseObject
         return _packagesWithErrors;
     }
 
-    public void addGeneneralError (String msg)
+    /**
+        @aribaapi ariba
+    */
+    public void clearGeneralErrors (String key)
     {
-        if (_generalErrors == null) {
-            _generalErrors = ListUtil.list();
+        if (key == null) {
+            key = "Other";
         }
-        _generalErrors.add(msg);
+        _generalErrors.remove(key);
     }
 
-    public List getGeneralErrors ()
+
+    public void addGeneralError (String key, String msg, Throwable exception)
     {
-        return _generalErrors;
+        if (key == null) {
+            key = "Other";
+        }
+        ValidationError error = new ValidationError(msg, exception);
+        MapUtil.merge(_generalErrors, key, error);
+    }
+
+    public void addGeneralError (String msg)
+    {
+        addGeneralError(null, msg, null);
+    }
+
+    /**
+        @aribaapi ariba
+    */
+    public List<String> getGeneralErrorKeys ()
+    {
+        return new ArrayList(_generalErrors.keySet());
+    }
+
+    /**
+        @aribaapi ariba
+    */
+    public List<ValidationError> getGeneralErrorsFor (String key)
+    {
+        List<ValidationError> result = _generalErrors.get(key);
+        return result != null ? result : Collections.<ValidationError>emptyList();
+    }
+
+    public List<String> getGeneralErrors ()
+    {
+        List<String> result = ListUtil.list();
+        for (String key : _generalErrors.keySet()) {
+            List<ValidationError> errors = _generalErrors.get(key);
+            for (ValidationError error : errors) {
+                result.add(Fmt.S("%s: %s", key, error.message));
+            }
+        }
+        return result;
     }
 
     /**
@@ -100,7 +173,8 @@ public class AWValidationContext extends AWBaseObject
     public boolean hasErrorForComponentPackage (AWComponent component)
     {
         String packageName = AWComponentApiManager.packageNameForComponent(component.componentDefinition());
-        return packagesWithErrors().contains(packageName);
+        List packagesWithErrors = packagesWithErrors();
+        return packagesWithErrors != null && packagesWithErrors.contains(packageName);
     }
 
     // Used in the element and in the AWApi

@@ -17,7 +17,7 @@
     $Id:  $
  -->
 
-<project name="awIdeaPlugin" default="default">
+<project name="aribawebIdeaPlugin" default="default">
 
     <description>
         AribaWeb-savvy plugin for IDEA (and, soon, Eclipse)
@@ -68,7 +68,13 @@
         </antcall>
     </target>
 
-    <target name="build-jar" depends="compile"
+    <target name="copy-resources">
+        <copy todir="${build.classes.dir}">
+            <fileset dir="${src.resource.path}" includes="**/*.xml" excludes="build*.xml,project/"/>
+        </copy>
+    </target>
+
+    <target name="build-jar" depends="compile, copy-resources"
             description="Packages the JAR file">
         <jarify>
             <manifest-body>

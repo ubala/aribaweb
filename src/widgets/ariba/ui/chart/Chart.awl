@@ -1,0 +1,91 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $$
+    </Copyright>
+
+    <Responsible>
+        craigf
+    </Responsible>
+
+    <Overview>
+        Displays a FusionCharts flash chart control.
+
+        Component content should be the XML for the chart data points.
+        (This can be provided using the ChartData or ChartPivotData components, for instance)
+        This component is smart about updating the flash object with new data
+        via incremental refresh if the component content XML changes (without instantiating
+        a new flash control)
+    </Overview>
+
+    <Binding key="type" type="String" direction="get">
+        Type of the chart to use.  (E.g. "Line" corresponds to "FCF_Line.swf").
+
+        Single dimension types (compatible with ChartData content):
+            "Bar2D", "Column2D", "Column3D", "Doughnut2D",
+            "Funnel", "Line", "Pie2D", "Pie3D"
+
+        Two dimension types (compatible with ChartPivot content):
+            "StackedArea2D", "StackedBar2D", "StackedColumn2D", "StackedColumn3D",
+            "MSArea2D", "MSBar2D", "MSColumn2D", "MSColumn2DLineDY",
+            "MSColumn3D", "MSColumn3DLineDY"
+
+    </Binding>
+
+    <Binding key="filename" type="String" direction="get">
+        swf files name (resource manager relative path) for file (e.g. "FCF_Line.swf").
+        This is an alternative to "type".
+    </Binding>
+
+    <Binding key="width" type="int" required="$false" direction="get">
+        Width in px of chart
+    </Binding>
+
+    <Binding key="height" type="int" required="$false" direction="get">
+        Height in px of chart
+    </Binding>
+
+    <Binding key="animation" type="int" required="$false" direction="get" default="0">
+        Should chart animate.  Default is no.
+    </Binding>
+</a:Api>\
+<a:ClientSideScript filename="fusioncharts/FusionCharts.js"/>\
+<a:ClientSideScript filename="widg/flashchart.js"/>\
+
+<a:SetValue objId="$requestContext.nextElementId"/>\
+<a:SetValue dataId="$requestContext.nextElementId"/>
+
+<!--- $type is in comment below to force refresh region update if chart type chages -->        
+<a:RefreshRegion>
+    <!-- $type -->
+    <div id="$objId">\
+        <a:Local>\
+            Loading Graph...
+        </a:Local>\
+    </div>\
+
+    <a:RefreshRegion>
+        <pre id="$dataId" style="display:none">\
+            <graph animation="$^animation:0" otherBindings="$otherBindingsValues">\
+                <a:IncludeContent/>\
+            </graph>\
+        </pre>\
+        <a:ClientSideScript>
+            // This will open / update the flash graph
+            awInsertFlashGraph("$objId", "$dataId", "$swfUrl",
+                "<a:String value='$^width:480'/>", "<a:String value='$^height:320'/>");
+        </a:ClientSideScript>
+    </a:RefreshRegion>
+</a:RefreshRegion>

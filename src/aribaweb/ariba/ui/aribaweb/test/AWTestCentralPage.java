@@ -12,22 +12,28 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AWTestCentralPage.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AWTestCentralPage.java#2 $
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWSessionRestorationException;
 import ariba.ui.aribaweb.html.AWImage;
 
-import java.util.Collection;
+import javax.servlet.http.HttpSession;
+
 import java.util.List;
 import java.util.Map;
 
 public class AWTestCentralPage extends AWComponent
 {
     final public static String Name = "AWTestCentralPage";
-    
+
+    public static String UserComponent = null;
+
+    private String _username;
+
     public AWTestCentralPage()
     {
     }
@@ -35,11 +41,40 @@ public class AWTestCentralPage extends AWComponent
     public void init ()
     {
         super.init();
+        try {
+            session();
+        }
+        catch (AWSessionRestorationException exception) {
+            requestContext().createHttpSession();
+        }
         Map m = session().dict();
         if (m.get(TestContext.Name) == null) {
-            m.put(TestContext.Name, new TestContext());
+            TestSessionSetup testSessionSetup = TestLinkManager.instance().getTestSessionSetup();
+            TestContext tc = TestContext.getSavedTestContext(requestContext());
+            if (tc == null) {
+                tc = new TestContext();
+                m.put(TestContext.Name, tc);
+                testSessionSetup.initializeTestContext(requestContext());
+                testSessionSetup.registerTestContextDataProvider(tc, session());
+            }
+            else {
+                m.put(TestContext.Name, tc);
+                testSessionSetup.initializeSession(requestContext(), tc);
+                TestContext.removeSavedTestContext(requestContext());
+            }
         }
     }
+
+    public boolean hasUserComponent()
+    {
+        return UserComponent != null;
+    }
+
+    public String getUserComponent()
+    {
+        return UserComponent;
+    }
+
     public List<Category> testCategoryList ()
     {
         return TestLinkManager.instance().getTestCategoryList();
@@ -85,12 +120,12 @@ public class AWTestCentralPage extends AWComponent
 
     public String reloadImageLink ()
     {
-        return AWImage.imageUrl(requestContext(), this, "reloadLink.gif");
+        return AWImage.imageUrl(requestContext(), this, "reloadImageLink.gif");
     }
 
     public String appImageLink ()
     {
-        return AWImage.imageUrl(requestContext(), this, "appLink.gif");
+        return AWImage.imageUrl(requestContext(), this, "appImageLink.gif");
     }
 
     public void clearTestContext ()
@@ -98,13 +133,14 @@ public class AWTestCentralPage extends AWComponent
         TestContext ts = TestContext.getTestContext(requestContext());
         ts.clear();
     }
-//    protected boolean shouldValidateRequest ()
-//    {
-//        return false;
-//    }
-//
-//    protected boolean shouldValidateSession ()
-//    {
-//        return false;
-//    }
+
+    protected boolean shouldValidateRequest ()
+    {
+        return false;
+    }
+
+    protected boolean shouldValidateSession ()
+    {
+        return false;
+    }
 }

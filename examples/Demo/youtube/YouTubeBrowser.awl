@@ -1,0 +1,43 @@
+<w:BasicPageWrapper hasForm="$true">
+    <w:FourZoneLayout>
+        <a:Content name="left">
+            <t:DataTable list="$feed" item="$video" displayGroup="$displayGroup"
+                         enableScrolling="$true"  showOptionsMenu="$true" singleSelect="$true"
+                         showSelectionColumn="$false" submitOnSelectionChange="$true">
+                <t:HeadingArea>
+                    <w:GenericChooser list="$categories" key="category" displayKey="title" 
+                                      type="Popup" action="$null"/>
+                    <w:CueTip value="$category.description"/>
+                </t:HeadingArea>
+                <t:Column label="Image">\
+                    <img src="$video.thumbnail.url" width="$video.thumbnail.width" height="$video.thumbnail.height"/>\
+                </t:Column>
+                <t:Column Label="Title" key="title"/>
+                <t:Column label="Duration" key="full.group.duration.seconds"
+                          formatter="$formatters.xml.duration" initiallyVisible="$false"/>
+                <t:Column label="Rating" key="full.rating.average" formatter="$formatters.xml.double" initiallyVisible="$false">
+                    <x:RatingBar value="$video.full.rating.average" max="5"/>
+                </t:Column>
+                <t:Column label="Author" key="full.author.name" initiallyVisible="$false"/>
+            </t:DataTable>
+            <br/>
+        </a:Content>
+        <a:Content name="right">
+            <h1 style="white-space:normal">$displayGroup.selectedObject.title</h1>
+            <a:If notEqualNull="$displayGroup.selectedObject.url">
+                <object width="425" height="344">
+                    <param name="movie" value="$displayGroup.selectedObject.url"></param>
+                    <param name="allowFullScreen" value="true"></param>
+                    <embed src="$displayGroup.selectedObject.url"
+                           type="application/x-shockwave-flash"
+                           allowfullscreen="true" width="425" height="344"></embed>
+                </object>
+            <a:Else/>
+                <i>Embeddable version of Video not available</i>
+            </a:If>
+            <w:Section title="Details" class="marginTop8">
+                $displayGroup.selectedObject.full.content
+            </w:Section>
+        </a:Content>
+    </w:FourZoneLayout>
+</w:BasicPageWrapper>

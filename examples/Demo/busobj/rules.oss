@@ -16,7 +16,6 @@ class=busobj.User {
     field=password {
         valid:${value.length > 5 ? true : "Bad password, dude" }
         operation=view {  visible:${value && value!=""}; label:"PSS" }
-        visible:false;
     }
 
     operation=edit {

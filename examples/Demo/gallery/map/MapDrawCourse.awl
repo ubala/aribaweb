@@ -1,0 +1,28 @@
+<w:BasicPageWrapper hasForm="$true">
+    <w:HintMessage>
+        <b>Click map</b> to place markers.  <b>Drag</b> markers to relocated.
+        <b>Click markers</b> to select them in the table.  <b>Drag rows</b> in
+        the table to reorder markers in the path.  <b>Delete</b> markers at will.
+    </w:HintMessage>
+    <w:FourZoneLayout>
+        <a:Content name="left">
+            <t:DataTable title="Markers" list="$markers" item="$marker" displayGroup="$displayGroup"
+                         reorderAction="$null" enableScrolling="$true" initialSortKey="">
+                <t:Column key="latitude"/>
+                <t:Column key="longitude"/>
+                <t:Column><w:TextButton action="$deleteMarker">Delete</w:TextButton></t:Column>
+            </t:DataTable>
+        </a:Content>
+        <a:Content name="right">
+            <h1>The Map</h1>
+            <x:GMap clickAction="$addMarker" eventLatitude="$lat" eventLongitude="$lng">
+                <a:For list="$markers" item="$marker">
+                    <x:GMapMarker latitude="$marker.latitude" longitude="$marker.longitude"
+                                  action="$markerClicked" dragAction="$markerDragged" autoCenterMap="$false"/>
+                </a:For>
+                <x:GMapPolyline list="$markers" item="$marker"
+                        latitude="$marker.latitude" longitude="$marker.longitude"/>
+            </x:GMap>
+        </a:Content>
+    </w:FourZoneLayout>
+</w:BasicPageWrapper>

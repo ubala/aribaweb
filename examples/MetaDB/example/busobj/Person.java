@@ -3,6 +3,9 @@ package example.busobj;
 import ariba.util.core.Date;
 import ariba.util.core.Fmt;
 import ariba.ui.meta.annotations.NavModuleClass;
+import ariba.ui.meta.annotations.Properties;
+import ariba.ui.meta.annotations.Traits;
+import ariba.ui.meta.annotations.Trait.*;
 
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
@@ -43,6 +46,7 @@ public class Person
         this.lastName = lastName;
     }
 
+    @LabelField
     public String getName () {
         return Fmt.S("%s %s", firstName, lastName);
     }

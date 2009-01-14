@@ -2,6 +2,8 @@ package example.busobj;
 
 import ariba.ui.validation.ChoiceSourceRegistry;
 import ariba.ui.meta.annotations.*;
+import ariba.ui.meta.annotations.Trait.*;
+import ariba.ui.meta.annotations.Property.*;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -18,11 +20,11 @@ public class User extends Person
 {
     public enum AccountStatus { PendingReview, Active, Suspended }
 
-    @Traits("secret") String password;
+    @Secret String password;
     BigDecimal accountBalance;
     @Properties("traits:enumeration; choices: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];")
     int rating;
-    @Traits("richtext") String bio;
+    @RichText String bio;
     AccountStatus accountStatus = AccountStatus.Active;
     @Transient
     List <Permission> permissions;
@@ -89,14 +91,14 @@ public class User extends Person
     public boolean isSuspended () { return accountStatus == AccountStatus.Suspended; }
 
     @Action(message="Account Suspended")
-    @Properties("visible:${!object.isSuspended}")
+    @Visible("${!object.isSuspended}")
     public void suspendAccount ()
     {
         accountStatus = AccountStatus.Suspended;
     }
 
     @Action(message="Account Re-activated")
-    @Properties("visible:${object.isSuspended}")
+    @Visible("${object.isSuspended}")
     public void reinstateAccount ()
     {
         accountStatus = AccountStatus.Active;

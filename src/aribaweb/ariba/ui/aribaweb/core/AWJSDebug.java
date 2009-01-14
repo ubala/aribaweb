@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWJSDebug.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWJSDebug.java#5 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -56,5 +56,13 @@ public final class AWJSDebug extends AWComponent
     public boolean markRefreshUpdates ()
     {
         return booleanValueForBinding("markRefreshUpdates");
+    }
+
+    public boolean markRefreshRegions ()
+    {
+        AWSession session = session(false);
+        return (session != null &&
+            Boolean.TRUE.equals(session.dict().get("RefreshRegionsVisible")));
+
     }
 }

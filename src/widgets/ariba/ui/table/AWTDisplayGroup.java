@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#62 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#64 $
 */
 package ariba.ui.table;
 
@@ -134,6 +134,11 @@ public final class AWTDisplayGroup
     protected void setOwningTable (AWTDataTable table)
     {
         _owningTable = table;
+    }
+
+    public AWTPivotState pivotState ()
+    {
+        return _owningTable.pivotState();
     }
 
     public void setObjectArray (List allObjects)
@@ -265,6 +270,12 @@ public final class AWTDisplayGroup
             List list = _dataSource.fetchObjects();
             checkObjectArray(list);
         }
+    }
+
+    public void hibernate ()
+    {
+        setObjectArray(ListUtil.list());
+        _didInitialFetch = false;
     }
 
     public List allObjects ()
@@ -484,7 +495,7 @@ public final class AWTDisplayGroup
         return _groupingValueState;
     }
 
-    protected GroupingState groupingState (Object row)
+    public GroupingState groupingState (Object row)
     {
         if (_lastGroupingRow != row) {
             _lastGroupingState = (GroupingState)groupingValueState().get(row);

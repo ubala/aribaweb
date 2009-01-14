@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/demoshell/ariba/ui/groovy/AWGroovyLoader.java#4 $
+    $Id: //ariba/platform/ui/demoshell/ariba/ui/groovy/AWGroovyLoader.java#5 $
 */
 package ariba.ui.groovy;
 
@@ -43,6 +43,7 @@ public class AWGroovyLoader extends AWClassLoader.PairedFileLoader
         if (_DidInit) return;
         _DidInit = true;
         AWUtil.setClassLoader(new AWGroovyLoader());
+        AWGPathClassExtensions.initialize();
     }
 
     static GroovyClassLoader _Gcl;

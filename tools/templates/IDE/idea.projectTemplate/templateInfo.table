@@ -1,0 +1,8 @@
+{
+    title = "IDEA project files";
+    description = "Adds an IntelliJ IDEA project file for your new app\nThis will include references to your AribaWeb libraries and Ant files.";
+    rank = 2;
+    parameters = (
+    );
+    autoOpenFile = "@ProjectName@.ipr";
+}

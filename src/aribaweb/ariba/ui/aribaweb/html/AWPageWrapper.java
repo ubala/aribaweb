@@ -12,16 +12,35 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPageWrapper.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPageWrapper.java#2 $
 */
 package ariba.ui.aribaweb.html;
 
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWConcreteServerApplication;
+import ariba.util.core.StringUtil;
 
 public class AWPageWrapper extends AWComponent
 {
     public String favIconUrl ()
     {
         return AWImage.imageUrl(requestContext(), this, "favicon.ico");
+    }
+    
+    public String debugTitle ()
+    {
+        String debugTitle = null;
+        if (application().isDebuggingEnabled()) {
+            if (AWConcreteServerApplication.IsAutomationPageTitleTestModeEnabled) {
+                debugTitle = pageComponent().name();
+            }
+            else {
+                debugTitle = stringValueForBinding(ariba.ui.aribaweb.html.BindingNames.debugTitle);
+                if (StringUtil.nullOrEmptyOrBlankString(debugTitle)) {
+                    debugTitle = pageComponent().name();
+                }
+            }
+        }
+        return debugTitle;
     }
 }

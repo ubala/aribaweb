@@ -306,7 +306,7 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
 
 
 
-    List _allColumnAttributes()
+    public List _allColumnAttributes()
     {
         return (List)_originalConfig[2];
     }
@@ -316,6 +316,22 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
         return (List)_originalConfig[0];
     }
 
+    public List rowFields()
+    {
+        return (List)_originalConfig[1];
+    }
+
+    public List<PivotEdgeColumn> leafLevelColumnsFor (Column columnFieldsColumn)
+    {
+        List<PivotEdgeColumn> all = ListUtil.list();
+        List result = ListUtil.list();
+        _columnEdgeRoot.createColumnsForLeafLevel(all);
+        for (PivotEdgeColumn col : all) {
+            if (col.edgeCell().attributeColumn() == columnFieldsColumn) result.add(col);
+        }
+        return result;
+    }
+    
     public List optionalAttributeColumns ()
     {
         // force computation
@@ -780,6 +796,16 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
     {
         List result = ListUtil.list();
         _columnEdgeRoot.collectCellsAtLevel(result, _currentHeaderDepth);
+        return result;
+    }
+
+    public List topLevelEdgeCells ()
+    {
+        int depth = 1;
+        while (depth < columnEdgeLevels() && _columnEdgeRoot.shouldCollapseCurrentLevel(depth, this)) depth++;
+        if (depth >= columnEdgeLevels()) return null;
+        List result = ListUtil.list();
+        _columnEdgeRoot.collectCellsAtLevel(result, depth);
         return result;
     }
 
@@ -1283,7 +1309,7 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
             return slot;
         }
 
-        Object itemInGroup (PivotGroup group)
+        public Object itemInGroup (PivotGroup group)
         {
             int slot = groupSlot();
             Assert.that(slot != -1, "Use of edgeCell with unassigned groupSlot");
@@ -1427,7 +1453,7 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
             return _groupSlot;
         }
 
-        EdgeCell objectCell ()
+        public EdgeCell objectCell ()
         {
             Assert.that(_children == null, "Should be called only on leaf cells");
             return isAttributeCell() ? _parent : this;
@@ -1441,13 +1467,23 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
         }
 
         // what's the effective rendering column for this cell
-        Column attributeColumn ()
+        public Column attributeColumn ()
         {
             if (_attributeColumn != null) return _attributeColumn;
             if (_parent != null) return _parent.attributeColumn();
             // we're the root -- return our attribute
             Assert.that(_column != null, "Got to root edge cell with no attribute column");
             return _column;
+        }
+
+        public Column column ()
+        {
+            return _column;
+        }
+
+        public Object object ()
+        {
+            return _object;
         }
 
         public boolean isFirstChild ()

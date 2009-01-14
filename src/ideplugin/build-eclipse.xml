@@ -17,7 +17,7 @@
     $Id:  $
  -->
 
-<project name="awEclipsePlugin" default="default">
+<project name="aribawebEclipsePlugin" default="default">
 
     <description>
         AribaWeb-savvy plugin Eclipse
@@ -53,17 +53,17 @@
                 <resources refid="source.files"/>
             </sources>
             <targets>
-                <path location="${build.plugin.dir}/ariba.ideplugin.eclipse_0.8.x.jar"/>
+                <path location="${build.plugin.dir}/aribawebEclipsePlugin.jar"/>
             </targets>
         </dependset>
-        <available file="${build.plugin.dir}/ariba.ideplugin.eclipse_0.8.x.jar" property="jar.uptodate"/>
+        <available file="${build.plugin.dir}/aribawebEclipsePlugin" property="jar.uptodate"/>
     </target>
 
-    <target name="jar" depends="check-missing-eclipse-lib, jar-check" unless="jar.uptodate" if="has.eclipse.lib"
+    <target name="jar" depends="common.init, check-missing-eclipse-lib, jar-check" unless="jar.uptodate" if="has.eclipse.lib"
             description="Packages the JAR file">
         <mkdir dir="${build.plugin.dir}"/>
         <antcall target="build-jar">
-            <param name="build.jar.file" value="${build.plugin.dir}/ariba.ideplugin.eclipse_0.8.x.jar"/>
+            <param name="build.jar.file" value="${build.plugin.dir}/aribawebEclipsePlugin.jar"/>
             <param name="javac.excludes" value="**/idea/**/*"/>
         </antcall>
     </target>

@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/MetaDB/example/busobj/Deal.java#1 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/MetaDB/example/busobj/Deal.java#2 $
 */
 package example.busobj;
 
 import ariba.util.core.ListUtil;
 import ariba.ui.meta.annotations.NavModuleClass;
+import ariba.ui.meta.annotations.Trait.*;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -33,7 +34,7 @@ public class Deal
 {
     @Id @GeneratedValue
     private Long id;
-        
+
     protected String description;
     protected BigDecimal value;
     protected boolean active;

@@ -44,16 +44,25 @@
     .ro:hover{
         text-decoration:underline;
     }
+
+    .boxWrapper {
+        border:1px solid gray;
+        margin:10px;
+        padding:10px;
+    }
+    
 </style>
-<div style="text-align:right">
-    <a href="#" oncLick='document.getElementById("rawStackTrace").style.display="block"'>Show Raw Stack Trace</a>
-</div>
-<form id="rawStackTrace" style="display:none; margin:20px">
-    <textarea rows="30" cols="100">
-        <a:String value="$stackTrace" escapeHtml="$true"/>\
-    </textarea>
-</form>
-<div style="border:1px solid gray; margin:10px;padding:10px">
+<a:If ifTrue="^showRawStackTrace:$true">
+    <div style="text-align:right">
+        <a href="#" oncLick='document.getElementById("rawStackTrace").style.display="block"'>Show Raw Stack Trace</a>
+    </div>
+    <form id="rawStackTrace" style="display:none; margin:20px">
+        <textarea rows="30" cols="100">
+            <a:String value="$stackTrace" escapeHtml="$true"/>\
+        </textarea>
+    </form>
+</a:If>
+<div class="$^wrapperClass:boxWrapper">
     <table class="ex">
         <tr><td colspan="3"><div style="width:800px"/></td></tr>
         <tr><td colspan="3">

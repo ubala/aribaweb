@@ -1,0 +1,40 @@
+<a:Api>
+    <Overview>
+        GMap Marker
+    </Overview>
+
+    <Binding key="list" type="List" direction="get">
+        location as address string (overrides longitude / latitude if present)
+    </Binding>
+
+    <Binding key="item" type="Object" direction="set">
+        Coordinate longitude
+    </Binding>
+
+    <Binding key="latitude" type="float" direction="get">
+        Polyline point latitude
+    </Binding>
+
+    <Binding key="longitude" type="float" direction="get">
+        Polyline point longitude
+    </Binding>
+
+    <Binding key="color" type="String" direction="get" default="#ff0000">
+        Color
+    </Binding>
+
+    <Binding key="size" type="String" direction="get" default="10">
+        Color
+    </Binding>
+
+    <Binding key="action" type="AWResponseGenerating" direction="get">
+        Action to be fired on click on marker
+    </Binding>
+</a:Api>\
+<a:ClientSideScript isSingleton="$false">\
+    ariba.GMaps.current().registerObj("Polyline",
+    <a:JSListRepetition list="$^list" item="^item">\
+        new GLatLng(<a:String value="$^latitude"/>, <a:String value="$^longitude"/>)\
+    </a:JSListRepetition>\
+    , "<a:String value="$^color:#ff0000"/>", <a:String value="$^size:10"/>);
+</a:ClientSideScript>\

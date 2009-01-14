@@ -1,6 +1,7 @@
 package example.busobj;
 
 import ariba.ui.meta.annotations.Traits;
+import ariba.ui.meta.annotations.Trait.*;
 import ariba.ui.meta.annotations.Properties;
 
 import javax.persistence.Id;
@@ -14,7 +15,7 @@ public class Comment
     @GeneratedValue
     private Long id;
 
-    @Traits("richtext")
+    @RichText
     protected String text;
 
     public String getText()

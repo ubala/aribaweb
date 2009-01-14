@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/BindingNames.java#18 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/BindingNames.java#19 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -36,4 +36,5 @@ abstract public class BindingNames extends AWBindingNames
     public static final String isValid                    = "isValid";
     public static final String message                    = "message";
     public static final String validator                  = "validator";
+    public static final String debugTitle                 = "debugTitle";
 }

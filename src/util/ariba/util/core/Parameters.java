@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Parameters.java#12 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Parameters.java#13 $
 */
 
 package ariba.util.core;
@@ -28,7 +28,7 @@ import java.util.Map;
 
 /**
     Interface to access easily configuration parameters
-   
+
     @aribaapi ariba
 */
 public abstract class Parameters
@@ -63,6 +63,10 @@ public abstract class Parameters
         @aribaapi private
     */
     public abstract Object getParameter (String parameter,
+                                         boolean warning,
+                                         boolean useDefault);
+
+    public abstract Object getUncachedParameter (String parameter,
                                          boolean warning,
                                          boolean useDefault);
 

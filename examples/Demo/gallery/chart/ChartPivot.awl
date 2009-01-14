@@ -1,0 +1,21 @@
+<w:BasicPageWrapper hasForm="$true">
+    <w:FourZoneLayout>
+        <a:Content name="left">
+            <t:DataTable csvPath="AutoSales.csv" displayGroup="$displayGroup"
+                         enableScrolling="$true" showOptionsMenu="$true" title="Car Sales"
+                         pivotLayout="$true" rowFields="$(Product)" columnFields="$(Year)"
+                         columnAttributes="$(Revenue, Profit)">
+            </t:DataTable>
+        </a:Content>
+        <a:Content name="right">
+            <div style="float:right">\
+                <w:GenericChooser list="$chartTypes" key="chosenType" type="Popup" action="$null"/>
+                <w:GenericChooser list="$(Revenue, Profit)" key="valueColumnName" type="Popup" action="$null"/>
+            </div>
+            <h1>The Chart</h1>
+            <w:Chart type="$chosenType" numberPrefix='${"$"}' numberSuffix='M'>
+                <w:ChartPivotData displayGroup="$displayGroup" valueColumnName="$valueColumnName"/>
+            </w:Chart>
+        </a:Content>
+    </w:FourZoneLayout>
+</w:BasicPageWrapper>

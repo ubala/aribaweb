@@ -25,11 +25,12 @@
     <property name="src.dir" location="${basedir}/src"/>
     <property file="${src.dir}/version.properties"/>
     <property name="war.name" value="Demo"/>
+    <property name="use.shared.webapps.base" value="true"/>
 
     <import file="tools/build-common.xml"/>
 
+    <property name="build.jars.dir" value="${dist.root.dir}/lib"/>
     <property name="demoshell.home" location="${src.samples.dir}/demoshell-site"/>
-
     <property name="binary.dist.zip" location="${dist.dir}/aribaweb-${version}.zip"/>
     <property name="src.dist.zip" location="${dist.dir}/aribaweb-src-${version}.zip"/>
 
@@ -42,6 +43,22 @@
         <module-crawl target="war"/>
     </target>
 
+    <target name="clean"
+            description="Removes contents of build and dist directories">
+        <delete dir="${build.dir}"/>
+        <delete>
+          <fileset dir="${build.jars.dir}" includes="*.jar"/>
+        </delete>
+        <delete dir="${build.wars.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete dir="${dist.root.dir}/work"/>
+        <delete dir="${doc.dir}/api"/>
+        <delete dir="${doc.dir}/tutorial"/>
+        <delete dir="${doc.dir}/site"/>
+        <delete dir="${doc.dir}/index.lucene"/>
+        <delete dir="${doc.dir}/xsd"/>
+    </target>
+    
     <target name="tomcat-build" depends="wars, tomcat"
             description="Rebuild WARs and start Tomcat"/>
 
@@ -102,9 +119,18 @@
         <property name="widgets.resource.dir" location="${src.ui.dir}/widgets/resource/webserver/"/>
         <delete dir="${doc.resource.dir}"/>
         <mkdir dir="${doc.resource.dir}"/>
+        <delete dir="${site.dir}"/>
+        <mkdir dir="${site.dir}"/>
         <copy file="${widgets.resource.dir}/widg/prettify.js" todir="${doc.resource.dir}"/>
         <copy file="${widgets.resource.dir}/branding/ariba/widgets.css" todir="${doc.resource.dir}"/>
+        <copy file="${widgets.resource.dir}/branding/ariba/cssOrangeGradient.gif" todir="${doc.resource.dir}"/>
+        <copy file="${widgets.resource.dir}/branding/ariba/cssGrayGradient.gif" todir="${doc.resource.dir}"/>
+        <copy file="${widgets.resource.dir}/cmdbar_prod.gif" todir="${doc.resource.dir}"/>
         <copy file="${src.dir}/docs/index.html" todir="${doc.dir}"/>
+        <copy file="${src.dir}/docs/site-index.html" todir="${site.dir}"/>
+        <copy todir="${site.dir}">
+            <fileset dir="${src.dir}/docs/" includes="screencasts/*"/>
+        </copy>
     </target>
 
     <target name="process-doc" depends="doc-resources" unless="nodoc">
@@ -120,6 +146,17 @@
             <arg value="${src.ui.dir}/ideplugin/docs"/>
 
             <arg value="${tutorial.doc.dir}"/>
+        </groovy>
+        <delete file="${tutorial.doc.dir}/screencasts.html"/>
+
+        <property name="site.template" location="${tools.dir}/templates/sitetemplate.awl"/>
+        <groovy src="bin/processdoc.groovy" classpathref="groovy.script.classpath">
+            <arg value="${site.template}"/>
+
+            <arg value="${tutorial.src.dir}"/>
+            <arg value="${src.ui.dir}/ideplugin/docs"/>
+
+            <arg value="${site.dir}"/>
         </groovy>
     </target>
 
@@ -172,13 +209,15 @@
     <!-- ================================================================== -->
     <!-- D I S T R I B U T I O N                                            -->
     <!-- ================================================================== -->
+    <patternset id="src.jar.patterns"
+                includes="**/*.java, **/*.awl, **/*.groovy, **/*.js, **/*.css, **/*.htm"/>
     <patternset id="src.dist.patterns"
                 includes="tools/,src/,examples/,*,lib/ext*/,bin/"
-                excludes="dist/, webapps/, work/, classes/, derived-src/"
+                excludes="dist/, webapps/, work/, classes/, derived-src/, docs/site/"
             />
     <patternset id="binary.root.dist.patterns"
                 includes="**"
-                excludes="dist/, conf/, work/, classes/, build/, derived-src/, webapps/, bin/"
+                excludes="dist/, conf/, work/, classes/, build/, derived-src/, webapps/, bin/, docs/site/"
             />
 
     <patternset id="binary.root.dist.patterns.exe"
@@ -190,7 +229,17 @@
     </target>
 
     <target name="package-binary"
-            depends="wars, docs, index-doc, check-ant, package-binary-min, package-binary-full">
+            depends="wars, src-jar, docs, index-doc, check-ant, package-binary-min, package-binary-full">
+    </target>
+
+    <target name="src-jar">
+        <zip destfile="${build.jars.dir}/ariba.aw-all-src.jar">
+            <zipfileset dir="${src.util.dir}"><patternset refid="src.jar.patterns"/></zipfileset>
+            <zipfileset dir="${src.expr.dir}"><patternset refid="src.jar.patterns"/></zipfileset>
+            <zipfileset dir="${src.ui.dir}/aribaweb"><patternset refid="src.jar.patterns"/></zipfileset>
+            <zipfileset dir="${src.ui.dir}/widgets"><patternset refid="src.jar.patterns"/></zipfileset>
+            <zipfileset dir="${src.ui.dir}/metaui"><patternset refid="src.jar.patterns"/></zipfileset>
+        </zip>
     </target>
 
     <target name="check-ant">
@@ -298,6 +347,8 @@
                 <property name="aw.home" location="${aw.home}"/>
                 <property name="make.common.dir" location="${make.common.dir}"/>
                 <property name="build.dir" value="${build.dir}"/>
+                <property name="build.jars.dir" value="${build.jars.dir}"/>
+                <property name="use.shared.webapps.base" value="true"/>
                 <fileset dir="${src.dir}" includes="build.xml" erroronmissingdir="false"/>
                 <fileset dir="${src.samples.dir}" includes="**/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="*/examples/*/build.xml" erroronmissingdir="false"/>

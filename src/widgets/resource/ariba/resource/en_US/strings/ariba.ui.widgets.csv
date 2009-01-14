@@ -26,6 +26,7 @@
 "AribaShutdownWarning",a001,"Re-authentication Request","Re-authentication Request",""
 "AribaShutdownWarning",a002,"Finish Work","Finish Work",""
 "AribaShutdownWarning",a003,"Logout Now","Logout Now",""
+"AribaShutdownWarning",a004,"Redirect Now","Redirect Now",""
 "Chooser",a001,"Search for more","Search for more",""
 "Chooser",a002,"Select from the list","Select from the list",""
 "Chooser",a003,"Add another selection","Add another selection",""

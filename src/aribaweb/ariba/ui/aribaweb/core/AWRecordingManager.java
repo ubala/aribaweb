@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRecordingManager.java#39 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRecordingManager.java#40 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -517,13 +517,26 @@ public class AWRecordingManager extends AWBaseObject
                                    requestContext, response, null);
     }
 
+    public static String applySemanticKeyPrefix(AWRequestContext requestContext, String semanticKeyString,
+                                                 String sourceKey)
+    {
+        SemanticKey semanticKey = (sourceKey == null ?
+                                   new SemanticKey(semanticKeyString) :
+                                   new SemanticKey(sourceKey));
+        String forIndex = requestContext._debugSemanticKeyPrefix();
+        if (forIndex != null && semanticKey.prefix() == null) {
+            semanticKey.setPrefix(StringUtil.strcat(forIndex, "::"));
+        }
+        return semanticKey.uniqueKey();
+    }
+    
     public static String registerSemanticKey (String elementId,
                                             String semanticKeyString,
                                             AWRequestContext requestContext,
                                             AWResponse response,
                                             SemanticKey sourceKey)
     {
-        if (elementId == null || semanticKeyString == null) {
+        if (semanticKeyString == null) {
             return null;
         }
         Map elementIdToSemanticKeyTable = response.elementIdToSemanticKeyTable();
@@ -532,22 +545,19 @@ public class AWRecordingManager extends AWBaseObject
         SemanticKey semanticKey = (sourceKey == null ?
                                    new SemanticKey(semanticKeyString) :
                                    new SemanticKey(sourceKey));
-        String forIndex = requestContext._debugSemanticKeyPrefix();
-        if (forIndex != null && semanticKey.prefix() == null) {
-            semanticKey.setPrefix(StringUtil.strcat(forIndex, "::"));
-        }
-        SemanticKey existingSemanticKey = (SemanticKey)elementIdToSemanticKeyTable.get(elementId);
-        if (existingSemanticKey != null) {
+        if (elementId != null) {
+            SemanticKey existingSemanticKey = (SemanticKey)elementIdToSemanticKeyTable.get(elementId);
+            if (existingSemanticKey != null) {
                 // in AWForm, there will be two semantic keys for the same element id,
                 // AWForm and awsf
-            String existingSemanticKeyString = existingSemanticKey.uniqueKey();
-            if (!existingSemanticKeyString.equals(semanticKeyString) && !semanticKeyString.equals("awsnf")) {
+                String existingSemanticKeyString = existingSemanticKey.uniqueKey();
+                if (!existingSemanticKeyString.equals(semanticKeyString) && !semanticKeyString.equals("awsnf")) {
                     //System.out.println(Fmt.S("can't replace semantic key %s with %s for elementId %s",
                     //                         existingSemanticKey, semanticKeyString, elementId));
-                return semanticKeyString;
+                    return semanticKeyString;
+                }
             }
         }
-
         Object existingEntry = semanticKeyToElementIdTable.get(semanticKey);
         if (existingEntry != null) {
             if (sourceKey != null) {
@@ -582,8 +592,13 @@ public class AWRecordingManager extends AWBaseObject
             String componentPath = requestContext.getCurrentComponent().componentPath("\n").toString();
             Log.aribaweb.debug("%s contains non-ascii character\n%s\n", uniqueSemanticKey, componentPath);
         }
-        semanticKeyToElementIdTable.put(semanticKey, elementId);
-        elementIdToSemanticKeyTable.put(elementId, semanticKey);
+        if (elementId != null) {
+            semanticKeyToElementIdTable.put(semanticKey, elementId);
+            elementIdToSemanticKeyTable.put(elementId, semanticKey);
+        }
+        else {
+            semanticKeyToElementIdTable.put(semanticKey, semanticKey);
+        }
         return semanticKey.uniqueKey();
     }
 

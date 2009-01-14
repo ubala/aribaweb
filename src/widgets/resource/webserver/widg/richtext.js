@@ -296,3 +296,5 @@ ariba.Event.registerHandler("RTERelocateStale", "onRefreshRequestComplete", remo
 ariba.Event.registerRefreshCallback(checkCleanRTE);
 ariba.Event.registerHandler("RTESubmit", "onsubmit", onSubmitRTE);
 
+ariba.registerRefreshRTEId = registerRefreshRTEId;
+ariba.prepRTEReplacement = prepRTEReplacement;

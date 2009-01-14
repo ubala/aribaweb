@@ -14,16 +14,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    (Some contents derived from a parallel Apache Lucene file, also licenced
-     under the same license)
-
     $Id:  $
  -->
 
 <project name="Demo" default="build-and-run">
 
     <description>
-        AW Demo -- demoshell app and widget gallery
+        AW Demo -- Demo app and widget gallery
     </description>
 
     <property name="compile.groovy" value="true"/>
@@ -38,4 +35,10 @@
         <include name="lucene-core.jar"/>
         <include name="lucene-highlighter.jar"/>
     </fileset>
+
+    <target name="copy-docroot-resources" depends="common.copy-docroot-resources">
+        <copy todir="${build.classes.dir}/docroot">
+            <fileset dir="${src.dir}" includes="**/*.js"/>
+        </copy>
+    </target>
 </project>

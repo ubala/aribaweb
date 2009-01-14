@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#18 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -22,7 +22,6 @@ import ariba.ui.aribaweb.util.AWCharacterEncoding;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWPagedVector;
-import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.Assert;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
@@ -169,6 +168,61 @@ public final class AWResponseBuffer extends AWBaseObject
     private AWResponseBuffer _next;
     private AWResponseBuffer _tail;
 
+    protected static class WriteContext {
+        OutputStream _outputStream;
+        AWCharacterEncoding _characterEncoding;
+        int _nestingLevel;
+        boolean _didWrite;
+        boolean _writeRefreshRegionBoundaryMarkers;
+
+        public WriteContext (OutputStream outputStream, AWCharacterEncoding characterEncoding,
+                             boolean writeRefreshRegionBoundaryMarkers)
+        {
+            _outputStream = outputStream;
+            _characterEncoding = characterEncoding;
+            _writeRefreshRegionBoundaryMarkers = writeRefreshRegionBoundaryMarkers;
+        }
+
+        public WriteContext (OutputStream outputStream, AWCharacterEncoding characterEncoding)
+        {
+            this(outputStream, characterEncoding, false);
+        }
+
+        public void write (byte[] bytes)
+        {
+            try {
+                _outputStream.write(bytes);
+            } catch (IOException e) {
+                throw new AWGenericException(e);
+            }
+        }
+
+        public void write (AWEncodedString encodedString)
+        {
+            write(encodedString.bytes(_characterEncoding));
+            _didWrite = true;
+        }
+
+        private static final AWEncodedString TopLevelMarker = new AWEncodedString("<!--@&@-->");
+
+        private int _nestLevel = 0;
+        void pushLevel ()
+        {
+            // we don't write makers for the first entry (or the last)
+            if (_nestLevel++ == 0 && _didWrite && _writeRefreshRegionBoundaryMarkers) {
+                write(TopLevelMarker);
+            }
+        }
+
+        void popLevel ()
+        {
+            Assert.that(_nestLevel > 0, "Unbalanced nesting level");
+            _nestLevel--;
+        }
+
+
+    }
+
     protected AWResponseBuffer (AWEncodedString name, boolean isScope, boolean alwaysRender, AWBaseResponse baseResponse)
     {
         _baseResponse = baseResponse;
@@ -296,16 +350,14 @@ public final class AWResponseBuffer extends AWBaseObject
     
     /**
      * This is the eternal entry point called by the AWBaseResponse instance.
-     * @param outputStream
-     * @param characterEncoding
      * @param otherBuffer
      */
-    protected void writeTo (OutputStream outputStream, AWCharacterEncoding characterEncoding, AWResponseBuffer otherBuffer)
+    protected void writeTo (WriteContext context, AWResponseBuffer otherBuffer)
     {
         if (_alwaysRender || otherBuffer == null || !isEqual(otherBuffer)) {
-            renderAll(outputStream, characterEncoding);
+            renderAll(context);
             if (_isScope) {
-                writeScopeUpdate(outputStream, characterEncoding);
+                writeScopeUpdate(context);
             }
         }
         else if (_isScope) {
@@ -317,78 +369,69 @@ public final class AWResponseBuffer extends AWBaseObject
             if (changes != null) {
                 if (changes.total > ScopeChildCountUpdateAllThreshhold) {
                     // write out the whole table
-                    renderAll(outputStream, characterEncoding);
-                    writeScopeUpdate(outputStream, characterEncoding);
+                    renderAll(context);
+                    writeScopeUpdate(context);
                 } else {
                     if (changes.inserts != null || changes.updates != null) {
                         // Now write out the table and its modified children, including insertions.  At the end, write out
                         // the deltedChildren as javascript calls.
-                        writeScopedBuffer(outputStream, characterEncoding, otherBuffer);
+                        writeScopedBuffer(context, otherBuffer);
 
                         // Now, outside the table, write any buffers which changed within rows that didn't change.
-                        writeUnmodifiedChildren(outputStream, characterEncoding, otherBuffer);
+                        writeUnmodifiedChildren(context, otherBuffer);
                     } else {
                         // write changes within rows (if any)
-                        writeNextSublevel(outputStream, characterEncoding, otherBuffer);
+                        writeNextSublevel(context, otherBuffer);
                     }
                     // JS to execute inserts and deletes
                     if (changes.inserts != null || changes.deletes != null) {
-                        writeScopeChangeScript(outputStream, characterEncoding, changes.inserts, changes.deletes);
+                        writeScopeChangeScript(context, changes.inserts, changes.deletes);
                     }
                 }
             }
             else {
-                writeNextSublevel(outputStream, characterEncoding, otherBuffer);
+                writeNextSublevel(context, otherBuffer);
             }
         }
         else {
-            writeNextLevel(outputStream, characterEncoding, otherBuffer);
+            writeNextLevel(context, otherBuffer);
         }
     }
 
     /**
      * When its determined that a given buffer should be rendered in its entirety, call this.
-     * @param outputStream
-     * @param characterEncoding
      */
-    private void renderAll (OutputStream outputStream, AWCharacterEncoding characterEncoding)
+    private void renderAll (WriteContext context)
     {
-        try {
-            AWPagedVector.AWPagedVectorIterator elements = _globalContents.elements(_contentsStartIndex, _contentsEndIndex);
-            while (elements.hasNext()) {
-                Object element = elements.next();
-                if (element instanceof AWEncodedString) {
-                    byte[] bytes = ((AWEncodedString)element).bytes(characterEncoding);
-                    write(outputStream, bytes);
-                }
-                else {
-                    AWResponseBuffer childBuffer = (AWResponseBuffer)element;
-                    childBuffer.renderAll(outputStream, characterEncoding);
-                    elements.skipTo(childBuffer._contentsEndIndex);
-                }
+        context.pushLevel();
+        AWPagedVector.AWPagedVectorIterator elements = _globalContents.elements(_contentsStartIndex, _contentsEndIndex);
+        while (elements.hasNext()) {
+            Object element = elements.next();
+            if (element instanceof AWEncodedString) {
+                context.write(((AWEncodedString)element));
             }
-            elements.release();
+            else {
+                AWResponseBuffer childBuffer = (AWResponseBuffer)element;
+                childBuffer.renderAll(context);
+                elements.skipTo(childBuffer._contentsEndIndex);
+            }
         }
-        catch (IOException ioexception) {
-            throw new AWGenericException(ioexception);
-        }
+        elements.release();
+        context.popLevel();
     }
 
 
     /**
      * This should ONLY be used by regular buffers.  It skips all the string content at the top level and
      * asks each child to determine if it requires writing.
-     * @param outputStream
-     * @param characterEncoding
-     * @param otherBuffer
      */
-    private void writeNextLevel (OutputStream outputStream, AWCharacterEncoding characterEncoding, AWResponseBuffer otherBuffer)
+    private void writeNextLevel (WriteContext context, AWResponseBuffer otherBuffer)
     {
         Assert.that(_isScope == false, "writeNextLevel(...) cannot be used by scoped buffers");
         AWResponseBuffer childBuffer = _children;
         AWResponseBuffer otherChildBuffer = otherBuffer._children;
         while (childBuffer != null) {
-            childBuffer.writeTo(outputStream, characterEncoding, otherChildBuffer);
+            childBuffer.writeTo(context, otherChildBuffer);
             childBuffer = childBuffer._next;
             otherChildBuffer = otherChildBuffer._next;
         }
@@ -398,11 +441,8 @@ public final class AWResponseBuffer extends AWBaseObject
      * This is used to write the buffers contained within the children of a scoped buffer (ie a div within a tablecell)
      * This should only be called on scoped children when its determined that the wrapper scope doesn't require
      * writing (ie all children are same in terms of their checksums)
-     * @param outputStream
-     * @param characterEncoding
-     * @param otherBuffer
      */
-    private void writeNextSublevel (OutputStream outputStream, AWCharacterEncoding characterEncoding, AWResponseBuffer otherBuffer)
+    private void writeNextSublevel (WriteContext context, AWResponseBuffer otherBuffer)
     {
         Assert.that(_isScope, "writeNextSublevel(...) can only be used by scoped buffers");
         AWResponseBuffer childBuffer = _children;
@@ -410,7 +450,7 @@ public final class AWResponseBuffer extends AWBaseObject
         while (childBuffer != null) {
             AWEncodedString childBufferName = childBuffer._name;
             AWResponseBuffer otherChildBuffer = (AWResponseBuffer)otherScopeChildren.get(childBufferName);
-            childBuffer.writeNextLevel(outputStream, characterEncoding, otherChildBuffer);
+            childBuffer.writeNextLevel(context, otherChildBuffer);
             childBuffer = childBuffer._next;
         }
     }
@@ -477,46 +517,39 @@ public final class AWResponseBuffer extends AWBaseObject
      * This is called when it has been determined that the scope wrapper is required due to at least on of the scoped
      * children being different at the top level.  Thus we write the wrapper itself and all changed children, including
      * insertions.
-     * @param outputStream
-     * @param characterEncoding
-     * @param otherBuffer
      */
-    private void writeScopedBuffer (OutputStream outputStream, AWCharacterEncoding characterEncoding, AWResponseBuffer otherBuffer)
+    private void writeScopedBuffer (WriteContext context, AWResponseBuffer otherBuffer)
     {
-        try {
-            AWResponseBuffer previousChild = _NullResponseRef;
-            AWPagedVector.AWPagedVectorIterator elements =
-                    _globalContents.elements(_contentsStartIndex, _contentsEndIndex);
-            HashMap otherScopeChildren = otherBuffer._globalScopeChildren;
-            while (elements.hasNext()) {
-                Object element = elements.next();
-                if (element instanceof AWEncodedString) {
-                    byte[] bytes = ((AWEncodedString)element).bytes(characterEncoding);
-                    write(outputStream, bytes);
-                }
-                else {
-                    AWResponseBuffer childBuffer = (AWResponseBuffer)element;
-                    AWEncodedString childBufferName = childBuffer._name;
-                    AWResponseBuffer otherChildBuffer = (AWResponseBuffer)otherScopeChildren.get(childBufferName);
-                    if (otherChildBuffer == null || !childBuffer.isEqual(otherChildBuffer) || childBuffer._alwaysRender) {
-                        childBuffer.renderAll(outputStream, characterEncoding);
-                        if (otherChildBuffer == null) {
-                            // This was an insertion -- output some javascript to denote that fact.
-                            // AWEncodedString previousChildName = previousChild._name;
-                            // writeInsertion(outputStream, characterEncoding, previousChildName, childBufferName);
-                        }
-                    }
-                    elements.skipTo(childBuffer._contentsEndIndex);
-                    previousChild = childBuffer;
-                }
+        context.pushLevel();
+        AWResponseBuffer previousChild = _NullResponseRef;
+        AWPagedVector.AWPagedVectorIterator elements =
+                _globalContents.elements(_contentsStartIndex, _contentsEndIndex);
+        HashMap otherScopeChildren = otherBuffer._globalScopeChildren;
+        while (elements.hasNext()) {
+            Object element = elements.next();
+            if (element instanceof AWEncodedString) {
+                context.write(((AWEncodedString)element));
             }
-            elements.release();
+            else {
+                AWResponseBuffer childBuffer = (AWResponseBuffer)element;
+                AWEncodedString childBufferName = childBuffer._name;
+                AWResponseBuffer otherChildBuffer = (AWResponseBuffer)otherScopeChildren.get(childBufferName);
+                if (otherChildBuffer == null || !childBuffer.isEqual(otherChildBuffer) || childBuffer._alwaysRender) {
+                    childBuffer.renderAll(context);
+                    if (otherChildBuffer == null) {
+                        // This was an insertion -- output some javascript to denote that fact.
+                        // AWEncodedString previousChildName = previousChild._name;
+                        // writeInsertion(context, previousChildName, childBufferName);
+                    }
+                }
+                elements.skipTo(childBuffer._contentsEndIndex);
+                previousChild = childBuffer;
+            }
         }
-        catch (IOException ioexception) {
-            throw new AWGenericException(ioexception);
-        }
+        elements.release();
+        context.popLevel();
     }
-
+    
     private static final AWEncodedString WriteScopeUpdate1 = new AWEncodedString("<script>parent.ariba.Refresh.registerScopeUpdate('");
     private static final AWEncodedString Separator = new AWEncodedString("','");
     private static final AWEncodedString EndScript = new AWEncodedString("');</script>");
@@ -528,54 +561,43 @@ public final class AWResponseBuffer extends AWBaseObject
     private static final AWEncodedString ChangeDelEndSeparator = new AWEncodedString("']);</script>");
     private static final AWEncodedString ChangeNoDelSeparator = new AWEncodedString("null);</script>");
 
-    private void writeScopeUpdate (OutputStream outputStream, AWCharacterEncoding characterEncoding)
+    private void writeScopeUpdate (WriteContext context)
     {
-        try {
-            write(outputStream, WriteScopeUpdate1.bytes(characterEncoding));
-            write(outputStream, _name.bytes(characterEncoding));
-            write(outputStream, EndScript.bytes(characterEncoding));
-        }
-        catch (IOException ioexception) {
-            throw new AWGenericException(ioexception);
-        }
+        context.write(WriteScopeUpdate1);
+        context.write(_name);
+        context.write(EndScript);
     }
 
-    private void writeScopeChangeScript (OutputStream outputStream, AWCharacterEncoding characterEncoding,
+    private void writeScopeChangeScript (WriteContext context,
             List <AWResponseBuffer>insertions, List <AWResponseBuffer>deletions)
     {
         // registerScopeChanges('tableId', [ insertions ], [ deletions ]);
-        try {
-            write(outputStream, WriteChanges.bytes(characterEncoding));
-            write(outputStream, _name.bytes(characterEncoding));
+        context.write(WriteChanges);
+        context.write(_name);
 
-            // insertions
-            if (insertions != null) {
-                write(outputStream, ChangeInsStartSeparator.bytes(characterEncoding));
-                for (int i=0, c=insertions.size(); i < c; i+=2) {
-                    write(outputStream, insertions.get(i)._name.bytes(characterEncoding));
-                    write(outputStream, Separator.bytes(characterEncoding));
-                    write(outputStream, insertions.get(i+1)._name.bytes(characterEncoding));
-                    if (i + 2 < c) write(outputStream, Separator.bytes(characterEncoding));
-                }
-                write(outputStream, ChangeInsEndSeparator.bytes(characterEncoding));
-            } else {
-                write(outputStream, ChangeNoInsSeparator.bytes(characterEncoding));
+        // insertions
+        if (insertions != null) {
+            context.write(ChangeInsStartSeparator);
+            for (int i=0, c=insertions.size(); i < c; i+=2) {
+                context.write(insertions.get(i)._name);
+                context.write(Separator);
+                context.write(insertions.get(i+1)._name);
+                if (i + 2 < c) context.write(Separator);
             }
-            // deletions
-            if (deletions != null) {
-                write(outputStream, ChangeDelStartSeparator.bytes(characterEncoding));
-                for (int i=0, c=deletions.size(); i < c; i++) {
-                    write(outputStream, deletions.get(i)._name.bytes(characterEncoding));
-                    if (i + 1 < c) write(outputStream, Separator.bytes(characterEncoding));
-                }
-                write(outputStream, ChangeDelEndSeparator.bytes(characterEncoding));
-            } else {
-                write(outputStream, ChangeNoDelSeparator.bytes(characterEncoding));
-            }
-
+            context.write(ChangeInsEndSeparator);
+        } else {
+            context.write(ChangeNoInsSeparator);
         }
-        catch (IOException ioexception) {
-            throw new AWGenericException(ioexception);
+        // deletions
+        if (deletions != null) {
+            context.write(ChangeDelStartSeparator);
+            for (int i=0, c=deletions.size(); i < c; i++) {
+                context.write(deletions.get(i)._name);
+                if (i + 1 < c) context.write(Separator);
+            }
+            context.write(ChangeDelEndSeparator);
+        } else {
+            context.write(ChangeNoDelSeparator);
         }
     }
 
@@ -583,18 +605,15 @@ public final class AWResponseBuffer extends AWBaseObject
      * This is used to write the changed contents of unmodified rows in a table.  Many of these will not end up writing
      * anything, but if there's a domsync block within a row that is changed, this will write that out.  This is called
      * after the table is finished rendering so that these changes do not end up within the <table></table> tags.
-     * @param outputStream
-     * @param characterEncoding
-     * @param otherBuffer
      */
-    private void  writeUnmodifiedChildren (OutputStream outputStream, AWCharacterEncoding characterEncoding, AWResponseBuffer otherBuffer)
+    private void  writeUnmodifiedChildren (WriteContext context, AWResponseBuffer otherBuffer)
     {
         HashMap otherScopeChildren = otherBuffer._globalScopeChildren;
         AWResponseBuffer childBuffer = _children;
         while (childBuffer != null) {
             AWResponseBuffer otherChildBuffer = (AWResponseBuffer)otherScopeChildren.get(childBuffer._name);
             if (otherChildBuffer != null && childBuffer.isEqual(otherChildBuffer)) {
-                childBuffer.writeNextLevel(outputStream, characterEncoding, otherChildBuffer);
+                childBuffer.writeNextLevel(context, otherChildBuffer);
             }
             childBuffer = childBuffer._next;
         }
@@ -625,7 +644,7 @@ public final class AWResponseBuffer extends AWBaseObject
         _baseResponse._bytesWritten += len;
     }
 
-    protected void debug_writeTopLevelOnly (OutputStream outputStream, AWCharacterEncoding characterEncoding)
+    protected void debug_writeTopLevelOnly (WriteContext context)
     {
         int totalLength = _globalContents.size();
         int index = 0;
@@ -635,7 +654,7 @@ public final class AWResponseBuffer extends AWBaseObject
             Iterator iterator = _globalContents.elements(index, endIndex);
             while (iterator.hasNext()) {
                 AWEncodedString string = (AWEncodedString)iterator.next();
-                AWUtil.write(outputStream, string, characterEncoding);
+                context.write(string);
             }
             if (child != null) {
                 index = child._contentsEndIndex;

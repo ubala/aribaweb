@@ -1,9 +1,12 @@
-<w:BasicPageWrapper hasForm="$true" hasSidebarNotch="$false" isSidebarVisible="$false" isDebugVisible="$false"
+<w:BasicPageWrapper hasForm="$true" omitWrapperFrame="$true"
+                    hasSidebarNotch="$false" isSidebarVisible="$false" isDebugVisible="$false"
         debugTitle="AW Validation Errors" disableHomeAction="$true" disableLogoutAction="$true">\
-<table width="100%">
-    <tr>
-        <td valign="top">
-            <a:If ifTrue="$isCurrentErrorsViewEnabled">
+<div style="padding:20px">
+<w:SectionHeading title="AW Errors"/>\
+<table width="100%">\
+    <tr>\
+        <td valign="top">\
+            <a:If ifTrue="$isCurrentErrorsViewEnabled">\
                 <w:PulldownButton menuId="ViewMenu">$selectedViewLabel</w:PulldownButton>\
                 <w:PopupMenu menuId="ViewMenu">\
                     <w:PopupMenuItem action="$setCurrentErrorsViewAction" showCheck="$isShowCurrentErrorsView">\
@@ -13,23 +16,22 @@
                         Show all errors.
                     </w:PopupMenuItem>\
                 </w:PopupMenu>\
-            </a:If>
-
-            <div style="float:top"><a:Image filename="cleardot.gif" height="1" width="240"/></div>
+            </a:If>\
+            <div style="float:top"><a:Image filename="cleardot.gif" height="1" width="240"/></div>\
             <w:OutlineRepetition list="$packageNames" item="$currentObject" children="$children"
-                hasChildren="$false" outlineState="$outlineState" selectedObject="$selectedObject">
+                hasChildren="$false" outlineState="$outlineState" selectedObject="$selectedObject">\
                 <div style="padding-top:4px">\
-                    <w:OutlineControl title="$currentObjectTitle" allowSelection="$true"/>
-                </div>
-            </w:OutlineRepetition>
-        </td>
+                    <w:OutlineControl title="$currentObjectTitle" allowSelection="$true"/>\
+                </div>\
+            </w:OutlineRepetition>\
+        </td>\
 
         <td class="brandMd" style="margin-right:100px;margin-left:100px">\
-            <a:Image filename="cleardot.gif" height="600" width="1"/>\
-        </td>
+            <a:Image filename="cleardot.gif" width="1"/>\
+        </td>\
 
-        <td valign="top" width="100%">
-            <h3>$selectedObject</h3>
+        <td valign="top" width="100%">\
+            <h3>$selectedObject</h3>\
             <t:DataTable batchSize="20" valign="middle"
                           list="$selectedObjectPackageErrorList"
                           groupByColumn="componentName"
@@ -37,15 +39,31 @@
                           showOptionsMenu="$false"
                           showBatchNavigation="$false"
                           width="100%"
-                          displayGroup="$dict.displayGroup">
-                <t:Column key="componentName" label="Component Name" align="left"/>
-                <t:Column label="Error" align="left">
-                    <a:String value="$dict.displayGroup.currentItem.error"/>
-                </t:Column>
-            </t:DataTable>
-        </td>
-    </tr>
-</table>
+                          displayGroup="$dict.displayGroup">\
+                <t:Column key="componentName" label="Component Name" align="left"/>\
+                <t:Column label="Error" align="left">\
+                    <a:String value="$dict.displayGroup.currentItem.error"/>\
+                </t:Column>\
+            </t:DataTable>\
+        </td>\
+    </tr>\
+</table>\
+<div style="padding-top:20px">\
+    <a:For list="$context.getGeneralErrorKeys" item="$currentGeneralErrorKey">\
+        <w:SectionHeading title="${'Errors: ' + currentGeneralErrorKey}"/>\
+        <w:SectionBody>
+        <a:For list="$getGeneralErrorsForCurrentKey" item="$dict.generalErrorItem">
+            <span class="pageSubHead" style="color:#000000"><a:String value="$dict.generalErrorItem.message"/></span>\
+            <a:If notEqualNull="$dict.generalErrorItem.exception">\
+                <a:ExceptionBodyRenderer exception="$dict.generalErrorItem.exception"
+                                         showRawStackTrace="$false"
+                                         wrapperClass=""/>\
+            </a:If>\
+        </a:For>\
+        </w:SectionBody>\
+    </a:For>\
+</div>\
+</div>
 <a:ClientSideScript>
     // force window to foreground
     window.focus();

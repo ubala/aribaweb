@@ -1,0 +1,8 @@
+<w:BasicPageWrapper hasForm="$true">
+    <h1>The Chart</h1>
+    <w:GenericChooser list="$chartTypes" key="chosenType" type="Popup" action="$null"/>
+    <w:GenericChooser list="$itemSets" key="chosenSet" type="Popup" displayKey="name" action="$null"/>
+    <w:Chart type="$chosenType">
+        <w:ChartData list="$chosenSet.items" labelKey="name" valueKey="val"/>
+    </w:Chart>
+</w:BasicPageWrapper>

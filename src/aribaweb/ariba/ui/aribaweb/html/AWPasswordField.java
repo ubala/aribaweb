@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPasswordField.java#19 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPasswordField.java#20 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -68,10 +68,14 @@ public class AWPasswordField extends AWComponent
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
-        // The value of a password field cannot be rendered in an incremental update.
-        // This is due browser security against setting/getting password value using javascript.
-        // So we need to force a FPR when we have a password field.
-        requestContext.forceFullPageRefresh();
+        // The value of a password field cannot be rendered in an IFrame incremental update.
+        // This is due IE browser security against setting/getting password value using javascript.
+        // So we need to force a FPR when we have a password field in a non-XMLHTTP on IE
+        if (requestContext().isIncrementalUpdateRequest()
+                && !requestContext().isXMLHttpIncrementalRequest()
+                && request().isBrowserMicrosoft()) {
+            requestContext.forceFullPageRefresh();
+        }
         super.renderResponse(requestContext, component);
     }
 

@@ -1,0 +1,10 @@
+<w:BasicPageWrapper hasForm="$true">
+    <w:TabSet>
+        <w:Tab label="Pivot Chart">
+            <x:ChartPivot/>
+        </w:Tab>
+        <w:Tab label="Simple Chart">
+            <x:ChartSample/>
+        </w:Tab>
+    </w:TabSet>
+</w:BasicPageWrapper>

@@ -1,6 +1,5 @@
-AribaWeb
-=========
-*Raising the Level of Web Application Development*
+Overview of AribaWeb
+====================
 
 Mission:
 --------

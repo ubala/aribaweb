@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AWTestCentralPage.awl#1 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AWTestCentralPage.awl#2 $
     </Copyright>
 </a:Api>
 <a:PageWrapper>
@@ -56,32 +56,24 @@
         </style>
     </a:Content>
     <a:Content name="body">
-        <a:Form>
-            <table border="0" cellPadding="2" cellSpacing="0">\
-                <tr>
-                    <td align="left" class="categoryLinks">\
-                        User:
-                        <a:TextField></a:TextField>
-                    </td>
-                    <td align="left" class="categoryLinks">\
-                        Current User is xxx
-                    </td>
-                    <td align="left">\
+        <a:If ifTrue="$hasUserComponent">
+            <a:IncludeComponent awcomponentName="$userComponent"/>\
+        </a:If>
+
+        <table border="0" cellPadding="2" cellSpacing="0">\
+            <tr>
+                <td align="left" class="categoryLinks">\
+                    <a:Hyperlink action="$clearTestContext" >
+                        Reset Test Context
+                    </a:Hyperlink>
+                </td>
+            </tr>
+            <tr>
+                <td align="left">\
                     &nbsp;
-                    </td>
-                    <td align="left" class="categoryLinks">\
-                        <a:Hyperlink action="$clearTestContext" >
-                            Reset Test Context
-                        </a:Hyperlink>
-                    </td>
-                </tr>
-                <tr>
-                    <td align="left">\
-                    &nbsp;
-                    </td>
-                </tr>
-            </table>
-        </a:Form>
+                </td>
+            </tr>
+        </table>
         <table border="0" cellpadding="2" cellspacing="0">\
             <tr>\
                 <a:For list="$testCategoryList" item="$currentCategory">

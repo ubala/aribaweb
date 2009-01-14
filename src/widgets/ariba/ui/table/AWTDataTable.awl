@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#114 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#115 $
     </Copyright>
 
     <Overview>
@@ -594,19 +594,22 @@
             awname="$awname">
 
         <a:Content name="headerArea">\
-            <a:If ifTrue="$tableBodyCollapsible">
-                <div class="tableBodyToggle">
-                    <w:ToggleImage isExternal="$true"
-                                   state="$tableBodyExpanded"/>
-                </div>
-            </a:If>
-            <a:If ifTrue="$showHeadingArea">
-                <a:MethodInvocation invoke="$makeHeadingAreaColumnCurrent"/>\
-                <a:IncludeComponent awcomponentName="$headingAreaColumn.rendererComponentName" table="$this"/>\
-            <a:Else ifTrue="$showTitle"/>
-                <h2 style="float:left">$^title</h2>
-            </a:If>
-            <a:IncludeBlock name="BatchNavRow" isTop="$true" showTotalItems="$^showTotalItems"/>
+            <table cellpadding="0" cellspacing="0" width="100%"><tr>
+                <a:If ifTrue="$tableBodyCollapsible">
+                    <td><w:ToggleImage isExternal="$true" state="$tableBodyExpanded"/></td>
+                </a:If>
+                <td>\
+                    <a:If ifTrue="$showHeadingArea">
+                            <a:MethodInvocation invoke="$makeHeadingAreaColumnCurrent"/>\
+                            <a:IncludeComponent awcomponentName="$headingAreaColumn.rendererComponentName" table="$this"/>\
+                    <a:Else ifTrue="$showTitle"/>
+                        <h2>$^title</h2>
+                    </a:If>
+                </td>
+                <td align="right">\
+                    <a:IncludeBlock name="BatchNavRow" isTop="$true" showTotalItems="$^showTotalItems"/>
+                </td>
+            </tr></table>
         </a:Content>
 
         <a:Content name="headingRows">\

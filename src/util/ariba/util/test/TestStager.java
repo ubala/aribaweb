@@ -12,9 +12,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLink.java#1 $
+    $Id: //ariba/platform/util/core/ariba/util/test/TestStager.java#1 $
 */
-package ariba.ui.aribaweb.test;
+package ariba.util.test;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE,ElementType.FIELD,ElementType.METHOD})
 @Inherited
-public @interface TestLink
+public @interface TestStager
 {
     public String name() default "";
     public String superType() default "";

@@ -56,7 +56,7 @@
         <module-crawl target="jar"/>
     </target>
 
-    <target name="awapidocs" description="Generate awapi docs" depends="jar">
+    <target name="awapidocs" description="Generate awapi docs" depends="init, jar">
         <echo message="Invoking java..."/>
         <mkdir dir="${doc.dir}/xsd"/>
         <java classname="ariba.ui.dev.AWApiDocGenerator" outputproperty="awapi.out">
@@ -71,7 +71,7 @@
         <echo message="Output: ${awapi.out}"/>
     </target>
 
-    <target name="generate-javadocs" description="Generate javadoc" depends="jar">
+    <target name="generate-javadocs" description="Generate javadoc" depends="init, jar">
         <mkdir dir="${doc.dir}/api"/>
         <invoke-javadoc
           access="public"

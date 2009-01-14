@@ -1,0 +1,37 @@
+<a:Api>
+    <Overview>
+        GMap Marker
+    </Overview>
+
+    <Binding key="address" type="String" direction="get">
+        location as address string (overrides longitude / latitude if present)
+    </Binding>
+
+    <Binding key="longitude" type="float" direction="get">
+        Coordinate longitude
+    </Binding>
+
+    <Binding key="latitude" type="float" direction="get">
+        Coordinate longitude
+    </Binding>
+
+    <Binding key="autoCenterMap" type="boolean" direction="get" default="$true">
+        Action to be fired on click on marker
+    </Binding>
+
+    <Binding key="action" type="AWResponseGenerating" direction="get">
+        Action to be fired on click on marker
+    </Binding>
+
+    <Binding key="dragAction" type="AWResponseGenerating" direction="get">
+        Action to be fired on drag of marker.  The *maps* eventLatitude/longitude
+        are updated to reflect the drop location
+    </Binding>
+</a:Api>\
+<a:ClientSideScript isSingleton="$false">\
+    ariba.GMaps.current().registerObj("AddressMarker", "$^address",
+            <a:String value="$^latitude:37.80354511753133"/>,
+            <a:String value="$^longitude:-122.35816955566406"/>,
+            <a:String value="$^autoCenterMap:true"/>,
+            "<a:ActionId action="$^action"/>", "<a:ActionId action="$^dragAction"/>");
+</a:ClientSideScript>\

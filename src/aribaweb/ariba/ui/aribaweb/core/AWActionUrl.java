@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWActionUrl.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWActionUrl.java#18 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -81,6 +81,7 @@ public final class AWActionUrl extends AWBindableElement
              String semanticKey = _semanticKeyBinding == null ?
                      AWRecordingManager.actionEffectiveKeyPathInComponent(_action, component) :
                      _semanticKeyBinding.stringValue(component);
+             semanticKey = AWRecordingManager.applySemanticKeyPrefix(requestContext, semanticKey, null);
              AWRecordingManager.registerSemanticKey(elementId.string(), semanticKey, requestContext);
          }
     }

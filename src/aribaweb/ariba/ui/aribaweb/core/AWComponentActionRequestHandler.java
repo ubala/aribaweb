@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#71 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#73 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -419,9 +419,9 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
             if (currentPage.pageComponent().shouldValidateSession()) {
                 currentPage.pageComponent().validateSession(requestContext);
             }
-            if (currentPage.pageComponent().shouldValidateRequest()) {
-                currentPage.pageComponent().validateRequest(requestContext);
-            }
+//            if (currentPage.pageComponent().shouldValidateRequest()) {
+//                currentPage.pageComponent().validateRequest(requestContext);
+//            }
             int requestType = session.requestType(request);
 
             AWPage perfSourcePage = null;
@@ -444,7 +444,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
 
                     if (backtrackState != null) {
                         requestContext.setBacktrackState(backtrackState);
-                        restoredPage = currentPage;
+                        restoredPage  = currentPage;
                     }
                     else {
                         restoredPage = (requestType == AWSession.BacktrackRequest) ?
@@ -586,9 +586,9 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
             if (mainPageComponent.shouldValidateSession()) {
                 mainPageComponent.validateSession(requestContext);
             }
-            if (mainPageComponent.shouldValidateRequest()) {
-                mainPageComponent.validateRequest(requestContext);
-            }
+//            if (mainPageComponent.shouldValidateRequest()) {
+//                mainPageComponent.validateRequest(requestContext);
+//            }
             formPostFilter(request,  requestContext, mainPageComponent);
             session.savePage(newPage);
             return requestContext.generateResponse();
@@ -670,10 +670,9 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                                 boolean runAsRefresh)
     {
         // swap out the response
-        AWResponse origResponse = requestContext.response();
         NullResponse nullResponse = new NullResponse();
         nullResponse.init();
-        requestContext.setResponse(nullResponse);
+        AWResponse origResponse = requestContext.temporarilySwapReponse(nullResponse);
         requestContext.setElementId(new AWElementIdGenerator());
 
         if (!runAsRefresh) {
@@ -686,7 +685,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
 
         // restore original response
         requestContext.setElementId(new AWElementIdGenerator());
-        requestContext.setResponse(origResponse);
+        requestContext.restoreOriginalResponse(origResponse);
     }
 
     private AWResponse processExceptionHandlerResults (

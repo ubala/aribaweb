@@ -40,8 +40,7 @@
         ariba.Widgets.clearDialog();
     </a:ClientSideScript>
     <a:ClientSideScript>
-          <!--- select first input field when page load complete -->
-          ariba.Input.postLoadSelectFirstText();
+          ariba.Input.allowSelectFirstText();
     </a:ClientSideScript>
     <a:PhaseInvocation append="$updateMessage"/>
     <a:If notEqualNull="$message">\

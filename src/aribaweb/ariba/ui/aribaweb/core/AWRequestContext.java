@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#123 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#125 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -36,6 +36,7 @@ import ariba.util.core.StringUtil;
 import ariba.util.core.SystemUtil;
 import ariba.util.core.ThreadDebugKey;
 import ariba.util.core.ThreadDebugState;
+import ariba.util.core.WrapperRuntimeException;
 
 import javax.servlet.http.HttpSession;
 import java.net.InetAddress;
@@ -61,7 +62,8 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     private static final ThreadDebugKey RequestContextID =
         new ThreadDebugKey("RequestContext");
     public static final String RefreshRequestKey = "awrr";
-
+    public static boolean UseXmlHttpRequests = false;
+    
     private AWApplication _application;
     private AWRequest _request;
     private List _requestSenderIds;
@@ -563,6 +565,25 @@ public class AWRequestContext extends AWBaseObject implements DebugState
 
     public void setResponse (AWResponse response)
     {
+        // swapping responses is generally not permitted if doing an XMLHHTP incremental refresh
+        assertFileDownloadCompatibleRequestRequired();
+        setXHRRCompatibleResponse(response);
+    }
+
+    public AWResponse temporarilySwapReponse (AWResponse response)
+    {
+        AWResponse orig = _response;
+        _response = response;
+        return orig;
+    }
+
+    public void restoreOriginalResponse (AWResponse response)
+    {
+        _response = response;
+    }
+    
+    public void setXHRRCompatibleResponse (AWResponse response)
+    {
         _response = response;
         if (_responseCompleteCallback != null) {
             if (response instanceof AWBaseResponse) {
@@ -895,7 +916,25 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     return null;
                 }
                 else {
-                    actionResults = _currentPage.invokeAction();
+                    try {
+                        actionResults = _currentPage.invokeAction();
+
+                        if ((actionResults instanceof AWResponse) && (actionResults != _response)) {
+                            assertFileDownloadCompatibleRequestRequired();
+                        }
+                    }
+                    catch (AWRequestContext.RetryRequestException e) {
+                        // ignore: we already wrote the response
+                        actionResults = _response;
+                    }
+                    catch (WrapperRuntimeException e) {
+                        if (e.originalException() instanceof AWRequestContext.RetryRequestException) {
+                            // ignore: we already wrote the response
+                            actionResults = _response;
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
             }
             catch (Throwable t) {
@@ -913,11 +952,6 @@ public class AWRequestContext extends AWBaseObject implements DebugState
             // if we need to invoke again, move on to the next senderId
             moreSenderIds = hasMoreSenderIds();
             if (moreSenderIds) {
-                if (isPathDebugRequest() && (actionResults instanceof AWComponent)) {
-                    // do a renderResponse on this page so we populate the AWDebugTrace ComponentTraceNode tree
-                    debugTrace().didFinishPathTracePhase();
-                    AWComponentActionRequestHandler.SharedInstance._runNullRender(this, (AWComponent)actionResults, request(), true);
-                }
                 previousActionResults = actionResults;
                 dequeueSenderId();
                 resetForNextCycle();
@@ -928,6 +962,12 @@ public class AWRequestContext extends AWBaseObject implements DebugState
             }
         }
         while (moreSenderIds);
+
+        if (isPathDebugRequest() && (actionResults instanceof AWComponent)) {
+            // do a renderResponse on this page so we populate the AWDebugTrace ComponentTraceNode tree
+            debugTrace().didFinishPathTracePhase();
+            // stopComponentPathRecording();
+        }
 
         if (isActionLoggingEnabled) {
             logActivityEnd("invokeAction");
@@ -982,13 +1022,26 @@ public class AWRequestContext extends AWBaseObject implements DebugState
             }
             _responsePage = _currentPage;
             _response = (response != null) ? response : _application.createResponse(_request);
+            if ((_response instanceof AWBaseResponse) && isXMLHttpIncrementalRequest()) {
+                ((AWBaseResponse)_response).setWriteRefreshRegionBoundaryMarkers(true);
+            }
             if (_cookies != null) {
                 for (int i = 0, size = _cookies.size(); i < size; i++) {
                     _response.addCookie((AWCookie)_cookies.get(i));
                 }
             }
             _currentPage.ensureAwake(this);
-            _currentPage.renderResponse();
+            try {
+                _currentPage.renderResponse();
+            }
+            catch (WrapperRuntimeException e) {
+                if (e.originalException() instanceof AWRequestContext.RetryRequestException) {
+                    // ignore: we already wrote the response
+                } else {
+                    throw e;
+                }
+            }
+
             if (isActionLoggingEnabled) {
                 logActivityEnd("renderResponse");
             }
@@ -1323,7 +1376,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         else {
             Boolean flag = ((Boolean)session().dict().get(AWConstants.ComponentPathDebugFlagKey));
             boolean flagValue = flag != null ? flag.booleanValue() : false;
-            _componentPathDebuggingEnabled = (flagValue || isPathDebugRequest()) && isDebuggingEnabled();
+            _componentPathDebuggingEnabled = (flagValue || wasPathDebugRequest()) && isDebuggingEnabled();
         }
     }
 
@@ -1391,12 +1444,19 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         if (_isPathDebugRequest == -1) {
             _isPathDebugRequest = _isDebuggingEnabled && formValueForKey("cpDebug") != null ? 1 : 0;
         }
-        return _isPathDebugRequest != 0;
+        return _isPathDebugRequest == 1;
     }
+
+    public boolean wasPathDebugRequest ()
+    {
+        if (_isPathDebugRequest == -1) isPathDebugRequest();
+        return (_isPathDebugRequest != 0);
+    }
+
 
     public void stopComponentPathRecording ()
     {
-        _isPathDebugRequest = 0;
+        _isPathDebugRequest = -2;
     }
     
         //////////////////////
@@ -1579,6 +1639,30 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     {
         return _request != null &&
                _request.formValuesForKey(IncrementalUpdateKey) != null;
+    }
+
+    public boolean isXMLHttpIncrementalRequest ()
+    {
+        if (_request != null) {
+            String key = _request.formValueForKey(IncrementalUpdateKey);
+            return (key != null && key.equals("xmlhttp"));
+        }
+        return false;
+    }
+
+    public static class RetryRequestException extends RuntimeException {
+    }
+
+    public void assertFileDownloadCompatibleRequestRequired ()
+    {
+        if (isXMLHttpIncrementalRequest()) {
+            _response = _application.createResponse(_request);
+            _response.appendContent("<script>ariba.Request.__retryRequest('"
+                                + requestSenderId() + "');\n"
+                    + "ariba.Refresh.completeRequest(0,0,true);\n"
+                    + "</script>\n");
+            throw new RetryRequestException();
+        }
     }
 
     public boolean isContentGeneration ()

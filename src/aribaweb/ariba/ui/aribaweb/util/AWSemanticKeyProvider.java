@@ -12,17 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSemanticKeyProvider.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSemanticKeyProvider.java#5 $
 */
 
 package ariba.ui.aribaweb.util;
 
+import ariba.ui.aribaweb.core.AWAction;
+import ariba.ui.aribaweb.core.AWComponent;
 import ariba.util.core.ClassExtension;
 import ariba.util.core.ClassExtensionRegistry;
-import ariba.ui.aribaweb.core.AWComponent;
-import ariba.ui.aribaweb.core.AWAction;
-
-import java.util.List;
 
 /**
 
@@ -31,6 +29,7 @@ Sample Usage:
     int index = AWOrderedList.get(someList).indexOf(someList, someObject);
 */
 abstract public class AWSemanticKeyProvider extends ClassExtension
+                                            implements SemanticKeyProvider
 {
     private static ClassExtensionRegistry SKClassExtensionRegistry = new ClassExtensionRegistry();
 
@@ -48,29 +47,28 @@ abstract public class AWSemanticKeyProvider extends ClassExtension
         SKClassExtensionRegistry.registerClassExtension(receiverClass, classExtension);
     }
 
-    public static AWSemanticKeyProvider get (Object receiver)
+    public static SemanticKeyProvider get (Object receiver)
     {
         try {
-            return (AWSemanticKeyProvider)SKClassExtensionRegistry.get(receiver);
+            if (receiver instanceof SemanticKeyProvider) {
+                return (SemanticKeyProvider)receiver;
+            }
+            else {
+                return (SemanticKeyProvider)SKClassExtensionRegistry.get(receiver);
+            }
         }
         catch(ClassCastException e) {
             return null;
         }
     }
 
-    public static AWSemanticKeyProvider get (Class targetClass)
+    public static SemanticKeyProvider get (Class targetClass)
     {
         try {
-            return (AWSemanticKeyProvider)SKClassExtensionRegistry.get(targetClass);
+            return (SemanticKeyProvider)SKClassExtensionRegistry.get(targetClass);
         }
         catch(ClassCastException e) {
             return null;
         }        
     }
-
-    /////////////////
-    // OrderList Api
-    /////////////////
-
-    abstract public String getKey (Object receiver, AWComponent component);
 }

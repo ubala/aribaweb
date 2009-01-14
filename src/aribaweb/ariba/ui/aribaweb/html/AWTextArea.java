@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.java#25 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.java#28 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -32,6 +32,7 @@ import ariba.util.core.Fmt;
 import ariba.util.core.Constants;
 import ariba.util.core.StringUtil;
 import ariba.util.formatter.FormatterHandlesNulls;
+import ariba.util.formatter.IntegerFormatter;
 
 // subclassed for validation
 public class AWTextArea extends AWComponent
@@ -55,6 +56,7 @@ public class AWTextArea extends AWComponent
     private Object _formatter;
     private boolean _formatterHandlesNulls;
     private boolean _disabled;
+    private AWEncodedString _maxLengthIndicatorId;
 
     private static final String LimitTextLengthFmt =
         "ariba.Dom.limitTextLength(document.%s.%s,%s);";
@@ -83,13 +85,14 @@ public class AWTextArea extends AWComponent
         _formatter = null;
         _formatterHandlesNulls = false;
         _disabled = false;
+        _maxLengthIndicatorId = null;
     }
 
     public AWEncodedString limitTextJavaScriptString ()
     {
         return AWEncodedString.sharedEncodedString(Fmt.S(LimitTextLengthFmt,
                                    requestContext().currentForm().formName(),
-                                   textAreaName(), maxLength()));
+                                   textAreaId(), maxLength()));
     }
 
     public AWEncodedString textAreaName ()
@@ -116,6 +119,11 @@ public class AWTextArea extends AWComponent
         else {
             return Constants.getInteger(0);
         }
+    }
+
+    private int maxLengthInt ()
+    {
+        return IntegerFormatter.getIntValue(maxLength());
     }
 
     public String formattedString ()
@@ -221,5 +229,28 @@ public class AWTextArea extends AWComponent
     public Object disabled ()
     {
         return _disabled ? BindingNames.awstandalone : null;
+    }
+
+    public boolean showMaxLengthIndicator ()
+    {
+        return maxLengthInt() > 0; 
+    }
+
+    public AWEncodedString maxLengthIndicatorId ()
+    {
+        if (_maxLengthIndicatorId == null) {
+            _maxLengthIndicatorId =
+                AWEncodedString.sharedEncodedString(
+                    StringUtil.strcat(textAreaId().toString(), "MLI"));            
+        }
+        return _maxLengthIndicatorId;
+    }
+
+    public int maxLengthIndicatorString ()
+    {
+        int maxLength = maxLengthInt();
+        String formattedString = formattedString();
+        int stringLength = formattedString != null ? formattedString.length() : 0;
+        return Math.max(maxLength - stringLength, 0);
     }
 }

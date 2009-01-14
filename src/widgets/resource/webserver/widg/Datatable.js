@@ -32,6 +32,7 @@ ariba.Datatable = function() {
     var _awtScrollTimer = null;
     var _AWTScrollDelay = 250;
     var _awtLastScrollMillis;
+    var ScrollPanelTimeoutId;
 
     // Scroll faulting
     var AWTFaultIndex_Position = 0; // values: -1 top, 0 no fault, 1 bottom
@@ -463,20 +464,27 @@ ariba.Datatable = function() {
 
             // go through each cell in the head and resize
             var headCells = tableInfo.headTable.rows[0].cells;
-            var bodyCells = tableInfo.bodyTable.rows[0].cells;
+            var bodyRows = tableInfo.bodyTable.rows;
+            var bodyCells = bodyRows[0].cells;
 
             Debug.log("Setting header cell widths...");
             var totalWd = 0;
-            for (var i = 0; i < bodyCells.length - 1; i++) {
-                var headCell = headCells[i];
-                var newWd = bodyCells[i].offsetWidth;
-                totalWd += newWd;
+            var empty = (bodyRows.length > 1 && bodyRows[1].cells.length > 0) && Dom.hasClass(bodyRows[1].cells[0], "empty");
+            if (!empty) {
+                for (var i = 0; i < bodyCells.length - 1; i++) {
+                    var headCell = headCells[i];
+                    var bodyCell = bodyCells[i];
+                    var newWd = bodyCell.offsetWidth;
+                    totalWd += newWd;
 
-                // Idea: If scroll faulting, we might want to force the columns to be the max of
-                // the old size and the new size
-                headCell.style.paddingRight = newWd + "px";
+                    // Idea: If scroll faulting, we might want to force the columns to be the max of
+                    // the old size and the new size
+                    headCell.style.paddingRight = newWd + "px";
+                }
+                headCells[headCells.length-1].style.width = "100%";
+            } else {
+                tableInfo.headTable.style.width = "100%";
             }
-            headCells[headCells.length-1].style.width = "100%";
             //debug("--- total = " + totalWd + "  (wrapper=" + tableInfo.wrapperTable.offsetWidth + ")");
         },
 
@@ -822,7 +830,8 @@ ariba.Datatable = function() {
                 // if row already visible, do nothing
                 var scrollHeight = bodyDiv.offsetHeight;
 
-                if (visRow.offsetTop > bodyDiv.scrollTop && (visRow.offsetTop + visRow.offsetHeight) <= scrollHeight) {
+                if (visRow.offsetTop > bodyDiv.scrollTop
+                        && (visRow.offsetTop + visRow.offsetHeight) <= (bodyDiv.scrollTop + scrollHeight)) {
                     Debug.log("Bailing on scroll pos set...:  scrollHeight=" + scrollHeight + ", visRow.offsetTop=" + visRow.offsetTop
                             + ", tableInfo.body.scrollTop=" + bodyDiv.scrollTop);
                     tableInfo.newScrollTop = tableInfo.rowIdToForceVisible = null;
@@ -1050,6 +1059,9 @@ ariba.Datatable = function() {
                 return;
             }
 
+            // quick out for common case of setting scroll to top, with no fault
+            if (tableInfo.topCount == 0 && tableInfo.body.scrollTop == 0) return;
+
             // if we're already processing, hide the panel
             if (_AWTPendingScroll) {
                 // this.scrollHidePanel();
@@ -1109,7 +1121,7 @@ ariba.Datatable = function() {
             // always push offset data, so the scroll pos is preserved if the user leaves this page and comes back
             Dom.setElementValue(tableInfo.topIndexId, faultData[AWTFaultIndex_TopRow]);
             Dom.setElementValue(tableInfo.topOffsetId, faultData[AWTFaultIndex_TopOffset]);
-
+            
             if (faultData[AWTFaultIndex_Position] != 0) {
                 if (_AWTPendingScroll) {
                     // Debug.log("<font color='red'>RACE CONDITION</font>");
@@ -1346,19 +1358,25 @@ ariba.Datatable = function() {
 
         scrollShowPanel : function (tableInfo)
         {
-            Input.disableInput(null, false);
+            Input.disableInput(false);
 
             // On firefox, showing the panel can cause a scroll reset, so remember the position so we can restore
             var e = tableInfo.body, sx = e.scrollLeft, sy = e.scrollTop;
-            Widgets.showPanel("awtFaultingPanel", tableInfo.body, true);
-            if (sx || sy) {
-                e.scrollLeft = sx;
-                e.scrollTop = sy;
-            }
+            ScrollPanelTimeoutId = setTimeout(function() {
+                ScrollPanelTimeoutId = null;
+                Widgets.showPanel("awtFaultingPanel", tableInfo.body, true);
+                if (sx || sy) {
+                    e.scrollLeft = sx;
+                    e.scrollTop = sy;
+                }
+            }.bind(this), 2000);
+
         },
 
         scrollHidePanel : function ()
         {
+            if (ScrollPanelTimeoutId) clearTimeout(ScrollPanelTimeoutId);
+            ScrollPanelTimeoutId = null;
             Widgets.hidePanel("awtFaultingPanel");
             Input.enableInput();
         },

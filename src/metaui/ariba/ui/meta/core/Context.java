@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#9 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#12 $
 */
 package ariba.ui.meta.core;
 
@@ -495,6 +495,11 @@ public class Context implements Extensible
                         && (!(oldVal instanceof List) || !((List)oldVal).contains(newVal)))));
     }
 
+    protected boolean isDeclare ()
+    {
+        return propertyForKey(Meta.KeyDeclare) != null;
+    }
+
     protected boolean _set (String key, Object svalue, Object value, boolean merge, boolean isChaining)
     {
         boolean hasOldValue = _values.containsKey(key);
@@ -539,7 +544,7 @@ public class Context implements Extensible
                     int firstAssignmentIdx = _prepareForOverride(recIdx, lastAssignmentIdx);
                     lastMatch = _rematchForOverride(recIdx, firstAssignmentIdx);
 
-                    if (merge) value = Meta.PropertyMerger_List.merge(oldVal, value);
+                    if (merge) value = Meta.PropertyMerger_List.merge(oldVal, value, isDeclare());
                 }
                 // Todo: this isn't quite right -- a chaining assignment from a *newer frame* should
             }
@@ -700,10 +705,6 @@ public class Context implements Extensible
                             }
                         }
                     }
-
-                    boolean suppress = (prevProps != null && prevProps.containsKey(key)
-                            && !_isNewValue(staticallyResolveValue(prevProps.get(key)), newVal))
-                            || _currentActivation._parent.hasDeferredAssignmentForKey(key);
                     */
                     boolean suppress = (prevProps != null && prevProps.containsKey(key)
                             && !_isNewValue(staticallyResolveValue(prevProps.get(key)), newVal))
@@ -746,7 +747,7 @@ public class Context implements Extensible
             if (scopeKey != null) {
                 if (!rec.srec.fromChaining) return scopeKey;
                 // for chaining assignments, we keep looking until we exhaust the first non-chaining activation
-                // Todo: broken -- disabling set of context key from chainging 
+                // Todo: broken -- disabling set of context key from chaining 
                 // if (foundKey == null) foundKey = scopeKey;
             }
             if (foundKey != null && !rec.srec.fromChaining) foundActivation = rec.srec.activation;
@@ -1079,7 +1080,8 @@ public class Context implements Extensible
 
         public Object evaluate(Context context)
         {
-            return _merger.merge(context.resolveValue(_override), context.resolveValue(_orig));
+            return _merger.merge(context.resolveValue(_override), context.resolveValue(_orig),
+                                        context.isDeclare());
         }
 
         public boolean equals(Object other)
@@ -1101,19 +1103,22 @@ public class Context implements Extensible
     // Merge lists
     public static Meta.PropertyMerger PropertyMerger_DeclareList =  new Meta.PropertyMergerDynamic()
     {
-        public Object merge(Object orig, Object override) {
+        public Object merge(Object orig, Object override, boolean isDeclare) {
+            if (!isDeclare) return override;
+
             // if we're override a single element with itself, don't go List...
             if (!(orig instanceof List) && !(override instanceof List)
                     && Meta.objectEquals(orig, override)) {
                 return orig;
             }
 
-            MergeIfDeclare prev = (orig instanceof MergeIfDeclare) ? ((MergeIfDeclare)orig)
-                    : new MergeIfDeclare(orig, null);
-            return new MergeIfDeclare(override, prev);
+            List result = new ArrayList();
+            ListUtil.addElementsIfAbsent(result, Meta.toList(orig));
+            ListUtil.addElementsIfAbsent(result, Meta.toList(override));
+            return result;
         }
     };
-
+/*
     static class MergeIfDeclare implements StaticallyResolvable, Meta.PropertyMapAwaking
     {
         MergeIfDeclare _prev;
@@ -1165,7 +1170,7 @@ public class Context implements Extensible
             return "<MergeIfDeclare: " + result + ">";
         }
     }
-
+*/
     public static Object newInnerInstance(Class innerClass, Object outerInstance)
     {
         try {
@@ -1212,13 +1217,14 @@ public class Context implements Extensible
         public void recordAssignments (Object receiver, AWDebugTrace.AssignmentRecorder recorder,
                                        AWBindableElement element)
         {
-            if (element instanceof MetaContext) {
+/*            if (element instanceof MetaContext) {
                 super.recordAssignments(receiver, recorder, element);
             }
             else {
-                Meta.MatchResult match = ((_StaticRec)receiver).match;
-                match._meta.propertiesForMatch(match, recorder);
             }
+*/
+            Meta.MatchResult match = ((_StaticRec)receiver).match;
+            match._meta.propertiesForMatch(match, recorder);
         }
 
         Map metaContext (_StaticRec srec)

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPageWrapper.awl#1 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPageWrapper.awl#2 $
     </Copyright>
 
     <Overview>
@@ -103,6 +103,7 @@ onLoad="$^onLoad"
     <a:If ifFalse="$^sessionless">
         <a:RichClientFooter/>\
     </a:If>
+    <a:DebugContent title="$debugTitle"/>\
 </a:Body>
 </html>
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResourceDirectory.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResourceDirectory.java#14 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.IOException;
@@ -384,9 +385,17 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
             if (parentPackage != null && shouldRunInitializers) {
                 AWNamespaceManager ns = AWNamespaceManager.instance();
                 AWNamespaceManager.Resolver resolver = ns.resolverForPackage(parentPackage);
+                Assert.that(resolver != null, "Couldn't find resolver for package: %s", parentPackage);
+
+                String namespaceId = (String)properties.get("namespace-identifier");
+                if (namespaceId != null) {
+                    resolver = new AWNamespaceManager.Resolver(resolver);
+                    resolver.addIncludeToNamespace(namespaceId, new AWNamespaceManager.Import(
+                            new ArrayList(loadedPackageNames), Arrays.asList("")));
+                }
+
                 for (String packageName : loadedPackageNames) {
                     ns.registerResolverForPackage(packageName, resolver);
-
                 }
             }
         } catch (IOException e) {

@@ -16,7 +16,6 @@ class=example.busobj.User {
     field=password {
         valid:${value.length > 5 ? true : "Bad password, dude" }
         operation=view {  visible:${value && value!=""}; label:"PSS" }
-        visible:false;
     }
 
     /* Use a custom AWXRatingBar component for the "rating" field and put it at the top */
@@ -39,14 +38,10 @@ class=example.busobj.User {
     }
 
     operation=create {
-        /* Hide all fields other than firstName, lastName, email, and birthday */
+        /* Hide all fields other than firstName, lastName, email, and password */
         field { after:zNone; }
         field=(firstName, lastName) { after:zLeft }
-        field=(email, birthDay) { after:zRight }
-    }
-
-    operation=edit {
-        field=birthDay { editable:false; }
+        field=(email, password) { after:zRight }
     }
 
     /* Change them contextually... (when viewing) */

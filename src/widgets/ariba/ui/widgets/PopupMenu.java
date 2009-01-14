@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.java#17 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.java#18 $
 */
 
 package ariba.ui.widgets;
@@ -164,7 +164,7 @@ public final class PopupMenu extends AWComponent
             if (menuIds.contains(menuId)) {
                 AWValidationContext validationContext = requestContext.validationContext();
                 String msg = Fmt.S("Error: multiple menus found with the same menu id: %s", menuId);
-                validationContext.addGeneneralError(msg);
+                validationContext.addGeneralError(msg);
                 ariba.ui.aribaweb.util.Log.dumpAWStack(component,msg);
             }
 

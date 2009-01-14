@@ -33,8 +33,8 @@ ariba.Request = function() {
     var AWPingCompleteTimeout;
     var AWPingCheckCount = 0;
     var _AWProgressTimerHandle;
-    
-    var _XMLHTTP_BUSY = false;
+
+    var _XMLHTTP_COUNT = 0;
     var _XMLQUEUE = [];
 
     var Request = {
@@ -53,6 +53,16 @@ ariba.Request = function() {
         AWShowRequestFrame : false,
         AWUpdateCompleteTime : 0,
         AWSessionSecureId : '',
+        UseXmlHttpRequests : false,
+
+        initParams : function (/* varargs */) {
+            Util.takeValues(ariba, ["Request.AWResponseId", "Request.AWSessionSecureId", "Request.AWRefreshUrl",
+                "Request.AWPingUrl", "Request.AWProgressUrl", "Request.AWReqUrl", "Request.UseXmlHttpRequests",
+                "Request.AWSessionIdKey", "Request.AWSessionId", "Request.AWFrameName",
+                "Refresh.AWBackTrackUrl", "Refresh.AWForwardTrackUrl",
+                "Input.AWWaitAlertMillis", "Dom.AWOpenWindowErrorMsg"],
+                arguments);
+        },
 
         setDocumentLocation : function (hrefString, windowName, windowAttributes)
         {
@@ -229,7 +239,14 @@ ariba.Request = function() {
         setupPoll : function (enabled, intervalSecs, senderId, updateId)
         {
             AWPollEnabled = enabled;
-            AWPollInterval = intervalSecs * 1000;
+            
+            var pollInterval = intervalSecs * 1000;
+            if (AWPollInterval != pollInterval) {
+                AWPollInterval = pollInterval;
+                clearTimeout(AWPollTimeoutId);
+                AWPollTimeoutId = null;
+            }
+
             AWPollSenderId = senderId;
             AWPollUpdateSenderId = updateId;
         // kick off initial timer
@@ -312,6 +329,7 @@ ariba.Request = function() {
                 }
             }
             if (shouldSubmit) {
+                ariba.Debug.resetRequestComplete();
                 Event.invokeRegisteredHandlers("onsubmit");
                 this.addAWFormFields(formObject);
 
@@ -333,23 +351,113 @@ ariba.Request = function() {
                 }
                 else {
                     this.prepareForRequest(async);
-                    var iframe = this.createRefreshIFrame();
-                    formObject.target = iframe.name;
-                    Dom.addFormField(formObject, 'awii', iframe.name);
                     try {
-                        formObject.submit();
-                    //debug("<--- start incremental post");
+                        if (this.UseXmlHttpRequests && !this.hasPopulatedFileInputContol(formObject)) {
+                            Debug.log("<--- Incremental post: XMLHTTP");
+                            Dom.addFormField(formObject, 'awii', "xmlhttp");
+                            var postBody = this.encodedFormValueString(formObject)
+                            Request.initiateXMLHttpRequest(this.partialUrl(), function (xmlhttp) {
+                                // XXX: Error handling?
+                                var string = xmlhttp.responseText;
+                                ariba.Refresh.processXMLHttpResponse(string);
+                            }, postBody);
+
+                        } else {
+                            Debug.log("<--- Incremental post: IFRAME");
+                            var iframe = this.createRefreshIFrame();
+                            formObject.target = iframe.name;
+                            Dom.addFormField(formObject, 'awii', iframe.name);
+                            formObject.submit();
+                        }
                     }
                     catch (e) {
                         // unblock user interaction
                         this.requestComplete();
                         this.handleFileUploadError(e);
+                        throw(e);
                     }
                 }
             }
 
             this.removeAWFormFields(formObject);
             formObject.target = null;
+        },
+
+        formValueAccessors : {
+            input: function(elm)
+            {
+                switch (elm.type.toLowerCase()) {
+                    case 'checkbox':
+                    case 'radio':
+                        return elm.checked ? elm.value : null;
+                    default:
+                        return elm.value;
+                }
+            },
+
+            textarea: function (elm) { return elm.value; },
+
+            select: function(elm)
+            {
+                function value (option) {
+                    return option.value || option.text;
+                }
+
+                if (elm.type.toLowerCase() == 'select-one') {
+                    var index = elm.selectedIndex;
+                    return index >= 0 ? value(elm.options[index]) : null;
+                } else {
+                    var values, length = elm.length;
+                    if (!length) return null;
+
+                    for (var i = 0, values = []; i < length; i++)
+                    {
+                        var option = elm.options[i];
+                        if (option.selected) values.push(value(option));
+                    }
+                    return values;
+                }
+            }
+        },
+
+        serialize : function (elm) {
+            var type = elm.tagName.toLowerCase();
+            var accessor = this.formValueAccessors[type];
+            return (accessor) ? accessor(elm) : null;
+        },
+
+        formValueMap : function (formObject) {
+            var elms = formObject.getElementsByTagName('*');
+            var data = {}
+            for (var i = 0; i < elms.length; i++) {
+                var e = elms[i]
+                if (!e.disabled && e.name) {
+                    var val = this.serialize(e);
+                    if (val) {
+                        var name = e.name;
+                        data[name] = Util.itemOrArrAdd(data[name], val)
+                    }
+                }
+
+            }
+            return data;
+        },
+
+        encodedFormValueString : function (formObject) {
+            var map = this.formValueMap(formObject);
+            var arr = [];
+            for (var key in map) {
+                var encKey = encodeURIComponent(key);
+                var val = map[key];
+                if (Util.isArray(val)) {
+                    for (var i=0; i < val.length; i++) {
+                        arr.push(encKey + "=" + encodeURIComponent(val[i] || ""));
+                    }
+                } else {
+                    arr.push(encKey + "=" + encodeURIComponent(val || ""));
+                }
+            }
+            return arr.join("&");
         },
 
         addFormValueForSubmit : function (key, value)
@@ -465,15 +573,15 @@ ariba.Request = function() {
             window.location.href = url;
             // in somes cases, we are trying to redirect while the download “Save/Open” dialog is up.
             // We need to retry in those cases.
-            if (Dom.IsIE6Only) {
+            if (Dom.IsIE6Only || Dom.isSafari) {
                 function retry() {
                     // Retry only if redirect is not in progress
                     if (document.readyState != "loading") {
                         window.location.href = url;
-                        setTimeout(retry, 1000);
+                        setTimeout(retry, 500);
                     }
                 }
-                setTimeout(retry, 1000);
+                setTimeout(retry, 500);
             }
         },
 
@@ -484,15 +592,32 @@ ariba.Request = function() {
         },
 
         // initiate content retrieval
-        getContent : function (url)
+        getContent : function (url, forceIFrame)
         {
+            ariba.Debug.resetRequestComplete();
             // Debug.log("--- awGetContent --> " + url + "  [windowName:" + window.name + ", this.AWReqUrl:" + AWReqUrl + "]");
             this.prepareForRequest();
-            var iframe = this.createRefreshIFrame();
-            url = this.appendQueryValue(url, "awii", iframe.name);
-        // Debug.log("<--- initiate incremental get " + url);
-            iframe.src = this.appendFrameName(url);
+            if (this.UseXmlHttpRequests && !forceIFrame) {
+                Debug.log("<--- Incremental get: XMLHTTP");
+                url = this.appendQueryValue(url, "awii", "xmlhttp");
+                Request.initiateXMLHttpRequest(url, function (xmlhttp) {
+                    // XXX: Error handling?
+                    var string = xmlhttp.responseText;
+                    ariba.Refresh.processXMLHttpResponse(string);
+                });
+            } else {
+                Debug.log("<--- Incremental get: IFRAME");
+                var iframe = this.createRefreshIFrame();
+            // Debug.log("<--- initiate incremental get " + url);
+                url = this.appendQueryValue(url, "awii", iframe.name);
+                iframe.src = this.appendFrameName(url);
+            }
+        },
 
+        __retryRequest : function (senderId)
+        {
+            Debug.log("Server responded with retry request (" + senderId +") -- doing IFrame retry ");
+            this.getContent(this.formatUrl(senderId), true);
         },
 
         prepareForRequest : function (noWaitCursor)
@@ -517,6 +642,13 @@ ariba.Request = function() {
             this.refreshRequestComplete();
             AWRequestInProgress = false;
             AWPollEnabled = false;
+        },
+
+        displayErrorDiv : function (innerHtml) {
+            var div = document.createElement("div");
+            div.className="debugFloat";
+            div.innerHTML = innerHtml;
+            document.body.appendChild(div);
         },
 
         createRequestIFrame : function (frameName, showFrame)
@@ -826,12 +958,11 @@ ariba.Request = function() {
         // File Upload Status
         //****************************************************
 
-        hasPopulatedFileInputContol : function (senderId, formId) {
-            Debug.log("hasPopulatedFileInputControl() formId=" + formId);
-            var elements = document.getElementsByTagName('input');
+        hasPopulatedFileInputContol : function (form) {
+            var elements = form.getElementsByTagName('input');
             for (var i = 0; i < elements.length; i++) {
                 var e = elements.item(i);
-                if (e.type == "file" && e.form.id == formId) {
+                if (e.type == "file") {
                     if (e.value.length > 0) return true;
                 }
             }
@@ -845,14 +976,14 @@ ariba.Request = function() {
         {
             var http = null;
             try {
-                http = new ActiveXObject("Msxml2.XMLHTTP");
+                http = new XMLHttpRequest();
             } catch (e1) {
                 try {
-                    http = new ActiveXObject("Microsoft.XMLHTTP");
+                    http = new ActiveXObject("Msxml2.XMLHTTP");
                 } catch (e2) {
                     try {
-                        http = new XMLHttpRequest();
                     } catch (e3) {
+                        http = new ActiveXObject("Microsoft.XMLHTTP");
                     }
                 }
             }
@@ -870,7 +1001,7 @@ ariba.Request = function() {
 
         _asyncDone : function (http)
         {
-            _XMLHTTP_BUSY = false;
+            _XMLHTTP_COUNT--;
             if (http) {
                 http.onreadystatechange = this.nullFunc;
             }
@@ -879,9 +1010,9 @@ ariba.Request = function() {
 
         _notifyGet : function ()
         {
-            if (_XMLHTTP_BUSY || (_XMLQUEUE.length == 0)) return;
+            if (_XMLHTTP_COUNT > 2 || (_XMLQUEUE.length == 0)) return;
             var func = _XMLQUEUE.shift();
-            _XMLHTTP_BUSY = true;
+            _XMLHTTP_COUNT++;
             var xmlhttp = this.getXMLHttp();
         // alert ("GET: " + xmlhttp);
             // need to do async for Firefox...
@@ -890,7 +1021,7 @@ ariba.Request = function() {
             }, 0);
         },
 
-        initiateXMLHttpRequest : function (url, callback)
+        initiateXMLHttpRequest : function (url, callback, formPostData)
         {
             function doGet(xmlhttp) {
                 // method, url, asynchronous, username, password
@@ -912,7 +1043,31 @@ ariba.Request = function() {
                 }
             }
 
-            this._asyncGet(doGet.bind(this));
+            function doPost(xmlhttp) {
+                // method, url, asynchronous, username, password
+                xmlhttp.open("POST", url, true);
+                xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+
+            // Define an event handler for processing
+                var _this = this;
+                xmlhttp.onreadystatechange = function() {
+                    _this.manageStateChange(xmlhttp, callback);
+                };
+
+            // Execute the request
+                try {
+                    xmlhttp.send(formPostData);
+                }
+                catch (e) {
+                    alert("Error initiating request");
+                }
+            }
+
+            if (formPostData) {
+                this._asyncGet(doPost.bind(this));
+            } else {
+                this._asyncGet(doGet.bind(this));
+            }
         },
         //(0) (UNINITIALIZED) The object has been created, but not initialized
         //                   (open method has not been called).
@@ -941,96 +1096,6 @@ ariba.Request = function() {
 
                     break;
             }
-        },
-
-        DebugXMLHttpResponse : function (xmlhttp)
-        {
-            alert("-- content: -- \n" + xmlhttp.responseText + "\n" +
-                  "-- content type: --\n" + xmlhttp.getResponseHeader("content-type") + "\n" +
-                  "-- all headers: --\n" + xmlhttp.getAllResponseHeaders());
-        },
-        //********************************************************************
-        // XMLHttp utilities
-        //********************************************************************
-
-        /**
-         Extracts the <script ...> containers and assumes they contain javascript.
-         The <script> container is unwrapped and the remainder is eval'd
-         */
-        evalScriptTags : function (responseText)
-        {
-            var matches = this.getContainersNamed(responseText, "script");
-            if (matches != null) {
-                var length = matches.length;
-                for (var index = 0; index < length; index++) {
-                    var container = matches[index];
-                    var string = this.unwrapTag(container);
-                    var indexOfVBScript = container.indexOf('VBScript');
-                    if (indexOfVBScript != -1 && indexOfVBScript < container.indexOf(">")) {
-                        Event.GlobalEvalVBScript(string);
-                    }
-                    else {
-                        eval(string);
-                    }
-                }
-            }
-        },
-        // Note: doesn't handle nested tags or multi-line open tag
-        getContainersNamed : function (responseText, tagName)
-        {
-            // eliminate newlines as the "." won't match those. -- note need \r for
-            // firefox handling of xmlhttp content
-            responseText = responseText.replace(/\n/g, "<awnewline>");
-            responseText = responseText.replace(/\r/g, "<awnewline>");
-            responseText = responseText.replace(/\f/g, "<awnewline>");
-
-        // Note: The ? in following regex causes match on first occurrence of the closing </tagName>
-            // Otherwise, it would find the last occurrence of </tagName>.
-            var RegEx = new RegExp("<" + tagName + "[ >].*?<\/" + tagName + ">", "gi");
-            var matches = responseText.match(RegEx);
-            if (matches != null) {
-                var length = matches.length;
-                for (var index = 0; index < length; index++) {
-                    var string = matches[index];
-                    string = string.replace(/<awnewline>/g, "\n");
-                    matches[index] = string;
-                }
-            }
-            return matches;
-        },
-        /**
-         Converts an array of container strings to strings without their containers.
-         In the container has ignore="true", discards the entire container if shouldIgnore is true.
-
-         unwrapContainers : function (containers, shouldIgnore)
-         {
-         var unwrappedContents = new Array();
-         var length = containers.length;
-         for (var index = 0; index < length; index++) {
-         var string = containers[index];
-         if (!shouldIgnore || !awHasIgnore(string)) {
-         string = this.unwrapTag(string);
-         string = string.replace(/<awnewline>/g, "\n");
-         unwrappedContents[index] = string;
-         }
-         }
-         return unwrappedContents;
-         },
-
-         hasIgnore : function (containerString)
-         {
-         var indexOfIgnore = containerString.indexOf('ignore=\"true\"');
-         return (indexOfIgnore != -1 && indexOfIgnore < containerString.indexOf(">"));
-         },    */
-
-        /**
-         Removes the containing tag from the string <foo ...>xxx</foo> becomes xxx.
-         */
-        unwrapTag : function (string)
-        {
-            var indexOfStart = string.indexOf(">") + 1;
-            var indexOfEnd = string.lastIndexOf("<");
-            return string.substring(indexOfStart, indexOfEnd);
         },
 
         downloadContent : function (srcUrl)

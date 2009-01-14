@@ -16,12 +16,12 @@
         //alert("in iframe " + parent.ariba.Dom.getElementById("AWRefreshFrame").style.display);
 
         <a:CurrWindowDecl/>
-        ariba.awCurrWindow.ariba.Request.prepareRedirectRequest();
+        ariba.Request.prepareRedirectRequest();
 
         // if we're in a refresh frame, then post the form through the parent.
         // since we use display:none on the refresh frame, firefox does not allow
         // form submits in the iframe.
-        parent.ariba.Refresh.iFrameFormSubmit(document.form1);
+        ariba.Refresh.iFrameFormSubmit(document.form1);
     }
     else {
         document.form1.submit();

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#22 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#24 $
     </Copyright>
 
     <Overview>
@@ -76,11 +76,23 @@
     </Binding>
 </a:Api>\
 <a:If ifTrue="$isEditable">
-    <textarea name="$textAreaName" formValue="$formValue" elementId="$elementId"
-              onKeyUp="$limitTextJavaScriptString" onKeyDown="$onKeyDownString"
-              otherBindings="$otherBindingsValues" id="$textAreaId" disabled="$disabled">\
-        <a:String value="$formattedString" escapeHtml="$^escapeHtml:$true"/>\
-    </textarea>\
+    <a:If ifFalse="$showMaxLengthIndicator">\
+        <a:IncludeBlock name="Input" escapeHtml="$^escapeHtml"/>\
+    <a:Else/>\
+        <table width="1%" cellpadding="0">\
+            <tr>\
+                <td>\
+                    <a:IncludeBlock name="Input" escapeHtml="$^escapeHtml"/>\
+                </td>\
+            </tr>\
+            <tr>\
+                <td>
+                    <div style="float:right;text-align:right;font-weight:bold;" id="$maxLengthIndicatorId">$maxLengthIndicatorString</div>\
+                    <div style="float:right"><a:Local key="a001">Characters left</a:Local>:</div>\                    
+                </td>
+            </tr>\
+        </table>\
+    </a:If>\
     <a:RefreshRegion>\
         <a:If ifTrue="$isInHighLightedErrorScope">
             <a:ClientSideScript>\
@@ -91,3 +103,10 @@
 <a:Else/>\
     <a:String value="$formattedString" escapeHtml="$^escapeHtml:$true"/>\
 </a:If>\
+<a:Block name="Input">
+    <textarea name="$textAreaName" formValue="$formValue" elementId="$elementId"
+              onKeyUp="$limitTextJavaScriptString" onKeyDown="$onKeyDownString"
+              otherBindings="$otherBindingsValues" id="$textAreaId" disabled="$disabled">\
+        <a:String value="$formattedString" escapeHtml="$^escapeHtml:$true"/>\
+    </textarea>\
+</a:Block>

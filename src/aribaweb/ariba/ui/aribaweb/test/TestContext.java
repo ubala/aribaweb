@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#2 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -22,13 +22,67 @@ import ariba.ui.aribaweb.core.AWSession;
 import ariba.util.core.MapUtil;
 
 import java.util.Map;
+import java.util.Set;
 
-public class TestContext {
+public class TestContext
+{
     public static final String Name = "uiTestContext";
-    
-    private Map<Class, Object> _context = MapUtil.map();
-    private String _username;
+    public static final String ID = "testContextId";
 
+    private Map<String, Object> _internalContext = MapUtil.map();
+    
+    private Map<Object, Object> _context = MapUtil.map();
+    private String _username;
+    private TestContextDataProvider _dataProvider;
+    private String _id;
+
+    private static Map<String, TestContext> _savedTestContext = MapUtil.map();
+
+    public TestContext ()
+    {
+        _id = String.valueOf(System.currentTimeMillis()) ;
+    }
+
+    public String getId ()
+    {
+        return _id;
+    }
+    
+    public static TestContext getSavedTestContext (AWRequestContext requestContext)
+    {
+        TestContext tc = null;
+        String tcId = requestContext.formValueForKey(ID);
+        if (tcId != null) {
+            tc = _savedTestContext.get(tcId);
+        }
+        return tc;
+    }
+
+    public static void removeSavedTestContext (AWRequestContext requestContext)
+    {
+        String tcId = requestContext.formValueForKey(ID);
+        _savedTestContext.remove(tcId);
+    }
+
+    public void saveTestContext ()
+    {
+        _savedTestContext.put(_id, this);
+    }
+
+    public void addInternalParam (String key, Object value)
+    {
+        _internalContext.put(key, value);
+    }
+    
+    public Object getInternalParam(String key)
+    {
+        return _internalContext.get(key);
+    }
+
+    public void setDataProvider (TestContextDataProvider dataProvider)
+    {
+        _dataProvider = dataProvider;
+    }
     static public TestContext getTestContext (AWRequestContext requestContext)
     {
         return (TestContext)requestContext.session().dict().get(TestContext.Name);
@@ -39,14 +93,28 @@ public class TestContext {
         return (TestContext)session.dict().get(TestContext.Name);
     }
 
+    public Set keys ()
+    {
+        return _context.keySet();
+    }
+    
     public Object get (Class type)
     {
-        return _context.get(type);
+        Object obj = _context.get(type);
+        if (_dataProvider != null) {
+            obj = _dataProvider.resolve(this, obj);
+        }
+        return obj;
     }
 
     public void put (Object object)
     {
         _context.put(object.getClass(), object); 
+    }
+    
+    public void put (Object key, Object value)
+    {
+        _context.put(key, value); 
     }
 
     public void setUsername (String username)

@@ -1,0 +1,11 @@
+<a:If ifTrue="$isDebuggingEnabled">
+    <a:ClientSideScript executeOnIncrementalUpdate="$false">
+        var windowTitle = '<a:PrimitiveString value="$^title"/>';
+        // use closure to access windowTitle
+        function setTitle () {
+           ariba.Debug.setWindowTitle(windowTitle);
+        }
+        ariba.Event.registerRefreshCallback(setTitle);
+        ariba.Event.registerRefreshCallback(ariba.Debug.requestCompleteNotification);
+    </a:ClientSideScript>\
+</a:If>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWStaticContent.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWStaticContent.java#8 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -43,12 +43,11 @@ public final class AWStaticContent extends AWContainerElement
 
     private String renderContentString (AWRequestContext requestContext, AWComponent component)
     {
-        AWResponse actualResponse = requestContext.response();
         AWResponse tempResponse = requestContext.application().createResponse(requestContext.request());
-        requestContext.setResponse(tempResponse);
+        AWResponse actualResponse = requestContext.temporarilySwapReponse(tempResponse);
         super.renderResponse(requestContext, component);
         String contentString = tempResponse.contentString();
-        requestContext.setResponse(actualResponse);
+        requestContext.restoreOriginalResponse(actualResponse);
         return contentString;
     }
 

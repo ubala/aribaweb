@@ -72,7 +72,7 @@
     <condition property="build.dir" value="${env.ARIBA_BUILD_ROOT}/opensourceui">
         <not><equals arg1="${env.ARIBA_BUILD_ROOT}" arg2="NOT_SET"/></not>
     </condition>
-    <property name="build.dir" location="${common.dir}/build"/>
+    <property name="build.dir" location="${basedir}/build"/>
 
     <condition property="dist.root.dir" value="${env.ARIBA_INSTALL_ROOT}/internal/opensource">
         <not><equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/></not>
@@ -167,13 +167,30 @@
     <property name="src.derived.dir" value="${build.dir}/derived-src/${name}"/>
     <property name="build.classes.dir" value="${build.dir}/classes/${name}"/>
     <property name="build.docroot.dir" value="${build.classes.dir}/docroot"/>
-    <property name="build.jars.dir" value="${dist.root.dir}/lib"/>
-    <property name="build.jar.file" location="${build.jars.dir}/${jar.name}"/>    
+    <property name="ariba.jars.dir" value="${dist.root.dir}/lib"/>
     <property name="doc.dir" location="${dist.root.dir}/docs"/>
+    <property name="site.dir" location="${dist.root.dir}/docs/site"/>
     <property name="tools.dir" location="${dist.root.dir}/tools"/>
-    <property name="awreload.jar" location="${build.jars.dir}/ariba.awreload-jmti.jar"/>
+    <property name="awreload.jar" location="${ariba.jars.dir}/ariba.awreload-jmti.jar"/>
 
     <target name="init">
+        <!-- support for tomcat base in build dir on alternate port -->
+        <property name="derived.catalina.base.dir" location="${build.dir}/tomcat-bases/${name}"/>
+        <condition property="servlet.port" value="9080">
+            <not><isset property="use.shared.webapps.base"/></not>
+        </condition>
+        <condition property="catalina.base.dir" value="${derived.catalina.base.dir}">
+            <not><isset property="use.shared.webapps.base"/></not>
+        </condition>
+        <condition property="tomcat.port.prefix.override" value="9">
+            <not><isset property="use.shared.webapps.base"/></not>
+        </condition>
+        <condition property="jpda.address" value="9000">
+            <not><isset property="use.shared.webapps.base"/></not>
+        </condition>
+
+        <property name="build.jars.dir" value="${build.dir}/lib"/>
+        <property name="build.jar.file" location="${build.jars.dir}/${jar.name}"/>
         <property name="catalina.base.dir" value="${dist.root.dir}"/>
         <property name="build.wars.dir" value="${catalina.base.dir}/webapps"/>
         <property name="build.war.file" location="${build.wars.dir}/${war.name}.war"/>
@@ -184,6 +201,7 @@
         <property name="servlet.description" value="Web application ${war.name}"/>
         <property name="servlet.class" value="ariba.ui.servletadaptor.AWDispatcherServlet"/>
         <property name="servlet.port" value="8080"/>
+        <property name="jpda.address" value="8000"/>
         <property name="app.url" value="http://localhost:${servlet.port}/${servlet.name}/AribaWeb"/>
 
         <!-- Need to build this even if we won't use it or the compiler will complain... -->
@@ -207,7 +225,7 @@
     </fileset>
 
     <!-- ToDo: derive a module specific list from a list declared within each module -->
-    <fileset id="build.jars" dir="${build.jars.dir}">
+    <fileset id="build.jars" dir="${ariba.jars.dir}">
         <include name="ariba.util.jar"/>
         <include name="ariba.expr.jar"/>
         <include name="ariba.aribaweb.jar"/>
@@ -216,7 +234,7 @@
         <include name="ariba.awreload.jar"/>
     </fileset>
 
-    <fileset id="war.resource.jars" dir="${build.jars.dir}">
+    <fileset id="war.resource.jars" dir="${ariba.jars.dir}">
         <include name="ariba.aribaweb.jar"/>
         <include name="ariba.widgets.jar"/>
         <include name="ariba.metaui.jar"/>
@@ -232,6 +250,7 @@
 
     <!--- placeholders -->
     <fileset id="war.jars" dir="." excludes="**"/>
+    <fileset id="app.war.jars" dir="." excludes="**"/>
     <fileset id="module.libs" dir="." excludes="**"/>
     <fileset id="module.libs2" dir="." excludes="**"/>
     <fileset id="module.libs3" dir="." excludes="**"/>
@@ -254,6 +273,7 @@
         <resources refid="module.libs2"/>
         <resources refid="module.libs3"/>
         <resources refid="war.jars"/>
+        <resources refid="app.war.jars"/>
         <pathelement location="${build.dir}/classes/java"/>
     </path>
 
@@ -301,7 +321,7 @@
     </path>
 
     <patternset id="jar.resource.patterns"
-                includes="**/*.awl,**/*.htm,**/*.oss,**/*.awz,**/*.afr,**/*.groovy,**/*.csv,**/*.xml"
+                includes="**/*.awl,**/*.htm,**/*.oss,**/*.awz,**/*.afr,**/*.csv,**/*.xml"
                 excludes="build.xml,install.csv"
             />
 
@@ -329,18 +349,13 @@
         <equals arg1="1.5" arg2="${ant.java.version}"/>
     </condition>
 
-    <target name="clean"
-            description="Removes contents of build and dist directories">
-        <delete dir="${build.dir}"/>
-        <delete>
-          <fileset dir="${build.jars.dir}" includes="*.jar"/>
-        </delete>
-        <delete dir="${build.wars.dir}"/>
-        <delete dir="${dist.dir}"/>
-        <delete dir="${dist.root.dir}/work"/>
-        <delete dir="${doc.dir}/api"/>
-        <delete dir="${doc.dir}/index.lucene"/>
-        <delete dir="${doc.dir}/xsd"/>
+    <target name="clean" depends="init"
+            description="Removes build output of this target">
+        <delete dir="${build.classes.dir}"/>
+        <delete dir="${src.derived.dir}"/>
+        <delete dir="${derived.catalina.base.dir}"/>
+        <delete dir="${build.wars.dir}/${war.name}" failonerror="false"/>
+        <delete dir="${build.jars.dir}" failonerror="false"/>
     </target>
 
     <target name="javacc-tree-check" if="src.jjt.path">
@@ -467,7 +482,7 @@
         <jarify/>
     </target>
 
-    <target name="jar" depends="jar-check" unless="jar.uptodate"
+    <target name="jar" depends="init, jar-check" unless="jar.uptodate"
             description="Packages the JAR file">
         <antcall target="build-jar"/>
     </target>
@@ -496,6 +511,7 @@
                 <resources refid="build.deps"/>
                 <resources refid="build.jars"/>
                 <resources refid="war.jars"/>
+                <resources refid="app.war.jars"/>
                 <resources refid="war.resources"/>
             </sources>
             <targets>
@@ -536,6 +552,7 @@
             <lib refid="build.deps"/>
             <lib refid="build.jars"/>
             <lib refid="war.jars"/>
+            <lib refid="app.war.jars"/>
             <lib refid="module.libs"/>
             <lib refid="module.libs2"/>
             <lib refid="module.libs3"/>
@@ -562,7 +579,7 @@
                 <include name="LICENSE.txt"/>
                 <include name="NOTICE.txt"/>
             </metainf>
-            <metainf dir="${build.jars.dir}">
+            <metainf dir="${ariba.jars.dir}">
                 <include name="EXT-LICENSE.txt"/>
             </metainf>
         </war>
@@ -690,9 +707,9 @@
         <property name="tomcat.jvmarg" value="-Dnop=x"/>
     </target>
 
-    <!-- can be run as precursor target.  I.e.:  `ant with-debug launch` -->
-    <target name="with-debug">
-        <property name="env.JPDA_ADDRESS" value="8000"/>
+    <!-- set debug by default -->
+    <target name="check-debug" unless="debug.off">
+        <property name="env.JPDA_ADDRESS" value="${jpda.address}"/>
         <property name="env.JPDA_TRANSPORT" value="dt_socket"/>
     </target>
 
@@ -710,7 +727,7 @@
         </launch-tomcat>
     </target>
 
-    <target name="tomcat" depends="init, check-awreload, has-tomcat, ensure-tomcat-conf, -tomcat-debug, -tomcat-no-debug"
+    <target name="tomcat" depends="init, check-awreload, check-debug, has-tomcat, ensure-tomcat-conf, -tomcat-debug, -tomcat-no-debug"
             description="Start tomcat (wihout rebuilding)"/>
 
     <target name="tomcat-browse" depends="init, has-tomcat, ensure-tomcat-conf"

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#36 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#37 $
     </Copyright>
 
     <Overview>
@@ -30,14 +30,10 @@
     <a:RefreshRegion useId="DC" ignore="$true" alwaysRender="$true">\
         <a:GenericContainer tagName="script" language="JavaScript">
             <a:CurrWindowDecl/>\
-\
-            function RJS (inc, sync, isGS, f) {
-                if (window.name == "AWRefreshFrame") {
-                    if (inc) parent.ariba.Refresh.RSS(sync, isGS, f.toString());
-                } else {
-                    ariba.Refresh.RSF(sync, isGS, f);
-                }
-            }
+            if (window.name == "AWRefreshFrame") {
+                ariba_IR = true;
+                RJS = function (inc, sync, isGS, f) { if (inc) parent.ariba.Refresh.RSS(sync, isGS, f.toString()); }
+            }\
         </a:GenericContainer>\
         <a:If ifTrue="$isBrowserMicrosoft">\
             <a:GenericContainer tagName="script" language="VBScript">
@@ -83,29 +79,33 @@
                 AWFrameName = null;
             </a:ClientSideScript>
         <a:Else/>
-            <a:ClientSideScript synchronous="$true">
-                ariba.Util.extend(ariba.Request, {
-                    AWResponseId : '<a:PrimitiveString value="$requestContext.responseId"/>',
-                    AWSessionSecureId: '<a:PrimitiveString value="$requestContext.sessionSecureId"/>',
-                    AWRefreshUrl : '<a:PrimitiveString value="$refreshUrl"/>',
-                    AWPingUrl : '<a:PrimitiveString value="$pingUrl"/>',
-                    AWProgressUrl : '<a:PrimitiveString value="$progressCheckUrl"/>',
-                    AWReqUrl : '<a:PrimitiveString value="$requestHandlerUrl"/>',
+            <a:ClientSideScript synchronous="$true">\
+                ariba.Request.initParams(\
+                    '<a:PrimitiveString value="$requestContext.responseId"/>',\
+                    '<a:PrimitiveString value="$requestContext.sessionSecureId"/>',\
+                    '<a:PrimitiveString value="$refreshUrl"/>',\
+                    '<a:PrimitiveString value="$pingUrl"/>',\
+                    '<a:PrimitiveString value="$progressCheckUrl"/>',\
+                    '<a:PrimitiveString value="$requestHandlerUrl"/>',\
+                    <a:PrimitiveString value="$ariba.ui.aribaweb.core.AWRequestContext.UseXmlHttpRequests"/>,\
                     <a:If ifFalse="$=ariba.ui.aribaweb.core.AWConcreteApplication.IsCookieSessionTrackingEnabled">\
-                        AWSessionIdKey : '<a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWRequestContext.SessionIdKey"/>',
-                        AWSessionId : '<a:PrimitiveString value="$httpSession.id"/>',
+                        '<a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWRequestContext.SessionIdKey"/>',\
+                        '<a:PrimitiveString value="$httpSession.id"/>',\
+                    <a:Else/>\
+                        null,\
+                        null,\
                     </a:If>\
-                    <a:If notEqualNull="$requestContext.frameName">
-                        AWFrameName : "$requestContext.frameName"
+                    <a:If notEqualNull="$requestContext.frameName">\
+                        "$requestContext.frameName",\
                     <a:Else/>
-                        AWFrameName : null
+                        null,\
                     </a:If>\
-                });
-                ariba.Refresh.AWBackTrackUrl = '<a:PrimitiveString value="$backTrackUrl"/>';
-                ariba.Refresh.AWForwardTrackUrl = '<a:PrimitiveString value="$forwardTrackUrl"/>';
-                <!--- Delay before the barber pole displays-->
-                ariba.Input.AWWaitAlertMillis = <a:PrimitiveString value="$waitAlertMillis"/>;
-                ariba.Dom.AWOpenWindowErrorMsg = '<a:JavascriptString value="$openWindowErrorMessage" escape="$true"/>';
+                    '<a:PrimitiveString value="$backTrackUrl"/>',\
+                    '<a:PrimitiveString value="$forwardTrackUrl"/>',\
+                    <!--- Delay before the barber pole displays-->\
+                    <a:PrimitiveString value="$waitAlertMillis"/>,\
+                    '<a:JavascriptString value="$openWindowErrorMessage" escape="$true"/>'\
+                );\
             </a:ClientSideScript>
         </a:If>\
     </a:RefreshRegion>\

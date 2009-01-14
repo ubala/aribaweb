@@ -32,6 +32,24 @@
         <echo message=""/>
     </target>
 
+    <target name="Welcome">
+        <groovy>
+            def input = new Scanner(System.in)
+            String choice = null
+            while (!choice) {
+                println ""
+                println "Would you like to (c)reate project, or (e)xit [e]?"
+                String response = input.nextLine().toLowerCase()
+                if (response == "e" || response == "") choice = "exit"
+                if (response == "c") choice = "create-project"
+            }
+            properties["def.run.target"] = choice
+        </groovy>
+        <antcall target="${def.run.target}"/>
+    </target>
+
+    <target name="exit"/>
+    
     <target name="create-project">
         <!--
         <pathconvert refid="classpath" property="classpath.string"/>
@@ -45,13 +63,6 @@
     <property name="greeting" value="This is a greeting from Ant!"/>
     <target name="greeting">
         <echo message="In greeting -- launching groovy..."/>
-        <groovy>
-            System.out.println "You can't stop me!"
-            def input = new Scanner(System.in)
-            ant.echo "An ant log..."
-            print "How old are you? "
-            println "${properties.greeting} -- In 10 years you will be ${input.nextInt() + 10}"
-        </groovy>
     </target>
 
 </project>

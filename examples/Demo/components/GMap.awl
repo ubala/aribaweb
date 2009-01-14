@@ -1,0 +1,69 @@
+<a:Api>
+    <Overview>
+        Displays a Google Map
+    </Overview>
+
+    <Binding key="width" type="int" direction="get">
+        Width of map control (in px)
+    </Binding>
+
+    <Binding key="height" type="int" direction="get">
+        Height of map control (in px)
+    </Binding>
+
+    <Binding key="longitude" type="float" direction="get">
+        Map center, longitude
+    </Binding>
+
+    <Binding key="latitude" type="float" direction="get">
+        Map center, latitude
+    </Binding>
+
+    <Binding key="clickAction" type="AWResponseGenerating" direction="get">
+        Invoked when map is clicked.  eventLatitude and eventLongitude are pushed with
+        the coordinates of the click prior to invocation.
+    </Binding>
+
+    <Binding key="eventLatitude" type="float" direction="set">
+        Pushed for events involving position
+    </Binding>
+
+    <Binding key="eventLongitude" type="float" direction="set">
+        Pushed for events involving position
+    </Binding>
+
+    <Binding key="zoomLevel" type="int" direction="get" default="13">
+        Map zoom level
+    </Binding>
+</a:Api>\
+<a:RefreshRegion forceRefreshOnChange="$true" useId="GMap">
+    <a:GenericContainer tagName="script" language="JavaScript" src="$url">\
+    </a:GenericContainer>\
+</a:RefreshRegion>\
+<a:ClientSideScript filename="components/GMaps.js" forceDirectInclude="$true"/>
+\
+<a:SetValue mapId="$requestContext.nextElementId"/>
+<a:RefreshRegion>
+    <div id="$mapId" style="$style"></div>
+    <a:Form omitTags="$requestContext.currentForm" style="margin:0px">\
+            <input type="hidden" elementId="$latId" id="$latId" name="$latId"
+                formValue="$eventLatitudeString"/>\
+            <input type="hidden" elementId="$lngId" id="$lngId" name="$lngId"
+                formValue="$eventLongitudeString"/>\
+        <a:ClientSideScript>\
+            ariba.GMaps.create("$mapId", <a:String value="$^latitude:37.80354511753133"/>,
+                                         <a:String value="$^longitude:-122.35816955566406"/>,
+                                         <a:String value="$^zoomLevel:13"/>,
+                                         "<a:ActionId action="$^clickAction"/>",
+                                         "$latId", "$lngId"
+                );
+        </a:ClientSideScript>
+
+        <a:RefreshRegion>
+            <a:IncludeContent/>
+            <a:ClientSideScript>\
+                ariba.GMaps.current().processObjs();
+            </a:ClientSideScript>
+        </a:RefreshRegion>
+    </a:Form>\
+</a:RefreshRegion>

@@ -1,7 +1,7 @@
 Getting Started With AribaWeb
 =============================
 
-(AribaWeb README file, August 2008)
+(AribaWeb README file, September 2008)
 
 Introduction
 ------------
@@ -19,13 +19,13 @@ Presently documentation and tutorials are limited.  This situation will be
 remedied soon.  Until then, if you don't already know how to use AribaWeb,
 you may get discouraged if you don't have access to an experienced AW user.
 
-Version 0.8.3 (BETA)
+Version 0.8.5 (BETA)
 --------------------
 
 Although most of the libraries in this distribution has been incorporated in a
 variety of Ariba commercial application releases over as many as 9 years, this
-is its first release in OpenSource form and there are, therefore, likely issues
-that will arise from its use in non-Ariba contexts.  Also, the documentation
+is AribaWeb's first release in OpenSource form and there are, therefore, likely issues
+that will arise in its use in non-Ariba contexts.  Also, the documentation
 is not ready for release and the samples are limited.  As such, we're calling it
 beta for the time being...  (That said, the majority of aribaweb and widgets APIs
 are likely to be very stable from here foreward)
@@ -69,11 +69,14 @@ Shipped Directories
         there to get you going quickly.
 
  - **ide/**
-        Contains the aribawebIdeaPlugin.jar -- a plug in for the IntelliJ IDEA IDE
+        Contains the aribawebIdeaPlugin.jar, aribawebEclipsePlugin.jar -- a plug ins
+        for two popular Java IDEs 
 
-Derived Directories
--------------------
+Generated Directories
+---------------------
 
+ - **build/**
+        derived source, compilied .class files, and computed app-local catalina-base directories
  - **webapps/**
         WAR files for AW sample/demo applications (fully self-contained, with jars and resources)
  - **conf/**

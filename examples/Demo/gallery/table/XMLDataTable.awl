@@ -23,7 +23,7 @@
         <br/>
         <t:DataTable singleSelect="$true" batchSize="10" list="$po.Request.OrderRequest.ItemOut[]">
 
-            <t:Column key="ItemDetail.Description.text" label="Description" action="$goto.Home"/>
+            <t:Column key="ItemDetail.Description.text" label="Description" action='${pageWithName("ERPage")}'/>
 
             <t:Column key="quantity" label="Quantity"/>
 

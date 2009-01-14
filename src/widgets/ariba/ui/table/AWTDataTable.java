@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#176 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#177 $
 */
 
 package ariba.ui.table;
@@ -493,7 +493,7 @@ public final class AWTDataTable extends AWComponent
             }
 
             if (_didHibernate) {
-                initializeDisplayGroupObjects();   // _displayGroup.fetch();
+                initializeDisplayGroupObjects();
                 _didHibernate = false;
             }
 
@@ -791,7 +791,7 @@ public final class AWTDataTable extends AWComponent
     {
         // should we hibernate even if we didn't create the displayGroup?
         if (_createdDisplayGroup) {
-            _displayGroup.setObjectArray(ListUtil.list());
+            _displayGroup.hibernate();
             _didHibernate = true;
         }
         // will restore value from list binding if we are accessed again.

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MRUTabList.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MRUTabList.java#6 $
 */
 package ariba.ui.widgets;
 
@@ -48,6 +48,7 @@ public class MRUTabList extends AWComponent
     public List<Tab> _all;
     public Tab _currentTab;
     protected Tab _selectedTab;
+    protected Tab _nextTab;
     AWBinding _rankBinding;
     long _allChecksum = 0L;
 
@@ -147,9 +148,7 @@ public class MRUTabList extends AWComponent
 
     public void setSelectedTab (Tab selected)
     {
-        recordBacktrackState(_selectedTab);
-        _selectedTab = selected;
-        setValueForBinding(selected.item, AWBindingNames.selection);
+        _nextTab = selected;
     }
 
     public AWResponseGenerating tabSelected ()
@@ -157,7 +156,13 @@ public class MRUTabList extends AWComponent
         getMRU(session(), componentReference()).updateMRUForKey(_currentTab.label);
         // invalidate list...
         _all = null;
-        return (AWResponseGenerating)valueForBinding(AWBindingNames.action);
+        setValueForBinding(_nextTab.item, AWBindingNames.selection);
+        AWResponseGenerating response = (AWResponseGenerating)valueForBinding(AWBindingNames.action);
+        if (response == null || response == pageComponent()) {
+            _selectedTab = _nextTab;
+            recordBacktrackState(_selectedTab);
+        }
+        return response;
     }
 
     // Backtrack support

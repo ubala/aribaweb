@@ -456,6 +456,10 @@ IMG.block {
     text-decoration:underline;
 }
 
+.marginTop8 {
+    margin-top:8px;
+}
+
 tr.top {
     vertical-align:top;
 }
@@ -590,6 +594,11 @@ tr.top {
     font-size:1px;
     height:1px;
     line-height:1px;
+    width:165px;
+}
+
+body.tocEmpty .tocContent {
+    display:none;
 }
 
 .wizNavBar {
@@ -1358,6 +1367,8 @@ b.rtop b.r4, b.rbottom b.r4 {
 
 /* Form field labels */
 .ffl {
+    font:bold 11px Verdana, Arial, Helvetica, sans-serif;
+    color:#888888;
     vertical-align:top;
     padding-top:3px;
     text-align:right;
@@ -2163,6 +2174,10 @@ a.tabSelected:link, a.tabSelected:visited {
    padding:0px 0px 0px 0px;
 }
 
+.noPadding td.tabBox {
+   padding-top:0px;
+}
+
 .tabListWrapper .grad {
     display:none;
 }
@@ -2541,45 +2556,12 @@ div.dialogContentWrapper {
     padding-top:0px;
 }
 
-.d1, .d2, .d3, .d4, .d5 {
-    display:block;
-    height:1px;
-    font-size:1px;
-    background-color:#000000;
+.dialogContent {
+    padding:5px;
 }
 
-.d1 {
-    filter: alpha(opacity=050);
-    -moz-opacity:0.5;
-    margin:0px 1px 0px;
-}
-
-.d2 {
-    filter: alpha(opacity=040);
-    -moz-opacity:0.4;
-    margin:0px 2px 0px;
-}
-
-.d3 {
-    filter: alpha(opacity=030);
-    -moz-opacity:0.3;
-    margin:0px 3px 0px;
-}
-
-.d4 {
-    filter: alpha(opacity=020);
-    -moz-opacity:0.2;
-    margin:0px 4px 0px;
-}
-
-.d5 {
-    filter: alpha(opacity=010);
-    -moz-opacity:0.1;
-    margin:0px 5px 0px;
-}
-
-.dialogShadowFade {
-    filter:blendTrans(duration=2);
+.dialogButtons {
+    padding:8px 5px 8px 5px;
 }
 
  /*concatenated styles set width for wrapper*/
@@ -2616,11 +2598,6 @@ div.dialogContentWrapper {
     padding:20px 10px 10px 20px;
     border-top:2px solid #FFFFFF;
     vertical-align:top;
-}
-
-/*contextual padding for nested table (dialogContent) cells creates vertical space between form controls*/
-.dialogContent td {
-    padding-bottom:5px;
 }
 
 div.about {
@@ -2718,7 +2695,7 @@ a.smLinkVisited:link, a.smLinkVisited:visited {
 
 .debugBar {
         position: absolute;
-        left:450px;
+        left:454px;
         top:0px;
         filter: alpha(opacity=050);
         -moz-opacity:0.5;
@@ -2732,6 +2709,27 @@ a.smLinkVisited:link, a.smLinkVisited:visited {
         background-color:#E9E9F1;
         padding-left:3px;
         left:450px;
+        top:0px;
+        filter: alpha(opacity=100);
+        -moz-opacity:1.0;
+}
+
+.testBar {
+        position: absolute;
+        left:10px;
+        top:0px;
+        filter: alpha(opacity=050);
+        -moz-opacity:0.5;
+}
+
+.testBarVis {
+        position: absolute;
+        border-left: 1px solid #9C9CB8;
+        border-right: 1px solid #9C9CB8;
+        border-bottom: 1px solid #9C9CB8;
+        background-color:#E9E9F1;
+        padding-left:3px;
+        left:10px;
         top:0px;
         filter: alpha(opacity=100);
         -moz-opacity:1.0;
@@ -2754,6 +2752,18 @@ div.debugError {
         color:#000000;
         font: bold 6pt Verdana, Arial, sans-serif;
         padding:2px;
+}
+
+.debugFloat {
+    position:absolute;
+    background-color:#FFEEEE;
+    border:2px solid red;
+    overflow:scroll;
+    padding:5px;
+    width:600px;
+    height:500px;
+    right:5px;
+    bottom:5px;
 }
 
 /* Online notification */
@@ -2843,6 +2853,27 @@ div.debugError {
 /* refresh region */
 .rr {
     display:inline;
+}
+
+.rrVis .rr {
+    display:block;
+    border:1px #99EEAA dotted;
+}
+
+div.showRR, span.showRR {
+    background-color: #BBFFAA;
+    border:1px solid #99EEAA !important;
+    display:block;
+}
+
+tr.showRR td.tableBody, table.showRR td.tableBody {
+    background-color: #BBFFAA !important;
+    border:1px solid #99EEAA !important;
+}
+
+.rrVis #BPR_Footer .rr, #BPR_Footer, #BPR_Panels, #BPR_FLs, #BSF, #DC, #PEP, #PEP .rr {
+    display:inline;
+    border:none;
 }
 
 /* drag container */
@@ -3209,6 +3240,7 @@ div.dbTOC {
 .titleBarAction {
     vertical-align:top;
     line-height:13px;
+    padding-top:1px;
 }
 
 .portletTitleBar {
@@ -3562,16 +3594,19 @@ td.btnOver .rbBtFC {
     background-color:#B0B0B0;
 }
 
-td.btnDisabled .rbBC {
+td.btnDisabled .rbBC,
+td.btnSpecial1Disabled .rbBC {
     background-color:#959595;
     border-color:#959595;
 }
 
-td.btnDisabled .rbFC {
+td.btnDisabled .rbFC,
+td.btnSpecial1Disabled .rbFC {
     background-color:#DCDCDC;
 }
 
-td.btnDisabled .rbB {
+td.btnDisabled .rbB,
+td.btnSpecial1Disabled .rbB {
     color:#959595;
     background-color:#DCDCDC !important;
     padding:0px 4px 1px 4px !important;

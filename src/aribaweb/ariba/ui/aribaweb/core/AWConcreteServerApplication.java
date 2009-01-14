@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#49 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#51 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -255,10 +255,10 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         resourceManager.registerPackageName("ariba.ui.aribaweb.core", true);
         resourceManager.registerPackageName("ariba.ui.aribaweb.test", true);
         
-        // initialize the TestLinkManager (if in test mode)
+        // force the class file to load so it registers with the annotation listener
         String cls = "ariba.ui.aribaweb.test.TestLinkManager";
         if (allowTestLinkInvokation() && ClassUtil.classForName(cls, false) != null) {
-            ClassUtil.invokeStaticMethod(cls, "initialize",
+            ClassUtil.invokeStaticMethod(cls, "forceClassLoad",
                 new Class[]{},
                 new Object[]{});
         }
@@ -311,6 +311,17 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         ns.registerResolverForPackage("ariba.ui.aribaweb", resolver);
 
         AWClasspathResourceDirectory.autoRegisterJarResources(resourceManager);
+
+        // default for using XMLHttpRequests
+        String def = AWUtil.getenv("ARIBA_AW_USE_XMLHTTP");
+        if (def != null) AWRequestContext.UseXmlHttpRequests = Boolean.parseBoolean(def);
+    }
+
+    // Invoked by aribaweb.properties to set defaults if we're in an Open Source AW (jar) application
+    static public void initializeForJarApplication ()
+    {
+        // we default to true for OSAW apps, false for Ariba apps (unless overridded by ARIBA_AW_USE_XMLHTTP)
+        AWRequestContext.UseXmlHttpRequests = true;
     }
 
     protected boolean allowTestLinkInvokation ()

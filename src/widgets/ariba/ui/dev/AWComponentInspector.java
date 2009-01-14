@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentInspector.java#13 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentInspector.java#14 $
 */
 package ariba.ui.dev;
 
@@ -121,6 +121,7 @@ public class AWComponentInspector extends AWComponent
         _pathDisplayGroup.setObjectArray(path);
 
         ComponentTraceNode traceRoot = debugTrace.componentTraceRoot().collapseChildren();
+        if (traceRoot == null) traceRoot = debugTrace.componentTraceRoot();
         setUpTraceDisplayGroup(_traceDisplayGroup,
                                traceRoot,
                                path);
@@ -131,7 +132,10 @@ public class AWComponentInspector extends AWComponent
                                traceRoot.cloneTree().collapseNonMetadataChildren(),
                                path);
 
-        if (_tabIndex == -1) {
+        if (_traceDisplayGroup.filteredObjects().isEmpty()) {
+            _tabIndex = 1;
+        } 
+        else if (_tabIndex == -1) {
             _tabIndex = (path != null) ? 1 : 0;
         }
         else if (_tabIndex == 1 && (path == null)) {

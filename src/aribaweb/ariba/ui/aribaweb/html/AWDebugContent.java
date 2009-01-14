@@ -12,19 +12,21 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkParam.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWDebugContent.java#1 $
 */
 
-package ariba.ui.aribaweb.test;
+package ariba.ui.aribaweb.html;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+import ariba.ui.aribaweb.core.AWComponent;
 
-@Target({ElementType.TYPE,ElementType.FIELD,ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface TestLinkParam
+
+public class AWDebugContent extends AWComponent
 {
+    
+    public boolean isDebuggingEnabled ()
+    {
+        return ariba.ui.aribaweb.core.AWConcreteServerApplication.IsDebuggingEnabled
+                && !requestContext().isPrintMode();
+    }
+
 }

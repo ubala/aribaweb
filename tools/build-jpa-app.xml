@@ -64,18 +64,18 @@
     <!-- Create schema on every run -->
     <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
 
+    <target name="init" depends="widgets-app.init">
+        <fileset id="war.jars" dir="${ariba.jars.dir}">
+            <include name="ariba.metaui-jpa.jar"/>
+        </fileset>
 
-    <fileset id="war.jars" dir="${build.jars.dir}">
-        <include name="ariba.metaui-jpa.jar"/>
-        <include name="${jar.name}"/>
-    </fileset>
-
-    <fileset id="war.resource.jars" dir="${build.jars.dir}">
-        <include name="ariba.aribaweb.jar"/>
-        <include name="ariba.widgets.jar"/>
-        <include name="ariba.metaui.jar"/>
-        <include name="ariba.demoshell.jar"/>
-    </fileset>
+        <fileset id="war.resource.jars" dir="${ariba.jars.dir}">
+            <include name="ariba.aribaweb.jar"/>
+            <include name="ariba.widgets.jar"/>
+            <include name="ariba.metaui.jar"/>
+            <include name="ariba.demoshell.jar"/>
+        </fileset>
+    </target>
 
     <fileset id="module.libs" dir="${lib.jpa.dir}">
         <include name="**/*.jar"/>
@@ -148,4 +148,15 @@
             <arg value="org.hsqldb.jdbcDriver"/>
         </java>
     </target>
+
+    <!-- Listed here so IDEs surface them as top-level targets -->
+    <target name="build-and-run" depends="init, widgets-app.build-and-run"
+            description="Rebuild WARs and start Tomcat"/>
+
+    <target name="launch" depends="init, widgets-app.launch"
+            description="Rebuild WARs, starts Tomcat, opens browser"/>
+
+    <target name="clean" depends="init, widgets-app.clean"
+            description="Removes build output of this target"/>
+    
 </project>

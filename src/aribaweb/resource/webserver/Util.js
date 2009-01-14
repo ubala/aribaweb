@@ -7,6 +7,7 @@ if (!this.ariba) this.ariba = { awCurrWindow : null };
 
 // Null logging implementation if Debug.js is not loaded
 ariba.Debug = {
+    _requestComplete : false,
     log : function () {},
     debugEvent : function () {}
 }
@@ -60,6 +61,18 @@ ariba.Util = function() {
             }
         },
 
+        isArray: function (obj)
+        {
+            return obj != null && typeof obj == "object" &&
+                   'splice' in obj && 'join' in obj;
+        },
+
+        itemOrArrAdd : function (orig, obj)
+        {
+            return !orig ? obj : (this.isArray(orig) ? orig.push(obj) : [orig].push(obj));
+        },
+
+
         isUndefined : function (value)
         {
             return (typeof value == "undefined");
@@ -78,6 +91,23 @@ ariba.Util = function() {
         stringEndsWith : function (sourceString, searchString)
         {
             return (sourceString.lastIndexOf(searchString) == (sourceString.length - searchString.length));
+        },
+
+        takeValue : function (obj, keypath, value) {
+            function  set (obj, keyArr, value) {
+                if (keyArr.length == 1) {
+                    obj[keyArr[0]] = value;
+                } else {
+                    set(obj[keyArr.shift()], keyArr, value);
+                }
+            }
+            set(obj, keypath.split("."), value);
+        },
+
+        takeValues : function (obj, keys, values) {
+            for (var i=0; i < values.length; i++) {
+                this.takeValue(obj, keys[i], values[i]);
+            }
         },
 
         ////////////////////

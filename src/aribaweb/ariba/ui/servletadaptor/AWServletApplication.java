@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#11 $
 */
 
 package ariba.ui.servletadaptor;
@@ -157,13 +157,12 @@ public class AWServletApplication extends AWConcreteApplication
     protected void initAdaptorUrl(boolean requestSecure, String url)
     {
         // since AWDirectActionUrl is normally initialized non-lazily during app init,
-        // we need to override its URL with one we get layer (i.e. now, during
+        // we need to override its URL with one we get later (i.e. now, during
         // the first request).
         if (requestSecure) {
             _adaptorUrlSecure = url;
         }
         else {
-            AWDirectActionUrl.setDefaultAdaptorUrl(url);
             _adaptorUrl = url;
         }
     }

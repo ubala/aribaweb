@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#93 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#94 $
     </Copyright>
 
     <Overview>
@@ -255,7 +255,6 @@
                 </a:RefreshRegion>\
             </a:If>\
           </w:PageWrapperForm>\
-          <a:DebugContent title="$debugTitle"/>\
         </a:RefreshRegion>
         <!--- Add in modal panels (if any) -->
         <a:RefreshRegion useId="BPR_Panels" class="rr relocdest">
@@ -281,6 +280,7 @@
                 <a:If ifFalse="$^sessionless">
                     <a:If ifFalse="$omitWrapperBoilerplate">
                         <a:If ifTrue="$^isDebugVisible:$true">\
+                            <a:TestPane/>\
                             <a:DebugPane/>\
                         </a:If>\
                     </a:If>
@@ -298,6 +298,7 @@
             <a:If ifFalse="$^sessionless">
                 <a:RichClientFooter/>\
             </a:If>
+            <a:DebugContent title="$debugTitle"/>\
         </a:RefreshRegion>
         <w:ImagePrefetch/>
     </a:Body>\

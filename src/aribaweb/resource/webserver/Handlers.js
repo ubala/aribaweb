@@ -93,7 +93,7 @@ ariba.Handlers = function() {
             var formObject = Dom.getElementById(formId);
             Dom.addFormField(formObject, Request.AWSenderIdKey, senderId);
             Request.submitForm(formObject, null);
-            return false;
+            return true;
         },
 
         resetTextFieldChanged : function ()

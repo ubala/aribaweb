@@ -1,0 +1,7 @@
+{
+    title = "No IDE integration";
+    description = "Just leaves your app with a basic Ant build file.";
+    rank = 1;
+    parameters = (
+    );
+}

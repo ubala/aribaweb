@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#105 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#106 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -76,7 +76,7 @@ import javax.servlet.http.HttpSession;
  */
 public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleableReference, AWResponseGenerating,
         AWResponseGenerating.ResponseSubstitution
-{
+{                  
     public static final String ComponentTemplateFileExtension = ".awl";
     public static final Class ClassObject = AWComponent.class;
     private static AWTemplateParser DefaultTemplateParser = null;
@@ -1193,6 +1193,24 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     }
 
     // Int
+    public double doubleValueForBinding (AWBinding binding)
+    {
+        return (binding != null) ? binding.doubleValue(_parent) : 0.0;
+    }
+
+    public double doubleValueForBinding (String bindingName)
+    {
+        AWBinding binding = bindingForName(bindingName, false);
+        return doubleValueForBinding(binding);
+    }
+
+    public double doubleValueForBinding (String bindingName, double defaultValue)
+    {
+        AWBinding binding = bindingForName(bindingName, false);
+        return (binding != null) ? doubleValueForBinding(binding) : defaultValue;
+    }
+
+    // Int
     public int intValueForBinding (AWBinding binding)
     {
         int intValue = 0;
@@ -1208,20 +1226,28 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         return intValueForBinding(binding);
     }
 
+    public int intValueForBinding (String bindingName, int defaultValue)
+    {
+        AWBinding binding = bindingForName(bindingName, false);
+        return (binding != null) ? intValueForBinding(binding) : defaultValue;
+    }
+
     // Boolean
     public boolean booleanValueForBinding (AWBinding binding)
     {
-        boolean booleanValue = false;
-        if (binding != null) {
-            booleanValue = binding.booleanValue(_parent);
-        }
-        return booleanValue;
+        return (binding != null) && binding.booleanValue(_parent);
     }
 
     public boolean booleanValueForBinding (String bindingName)
     {
         AWBinding binding = bindingForName(bindingName, false);
         return booleanValueForBinding(binding);
+    }
+
+    public boolean booleanValueForBinding (String bindingName, boolean defaultValue)
+    {
+        AWBinding binding = bindingForName(bindingName, false);
+        return (binding != null) ? booleanValueForBinding(binding) : defaultValue;
     }
 
     // Object
@@ -1240,6 +1266,12 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         return valueForBinding(binding);
     }
 
+    public Object valueForBinding (String bindingName, Object defaultValue)
+    {
+        AWBinding binding = bindingForName(bindingName, false);
+        return (binding != null) ? valueForBinding(binding) : defaultValue;
+    }
+
     // String
     public String stringValueForBinding (AWBinding binding)
     {
@@ -1254,6 +1286,12 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     {
         AWBinding binding = bindingForName(bindingName, false);
         return stringValueForBinding(binding);
+    }
+
+    public String stringValueForBinding (String bindingName, String defaultValue)
+    {
+        AWBinding binding = bindingForName(bindingName, false);
+        return (binding != null) ? stringValueForBinding(binding) : defaultValue;
     }
 
     // AWEncodedString

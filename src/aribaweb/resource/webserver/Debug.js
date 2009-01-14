@@ -40,6 +40,7 @@ ariba.Util.extend(ariba.Debug, function() {
     // pointer from debug panel back to main window that spawned it
     var _AWXUpdateCPICallback = null;
 
+
     Event.registerBehaviors({
         // remote open
         _RO : {
@@ -75,8 +76,7 @@ ariba.Util.extend(ariba.Debug, function() {
 
         // Public Globals
         AWDebugJSUrl : '',
-        _AWShowComponentPathAction : null,
-        
+
         debugEvent : function (evt, target, sMsg, iHistory) {
             if (evt && AWDebugEvents[evt.type]) {
                 var source = Event.eventSourceElement(evt);
@@ -352,7 +352,7 @@ ariba.Util.extend(ariba.Debug, function() {
         // an invocation of component inspector        
         checkDebugClick : function (evt)
         {
-            if (!evt || evt.type != "click" || !this._AWShowComponentPathAction || !evt.altKey) return false;
+            if (!evt || evt.type != "click" || !evt.altKey) return false;
             var senderId = null;
             var target = (evt.srcElement) ? evt.srcElement : evt.target;
             while (target) {
@@ -363,23 +363,13 @@ ariba.Util.extend(ariba.Debug, function() {
                 target = target.parentNode;
             }
             if (senderId) {
-                senderId = senderId + "," + this._AWShowComponentPathAction;
+                senderId = senderId + "&cpDebug=1";
                 this.log("** Component Path this.log, id=" + senderId);
-                Request.setDocumentLocation(Request.formatUrl(senderId) + "&cpDebug=1", "AWComponentPath", _AWCPIWindOpts);
+                // Request.setDocumentLocation(Request.formatUrl(senderId) + "&cpDebug=1", "AWComponentPath", _AWCPIWindOpts);
+                Request.invoke(null, senderId)
 
-            // pop window to foreground
-                var win = open("", "AWComponentPath", "");
-                if (win) {
-                    win.focus();
-                    function setPtr() {
-                        if (win.ariba.Debug) {
-                            win.ariba.Debug._AWXMainWindow = window;
-                        } else {
-                            setTimeout(setPtr, 200);
-                        }
-                    }
-                    setTimeout(setPtr, 1000);
-                }
+                // pop window to foreground
+                if (!_ComponentInspectorWin || !_ComponentInspectorWin.ariba.Request.invoke) open("", "AWComponentPath", _AWCPIWindOpts);
                 return true;
             }
             return false;
@@ -412,37 +402,31 @@ ariba.Util.extend(ariba.Debug, function() {
 
         updateComponentInspector : function (sessionId, actionId, enabled)
         {
-            if (_AWXUpdateCPICallback) Event.unregisterRefreshCallback(_AWXUpdateCPICallback);
             if (enabled) {
-                _AWXUpdateCPICallback = function() {
-                    var win = _ComponentInspectorWin;
-                    try {
-                        if (win && win.ariba.Request.invoke && win.ariba.Debug._AWCPISession == sessionId) {
-                            // try to do an incremental refresh
-                            // alert("Going incremental...");
-                            win.ariba.Request.invoke.call(win, null, win.ariba.Debug._AWCPIRefreshId);
-                            return;
-                        }
-                    } catch (e) {
+                var win = _ComponentInspectorWin;
+                try {
+                    if (win && win.ariba.Request.invoke && win.ariba.Debug._AWCPISession == sessionId) {
+                        // try to do an incremental refresh
+                        // alert("Going incremental...");
+                        win.ariba.Request.invoke.call(win.ariba.Request, null, win.ariba.Debug._AWCPIRefreshId);
+                        return;
                     }
-
-                // alert("Not incremental...");
-                    // full page refresh version
-                    _ComponentInspectorWin = null;
-                    try {
-                        var url = Request.formatUrl(actionId);
-                        _ComponentInspectorWin = window.open(url, "AWComponentPath", _AWCPIWindOpts);
-                    } catch (e) {
-                        setTimeout(_AWXUpdateCPICallback, 1);
-                    }
-                    if (_ComponentInspectorWin && _ComponentInspectorWin.ariba) {
-                        _ComponentInspectorWin.ariba.Debug._AWXMainWindow = this;
-                        _ComponentInspectorWin.focus();
-                    }
+                } catch (e) {
+                    // alert("window invoke exception:" + e);
                 }
-                Event.registerRefreshCallback(_AWXUpdateCPICallback);
+
+            // alert("Not incremental...");
+                // full page refresh version
+                _ComponentInspectorWin = null;
+                try {
+                    var url = Request.formatUrl(actionId);
+                    _ComponentInspectorWin = window.open(url, "AWComponentPath", _AWCPIWindOpts);
+                } catch (e) {
+                }
+                if (_ComponentInspectorWin && _ComponentInspectorWin.ariba) {
+                    _ComponentInspectorWin.ariba.Debug._AWXMainWindow = this;
+                }
             }
-            ;
         },
 
         fireMainWindowAction : function (actionId)
@@ -483,6 +467,27 @@ ariba.Util.extend(ariba.Debug, function() {
                 if (e.className && e.className.match(new RegExp("(^|\\s)" + className + "(\\s|$)"))) {
                     func(e);
                 }
+            }
+        },
+
+        setWindowTitle : function (windowTitle) {
+            if (windowTitle != '') {
+                document.title = windowTitle;
+            }
+        },
+
+        isRequestComplete : function () {
+            return ariba.Debug._requestComplete;
+        },
+        
+        resetRequestComplete : function () {
+            ariba.Debug._requestComplete = false;
+        },
+
+        requestCompleteNotification : function () {
+            ariba.Debug._requestComplete = true;
+            if (typeof aribaDebugRequestCompleteCallback != "undefined") {
+                aribaDebugRequestCompleteCallback();
             }
         },
 

@@ -12,13 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AWTestCategoryLinks.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AWTestCategoryLinks.java#2 $
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.util.core.ClassUtil;
+import ariba.util.core.StringUtil;
 
 public class AWTestCategoryLinks extends AWComponent
 {
@@ -49,6 +51,30 @@ public class AWTestCategoryLinks extends AWComponent
 
     public boolean currentTestUnitLinkActive ()
     {
-        return ((TestLinkHolder)valueForBinding("currentTestUnitLink")).isActive(requestContext());
+        TestSessionSetup testSessionSetup = TestLinkManager.instance().getTestSessionSetup();
+        if (!testSessionSetup.activateTestLinks(requestContext())) {
+            return false;
+        }
+        else {
+            return ((TestLinkHolder)valueForBinding("currentTestUnitLink")).isActive(requestContext());
+        }
+    }
+
+    public boolean currentTestDisplayTestContextValue ()
+    {
+        return getCurrentTestUnit().displayTestContextValue() &&
+                !StringUtil.nullOrEmptyOrBlankString(currentTestUnitContextValue());
+    }
+
+    public String currentTestUnitContextValue ()
+    {
+        TestSessionSetup testSessionSetup = TestLinkManager.instance().getTestSessionSetup();
+        TestContext testContext = TestContext.getTestContext(requestContext());
+        Class key = ClassUtil.classForName(getCurrentTestUnit().getFullName());
+        String displayName = null;
+        if (testContext.get(key) != null) {
+            displayName = testSessionSetup.getObjectDisplayName(testContext.get(key));                                    
+        }
+        return displayName;
     }
 }

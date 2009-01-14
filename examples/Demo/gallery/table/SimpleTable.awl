@@ -8,7 +8,7 @@
         initialSortDirection="descending" initialSortKey="Category"
         tableConfigName="SimpleTable" showOptionsMenu="$true">
 
-    <t:Column key="Department" label="Big D!" action="$goto.Home" nowrap/>
+    <t:Column key="Department" label="Big D!" action='${pageWithName("ERPage")}' nowrap/>
 
     <t:Column key="Category"/>
 

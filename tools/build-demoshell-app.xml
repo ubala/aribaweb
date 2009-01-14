@@ -30,17 +30,19 @@
 
     <import file="build-metaui-app.xml"/>
 
-    <fileset id="war.jars" dir="${build.jars.dir}">
-        <include name="ariba.demoshell.jar"/>
-        <include name="${jar.name}"/>
-    </fileset>
+    <target name="init" depends="widgets-app.init">
+        <!-- include our jar in the war -->
+        <fileset id="war.jars" dir="${build.jars.dir}">
+            <include name="ariba.demoshell.jar"/>
+        </fileset>
 
-    <fileset id="war.resource.jars" dir="${build.jars.dir}">
-        <include name="ariba.aribaweb.jar"/>
-        <include name="ariba.widgets.jar"/>
-        <include name="ariba.metaui.jar"/>
-        <include name="ariba.demoshell.jar"/>
-    </fileset>
+        <fileset id="war.resource.jars" dir="${ariba.jars.dir}">
+            <include name="ariba.aribaweb.jar"/>
+            <include name="ariba.widgets.jar"/>
+            <include name="ariba.metaui.jar"/>
+            <include name="ariba.demoshell.jar"/>
+        </fileset>
+    </target>
 
     <fileset id="module.libs" dir="${lib.dir}">
         <include name="js.jar"/>

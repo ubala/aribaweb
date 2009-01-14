@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWValidationErrorPage.java#9 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWValidationErrorPage.java#10 $
 */
 
 package ariba.ui.dev;
@@ -25,6 +25,7 @@ import ariba.ui.aribaweb.core.AWComponentDefinition;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWValidationContext;
+import ariba.ui.aribaweb.core.AWValidationContext.ValidationError;
 import ariba.ui.outline.OutlineState;
 
 import java.util.List;
@@ -47,6 +48,7 @@ public final class AWValidationErrorPage extends AWComponent
     private List _currentErrorsPackageNames;
     public OutlineState _outlineState;
     public String _currentObject;
+    public String _currentGeneralErrorKey;
     private List _selectedObjectPackageErrorList = null;
 
     // Validation Context for the "current" error page
@@ -357,6 +359,30 @@ public final class AWValidationErrorPage extends AWComponent
             }
         }
         return _selectedObjectPackageErrorList;
+    }
+
+    /**
+        @aribaapi ariba
+    */
+    public AWValidationContext context ()
+    {
+        return _validationContext;
+    }
+
+    /**
+        @aribaapi ariba
+    */
+    public List<ValidationError> getGeneralErrorsForCurrentKey ()
+    {
+        return _validationContext.getGeneralErrorsFor(_currentGeneralErrorKey);
+    }
+
+    /**
+        @aribaapi ariba
+    */
+    public List<String> getGeneralErrors ()
+    {
+        return _validationContext.getGeneralErrors();
     }
 
     ////////////////////////////

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#22 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#24 $
 */
 package ariba.ui.validation;
 
@@ -29,6 +29,7 @@ import ariba.util.core.MapUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.formatter.DateFormatter;
 import ariba.util.formatter.IntegerFormatter;
+import ariba.util.formatter.DoubleFormatter;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -39,6 +40,7 @@ public final class AWVFormatterFactory
 {
     public static final String RequiredStringFormatterKey = "requiredString";
     public static final String IntegerFormatterKey = "integer";
+    public static final String DoubleFormatterKey = "double";
     public static final String MoneyFormatterKey = "money";
     public static final String ShortDateFormatterKey = "shortDate";
     public static final String LongDateFormatterKey = "longDate";
@@ -46,6 +48,7 @@ public final class AWVFormatterFactory
     public static final String DateTimeFormatterKey = "dateTime";
     public static final String LongDateTimeFormatterKey = "longDateTime";
     public static final String BooleanFormatterKey = "boolean";
+    public static final String DurationFormatterKey = "duration";
     public static final String TimeMillisFormatterKey = "timeMillis";
     public static final String HiddenPassword = "hiddenPassword";
     public static final String Identifier = "identifier";
@@ -189,6 +192,17 @@ public final class AWVFormatterFactory
         Object bigDecimal = new AWVBigDecimalFormatter("#,###.##", 2, locale);
         formatters.put(BigDecimalFormatterKey, bigDecimal);
         xml.put(BigDecimalFormatterKey, new PipedFormatter(CanonicalNumberFormatter, bigDecimal));
+        Object dbl = new DoubleFormatter() {
+            protected String formatObject (Object object, Locale locale)
+            {
+                Assert.that(object instanceof Double, "invalid type");
+                return getStringValue((Double)object, 3, 3, "#,###.000", locale);
+            }
+        };
+        
+        formatters.put(DoubleFormatterKey, dbl);
+        Object dblXML = new AWVBigDecimalFormatter("#,###.##", 0, locale);
+        xml.put(DoubleFormatterKey, new PipedFormatter(CanonicalNumberFormatter, dblXML));
 
         Object integer = new IntegerFormatter();
         formatters.put(IntegerFormatterKey, integer);
@@ -215,6 +229,10 @@ public final class AWVFormatterFactory
         Object timeMillis = new AWVTimeMillisFormatter(locale, timeZone);
         formatters.put(TimeMillisFormatterKey, timeMillis);
         xml.put(TimeMillisFormatterKey, new PipedFormatter(timeMillis, timeMillis));
+
+        Object durationFormatter = new TimeDurationFormatter();
+        formatters.put(DurationFormatterKey, durationFormatter);
+        xml.put(DurationFormatterKey, new PipedFormatter(CanonicalNumberFormatter, durationFormatter));
 
         Object booleanFormatter = new CanonicalBooleanForamatter();
         formatters.put(BooleanFormatterKey, booleanFormatter);
@@ -279,6 +297,43 @@ public final class AWVFormatterFactory
         public Object parseObject (String stringToParse) throws ParseException
         {
             return stringToParse;
+        }
+    }
+
+    /**
+        Covert time in seconds to format like 1:23:22.01
+     */
+    static public final class TimeDurationFormatter extends AWFormatter
+    {
+        public String format (Object value)
+        {
+            if (value == null) return null;
+            Assert.that (value instanceof Number, "Incorrect input type: %s", value.getClass());
+
+            int time = (int)(((Number)value).doubleValue() *1000);
+            FastStringBuffer buf = new FastStringBuffer(11);
+            int millis = time % 1000;
+            int seconds = (time/1000) % 60;
+            int minutes = (time/60000) % 60;
+            int hours = (time/3600000) % 24;
+            if (hours != 0) append(buf, hours, ":");
+            append(buf, minutes, ":");
+            append(buf, seconds, (millis != 0) ? "." : null);
+            if (millis != 0) append(buf, millis, null);
+            return buf.toString();
+        }
+
+        void append(FastStringBuffer buf, int comp, String sep) {
+            String s = Integer.toString(comp);
+            if (s.length() < 2) buf.append("0");
+            buf.append(s);
+            if (sep != null) buf.append(sep);
+        }
+
+        public Object parseObject (String stringToParse) throws ParseException
+        {
+            Assert.that(false, "This formatter doesn not support input conversion");
+            return null;
         }
     }
 }
