@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWLocalLoginSessionHandler.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWLocalLoginSessionHandler.java#5 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -71,22 +71,28 @@ public abstract class AWLocalLoginSessionHandler implements AWSessionValidator
     public AWResponseGenerating handleSessionValidationError (
         AWRequestContext requestContext, Exception exception)
     {
-        return this.handleComponentActionSessionValidationError(
-            requestContext, exception);
+        // user not authenticated
+        return _handleValidationError(requestContext, true);
     }
 
     public AWResponseGenerating handleComponentActionSessionValidationError (
         AWRequestContext requestContext, Exception exception)
     {
+        return _handleValidationError(requestContext, false);
+    }
+
+    public AWResponseGenerating _handleValidationError (
+        AWRequestContext requestContext, boolean showLogin)
+    {
         // if no session just create one and hit front door
         AWSession session = requestContext.session(false);
         if (session == null) {
             HttpSession httpSession = requestContext.createHttpSession();
-            AWResponseGenerating handlerResults = handleSessionRestorationError(requestContext);
-            AWResponse response =
-                processExceptionHandlerResults(handlerResults,
-                    requestContext, AWSession.session(httpSession));
-            return response;
+            session = AWSession.session(httpSession);
+
+            if (!showLogin) {
+                return AWComponentActionRequestHandler.SharedInstance.processFrontDoorRequest(requestContext);
+            }
         }
 
         ReplayInvocation invocation = new ReplayInvocation(requestContext);
@@ -150,11 +156,14 @@ public abstract class AWLocalLoginSessionHandler implements AWSessionValidator
 
         public ReplayInvocation (AWRequestContext requestContext)
         {
-            _requestUrl = AWRequestUtil.getRequestUrl(requestContext);
+            AWBaseRequest req = (AWBaseRequest)requestContext.request();
             _formValues = MapUtil.cloneMap(requestContext.formValues());
-            _prevPage = requestContext.pageComponent();
+            _requestUrl = req.uriForReplay(requestContext, _formValues);
             AWSession session = requestContext.session(false);
-            if (session != null)  _pageMark = _prevPage.session().markPageCache();
+            if (requestContext.page() != null && session != null) {
+                _prevPage = requestContext.pageComponent();
+                _pageMark = _prevPage.session().markPageCache();
+            }
         }
 
         public AWResponseGenerating cancel (AWRequestContext requestContext)
@@ -174,7 +183,7 @@ public abstract class AWLocalLoginSessionHandler implements AWSessionValidator
                 String origRequestId = rIDA[0];
                 int nextId = session.nextResponseId();
                 rIDA[0] = Integer.toString(nextId);
-                // _formValues.put(AWRequestContext.ResponseIdKey, newId);
+                _formValues.put(AWRequestContext.ResponseIdKey, rIDA);
             }
             // If this was an incremental request, it's not anymore...
             _formValues.remove(AWRequestContext.IncrementalUpdateKey);
@@ -182,6 +191,7 @@ public abstract class AWLocalLoginSessionHandler implements AWSessionValidator
             AWFormRedirect formRedirect =
                 (AWFormRedirect)requestContext.createPageWithName(AWFormRedirect.PageName);
             formRedirect.addFormValues(_formValues);
+            formRedirect.setFormActionUrl(_requestUrl);
             return formRedirect;
         }
     }

@@ -1,0 +1,8 @@
+<a:RefreshRegion>
+    <a:ClientSideScript>
+        google.pageTracker._trackPageview('$trackPageName');            
+    </a:ClientSideScript>
+    <a:If ifTrue="$=ariba.ui.aribaweb.core.AWConcreteServerApplication.IsDebuggingEnabled">
+        <div style="position:absolute;top:0;left:0"><b>Google Analytics page name:</b> $trackPageName</div>
+    </a:If>
+</a:RefreshRegion>

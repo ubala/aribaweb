@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#19 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#21 $
     </Copyright>
 
     <Overview>
@@ -92,7 +92,7 @@
                                      size="$^size"/>
                     </td>
                     <td class="chWrapRight">
-                        <a href="javascript:void(0);" omitTags="$^disabled" tabindex="-1">
+                        <a href="javascript:void(0);" omitTags="$isDisabled" tabindex="-1">
                             <a:Image class="chModeLink" filename="pull_down.gif" title="$[a002]Select from the list"
                                      awname="$chooserDropDownSemanticKey"/>                                    
                         </a>
@@ -101,7 +101,7 @@
                     </td>
                     <a:If ifTrue="$chooserState.multiSelect">
                         <td>
-                            <a href="javascript:void(0);" omitTags="$^disabled" tabindex="-1">
+                            <a href="javascript:void(0);" omitTags="$isDisabled" tabindex="-1">
                                 <a:Image class="chAddLink" filename="add_off.gif" awname="$chooserAddLinkSemanticKey"/>
                             </a>
                             <a:Image class="chAddOffImg hide" filename="add_off.gif" title="$[a005]Multiple selections allowed"/>
@@ -131,7 +131,7 @@
                         <td class="chMultiWrap chMultiWrapRight">
                             <span class="chSelectionContainer">\
                                 <a:Checkbox class="chRemove hide" value="$removeValue"/>\
-                                <a:Hyperlink action="$null" omitTags="$^disabled" tabindex="-1" submitForm="$true" behavior="CHR">\
+                                <a:Hyperlink action="$null" omitTags="$isDisabled" tabindex="-1" submitForm="$true" behavior="CHR">\
                                     <a:Image class="chRemoveLink" filename="remove_off.gif" awname="$chooserRemoveLinkSemanticKey"/>
                                     <a:Image class="chRemoveOffImg hide" filename="remove_off.gif"/>
                                     <a:Image class="chRemoveOnImg hide" filename="remove_on.gif" title="$[a004]Remove selection"/>
@@ -158,9 +158,9 @@
                                 value="$toggleValue">\
                     <span class="chSelections">\
                         <a:IncludeBlock name="ChooserList"
-                            list="$^selections"
-                            showBullet="$showBullet"
-                            showCheck="$showCheck">\
+                                        list="$^selections"
+                                        showBullet="$showBullet"
+                                        showCheck="$showCheck">\
                             $currentItemString\
                         </a:IncludeBlock>\
                     </span>\
@@ -200,15 +200,17 @@
 </span>
 <a:Block name="ChooserList">
     <span class="chList" chlname="$^name">
-        <a:For list="$^list"
-                      item="$chooserState.currentItem">
-            <w:PopupMenuItem action="$null"
-                           showBullet="$^showBullet:$false"
-                           showCheck="$^showCheck:$false"
-                           clientTrigger="ariba.Chooser.chooserMenuTrigger(event)">\
-                <a:IncludeContent/>\
-            </w:PopupMenuItem>
-        </a:For>
+        <a:If ifTrue="$displayRecentlyViewed">\
+            <a:For list="$^list"
+                   item="$chooserState.currentItem">
+                <w:PopupMenuItem action="$null"
+                                 showBullet="$^showBullet:$false"
+                                 showCheck="$^showCheck:$false"
+                                 clientTrigger="ariba.Chooser.chooserMenuTrigger(event)">\
+                    <a:IncludeContent/>\
+                </w:PopupMenuItem>
+            </a:For>
+        </a:If>
     </span>
 </a:Block>
 <a:Block name="SelectionContainer">

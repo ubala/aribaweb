@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#6 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#7 $
 */
 package ariba.ui.meta.core;
 
@@ -24,6 +24,8 @@ import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWElement;
 import ariba.ui.aribaweb.core.AWTemplate;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
+import ariba.ui.aribaweb.core.AWBindingNames;
 import ariba.ui.aribaweb.util.AWEnvironmentStack;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWUtil;
@@ -183,6 +185,23 @@ public class MetaContext extends AWContainerElement
             }
         }
 
+        boolean shouldPushSemanticKeyPrefix =
+                (AWConcreteApplication.IsAutomationTestModeEnabled &&
+                requestContext.isDebuggingEnabled() &&
+                !AWBindingNames.UseNamePrefixBinding) ||
+                requestContext._debugShouldRecord();
+        if (shouldPushSemanticKeyPrefix) {
+            requestContext._debugPushSemanticKeyPrefix();
+            Context context = MetaContext.currentContext(component);
+            String key = context._currentPropertyScopeKey(true);
+            if (key != null) {
+                Object value = context.values().get(key);
+                if (value != null) {
+                    requestContext._debugSetSemanticKeyPrefix(key.concat("=").concat(value.toString()));
+                }
+            }
+        }
+        
         try {
             super.renderResponse(requestContext, component);
         }
@@ -196,6 +215,10 @@ public class MetaContext extends AWContainerElement
             }
             
             pushPop(false, needCleanup, component);
+
+            if (shouldPushSemanticKeyPrefix) {
+                requestContext._debugPopSemanticKeyPrefix();
+            }
         }
     }
 

@@ -266,9 +266,8 @@ ariba.Request = function() {
                 // aware of and then reset it to null so our timer starts the poll again
                 clearTimeout(AWPollTimeoutId);
                 AWPollTimeoutId = null;
+                var response = xmlhttp.responseText;
                 if (!AWRequestInProgress) {
-                    var response = xmlhttp.responseText;
-
                 // Debug.log("poll response: " + Util.htmlEscapeValue(response));
 
                     if (response == "<AWPoll state='update'/>") {
@@ -277,7 +276,10 @@ ariba.Request = function() {
                         this.getContent(this.formatSenderUrl(AWPollUpdateSenderId));
                     }
                 }
-                timer();
+                // check for nochange explicity, since the sesssion might have expired
+                if (response == "<AWPoll state='nochange'/>") {
+                    timer();
+                }
             }
 
             function poll()

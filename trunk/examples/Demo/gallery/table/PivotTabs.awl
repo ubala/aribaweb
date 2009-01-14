@@ -1,5 +1,5 @@
 <w:BasicPageWrapper hasForm="$true">
-    <w:TabSet  actionMenuLabel="Actions" actionMenuId="TabMenu">
+    <w:TabSet  actionMenuLabel="Actions" actionMenuId="TabMenu" vertical="$true">
         <w:Tab label="Basic Pivot Table">
           <a:IncludeComponent name="SimplePivotTable"/>
         </w:Tab>

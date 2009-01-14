@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/CueTip.awl#12 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/CueTip.awl#15 $
     </Copyright>
 
     <Overview>
@@ -69,7 +69,9 @@
 
 </a:Api>\
 <a:RefreshRegion>
-    <w:PopupMenuLink menuId="$menuId" position="this"><a:Image class="cueTipIcon" filename="$^image:cueTip.gif"/></w:PopupMenuLink>\
+    <w:PopupMenuLink menuId="$menuId" class="hoverArrow noLine" position="this">\
+        <a:Image filename="cleardot.gif" class="cueTipIcon" width="15" height="12"/>\
+    </w:PopupMenuLink>\
     <w:PopupMenu menuId="$menuId" onDisplayHandler="$onDisplayHandler">
         <a:LazyDiv>
             <div id="$divId" class="cueTipText" style="$style">

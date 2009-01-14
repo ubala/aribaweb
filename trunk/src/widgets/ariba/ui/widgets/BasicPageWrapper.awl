@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#94 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#98 $
     </Copyright>
 
     <Overview>
@@ -73,7 +73,7 @@
     <Binding key="disableHomeAction" direction="get" type="boolean" default="$false">
         Removes the Home button from the page wrapper.  (see AribaBasicPageWrapper.htm)
     </Binding>
-
+    
     <Binding key="disableHelpAction" direction="get" type="boolean" default="$false">
         Removes the Help button from the page wrapper.  (see AribaBasicPageWrapper.htm)
     </Binding>
@@ -279,14 +279,17 @@
                 <w:ErrorBubble/>
                 <a:If ifFalse="$^sessionless">
                     <a:If ifFalse="$omitWrapperBoilerplate">
+                        <a:If ifTrue="$hasTestPane">
+                            <a:IncludeComponent awcomponentName="$testPane"/>\
+                        </a:If>
                         <a:If ifTrue="$^isDebugVisible:$true">\
-                            <a:TestPane/>\
                             <a:DebugPane/>\
                         </a:If>\
                     </a:If>
                 </a:If>
                 <w:SessionManagerInclude sessionless="$^sessionless"/>
                 <a:PollInterval/>\
+                <w:FooterIncludes/>
             </a:If>\
             <w:ClientSideTemplates/>
             <!--- NOTE: make sure that the AWRichClientFooter comes after all components which require

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#27 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#31 $
     </Copyright>
 
     <Overview>
@@ -67,7 +67,7 @@
 <!---
      The nobr is needed for both layout and reference node in dateFieldOnClick and dateFieldMouseDown
 -->
-<nobr elementId="$menuId">\
+<nobr elementId="$menuId" class="DTCh">\
     <!--- textFieldType is provided to allow AN to use ANVTextField.  Once we have a unified
           error-handling model, we can eliminate this AWSwitchCompoent and just use AWTextField directly -->
     <a:RefreshRegion alwaysRender="$true">
@@ -85,17 +85,17 @@
                            errorKey="$^errorKey"
                            id="$dateTextFieldId"/>\
     </a:RefreshRegion>\
-    <a:If ifFalse="$^disabled">\
+    <a:If ifFalse="$isDisabled">\
         <a href="javascript:void(0);"
            class="awmenuLink"
            elementId="$linkId"
            id="$linkId"
            awmenuId="$menuId"
            onClick="return ariba.Calendar.dateFieldOnClick(this, event)">\
-            <a:Image align="absmiddle" style="margin:3px" filename="widg/calendar.gif" alt="$[a001]Select a date from the calendar"/>\
+            <a:Image align="absmiddle" class="DTCh" filename="widg/calendar.gif" alt="$[a001]Select a date from the calendar"/>\
         </a>\
     <a:Else/>\
-        <a:Image align="absmiddle" style="margin:3px" filename="widg/calendar.gif" alt="$[a002]Calendar is disabled"/>\
+        <a:Image align="absmiddle" class="DTCh" filename="widg/calendar.gif" alt="$[a002]Calendar is disabled"/>\
     </a:If>\
 <w:PopupMenu menuId="$menuId">
     <a:RefreshRegion>

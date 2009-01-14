@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#111 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#115 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -158,11 +158,13 @@ abstract public class AWConcreteApplication
                 throw new AWGenericException(illegalAccessException);
             }
             application.init();
-            application._didCompleteInit = true;
+        }
+        if (!application._didCompleteInit) {
             for (DidInitCallback cb : application._PostInitCallbacks) {
                 cb.applicationDidInit(application);
             }
             application._PostInitCallbacks = null;
+            application._didCompleteInit = true;
         }
         return application;
     }
@@ -261,6 +263,11 @@ abstract public class AWConcreteApplication
         if (RequestContextClass == null) {
             RequestContextClass = AWRequestContext.class;
         }
+    }
+
+    protected Class sessionClass ()
+    {
+        return SessionClass;
     }
 
     /**
@@ -526,14 +533,15 @@ abstract public class AWConcreteApplication
     public AWSession createSession (AWRequestContext requestContext)
     {
         AWSession newSession = null;
+        Class sessionClass = sessionClass();
         try {
-            newSession = (AWSession)SessionClass.newInstance();
+            newSession = (AWSession)sessionClass.newInstance();
         }
         catch (IllegalAccessException illegalAccessException) {
             throw new AWGenericException(illegalAccessException);
         }
         catch (InstantiationException exception) {
-            String message = Fmt.S("Error: cannot create instance of httpSession class \"%s\"", SessionClass.getName());
+            String message = Fmt.S("Error: cannot create instance of httpSession class \"%s\"", sessionClass.getName());
             throw new AWGenericException(message, exception);
         }
         newSession.init(this, requestContext);
@@ -1222,6 +1230,16 @@ abstract public class AWConcreteApplication
         return _bookmarker;
     }
 
+    public String encryptString (String val)
+    {
+        return val;
+    }
+
+    public String decryptString (String encVal)
+    {
+        return encVal;
+    }
+
     //////////////////////
     // Monitoring Support
     //////////////////////
@@ -1386,11 +1404,6 @@ abstract public class AWConcreteApplication
         // no-op for now.  Allow subclasses to implement.
         // Subclasses should still call super.validateRequest
         // as we may implement basic validation here in the future.
-    }
-
-    public String getSessionSecureId (AWRequestContext requestContext)
-    {
-        return null;
     }
 
     ////////////////////////

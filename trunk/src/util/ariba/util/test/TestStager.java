@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/test/TestStager.java#1 $
+    $Id: //ariba/platform/util/core/ariba/util/test/TestStager.java#3 $
 */
 package ariba.util.test;
 
@@ -30,4 +30,6 @@ public @interface TestStager
     public String name() default "";
     public String superType() default "";
     public String typeList () default "";
+    public boolean requireUser() default true;
+    public String description () default "";
 }

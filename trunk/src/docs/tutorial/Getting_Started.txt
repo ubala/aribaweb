@@ -1,7 +1,7 @@
 Getting Started With AribaWeb
 =============================
 
-(AribaWeb README file, September 2008)
+(AribaWeb README file, November 2008)
 
 Introduction
 ------------
@@ -19,19 +19,21 @@ Presently documentation and tutorials are limited.  This situation will be
 remedied soon.  Until then, if you don't already know how to use AribaWeb,
 you may get discouraged if you don't have access to an experienced AW user.
 
-Version 0.8.5 (BETA)
+Version 5.0b6 (BETA)
 --------------------
 
 Although most of the libraries in this distribution has been incorporated in a
 variety of Ariba commercial application releases over as many as 9 years, this
-is AribaWeb's first release in OpenSource form and there are, therefore, likely issues
-that will arise in its use in non-Ariba contexts.  Also, the documentation
-is not ready for release and the samples are limited.  As such, we're calling it
-beta for the time being...  (That said, the majority of aribaweb and widgets APIs
-are likely to be very stable from here foreward)
+is its first release in OpenSource form and there are, therefore, likely issues
+that will arise from its use in non-Ariba contexts.  Also, the documentation
+is not ready for release and the metaui (and especially metaui-jpa) layers
+are new.  As such, we're calling it beta for the time being...  (That said, the
+majority of aribaweb and widgets APIs are likely to be very stable from here foreward)
 
 Running Examples
 ----------------
+
+  0  See online video tutorial: [Getting Started](http://www.vimeo.com/1790856)
 
   1. Install the Java5 or Java6 JDK (http://java.sun.com/javase/downloads/index_jdk5.jsp)
         > set your JAVA_HOME I.e.:
@@ -40,7 +42,7 @@ Running Examples
   2. **Double-click in `aribaweb/bin` directory on `start`**
 
   3. Wait a minute or so and the Demo will open automatically in your browser
-		(your browser should open to http://localhost:8080/Demo/AribaWeb)
+		(your browser should open to http://localhost:9080/Demo/AribaWeb)
 
   4.  See src/BUILD.txt for more instructions on building and debugging
 
@@ -69,7 +71,7 @@ Shipped Directories
         there to get you going quickly.
 
  - **ide/**
-        Contains the aribawebIdeaPlugin.jar, aribawebEclipsePlugin.jar -- a plug ins
+        Contains the aribawebIdeaPlugin.jar, ariba.ideplugin.eclipse.5.0b6.jar -- a plug ins
         for two popular Java IDEs 
 
 Generated Directories
@@ -132,13 +134,10 @@ Lib Details:
     Currently supports generating forms (with validation), tables, as well as
     global application navigation (e.g. nav tabs) and Action (global and instance-level)
 
- - ariba.demoshell
-    > An application prototyping environment built on the full AW stack.  Enables
-    rapid development of functional prototypes using AW components and server-side
-    JavaScript (Rhino) or Groovy scripting.
-
-    > Note: this jar contains webserver resources in docroot/** that need to be
-    copied to any application deployment WAR file.
+ - ariba.groovyloader
+    > Integration between AribaWeb and the Groovy scripting language.  Supports
+      rapid-turnaround on edits to .groovy source files, and the embedding of
+      groovy source code in .awl files via the `groovy` tag.
 
 Src/ Details
 ------------
@@ -146,7 +145,7 @@ Src/ Details
  - BUILD.txt
       > Read this for instructions on how to build the AribaWeb distribution from source
 
- - util, aribaweb, widgets, expr, metaui, demoshell/
+ - util, aribaweb, widgets, expr, metaui, groovyloader/
       > Correspond to the above-described jars
 
  - build.xml

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#24 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#26 $
     </Copyright>
 
     <Overview>
@@ -66,6 +66,10 @@
         Any amount greater will be truncated. If it is 0, there is no maxLength.
     </Binding>
 
+    <Binding key="showMaxLength" type="boolean" required="$false" direction="get">
+        Display the number of characters left if true and if maxLength is specified.
+    </Binding>
+
     <Binding key="onChange" type="String" default="$null" direction="get" deprecated="$true">
         Not supported?
     </Binding>
@@ -77,12 +81,12 @@
 </a:Api>\
 <a:If ifTrue="$isEditable">
     <a:If ifFalse="$showMaxLengthIndicator">\
-        <a:IncludeBlock name="Input" escapeHtml="$^escapeHtml"/>\
+        <a:IncludeBlock name="Input" escapeHtml="$^escapeHtml" awname="$^awname"/>\
     <a:Else/>\
         <table width="1%" cellpadding="0">\
             <tr>\
                 <td>\
-                    <a:IncludeBlock name="Input" escapeHtml="$^escapeHtml"/>\
+                    <a:IncludeBlock name="Input" escapeHtml="$^escapeHtml" awname="$^awname"/>\
                 </td>\
             </tr>\
             <tr>\

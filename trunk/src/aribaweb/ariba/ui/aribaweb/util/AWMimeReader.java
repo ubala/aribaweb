@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMimeReader.java#18 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMimeReader.java#20 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -155,7 +155,7 @@ public final class AWMimeReader extends AWBaseObject
                 }
                 else {
                     // Adjust the count of bytes appended to buffer to account for marker
-                    bytesAppendedToBuffer = 0;
+                    bytesAppendedToBuffer -= markerLength;
                 }
 
                 ostream.write(byteArray.array(), 0, byteLength);
@@ -170,8 +170,8 @@ public final class AWMimeReader extends AWBaseObject
                 // If the buffer is full, we write out the current bytes and left shift the buffer so that
                 // the marker and the extra carriage return and new line which follow the chunk data and precede the
                 // marker remain in the buffer.
-                ostream.write(byteArray.array(), 0, (byteArraySize - markerLength - 2));
-                byteArray.leftShiftElements(byteArraySize - markerLength - 2);
+                ostream.write(byteArray.array(), 0, (byteArray.inUse - markerLength - 2));
+                byteArray.leftShiftElements(byteArray.inUse - markerLength - 2);
             }
         }
 

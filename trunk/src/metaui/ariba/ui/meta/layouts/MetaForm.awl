@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.awl#5 $
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.awl#11 $
     </Copyright>
 
     <Overview>
@@ -26,27 +26,35 @@
 </a:Api>\
 \
 <m:Context contextKey="class">
+    <a:PhaseInvocation append="$initClass"/>
     <!--<b>MetaForm: </b><pre>$metaContext.debugString</pre>-->
+    <div emitTags="$dragType" class="regionWrapper">
+    <a:SetValue fieldsByZone="$metaContext.properties.fieldsByZone"/>
     <a:If ifTrue="$metaContext.properties.fourZoneLayout">\
-        <a:SetValue fieldsByZone="$metaContext.properties.fieldsByZone"/>
-        <w:FormTable showErrorFlags="$currentProperties.editing" useFourZones="$true"
-                      leftZoneRowCount="$fieldsByZone.zLeft.size">
+        <w:FormTable showErrorFlags="$currentProperties.editing"
+                     useFourZones="$true"
+                     editable="$metaContext.properties.editing"
+                     omitLabelPadding="$metaContext.properties.bindings.omitLabelPadding">
             <a:Content name="top">\
+                <a:IncludeBlock name="DropZone" zone="zTop"/>\
                 <a:For list="$fieldsByZone.zTop" item="$field">
                     <a:IncludeBlock name="RowTemplate"/>
                 </a:For>
             </a:Content>
             <a:Content name="left">\
+                <a:IncludeBlock name="DropZone" zone="zLeft"/>\
                 <a:For list="$fieldsByZone.zLeft" item="$field">
                     <a:IncludeBlock name="RowTemplate"/>
                 </a:For>
             </a:Content>
             <a:Content name="right">\
+                <a:IncludeBlock name="DropZone" zone="zRight"/>\
                 <a:For list="$fieldsByZone.zRight" item="$field">
                     <a:IncludeBlock name="RowTemplate"/>
                 </a:For>
             </a:Content>
             <a:Content name="bottom">\
+                <a:IncludeBlock name="DropZone" zone="zBottom"/>\
                 <a:For list="$fieldsByZone.zBottom" item="$field">
                     <a:IncludeBlock name="RowTemplate"/>
                 </a:For>
@@ -54,20 +62,61 @@
         </w:FormTable>\
     <a:Else/>\
         <w:FormTable>
-            <a:For list="$metaContext.properties.fieldsByZone.zLeft" item="$field">
+            <a:IncludeBlock name="DropZone" zone="zTop"/>\
+            <a:For list="$fieldsByZone.zTop" item="$field">
+                <a:IncludeBlock name="RowTemplate"/>
+            </a:For>
+            <a:For list="$fieldsByZone.zLeft" item="$field">
+                <a:IncludeBlock name="RowTemplate"/>
+            </a:For>
+            <a:For list="$fieldsByZone.zRight" item="$field">
+                <a:IncludeBlock name="RowTemplate"/>
+            </a:For>
+            <a:For list="$fieldsByZone.zBottom" item="$field">
                 <a:IncludeBlock name="RowTemplate"/>
             </a:For>
         </w:FormTable>\
     </a:If>
     <!--- Detail fields -->
-    <a:For list="$metaContext.properties.fieldsByZone.zDetail" item="$field">
-        <m:Context field="$field">
-            <a:SetValue properties="$metaContext.properties"/>
-            <m:IncludeComponent/>\
-        </m:Context>
-        <br/>
-    </a:For>
+    <a:RefreshRegion tagName="table" isScope="$true" cellpadding="0" cellspacing="0" width="100%">
+        <a:RefreshRegion tagName="tr"><td></td></a:RefreshRegion>
+        <a:IncludeBlock name="DropZone" zone="zDetail"/>
+        <a:For list="$metaContext.properties.fieldsByZone.zDetail" item="$field">
+            <m:Context field="$field">
+                <a:If ifTrue="$metaContext.properties.visible">\
+                    <a:IncludeBlock name='${dragType ? "DetailRowDrag" : "DetailRowPlain"}'>\
+                        <m:IncludeComponent/>\
+                    </a:IncludeBlock>\
+                    <a:IncludeBlock name="DetailRowPlain">\
+                        &nbsp;
+                    </a:IncludeBlock>\
+                </a:If>
+            </m:Context>
+        </a:For>
+    </a:RefreshRegion>\
+    </div>
 </m:Context>\
+\
+<a:Block name="DetailRowPlain">
+    <a:RefreshRegion tagName="tr">
+        <td><a:IncludeContent/></td>
+    </a:RefreshRegion>
+</a:Block>
+\
+<a:Block name="DetailRowDrag">
+    <a:RefreshRegion tagName="tr" valign="middle"
+                     bh="DrP" class="$dragClass" dropAction="$dropAction">
+        <td width="1px" class="dropArea" style="padding:0px 4px 0px 8px">
+            <a:DragContainer dragAction="$dragAction" type="$dragType"
+                             showParent="$true" class="flL">\
+                <a:ActiveImage filename="field_grabber.gif" class="hovDrag"
+                        action="$handleClickedAction"/>\
+            </a:DragContainer>
+        </td>
+        <td class="dropArea"><a:IncludeContent/></td>
+    </a:RefreshRegion>
+</a:Block>
+\
 <a:Block name="RowTemplate">\
     <m:Context field="$field">
         <a:SetValue properties="$metaContext.properties"/>
@@ -76,8 +125,24 @@
                     cueTip="$properties.cueTip"
                     required="$properties.required"
                     errorValueSource="$object"
-                    errorFieldPath="$properties.field">\
+                    errorFieldPath="$properties.field"
+                    dragType="$dragType"
+                    dragAction="$dragAction" dropAction="$dropAction"
+                    dragHandleClickAction="$handleClickedAction"
+                    highlightRow="$isInspectedField">\            
                 <m:IncludeComponent/>\
         </w:FormRow>
     </m:Context>
+</a:Block>
+\
+<a:Block name="DropZone">\
+    <a:If ifTrue="$dragType">\
+        <a:SetValue zone="$^zone"/>
+        <m:Context field="$zonePath">\
+            <a:RefreshRegion tagName="tr" valign="middle"
+                         bh="DrP" class="$dropAreaClass" dropAction="$dropAction">
+                <td colspan="3" class="dropArea"><a:Image filename="cleardot.gif" width="1" height="2"/></td>
+            </a:RefreshRegion>
+        </m:Context>
+    </a:If>
 </a:Block>

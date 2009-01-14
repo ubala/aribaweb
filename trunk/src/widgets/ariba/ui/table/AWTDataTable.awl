@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#115 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#118 $
     </Copyright>
 
     <Overview>
@@ -517,6 +517,24 @@
         Whether to display remaining non-Column attributes (visible columns) as detail rows
     </Binding>
 
+    <Binding key="useRowDetailExpansionControl" type="boolean" default="$false" required="$false" direction="get">
+        If showRowAttributes (above) is true, setting useRowDetailExpansionControl to true
+        will initially hide detail rows and will render an expand / collapse control to
+        conditionally display them.
+
+        This setting is evaluated on a per (parent) row basis, so the app may, for example,
+        set this to false and always display details for "questions" while setting it
+        to true and initially hiding detail for "items"
+    </Binding>
+
+    <Binding key="showColumnAttributeLableOnRow" type="boolean" default="$false" required="$false" direction="get">
+        Whether to display a label to the right of the value columns (after the row field
+        columns) identifying the column attribute being rendered to its right.
+        This can be useful if the column attribute is being varied dynamically per row
+        (via `overrideAttribute`), for instance displaying "Price" on some rows and
+        "Discount" on others.
+    </Binding>
+
     <Binding key="scopeSubcomponentsByColumn" type="boolean" default="$false" required="$false" direction="get">
         Whether stateful subcomponents in table cells should be scoped based on column *identity*
         (instead of position).  In the AW default behavior (positional), the addition or removal of a column
@@ -605,9 +623,10 @@
                     <a:Else ifTrue="$showTitle"/>
                         <h2>$^title</h2>
                     </a:If>
+                    <a:IncludeBlock name="Buttons" isTop="$true" showTotalItems="$^showTotalItems"/>
                 </td>
-                <td align="right">\
-                    <a:IncludeBlock name="BatchNavRow" isTop="$true" showTotalItems="$^showTotalItems"/>
+                <td width="1px" nowrap style="white-space:nowrap" align="right">\
+                    <nobr><a:IncludeBlock name="BatchNavRow" isTop="$true" showTotalItems="$^showTotalItems"/></nobr>\
                 </td>
             </tr></table>
         </a:Content>
@@ -704,7 +723,7 @@
         </a:Content>
 
         <a:Content name="footerArea">\
-            <a:IncludeBlock name="BatchNavRow" isTop="$false" showTotalItems="$^showTotalItems"/>
+            <a:IncludeBlock name="Buttons" isTop="$false" showTotalItems="$^showTotalItems"/>
         </a:Content>
 
         <a:Content name="footerAreaRight">\
@@ -712,8 +731,8 @@
                 <a:IncludeComponent awcomponentName="$rightButtonArea.rendererComponentName" table="$this"/>\
             </a:If>\
             <a:IncludeContent name="footerAreaRight" required="$false"/>
+            <a:IncludeBlock name="BatchNavRow" isTop="$false" showTotalItems="$^showTotalItems"/>
         </a:Content>
-
     </t:ScrollTableWrapper>\
 <a:Else/>
     <!--- todo: This is an EXACT COPY of code above.  Need to factor into a sub-template -->
@@ -821,7 +840,7 @@
 </a:Block>
 \
 \
-<a:Block name="BatchNavRow">\
+<a:Block name="Buttons">\
     <a:SetValue isTopBar="$^isTop"/>\
     <a:If ifTrue="$showButtonColumns">\
         <table cellspacing="0" cellpadding="0">
@@ -847,7 +866,10 @@
             </tr>
         </table>
     </a:If>\
+</a:Block>
 \
+<a:Block name="BatchNavRow">\
+    <a:SetValue isTopBar="$^isTop"/>\
     <a:If ifTrue="$showOptionsMenu">\
         <a:If ifTrue="$^isTop">\
             <div style="float:right;padding-left:5px">\

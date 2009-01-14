@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StringHandler.java#17 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StringHandler.java#19 $
 */
 
 package ariba.ui.widgets;
@@ -29,6 +29,7 @@ public abstract class StringHandler extends BaseHandler
     public static final String ContactInfo = "contactInfo";
     public static final String Home = "Home";
     public static final String Help = "Help";
+    public static final String RefreshSession = "RefreshSession";
     public static final String Documentation = "Documentation";
     public static final String Training = "Training";
     public static final String Support = "Support";

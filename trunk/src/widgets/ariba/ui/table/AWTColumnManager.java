@@ -12,10 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTColumnManager.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTColumnManager.java#4 $
 */
 
 package ariba.ui.table;
+
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 
 /**
     Column managers, that implement this interface, can register themselves with an
@@ -52,7 +54,7 @@ public interface AWTColumnManager
         @param table The table executing the phase
         @aribaapi private
     */
-    public void postInvoke (AWTDataTable table);
+    public void postInvoke (AWTDataTable table, AWResponseGenerating result);
 
     /**
         Do work before the table's renderResponse

@@ -33,7 +33,7 @@
                 <t:DataTable item="$traceNode" children="$traceNode.children" displayGroup="$currentTraceDisplayGroup"
                               singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
                               showColumnHeader="$false" enableScrolling="$true" showOptionsMenu="$true"
-                              class="scrollTableWrapper smallFont" minHeight="400">
+                              class="scrollTableWrapper smallFont noTopLine" minHeight="400">
                     <t:HeadingArea>
                         <div class="flL" _ifTrue="$metadataDisplayGroup">
                             Show:
@@ -89,7 +89,7 @@
                 <t:DataTable item="$traceNode" displayGroup="$pathDisplayGroup"
                               singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
                               title="Component Path" showColumnHeader="$false" enableScrolling="$true" showOptionsMenu="$true"
-                              class="scrollTableWrapper smallFont" minHeight="400">
+                              class="scrollTableWrapper smallFont noTopLine" minHeight="400">
                     <a:Content name="optionsMenu">
                         <a:If ifTrue="$showingFileContents">
                             <a:Hyperlink action="${showingFileContents=false;null}">&lt; Hide Contents</a:Hyperlink>
@@ -144,50 +144,8 @@
                     </div>\
                 </w:Tab>
                 <w:Tab label="Meta Properties" isVisible="$traceNode.associatedMetadata">
-                    <a:If ifTrue="$showProperties">
-                        <t:DataTable enableScrolling="true" initialSortDirection="descending"
-                                     item="$propertyKey" list="${traceNode.associatedMetadataProperties.keySet().toArray()}">
-                            <t:HeadingArea>\
-                                <b>Properties</b>
-                                <a:If ifTrue="$canShowAssignments">\
-                                    |
-                                    <a:Hyperlink action="${showProperties=!showProperties; null}">Assignments</a:Hyperlink>
-                                </a:If>
-                            </t:HeadingArea>
-                            <t:Column label="Property" key="self"/>
-                            <t:Column label="Value">
-                                <a:String value="${traceNode.associatedMetadataProperties.get(propertyKey)}"/>
-                            </t:Column>
-                        </t:DataTable>
-                    <a:Else/>
-                        <t:DataTable enableScrolling="true" showColumnHeader="$false"
-                                     initialSortKey="rank" initialSortDirection="descending"
-                                     item="$assignmentSource" list="${traceNode.associatedMetadataAssignmentMap.keySet().toArray()}">
-                            <t:HeadingArea>\
-                                <a:Hyperlink action="${showProperties=!showProperties; null}">Properties</a:Hyperlink>
-                                |
-                                <b>Assignments</b>
-                            </t:HeadingArea>
-                            <t:Column key="description"/>
-                            <t:Column key="location" align="right">\
-                                <a:DebugRemoteOpen value="$assignmentSource.location">\
-                                    $assignmentSource.locationShortName\
-                                </a:DebugRemoteOpen>\
-                            </t:Column>
-                            <t:RowDetail>
-                                <div style='padding-left:30px;font:normal 11px/15px "Courier New", Courier, mono'>
-                                    <a:For item="$assignment"
-                                           list="${traceNode.associatedMetadataAssignmentMap.get(assignmentSource)}">
-                                       <span emitTags="$assignment.isOverridden" style="text-decoration:line-through">
-                                           <span style="color:green">$assignment.key: </span>
-                                           <span style="color:blue">$assignment.value</span>
-                                       </span>
-                                       <br/>
-                                    </a:For>
-                                </div>
-                            </t:RowDetail>
-                        </t:DataTable>
-                    </a:If>
+                    <a:IncludeComponent name="${traceNode.associatedMetadata.inspectorComponentName(traceNode.element)}"
+                                        traceNode="$traceNode"/>
                 </w:Tab>
             </w:TabSet>
         <a:Else/>

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Section.awl#2 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Section.awl#3 $
     </Copyright>
 
     <Overview>
@@ -37,7 +37,6 @@
     </Binding>
 </a:Api>\
 <w:SectionHeading title="$^title" class="$^class"/>
-<w:SectionBody showTopSpace="$^showTopSpace" showBottomSpace="$^showBottomSpace">
-    <a:IncludeContent/>
+<w:SectionBody showTopSpace="$^showTopSpace" showBottomSpace="$^showBottomSpace">\
+    <a:IncludeContent/>\
 </w:SectionBody>
-        

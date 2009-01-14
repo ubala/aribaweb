@@ -1,9 +1,6 @@
 <w:BasicPageWrapper hasForm="$true">
     <h1>Forms</h1>
     <w:TabSet>
-        <w:Tab label="Basic Form">
-            <a:IncludeComponent name="BasicForm"/>
-        </w:Tab>
         <w:Tab label="MetaUI Simple">
             <a:IncludeComponent name="UserFormSimple"/>
         </w:Tab>
@@ -12,6 +9,9 @@
         </w:Tab>
         <w:Tab label="MetaUI Advanced">
             <a:IncludeComponent name="UserFormAdvanced"/>
+        </w:Tab>
+        <w:Tab label="Basic Form">
+            <a:IncludeComponent name="BasicForm"/>
         </w:Tab>
     </w:TabSet>
 </w:BasicPageWrapper>

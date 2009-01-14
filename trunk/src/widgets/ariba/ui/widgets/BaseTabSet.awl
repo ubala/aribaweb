@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#3 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#4 $
     </Copyright>
 
     <Overview>
@@ -73,6 +73,10 @@
         TBD
     </Binding>
 
+    <Binding key="vertical" type="boolean" direction="get" default="$false">
+        Render as a vertical stack
+    </Binding>
+
     <Binding key="index" type="int" direction="set" required="$false">
         TBD
     </Binding>
@@ -83,23 +87,60 @@
 </a:Api>\
 
 <a:RefreshRegion>\
-    <table cellspacing="0" cellpadding="0" width="100%">\
-        <tr>\
-            <td class="$^class:pageTabWrapper">\
-                <w:TabList list="$tabList" visibles="$^visibles" item="$^item" index="$^index" label="$^label:^displayString"
-                    selection="$selectedTab" submitForm="$^submitForm" awname="$^awname" class="$^class:pageTabWrapper"
-                    dropType="$^dropType" dropAction="$^dropAction" action="$^action"
-                    actionMenuId="$^actionMenuId" actionMenuLabel="$^actionMenuLabel"/>\
-            </td>\
-        </tr>
-        <tr>\
-            <td class="$^contentClass">\
-                <div class="tabPanel" emitTags="$true">\
-                    <a:MethodInvocation invoke="$pushElementId"/>\
-                    <a:IncludeContent/>\
-                    <a:MethodInvocation invoke="$popElementId"/>\
-                </div>
-            </td>\
-        </tr>
-    </table>
+    <a:If ifFalse="$^vertical">
+        <table cellspacing="0" cellpadding="0" width="100%">\
+            <tr>\
+                <td class="$^class:pageTabWrapper">\
+                    <w:TabList list="$tabList" visibles="$^visibles" item="$^item"
+                               index="$^index" label="$^label:^displayString"
+                               selection="$selectedTab" submitForm="$^submitForm"
+                               awname="$^awname"
+                               class="$^class:pageTabWrapper" vertical="$^vertical"
+                               dropType="$^dropType" dropAction="$^dropAction"
+                               action="$^action"
+                               actionMenuId="$^actionMenuId"
+                               actionMenuLabel="$^actionMenuLabel"/>\
+                </td>
+                \
+            </tr>
+            <tr>\
+                <td class="$^contentClass">\
+                    <div class="tabPanel" emitTags="$true">\
+                        <a:MethodInvocation invoke="$pushElementId"/>\
+                        <a:IncludeContent/>\
+                        <a:MethodInvocation invoke="$popElementId"/>\
+                    </div>
+                </td>
+                \
+            </tr>
+        </table>
+    <a:Else/>
+        <table class="vTabSet" cellspacing="0" cellpadding="0" width="100%">\
+            <tr>\
+                <td class="$^class:pageTabWrapper" valign="top" width="1px">\
+                    <w:RoundedBox class="wizBox" roundStyle="$ariba.ui.widgets.RoundedBox.BottomLeft" hideGradient="$true">
+                        <w:TabList list="$tabList" visibles="$^visibles" item="$^item"
+                                   index="$^index" label="$^label:^displayString"
+                                   selection="$selectedTab" submitForm="$^submitForm"
+                                   awname="$^awname"
+                                   class="$^class:pageTabWrapper" vertical="$^vertical"
+                                   dropType="$^dropType" dropAction="$^dropAction"
+                                   action="$^action"
+                                   actionMenuId="$^actionMenuId"
+                                   actionMenuLabel="$^actionMenuLabel"/>\
+                        <div style="width:180px"> </div>
+                    </w:RoundedBox>
+                </td>
+                \
+                <td class="$^contentClass" valign="top">\
+                    <div class="tabPanel" emitTags="$true">\
+                        <a:MethodInvocation invoke="$pushElementId"/>\
+                        <a:IncludeContent/>\
+                        <a:MethodInvocation invoke="$popElementId"/>\
+                    </div>
+                </td>
+                \
+            </tr>
+        </table>
+    </a:If>
 </a:RefreshRegion>\

@@ -100,7 +100,7 @@ ariba.Handlers = function() {
         {
             if (AWTextFieldChangedId != null) {
                 AWTextFieldChangedId = null;
-                document.onclick = null;
+                Event.updateDocHandler("click", null);
             }
         },
 
@@ -115,10 +115,10 @@ ariba.Handlers = function() {
             }
             else {
                 textField.setAttribute(AWDidChangeKey, "1");
-                if (document.onclick == null) {
+                if (Event.getDocHandler("click") == null) {
                     Event.registerUpdateCompleteCallback(this.resetTextFieldChanged.bind(this));
                     AWTextFieldChangedId = textField.id;
-                    document.onclick = function (mevent) {
+                    var docOnClickHandler = function (mevent) {
                         if (AWTextFieldChangedId != null) {
                             mevent = mevent ? mevent : event;
                             var textField = Dom.getElementById(AWTextFieldChangedId);
@@ -127,7 +127,8 @@ ariba.Handlers = function() {
                                 return Handlers.textFieldRefresh(formObject.id, textField.name)
                             }
                         }
-                    }.bindDocHandler(this);
+                    }.bindEventHandler(this);
+                    Event.updateDocHandler("click", docOnClickHandler);
                 }
             }
             return true;
@@ -410,7 +411,7 @@ ariba.Handlers = function() {
         // Rollover
         ROV : {
             mouseover : function (elm, evt) {
-                var s = elm.getAttribute('roClass');
+                var s = elm.getAttribute('roClass') || "hov";
                 elm.setAttribute("origClass", elm.className);
                 elm.className = s;
                 return true;

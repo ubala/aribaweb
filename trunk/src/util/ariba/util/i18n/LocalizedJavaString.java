@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/i18n/LocalizedJavaString.java#10 $
+    $Id: //ariba/platform/util/core/ariba/util/i18n/LocalizedJavaString.java#11 $
 */
 
 package ariba.util.i18n;
@@ -25,8 +25,7 @@ import java.util.Locale;
 
     @aribaapi ariba
 */
-
-public final class LocalizedJavaString
+public final class LocalizedJavaString implements LocalizedStringInterface
 {
     /**
         A Localizer knows how to return a localized string given the key and class name.
@@ -48,6 +47,31 @@ public final class LocalizedJavaString
                                           String key,
                                           String originalString,
                                           Locale locale);
+    }
+
+    /**
+        A Localizer knows how to return a localized string given the key and class name.
+        A LocalizerWithSourceOfTruthLocale also knows how to return the source of truth
+        locale in which the original string was composed. 
+        
+        @aribaapi ariba
+    */
+    public static interface LocalizerWithSourceOfTruthLocale extends Localizer
+    {
+        /**
+            @param className name of the class in which the string is created.
+            @param key unique key for the string within that classes
+            @return Locale which is the "source of truth" for this
+            localized/multiLocale/multiLingual string.  This has also been known as the
+            "OriginalLocale", and as the BaseLocale.  It is the source of truth for
+            translating this string into other locales.  For a LocalizedJavaString, if the
+            registered Localizer doesn't implement this extended interface, Locale.US will
+            be used as the source of truth.  For a MultiLocaleString it is the
+            OriginalLocale, and for a MultiLingualString it is probably the default locale
+            of the realm/partition.
+            @aribaapi ariba
+        */
+        public Locale getSourceOfTruthLocale (String className, String key);
     }
 
     private static Localizer _localizer;
@@ -126,6 +150,59 @@ public final class LocalizedJavaString
     public String getClassName ()
     {
         return _className;
+    }
+
+    /**
+        Implementations of the single parameter getString should always just call
+        getString with a second parameter of true, for useDefaulting.
+        Part of LocalizedStringSource interface.
+    */
+    public String getString (Locale locale)
+    {
+        return getString(locale, true);
+    }
+
+    /**
+        @return String value in given locale for localized/multiLocale/multiLingual
+        string.  If useDefaulting is false, we return null if the locale is not
+        the source of truth, yet the value is the same as the source of truth value.
+        Part of the LocalizedStringSource interface.
+    */
+    public String getString (Locale locale, boolean useDefaulting)
+    {
+        String result = getLocalizedString(locale);
+        if (result != null && !useDefaulting && locale != null) {
+            Locale defaultLocale = getSourceOfTruthLocale();
+            if (!locale.equals(defaultLocale)) {
+                String defaultResult = getLocalizedString(defaultLocale);
+                if (result.equals(defaultResult)) {
+                    result = null;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+        @return Locale which is the "source of truth" for this
+        localized/multiLocale/multiLingual string.  This has also been known as the
+        "OriginalLocale", and as the BaseLocale.  It is the source of truth for
+        translating this string into other locales.  For a LocalizedJavaString, this will
+        always return the Locale "en_US", since the source of truth is the strings is the
+        originalString in the Java code, which is always in American English.  For a
+        MultiLocaleString it is the OriginalLocale, and for a MultiLingualString it is
+        probably the default locale of the realm/partition.  Part of LocalizedStringSource
+        interface.
+    */
+    public Locale getSourceOfTruthLocale ()
+    {
+        Locale truthLocale = Locale.US;
+        if (_localizer instanceof LocalizerWithSourceOfTruthLocale) {
+            LocalizerWithSourceOfTruthLocale truthLocalizer =
+                (LocalizerWithSourceOfTruthLocale)_localizer;
+            truthLocale = truthLocalizer.getSourceOfTruthLocale(_className, _keyString);
+        }
+        return truthLocale;
     }
 
     /**

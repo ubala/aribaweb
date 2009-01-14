@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentDefinition.java#44 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentDefinition.java#45 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -26,6 +26,7 @@ import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWSingleLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWRecyclePool;
+import ariba.ui.aribaweb.util.AWResourceManager;
 import ariba.util.core.FormatBuffer;
 import ariba.util.core.Fmt;
 import java.util.Map;
@@ -34,7 +35,6 @@ import ariba.util.core.StringUtil;
 import java.util.List;
 import java.io.File;
 import java.util.Iterator;
-import java.util.Locale;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -142,6 +142,39 @@ public class AWComponentDefinition extends AWBaseObject
         }
     }
 
+    public interface ScriptClassProvider extends AWBindable {
+        // public Class componentSubclass (String name, AWTemplate template);
+        public Class componentSubclass (String packageName, String filename, String body, Class superclass);
+    }
+
+    static Map<String, ScriptClassProvider> _ScriptProviders = MapUtil.map();
+
+    static public void registerScriptProvider (String tagName, ScriptClassProvider provider)
+    {
+        AWComponent.defaultTemplateParser().registerContainerClassForTagName(tagName, provider.getClass());
+        _ScriptProviders.put("<" + tagName, provider);
+    }
+
+    Class classFromProvider (AWResource templateResource)
+    {
+        if (_ScriptProviders.isEmpty()) return null;
+        String templateString = AWUtil.stringWithContentsOfInputStream(templateResource.inputStream(), false);
+        for (String tagName : _ScriptProviders.keySet()) {
+            int index = templateString.indexOf(tagName);
+            if (index != -1) {
+                int closeIndex = templateString.indexOf("</" + tagName.substring(1) + ">", index);
+                if (closeIndex != -1) {
+                    int beginTagEnd = templateString.indexOf(">", index);
+                    String body = templateString.substring(beginTagEnd + 1, closeIndex);
+                    String className = componentName().replace('.', '_').replace('-', '_'); // templateName().replace('.', '_').replace('-', '_');                    
+                    Class cls = _ScriptProviders.get(tagName).componentSubclass(componentPackageName(), className, body, null);
+                    if (cls != null) return cls;
+                }
+            }
+        }
+        return null;
+    }
+
     /* Thread Safety Considerations: Instances of this class are shared by many threads.  Some ivars are immutable and some require locking.  The mutable ones are:
 
         _sharedComponent
@@ -193,6 +226,7 @@ public class AWComponentDefinition extends AWBaseObject
                  ? initComponentNamePath(_componentName).intern()
                  : initComponentNamePath(componentClass.getName()).intern();
         _componentClass = componentClass;
+        _isClassless = _componentClass == AWComponent.class;        
         String origComponentName =
             AWUtil.getClassLoader().getComponentNameForClass(
                 componentClass.getName());
@@ -206,6 +240,7 @@ public class AWComponentDefinition extends AWBaseObject
     public void setTemplateName (String templateName)
     {
         _templateName = templateName;
+        flushCacheIfClassChanged();
     }
 
     public boolean isStateless ()
@@ -238,10 +273,12 @@ public class AWComponentDefinition extends AWBaseObject
         Only called from newComponentInstance, this method
         refreshes the class if we are debugging.
     */
+    long _lastClassScan = 0;
+
     public Class componentClass ()
     {
         // Todo: Perf - throttle checking -- maybe once per second per component defn
-        if (_isReloadable) {
+        if (_isReloadable || _isClassless) {
             flushCacheIfClassChanged();
         }
         return _componentClass;
@@ -254,14 +291,14 @@ public class AWComponentDefinition extends AWBaseObject
 
     public String componentPackageName ()
     {
-        Class componentClass = componentClass();
         String currPackage = null;
-        if (componentClass == AWComponent.class) {
+        if (_isClassless) {
             // we've got a generic component so get the package of
             // the template
             currPackage = AWUtil.fileNameToJavaPackage(templateName());
         }
         else {
+            Class componentClass = componentClass();
             Package pkg = componentClass.getPackage();
             currPackage = (pkg != null) ? pkg.getName() : "";
         }
@@ -380,10 +417,31 @@ public class AWComponentDefinition extends AWBaseObject
     /**
         Only called in debug mode.
     */
-    private void flushCacheIfClassChanged ()
+    protected void flushCacheIfClassChanged ()
     {
+        if (!_isReloadable && !_isClassless) return;         
         Class componentClass = AWUtil.getClassLoader().checkReloadClass(_componentClass);
         if (componentClass != null) setComponentClass(componentClass);
+
+        // Handle templates with embedded script tags (e.g. <groovy></groovy>
+        if (_isClassless) {
+            AWResourceManager resourceManager = AWComponent.templateResourceManager();
+            String templateName = templateName();
+            AWResource resource = resourceManager.resourceNamed(templateName);
+            checkForEmbeddedScriptChanges(resource);
+        }
+    }
+
+    protected void checkForEmbeddedScriptChanges (AWResource resource)
+    {
+        if (resource != null && resource.lastModified() > _lastClassScan) {
+            _lastClassScan = System.currentTimeMillis();
+            Class newClass = classFromProvider(resource);
+            if (newClass != null && newClass != _componentClass) {
+                setComponentClass(newClass);
+                initFromComponent();
+            }
+        }
     }
 
     protected void setComponentClass(Class componentClass)
@@ -411,10 +469,11 @@ public class AWComponentDefinition extends AWBaseObject
         // This needn't be synchronized since its during initialization and only one thread has visibility to an instance during initialization.
         AWComponent componentInstance = newComponentInstance();
         _isStatelessComponent = componentInstance.isStateless();
-        _isClassless = componentInstance.getClass() == AWComponent.class;
         _supportedBindingNames = componentInstance.supportedBindingNames();
         if (_isStatelessComponent && !componentInstance.useLocalPool()) {
             initComponentPool();
+        } else {
+            _componentPool = null;
         }
     }
 
@@ -434,7 +493,7 @@ public class AWComponentDefinition extends AWBaseObject
     {
         AWTemplate defaultTemplate = null;
         synchronized (this) {
-            AWComponent componentInstance = newComponentInstance();
+            AWComponent componentInstance = (_isClassless) ? new AWComponent() : newComponentInstance();
             AWPage page = new AWPage(componentInstance, null);
             componentInstance.setupForNextCycle(sharedComponentReference(), null, page);
             defaultTemplate = componentInstance.template();

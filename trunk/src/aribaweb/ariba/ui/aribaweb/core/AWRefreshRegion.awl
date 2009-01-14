@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.awl#29 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.awl#32 $
     </Copyright>
 
     <Overview>
@@ -91,6 +91,10 @@
         If set to true, causes the AWRefreshRegion to act like an AWGenericContainer.
     </Binding>
 
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        Disable refresh region (don't render surrounding tags, but render content)
+    </Binding>
+
     <Binding key="ignore" direction="get" type="boolean" default="$false">
         Indicates that this AWRefreshRegion should be ignored during incremental updates.
     </Binding>
@@ -101,19 +105,23 @@
     </Binding>
 
 </a:Api>\
-<a:If ifFalse="$^disabled:$false">\
+<a:If ifTrue="$^omitTags">\
+    <a:IncludeContent/>\
+<a:Else/>\
     <a:PhaseInvocation append="$pushBuffer"/>\
     <!--- todo: conditionalize domsync="**** debug ****" -->\
     <a:If ifTrue="$dragEnabled">\
-        <a:GenericContainer tagName="$^tagName:div" id="$elementId"
+        <a:GenericContainer tagName="$tagName" id="$elementId"
+            invokeAction="$fireAction"
             class="$className"
             style="$^style"
-            otherBindings="$otherBindingsValues" invokeAction="$fireAction"
+            omitTags="$^omitTags"
+            otherBindings="$otherBindingsValues"
             awname="$^awname" ignore="$^ignore">\
             <a:IncludeContent/>\
         </a:GenericContainer>\
     <a:Else/>\
-        <a:GenericContainer tagName="$^tagName:div" id="$elementId"
+        <a:GenericContainer tagName="$tagName" id="$elementId"
             omitTags="$^forceRefreshOnChange"
             class="$className"
             style="$^style"
@@ -123,11 +131,4 @@
         </a:GenericContainer>\
     </a:If>\
     <a:PhaseInvocation append="$popBuffer"/>\
-<a:Else/>\
-    <a:GenericContainer tagName="$^tagName:div" style="$^style" id="$elementId"
-                        class="$className"
-                        otherBindings="$otherBindingsValues"
-                        awname="$^awname" ignore="$^ignore">\
-        <a:IncludeContent/>\
-    </a:GenericContainer>\
 </a:If>\

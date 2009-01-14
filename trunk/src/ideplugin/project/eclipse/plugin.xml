@@ -4,4 +4,75 @@
    <extension point="org.eclipse.ui.startup">
          <startup class="ariba.ideplugin.eclipse.Control"/>
    </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="AribaWeb"
+            id="ariba.ideplugin.eclipse">
+      </category>
+      <wizard
+            canFinishEarly="false"
+            category="ariba.ideplugin.eclipse"
+            class="ariba.ideplugin.eclipse.wizards.AWNewProjectWizard"
+            hasPages="true"
+            icon="icons/sample.gif"
+            id="ariba.ideplugin.eclipse.wizards.AWNewProjectWizard"
+            name="AribaWeb Project"
+            project="true">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="ariba.ideplugin.eclipse.preferences.AWPreferencesPage"
+            id="ariba.ideplugin.eclipse.preferences.AWPreferencesPage"
+            name="AribaWeb">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="ariba.ideplugin.eclipse.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
+    <extension
+         point="org.eclipse.ant.core.antProperties">
+      <antProperty
+            class="ariba.ideplugin.eclipse.AWHomeProvider"
+            eclipseRuntime="false"
+            headless="true"
+            name="aw.home"/>
+     </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+
+      <command
+            id="ariba.ideplugin.eclipse.commands.awlToggle"
+            name="Toggle AWL/Java"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="ariba.ideplugin.eclipse.commands.awlToggle"
+            contextId="org.eclipse.ui.textEditorScope"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="CTRL+ALT+A"/>
+    </extension>
+       <extension
+         point="org.eclipse.ui.actionSets">
+         <actionSet
+            id="ariba.ideplugin.eclipse.actions.actionSet1"
+            label="Ariba Actions"
+            visible="true">
+                  <action
+               class="ariba.ideplugin.eclipse.AWLToggle"
+               definitionId="ariba.ideplugin.eclipse.commands.awlToggle"
+               id="com.ariba.ui.actions.awlToogle"
+               label="Toggle AWL/Java">
+            <selection class="org.eclipse.core.resources.IFile" name="*.java"/>
+            <selection class="org.eclipse.core.resources.IFile" name="*.awl"/>
+            <selection class="org.eclipse.core.resources.IFile" name="*.groovy"/>
+         </action>
+         </actionSet>
+         </extension>
 </plugin>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestUtil.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestUtil.java#2 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -226,4 +226,13 @@ public class AWRequestUtil
         return applicationBaseUrl(requestContext) + urlSuffix;
     }
 
+    public static String getRequestUrlMinusQueryString (AWRequestContext requestContext)
+    {
+        // This *appears* to be a sufficient version of the *external* Url...
+        // The AWServletRequest:httpServletRequest.getRequestURL() might be better
+        // (but isn't portable...)
+        String requestUrl = requestContext.requestUrl();
+        int qIndex = requestUrl.indexOf("?");
+        return (qIndex != -1) ? requestUrl.substring(0, qIndex) : requestUrl;
+    }
 }

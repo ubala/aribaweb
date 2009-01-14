@@ -231,7 +231,12 @@ ariba.Dom = function() {
                 }
             }
             catch (e) {
-                alert(Dom.AWOpenWindowErrorMsg);
+                // Safari crashes if we alert without a setTimeout.
+                // It probably has to do the way we use eval and closures to execute callbacks. 
+                function warn () {
+                    alert(Dom.AWOpenWindowErrorMsg);
+                }
+                setTimeout(warn);
             }
             return namedWindow;
         },
@@ -293,12 +298,20 @@ ariba.Dom = function() {
 
         limitTextLength : function (textfield, maxlength) {
             if (maxlength < 1 ) return;
-            var textFieldLength = textfield.value.length;
+            var textFieldValue = textfield.value;
+            // Mozilla doesn't add the \r in the js string, 
+            // but does submit it with \r. These replacements make it consistent. 
+            if (this.IsMoz) {
+                textFieldValue = textFieldValue.replace(/([^\r])\n/g, "$1\r\n");
+                textFieldValue = textFieldValue.replace(/^\n/g, "\r\n");
+            }
+            var textFieldLength = textFieldValue.length;
             if (textFieldLength > maxlength) {
-                textfield.value = textfield.value.substring(0, maxlength);
+                textfield.value = textFieldValue.substring(0, maxlength);
             }
             else {
                 var indicator = this.getElementById(textfield.id + "MLI");
+                if (!indicator) return;  
                 var width = indicator.clientWidth;
                 indicator.style.width = '';                
                 indicator.innerHTML = maxlength - textFieldLength;
@@ -354,9 +367,9 @@ ariba.Dom = function() {
             var containerWidth = (container == this.documentElement()) ? this.documentClientWidth() : container.clientWidth;
         // Debug.log ("awPositionDialogBox---  containerHeight=" + containerHeight + ", target.offsetHeight=" + target.offsetHeight);
             target.style.left =
-            containerWidth / 2 - target.offsetWidth / 2 + container.scrollLeft + "px";
+            containerWidth / 2 - target.offsetWidth / 2 + this.getScrollLeft(container) + "px";
             target.style.top =
-            containerHeight / 2 - target.offsetHeight / 2 + container.scrollTop + "px";
+            containerHeight / 2 - target.offsetHeight / 2 + this.getScrollTop(container) + "px";
             if (target.onresize) target.onresize.call(target);
         },
 
@@ -409,7 +422,7 @@ ariba.Dom = function() {
             var parentElement = element.offsetParent;
             while (parentElement != null) {
                 absoluteTop += parentElement.offsetTop;
-                if (parentElement != this.documentElement()) {
+                if (parentElement != this.getPageScrollElement()) {
                     // subtract scrollTop for positioning inside of scrollable elements
                     absoluteTop -= parentElement.scrollTop;
                 }
@@ -453,7 +466,7 @@ ariba.Dom = function() {
 
         correctForRightEdge : function (divLeft, div)
         {
-            var clientWidth = this.clientWidth(this.documentElement());
+            var clientWidth = this.clientWidth(document.documentElement);
             var adjustedDivLeft = clientWidth - div.offsetWidth;
             if (divLeft > adjustedDivLeft) {
                 divLeft = adjustedDivLeft;
@@ -463,7 +476,7 @@ ariba.Dom = function() {
 
         correctForBottomEdge : function (divTop, div)
         {
-            var clientHeight = this.clientHeight(this.documentElement());
+            var clientHeight = this.clientHeight(document.documentElement);
             var adjustedMenuTop = clientHeight - div.offsetHeight;
             if (divTop > adjustedMenuTop) {
                 divTop = adjustedMenuTop;
@@ -488,7 +501,7 @@ ariba.Dom = function() {
             var parentElement = element.offsetParent;
             while (parentElement != null) {
                 absoluteLeft += parentElement.offsetLeft;
-                if (parentElement != this.documentElement()) {
+                if (parentElement != this.getPageScrollElement()) {
                     // subtract scrollLeft for positioning inside of scrollable elements
                     absoluteLeft -= parentElement.scrollLeft;
                 }
@@ -551,10 +564,9 @@ ariba.Dom = function() {
 
         positioningParent : function (element)
         {
-            while (element && element != document.documentElement) {
+            while (element && (element = element.parentNode) && element != document.documentElement) {
                 var pos = this.effectiveStyle(element, 'position');
                 if (pos == 'absolute' || pos == 'relative' || pos == 'fixed') break;
-                element = element.parentNode;
             }
             return element || document.documentElement;
         },
@@ -584,7 +596,7 @@ ariba.Dom = function() {
             if (offsetParent) {
                 left -= this.absoluteLeft(offsetParent);
                 top -= this.absoluteTop(offsetParent);
-                if (offsetParent != this.documentElement()) {
+                if (offsetParent != this.getPageScrollElement()) {
                     left += offsetParent.scrollLeft;
                     top += offsetParent.scrollTop;
                 }
@@ -848,8 +860,57 @@ ariba.Dom = function() {
             }
             return null;
         },
-        
+
+        getScrollTop : function (element)
+        {
+            return element.scrollTop;
+        },
+
+        getScrollLeft : function (element)
+        {
+            return element.scrollLeft;
+        },
+
+        // element holding the page scroll values
+        getPageScrollElement : function ()
+        {
+            return document.documentElement;
+        },
+
         EOF:0};
+
+    //
+    //   Safari - specific methods
+    //
+    if (Dom.isSafari) Util.extend(Dom, function () {
+        return {
+            // page scroll values are stored on the body instead of the html element
+            getScrollTop : function (element)
+            {
+                var scrollTop = element.scrollTop;
+                if (element = document.documentElement) {
+                    scrollTop = document.body.scrollTop;
+                }
+                return scrollTop;
+            },
+
+            getScrollLeft : function (element)
+            {
+                var scrollLeft = element.scrollLeft;
+                if (element = document.documentElement) {
+                    scrollLeft = document.body.scrollLeft;
+                }
+                return scrollLeft;
+            },
+
+            getPageScrollElement : function ()
+            {
+                return document.body;
+            },
+
+            EOF:0
+        };
+    }());
 
     //
     // IE - specific methods

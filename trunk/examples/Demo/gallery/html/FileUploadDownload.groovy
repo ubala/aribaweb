@@ -22,29 +22,36 @@ import ariba.ui.aribaweb.core.AWComponent
 import java.util.List
 import ariba.ui.aribaweb.core.AWResponseGenerating
 import ariba.ui.aribaweb.core.AWResponse
+import ariba.ui.aribaweb.core.AWActionCallback
+import ariba.ui.table.AWTDisplayGroup
 
 class FileUploadDownload extends AWComponent
 {
     public boolean isStateless() { return false; }
 
-    Upload newUpload = new Upload(), currentUpload
+    AWTDisplayGroup displayGroup
+    Upload currentUpload
     List uploads = []
-    InputStream inputStream
-    boolean fileSizeExceeded
 
-    void doUpload () {
-        if (fileSizeExceeded) {
-            recordValidationError("file", "Your upload exceeds the maximuma allowable size", null);
-            errorManager().checkErrorsAndEnableDisplay();
-            return
-        }
-        
-        newUpload.bytes = AWUtil.getBytes(inputStream)
-        uploads += newUpload
-        newUpload = new Upload()        
+    AWComponent add () {
+        FileUploadPanel panel = (FileUploadPanel)pageWithName(FileUploadPanel.class.getName())
+        panel.setup(new UploadCallback(this, null), 100000);
+        return panel;
     }
 
-    void fileSizeExceeded () {
+    AWComponent update () {
+        FileUploadPanel panel = (FileUploadPanel)pageWithName(FileUploadPanel.class.getName())
+        panel.setup(new UploadCallback(this, currentUpload), 100000);
+        return panel;
+    }
+
+    void remove () { displayGroup.selectedObjects().each { uploads.remove(it) } }
+
+    Upload updateFile (Upload upload, fileName, mimeType, inputStream) {
+        upload.bytes = AWUtil.getBytes(inputStream)
+        upload.mimeType = mimeType
+        upload.fileName = fileName
+        return upload
     }
 
     AWResponseGenerating doDownload () {
@@ -57,8 +64,26 @@ class FileUploadDownload extends AWComponent
     }
 }
 
+// in Java I'd just make this an anonymous inner class...
+class UploadCallback extends AWActionCallback {
+    FileUploadDownload _caller
+    Upload _orig
+    UploadCallback (FileUploadDownload caller, Upload orig) { super(caller); _caller = caller; _orig = orig }
+    public AWResponseGenerating doneAction (AWComponent sender) {
+        if (sender.inputStream) {
+            if (_orig) {
+                _caller.updateFile(_orig, sender.fileName, sender.mimeType, sender.inputStream)
+            } else {
+                _caller.uploads += _caller.updateFile(new Upload(), sender.fileName, sender.mimeType, sender.inputStream)
+            }
+        }
+        return _caller.pageComponent();
+    }
+}
+
 class Upload {
-    String title, fileName
+    String fileName
+    String description
     def mimeType
     byte[] bytes
 }

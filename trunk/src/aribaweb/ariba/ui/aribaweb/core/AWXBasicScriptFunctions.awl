@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#37 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#40 $
     </Copyright>
 
     <Overview>
@@ -76,13 +76,13 @@
     <a:RefreshRegion useId="BSF">
         <a:If ifTrue="$^sessionless:$false">
             <a:ClientSideScript synchronous="$true">
-                AWFrameName = null;
+                ariba.Request.AWFrameName = null;
             </a:ClientSideScript>
         <a:Else/>
             <a:ClientSideScript synchronous="$true">\
                 ariba.Request.initParams(\
                     '<a:PrimitiveString value="$requestContext.responseId"/>',\
-                    '<a:PrimitiveString value="$requestContext.sessionSecureId"/>',\
+                    '<a:PrimitiveString value="$session.sessionSecureId"/>',\
                     '<a:PrimitiveString value="$refreshUrl"/>',\
                     '<a:PrimitiveString value="$pingUrl"/>',\
                     '<a:PrimitiveString value="$progressCheckUrl"/>',\
@@ -108,5 +108,8 @@
                 );\
             </a:ClientSideScript>
         </a:If>\
+        <a:ClientSideScript synchronous="$true">
+            ariba.Refresh.AWAllowParentFrame = <a:String value="$=ariba.ui.aribaweb.core.AWPage.AllowParentFrame"/>;
+        </a:ClientSideScript>
     </a:RefreshRegion>\
 </a:Singleton>\

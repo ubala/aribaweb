@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Traits.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Traits.java#2 $
 */
 package ariba.ui.meta.annotations;
 
@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * Associates OSS trait(s) with a field.  E.g. @Traits("richtext") or @Traits("required enumeration")
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD,ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
 @Inherited
 public @interface Traits {
     String value();

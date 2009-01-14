@@ -12,11 +12,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Trait.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Property.java#3 $
 */
 package ariba.ui.meta.annotations;
 
-import ariba.ui.meta.core.UIMeta;
+import ariba.ui.meta.core.ObjectMeta;
 import ariba.util.core.Fmt;
 import ariba.util.fieldvalue.FieldValue;
 
@@ -26,7 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
-import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +47,7 @@ public class Property
     @Retention(RetentionPolicy.RUNTIME) @Target({ElementType.FIELD,ElementType.METHOD}) @Inherited
     public @interface Label { public abstract String value(); }
 
-    static public void registerAnnotationListeners (UIMeta meta)
+    static public void registerAnnotationListeners (ObjectMeta meta)
     {
         registerProperty(Visible.class, meta);
         registerProperty(Valid.class, meta);
@@ -55,10 +55,10 @@ public class Property
         registerProperty(Label.class, meta);
     }
 
-    static public void registerProperty (final Class annotationClass, final UIMeta meta)
+    static public void registerProperty (final Class annotationClass, final ObjectMeta meta)
     {
-        meta.registerAnnotationListener(annotationClass, new UIMeta.AnnotationProcessor(){
-            public void processAnnotation(Annotation annotation, AccessibleObject prop, List predicateList, Map propertyMap, boolean isAction)
+        meta.registerAnnotationListener(annotationClass, new ObjectMeta.AnnotationProcessor(){
+            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List predicateList, Map propertyMap, boolean isAction)
             {
                 String propertyDecl = Fmt.S("%s:%s", annotationClass.getSimpleName().toLowerCase(),
                         FieldValue.getFieldValue(annotation,  "value"));

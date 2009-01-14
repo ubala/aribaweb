@@ -24,7 +24,10 @@ class AdvancedTable extends AWComponent
     void init () {
         // initialize the display group and fetch objects ourselves so we can pre-select all
         list = AWTCSVDataSource.dataSourceForPath("SampleSpend.csv", this).fetchObjects()
-        users = ariba.ui.demoshell.XMLFactory.xmlNamed("Users.xml", this);
+
+        URL url = ariba.ui.table.ResourceLocator.urlForRelativePath("Users.xml", this);
+        users = new XmlSlurper().parseText(url.text)
+
         displayGroup = new ariba.ui.table.AWTDisplayGroup()
     }
 

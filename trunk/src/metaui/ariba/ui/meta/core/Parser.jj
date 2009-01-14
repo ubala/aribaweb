@@ -64,14 +64,14 @@ PARSER_END(Parser)
 
 /* Parse the whole rule file and add it to the Meta */
 void addRules () : {
-    Meta.Rule r;
+    Rule r;
 }
 {
     addRulesWithPredicate(null)
 }
 
 void addRulesWithPredicate (List contextPreds) : {
-    Meta.Rule r;
+    Rule r;
 }
 {
     (rule(contextPreds))*<EOF>
@@ -89,7 +89,7 @@ void rule (List contextPreds) : {
         {
             props = new HashMap();
             props.put("traits", t.image);
-            Meta.Predicate p = (Meta.Predicate)ListUtil.lastElement(preds);
+            Rule.Predicate p = (Rule.Predicate)ListUtil.lastElement(preds);
             if (p._value == Meta.KeyAny) p._value = t.image;
         }
     ]
@@ -99,7 +99,7 @@ void rule (List contextPreds) : {
         )
       |
         (
-            ";" {  _meta.addRule( new Meta.Rule(preds, props, 0, token.beginLine)); }
+            ";" {  _meta.addRule( new Rule(preds, props, 0, token.beginLine)); }
         )
     )
 }
@@ -113,22 +113,33 @@ void processRuleBody(List preds, Map props) : {
         (
             k=key() ":" v=value() ["!" { isOverride = true; }]
             { if (props == null) props = new HashMap();
-              if (isOverride) v = new Meta.OverrideValue(v);
+              if (isOverride) {v = new Meta.OverrideValue(v); isOverride=false; }
               props.put(k, v); }
             [ ";" ]
         )
       |
         /* flush any current rule to preserve rank */
-        { _meta.addRule( new Meta.Rule(preds, props, 0, token.beginLine)); props = null; }
+        { _meta.addRule( new Rule(preds, props, 0, token.beginLine)); props = null; }
         rule(preds)
     )*
-    { _meta.addRule(new Meta.Rule(preds, props, 0, token.beginLine)); }
+    { _meta.addRule(new Rule(preds, props, 0, token.beginLine)); }
 }
 
+void processProperty (Map props) : {
+    Object k, v;
+    boolean isOverride = false;
+}
+{
+    k=key() ":" v=value() ["!" { isOverride = true; }]
+    { if (props == null) props = new HashMap();
+      if (isOverride) v = new Meta.OverrideValue(v);
+      props.put(k, v); }
+    [ ";" ]
+}
 
 List predicateList () : {
     List preds = new ArrayList();
-    Meta.Predicate p;
+    Rule.Predicate p;
 }
 {
     (
@@ -140,7 +151,7 @@ List predicateList () : {
     { return preds; }
 }
 
-Meta.Predicate predicate () : {
+Rule.Predicate predicate () : {
     Token t;
     Object value = Meta.KeyAny;
     boolean isDecl = false;
@@ -150,12 +161,12 @@ Meta.Predicate predicate () : {
     (
         t=<IDENT> ["=" (value=simpleValue() | ( "(" value=valueOrList() ")") )]
         {
-            return new Meta.Predicate(t.image, value, isDecl);
+            return new Rule.Predicate(t.image, value, isDecl);
         }
       |
         "~" t=<IDENT>
         {
-            return new Meta.Predicate(t.image, Meta.NullMarker, isDecl);
+            return new Rule.Predicate(t.image, Meta.NullMarker, isDecl);
         }
     )
 }
@@ -299,7 +310,7 @@ Object bindingValue() : {
 {
     t=<FIELDPATHBINDING>
         {
-            return new Context.ContextFieldPath(t.image.substring(1));
+            return new PropertyValue.ContextFieldPath(t.image.substring(1));
         }
 }
 
@@ -311,7 +322,7 @@ Object exprValue() : {
         {
             String exprString = (String)token_source.literalValue;
             try {
-                return new Context.ExprValue(exprString);
+                return new PropertyValue.Expr(exprString);
             } catch (Exception e) {
                 ParseException pe = new ParseException(
                     Fmt.S("Expression parsing embedded expression, line: %s:\nExpr Message - %s",

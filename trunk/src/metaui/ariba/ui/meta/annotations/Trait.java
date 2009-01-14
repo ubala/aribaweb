@@ -12,11 +12,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Trait.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Trait.java#5 $
 */
 package ariba.ui.meta.annotations;
 
-import ariba.ui.meta.core.UIMeta;
+import ariba.ui.meta.core.ObjectMeta;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
-import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 import java.util.Map;
 
@@ -51,22 +51,22 @@ public class Trait
     @Retention(RetentionPolicy.RUNTIME) @Target({ElementType.FIELD,ElementType.METHOD}) @Inherited
     public @interface Truncated {}
 
-    static public void registerAnnotationListeners (UIMeta meta)
+    static public void registerAnnotationListeners (ObjectMeta meta)
     {
-        registerAnnotation(LongText.class, meta);
-        registerAnnotation(RichText.class, meta);
-        registerAnnotation(LabelField.class, meta);
-        registerAnnotation(Secret.class, meta);
-        registerAnnotation(Required.class, meta);
-        registerAnnotation(Truncated.class, meta);
+        registerAnnotation(LongText.class, "longtext", meta);
+        registerAnnotation(RichText.class, "richtext", meta);
+        registerAnnotation(LabelField.class, "labelField", meta);
+        registerAnnotation(Secret.class, "secret", meta);
+        registerAnnotation(Required.class, "required", meta);
+        registerAnnotation(Truncated.class, "truncated", meta);
     }
 
-    static public void registerAnnotation (final Class annotationClass, UIMeta meta)
+    static public void registerAnnotation (final Class annotationClass, final String name, ObjectMeta meta)
     {
-        meta.registerAnnotationListener(annotationClass, new UIMeta.AnnotationProcessor(){
-            public void processAnnotation(Annotation annotation, AccessibleObject prop, List predicateList, Map propertyMap, boolean isAction)
+        meta.registerAnnotationListener(annotationClass, new ObjectMeta.AnnotationProcessor(){
+            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List predicateList, Map propertyMap, boolean isAction)
             {
-                UIMeta.addTrait(annotationClass.getSimpleName(), propertyMap);
+                ObjectMeta.addTrait(name, propertyMap);
             }
         });
     }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.java#28 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.java#30 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -49,6 +49,7 @@ public class AWTextArea extends AWComponent
          BindingNames.errorKey,
          BindingNames.editable,
          BindingNames.onKeyDown,
+         BindingNames.showMaxLength
     };
     public AWEncodedString _elementId;
     private AWEncodedString _textAreaName;
@@ -233,7 +234,7 @@ public class AWTextArea extends AWComponent
 
     public boolean showMaxLengthIndicator ()
     {
-        return maxLengthInt() > 0; 
+        return maxLengthInt() > 0 && booleanValueForBinding(BindingNames.showMaxLength); 
     }
 
     public AWEncodedString maxLengthIndicatorId ()

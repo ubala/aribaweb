@@ -3,6 +3,8 @@
 
     Also includes debug time form validation
 */
+var _AWXMainWindow = null;
+var _AWXRefreshMainActionId = null;
 
 ariba.Util.extend(ariba.Debug, function() {
     // imports
@@ -49,9 +51,10 @@ ariba.Util.extend(ariba.Debug, function() {
                 if (!fileLocation) {
                     fileLocation = elm.innerHTML;
                 }
-                fileLocation = fileLocation.replace(/file:\\*/, "");
+                fileLocation = fileLocation.replace(/^file:/, "");
                 fileLocation = fileLocation.replace(/.*:\//, "");
                 fileLocation = fileLocation.replace("\\", "/");
+                fileLocation = fileLocation.replace(/^\//, "");
                 var parts = fileLocation.split(".");
                 fileLocation = parts[0];
                 var length = parts.length;
@@ -72,7 +75,6 @@ ariba.Util.extend(ariba.Debug, function() {
         // Parameters put in the panel by AWComponentInspector.awl
         _AWCPISession : "",
         _AWCPIRefreshId : "",
-        _AWXMainWindow : null,
 
         // Public Globals
         AWDebugJSUrl : '',
@@ -360,16 +362,30 @@ ariba.Util.extend(ariba.Debug, function() {
                 if (senderId) break;
                 senderId = target.id;
                 if (senderId) break;
+                senderId = target.getAttribute("for");
+                if (senderId) break;
                 target = target.parentNode;
             }
             if (senderId) {
                 senderId = senderId + "&cpDebug=1";
                 this.log("** Component Path this.log, id=" + senderId);
-                // Request.setDocumentLocation(Request.formatUrl(senderId) + "&cpDebug=1", "AWComponentPath", _AWCPIWindOpts);
-                Request.invoke(null, senderId)
 
                 // pop window to foreground
-                if (!_ComponentInspectorWin || !_ComponentInspectorWin.ariba.Request.invoke) open("", "AWComponentPath", _AWCPIWindOpts);
+                if (!_ComponentInspectorWin || !_ComponentInspectorWin.open
+                        || !_ComponentInspectorWin.ariba.Request.invoke)
+                {
+                    _ComponentInspectorWin = window.open("", "AWComponentPath", _AWCPIWindOpts);
+                }
+
+                // Setup back pointer
+                var mainWindow = window;
+                setTimeout(function() {
+                    _ComponentInspectorWin._AWXMainWindow = mainWindow;
+                }, 2000);
+
+                // Call on main window with path debug click
+                Request.invoke(null, senderId)
+
                 return true;
             }
             return false;
@@ -400,12 +416,12 @@ ariba.Util.extend(ariba.Debug, function() {
             }
         },
 
-        updateComponentInspector : function (sessionId, actionId, enabled)
+        updateComponentInspector : function (sessionId, openActionId, refreshMainActionId, enabled)
         {
             if (enabled) {
                 var win = _ComponentInspectorWin;
                 try {
-                    if (win && win.ariba.Request.invoke && win.ariba.Debug._AWCPISession == sessionId) {
+                    if (win && win.open && win.ariba.Request.invoke && win.ariba.Debug._AWCPISession == sessionId) {
                         // try to do an incremental refresh
                         // alert("Going incremental...");
                         win.ariba.Request.invoke.call(win.ariba.Request, null, win.ariba.Debug._AWCPIRefreshId);
@@ -419,21 +435,39 @@ ariba.Util.extend(ariba.Debug, function() {
                 // full page refresh version
                 _ComponentInspectorWin = null;
                 try {
-                    var url = Request.formatUrl(actionId);
+                    var url = Request.formatUrl(openActionId);
+                    window.name="Main";
+                    /*
+                    alert("Opening window = " + self + opener  + ", window.name = " + window.name
+                           + ", _ComponentInspectorWin.opener = " + _ComponentInspectorWin.opener
+                           + ", _ComponentInspectorWin.name = " + _ComponentInspectorWin.name
+                           + ", _ComponentInspectorWin.opener.name = " + _ComponentInspectorWin.opener.name);
+                           */
                     _ComponentInspectorWin = window.open(url, "AWComponentPath", _AWCPIWindOpts);
+
+                    var mainWindow = window;
+                    setTimeout(function() {
+                        // alert ("trying to set " + _ComponentInspectorWin + " to " + window);
+                        _ComponentInspectorWin._AWXMainWindow = mainWindow;
+                        _ComponentInspectorWin._AWXRefreshMainActionId = refreshMainActionId;
+                    },3000);
                 } catch (e) {
-                }
-                if (_ComponentInspectorWin && _ComponentInspectorWin.ariba) {
-                    _ComponentInspectorWin.ariba.Debug._AWXMainWindow = this;
                 }
             }
         },
 
         fireMainWindowAction : function (actionId)
         {
-            if (this._AWXMainWindow) {
+            /*
+            alert("Opener = " + opener + ", ariba = " + window.opener.ariba
+                   + ", opener.name = " + window.opener.name
+                   + ", window.name = " + window.name
+                   + ", window=opener == " + (window == window.opener));
+            */
+            if (_AWXMainWindow && _AWXMainWindow.open && _AWXMainWindow.ariba) {
+                _AWXMainWindow.ariba.Request.invoke.call(_AWXMainWindow.ariba.Request, null, actionId);
                 setTimeout(function() {
-                    this._AWXMainWindow.ariba.Request.invoke.call(this._AWXMainWindow.ariba.Request, null, actionId);
+                    // this._AWXMainWindow.ariba.Request.redirectRefresh.call(this._AWXMainWindow.ariba.Request);
                 }.bind(this), 200);
             } else {
                 alert("Debug.fireMainWindowAction() - Trying to invoke in main window, but pointer not set");

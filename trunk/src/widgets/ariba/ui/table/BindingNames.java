@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/BindingNames.java#35 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/BindingNames.java#36 $
 */
 
 package ariba.ui.table;
@@ -77,6 +77,8 @@ public final class BindingNames extends ariba.ui.widgets.BindingNames
     public static final String showRowAttributes = "showRowAttributes";
     public static final String overrideAttribute = "overrideAttribute";    
     public static final String filteredColumnAttributes = "filteredColumnAttributes";    
+    public static final String useRowDetailExpansionControl = "useRowDetailExpansionControl";
+    public static final String showColumnAttributeLableOnRow = "showColumnAttributeLabelOnRow";
 
     // DisplayGroup
     public static final String displayGroup          = "displayGroup";

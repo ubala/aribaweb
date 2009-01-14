@@ -12,27 +12,30 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#24 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#26 $
 */
 
 
 package ariba.ui.widgets;
 
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
+import ariba.ui.aribaweb.core.AWEditableRegion;
+import ariba.ui.aribaweb.core.AWErrorManager;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponse;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
-import ariba.ui.aribaweb.core.AWErrorManager;
-import ariba.ui.aribaweb.core.AWConcreteApplication;
+import ariba.ui.aribaweb.test.TestContext;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWFormatting;
-import ariba.util.core.StringUtil;
-import ariba.util.core.ListUtil;
 import ariba.util.core.Fmt;
 import ariba.util.core.HTML;
+import ariba.util.core.ListUtil;
+import ariba.util.core.StringUtil;
 import ariba.util.formatter.Formatter;
-import java.util.List;
+
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
 public class Chooser extends AWComponent
@@ -75,7 +78,8 @@ public class Chooser extends AWComponent
     {
         _chooserState = (ChooserState)valueForBinding(BindingNames.state);
         _formatter = (Formatter)valueForBinding(BindingNames.formatter);
-        _disabled = booleanValueForBinding(BindingNames.disabled);
+        _disabled = booleanValueForBinding(BindingNames.disabled) ||
+            AWEditableRegion.disabled(requestContext());
         _allowFullMatchOnInput = booleanValueForBinding(allowFullMatchOnInput);
     }
 
@@ -351,6 +355,17 @@ public class Chooser extends AWComponent
         return null;
     }
 
+    public boolean displayRecentlyViewed ()
+    {
+        // Don't display the recent viewed items during record and play back
+        // so they can not be used during recording, which  forces the
+        // user to search for the item they need to select.  If we allow
+        // users to select from the recently viewed items, it could cause tests
+        // to give false failures, because an item that selected during the recoding face
+        // from the recent item list might not be present in the recent item list during playback. 
+        return !TestContext.isTestAutomationMode(requestContext());
+    }
+
     public void setSelectionList (String listId)
     {
         if (Matches.equals(listId)) {
@@ -531,5 +546,9 @@ public class Chooser extends AWComponent
         panel.setup(_chooserState, selectionSource, _formatter);
         return panel;
     }
-
+    
+    public boolean isDisabled ()
+    {
+        return _disabled;
+    }
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestUnit.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestUnit.java#3 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -21,6 +21,8 @@ import ariba.util.core.ClassUtil;
 import ariba.util.core.ListUtil;
 
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class TestUnit
 {
@@ -28,11 +30,10 @@ public class TestUnit
     private String _mainName;
     private String _secondName;
     
-    private List _uiWithParamLinks = ListUtil.list();
-    private List _uiNoParamLinks = ListUtil.list();
-    private List _noUIWithParamLinks = ListUtil.list();
-    private List _noUiNoParamLinks = ListUtil.list();
-    private List _noLinks = ListUtil.list();
+    private List<TestLinkHolder> _uiWithParamLinks = ListUtil.list();
+    private List<TestLinkHolder> _uiNoParamLinks = ListUtil.list();
+    private List<TestLinkHolder> _noUIWithParamLinks = ListUtil.list();
+    private List<TestLinkHolder> _noUiNoParamLinks = ListUtil.list();
 
     private boolean _displayTestContextValue = false;
 
@@ -125,5 +126,31 @@ public class TestUnit
     public boolean hasNoUiNoParamLinks ()
     {
         return _noUiNoParamLinks.size() > 0;
+    }
+
+    public void sort ()
+    {
+        sort(_uiWithParamLinks);
+        sort(_uiNoParamLinks);
+        sort(_noUIWithParamLinks);
+        sort(_noUiNoParamLinks);
+
+    }
+
+    private void sort (List<TestLinkHolder> list)
+    {
+        Collections.sort(list,
+                 new Comparator() {
+                     public int compare (Object object1, Object object2)
+                     {
+                         TestLinkHolder c1 = (TestLinkHolder)object1;
+                         TestLinkHolder c2 = (TestLinkHolder)object2;
+                         return c1.getDisplayName().compareTo(c2.getDisplayName());
+                     }
+                     public boolean equals (Object o1, Object o2)
+                     {
+                         return compare(o1, o2) == 0;
+                     }
+                 });
     }
 }

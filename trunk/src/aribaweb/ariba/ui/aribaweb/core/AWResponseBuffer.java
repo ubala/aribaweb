@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#18 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#19 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -337,6 +337,11 @@ public final class AWResponseBuffer extends AWBaseObject
                 updateChecksum(responseBuffer._name);
             }
         }
+    }
+
+    protected boolean isScope ()
+    {
+        return _isScope;
     }
 
     static class ScopeChanges {

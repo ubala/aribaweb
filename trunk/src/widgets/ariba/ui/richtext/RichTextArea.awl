@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.awl#18 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.awl#19 $
     </Copyright>
 
     <Responsible>
@@ -95,8 +95,7 @@
                     otherBindings="$otherBindingsValues"/>\        
     <a:Else/>
         <w:RichTextAreaScript/>
-        <a:RefreshRegion>
-            <span elementId="$areaName" class="rtaWrapper">\
+        <a:RefreshRegion elementId="$areaName" class="rtaWrapper">
                 <a:RefreshRegion alwaysRender="$true">\
                     <a:GenericContainer tagName="script">
                         if (ariba_IR && ariba.registerRefreshRTEId) ariba.registerRefreshRTEId('$areaName');
@@ -117,7 +116,6 @@
                 <a:ClientSideScript isSingleton="$false">
                     initRTA('$areaName');
                 </a:ClientSideScript>
-            </span>
         </a:RefreshRegion>
     </a:If>
 <a:Else/>\

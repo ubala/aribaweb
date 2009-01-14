@@ -1,6 +1,6 @@
 {
     title = "Groovy AribaWeb/Widgets Application";
-    description = "A starter template for a basic (non-database)\nAribaWeb application that uses the Widgets library\n and supports definition of component in Groovy.";
+    description = "A starter template for a basic (non-database)\nAribaWeb application that uses the Widgets library\n and supports definition of components in Groovy.";
     rank = 2;
     parameters = (
         {

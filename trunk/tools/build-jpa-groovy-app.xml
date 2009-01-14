@@ -35,7 +35,7 @@
         <!-- Must include demoshell for AWGroovyLoader rapid turnaround -->
         <fileset id="war.jars" dir="${ariba.jars.dir}">
             <include name="ariba.metaui-jpa.jar"/>
-            <include name="ariba.demoshell.jar"/>
+            <include name="ariba.groovyloader.jar"/>
         </fileset>
     </target>
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaCommandBar.java#12 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaCommandBar.java#13 $
 */
 
 package ariba.ui.widgets;
@@ -23,7 +23,12 @@ public final class AribaCommandBar extends BrandingComponent
 
     public static void setGlobalCommandBar (String globalCommandBar)
     {
-        _globalCommandBar = globalCommandBar;
+        setGlobalCommandBar(globalCommandBar, true);
+    }
+
+    public static void setGlobalCommandBar (String globalCommandBar, boolean override)
+    {
+        if (override || _globalCommandBar == null) _globalCommandBar = globalCommandBar;
     }
 
     public String commands ()

@@ -1,4 +1,4 @@
-<w:FormTable showErrorFlags="$true">
+<w:FormTable showErrorFlags="$true" omitLabelPadding="$true">
     <w:FormRow label="Date">
         <w:DateField value="$^currentItem.Year" size="17"/>
     </w:FormRow>

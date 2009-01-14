@@ -4,14 +4,21 @@ Creating a New Application
 AribaWeb includes new project templates that make getting started
 with your first application quite easy.
 
+Online Video Tutorials
+----------------------
+- [Getting Started](http://www.vimeo.com/1790856)
+- [Building a GuestBook](http://www.vimeo.com/1773123)
+- [Setting up IntelliJ IDEA] (http://www.vimeo.com/1776187)
+
 Before Getting Started
 ----------------------
 
 1. Open a shell window (e.g. Windows cygwin/MKS window, or MacOS X / Linux Terminal)
 
-2. Make sure that you have the bin directory of you aribaweb installation in your PATH.  e.g. if you unpacked AW in your home directory:
+2. Make sure that you have the bin directory of you aribaweb installation in your PATH.
+e.g. if you unpacked AW in your home directory:
 
-        export PATH="~/aribaweb-0.8.4/bin:$PATH"
+        export PATH="~/aribaweb-5.0b6/bin:$PATH"
 
 
 Creating a Widgets App

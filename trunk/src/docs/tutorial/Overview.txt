@@ -1,6 +1,23 @@
 Overview of AribaWeb
 ====================
 
+<div style="width:170px; float:right; border:1px solid #AAAAAA; padding:8px; margin:0px 0px 8px 8px; background-color:#66FF66;text-align:center;line-height:1.5em">
+    <a href="https://sourceforge.net/project/showfiles.php?group_id=227584"><b>Download v5.0b6</b></a><br/>
+    <a href="CHANGES.html" style="font-size:9px;padding-top:5px" class="hoverLink">(Version History)</a>
+</div>
+
+<div style="width:170px; float:right; clear:both; border:1px solid #AAAAAA; padding:8px; margin:8px 0px 8px 8px; background-image:url(../resource/cssOrangeGradient.gif)">
+    <a href="Screencasts.html"><b>Screencasts</b></a><br>
+    <ul style="margin:0.5em 1em 0em 2em;padding:0px;line-height:1.5em">
+    <li><a href="http://www.vimeo.com/1790856">Getting Started</a></li>
+    <li><a href="http://www.vimeo.com/1773123">Building GuestBook</a></li>
+    <li><a href="http://www.vimeo.com/1827249">Rich Widgets and AJAX</a></li>
+    <li><a href="http://www.vimeo.com/2239096">Live UI Editing</a></li>
+    <li><a href="http://www.vimeo.com/1844030">Building Database app</a></li>
+    <li><a href="http://www.vimeo.com/1826564">Auto-AJAX Explained</a></li>
+    </ul>
+</div>
+
 Mission:
 --------
 **AribaWeb makes creating compelling, professional-grade web applications fast and fun.**
@@ -73,7 +90,7 @@ AribaWeb is at the heart of every application in [Ariba](http://www.ariba.com)'s
 Spend Management solutions and [Network services](http://discovery.ariba.com) --
 market leading web application used by hundreds of the largest corporations around
 the world, both deployed behind their firewalls and hosted at scale as a multi-tenant
-"On Demand" service.
+"On Demand" service.  (See the [AribaWeb release history](Release_History.html)).
 
 
 Minimal Code, Maximum Inference

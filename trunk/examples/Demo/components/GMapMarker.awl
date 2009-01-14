@@ -19,6 +19,10 @@
         Action to be fired on click on marker
     </Binding>
 
+    <Binding key="infoHtml" type="String" direction="get">
+        Html to be rendered in an InfoWindow on the marker
+    </Binding>
+
     <Binding key="action" type="AWResponseGenerating" direction="get">
         Action to be fired on click on marker
     </Binding>
@@ -33,5 +37,6 @@
             <a:String value="$^latitude:37.80354511753133"/>,
             <a:String value="$^longitude:-122.35816955566406"/>,
             <a:String value="$^autoCenterMap:true"/>,
-            "<a:ActionId action="$^action"/>", "<a:ActionId action="$^dragAction"/>");
+            "<a:ActionId action="$^action"/>", "<a:ActionId action="$^dragAction"/>",
+            "$^infoHtml");
 </a:ClientSideScript>\

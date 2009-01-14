@@ -9,6 +9,7 @@
         <w:BucketItem label="Pivot Tables" action='${pageWithName("PivotTabs")}'/>
         <w:BucketItem label="Forms" action='${pageWithName("MetaUIForms")}'/>
         <w:BucketItem label="File Upload" action='${pageWithName("FileUploadDownload")}'/>
+        <w:BucketItem label="Multi File Upload" action='${pageWithName("MultiFileUpload")}'/>
     </w:BucketHeading>
     <w:BucketHeading label="Fun">
         <w:BucketItem label="Master Detail app" action='${pageWithName("ERPage")}'/>
@@ -16,5 +17,6 @@
         <w:BucketItem label="Charts" action='${pageWithName("ChartTabs")}'/>
         <w:BucketItem label="Maps" action='${pageWithName("MapTabs")}'/>
         <w:BucketItem label="Map Race" action='${pageWithName("MapRace")}'/>
+        <w:BucketItem label="Mail Reader" action='${pageWithName("MailReader")}'/>
     </w:BucketHeading>
 </w:BucketsTOC>\

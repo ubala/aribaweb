@@ -24,8 +24,7 @@
     </description>
 
     <!-- aribaweb.properties: defaults  -->
-    <property name="aw.dependsOn" value="ariba.demoshell"/>
-    <property name="servlet.class" value="ariba.ui.demoshell.DispatcherServlet"/>
+    <property name="aw.dependsOn" value="ariba.groovyloader,ariba.metaui"/>
     <property name="aw.packagedResourceExtensions" value="awl,oss,csv,xml"/>
 
     <import file="build-metaui-app.xml"/>
@@ -33,20 +32,15 @@
     <target name="init" depends="widgets-app.init">
         <!-- include our jar in the war -->
         <fileset id="war.jars" dir="${build.jars.dir}">
-            <include name="ariba.demoshell.jar"/>
+            <include name="ariba.groovyloader.jar"/>
         </fileset>
 
         <fileset id="war.resource.jars" dir="${ariba.jars.dir}">
             <include name="ariba.aribaweb.jar"/>
             <include name="ariba.widgets.jar"/>
             <include name="ariba.metaui.jar"/>
-            <include name="ariba.demoshell.jar"/>
         </fileset>
     </target>
-
-    <fileset id="module.libs" dir="${lib.dir}">
-        <include name="js.jar"/>
-    </fileset>
 
     <fileset id="module.libs2" dir="${lib-internal.dir}">
         <include name="groovy-all.jar"/>

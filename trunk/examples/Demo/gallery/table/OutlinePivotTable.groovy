@@ -19,6 +19,7 @@ class OutlinePivotTable extends AWComponent
           layouts:[
             [name:"Non-Pivot"],
             [name:"By Supplier (P)", c:["Supplier"], r:["Item", "Region"], a:["Price"]],
+            [name:"By Supplier (P, Del)", c:["Supplier"], r:["Item", "Region"], a:["Price", "Delete"]],
             [name:"By Supplier", c:["Supplier"], r:["Item", "Region"], a:["BigFlag", "Price", "Quantity"]],
             [name:"By Supplier and Region", c:["Supplier", "Region"], r:["Item"], a:["Price", "Quantity"]],
             [name:"By Region and Supplier", c:["Region", "Supplier"], r:["Item"], a:["Price", "Quantity"]],
@@ -54,6 +55,12 @@ class OutlinePivotTable extends AWComponent
         updateFile();
     }
 
+    void delete () {
+        fullList.remove(displayGroup.currentItem())
+        rootList = AWTCSVDataSource.computeOutlineList (fullList, "children", "Level");
+        optionsChanged();
+    }
+
     def updateFile () {
         // read CSV and then convert to nested tree by interpreting Level field
         fullList = AWTCSVDataSource.dataSourceForPath(file.name, this).fetchObjects();
@@ -61,7 +68,7 @@ class OutlinePivotTable extends AWComponent
         layout=layouts()[1];
         optionsChanged();
         return null;
-    }
+    } 
 
     def showFilterPanel () {
         def panel = pageWithName("FilterPanel");
@@ -86,7 +93,6 @@ class OutlinePivotTable extends AWComponent
     def isItem () { return displayGroup.currentItem().Type == "Item" }
 
     def isColorBlank () { def it = displayGroup.currentItem()
-        println "isColorBlank: ${it.Item} ${it.ItemDesc} ${it.Region} -${it.Color}-";
         return !isItem() || !displayGroup.currentItem().Color }
 
 

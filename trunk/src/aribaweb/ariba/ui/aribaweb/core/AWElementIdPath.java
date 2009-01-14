@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#14 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -240,6 +240,25 @@ public class AWElementIdPath extends AWBaseObject
             }
         }
         return true;
+    }
+
+    /*
+        Determines whether arg is our parent or anticedent sibling, or "uncle"
+     */
+    public boolean isParentOrSiblingPredecessor (AWElementIdPath parent)
+    {
+        char[] thisPath = _path;
+        char[] parentPath = parent._path;
+
+        int parentLength = parentPath.length;
+        if (parentLength > thisPath.length) return false;
+        // don't require match on the trailing 0 on the parent
+        for (int i=0; i < parentLength-1; i++) {
+            if (thisPath[i] != parentPath[i]) {
+                return false;
+            }
+        }
+        return thisPath[parentLength-1] >= parentPath[parentLength-1];
     }
 
     /**

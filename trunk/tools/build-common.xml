@@ -174,26 +174,28 @@
     <property name="awreload.jar" location="${ariba.jars.dir}/ariba.awreload-jmti.jar"/>
 
     <target name="init">
-        <!-- support for tomcat base in build dir on alternate port -->
+        <!-- support for tomcat base in build dir / on alternate port -->
         <property name="derived.catalina.base.dir" location="${build.dir}/tomcat-bases/${name}"/>
-        <condition property="servlet.port" value="9080">
-            <not><isset property="use.shared.webapps.base"/></not>
-        </condition>
         <condition property="catalina.base.dir" value="${derived.catalina.base.dir}">
             <not><isset property="use.shared.webapps.base"/></not>
         </condition>
+
+        <condition property="servlet.port" value="9080">
+            <isset property="use.shared.webapps.base"/>
+        </condition>
         <condition property="tomcat.port.prefix.override" value="9">
-            <not><isset property="use.shared.webapps.base"/></not>
+            <isset property="use.shared.webapps.base"/>
         </condition>
         <condition property="jpda.address" value="9000">
-            <not><isset property="use.shared.webapps.base"/></not>
+            <isset property="use.shared.webapps.base"/>
         </condition>
 
         <property name="build.jars.dir" value="${build.dir}/lib"/>
         <property name="build.jar.file" location="${build.jars.dir}/${jar.name}"/>
         <property name="catalina.base.dir" value="${dist.root.dir}"/>
         <property name="build.wars.dir" value="${catalina.base.dir}/webapps"/>
-        <property name="build.war.file" location="${build.wars.dir}/${war.name}.war"/>
+        <property name="build.war.dir" location="${build.wars.dir}/${war.name}"/>
+        <property name="build.war.file" location="${build.war.dir}.war"/>
 
         <!-- web.xml: defaults  -->
         <property name="servlet.name" value="${war.name}"/>
@@ -217,6 +219,7 @@
         <include name="asm.jar"/>
         <include name="bcel.jar"/>
         <include name="mail.jar"/>
+        <include name="activation.jar"/>
         <include name="markdownj.jar"/>
     </fileset>
 
@@ -286,10 +289,29 @@
 
     <!-- For launched groovy scripts -->
     <path id="groovy.script.classpath">
-        <path refid="classpath"/>
         <fileset dir="${lib-internal.dir}">
             <include name="groovy-all.jar"/>
         </fileset>
+        
+        <!-- minimal set of AW / Widgets jars -->
+        <fileset dir="${lib-build.dir}">
+            <include name="javax.servlet.zip"/>
+        </fileset>
+        <fileset dir="${lib.dir}">
+            <include name="log4j.jar"/>
+            <include name="jakarta-oro.jar"/>
+            <include name="asm.jar"/>
+            <include name="bcel.jar"/>
+            <include name="markdownj.jar"/>
+        </fileset>
+        <fileset dir="${ariba.jars.dir}">
+            <include name="ariba.util.jar"/>
+            <include name="ariba.expr.jar"/>
+            <include name="ariba.aribaweb.jar"/>
+            <include name="ariba.widgets.jar"/>
+        </fileset>
+
+        <!-- plus lucene -->
         <fileset dir="${lib-demo.dir}">
             <include name="lucene-core.jar"/>
             <include name="lucene-highlighter.jar"/>
@@ -310,10 +332,6 @@
         <pathelement location="${ant.home}/lib/ant.jar"/>
 
         <fileset refid="build.deps"/>
-
-        <fileset dir="${lib.dir}">
-            <include name="js.jar"/>
-        </fileset>
 
         <fileset dir="${lib-internal.dir}">
             <include name="groovy-all.jar"/>
@@ -354,7 +372,7 @@
         <delete dir="${build.classes.dir}"/>
         <delete dir="${src.derived.dir}"/>
         <delete dir="${derived.catalina.base.dir}"/>
-        <delete dir="${build.wars.dir}/${war.name}" failonerror="false"/>
+        <delete dir="${build.war.dir}" failonerror="false"/>
         <delete dir="${build.jars.dir}" failonerror="false"/>
     </target>
 
@@ -415,13 +433,12 @@
         </compile>
     </target>
 
-    <target name="merge-js-check" if="js.merge.destfile">
+    <target name="merge-js-check" depends="init-js-resources" if="js.merge.destfile">
         <property name="js.merge.fullpath" location="${src.derived.dir}/${js.merge.destpath}/${js.merge.destfile}"/>
         <property name="js.compact.fullpath" location="${build.docroot.dir}/${js.merge.destpath}/${js.merge.destfile}"/>
         <dependset>
             <sources>
-                <filelist refid="merge.js.filelist"/>
-                <filelist refid="unmerged.js.filelist"/>
+                <resources refid="js.resources"/>
             </sources>
             <targets>
                 <path location="${js.compact.fullpath}"/>
@@ -488,18 +505,29 @@
     </target>
 
     <target name="war-resources" if="war.name" unless="war.uptodate">
-        <property name="war.resource.dir" location="${src.derived.dir}/${war.name}-resources"/>
+        <property name="war.resource.dir" location="${build.war.dir}"/>
         <mkdir dir="${war.resource.dir}"/>
-        <fileset id="war.resources" dir="${war.resource.dir}" includes="**/*"/>
         <!--- create resources by unzipping jars... -->
-        <pathconvert property="war.resource.jars.path" refid="war.resource.jars"/>
-        <echo message="Unzipping resources from ${war.resource.jars.path} to ${war.resource.dir}"/>
-        <unzip dest="${war.resource.dir}">
-            <patternset>
-                <include name="docroot/**/*"/>
-            </patternset>
-            <resources refid="war.resource.jars"/>
-        </unzip>
+        <pathconvert property="war.resource.jars.path" refid="war.resource.jars" pathsep=";"/>
+        <groovy>
+            def dest = properties["war.resource.dir"]
+            File tsFile = new File(properties["src.derived.dir"], "war.timestamp")
+            boolean didWrite
+            properties['war.resource.jars.path']?.split(";").each {
+                File jar = new File(it)
+                if (!tsFile.exists() || (tsFile.lastModified() &lt; jar.lastModified())) {
+                    println "Unzipping ${jar.path} to ${dest}..."
+                    ant.unzip(src:jar, dest: dest) {
+                        patternset { include(name:"docroot/**/*") }
+                    }
+                    didWrite = true
+                } else {
+                    println "Skipping ${jar} -- uptodate"
+                }
+            }
+            if (didWrite) tsFile.write("")
+        </groovy>
+        <fileset id="war.resources" dir="${war.resource.dir}" includes="**/*"/>
     </target>
 
     <target name="war-check" if="war.name">
@@ -508,11 +536,7 @@
 
         <dependset>
             <sources>
-                <resources refid="build.deps"/>
-                <resources refid="build.jars"/>
-                <resources refid="war.jars"/>
-                <resources refid="app.war.jars"/>
-                <resources refid="war.resources"/>
+                <fileset dir="${build.war.dir}"/>
             </sources>
             <targets>
                 <path location="${build.war.file}"/>
@@ -542,47 +566,61 @@
         <evaluate-template templateFile="${tools.dir}/templates/aribaweb.properties" outputFile="${aribaweb.properties}"/>
     </target>
 
-    <target name="war" depends="init, war-check, war-resources, check-web-xml" if="war.name" unless="war.uptodate">
-        <mkdir dir="${build.wars.dir}"/>
-        <!-- delete expanded war if present -->
-        <delete dir="${build.wars.dir}/${war.name}" quiet="true"/>
-        <!-- build new war -->
-        <war destfile="${build.war.file}"
-             webxml="${web.xml}">
-            <lib refid="build.deps"/>
-            <lib refid="build.jars"/>
-            <lib refid="war.jars"/>
-            <lib refid="app.war.jars"/>
-            <lib refid="module.libs"/>
-            <lib refid="module.libs2"/>
-            <lib refid="module.libs3"/>
-            <resources refid="war.resources"/>
-            <manifest>
-                <attribute name="Specification-Title"
-                           value="AribaWeb application"/>
-                <!-- spec version must match "digit+{.digit+}*" -->
-                <attribute name="Specification-Version" value="${version}"/>
-                <attribute name="Specification-Vendor"
-                           value="Ariba, Inc."/>
-                <attribute name="Implementation-Title" value="ariba.ui.aribaweb"/>
-                <!-- impl version can be any string -->
-                <attribute name="Implementation-Version"
-                           value="${version}"/>
-                <attribute name="Implementation-Vendor"
-                           value="Ariba, Inc."/>
-                <attribute name="X-Compile-Source-JDK"
-                           value="${javac.source}"/>
-                <attribute name="X-Compile-Target-JDK"
-                           value="${javac.target}"/>
-            </manifest>
-            <metainf dir="${common.dir}">
-                <include name="LICENSE.txt"/>
-                <include name="NOTICE.txt"/>
-            </metainf>
-            <metainf dir="${ariba.jars.dir}">
-                <include name="EXT-LICENSE.txt"/>
-            </metainf>
-        </war>
+    <target name="webapp" depends="init, war-resources, check-web-xml" if="war.name">
+        <resources id="war.all.libs">
+            <resources refid="build.deps"/>
+            <resources refid="build.jars"/>
+            <resources refid="war.jars"/>
+            <resources refid="app.war.jars"/>
+            <resources refid="module.libs"/>
+            <resources refid="module.libs2"/>
+            <resources refid="module.libs3"/>
+        </resources>
+        <pathconvert refid="war.all.libs" property="war.all.libs.path" pathsep=";"/>
+
+        <groovy>
+            def warDir = new File(properties["build.war.dir"])
+            def libDir = new File(warDir, "WEB-INF/lib")
+            // ["build.deps", "build.jars", "war.jars, "app.war.jars", "module.libs", "module.libs2", "module.libs3"]
+            properties["war.all.libs.path"].split(";").each {
+                def src = new File(it), dest = new File(libDir, src.name)
+                if (!dest.exists() || (dest.lastModified() &lt; src.lastModified())) {
+                    println "Copying: ${src} to ${dest}"
+                    ant.copy(file:src, todir:libDir)
+                }
+            }
+        </groovy>
+
+        <copy todir="${build.war.dir}/WEB-INF" file="${web.xml}"/>
+
+        <mkdir dir="${build.war.dir}/META-INF"/>
+        <manifest file="${build.war.dir}/META-INF/MANIFEST.MF">
+            <attribute name="Specification-Title"
+                       value="AribaWeb application"/>
+            <attribute name="Specification-Version" value="${version}"/>
+            <attribute name="Specification-Vendor"
+                       value="Ariba, Inc."/>
+            <attribute name="Implementation-Title" value="ariba.ui.aribaweb"/>
+            <attribute name="Implementation-Version"
+                       value="${version}"/>
+            <attribute name="Implementation-Vendor"
+                       value="Ariba, Inc."/>
+            <attribute name="X-Compile-Source-JDK"
+                       value="${javac.source}"/>
+            <attribute name="X-Compile-Target-JDK"
+                       value="${javac.target}"/>
+        </manifest>
+
+        <copy todir="${build.war.dir}/META-INF">
+            <fileset dir="${common.dir}" includes="LICENSE.txt, NOTICE.txt"/>
+            <fileset dir="${ariba.jars.dir}" includes="EXT-LICENSE.txt"/>
+        </copy>
+    </target>
+
+    <target name="war" depends="webapp, war-check" if="war.name" unless="war.uptodate">
+        <zip destfile="${build.war.file}">
+            <zipfileset dir="${build.war.dir}"/>
+        </zip>
     </target>
 
     <target name="javadocs"/>
@@ -735,9 +773,9 @@
         <parallel>
             <antcall target="tomcat"/>
             <sequential>
-                <sleep seconds="3"/>
-                <waitfor maxwait="45" maxwaitunit="second" checkevery="1000">
-                    <http url="${app.url}"/>
+                <sleep seconds="2"/>
+                <waitfor maxwait="45" maxwaitunit="second" checkevery="500">
+                    <http url="${app.url}/ad/ping"/>
                 </waitfor>
                 <openurl url="${app.url}"/>
             </sequential>
@@ -763,6 +801,11 @@
         </exec>
     </target>
 
+    <target name="echo-build-classpath">
+        <pathconvert property="classpath.string" refid="classpath" pathsep=";"/>
+        <echo message="CLASSPATH: ${classpath.string}"/>
+    </target>
+        
     <!--+
     | M A C R O S
     +-->
@@ -857,7 +900,7 @@
             <java jar="${catalina.home.dir}/bin/bootstrap.jar" fork="true">
                 <env key="CATALINA_HOME" value="${catalina.home.dir}"/>
                 <env key="ARIBAWEB_HOME" value="${dist.root.dir}"/>
-                <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
+                <!-- <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/> -->
                 <env key="ARIBA_AW_SEARCH_PATH" value="${aw.search.path}"/>
                 <env key="AW_HOME" value="${aw.home}"/>
 

@@ -276,13 +276,17 @@ ariba.Input = function() {
             // Debug.log("awModallyDisabled:  AWCoverDiv=" + AWCoverDiv + ", posParent=" + Dom.positioningParent(elm)
             //       + ", zindex-elm=" + Dom.effectiveStyle(elm, 'z-index'));
             if (!AWCoverDiv)  return false;
-            var posParent = Dom.positioningParent(elm);
-            if (posParent == null || posParent == Dom.documentElement()) return true;
-            var elmZ = Dom.effectiveStyle(posParent, 'z-index');
-            if (!elmZ) return true;
-            var coverZ = Dom.effectiveStyle(Dom.positioningParent(AWCoverDiv), 'z-index');
-            // Debug.log("awModallyDisabled: " + coverZ + ", " + elmZ);
-            return parseInt(elmZ) < parseInt(coverZ);
+            var posParent = elm;
+            while ((posParent = Dom.positioningParent(posParent)) && posParent != Dom.documentElement()) {
+                // Debug.log("posParent = " + posParent);
+                var elmZ = Dom.effectiveStyle(posParent, 'z-index');
+                if (elmZ) {
+                    var coverZ = Dom.effectiveStyle(Dom.positioningParent(AWCoverDiv), 'z-index');
+                    Debug.log("awModallyDisabled: " + coverZ + ", " + elmZ);
+                    if (parseInt(elmZ) > parseInt(coverZ)) return false;
+                }
+            }
+            return true;
         },
 
         registerActiveElementId : function (elementId) {

@@ -48,11 +48,11 @@
         </fileset>
     </target>
 
-    <target name="build-and-run" depends="init, jar, war, tomcat"
-            description="Rebuild WARs and start Tomcat"/>
+    <target name="build-and-run" depends="init, jar, webapp, tomcat"
+            description="Rebuild webapp and start Tomcat"/>
 
-    <target name="launch" depends="init, jar, war, tomcat-browse"
-            description="Rebuild WARs, starts Tomcat, opens browser"/>
+    <target name="launch" depends="init, jar, webapp, tomcat-browse"
+            description="Rebuild webapp, starts Tomcat, opens browser"/>
 
     <target name="clean" depends="init, common.clean"
             description="Removes build output of this target"/>

@@ -16,13 +16,12 @@
     (by <a href="mailto:bill@burkecentral.com">Bill Burke</a>)
     also licensed under Apache v 2.0.
     
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWJarWalker.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWJarWalker.java#7 $
 */
 package ariba.ui.aribaweb.util;
 
 import ariba.util.core.Assert;
 import ariba.util.core.ClassUtil;
-import ariba.util.core.ListUtil;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassReader;
@@ -647,56 +646,79 @@ public class AWJarWalker
     static void processBytecode (StreamIterator iter, String filename)
     {
         if (_AnnotationListeners == null) return;
+        visitBytecode(iter, filename,
+            new Visitor() {
+            String _classNamePath;
+
+            public void visit(int i, int i1, String s, String s1, String s2, String[] strings)
+            {
+                // System.out.println(" *** CLASS " + s);
+                _classNamePath = s;
+            }
+
+            public AnnotationVisitor visitAnnotation(String s, boolean b)
+            {
+                String className = _classNamePath.replace("/", ".");
+                // System.out.println("   --  Class: " + className + " - Annotation.. " + s);
+                notifyAnnotationListeners(className, s);
+                return this;
+            }
+
+            public FieldVisitor visitField(int i, String s, String s1, String s2, Object o)
+            {
+                // System.out.println("   --  Field " + s);
+                return this;
+            }
+
+            public MethodVisitor visitMethod(
+                final int access,
+                final String name,
+                final String desc,
+                final String signature,
+                final String[] exceptions)
+            {
+                // System.out.println("   --  Method " + name);
+                return this;
+            }
+
+            public void visitEnd()
+            {
+
+            }
+        });
+    }
+    
+    static void visitBytecode (StreamIterator iter, String filename, Visitor visitor)
+    {
+
         try {
             InputStream is = iter.getInputStream();
-            
             ClassReader cr = new ClassReader(is);
-            cr.accept(new EmptyVisitor() {
-                String _classNamePath;
-
-                public void visit(int i, int i1, String s, String s1, String s2, String[] strings)
-                {
-                    // System.out.println(" *** CLASS " + s);
-                    _classNamePath = s;
-                }
-
-                public AnnotationVisitor visitAnnotation(String s, boolean b)
-                {
-                    String className = _classNamePath.replace("/", ".");
-                    // System.out.println("   --  Class: " + className + " - Annotation.. " + s);
-                    notifyAnnotationListeners(className, s);
-                    return this;
-                }
-
-                public FieldVisitor visitField(int i, String s, String s1, String s2, Object o)
-                {
-                    // System.out.println("   --  Field " + s);
-                    return this;
-                }
-
-                public MethodVisitor visitMethod(
-                    final int access,
-                    final String name,
-                    final String desc,
-                    final String signature,
-                    final String[] exceptions)
-                {
-                    // System.out.println("   --  Method " + name);
-                    return this;
-                }
-
-                public void visitEnd()
-                {
-
-                }
-            }, false);
+            cr.accept(visitor, false);
         } catch (IOException e) {
             // skip?
         }
-
     }
 
-    static class EmptyVisitor implements ClassVisitor, MethodVisitor, FieldVisitor, AnnotationVisitor
+    public static void scanClasses (Filter jarfilter, Filter jarEntryFilter, Visitor visitor)
+        throws IOException
+    {
+        URL[] urls = AWJarWalker.findClassPaths();
+        for (int i = 0; i < urls.length; i++) {
+            URL jarURL = urls[i];
+            if (jarfilter.accepts(jarURL.toString())) {
+                AWJarWalker.StreamIterator iter =
+                    AWJarWalker.create(jarURL, jarEntryFilter);
+
+                while (iter.next()) {
+                    String filename = iter.getFilename();
+                    visitBytecode(iter, filename, visitor);
+                }
+            }
+        }
+    }
+    
+    public static class Visitor implements ClassVisitor, MethodVisitor, FieldVisitor, AnnotationVisitor
     {
         public void visit(int i, int i1, String s, String s1, String s2, String[] strings)
         {

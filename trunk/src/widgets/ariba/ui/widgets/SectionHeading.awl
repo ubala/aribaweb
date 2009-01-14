@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionHeading.awl#14 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionHeading.awl#15 $
     </Copyright>
 
     <Overview>
@@ -42,7 +42,7 @@
         </tr>
     </table>
 <a:Else/>    
-    <table class="$^class" width="100%" border="0" cellspacing="0" cellpadding="0">
+    <table class="$^class:sectionh1" width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>
             <td class="sectionHLeft">
                 <w:RoundedBox hideGradient="$true" roundStyle="$=ariba.ui.widgets.RoundedBox.TopLeft">

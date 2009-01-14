@@ -1,0 +1,43 @@
+<w:BasicPageWrapper hasForm="$false">
+    <a:Form enctype="multipart/form-data">
+        <t:DataTable title="Uploads" list="$uploads" item="$currentUpload" displayGroup="$displayGroup" 
+                     enableScrolling="$true" multiSelect="$true">
+            <t:Column label="File" isValueColumn="$true">
+                <a:HighLightedErrorScope errorValueSource="$currentUpload"
+                                         errorFieldPath="fileName">
+                    <w:ErrorIndicator showRequired="$^required"/>
+                    <a:If ifTrue="$currentUpload.fileName">
+                        <b><a:String value="$currentUpload.fileName"/></b>
+                        [<a:Hyperlink action="$update" submitForm="$false">Update</a:Hyperlink>]
+                    <a:Else/>
+                        <a:FileUpload filename="$currentUpload.fileName"
+                            bytes="$currentUpload.bytes"
+                            mimeType="$currentUpload.mimeType"
+                            maxLength="100000"
+                            fileSizeExceeded="$fileSizeExceeded"/>\
+                    </a:If>
+                </a:HighLightedErrorScope>
+            </t:Column>
+
+            <t:Column key="mimeType" label="Type"/>
+
+            <t:Column key="bytes.length" label="Size"/>
+
+            <t:Column width="1px">\
+                <a:If ifTrue="$currentUpload.fileName">
+                    <w:TextButton action="$doDownload" submitForm="$false">Download</w:TextButton>
+                </a:If>
+                <w:TextButton action="$remove" submitForm="$false">Remove</w:TextButton>
+            </t:Column>
+
+            <t:RowDetail style="padding-left:30px">\
+                <w:RichTextArea value="$currentUpload.description"/>\
+            </t:RowDetail>
+
+            <t:ButtonArea>
+                <w:TextButton action="$add" submitForm="$false">Add</w:TextButton>
+                <w:TextButton action="$upload" isBrandStyle="$true">Upload Files</w:TextButton>
+            </t:ButtonArea>
+        </t:DataTable>
+    </a:Form>
+</w:BasicPageWrapper>

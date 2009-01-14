@@ -12,13 +12,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaShutdownWarning.java#10 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaShutdownWarning.java#12 $
 */
 
 package ariba.ui.widgets;
 
-import ariba.ui.aribaweb.util.AWBookmarker;
-import ariba.ui.aribaweb.core.AWRedirect;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWRequestContext;
@@ -68,16 +66,28 @@ public class AribaShutdownWarning extends AWComponent
         // how much time until shutdown
         int remainingShutdownPeriodInMinutes =
             (int)application().monitorStats().remainingShutdownPeriod() / 1000 / 60;
-
-        String message = localizedJavaString(2,
-            "Attention: Routine system maintenance has occurred on the site. You must " +
-            "re-authenticate by logging off within {0} minutes of receiving this message. " +
-            "Please click <i>Finish Work</i>, save your work and log out. <b>Once logged out, " +
-            "you may immediately log back in and continue working.</b> You will be automatically " +
-            "logged out in {1} minutes." /*  */);
+        int msg = 2;
+        
+        if (showRefreshSession()) {
+            msg = 1;
+        }
+        String message = localizedJavaString(msg,
+            "<p><b>Attention:</b> Routine system maintenance has occurred on the site " +
+            "and we need to refresh your login session.</p><p>To refresh, please click " +
+            "the <i>Refresh Session</i> button. <b>Note: you will not be logged out." +
+            "</b></p><p>If you are in the middle of some work, you may click <i>Finish Work</i>, " +
+            "complete what you are doing and click the <i>Refresh Session</i> link in the " +
+            "top-right of the page.</p><p>Your session will be refreshed automatically in {0} minutes.</p>");
         message = Fmt.Si(message, remainingShutdownPeriodInMinutes,
                          remainingShutdownPeriodInMinutes);
         return message;
+    }
+
+    public boolean showRefreshSession ()
+    {
+        ConditionHandler handler = 
+            ConditionHandler.resolveHandlerInComponent("disableReturnToHome", this);
+        return handler.evaluateCondition(requestContext());
     }
 
     public AWResponseGenerating finishWork ()
@@ -87,15 +97,7 @@ public class AribaShutdownWarning extends AWComponent
 
     public AWResponseGenerating redirect ()
     {
-        AWRedirect redirect = null;
-        AWBookmarker bookmarker = application().getBookmarker();
-        AWRequestContext requestContext = requestContext();
-        if (bookmarker.isBookmarkable(requestContext)) {
-            String url = bookmarker.getURLString(requestContext);
-            redirect = AWRedirect.getRedirect(requestContext, url);
-            redirect.setAllowInternalDispatch(false);
-        }
-        session().terminate();
-        return redirect;
+        ActionHandler handler = ActionHandler.resolveHandler("refreshSession");
+        return handler.actionClicked(requestContext());
     }
 }

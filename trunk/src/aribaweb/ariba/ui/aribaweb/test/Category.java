@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/Category.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/Category.java#2 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -20,6 +20,8 @@ package ariba.ui.aribaweb.test;
 import ariba.util.core.ListUtil;
 
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class Category
 {
@@ -46,4 +48,24 @@ public class Category
         return _testUnitList;
     }
 
+    public void sort ()
+    {
+        Collections.sort(_testUnitList,
+                new Comparator() {
+                    public int compare (Object object1, Object object2)
+                    {
+                        TestUnit c1 = (TestUnit)object1;
+                        TestUnit c2 = (TestUnit)object2;
+                        return c1.getMainName().compareTo(c2.getMainName());
+                    }
+                    public boolean equals (Object o1, Object o2)
+                    {
+                        return compare(o1, o2) == 0;
+                    }
+                });
+        for (TestUnit tu : _testUnitList) {
+            tu.sort();
+        }
+
+    }
 }

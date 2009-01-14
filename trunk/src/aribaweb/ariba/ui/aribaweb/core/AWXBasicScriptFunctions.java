@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.java#31 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.java#34 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -30,9 +30,6 @@ public final class AWXBasicScriptFunctions extends AWComponent
     public static final AWEncodedString EmptyDocScriptlet =
         new AWEncodedString("javascript:void(document.open());void(document.write(\"<html></html>\"));void(document.close());");
     private static AWEncodedString _RequestHandlerUrl;
-
-    private static String BackTrackUrl;
-    private static String ForwardTrackUrl;
 
     public AWEncodedString requestHandlerUrl ()
     {
@@ -109,41 +106,37 @@ public final class AWXBasicScriptFunctions extends AWComponent
 
     public String getRefreshUrl ()
     {
-        return AWComponentActionRequestHandler.SharedInstance.refreshUrl(requestContext());
+        AWSession session = session();
+        String refreshURL = session.getRefreshURL();
+        if (refreshURL == null) {
+            refreshURL = AWComponentActionRequestHandler.SharedInstance.refreshUrl(requestContext());
+            session.setRefreshURL(refreshURL);
+        }
+        return refreshURL;
     }
 
     public String getBackTrackUrl ()
     {
-        if (AWConcreteApplication.IsCookieSessionTrackingEnabled) {
-            if (BackTrackUrl == null) {
-                BackTrackUrl =
-                    AWComponentActionRequestHandler.SharedInstance.historyRequestHandlerUrl(requestContext(),
+        AWSession session = session();
+        String backTrackURL = session.getBackTrackURL();
+        if (backTrackURL == null) {
+            backTrackURL = AWComponentActionRequestHandler.SharedInstance.historyRequestHandlerUrl(requestContext(),
                                 AWComponentActionRequestHandler.BackTrackActionName);
-            }
-            return BackTrackUrl;
+            session.setBackTrackURL(backTrackURL);
         }
-        else {
-            return AWComponentActionRequestHandler.SharedInstance.historyRequestHandlerUrl(requestContext(),
-                                AWComponentActionRequestHandler.BackTrackActionName);
-        }
+        return backTrackURL;
     }
 
     public String getForwardTrackUrl ()
     {
-        if (AWConcreteApplication.IsCookieSessionTrackingEnabled) {
-
-            if (ForwardTrackUrl == null) {
-                ForwardTrackUrl =
-                    AWComponentActionRequestHandler.SharedInstance.historyRequestHandlerUrl(requestContext(),
+        AWSession session = session();
+        String forwardTrackURL = session.getForwardTrackURL();
+        if (forwardTrackURL == null) {
+            forwardTrackURL = AWComponentActionRequestHandler.SharedInstance.historyRequestHandlerUrl(requestContext(),
                                 AWComponentActionRequestHandler.ForwardTrackActionName);
-            }
-            return ForwardTrackUrl;
+            session.setForwardTrackURL(forwardTrackURL);
         }
-        else  {
-            return AWComponentActionRequestHandler.SharedInstance.historyRequestHandlerUrl(requestContext(),
-                                AWComponentActionRequestHandler.ForwardTrackActionName);
-
-        }
+        return forwardTrackURL;
     }
 
     public String getPingUrl ()
@@ -153,7 +146,17 @@ public final class AWXBasicScriptFunctions extends AWComponent
 
     public String getProgressCheckUrl ()
     {
-        return AWDirectActionUrl.urlForDirectAction(AWDirectAction.ProgressCheckActionName, null);
+        AWDirectActionUrl url = AWDirectActionUrl.checkoutUrl();
+        url.setDirectActionName(AWDirectAction.ProgressCheckActionName);
+        if (!AWConcreteApplication.IsCookieSessionTrackingEnabled && request().applicationNumber() != null) {
+            // Without cookies, this ensures the progress check goes to the same app instance
+            url.setApplicationNumber(request().applicationNumber());
+        }
+        url.put(AWDirectAction.ProgressCheckSessionKeyName, session().sessionId());
+        String s = url.finishUrl();
+        // Use null request context to avoid associating to the session
+        s = AWDirectActionUrl.decorateUrl(null, s);
+        return s;
     }
 
     public String waitAlertMillis ()

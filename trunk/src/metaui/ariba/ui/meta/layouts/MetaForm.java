@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.java#3 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.java#8 $
 */
 package ariba.ui.meta.layouts;
 
@@ -24,6 +24,11 @@ import ariba.ui.meta.core.ItemProperties;
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.MetaContext;
 import ariba.ui.meta.core.Context;
+import ariba.ui.meta.core.ObjectMeta;
+import ariba.ui.meta.editor.EditManager;
+import ariba.ui.meta.editor.MetaSideInspector;
+import ariba.ui.widgets.AribaPageContent;
+import ariba.util.core.Fmt;
 
 import java.util.List;
 import java.util.Map;
@@ -38,14 +43,19 @@ public class MetaForm extends AWComponent implements AWFullValidationHandler
     public Map<String, List<String>> _fieldsByZone;
     Context.Snapshot _contextSnapshot;
     public Object _properties; 
+    EditManager _editManager;
+    public String _className;
+    public String _zonePath;
+    public String _zone;
 
-    public void init() {
-        super.init();
+    public boolean isStateless() {
+        return false;
     }
 
     public void renderResponse (AWRequestContext requestContext, AWComponent component)
     {
         Context context = MetaContext.currentContext(this);
+        _editManager = EditManager.activeEditManager(UIMeta.getInstance(), session());
 
         _object = context.values().get("object");
 
@@ -57,10 +67,6 @@ public class MetaForm extends AWComponent implements AWFullValidationHandler
             errorManager().registerFullValidationHandler(this);
         }
         super.renderResponse(requestContext, component);
-    }
-
-    public boolean isStateless() {
-        return false;
     }
 
     public Object currentProperties ()
@@ -76,6 +82,66 @@ public class MetaForm extends AWComponent implements AWFullValidationHandler
                 if (fields != null) processValidationForFields(fields);
             }
         }
+    }
+
+    public void initClass ()
+    {
+        Context context = MetaContext.currentContext(this);
+        _className = (String)context.values().get(ObjectMeta.KeyClass);
+        String zonePath = UIMeta.getInstance().zonePath(context);
+        _zonePath = (zonePath == null) ? null : zonePath.concat(".");
+    }
+
+    public String zonePath ()
+    {
+        return (_zonePath == null) ? _zone : _zonePath.concat(_zone);
+    }
+
+    public String dropAreaClass ()
+    {
+        return "dropArea awDrp_".concat(_className);
+    }
+
+    public String dragType ()
+    {
+        return (_editManager == null) ? null : _className;
+    }
+
+    public String dragClass ()
+    {
+        String dragType = dragType();
+        return (dragType != null)
+                ? Fmt.S("dropArea awDrp_%s awDrgCnt_%s%s", dragType, dragType,
+                    (isInspectedField() ? " selReg" : ""))
+                : null;
+    }
+
+    static final String SessionFieldKey = "metaForm.F";
+
+    public void dragAction ()
+    {
+        session().dict().put(SessionFieldKey, MetaContext.currentContext(this).debugTracePropertyProvider());
+    }
+
+    public void dropAction ()
+    {
+        Object dragContext = session().dict().get(SessionFieldKey);
+        Object dropContext = MetaContext.currentContext(this).debugTracePropertyProvider();
+        // AribaPageContent.setMessage(Fmt.S("Dragged %s onto %s", dragContext, dropContext), session());
+        _editManager.handleDrop(dragContext, dropContext);
+    }
+
+    public void handleClickedAction ()
+    {
+        MetaSideInspector.initialize();
+        Context context = MetaContext.currentContext(this);        
+        _editManager.setSelectedRecord((Context.AssignmentRecord)context.debugTracePropertyProvider());
+    }
+
+    public boolean isInspectedField ()
+    {
+        Context context = MetaContext.currentContext(this);
+        return _editManager.isCurrentFieldSelected(context);
     }
 
     void processValidationForFields (List<String> fields)

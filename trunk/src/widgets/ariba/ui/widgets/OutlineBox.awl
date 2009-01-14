@@ -17,7 +17,7 @@
     <tr>\
         <td class="$^headingClass:tableHeader">\
             <div >
-                 <table border="0" cellspacing="0" cellpadding="0">\
+                 <table border="0" cellspacing="0" cellpadding="0" width="100%">\
                     <tr>\
                         <td align="$languageLeft"
                             class="$^titleClass:sectionHead"
@@ -36,7 +36,7 @@
                                 <a:String value="$^title"/>&nbsp;\
                             </a:Hyperlink>\
                         </td>\
-                        <td nowrap="true">\
+                        <td nowrap="true" align="right">\
                             <a:IncludeContent required="$false" templateName="buttonArea"/>\
                         </td>\
                     </tr>\

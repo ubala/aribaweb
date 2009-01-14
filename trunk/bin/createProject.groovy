@@ -40,12 +40,22 @@ def usage = """
                  }
             }
  */
+ParamsFileName = "templateInfo.table"
+SubstFileExtension = ".awtmpl"
+
+// We may be invoked by the IDE plugins with Param* variables bound 
+try {
+    //If params are bound this call will proceed, otherwise we'll get an exception
+    applyTemplate(ParamTemplateDir,ParamProjectDir,ParamConfigMap);
+    return;
+} catch(MissingPropertyException e) {
+    //No params: we are running from command line and should proceed normally
+}
+
 assert args.length == 1, usage
 File templatesDir = new File(args[0])
 assert templatesDir.exists(), "Supplied template directory not found: ${templatesDir}"
 
-ParamsFileName = "templateInfo.table"
-SubstFileExtension = ".awtmpl"
 input = new Scanner(System.in)
 
 File baseDir = new File(".")

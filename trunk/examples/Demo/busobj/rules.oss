@@ -29,3 +29,12 @@ class=busobj.User {
         }
     }
 }
+
+class=busobj.Project {
+    operation=list {
+        field=status { visible:false }  /* column completely hidden */
+        field=budget object {           /* column visible, some *cells* conditionally hidden */             
+            visible:${value > 2000};
+        }
+    }
+}

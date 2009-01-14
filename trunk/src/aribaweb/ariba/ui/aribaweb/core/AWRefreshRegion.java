@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.java#23 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.java#27 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -33,16 +33,17 @@ public final class AWRefreshRegion extends AWComponent
         AWBindingNames.useId,
         AWBindingNames.disabled,
         AWBindingNames.ignore,
+        AWBindingNames.omitTags,
         AWBindingNames.forceRefreshOnChange,
         AWDragContainer.DragActionBinding,
         AWDropContainer.DropActionBinding,
     };
 
-    private boolean _isDisabled;
+    public boolean _isDisabled;
     public boolean _dragEnabled;
     public AWEncodedString _elementId;
 
-    public AWBinding _tagNameBinding;
+    public String _tagName;
     public AWBinding _classBinding;
     public boolean _hasValueBinding;
     public boolean _hasRequiresRefreshBinding;
@@ -57,7 +58,16 @@ public final class AWRefreshRegion extends AWComponent
 
     protected void awake ()
     {
+        _tagName = stringValueForBinding(AWBindingNames.tagName, "div");
+
         _isDisabled = booleanValueForBinding(AWBindingNames.disabled);
+        if (!_isDisabled) {
+            // Disable if we're a TR but not in a scope
+            AWResponse response = response();
+            _isDisabled = (response == null || !(response instanceof AWBaseResponse)
+                    || ("tr".equals(_tagName) && !((AWBaseResponse)response()).currentRegionIsScope()));
+        }
+
         _dragEnabled = hasBinding(AWDragContainer.DragActionBinding);
         String useId = stringValueForBinding("useId");
         if (useId != null) {
@@ -67,7 +77,6 @@ public final class AWRefreshRegion extends AWComponent
         }
         setValueForBinding(_elementId, AWBindingNames.elementId);
         _classBinding = bindingForName(AWBindingNames.classBinding);
-        _tagNameBinding = bindingForName(AWBindingNames.tagName);
         // use false here to avoid recursion.
         // We only want to know what usage pattern
         // is desired -- not if it ultimately is bound.
@@ -87,7 +96,7 @@ public final class AWRefreshRegion extends AWComponent
         _isDisabled = false;
         _dragEnabled = false;
         _classBinding = null;
-        _tagNameBinding = null;
+        _tagName = null;
         _hasValueBinding = false;
         _hasRequiresRefreshBinding = false;
         super.sleep();
@@ -142,11 +151,8 @@ public final class AWRefreshRegion extends AWComponent
         if (hasBinding(_classBinding)) {
             className = stringValueForBinding(_classBinding);
         }
-        else if (hasBinding(_tagNameBinding)) {
-            String tagName = stringValueForBinding(_tagNameBinding);
-            if (!"div".equals(tagName)) {
-                className = null;
-            }
+        else if (!"div".equals(_tagName)) {
+            className = null;
         }
         return className;
     }

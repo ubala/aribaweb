@@ -3,6 +3,9 @@
         <w:Tab label="Simple Map">
             <x:MapSample/>
         </w:Tab>
+        <w:Tab label="Map Search">
+            <x:MapSearch/>
+        </w:Tab>
         <w:Tab label="Draw Course">
             <x:MapDrawCourse/>
         </w:Tab>

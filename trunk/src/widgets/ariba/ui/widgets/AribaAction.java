@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaAction.java#33 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaAction.java#34 $
 */
 
 package ariba.ui.widgets;
@@ -30,6 +30,7 @@ public class AribaAction extends AWComponent
     public final static String LogoutAction     = "logout";
     public final static String SupportAction    = "support";
     public final static String HelpAction       = "help";
+    public final static String SiteAction       = "site";
     public static final String GlobalNavAction  = "globalNav";
     public static final String PreferencesAction = "preferences";
 

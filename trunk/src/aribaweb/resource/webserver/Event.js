@@ -25,6 +25,7 @@ ariba.Event = function() {
     // walk
     var _FE = false;
     var EventsEnabled = true;
+    var AWDocHandler = new Object();
 
     var AWPrintWindowName = "AWPrintPage";
     var AWMouseDown = 'AWMouseDown';
@@ -272,6 +273,18 @@ ariba.Event = function() {
             EventsEnabled = false;
         },
 
+        updateDocHandler : function (eventType, docHandler)
+        {
+            var origDocHandler = AWDocHandler[eventType];
+            AWDocHandler[eventType] = docHandler;
+            return origDocHandler;
+        },
+
+        getDocHandler : function (eventType)
+        {
+            return AWDocHandler[eventType];
+        },
+
         // Called when events bubble up to our global handler on the document.
         // (We attempts to ensure that no handlers are enabled other than the doc handler so
         // that all events are actually dispatched here).
@@ -347,6 +360,14 @@ ariba.Event = function() {
         _elementInvoke : function (elm, evt, onName, xName) {
             var ret = true;
             var func;
+            var evtType = evt.type;
+            if (elm == window.document) {
+                // run doc handler if any
+                var docHandler = AWDocHandler[evtType];
+                if (docHandler) {
+                    return docHandler(evt);
+                }
+            }
 
         // check for local handler
             var handler = elm[onName];
@@ -706,14 +727,14 @@ ariba.Event = function() {
         {
             // this method makes it so a click
             // on the background makes the menu go away
-            AWOrigDocumentOnMouseDown = window.document.onmousedown;
-            window.document.onmousedown = func.bindDocHandler(this);
+            AWOrigDocumentOnMouseDown =
+                this.updateDocHandler("mousedown", func.bindEventHandler(this));
         },
 
         disableDocumentClick : function ()
         {
             if (AWOrigDocumentOnMouseDown) {
-                window.document.onmousedown = AWOrigDocumentOnMouseDown;
+                this.updateDocHandler("mousedown", AWOrigDocumentOnMouseDown);
                 AWOrigDocumentOnMouseDown = null;
             }
         },
@@ -846,6 +867,7 @@ ariba.Event = function() {
         }
     }
 
+    /*
     Function.prototype.bindDocHandler = function() {
         var __method = this, a = Util.toArray(arguments), obj = a.shift();
         return function(evt) {
@@ -853,8 +875,8 @@ ariba.Event = function() {
                     : Event.gl_handler.apply(Event, Util.concatArr([evt || window.event], a));
         }
     }
+    */
 
-    
     //********************************************************************
     // Global Handlers (for Behavior system)  ---------
     if (window == ariba.awCurrWindow) {

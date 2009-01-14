@@ -1,0 +1,8 @@
+<a:GenericContainer tagName="script" language="JavaScript" src="$url">\
+</a:GenericContainer>\
+<a:ClientSideScript>
+    window.google = {
+        pageTracker : _gat._getTracker('<a:String value="$=ariba.ui.widgets.GoogleAnalytics.webPropertyID"/>')
+    };
+    google.pageTracker._initData();
+</a:ClientSideScript>

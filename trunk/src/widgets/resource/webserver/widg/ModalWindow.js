@@ -264,6 +264,19 @@ ariba.ModalWindow = function() {
 
         EOF:0};
 
+    Event.registerBehaviors({
+        // HyperLink
+        MWL : {
+            mousedown :  function (elm, evt) {
+                var windowName = elm.getAttribute('_wn');
+                var tile = Dom.boolAttr(elm, '_tw');
+                var width = elm.getAttribute('_w');
+                var height = elm.getAttribute('_h');
+                return ariba.ModalWindow.openModalWindow(windowName, tile, width, height);
+            }
+        }
+    });
+
     /////////////////////////
     // Window Close Handling
     /////////////////////////

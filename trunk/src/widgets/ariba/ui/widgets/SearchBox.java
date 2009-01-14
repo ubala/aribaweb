@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SearchBox.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SearchBox.java#3 $
 */
 
 package ariba.ui.widgets;
@@ -21,9 +21,19 @@ import ariba.ui.aribaweb.core.AWComponent;
 
 public class SearchBox extends AWComponent
 {
+    public boolean showToggle ()
+    {
+        return hasBinding("toggleState");            
+    }
+
     public boolean showBodyTopArea ()
     {
         return  hasSubTemplateNamed("bodyTopArea") && !booleanValueForBinding("hideBodyTopArea");
+    }
+
+    public boolean showBodyArea ()
+    {
+        return !booleanValueForBinding("hideBodyArea");
     }
 
     public boolean showFooterArea ()

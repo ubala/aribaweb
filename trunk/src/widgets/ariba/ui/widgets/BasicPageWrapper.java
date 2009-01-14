@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.java#30 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.java#31 $
 */
 
 package ariba.ui.widgets;
@@ -80,5 +80,24 @@ public final class BasicPageWrapper extends PageWrapper
     public boolean alreadyInPageWrapper ()
     {
         return env().peek("PageWrapper") != null;
+    }
+
+    /**
+        Displays a pane during automation testing runs that contains TA links.
+     */
+    private static String TestPaneComponent = null;
+    public static void registerTestPaneComponent (String componentName)
+    {
+        TestPaneComponent = componentName;
+    }
+    
+    public boolean hasTestPane ()
+    {
+        return TestPaneComponent != null;
+    }
+
+    public String getTestPane ()
+    {
+        return TestPaneComponent;
     }
 }

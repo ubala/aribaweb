@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HtmlInclude.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HtmlInclude.java#4 $
 */
 
 package ariba.ui.widgets;
@@ -24,9 +24,14 @@ import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWUtil;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.regex.Pattern;
 
 public final class HtmlInclude extends AWComponent
 {
+
+    private static Pattern EventPattern =
+        Pattern.compile("(?i)on(click|mousein|mouseover|mousedown|mouseup|keydown|keypress|blur|focus)");
+
     public String htmlString ()
     {
         String htmlString = null;
@@ -43,6 +48,10 @@ public final class HtmlInclude extends AWComponent
                     AWUtil.close(inputStream);
                     if (htmlString == null) {
                         htmlString = "";
+                    }
+                    else {
+                        // See AWGenericElement._TranslatedBindings
+                        htmlString = EventPattern.matcher(htmlString).replaceAll("x$1");
                     }
                     resource.setObject(htmlString);
                 }

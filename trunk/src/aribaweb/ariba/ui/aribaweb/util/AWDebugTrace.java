@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#10 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -25,6 +25,7 @@ import ariba.ui.aribaweb.core.AWComponentDefinition;
 import ariba.ui.aribaweb.core.AWComponentReference;
 import ariba.ui.aribaweb.core.AWBaseElement;
 import ariba.ui.aribaweb.core.AWBindableElement;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 
 import java.util.Map;
 import java.util.List;
@@ -462,6 +463,17 @@ public class AWDebugTrace
             }
             return _recorder.getAssignments();
         }
+
+        public void invalidate ()
+        {
+            _properties = null;
+            _recorder = null;
+        }
+
+        public String inspectorComponentName (AWBindableElement element)
+        {
+            return MetaProvider.get(_metaPropertyProvider).inspectorComponentName(_metaPropertyProvider, element);
+        }
     }
 
     abstract static public class MetaProvider extends ClassExtension
@@ -499,6 +511,11 @@ public class AWDebugTrace
         {
             return title;
         }
+
+        public String inspectorComponentName (Object receiver, AWBindableElement element)
+        {
+            return "AWMetaInspectorPane";
+        }
     }
 
     static public class AssignmentRecorder
@@ -507,15 +524,20 @@ public class AWDebugTrace
         AssignmentSource _currentSource;
         boolean _didProcess;
 
+        public void setCurrentSource (AssignmentSource as)
+        {
+            _currentSource = as;
+            _assignments.put(_currentSource, new ArrayList());
+        }
+
         public void setCurrentSource (int rank, String description, String location)
         {
-            _currentSource = new AssignmentSource(rank, description, location);
-            _assignments.put(_currentSource, new ArrayList());
+            setCurrentSource(new AssignmentSourceImpl(rank, description, location));
         }
 
         public void registerAssignment (String key, Object value)
         {
-            _assignments.get(_currentSource).add(new Assignment(key, value));
+            _assignments.get(_currentSource).add(new Assignment(_currentSource, key, value));
         }
 
         public Map<AssignmentSource, List<Assignment>> getAssignments()
@@ -534,7 +556,7 @@ public class AWDebugTrace
             Collections.sort(sources, new Comparator<AssignmentSource> () {
                 public int compare(AssignmentSource assignmentSource, AssignmentSource assignmentSource1)
                 {
-                    return assignmentSource.rank - assignmentSource1.rank;
+                    return assignmentSource.getRank() - assignmentSource1.getRank();
                 }
             });
 
@@ -551,14 +573,21 @@ public class AWDebugTrace
 
     public static class Assignment
     {
+        AssignmentSource source;
         String key;
         Object value;
         boolean isOverridden;
 
-        public Assignment(String key, Object value)
+        public Assignment(AssignmentSource source, String key, Object value)
         {
+            this.source = source;
             this.key = key;
             this.value = value;
+        }
+
+        public AssignmentSource getSource ()
+        {
+            return source;
         }
 
         public String getKey()
@@ -577,13 +606,26 @@ public class AWDebugTrace
         }
     }
 
-    public static class AssignmentSource
+    public static abstract class AssignmentSource
+    {
+        abstract public int getRank();
+        abstract public String getDescription();
+        abstract public String getLocation();
+
+        public String locationShortName()
+        {
+            String location = getLocation();
+            return (location != null) ? AWUtil.lastComponent(location, "/") : "Unknown";
+        }
+    }
+
+    public static class AssignmentSourceImpl extends AssignmentSource
     {
         int rank;
         String description;
         String location;
 
-        public AssignmentSource(int rank, String description, String location)
+        public AssignmentSourceImpl(int rank, String description, String location)
         {
             this.rank = rank;
             this.description = description;
@@ -603,11 +645,6 @@ public class AWDebugTrace
         public String getLocation()
         {
             return location;
-        }
-
-        public String locationShortName()
-        {
-            return (location != null) ? AWUtil.lastComponent(location, "/") : "Unknown";
         }
     }
 

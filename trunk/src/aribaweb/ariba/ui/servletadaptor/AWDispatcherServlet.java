@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWDispatcherServlet.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWDispatcherServlet.java#5 $
 */
 
 package ariba.ui.servletadaptor;
@@ -56,7 +56,7 @@ public class AWDispatcherServlet extends HttpServlet
 
     public String applicationClassName ()
     {
-        return "Application";
+        return "app.Application";
     }
 
     public AWServletApplication createApplication ()

@@ -1,0 +1,43 @@
+<w:BasicPageWrapper hasForm="$true">
+
+    <w:Confirmation id="LoginPanel" okAction="$loginAction">
+        <a:Content name="header">IMAP Login Parameters</a:Content>\
+        <a:Content name="content">
+            <m:Context object="$loginParams" operation="edit"><m:Form/></m:Context>
+        </a:Content>\
+    </w:Confirmation>
+
+    <w:FourZoneLayout widthLeft="100px">
+        <a:Content name="left">
+            <w:RoundedBox>
+                <w:OutlineRepetition list="$folderNames" item="$folderName" children="$null"
+                                     hasChildren="$false" selectedObject="$selFolder">
+                    <div style="padding-top:4px">\
+                        <w:OutlineFolderControl title="$folderName.name" allowSelection="$true"
+                            isFolder="$true"/>\
+                    </div>
+                </w:OutlineRepetition>
+                <br/>
+            </w:RoundedBox>
+        </a:Content>
+        <a:Content name="right">
+            <t:DataTable list="$messages" item="$message" displayGroup="$displayGroup"
+                         initialSortKey=""
+                         multiSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                         enableScrolling="$true">
+                <t:Column key="sentDate" label="Sent" formatter="$formatters.shortDate"/>
+                <t:Column key="from" label="From"/>
+                <t:Column key="subject" label="Subject"/>
+            </t:DataTable>
+
+            <div style="width:625px; height:450px; overflow:scroll; margin-top:7px; padding:3px; border: 1px solid #9C9CB8;">\
+                <a:If notEqualNull="$displayGroup.selectedObject.html">
+                    <a:PrimitiveString value="$displayGroup.selectedObject.html"/>
+                <a:Else/>
+                    <pre>$displayGroup.selectedObject.plainText</pre>
+                </a:If>
+            </div>\
+            <br/>
+        </a:Content>
+    </w:FourZoneLayout>
+</w:BasicPageWrapper>

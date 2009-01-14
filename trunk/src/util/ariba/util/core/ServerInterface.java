@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ServerInterface.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ServerInterface.java#6 $
 */
 
 package ariba.util.core;
@@ -25,6 +25,11 @@ package ariba.util.core;
 */
 public interface ServerInterface
 {
+    // initialization topic
+
+    public final static String TopicStartupComplete =
+        "Ariba.RPC.Server.StartupComplete";
+
     /**
         Call to Terminate the application when a fatal error has been
         encountered.  Server gets restarted when it terminates via the 'fatal'

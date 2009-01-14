@@ -39,6 +39,10 @@
         <module-crawl target="jar"/>
     </target>
 
+    <target name="webapps" depends="jars">
+        <module-crawl target="webapp"/>
+    </target>
+
     <target name="wars" depends="jars">
         <module-crawl target="war"/>
     </target>
@@ -59,36 +63,36 @@
         <delete dir="${doc.dir}/xsd"/>
     </target>
     
-    <target name="tomcat-build" depends="wars, tomcat"
-            description="Rebuild WARs and start Tomcat"/>
+    <target name="tomcat-build" depends="webapps, tomcat"
+            description="Rebuild WAR dirs and start Tomcat"/>
 
-    <target name="tomcat-build-browse" depends="wars, tomcat-browse"/>
+    <target name="tomcat-build-browse" depends="webapps, tomcat-browse"/>
 
     <target name="launch" depends="tomcat-build-browse"
-            description="Rebuild WARs, start Tomcat, opens browser window"/>
+            description="Rebuild WAR dirs, start Tomcat, opens browser window"/>
 
-    <target name="tomcat-exec" depends="has-tomcat, wars"
+    <target name="tomcat-exec" depends="has-tomcat, webapps"
             description="Build, then run Tomcat">
         <property name="demoshell.home" location="${src.ui.dir}/demoshell/site"/>
         <condition property="catalina-command" value="catalina.bat">
             <os family="windows"/>
         </condition>
         <property name="catalina-command" value="catalina.sh"/>
-        <echo message="Launching tomcat with CATALINA_BASE=${catalina.base.dir}, ARIBA_DEMOSHELL_HOME=${demoshell.home} ([CTRL-C] to stop)..."/>
+        <echo message="Launching tomcat with CATALINA_BASE=${catalina.base.dir} ([CTRL-C] to stop)..."/>
         <echo message="Setting ARIBA_AW_SEARCH_PATH=${aw.search.path}"/>
         <echo message="Connect via ${app.url}"/>
         <exec dir="." executable="${catalina.home.dir}/bin/${catalina-command}">
             <env key="CATALINA_BASE" value="${catalina.base.dir}"/>
             <env key="CATALINA_HOME" value="${catalina.home.dir}"/>
             <env key="ARIBAWEB_HOME" value="${dist.root.dir}"/>
-            <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
+            <!-- <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/> -->
             <env key="ARIBA_AW_SEARCH_PATH" value="${aw.search.path}"/>
             <arg value="jpda"/>
             <arg value="run"/>
         </exec>
     </target>
 
-    <target name="tomcat-build-exec" depends="wars, tomcat-exec"
+    <target name="tomcat-build-exec" depends="webapps, tomcat-exec"
             description="Rebuild WARs and start Tomcat"/>
 
     <target name="groovysh-broken">
@@ -153,6 +157,7 @@
         <groovy src="bin/processdoc.groovy" classpathref="groovy.script.classpath">
             <arg value="${site.template}"/>
 
+            <arg value="${basedir}/CHANGES.txt"/>
             <arg value="${tutorial.src.dir}"/>
             <arg value="${src.ui.dir}/ideplugin/docs"/>
 
@@ -230,6 +235,10 @@
 
     <target name="package-binary"
             depends="wars, src-jar, docs, index-doc, check-ant, package-binary-min, package-binary-full">
+    </target>
+
+    <target name="inc-package-binary"
+            depends="jars, src-jar, check-ant, package-binary-min, package-binary-full">
     </target>
 
     <target name="src-jar">

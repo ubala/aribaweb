@@ -14,9 +14,10 @@ assert args.length >= 3, usage
 
 // println "Sleeping for debugger attach..."; Thread.currentThread().sleep(5000)
 
-File templateFile = new File(args[0])
+templateFile = new File(args[0])
+outputDir = new File(args[-1])
+
 List inputDirs = args[1..-2].collect() { new File(it) }
-File outputDir = new File(args[-1])
 
 // inputDirs.each { println "input dir: $it" }
 // System.exit(0)
@@ -30,23 +31,25 @@ AWConcreteApplication application = (AWConcreteApplication)AWConcreteApplication
 AWNamespaceManager ns = AWNamespaceManager.instance();
 ns.registerResolverForPackage("ariba.ui.aribaweb.util", ns.resolverForPackage("ariba.ui.widgets"));
 
+def processFile (File file) {
+    int prefixLen = file.getParentFile().getCanonicalPath().length()
+    String relativePath = file.getCanonicalPath().substring(prefixLen)
+    File outputFile = new File(outputDir, relativePath.replaceAll(/\.txt$/, ".html"))
+    println "    ... processing $relativePath ..."
+    String markdown = file.text
+    String title = "AribaWeb -- " + file.name.replace('_', ' ').replace('.txt', '')
+    AWEvaluateTemplateFile page = AWEvaluateTemplateFile.create(templateFile,
+            [contents:markdown, title:title])
+    page.process(outputFile)
+}
+
 inputDirs.each { File dir ->
     if (!dir.exists()) {
         println "Warning: input dir not found: $dir"
+    } else if (dir.isFile()) {
+        processFile(dir)
     } else {
-        int prefixLen = dir.getCanonicalPath().length()
         println "Scanning $dir"
-        dir.eachFile { File file ->
-            if (file.name.endsWith(".txt")) {
-                String relativePath = file.getCanonicalPath().substring(prefixLen)
-                File outputFile = new File(outputDir, relativePath.replaceAll(/\.txt$/, ".html"))
-                println "    ... processing $relativePath ..."
-                String markdown = file.text
-                String title = file.name.replace('_', ' ')
-                AWEvaluateTemplateFile page = AWEvaluateTemplateFile.create(templateFile,
-                        [contents:markdown, title:title])
-                page.process(outputFile)
-            }
-        }
+        dir.eachFile { File file -> if (file.name.endsWith(".txt")) processFile(file) }
     }
 }

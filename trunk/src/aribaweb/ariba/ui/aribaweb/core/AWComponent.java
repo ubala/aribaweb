@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#106 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#109 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -820,7 +820,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
                         // validate the componentAPI.  Needed since componentAPI
                         // validation initializes supported binding information.
 
-                        if (componentApi != null) {
+                        if (componentApi != null && requestContext() != null) {
                             // if there is a component api, then validate it (metadata validation)
                             componentApi.validate(requestContext().validationContext(), this);
                         }
@@ -861,9 +861,15 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         return replacement;
     }
 
-    //////////////////////
-    // Stateless/full Support
-    //////////////////////
+
+    /**
+        Overridden by AWComponent subclasses to indicate whether component instances
+        should be preseved with the page/session (i.e. are "stateful") or can be
+        pooled and reused for each phase of request processing (i.e. are stateless)
+
+        Default is to be statelss unless the component is used as the top-level
+        (page) component.
+     */
     public boolean isStateless ()
     {
         // default is true (and by default components aren't client panels...)
@@ -1504,7 +1510,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
                 }
                 if (elem != null) {
                     stringBuffer.append("(");
-                    stringBuffer.append(currentComponent.fullTemplateResourceUrl());
+                    stringBuffer.append(currentComponent.fullTemplateResourceUrl().replaceAll("^file\\:/", "/"));
                     stringBuffer.append(":");
                     stringBuffer.append(elem.lineNumber());
                     stringBuffer.append(")");

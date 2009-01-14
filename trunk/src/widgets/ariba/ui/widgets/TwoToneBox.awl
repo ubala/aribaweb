@@ -1,0 +1,10 @@
+<w:RoundedBox roundStyle="$=ariba.ui.widgets.RoundedBox.Top"
+            hideGradient="$true"
+            class="twoTT">
+    <a:IncludeContent name="header"/>
+</w:RoundedBox>
+<w:RoundedBox roundStyle="$=ariba.ui.widgets.RoundedBox.Bottom"
+            hideGradient="$true"
+            class="twoTB">
+    <a:IncludeContent name="body"/>
+</w:RoundedBox>

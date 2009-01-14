@@ -34,7 +34,9 @@
             <a:IncludeBlock name="Column"/>\
         </a:If>\
 -->
-            <m:IncludeComponent/>\
+            <a:If ifTrue="$metaContext.properties.visible">\
+                <m:IncludeComponent/>\
+            </a:If>\
         </a:OutputRangeCheck>\
     </td>\
     </m:Context>\

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWIncludeComponent.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWIncludeComponent.java#7 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -123,49 +123,57 @@ public class AWIncludeComponent extends AWContainerElement
         if (element == null) {
             String componentName = componentName(component);
             Assert.that(componentName != null, "Null component name not allowed for AWIncludeComponent");
-            Map newBindingsHashtable = bindingsForNewReference(component);
-            AWBinding awContentBinding = (AWBinding)newBindingsHashtable.remove(AWBindingNames.awcontent);
-            AWComponentDefinition componentDefinition = ((AWConcreteApplication)application)._componentDefinitionForName(componentName, component);
-            if (componentDefinition != null) {
-                element = AWComponentReference.create(componentDefinition);
-                element.init(componentName, newBindingsHashtable);
-                ((AWBaseElement)element).setTemplateName(templateName());
-                ((AWBaseElement)element).setLineNumber(lineNumber());
-            } else {
-                Class elementClass = application.resourceManager().classForName(componentName);
-                Assert.that(elementClass != null, "AWIncludeComponent cannot locate component named '%s'", componentName);
-                Assert.that(AWUtil.classImplementsInterface(elementClass, AWBindable.class),
-                        "Can't switch in component / Element that's not bindable: %s", componentName);
-                try {
-                    element = (AWBindable)elementClass.newInstance();
-                    element = (AWBindable)element.determineInstance(componentName, elementClass.getName(),
-                                    newBindingsHashtable, templateName(), lineNumber());
-                }
-                catch (IllegalAccessException illegalAccessException) {
-                    throw new AWGenericException(illegalAccessException);
-                }
-                catch (InstantiationException instantiationException) {
-                    String errorMessage = Fmt.S("Problem creating new instance of \"%s\" (%s) templateName: \"%s\" lineNumber: %s",
-                                                componentName, elementClass.getName(),
-                                                templateName(), String.valueOf(lineNumber()));
-                    throw new AWGenericException(errorMessage, instantiationException);
-                }
-            }
-            if (element instanceof AWElementContaining) {
-                AWElement contentElement = contentElement();
-                // see if we have a binding for our component content
-                if (awContentBinding != null) {
-                    Map valueBindingMap = new HashMap();
-                    valueBindingMap.put("value", awContentBinding);
-                    contentElement = new AWString();
-                    ((AWString)contentElement).init("AWString", valueBindingMap);
-                    setTemplateName(templateName());
-                    setLineNumber(lineNumber());
-                }
-                // To Do -- consider fabricating a dynamic (binding-based) body
-                ((AWElementContaining)element).add(contentElement);
-            }
+            element = _createComponentReference(componentName, component, application);
             storeElementReference(element, componentName, component);
+        }
+        return element;
+    }
+
+    protected AWBindable _createComponentReference (String componentName, AWComponent component,
+                                                    AWApplication application)
+    {
+        AWBindable element;
+        Map newBindingsHashtable = bindingsForNewReference(component);
+        AWBinding awContentBinding = (AWBinding)newBindingsHashtable.remove(AWBindingNames.awcontent);
+        AWComponentDefinition componentDefinition = ((AWConcreteApplication)application)._componentDefinitionForName(componentName, component);
+        if (componentDefinition != null) {
+            element = AWComponentReference.create(componentDefinition);
+            element.init(componentName, newBindingsHashtable);
+            ((AWBaseElement)element).setTemplateName(templateName());
+            ((AWBaseElement)element).setLineNumber(lineNumber());
+        } else {
+            Class elementClass = application.resourceManager().classForName(componentName);
+            Assert.that(elementClass != null, "AWIncludeComponent cannot locate component named '%s'", componentName);
+            Assert.that(AWUtil.classImplementsInterface(elementClass, AWBindable.class),
+                    "Can't switch in component / Element that's not bindable: %s", componentName);
+            try {
+                element = (AWBindable)elementClass.newInstance();
+                element = (AWBindable)element.determineInstance(componentName, elementClass.getName(),
+                                newBindingsHashtable, templateName(), lineNumber());
+            }
+            catch (IllegalAccessException illegalAccessException) {
+                throw new AWGenericException(illegalAccessException);
+            }
+            catch (InstantiationException instantiationException) {
+                String errorMessage = Fmt.S("Problem creating new instance of \"%s\" (%s) templateName: \"%s\" lineNumber: %s",
+                                            componentName, elementClass.getName(),
+                                            templateName(), String.valueOf(lineNumber()));
+                throw new AWGenericException(errorMessage, instantiationException);
+            }
+        }
+        if (element instanceof AWElementContaining) {
+            AWElement contentElement = contentElement();
+            // see if we have a binding for our component content
+            if (awContentBinding != null) {
+                Map valueBindingMap = new HashMap();
+                valueBindingMap.put("value", awContentBinding);
+                contentElement = new AWString();
+                ((AWString)contentElement).init("AWString", valueBindingMap);
+                setTemplateName(templateName());
+                setLineNumber(lineNumber());
+            }
+            // To Do -- consider fabricating a dynamic (binding-based) body
+            ((AWElementContaining)element).add(contentElement);
         }
         return element;
     }
@@ -258,7 +266,7 @@ public class AWIncludeComponent extends AWContainerElement
 
         index = computeIndexForElement(element, component);
         AWBindable existingElement = (AWBindable) _elementReferencesForId.get(index);
-        while (existingElement != null) {
+        while (existingElement != null && !_elementsAreCompatible(component, existingElement, element)) {
             // collision
             index++;
             Assert.that(index >= 0 && index < AWElementIdPath.LevelMaxSize, "elementReferenceId out of range:" + index);
@@ -267,6 +275,11 @@ public class AWIncludeComponent extends AWContainerElement
         _elementReferencesForId.put(index, element);
         _elementReferenceIds.put(element, index);
         return index;
+    }
+
+    protected boolean _elementsAreCompatible (AWComponent component, AWBindable orig, AWBindable element)
+    {
+        return false;
     }
 
     protected int computeIndexForElement (AWBindable element, AWComponent component)

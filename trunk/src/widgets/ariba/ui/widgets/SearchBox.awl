@@ -2,6 +2,9 @@
     <div class="searchBox">
         <table class="searchBoxHeader" cellpadding="0" cellspacing="0" width="100%">
             <tr>\
+                <a:If ifTrue="$showToggle">
+                    <td><w:ToggleImage state="$^toggleState" initState="$^initToggleState"/></td>
+                </a:If>
                 <td width="99%">\
                     <a:IncludeContent name="headerLeftArea" required="$false"/>\
                 </td>
@@ -10,31 +13,35 @@
                 </td>
             </tr>
         </table>
-        <table class="searchBoxBody" cellpadding="0" cellspacing="0" width="100%">
-            <a:If ifTrue="$showBodyTopArea">
+        <a:If ifTrue="$showBodyArea">
+            <table class="searchBoxBody" cellpadding="0" cellspacing="0">
+                <a:If ifTrue="$showBodyTopArea">
+                    <tr>\
+                        <td width="100%" valign="top" colspan="3">\
+                            <a:IncludeContent name="bodyTopArea" required="$false"/>\
+                        </td>
+                    </tr>
+                </a:If>
                 <tr>\
-                    <td width="100%" valign="top" colspan="2">\
-                        <a:IncludeContent name="bodyTopArea" required="$false"/>\
+                    <td width="50%" valign="top">\
+                        <a:IncludeContent name="bodyLeftArea" required="$false"/>\
+                    </td>
+                    <td class="ftAs"></td>
+                    <td width="50%" valign="top">\
+                        <a:IncludeContent name="bodyRightArea" required="$false"/>\
                     </td>
                 </tr>
-            </a:If>
-            <tr>\
-                <td width="50%" valign="top">\
-                    <a:IncludeContent name="bodyLeftArea" required="$false"/>\
-                </td>
-                <td width="50%" valign="top">\
-                    <a:IncludeContent name="bodyRightArea" required="$false"/>\
-                </td>
-            </tr>
-            <tr>\
-                <td width="50%" valign="top" style="padding-right:0px">\
-                    <a:IncludeContent name="bodyBottomLeftArea" required="$false"/>\
-                </td>
-                <td width="50%" valign="top" style="padding-left:0px">\
-                    <a:IncludeContent name="bodyBottomRightArea" required="$false"/>\
-                </td>
-            </tr>
-        </table>
+                <tr>\
+                    <td width="50%" valign="top" style="padding-right:0px">\
+                        <a:IncludeContent name="bodyBottomLeftArea" required="$false"/>\
+                    </td>
+                    <td class="ftAs"></td>
+                    <td width="50%" valign="top" style="padding-left:0px">\
+                        <a:IncludeContent name="bodyBottomRightArea" required="$false"/>\
+                    </td>
+                </tr>
+            </table>
+        </a:If>
         <a:If ifTrue="$showFooterArea">
             <table class="searchBoxFooter" cellpadding="0" cellspacing="0" width="100%">
                 <tr>\

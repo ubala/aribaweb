@@ -29,8 +29,4 @@ class UserListEditorPanel extends AWComponent
         (1..40).each { users.add([Name: "Joe${it}", Title: "Employee", Company: "Ariba"]) }
         return null;
     }
-
-    def modalPage () {
-        return pageWithName("ExpressionTest");
-    }
 }

@@ -12,36 +12,45 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#7 $
 */
 
 package ariba.ui.aribaweb.test;
 
-import ariba.util.test.TestLink;
-import ariba.util.test.TestStager;
-import ariba.util.core.ClassUtil;
-import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWDirectAction;
+import ariba.ui.aribaweb.core.AWRequestContext;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.util.core.ClassUtil;
+import ariba.util.test.TestPageLink;
+import ariba.util.test.TestParam;
+import ariba.util.test.TestStager;
+import ariba.util.test.TestValidator;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+import java.util.Set;
 
 public class AnnotationUtil
 {
     static public String getAnnotationTypeList (Annotation annotation)
     {
         String typeList = null;
-        if (TestLink.class.isAssignableFrom(annotation.annotationType())) {
-            TestLink testLink = (TestLink)annotation;
+        if (TestPageLink.class.isAssignableFrom(annotation.annotationType())) {
+            TestPageLink testLink = (TestPageLink)annotation;
             typeList = testLink.typeList();
         }
         else if (TestStager.class.isAssignableFrom(annotation.annotationType())) {
             TestStager testLink = (TestStager)annotation;
             typeList = testLink.typeList();
+        }
+        else if (TestValidator.class.isAssignableFrom(annotation.annotationType())) {
+            TestValidator testValidator = (TestValidator)annotation;
+            typeList = testValidator.typeList();
         }
         return typeList;
     }
@@ -49,13 +58,17 @@ public class AnnotationUtil
     static public String getAnnotationSuperType (Annotation annotation)
     {
         String superType = null;
-        if (TestLink.class.isAssignableFrom(annotation.annotationType())) {
-            TestLink testLink = (TestLink)annotation;
+        if (TestPageLink.class.isAssignableFrom(annotation.annotationType())) {
+            TestPageLink testLink = (TestPageLink)annotation;
             superType = testLink.superType();
         }
         else if (TestStager.class.isAssignableFrom(annotation.annotationType())) {
             TestStager testLink = (TestStager)annotation;
             superType = testLink.superType();
+        }
+        else if (TestValidator.class.isAssignableFrom(annotation.annotationType())) {
+            TestValidator testValidator = (TestValidator)annotation;
+            superType = testValidator.superType();
         }
         return superType;
     }
@@ -63,13 +76,28 @@ public class AnnotationUtil
     static public String getAnnotationName  (Annotation annotation)
     {
         String name = null;
-        if (TestLink.class.isAssignableFrom(annotation.annotationType())) {
-            TestLink testLink = (TestLink)annotation;
+        if (TestPageLink.class.isAssignableFrom(annotation.annotationType())) {
+            TestPageLink testLink = (TestPageLink)annotation;
             name = testLink.name();
         }
         else if (TestStager.class.isAssignableFrom(annotation.annotationType())) {
             TestStager testLink = (TestStager)annotation;
             name = testLink.name();
+        }
+        return name;
+    }
+
+
+    static public String getDescription  (Annotation annotation)
+    {
+        String name = null;
+        if (TestPageLink.class.isAssignableFrom(annotation.annotationType())) {
+            TestPageLink testLink = (TestPageLink)annotation;
+            name = testLink.description();
+        }
+        else if (TestStager.class.isAssignableFrom(annotation.annotationType())) {
+            TestStager testLink = (TestStager)annotation;
+            name = testLink.description();
         }
         return name;
     }
@@ -90,7 +118,11 @@ public class AnnotationUtil
         for (int i=0; i<methodTypes.length; i++) {
             if (AWRequestContext.class.equals(methodTypes[i])) {
                 args[i] = requestContext;
-            } else {
+            }
+            else if (TestContext.class.equals(methodTypes[i])) {
+                args[i] = testContext;
+            }
+            else {
                 args[i] = testContext.get(methodTypes[i]);
             }
         }
@@ -136,4 +168,22 @@ public class AnnotationUtil
         }
     }
 
+    public static void initializePageTestParams (AWRequestContext requestContext, AWResponseGenerating page)
+    {
+        TestContext testContext = TestContext.getTestContext(requestContext); 
+        // loop through all of the methods with TestParam Annotation and invoke
+        // the with method passing the proper needed argument to the method.
+        Map<Class, Object> annotations = TestLinkManager.instance().annotationsForClass(page.getClass().getName());
+        Set keys = annotations.keySet();
+        for (Object key : keys) {
+            Annotation annotation = (Annotation)key;
+            if (TestParam.class.isAssignableFrom(annotation.annotationType())) {
+                Object ref = annotations.get(key);
+                if (ref.getClass() == Method.class) {
+                    AnnotationUtil.invokeMethod(requestContext, testContext, (Method)ref, page);
+                }
+            }
+        }
+
+    }
 }

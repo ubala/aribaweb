@@ -9,7 +9,7 @@ FEATURES
 The plugin adds three features to IDEA and Eclipse:
 
 
-#### Code to/from Template toggle  (Alt-A)
+#### Code to/from Template toggle  (Alt-A / Ctrl-Alt-A)
 
 By convention, in AribaWeb the code (.java or .groovy) and template (.awl or .htm)
 files sit together in the source directory and have the same name (but different file
@@ -17,7 +17,7 @@ extensions).  The Alt-A command will toggle from viewing the code to template, o
 visa-versa.  You'd be surprised about just how handy this is in practice.
 
 
-#### Tag to Definition Jump (Alt-B)
+#### Tag to Definition Jump (Alt-B, Ctrl-Alt-B)
 
 When viewing a .awl file, if your cursor sits in an AW tag (e.g. `<TextButton>`)
 and you press Alt-B you will be jumped to the .awl file that defines that
@@ -42,10 +42,44 @@ To use the plug in within your IDE you must first install the appropriate .jar f
 your IDE's plug in directory.  These plugins can be found in your AribaWeb install root:
 
     ide/
-        ariba.ideplugin.eclipse_0.8.x.jar
+        ariba.ideplugin.eclipse.5.0b6.jar
         aribawebIdeaPlugin.jar
 
-Copy the appropriate one for your IDE into its plugins directory and restart your IDE.
+Copy the appropriate one for your IDE into its plugins directory (e.g. eclipse/plugins)
+and restart your IDE.
+
+**IDEA:** The IDEA plug-in can be downloaded via the IntelliJ Preferences->Plugins -> Available
+panel (search for AribaWeb).
+
+GETTING STARTED: IDEA
+---------------------
+See the webcast, [AribaWeb: Setting up IntelliJ IDEA for AW Development](http://www.vimeo.com/1776187).
+
+Important:
+
+- The first time you open a new AW project in IDEA you will be propted to enter your "AW_HOME"
+  path variable.  After setting this variable to point at the install location for AribaWeb,
+  *restart IDEA* (there appears to be a bug where this parameter change does not properly
+  take effect until after a clear restart)
+
+- *You need to update your Ant Home to Ant 1.7.1*.  IDEA 7.0.x comes bundled with Ant
+   1.7.0.  AW build files require 1.7.1, so you need to update your Ant_Home to 1.7.1.
+   In the Ant panel Properties panel, under the "Execution" panel, select "Use custom ant",
+   click the "..." file selector button, and select the copy of Ant 1.7.1 bundled in
+   AW_HOME/tools/ant.
+
+GETTING STARTED: ECLIPSE
+------------------------
+The plugin automatically aids in the setup of your Eclipse workspace for AW development.
+
+- Upon the first restart after installing the plugin, Eclipse will prompt you for your
+  AW_HOME.  Select the directory where you unzipped the AribaWeb distribution.
+
+- Based on your AW_HOME, the plug in will:
+    1. Change your Ant Home to point at the 1.7.1 version included with AribaWeb
+    2. Set the Ant variable ${aw.home} to point at your AW_HOME
+    3. Set up a "User Library" with all of the AW distribution jars (for use
+           in the classpath of your AW projects).
 
 BUILDING
 --------
