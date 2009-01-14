@@ -30,6 +30,8 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
+import ariba.util.fieldtype.TypeInfo;
+
 /**
  * @author Luke Blanshard (blanshlu@netscape.net)
  * @author Drew Davidson (drew@ognl.org)
@@ -48,7 +50,13 @@ class ASTSubtract extends ExpressionNode
     {
         Object v1 = children[0].getValue( context, source );
         Object v2 = children[1].getValue( context, source );
-        return ExprOps.subtract( v1, v2 );
+        TypeInfo v1Info = children[0].getTypeInfo();
+        TypeInfo v2Info = children[1].getTypeInfo();
+        return ExprOps.subtract(
+        		v1, 
+        		v2, 
+        		v1Info != null? v1Info.getName(): null,
+        	    v2Info != null? v2Info.getName(): null);
     }
 
     public String getExpressionOperator(int index)

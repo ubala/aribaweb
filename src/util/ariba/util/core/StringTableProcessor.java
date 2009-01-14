@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StringTableProcessor.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StringTableProcessor.java#6 $
 */
 
 package ariba.util.core;
@@ -36,8 +36,8 @@ public interface StringTableProcessor
 {
     /**
         create a csv consumer.
-        @param url: location of csv file
-        @param displayWarning: flag that indicates whether warning should be displayed for errors
+        @param url location of csv file
+        @param displayWarning flag that indicates whether warning should be displayed for errors
         @aribaapi ariba
     */
     public StringCSVConsumer createStringCSVConsumer (URL url,
@@ -45,8 +45,8 @@ public interface StringTableProcessor
     
     /**
         Merge string map read from different directories.
-        @param dest: destination map
-        @param source: source map
+        @param dest destination map
+        @param source source map
         @aribaapi ariba
     */
     public void mergeStringTables (Map dest, Map source);

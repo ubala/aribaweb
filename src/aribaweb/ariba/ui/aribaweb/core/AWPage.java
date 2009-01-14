@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#114 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#117 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -926,7 +926,8 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
             awake();
         }
         // Check here if our page instance is out of date (due to dynamic class reloading)
-        if (AWConcreteApplication.IsRapidTurnaroundEnabled) {
+        if (AWConcreteApplication.IsRapidTurnaroundEnabled
+                    && requestContext.currentPhase() == AWRequestContext.Phase_Render) {
             AWComponentDefinition componentDefinition = _pageComponent.componentDefinition();
             if (componentDefinition != null) {
                 AWComponent component = AWComponentReference.refreshedComponent(componentDefinition,
@@ -1221,7 +1222,6 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
      * Given the element id of a form, returns the list of form input element id's for
      * the form.
      * @param formId
-     * @return
      * @aribaapi private
      */
     public AWArrayManager getFormIds (String formId)
@@ -1309,8 +1309,8 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     }
 
     /**
-
-       @return
+       Notify that AWPoll-relevant changes have taken place (and client should be updated)
+       @return true if a changeNotifier is in effect
        @aribaapi private
     */
     public final boolean notifyChange ()
@@ -1331,6 +1331,11 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
         // one time read -- always reset to false after reading value.
         _hasChanged = false;
         return hasChanged;
+    }
+
+    public void resetHasChanged ()
+    {
+        _hasChanged = false;
     }
 
     public AWChangeNotifier getChangeNotifier ()

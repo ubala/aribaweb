@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTCSVDataSource.java#18 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTCSVDataSource.java#19 $
 */
 package ariba.ui.table;
 
@@ -45,6 +45,7 @@ import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
+import java.net.URL;
 
 public final class AWTCSVDataSource extends AWTDataSource implements CSVConsumer
 {
@@ -150,6 +151,18 @@ protected Entity (List keys, List classes)
         return dataSource;
     }
 
+    public static AWTCSVDataSource dataSourceForURL (URL url)
+    {
+        AWTCSVDataSource dataSource = new AWTCSVDataSource();
+        CSVReader reader = new CSVReader(dataSource);
+        try {
+            reader.read(url, I18NUtil.EncodingUTF8);
+        } catch (IOException e) {
+            throw new AWGenericException(e);
+        }
+        return dataSource;
+    }
+
     public static AWTCSVDataSource dataSourceForCSVString (String content)
     {
         AWTCSVDataSource dataSource = new AWTCSVDataSource();
@@ -164,9 +177,9 @@ protected Entity (List keys, List classes)
 
     public static AWTCSVDataSource dataSourceForPath (String path, AWComponent parentComponent)
     {
-        File f = ResourceLocator.fileForRelativePath(path, parentComponent);
-        if (f.exists()) {
-            return dataSourceForFile(f);
+        URL url = ResourceLocator.urlForRelativePath(path, parentComponent);
+        if (url != null) {
+            return dataSourceForURL(url);
         }
 
         AWResourceManager resourceManager = parentComponent.resourceManager();

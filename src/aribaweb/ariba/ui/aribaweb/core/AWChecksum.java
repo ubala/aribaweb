@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWChecksum.java#12 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWChecksum.java#13 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -178,7 +178,7 @@ public class AWChecksum
      * Only uses the last 30 values to keep it fast.
      * @param buf
      * @param len
-     * @return
+     * @return the crc
      */
     public static int crc32Hash (char[] buf, int len)
     {

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StableOrder.java#3 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StableOrder.java#5 $
 */
 
 package ariba.util.core;
@@ -42,7 +42,7 @@ public abstract class StableOrder
 
     /**
         Stable order for lists of strings
-        @see this.stableOrder(String, Comparator)
+        @see StableOrder#stableOrder(List, StringRepresentation)
         @aribaapi ariba
     */
     public List stableOrder (List/*<String>*/ original)
@@ -128,6 +128,9 @@ public abstract class StableOrder
         return factory == null ? null : factory.getOrder(name);
     }
 
+    /**
+     * @aribaapi ariba
+     */
     public static interface StringRepresentation
     {
         /**
@@ -140,6 +143,9 @@ public abstract class StableOrder
         public String asString (Object object);
     }
 
+    /**
+     * @aribaapi ariba
+     */
     protected static interface StableOrderFactory
     {
         public StableOrder getOrder (String name);

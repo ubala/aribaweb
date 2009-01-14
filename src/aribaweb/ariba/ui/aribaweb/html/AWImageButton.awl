@@ -13,11 +13,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWImageButton.awl#8 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWImageButton.awl#9 $
     </Copyright>
 
     <Overview>
-        Renders an <input type="image" ../> tag into the outgoing html along with appropriate attributes.  If the filename
+        Renders an `<input type="image" .. />` tag into the outgoing html along with appropriate attributes.  If the filename
         attribute is provided, AWImageButton will automatically compute the width and height from the image file it locates
         under the application resource directories.  The url generated is controlled by the AWResourceManager's url
         specification for the directory in which the image is found, but generally, the url's generated are directed at
@@ -59,7 +59,7 @@
     </Binding>
 
     <Binding key="*" type="String" default="$null" direction="get">
-        Arbitrary key/value pairs may be passed-through to the \<img.../> tag.  Most common html components also allow for this.
+        Arbitrary key/value pairs may be passed-through to the `<img.../>` tag.  Most common html components also allow for this.
     </Binding>
 
 </a:Api>\

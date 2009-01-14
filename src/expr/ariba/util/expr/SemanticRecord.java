@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/SemanticRecord.java#6 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/SemanticRecord.java#7 $
 */
 
 package ariba.util.expr;
@@ -110,7 +110,6 @@ public class SemanticRecord
      * node.  This is usually used in field path containing within a
      * projection.  In this case, the field path is not fully valid without
      * knowing the (extended) field path that leads to the projection node.
-     * @return
      */
     public Node getExtendedFieldPathNode ()
     {

@@ -1,5 +1,55 @@
 CHANGES.txt
 
+
+New in Version 0.8.3 (8/15/2008)
+---------------------------------
+- Documentation
+    - JavaDoc, including inlined AWApi (binding doc)
+    - SourceSearch documentation browse / search application
+    - New w:Markdown tag for writing markdown in components
+
+- Reworked organization of Examples
+    - All interesting examples now in examples/Demo app
+    - No embedded (demoshell) JS and groovy -- all .java or discrete .groovy files
+
+- Improved Component Inspector
+    - Browse metaui meta data (properties, and assignment source)
+    - Cleaner switching between path and tree views
+
+- Added RichTextEditor widget (based on Xinha javascript library)
+    - Used automatically by Meta UI for strings marked with trait "RichText"
+
+- Added AWReload: aka Java Rapid Turnaround
+    - i.e. support for dynmically compiling and reloading Java (and groovy) source changes
+    
+- Added AribaWeb IDE plugings for IntelliJ IDEA and Eclipse (see ide/ and src/ideplugin/README.txt)
+
+- Added metaui-jpa -- alpha implementation of metaui persistence API in terms of
+  EJB3 JPA / Hibernate.  Includes project templates, ant files, and bundled HSQLDB
+
+- Demo app enhancements
+    - Separate demo app from demoshell lib
+    - Support for .groovy files (in addition to script embedded in <groovy> tags) with automatic reloading
+
+- New "start", "aw" and "create-project" commands
+    - "aw" command sets up AW_HOME, ANT_HOME, JAVA_HOME, and checks CATALINA_HOME
+        - will invoke ant targets from tools/build-commands.xml (like create-project)
+    - "create-project" creates new project skeletons from templates
+        - currently have templates for a basic AW/Widgets apps and MetaUI-jpa (database) apps
+
+- Ant build file clean up (round 2)
+    - Apps can use tools/build-*-app.xml parent build files
+      web.xml and aribaweb.properties generated automatically
+    - Can build and run tomcat directly from app subdirectory (if AW_HOME set)
+    - Tomcat 6 support (copy conf from CATALINA_HOME rather than bundle it)
+
+- Embedded Tomcat (6.0.x) and Ant (1.7.1) simplifies getting started
+
+- Lib dir re-org
+    - External dependencies now in ext* subdirectories of lib
+    - Example ariba libs now prefixed with "app." (to distinguish from ariba.*.jar libs)
+
+
 New in Version 0.8.2 (6/25/2008)
 ---------------------------------
 - Ant build file cleanup

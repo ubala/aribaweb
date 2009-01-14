@@ -13,48 +13,52 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#111 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#114 $
     </Copyright>
 
     <Overview>
         AWTDataTable provides an Ariba branded, paginated, sortable, user-configurable table.
 
         The content of the table is processed unconventionally, somewhat like TabSet.  E.g.:
-        <t:DataTable multiSelect="$true" batchSize="10" list="$myList" displayGroup="$displayGroup">
-            <t:Column key="Department" label="Big D!" action="$goto.Home"/>
-            <t:Column label="Category">
-                $displayGroup.currentItem.Category
-            </t:Column>
-            <t:Column key="Amount" formatter="$formatters.money" align="right"/>
-            <t:Column key="Year" formatter="$formatters.shortDate" align="right"/>
-            <t:Column label="Actions">
-                <w:TextButton action="$null">Inspect</w:TextButton>
-            </t:Column>
-            <t:ButtonArea>
-                <w:TextButton action="$null">Delete</w:TextButton>
-                <w:TextButton action="$null">Edit</w:TextButton>
-            </t:ButtonArea>
-        </t:DataTable>
+
+                <t:DataTable list="$myList" displayGroup="$displayGroup"
+                            multiSelect="$true" batchSize="10">
+                    <t:Column key="Department" label="Big D!" action="$goto.Home"/>
+                    <t:Column label="Category">
+                        $displayGroup.currentItem.Category
+                    </t:Column>
+                    <t:Column key="Amount" formatter="$formatters.money" align="right"/>
+                    <t:Column key="Year" formatter="$formatters.shortDate" align="right"/>
+                    <t:Column label="Actions">
+                        <w:TextButton action="$null">Inspect</w:TextButton>
+                    </t:Column>
+                    <t:ButtonArea>
+                        <w:TextButton action="$null">Delete</w:TextButton>
+                        <w:TextButton action="$null">Edit</w:TextButton>
+                    </t:ButtonArea>
+                </t:DataTable>
 
         AWTColumn, AWTButtonArea, and AWTRowDetail are special "column types" that can appear in the
         body of the table tag.  Other tags (e.g. AWConditional, ...) appearing in the top level of the content
         are not supported (although they may appear in the body of a Column, ButtonArea, etc.
 
-        See Also:
-            AWTDisplayGroup
-            AWXOutlineControl
-            AWTOptionsMenuButton
-            AWTScrollTableWrapper
+        *See Also:* AWTDisplayGroup, AWXOutlineControl, AWTOptionsMenuButton, AWTScrollTableWrapper
 
         Scrolling / Pagination:
+        -----------------------
+
         Scrolling is used if all the following are true:
+
         -	the developer turned it on for that table (enableScrolling="$true"
+
         -	the browser is IE on Windows
+
         -	ADA accessibility is not enabled
 
         When scrolling is enabled:
+
         -	If the data won't fit in the current view (i.e. the scrollbar is visible) then the maximize control will appear.
-        **	Note: the appearance of the maximize control is tied to the presence of the AWTOptionsMenuButton ( )  If the
+        	*Note:* the appearance of the maximize control is tied to the presence of the AWTOptionsMenuButton ( )  If the
             page is not configured to show this, it will also not show the min/max control.
 
         -	If the result set is large (i.e. the number of rows is greater that 40), then a technique called
@@ -64,8 +68,11 @@
             takes the place of the pagination control.
 
         When scrolling is not enabled (Netscape, Accessibility, etc):
+
         -	There's no scrollbar, and thus no min/max control
+
         -	The number of rows per page is set by the "batchSize"
+
         -	If the result set is large (i.e. the number of rows is greater that the batch size), then the traditional
             pagination control will display, and can be used to move to subsequent pages.
 
@@ -206,15 +213,15 @@
     </Binding>
 
     <Binding key="selectionPath" type="AWOrderedList" required="$false" direction="both">
-        See AWXOutlineRepetition -- used only in tree mode.
+        See OutlineRepetition -- used only in tree mode.
     </Binding>
 
     <Binding key="expandCurrentItem" type="boolean" required="$false" direction="get">
-        See AWXOutlineRepetition -- used only in tree mode.
+        See OutlineRepetition -- used only in tree mode.
     </Binding>
 
     <Binding key="showExpansionControl" type="boolean" required="$false" direction="get">
-        See AWXOutlineRepetition -- used only in tree mode.
+        See OutlineRepetition -- used only in tree mode.
     </Binding>
 
     <Binding key="showTotalItems" type="String" required="$false" direction="get">
@@ -234,7 +241,7 @@
     </Binding>
 
     <Binding key="width" type="String" required="$false" direction="get">
-        Passed on to the <table/> width property.
+        Passed on to the `<table >` width property.
     </Binding>
 
     <Binding key="valign" type="String" required="$false" direction="get">
@@ -266,14 +273,15 @@
 
         A more sophisticated example: if you want to remove the background color on the grouping rows in the table,
         try something like this:
-        <style>
-            .oTableWrapper tr.tableGroupBy {
-                background-color:#FFFFFF;
-            }
-        </style>
 
-        <t:DataTable class="oTableWrapper scrollTableWrapper"/>
-            ...
+            <style>
+                .oTableWrapper tr.tableGroupBy {
+                    background-color:#FFFFFF;
+                }
+            </style>
+
+            <t:DataTable class="oTableWrapper scrollTableWrapper"/>
+                ...
     </Binding>
 
     <Binding key="rowClass" type="String" required="$false" direction="get" default="dynamic">
@@ -318,10 +326,13 @@
         automatically reset this value to false.
 
         NOTE: This binding is read / reset during the appendToResponse phase.  This means
-        1) the value passed in must be set appropriately at the beginning of
+
+        1. the value passed in must be set appropriately at the beginning of
            renderResponse and
-        2) the value passed in should not be used for any other purpose since it WILL be
+
+        2. the value passed in should not be used for any other purpose since it WILL be
            modified in the midst of the renderResponse phase
+
         Using this value for any other purpose (such as an AWConditional) will cause
         undefined (and most likely invalid) behavior.
     </Binding>
@@ -363,13 +374,14 @@
         requestContext.dict() or in some cross component data structure -- parent
         component, global data, etc.)
 
-        *** NOTE: This action is guaranteed to be invoked before the drop action is
+        **NOTE:** This action is guaranteed to be invoked before the drop action is
         invoked on a AWDropContainer.  This pseudo-action is invoked prior to the
         real action (drop action) so it should not change any object state which will
         affect the invokeActionForRequest() phase.
 
         General AWTDataTable drag/drop usage:
         -------------------------------------
+
         If a dragType is available, then is used.  If no dragType is defined, but a
         reorderAction exists, then the id of the AWTDataTable is used as the
         dragType (allowing drap/drop only within the current AWTDataTable).
@@ -525,20 +537,26 @@
         (You both lose your relevant subcomponent state -- invalidating the whole value of this feature -- and
         baloon your page memory usage)
     </Binding>
-
+    <Binding key="tableBodyCollapsible" type="boolean" required="$false" default="$false" direction="get">
+        Whether the table body can be collapsed.
+    </Binding>
+    <Binding key="initialTableBodyExpanded" type="boolean" required="$false" default="$true" direction="get">
+        Whether the table body is initially expanded.  This is ignore if rowsCollapsible="$false"
+    </Binding>
     <NamedContent name="optionsMenu" required="$false">
         Enable override of optionsMenu without needing to build entire header area.
         For example, the following has an options menu with only the excel export menu items.
-        <t:DataTable list="$data" showOptionsMenu="$true">
-           <t:Column key="key1"/>
-           <t:Column key="key2"/>
-           <a:Content name="optionsMenu">
-               <t:OptionsMenuButton showHideColumns="$false"
-                                     showGroupBy="$false"
-                                     showOutlineExpansion="$false"
-                                     showExcelExport="$true"/>\
-           </a:Content>
-        </t:DataTable>
+        
+            <t:DataTable list="$data" showOptionsMenu="$true">
+               <t:Column key="key1"/>
+               <t:Column key="key2"/>
+               <a:Content name="optionsMenu">
+                   <t:OptionsMenuButton showHideColumns="$false"
+                                         showGroupBy="$false"
+                                         showOutlineExpansion="$false"
+                                         showExcelExport="$true"/>\\
+               </a:Content>
+            </t:DataTable>
     </NamedContent>
 
 </a:Api>\
@@ -572,10 +590,16 @@
             isMaximized="$isMaximized" elementIdForVisibleRow="$elementIdForVisibleRow"
             disableRowSelection="$disableRowSelection" checkNbsps="$false" checkSelectionStyle="$false"
             updateSelectAllAction="$updateSelectAllAction"
-            useScrollFaulting="$useScrollFaulting"
-        awname="$awname">
+            useScrollFaulting="$useScrollFaulting" tableBodyExpanded="$tableBodyExpanded"
+            awname="$awname">
 
         <a:Content name="headerArea">\
+            <a:If ifTrue="$tableBodyCollapsible">
+                <div class="tableBodyToggle">
+                    <w:ToggleImage isExternal="$true"
+                                   state="$tableBodyExpanded"/>
+                </div>
+            </a:If>
             <a:If ifTrue="$showHeadingArea">
                 <a:MethodInvocation invoke="$makeHeadingAreaColumnCurrent"/>\
                 <a:IncludeComponent awcomponentName="$headingAreaColumn.rendererComponentName" table="$this"/>\

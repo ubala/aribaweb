@@ -30,6 +30,8 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
+import ariba.util.fieldtype.TypeInfo;
+
 /**
  * @author Luke Blanshard (blanshlu@netscape.net)
  * @author Drew Davidson (drew@ognl.org)
@@ -51,8 +53,17 @@ class ASTMultiply extends ExpressionNode
     protected Object getValueBody( ExprContext context, Object source ) throws ExprException
     {
         Object result = children[0].getValue( context, source );
-        for ( int i=1; i < children.length; ++i )
-            result = ExprOps.multiply( result, children[i].getValue(context, source) );
+        TypeInfo resultInfo = children[0].getTypeInfo();
+        String resultType = resultInfo != null? resultInfo.getName(): null; 
+        for ( int i=1; i < children.length; ++i ) {
+        	TypeInfo info = children[i].getTypeInfo();
+            result = ExprOps.multiply(
+            		result, 
+            		children[i].getValue(context, source),
+            		resultType,
+            	    info != null? info.getName(): null);
+            resultType = result != null? result.getClass().getName(): null;
+        }
         return result;
     }
 

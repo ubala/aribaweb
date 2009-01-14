@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWResource.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWResource.java#7 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -112,5 +112,13 @@ public abstract class AWResource extends AWBaseObject
         return StringUtil.strcat(getClass().getName(),
                             " resourceName: ", _resourceName,
                             " url: ", url());
+    }
+
+    /**
+        Try to find another resource at location relative to this one
+     */
+    public AWResource relativeResource (String relativePath, AWResourceManager resourceManager)
+    {
+        return null;
     }
 }

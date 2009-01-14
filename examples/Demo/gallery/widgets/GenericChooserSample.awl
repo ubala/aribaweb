@@ -1,0 +1,16 @@
+<w:BasicPageWrapper title="GenericChooserSample!" hasForm="$true">
+    <w:HintMessage>
+        A simple example of how a auto-refresh choosers can be used
+        for a dependent, two-part selection.
+    </w:HintMessage>
+    <!-- a selection in the first chooser will call setRegion(selected), which
+         will result in a recomputation of statesForSelectedRegion -->
+    Region:
+    <w:GenericChooser list="$regions" key="region" type="Popup" action="$null"/>
+    State:
+    <w:GenericChooser list="$statesForSelectedRegion" key="state"  type="Popup" action="$null"/>
+
+    <br/><br/>
+    Selection: $region : $state
+</w:BasicPageWrapper>
+                

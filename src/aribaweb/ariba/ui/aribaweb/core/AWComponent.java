@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#102 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#105 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -50,7 +50,30 @@ import java.util.Iterator;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 
-/** @aribaapi private */
+/**
+    AWComponent is the key class for template/based interactive content.  All "pages",
+    page sub-sections, "wrappers", as well as most controls / widgets, and even control
+    contructs are implemented as subclasses of AWComponent.
+     <p/>
+
+    Components typically have a {@link AWTemplate template} (.awl file) containing "bare
+    html text" mixed with {@link AWComponentReference references} to other embedded
+    AWComponents (or low level {@link ariba.ui.aribaweb.core.AWBindableElement elements}).
+    These, in turn, have {@link AWBinding bindings} that refer back to the java instance
+    paired with the template (often using {@link ariba.util.fieldvalue.FieldPath fieldpaths}
+    to dynamically push/pull values and invoke actions.
+    <p/>
+    Components may be either {@link #isStateless() stateless} (pooled) or stateful (bound to their
+    page instance and stored in the session.  (Typically pages, page sub-sections, and
+    particular rich components are stateful, while simple controls are stateless and
+    simply push/pull their needed state from their parent component via bindings).
+    <p/>
+    Simple subclasses of AWComponent typically declare instance variables (possible public
+    for use in bindings) as well as action methods (which return {@link AWResponseGenerating reponses}
+    which are usually just other page-level AWComponent instances for the next page (or null
+    to rerender the current page while reflecting any updated state).
+  @aribaapi private
+ */
 public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleableReference, AWResponseGenerating,
         AWResponseGenerating.ResponseSubstitution
 {
@@ -648,7 +671,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         return resource;
     }
 
-    protected AWResource templateResource ()
+    public AWResource templateResource ()
     {
         AWResource resource = safeTemplateResource();
         if (resource == null) {
@@ -661,7 +684,6 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         We need to use the same resource manager for loading templates.
         Otherwise, each component instances can potential get templates with
         a different structure (ie, AWIncludeComponent maps)
-        @return
      */
     public static AWResourceManager templateResourceManager ()
     {
@@ -1472,7 +1494,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     ////////////////////////
     /**
      * Retrieve the error manager for the page.
-     * @return
+     * @return error manager
      */
     public AWErrorManager errorManager ()
     {
@@ -1647,9 +1669,9 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         record and playback
     --------------------------------------------------------------------*/
     /**
-     * If any component wants to provider a semantic key different from the
+     * If any component wants to provide a semantic key different from the
      * default, it should override _debugSemanticKeyInteresting() and _debugSemanticKey()
-     * @return
+     * @return whether key is interesting
      */
     protected boolean _debugSemanticKeyInteresting ()
     {
@@ -1728,7 +1750,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
 
     /**
      * Override this method to disable wrapping of components in spans when doing componentPathDebugging
-     * @return
+     * @return whether component path debugging is allowed for this component
      */
     protected boolean allowComponentPathDebugging ()
     {
@@ -1738,7 +1760,6 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     /**
      * Override this method to restore the behavior in this page to that of aribaweb-7.
      * This only applies to page-level components
-     * @return
      */
     public boolean requiresPreGlidCompatibility ()
     {
@@ -1760,6 +1781,25 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     protected void validateSession (AWRequestContext requestContext)
     {
         requestContext.application().assertValidSession(requestContext);
+    }
+
+    /**
+         Provides verification on the request before its handled.
+         One of the items that are being checked for component action
+         requests is to protected against "CSRF" attack, this is done
+         by placing on session identifier on all component actions
+         requests and validating against the session on the server.
+
+         @return true by default
+     */
+    protected boolean shouldValidateRequest ()
+    {
+        return true;
+    }
+
+    protected void validateRequest (AWRequestContext requestContext)
+    {
+        requestContext.application().validateRequest(requestContext);
     }
 
     /**
@@ -1794,7 +1834,6 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
      * See AWParameters for more information.
      *
      * example: $AWParameters.System.UI.Table.MinHeight
-     * @return
      * @aribaapi private
      */
     public AWParameters getAWParameter ()

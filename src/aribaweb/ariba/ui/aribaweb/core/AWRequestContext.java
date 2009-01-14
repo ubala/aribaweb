@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#117 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#123 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -51,6 +51,8 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         AWEncodedString.sharedEncodedString("_self");
     public static final String SessionIdKey = "aws";
     public static final String ResponseIdKey = "awr";
+    public static final String SessionSecureIdKey = "awssk";
+    public static final String SessionSecureIdKeyEquals = AWRequestContext.SessionSecureIdKey + "=";
     public static final String FrameNameKey = "awf";
     public static final String PageScrollTopKey = "awst";
     public static final String PageScrollLeftKey = "awsl";
@@ -75,6 +77,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     private AWSession _awsession;
     private AWResponse _response;
     private AWEncodedString _responseId;
+    private String _sessionSecureId;
     private AWEncodedString _frameName;
     private Map _userState;
     private AWHtmlForm _currentForm;
@@ -127,9 +130,9 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     private String _directActionName;
 
     private int _currentPhase;
-    public static final int Phase_Render = 0;
     public static final int Phase_ApplyValues = 1;
     public static final int Phase_InvokeAction = 2;
+    public static final int Phase_Render = 3;
 
     public void init (AWApplication application, AWRequest request)
     {
@@ -241,6 +244,14 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     public AWPage requestPage ()
     {
         return _requestPage;
+    }
+
+    public String sessionSecureId ()
+    {
+        if (_sessionSecureId == null) {
+            _sessionSecureId = _application.getSessionSecureId(this);
+        }
+        return _sessionSecureId;
     }
 
     public AWEncodedString responseId ()
@@ -407,10 +418,10 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         if (_awsession == null) {
             _awsession = createSessionForHttpSession(httpSession);
         }
+        _awsession.ensureAwake(this);
         if (!AWRecordingManager.isInPlaybackMode(request())) {
             checkRemoteHostAddress(_awsession, sessionId, checkRemoteHostAddress);
         }
-        _awsession.ensureAwake(this);
         return httpSession;
     }
 
@@ -426,12 +437,14 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     remoteHostsMatch = checkHostsAgainstMask(sessionRemoteIPAddress, remoteHostAddress, remoteHostMask);
                 }
                 if (!remoteHostsMatch) {
+             	       // the session will be accessed when rendering the error page.
+             	       // set the remotehostaddress so the same error does not get triggered.
+                    session.setRemoteHostAddress(remoteHostAddress);
                     checkInExistingHttpSession();
-                    setHttpSession(null);
                     String message = Fmt.S("Unable to restore session with sessionId: '%s'.  The remote address of the current request '%s' does not match the remote address of the initial request '%s' with mask '%s'.",
                         sessionId, remoteHostAddress, sessionRemoteIPAddress.getHostAddress(), String.valueOf(remoteHostMask));
                     Log.aribaweb_session.debug(message);
-                    throw new AWSessionRestorationException(message);
+                    throw new AWGenericException(message);
                 }
             }
         }
@@ -479,7 +492,6 @@ public class AWRequestContext extends AWBaseObject implements DebugState
      * AWSession, this method returns null.
      *
      * @param required
-     * @return
      * @aribaapi private
      */
     public AWSession session (boolean required)
@@ -826,9 +838,9 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                 }
                 _currentPage.applyValues();
             }
-            catch (RuntimeException runtimeException) {
+            catch (Throwable t) {
                 String message = currentComponentPath();
-                throw AWGenericException.augmentedExceptionWithMessage(message, runtimeException);
+                throw AWGenericException.augmentedExceptionWithMessage(message, t);
             }
         }
         if (isActionLoggingEnabled) {
@@ -886,9 +898,9 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     actionResults = _currentPage.invokeAction();
                 }
             }
-            catch (RuntimeException runtimeException) {
+            catch (Throwable t) {
                 String message = "-- Component Path:\n" + currentComponentPath();
-                throw AWGenericException.augmentedExceptionWithMessage(message, runtimeException);
+                throw AWGenericException.augmentedExceptionWithMessage(message, t);
             }
             finally {
                 // clear the form input ids only if we have a component result.
@@ -901,6 +913,11 @@ public class AWRequestContext extends AWBaseObject implements DebugState
             // if we need to invoke again, move on to the next senderId
             moreSenderIds = hasMoreSenderIds();
             if (moreSenderIds) {
+                if (isPathDebugRequest() && (actionResults instanceof AWComponent)) {
+                    // do a renderResponse on this page so we populate the AWDebugTrace ComponentTraceNode tree
+                    debugTrace().didFinishPathTracePhase();
+                    AWComponentActionRequestHandler.SharedInstance._runNullRender(this, (AWComponent)actionResults, request(), true);
+                }
                 previousActionResults = actionResults;
                 dequeueSenderId();
                 resetForNextCycle();
@@ -979,12 +996,15 @@ public class AWRequestContext extends AWBaseObject implements DebugState
 
             updateRequestInterval();
         }
-        catch (RuntimeException runtimeException) {
+        catch (AWSessionRestorationException e) {
+            throw e;
+        }
+        catch (Throwable t) {
             Log.aribaweb.info(9023,
                               "Runtime exception in AWRequestContext.generateResponse",
-                              SystemUtil.stackTrace(runtimeException));
+                              SystemUtil.stackTrace(t));
             String message = currentComponentPath();
-            throw AWGenericException.augmentedExceptionWithMessage(message, runtimeException);
+            throw AWGenericException.augmentedExceptionWithMessage(message, t);
         }
         finally {
             // Note: we only clear the _userState at the end of renderResponse which means the app
@@ -1266,7 +1286,6 @@ public class AWRequestContext extends AWBaseObject implements DebugState
 
     /**
      * @deprecated use pushCurrentElement / popCurrentElement instead
-     * @return
      */
     public void setCurrentElement (AWBaseElement element)
     {
@@ -1304,7 +1323,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         else {
             Boolean flag = ((Boolean)session().dict().get(AWConstants.ComponentPathDebugFlagKey));
             boolean flagValue = flag != null ? flag.booleanValue() : false;
-            _componentPathDebuggingEnabled = flagValue && isDebuggingEnabled();
+            _componentPathDebuggingEnabled = (flagValue || isPathDebugRequest()) && isDebuggingEnabled();
         }
     }
 
@@ -1340,7 +1359,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     {
         setCurrentComponent(component);
         if (_componentPathDebuggingEnabled && (_currentPhase == Phase_Render)) {
-            debugTrace().pushTraceNode(component);
+            debugTrace().pushTraceNode(component.componentReference());
         }
     }
 
@@ -1629,7 +1648,6 @@ public class AWRequestContext extends AWBaseObject implements DebugState
 
     /**
      * @deprecated use put(key,value) and get(key) API's directly
-     * @return
      */
     public Map dict ()
     {

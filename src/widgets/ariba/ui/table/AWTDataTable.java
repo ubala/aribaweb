@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#174 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#176 $
 */
 
 package ariba.ui.table;
@@ -56,8 +56,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *  The basic table displayer.<br>
-    See <AWApi> section of .awl file for usage information.
+    DataTable widget
+    See the AWApi section of .awl file for usage information.
     @aribaapi ariba
 */
 public final class AWTDataTable extends AWComponent
@@ -97,6 +97,7 @@ public final class AWTDataTable extends AWComponent
     private static final String SortOrderingsConfigKey = "sortOrderings";
     private static final String GroupingExpansionDefaultConfigKey = "groupingExpansion";
     private static final String OutlineExpansionDefaultConfigKey = "outlineExpansion";
+    private static final String TableBodyExpansionDefaultConfigKey = "tableBodyExpansion";
 
     /**
      * Maximum number of characters being displayed in the menus for the column names
@@ -393,6 +394,8 @@ public final class AWTDataTable extends AWComponent
     public boolean _useRefresh;
     public boolean _isMaximized;  // pushed through from ScrollTableWrapper
     protected boolean _showSelectionColumn;
+    public boolean _tableBodyCollapsible;
+    public boolean _tableBodyExpanded;
 
     protected boolean _isDragDropEnabled = false;
 
@@ -464,65 +467,69 @@ public final class AWTDataTable extends AWComponent
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
-        _phasePrepare();
-        if ((_processedReference != componentReference()) ||
-            parentTableLayoutChanged() ||
-            hasDisplayGroupChanged()) {
+        try {
+            _phasePrepare();
+            if ((_processedReference != componentReference()) ||
+                parentTableLayoutChanged() ||
+                hasDisplayGroupChanged()) {
 
-            // make sure that columns are not being changed since we're trying to export
-            // the visible columns during invoke
-            Assert.that(!isExportMode(),
-                "Cannot change table structure during data export.");
+                // make sure that columns are not being changed since we're trying to export
+                // the visible columns during invoke
+                Assert.that(!isExportMode(),
+                    "Cannot change table structure during data export.");
 
-            initForChangedReference();
+                initForChangedReference();
 
-            // if we're going to initForChangedReference, then we're going to update all
-            // the columns and we need to ensure that our _forceColumnUpdateBinding
-            // continues to operate as a latch by pushing false to the binding
-            shouldForceColumnUpdate();
+                // if we're going to initForChangedReference, then we're going to update all
+                // the columns and we need to ensure that our _forceColumnUpdateBinding
+                // continues to operate as a latch by pushing false to the binding
+                shouldForceColumnUpdate();
 
-            // remember this template (and flag that we're done with initialization)
-            _processedReference = componentReference();
-        } else if (shouldForceColumnUpdate() && !isExportMode()) {
-            invalidateColumns();
-            columns();  // force refresh
+                // remember this template (and flag that we're done with initialization)
+                _processedReference = componentReference();
+            } else if (shouldForceColumnUpdate() && !isExportMode()) {
+                invalidateColumns();
+                columns();  // force refresh
+            }
+
+            if (_didHibernate) {
+                initializeDisplayGroupObjects();   // _displayGroup.fetch();
+                _didHibernate = false;
+            }
+
+            checkListChanges();
+            prepareForIteration();
+            checkGroupByColumn();
+            _rowToggleState = false;
+
+            _showSelectionColumn = !hasBinding(BindingNames.showSelectionColumn)
+                        || booleanValueForBinding(BindingNames.showSelectionColumn);
+
+            // we delay buffered changes to the scroll offset until renderResponse
+            checkScrollTop();
+
+            _displayGroup._discardBufferedSelection();
+
+            int cmLen = ListUtil.getListSize(_columnManagers);
+            for (int ii=0; ii<cmLen; ii++) {
+                ((AWTColumnManager)_columnManagers.get(ii)).preAppend(this);
+            }
+
+            // register error nav handler to provide default table nav support
+            // We need to register with highest possible priority
+            errorManager().registerErrorHandler(new DataTableNavigationHandler(this), 1, true);
+
+            // run the append on all our contained elements
+            super.renderResponse(requestContext, component);
+
+            for (int ii=0; ii<cmLen; ii++) {
+                ((AWTColumnManager)_columnManagers.get(ii)).postAppend(this);
+            }
+            _forceRenderSelectionColumn = false;
         }
-
-        if (_didHibernate) {
-            initializeDisplayGroupObjects();   // _displayGroup.fetch();
-            _didHibernate = false;
+        finally {
+            _phaseComplete();
         }
-
-        checkListChanges();
-        prepareForIteration();
-        checkGroupByColumn();
-        _rowToggleState = false;
-
-        _showSelectionColumn = !hasBinding(BindingNames.showSelectionColumn)
-                    || booleanValueForBinding(BindingNames.showSelectionColumn);
-
-        // we delay buffered changes to the scroll offset until renderResponse
-        checkScrollTop();
-
-        _displayGroup._discardBufferedSelection();
-
-        int cmLen = ListUtil.getListSize(_columnManagers);
-        for (int ii=0; ii<cmLen; ii++) {
-            ((AWTColumnManager)_columnManagers.get(ii)).preAppend(this);
-        }
-
-        // register error nav handler to provide default table nav support
-        // We need to register with highest possible priority
-        errorManager().registerErrorHandler(new DataTableNavigationHandler(this), 1, true);
-
-        // run the append on all our contained elements
-        super.renderResponse(requestContext, component);
-
-        for (int ii=0; ii<cmLen; ii++) {
-            ((AWTColumnManager)_columnManagers.get(ii)).postAppend(this);
-        }
-        _forceRenderSelectionColumn = false;
-        _phaseComplete();
     }
 
     public AWResponseGenerating  scrollFaultAction ()
@@ -589,6 +596,10 @@ public final class AWTDataTable extends AWComponent
 
         _showColumnHeader = (hasBinding(BindingNames.showColumnHeader)) ?
             booleanValueForBinding(BindingNames.showColumnHeader) : true;
+        _tableBodyCollapsible = booleanValueForBinding(BindingNames.tableBodyCollapsible);
+        _tableBodyExpanded = _tableBodyCollapsible
+            && hasBinding(BindingNames.initialTableBodyExpanded) ?
+                booleanValueForBinding(BindingNames.initialTableBodyExpanded) : true;
         _style = (hasBinding(BindingNames.style)) ?
             (String)valueForBinding(BindingNames.style) : null;
         boolean scrollingAllowed = AWTScrollTableWrapper.scrollingAllowed(requestContext())
@@ -650,67 +661,70 @@ public final class AWTDataTable extends AWComponent
     public AWResponseGenerating invokeAction(AWRequestContext requestContext,
                                                         AWComponent component)
     {
-        _phasePrepare();
+        try {
+            _phasePrepare();
 
-        // To render to excel the challenge is to render *just* this table (which may
-        // be embedded in a page).  We do this by catching the action that requests
-        // Excel rendering and, if the flag is set by the action, invoke renderResponse
-        // *on ourselves* to render just our table.
-        // WARNING:  ElementIds are screwed up by this, so stateful components in our content
-        // will fail to rendezvous with their instances.
-        _exportState = EXPORT_NONE;
+            // To render to excel the challenge is to render *just* this table (which may
+            // be embedded in a page).  We do this by catching the action that requests
+            // Excel rendering and, if the flag is set by the action, invoke renderResponse
+            // *on ourselves* to render just our table.
+            // WARNING:  ElementIds are screwed up by this, so stateful components in our content
+            // will fail to rendezvous with their instances.
+            _exportState = EXPORT_NONE;
 
-        prepareForIteration();
+            prepareForIteration();
 
-        int cmLen = ListUtil.getListSize(_columnManagers);
-        for (int ii=0; ii<cmLen; ii++) {
-            ((AWTColumnManager)_columnManagers.get(ii)).preInvoke(this);
-        }
-
-        // Todo:  for export, snapshot the element before doing this and restore it before doing renderResponse
-        AWResponseGenerating response =
-            super.invokeAction(requestContext, component);
-
-        boolean exportValidation =
-            ariba.ui.aribaweb.util.Log.aribawebvalidation_exportMode.isDebugEnabled();
-
-        // if export validation is on, do the export, but don't save the result
-        // see AWRequestContext.recordFormInputId for the actual validation.
-        if (isExportMode() || exportValidation) {
-            AWResponse excelResponse = application().createResponse();
-            excelResponse.setContentType(AWContentType.ApplicationVndMsexcel);
-            Util.setHeadersForDownload(excelResponse, "data.xls");
-
-            // temporarily hide non-data columns
-            Object state = _prepareColumnsForExport();
-
-            boolean origExpandAll = _expandAll;
-            if (_exportState == EXPORT_ALL) {
-                // expand all if exporting all
-                _expandAll = true;
+            int cmLen = ListUtil.getListSize(_columnManagers);
+            for (int ii=0; ii<cmLen; ii++) {
+                ((AWTColumnManager)_columnManagers.get(ii)).preInvoke(this);
             }
-            requestContext.setExportMode(true);
-            requestContext.setResponse(excelResponse);
-            renderResponse(requestContext, component);
 
-            _restoreColumnsAfterExport(state);
-            _expandAll = origExpandAll;
+            // Todo:  for export, snapshot the element before doing this and restore it before doing renderResponse
+            AWResponseGenerating response =
+                super.invokeAction(requestContext, component);
 
-            // System.out.println("Returning response: \n" + excelResponse.contentString());
+            boolean exportValidation =
+                ariba.ui.aribaweb.util.Log.aribawebvalidation_exportMode.isDebugEnabled();
 
-            if (!exportValidation) {
-                response = excelResponse;
+            // if export validation is on, do the export, but don't save the result
+            // see AWRequestContext.recordFormInputId for the actual validation.
+            if (isExportMode() || exportValidation) {
+                AWResponse excelResponse = application().createResponse();
+                excelResponse.setContentType(AWContentType.ApplicationVndMsexcel);
+                Util.setHeadersForDownload(excelResponse, "data.xls");
+
+                // temporarily hide non-data columns
+                Object state = _prepareColumnsForExport();
+
+                boolean origExpandAll = _expandAll;
+                if (_exportState == EXPORT_ALL) {
+                    // expand all if exporting all
+                    _expandAll = true;
+                }
+                requestContext.setExportMode(true);
+                requestContext.setResponse(excelResponse);
+                renderResponse(requestContext, component);
+
+                _restoreColumnsAfterExport(state);
+                _expandAll = origExpandAll;
+
+                // System.out.println("Returning response: \n" + excelResponse.contentString());
+
+                if (!exportValidation) {
+                    response = excelResponse;
+                }
             }
+
+            for (int ii=0; ii<cmLen; ii++) {
+                ((AWTColumnManager)_columnManagers.get(ii)).postInvoke(this);
+            }
+
+            _exportState = EXPORT_NONE;
+            return response;
         }
-
-        for (int ii=0; ii<cmLen; ii++) {
-            ((AWTColumnManager)_columnManagers.get(ii)).postInvoke(this);
+        finally {
+            _phaseComplete();
         }
-
-        _exportState = EXPORT_NONE;
-
-        _phaseComplete();
-        return response;
     }
 
     public AWComponent downloadToExcelAll ()
@@ -744,26 +758,30 @@ public final class AWTDataTable extends AWComponent
     public void applyValues(AWRequestContext requestContext,
                                        AWComponent component)
     {
-        _phasePrepare();
-        prepareForIteration();
+        try {
+            _phasePrepare();
+            prepareForIteration();
 
-        int cmLen = ListUtil.getListSize(_columnManagers);
-        for (int ii=0; ii<cmLen; ii++) {
-            ((AWTColumnManager)_columnManagers.get(ii)).preTake(this);
+            int cmLen = ListUtil.getListSize(_columnManagers);
+            for (int ii=0; ii<cmLen; ii++) {
+                ((AWTColumnManager)_columnManagers.get(ii)).preTake(this);
+            }
+
+            super.applyValues(requestContext, component);
+
+            for (int ii=0; ii<cmLen; ii++) {
+                ((AWTColumnManager)_columnManagers.get(ii)).postTake(this);
+            }
+            // Clear the force visible row element id only if request is coming from the table's form.
+            // This is when we have client's scroll info, and have no more need for it.
+            // For requests not from the table's form, we need to maintain this element id
+            // to avoid a refresh region diff in the Datatable.updateScrollTable script block,
+            // and therefore wrongly trigger the scroll repositioning code.
+            _elementIdForVisibleRow = null;
         }
-
-        super.applyValues(requestContext, component);
-
-        for (int ii=0; ii<cmLen; ii++) {
-            ((AWTColumnManager)_columnManagers.get(ii)).postTake(this);
+        finally {
+            _phaseComplete();
         }
-        // Clear the force visible row element id only if request is coming from the table's form.
-        // This is when we have client's scroll info, and have no more need for it.
-        // For requests not from the table's form, we need to maintain this element id
-        // to avoid a refresh region diff in the Datatable.updateScrollTable script block,
-        // and therefore wrongly trigger the scroll repositioning code.
-        _elementIdForVisibleRow = null;
-        _phaseComplete();
     }
 
     /**
@@ -2469,6 +2487,11 @@ public final class AWTDataTable extends AWComponent
         config.put(OutlineExpansionDefaultConfigKey,
                    Boolean.toString(outlineState().defaultExpansionState()));
 
+        if (_tableBodyCollapsible) {
+            config.put(TableBodyExpansionDefaultConfigKey,
+                    Boolean.toString(_tableBodyExpanded));
+        }
+        
         if (_pivotState != null) _pivotState.writeToTableConfig(config);
 
         return config;
@@ -2554,6 +2577,14 @@ public final class AWTDataTable extends AWComponent
                     else {
                         outlineState().collapseAll();
                     }
+                }
+            }
+
+            if (_tableBodyCollapsible) {
+                String tableBodyExpanded = (String)config.get(TableBodyExpansionDefaultConfigKey);
+                if (!StringUtil.nullOrEmptyOrBlankString(tableBodyExpanded)) {
+                    _tableBodyExpanded =
+                        Boolean.valueOf(outlineExpansionDefaultString).booleanValue();   
                 }
             }
             return true;

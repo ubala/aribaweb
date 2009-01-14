@@ -1,0 +1,31 @@
+<w:BasicPageWrapper hasForm="$true">
+<w:TabSet actionMenuLabel="Actions" actionMenuId="TabMenu">
+    <w:Tab label="Basic Pivot Table">
+      <Include name="SimplePivotTable"/>
+    </w:Tab>
+    <w:Tab label="Outline Pivot Table">
+        <Include name="OutlinePivotTable"/>
+    </w:Tab>
+    <w:Tab label="RFP Pivot Table">
+        <Include name="RFPPivotTable"/>
+    </w:Tab>
+    <w:Tab label="Dynamic Pivot Table">
+      <Include name="DynamicPivotTable"/>
+    </w:Tab>
+</w:TabSet>
+<w:PopupMenu menuId="TabMenu">
+    <w:PopupMenuHeading showSeparator="$false">\
+        Create New Object\
+    </w:PopupMenuHeading>
+
+    <w:PopupMenuItem action="$null" showBullet="$false" disabled="$false">\
+            New Workspace\
+    </w:PopupMenuItem>
+    <w:PopupMenuItem action="$null" showBullet="$false" disabled="$false">\
+            New Document\
+    </w:PopupMenuItem>
+    <w:PopupMenuItem action="$null" showBullet="$false" disabled="$false">\
+            New RFx\
+    </w:PopupMenuItem>    
+</w:PopupMenu>
+</w:BasicPageWrapper>

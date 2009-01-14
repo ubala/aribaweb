@@ -1,0 +1,23 @@
+package @ViewPkg@
+
+import ariba.ui.aribaweb.core.AWComponent
+
+import java.util.List
+import java.util.ArrayList
+
+public class Main extends AWComponent
+{
+    Entry current = new Entry(), item
+    def entries = []
+
+    public void add ()
+    {
+        entries.add(current)
+        current = new Entry()
+    }
+}
+
+class Entry {
+    String name
+    String comment
+}

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/AWXHTMLComponentFactory.java#29 $
+    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/AWXHTMLComponentFactory.java#30 $
 */
 
 package ariba.ui.demoshell;
@@ -32,6 +32,8 @@ import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWFileResource;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWNamespaceManager;
+import ariba.ui.aribaweb.util.AWResource;
+import ariba.ui.aribaweb.util.AWResourceManager;
 import ariba.ui.aribaweb.html.AWBody;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.Assert;
@@ -48,8 +50,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.net.MalformedURLException;
 
 public class AWXHTMLComponentFactory implements AWConcreteApplication.ComponentDefinitionResolver,
         ResourceLocator.Provider
@@ -527,9 +531,12 @@ public class AWXHTMLComponentFactory implements AWConcreteApplication.ComponentD
         return definition;
     }
 
+    public _Resource templateResourceForDefinition (AWComponentDefinition definition) {
+        return (_Resource)_definitionToResource.get(definition);
+    }
+
     public AWTemplate templateForDefinition (AWComponentDefinition definition) {
-        _Resource r = (_Resource)_definitionToResource.get(definition);
-        return r.template();
+        return templateResourceForDefinition(definition).template();
     }
 
     protected AWComponentDefinition createDefinitionFromFile (File file)
@@ -545,9 +552,8 @@ public class AWXHTMLComponentFactory implements AWConcreteApplication.ComponentD
         // FIX ME!  not sure if this is right (or if it matters...).
         synchronized (this) {
             componentDefinition = new DynamicComponentDefinition();
-            _Resource r = new _Resource();
+            _Resource r = new _Resource(file);
             _pathToDefinition.put(path, componentDefinition);
-            r.setFile(file);
             _definitionToResource.put(componentDefinition, r);
             componentDefinition.init(file.getName(), AWXHTMLComponent.class);
             componentDefinition.setTemplateName(templateName);
@@ -695,21 +701,57 @@ public class AWXHTMLComponentFactory implements AWConcreteApplication.ComponentD
         return _templateParser;
     }
 
-    protected class _Resource
+    protected class _Resource extends AWResource
     {
         protected AWTemplate _template;
         protected File _file;
         protected long _lastModified;
 
-        public void setFile (File file)
+        public _Resource (File file)
         {
+            super(file.getName(), file.getPath());
+            
             _file = file;
             _lastModified = file.lastModified();
+        }
+
+        public String url()
+        {
+            return fullUrl();
+        }
+
+        public String fullUrl()
+        {
+            try {
+                return _file.toURL().toExternalForm();
+            } catch (MalformedURLException e) {
+                throw new AWGenericException(e);
+            }
+        }
+
+        public long lastModified()
+        {
+            return _lastModified;
+        }
+
+        public InputStream inputStream()
+        {
+            try {
+                return new FileInputStream(_file);
+            } catch (FileNotFoundException e) {
+                throw new AWGenericException(e);
+            }
         }
 
         public boolean hasChanged ()
         {
             return (AWFileResource.fileLastModified(_file) > _lastModified);
+        }
+
+        public AWResource relativeResource (String relativePath, AWResourceManager resourceManager)
+        {
+            File f = new File(_file.getParentFile(), relativePath);
+            return new _Resource(f);
         }
 
         public File file ()

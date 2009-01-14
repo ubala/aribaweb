@@ -13,17 +13,31 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.awl#4 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.awl#6 $
     </Copyright>
 
     <Overview>
         Rewrites static HTML string to turn embeded href and action URLs into
-        AWRedirects (thereby supporting local direct action invocation / x-page refresh
-        and remote URL annotation)
+        AW actions, which, by default, are turned into AWRedirects, or, with the
+        `action` binding, can execute arbitrary AW code.
+
+        When used with content vended by the displaying AW app, and with direct action
+        URLs pointing back at that app, the default redirect will be turned into a
+        "local direct action" invocation, (thereby avoiding the actual redirect and
+        providing / x-page refresh and remote URL annotation)
     </Overview>
 
     <Binding key="value" type="String" direction="get" required="$true">
         HTML string to be rewritten
+    </Binding>
+
+    <Binding key="action" type="AWResponseGenerating" direction="get">
+        Invoked after pushing new url to `actionUrl` to ask app for new page.
+        If null is returned, then an AWRedirect to the actionUrl is used.
+    </Binding>
+
+    <Binding key="actionUrl" type="String" direction="set">
+        Push of the url that was just clicked.
     </Binding>
 </a:Api>\
 <a:While notEqualNull="$nextAction">\

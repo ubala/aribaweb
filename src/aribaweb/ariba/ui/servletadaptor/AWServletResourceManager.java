@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletResourceManager.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletResourceManager.java#4 $
 */
 
 package ariba.ui.servletadaptor;
@@ -65,7 +65,6 @@ public class AWServletResourceManager extends AWMultiLocaleResourceManager
      * managers.
      *
      * @param brandName
-     * @return
      * @aribaapi private
      */
     public AWMultiLocaleResourceManager createBrandedResourceManager (

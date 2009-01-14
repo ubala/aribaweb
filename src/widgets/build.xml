@@ -14,9 +14,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    (Some contents derived from a parallel Apache Lucene file, also licenced
-     under the same license)
-
     $Id:  $
  -->
 
@@ -26,22 +23,35 @@
         AribaWeb Widgets Framework
     </description>
 
-    <condition property="make.common.dir" value="${basedir}/../ui/opensourceui/build-support/">
-        <available file="${basedir}/../ui/opensourceui/build-support/"/>
-    </condition>
-    <property name="make.common.dir" location="../build-support"/>
-    <import file="${make.common.dir}/module-build.xml"/>
+    <property environment="env"/>
+    <property name="aw.home" location="${env.AW_HOME}"/>
+    <import file="${aw.home}/tools/build-module.xml"/>
 
     <target name="copy-resources" depends="common.copy-resources">
         <copy todir="${build.classes.dir}/ariba" failonerror="false">
             <fileset dir="${src.dir}" includes="resource/global/**"/>
         </copy>
     </target>
-    
+
+    <condition property="xinha.base.dir"
+               value="${env.ARIBA_INSTALL_ROOT}">
+        <not><equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/></not>
+    </condition>
+    <property name="xinha.base.dir" location="${src.dir}"/>
+
     <!-- Docroot -->
     <target name="copy-docroot-resources" depends="common.copy-docroot-resources">
         <copy todir="${build.classes.dir}/docroot">
             <fileset dir="${src.dir}" includes="ariba/**/*.gif"/>
+        </copy>
+        <copy todir="${build.classes.dir}/docroot">
+            <fileset dir="${xinha.base.dir}">
+                <include name="ariba/ui/richtext/*.gif"/>
+                <include name="ariba/ui/richtext/*.js"/>
+                <include name="ariba/ui/richtext/*.css"/>
+                <include name="ariba/ui/richtext/*.html"/>
+                <include name="ariba/ui/richtext/xinha/**/*"/>
+            </fileset>
         </copy>
         <copy todir="${build.classes.dir}/docroot/ariba/ui">
             <fileset dir="${src.dir}/resource/webserver"/>
@@ -57,6 +67,6 @@
     <filelist id="merge.js.filelist" dir="${src.dir}/resource/webserver/widg/"
               files="DragDrop.js Widgets.js Menu.js Chooser.js Datatable.js Calendar.js"/>
     <filelist id="unmerged.js.filelist" dir="${src.dir}/resource/webserver/widg/"
-              files="ModalWindow.js"/>
+              files="ModalWindow.js prettify.js richtext.js"/>
 
 </project>

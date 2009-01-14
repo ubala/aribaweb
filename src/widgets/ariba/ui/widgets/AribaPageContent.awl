@@ -17,34 +17,6 @@
 <a:Environment inAPageContent="$true">
 <a name="content"></a>\
 <a:RefreshRegion>
-<a:If notEqualNull="$message">\
-        <div id="apcMessage" style="position:fixed; top:0px; z-index:10; filter:alpha(opacity=087);-moz-opacity:0.87;">
-        <table border="0" cellspacing="0" cellpadding="0" style="width:100%; align:center;">\
-            <tr>\
-                <td class="brandAccent" valign="bottom" width="1%" border="0">\
-                    <a:Image filename="awxMessageCornerLeft.gif"/>\
-                </td>\
-                <td class="brandAccent" style="padding:3px 8px 2px 0px;" width="1%">\
-                    <a:Image filename="awxMessageIcon.gif" align="absmidle"/>\
-                </td>\
-                <td class="brandAccent" style="padding:3px 0px 2px 0px" width="75%">\
-                    <a:If ifTrue="$isTextMessage">\
-                        <a:String escapeUnsafeHtml="$true" value="$message"/>\
-                    <a:Else/>\
-                        <a:ComponentInclude awcomponent="$message"/>
-                    </a:If>\
-                </td>\
-                <td class="brandAccent" align="right">\
-                    <a:Image filename="portletCloseGray.gif"
-                             onClick="ariba.Dom.getElementById('apcMessage').style.display='none'"/>\
-                </td>
-                <td class="brandAccent" valign="bottom" width="1%" align="right"  border="0">\
-                    <a:Image filename="awxMessageCornerRight.gif"/>\
-                </td>\
-            </tr>\
-        </table>\
-        </div>
-</a:If>\
 <a:If ifTrue="$addContentMargin">\
     <a:Image filename="cleardot.gif" width="1" height="10" class="block" />\
 </a:If>\
@@ -71,6 +43,38 @@
           <!--- select first input field when page load complete -->
           ariba.Input.postLoadSelectFirstText();
     </a:ClientSideScript>
+    <a:PhaseInvocation append="$updateMessage"/>
+    <a:If notEqualNull="$message">\
+        <div id="apcMessage" class="apcMessage fixedTop">
+            <table border="0" cellspacing="0" cellpadding="0" style="width:100%; align:center;">\
+                <tr>\
+                    <td class="brandAccent" valign="bottom" width="1%" border="0">\
+                        <a:Image filename="awxMessageCornerLeft.gif"/>\
+                    </td>\
+                    <td class="brandAccent" style="padding:3px 8px 2px 0px;" width="1%">\
+                        <a:Image filename="awxMessageIcon.gif" align="absmidle"/>\
+                    </td>\
+                    <td class="brandAccent" style="padding:3px 0px 2px 0px">\
+                        <a:If ifTrue="$isTextMessage">\
+                            <a:String escapeUnsafeHtml="$true" value="$message"/>\
+                        <a:Else/>\
+                            <a:ComponentInclude awcomponent="$message"/>
+                        </a:If>\
+                    </td>\
+                    <td class="brandAccent" align="right" width="21%">\
+                        <a:Image filename="portletCloseGray.gif"
+                                 onClick="ariba.Dom.getElementById('apcMessage').style.display='none'"/>\
+                    </td>
+                    <td class="brandAccent" valign="bottom" width="1%" align="right"  border="0">\
+                        <a:Image filename="awxMessageCornerRight.gif"/>\
+                    </td>\
+                    <td>\
+                        <div style="width:20px"></div>
+                    </td>\
+                </tr>\
+            </table>\
+        </div>
+    </a:If>\
 </a:RefreshRegion>
 </a:Environment>
 </div>

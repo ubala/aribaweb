@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWContainerElement.java#15 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWContainerElement.java#16 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -74,8 +74,8 @@ abstract public class AWContainerElement extends AWBindableElement implements AW
             catch (AWGenericException ge) {
                 throw ge;
             }
-            catch (RuntimeException runtimeException) {
-                throwException(runtimeException, component);
+            catch (Throwable t) {
+                throwException(t, component);
             }
         }
     }
@@ -103,8 +103,8 @@ abstract public class AWContainerElement extends AWBindableElement implements AW
                 }
                 throw e;
             }
-            catch (RuntimeException runtimeException) {
-                throwException(runtimeException, component);
+            catch (Throwable t) {
+                throwException(t, component);
             }
         }
         return actionResults;
@@ -128,16 +128,16 @@ abstract public class AWContainerElement extends AWBindableElement implements AW
             catch (AWGenericException ge) {
                 throw ge;
             }
-            catch (RuntimeException runtimeException) {
-                throwException(runtimeException, component);
+            catch (Throwable t) {
+                throwException(t, component);
             }
         }
     }
 
-    private void throwException (RuntimeException runtimeException, AWComponent component)
+    private void throwException (Throwable t, AWComponent component)
     {
         String message = component.componentPath("\n").toString();
-        throw new AWGenericException(message, runtimeException);
+        throw new AWGenericException(message, t);
     }
 
     public void validate (AWValidationContext validationContext, AWComponent component)

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.java#43 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.java#44 $
 */
 
 package ariba.ui.widgets;
@@ -96,12 +96,11 @@ public final class TextButton extends AWComponent
         _confirmationId = null;
     }
 
-    public void renderResponse(AWRequestContext requestContext, AWComponent component)
+    public void renderResponse (AWRequestContext requestContext, AWComponent component)
     {
         _isBrandStyle = booleanValueForBinding(_isBrandStyleBinding);
         _isHilite = booleanValueForBinding(_hiliteBinding);
         _isPlain = booleanValueForBinding(_plainBinding);
-        _buttonClass = encodedStringValueForBinding(BindingNames.buttonClass);
         _buttonWrapperStyle = encodedStringValueForBinding(BindingNames.buttonWrapperStyle);
         // The formName attribute should only be provided when NOT using an AWForm
         _formName = encodedStringValueForBinding(_formNameBinding);
@@ -120,16 +119,24 @@ public final class TextButton extends AWComponent
 
     public AWEncodedString buttonClassString ()
     {
-        if (_isDisabled) {
-            _buttonClass = _isBrandStyle ? BtnClassBrandDisabled : BtnClassNormalDisabled;
-        }
-        else {
+        if (_buttonClass == null) {
+            _buttonClass = encodedStringValueForBinding(BindingNames.buttonClass);
+
             if (_buttonClass == null) {
-                if (_isHilite) {
+                if (_isDisabled) {
+                    _buttonClass = _isBrandStyle ? BtnClassBrandDisabled : BtnClassNormalDisabled;
+                }
+                else if (_isHilite) {
                     _buttonClass = BtnClassSpecial1;
                 }
                 else {
                     _buttonClass = _isBrandStyle ? BtnClassBrand : BtnClassNormal;
+                }
+            }
+            else {
+               if (_isDisabled) {
+                    _buttonClass = AWEncodedString.sharedEncodedString(
+                        StringUtil.strcat(_buttonClass.string(), "Disabled"));
                 }
             }
         }

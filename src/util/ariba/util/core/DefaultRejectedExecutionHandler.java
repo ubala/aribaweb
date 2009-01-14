@@ -13,11 +13,14 @@
  limitations under the License.
 
 
-    $Id: //ariba/platform/util/core/ariba/util/core/DefaultRejectedExecutionHandler.java#3 $
+    $Id: //ariba/platform/util/core/ariba/util/core/DefaultRejectedExecutionHandler.java#4 $
 */
 
 package ariba.util.core;
 
+/**
+ * @aribaapi ariba
+ */
 public class DefaultRejectedExecutionHandler
     implements RejectedExecutionHandler
 {

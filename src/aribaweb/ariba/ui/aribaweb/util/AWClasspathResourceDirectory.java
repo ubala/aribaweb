@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResourceDirectory.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResourceDirectory.java#13 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -215,35 +215,56 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
             
      */
     public static final String AWJarPropertiesPath = "META-INF/aribaweb.properties";
-    protected static final Pattern _URLJarNamePattern = Pattern.compile(".*/(.+)\\.jar\\!/.*");
+    static final Pattern _URLJarNamePattern = Pattern.compile(".*/(.+)\\.(jar|zip)\\!/.*");
+    static final String _ZipMarker = ".zip!";
 
+    static Map<String, URL> _AWJarUrlsByName = null;
+
+    /**
+        Returns list of aribaweb-savvy jars (those containing an aribaweb.properties file)
+
+        @return Map with file name of jar (without extension) as key, and URL to jar as
+                value
+     */
+    public static  Map<String, URL> awJarUrlsByName ()
+    {
+        if (_AWJarUrlsByName == null) {
+            _AWJarUrlsByName = new HashMap();
+            Enumeration<URL> urls = null;
+            try {
+                urls = Thread.currentThread().getContextClassLoader().getResources(AWJarPropertiesPath);
+            } catch (IOException e) {
+                throw new AWGenericException(e);
+            }
+            while (urls.hasMoreElements()) {
+                URL url = urls.nextElement();
+                Matcher m = _URLJarNamePattern.matcher(url.toExternalForm());
+                // Assert.that(m.matches(), "Can't find jar name in URL: %s", url);
+                if (m.matches()) {
+                    String jarName = m.group(1);
+                    _AWJarUrlsByName.put(jarName, url);
+                }
+            }
+        }
+        return _AWJarUrlsByName;
+    }
+
+    /**
+        Process all AW jars, registering their resources and running their initializers
+     */
     public static void autoRegisterJarResources (final AWMultiLocaleResourceManager resourceManager)
     {
+        long startMillis = System.currentTimeMillis();
         // System.out.println("----------- autoRegisterJarResources ------------");
         final String resourceUrl = ((AWConcreteServerApplication) AWConcreteServerApplication.sharedInstance()).resourceUrl();
         // Resource directory for "." (jars)
         final AWClasspathResourceDirectory rd = new AWClasspathResourceDirectory("", resourceUrl);
         rd.setContainsPackagedResources(true);
 
-        Map<String, URL> awJarUrlsByName = new HashMap();
-        Set<String> processedJars = new HashSet();
-        Enumeration<URL> urls = null;
-        try {
-            urls = Thread.currentThread().getContextClassLoader().getResources(AWJarPropertiesPath);
-        } catch (IOException e) {
-            throw new AWGenericException(e);
-        }
-        while (urls.hasMoreElements()) {
-            URL url = urls.nextElement();
-            Matcher m = _URLJarNamePattern.matcher(url.toExternalForm());
-            Assert.that(m.matches(), "Can't find jar name in URL: %s", url);
-            String jarName = m.group(1);
-            awJarUrlsByName.put(jarName, url);
-        }
-
+        Map<String, URL> awJarUrlsByName = awJarUrlsByName();
         final List<String> postInitializers = new ArrayList();
-
         final boolean didLoad = !awJarUrlsByName.isEmpty();
+        Set<String> processedJars = new HashSet();
 
         // Register post-loads after the application has completed initialization
         AWConcreteApplication application = (AWConcreteApplication)AWConcreteApplication.sharedInstance();
@@ -270,6 +291,9 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
             initJar(resourceManager, rd, e.getValue(), e.getKey(), awJarUrlsByName,
                     processedJars, postInitializers);
         }
+
+        long runtime = System.currentTimeMillis() - startMillis;
+        /// System.out.printf("*** Jar scan time = %f", ((float)runtime)/1000);
     }
 
     static void initJar (final AWMultiLocaleResourceManager resourceManager,
@@ -285,46 +309,52 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
             Properties properties = new Properties();
             properties.load(url.openStream());
 
+            boolean isZip = url.toExternalForm().contains(_ZipMarker);
+            boolean shouldRunInitializers = !isZip || Boolean.valueOf((String)properties.get("run-in-zip"));
+
             String dependsOn = (String)properties.get("depends-on");
             if (dependsOn != null) {
                 for (String dep : dependsOn.split(",")) {
                     URL depUrl = awJarUrlsByName.get(dep);
-                    Assert.that(depUrl != null, "Couldn't find jar \'%s\" referenced in depends-on in jar: %s", dep, url);
-                    initJar(resourceManager, rd, depUrl, dep, awJarUrlsByName, processedJars, postInitializers);
+                    Assert.that(depUrl != null || !shouldRunInitializers,
+                            "Couldn't find jar \'%s\" referenced in depends-on in jar: %s", dep, url);
+                    if (depUrl != null) initJar(resourceManager, rd, depUrl, dep, awJarUrlsByName, processedJars, postInitializers);
                 }
             }
 
             // fire the initializer (if any)
             String preInitializer = (String)properties.get("pre-initializer");
-            if (preInitializer != null) {
+            if (preInitializer != null && shouldRunInitializers) {
                 AWBinding.fieldBinding("pre-initializer", preInitializer, null).value(null);
             }
 
             final Set<String> loadedPackageNames = new HashSet();
             String extString = (String)properties.get("packaged-resource-extensions");
+            List exts = new ArrayList();
             if (extString != null) {
-                List exts = new ArrayList();
                 for (String ext : extString.split(",")) {
                     exts.add(ext.startsWith(".") ? ext : ".".concat(ext));
                     resourceManager.registerPackagedResourceExtension(ext);
                 }
-                final List packagedResourceExtensions = exts;
-                URL jar = AWJarWalker.ClasspathUrlFinder.findResourceBase(url, AWJarPropertiesPath);
-                AWJarWalker.StreamIterator iter = AWJarWalker.create(jar, new AWJarWalker.Filter() {
-                    public boolean accepts(String filename)
-                    {
-                        // System.out.println("checking " + filename);
-                        return true;
-                    }
-                });
+            }
+            final List packagedResourceExtensions = exts;
+            URL jar = AWJarWalker.ClasspathUrlFinder.findResourceBase(url, AWJarPropertiesPath);
+            AWJarWalker.StreamIterator iter = AWJarWalker.create(jar, new AWJarWalker.Filter() {
+                public boolean accepts(String filename)
+                {
+                    // System.out.println("checking " + filename);
+                    return true;
+                }
+            });
 
-                while (iter.next()) {
-                    String filename = iter.getFilename();
-                    if (filename.endsWith(".class")) {
-                        // System.out.println("recording " + filename);
-                        AWJarWalker.processBytecode(iter, filename);
-                    }
-                    else {
+            while (iter.next()) {
+                String filename = iter.getFilename();
+                if (filename.endsWith(".class")) {
+                    // System.out.println("recording " + filename);
+                    AWJarWalker.processBytecode(iter, filename);
+                }
+                else {
+                    if (extString != null && shouldRunInitializers) {
                         String urlString = iter.getURLString();
                         AWClasspathResourceDirectory.recordResourcePath(filename, urlString);
                         int index = filename.lastIndexOf('.');
@@ -336,22 +366,22 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
                         }
                     }
                 }
-
             }
+
             // fire the initializer (if any)
             String initializer = (String)properties.get("initializer");
-            if (initializer != null) {
+            if (initializer != null && shouldRunInitializers) {
                 AWBinding.fieldBinding("initializer", initializer, null).value(null);
             }
 
             String postInitializer = (String)properties.get("post-initializer");
-            if (postInitializer != null) {
+            if (postInitializer != null && shouldRunInitializers) {
                 postInitializers.add(postInitializer);
             }
 
             // set the namespace resolver for these packages
             String parentPackage = (String)properties.get("use-namespace-from-package");
-            if (parentPackage != null) {
+            if (parentPackage != null && shouldRunInitializers) {
                 AWNamespaceManager ns = AWNamespaceManager.instance();
                 AWNamespaceManager.Resolver resolver = ns.resolverForPackage(parentPackage);
                 for (String packageName : loadedPackageNames) {

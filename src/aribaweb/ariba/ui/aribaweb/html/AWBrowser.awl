@@ -13,11 +13,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBrowser.awl#4 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBrowser.awl#6 $
     </Copyright>
 
     <Overview>
-        See AWPopup.  This renders a <select/> tag, but uses the "size" attribute of <select/>
+        See AWPopup.  This renders a `<select/>` tag, but uses the "size" attribute of `<select/>`
         to indicate that we are to show more than one element.
     </Overview>
 
@@ -67,8 +67,8 @@
 
     <Binding key="isItemSelected" type="boolean" direction="get">
         Allows for externalizing the decision about whether an item is one of the selected items or not.
-        By default, AWBrowser uses the indexOf() and equals() method to decide if an item is selected or not.
-        If this turns out to be undesirable, you can provide your own detemination of wheter or not the item
+        By default, AWBrowser uses the `indexOf()` and `equals()` method to decide if an item is selected or not.
+        If this turns out to be undesirable, you can provide your own detemination of whether or not the item
         isSelected by implementing this binding.
     </Binding>
 </a:Api>\

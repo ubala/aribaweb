@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/VirtualForm.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/VirtualForm.java#4 $
 */
 
 package ariba.ui.widgets;
@@ -32,7 +32,6 @@ public class VirtualForm extends AWComponent
      * This can be accessed by other components to determine if they're within a VirtualForm
      * and do the proper thing wrt to bubbling up events.
      * @param requestContext
-     * @return
      */
     public static int virtualFormCount (AWRequestContext requestContext)
     {

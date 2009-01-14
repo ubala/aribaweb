@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/demoshell/ariba/ui/groovy/AWXGroovyTag.java#7 $
+    $Id: //ariba/platform/ui/demoshell/ariba/ui/groovy/AWXGroovyTag.java#8 $
 */
 package ariba.ui.groovy;
 
@@ -187,7 +187,7 @@ public class AWXGroovyTag extends AWContainerElement implements AWXHTMLComponent
         }
 
         // use groovy class loader to load class as necessary...
-        GroovyClassLoader gcl = new GroovyClassLoader();
+        GroovyClassLoader gcl = AWGroovyLoader.gcl();
 
         Log.demoshell.debug("--- Generating class: %s", className);
         // classString += "\n\n class C2 { def test () { return \"Yeah!\" }; } \n";

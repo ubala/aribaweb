@@ -1,0 +1,12 @@
+<w:ModalPageWrapper title="Filter Table" okAction="$okAction">
+    <t:DataTable displayGroup="$displayGroup" item="$iter" multiSelect="$true" submitOnSelectionChange="$true" enableScrolling="$true">
+        <t:HeadingArea>
+            <div style="float:left">
+                Filter: <a:Popup list="$filterKeys" item="$iter" selection="$selectedFilterKey" action="$updateValueList">$iter</a:Popup>
+            </div>
+        </t:HeadingArea>
+        <t:Column label="Value">
+            $iter
+        </t:Column>
+    </t:DataTable>
+</w:ModalPageWrapper>

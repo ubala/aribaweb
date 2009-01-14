@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+
+<!--
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    $Id:  $
+ -->
+
+<project name="awIdeaPlugin" default="default">
+
+    <description>
+        AribaWeb-savvy plugin for IDEA (and, soon, Eclipse)
+    </description>
+
+    <property name="src.resource.path" value=""/>
+    <patternset id="metainf.includes">
+        <include name="project/idea/META-INF/plugin.xml"/>
+    </patternset>
+
+    <property environment="env"/>
+    <property name="aw.home" location="${env.AW_HOME}"/>
+    <import file="${aw.home}/tools/build-module.xml"/>
+
+    <property name="build.plugin.dir" value="${dist.root.dir}/ide"/>
+    <available file="lib/idea" property="idea.lib.dir" value="lib/idea"/>
+
+    <fileset id="module.libs" dir="${idea.lib.dir}">
+        <include name="*.jar"/>
+    </fileset>
+
+    <target name="check-idea-lib">
+        <available file="${idea.lib.dir}" property="has.idea.lib"/>
+    </target>
+
+    <target name="check-missing-idea-lib" depends="check-idea-lib" unless="has.idea.lib">
+        <echo message="Cannot find idea libs.  Must set idea.lib.dir to point at directory containing openapi.jar and extensions.jar.  Skipping build..."/>
+    </target>
+
+    <target name="jar-check">
+        <dependset>
+            <sources>
+                <resources refid="source.files"/>
+            </sources>
+            <targets>
+                <path location="${build.plugin.dir}/aribawebIdeaPlugin.jar"/>
+            </targets>
+        </dependset>
+        <available file="${build.plugin.dir}/aribawebIdeaPlugin.jar" property="jar.uptodate"/>
+    </target>
+
+    <target name="jar" depends="check-missing-idea-lib, jar-check" unless="jar.uptodate" if="has.idea.lib"
+            description="Packages the JAR file">
+        <mkdir dir="${build.plugin.dir}"/>
+        <antcall target="build-jar">
+            <param name="build.jar.file" value="${build.plugin.dir}/aribawebIdeaPlugin.jar"/>
+            <param name="javac.excludes" value="**/eclipse/**/*"/>
+        </antcall>
+    </target>
+
+    <target name="build-jar" depends="compile"
+            description="Packages the JAR file">
+        <jarify>
+            <manifest-body>
+                <metainf dir="${src.dir}/project/idea/META-INF">
+                    <patternset includes="**/*"/>
+                </metainf>
+            </manifest-body>
+        </jarify>
+    </target>
+</project>

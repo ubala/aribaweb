@@ -29,7 +29,7 @@
 <input id=button1 name=button1 type=button value=Extract>
   </p>
 
-<w:ExcelCreate downloadURL="$downloadURL" rowFields="$rowFields" columnFields="$columnFields" dataFields="$dataFields"/>
+<x:ExcelCreate downloadURL="$downloadURL" rowFields="$rowFields" columnFields="$columnFields" dataFields="$dataFields"/>
 
 <br/>
 <br/>

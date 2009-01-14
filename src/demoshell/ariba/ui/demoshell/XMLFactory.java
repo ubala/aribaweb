@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/XMLFactory.java#14 $
+    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/XMLFactory.java#15 $
 */
 package ariba.ui.demoshell;
 
@@ -127,8 +127,8 @@ public class XMLFactory
 
     public static Document xmlNamed (String path, AWComponent parent)
     {
-        File file = ResourceLocator.fileForRelativePath(path, parent);
-        return registeredInstance().documentForUrl(URLUtil.urlAbsolute(file), parent.requestContext());
+        URL url = ResourceLocator.urlForRelativePath(path, parent);
+        return registeredInstance().documentForUrl(url, parent.requestContext());
     }
 
     /**

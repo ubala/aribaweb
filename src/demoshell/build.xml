@@ -14,9 +14,6 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    (Some contents derived from a parallel Apache Lucene file, also licenced
-     under the same license)
-
     $Id:  $
  -->
 
@@ -26,11 +23,13 @@
         AribaWeb Demoshell Framework
     </description>
 
-    <condition property="make.common.dir" value="${basedir}/../ui/opensourceui/build-support/">
-        <available file="${basedir}/../ui/opensourceui/build-support/"/>
-    </condition>
-    <property name="make.common.dir" location="../build-support"/>
-    <import file="${make.common.dir}/module-build.xml"/>
+    <property environment="env"/>
+    <property name="aw.home" location="${env.AW_HOME}"/>
+    <import file="${aw.home}/tools/build-module.xml"/>
+
+    <fileset id="jar.resources" dir="${basedir}" excludes="sample/**/*">
+        <patternset refid="jar.resource.patterns"/>
+    </fileset>
 
     <target name="copy-resources" depends="common.copy-resources">
         <copy todir="${build.classes.dir}" failonerror="false">
@@ -45,15 +44,4 @@
     <fileset id="module.libs2" dir="${lib-internal.dir}">
         <include name="groovy-all.jar"/>
     </fileset>
-        
-    <fileset id="war.jars" dir="${build.jars.dir}">
-        <include name="ariba.demoshell.jar"/>
-    </fileset>
-
-    <property name="war.name" value="Demo"/>
-    <resources id="war.resources">
-        <resources refid="aw.resources"/>
-        <fileset dir="${build.dir}/classes/demoshell/" includes="docroot/**/*"/>
-    </resources>
-
 </project>

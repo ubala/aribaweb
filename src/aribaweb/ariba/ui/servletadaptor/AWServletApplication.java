@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#10 $
 */
 
 package ariba.ui.servletadaptor;
@@ -35,6 +35,9 @@ import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWPage;
 import ariba.ui.aribaweb.core.AWDirectActionRequestHandler;
 import ariba.ui.aribaweb.core.AWDirectAction;
+import ariba.ui.aribaweb.core.AWRedirect;
+import ariba.ui.aribaweb.core.AWApplication;
+import ariba.ui.aribaweb.core.AWComponentActionRequestHandler;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWUtil;
@@ -453,32 +456,11 @@ public class AWServletApplication extends AWConcreteApplication
         public AWResponseGenerating handleComponentActionSessionValidationError (
             AWRequestContext requestContext, Exception exception)
         {
-            HttpSession httpSession = requestContext.createHttpSession();
-            AWResponseGenerating handlerResults = handleSessionRestorationError(requestContext);
-            AWResponse response =
-                processExceptionHandlerResults(handlerResults,
-                    requestContext, AWSession.session(httpSession));
-            return response;
-        }
-
-        private AWResponse processExceptionHandlerResults (
-            AWResponseGenerating handlerResults,
-            AWRequestContext requestContext,
-            AWSession session)
-        {
-            AWResponse response = null;
-            if (handlerResults instanceof AWComponent) {
-                AWPage handlerPage = ((AWComponent)handlerResults).page();
-                if (session != null && handlerPage.pageComponent().shouldCachePage()) {
-                    session.savePage(handlerPage);
-                    requestContext.setPage(handlerPage);
-                    response = requestContext.generateResponse();
-                }
+            // force creation of session if not available
+            if (requestContext.session(false) == null) {
+                HttpSession httpSession = requestContext.createHttpSession();
             }
-            if (response == null) {
-                response = handlerResults.generateResponse();
-            }
-            return response;
+            return AWComponentActionRequestHandler.SharedInstance.processFrontDoorRequest(requestContext);
         }
 
         /**

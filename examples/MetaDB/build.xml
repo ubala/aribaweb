@@ -1,0 +1,25 @@
+<project name="MetaDB" default="default">
+
+    <description>
+        MetaUI-JPA Sample Application
+    </description>
+
+    <!-- for persistence.xml generation: See build-jpa-app.xml for additional parameters -->
+    <!-- File for HSQLDB database
+        <property name="database.dir" value="${java.io.tmpdir}//${ant.project.name}-db"/>
+    -->
+
+    <!-- Create schema on every run
+        <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+    -->
+    
+    <!-- figure out location of parent build file - more complicated
+         for this example, since we want to run out of ariba source structure -->
+    <property environment="env"/>
+    <property name="aw.home" location="${env.AW_HOME}"/>
+    <available file="../../tools" property="jpa.tools" value="../../tools"/>
+    <property name="jpa.tools" location="${aw.home}/tools"/>
+    <import file="${jpa.tools}/build-jpa-app.xml"/>
+
+</project>
+

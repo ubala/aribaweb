@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#58 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#59 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -212,24 +212,22 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
 
         String[] directActionName = parseDirectActionRequest(request);
 
-        Class directActionClass = null;
-
         // isReloadable() returns true if we have hotswap reloading enabled
-        boolean isReloadable = AWUtil.getClassLoader().isReloadable(
-            DefaultDirectActionClassName);
-        if (directActionClass == null || isReloadable) {
-            directActionName[ClassNameIndex] =
-                application.directActionClassNameForKey(directActionName[ClassNameIndex]);
-            if (isReloadable) {
-                application.resourceManager().removeClass(
-                    directActionName[ClassNameIndex]);
+        String className = application.directActionClassNameForKey(directActionName[ClassNameIndex]);
+        directActionName[ClassNameIndex] = className;
+
+        Class directActionClass =
+            application.resourceManager().classForName(className);
+
+        if (AWUtil.getClassLoader().isReloadable(className)) {
+            Class reloadedClass = AWUtil.getClassLoader().checkReloadClass(directActionClass);
+            if (reloadedClass != directActionClass) {
+                application.resourceManager().removeClass(className);
+                directActionClass = reloadedClass;
             }
-            directActionClass =
-                application.resourceManager().classForName(
-                    directActionName[ClassNameIndex]);
         }
-        requestContext.setCurrentDirectAction(directActionName[ClassNameIndex],
-            directActionName[ActionNameIndex]);
+
+        requestContext.setCurrentDirectAction(className, directActionName[ActionNameIndex]);
         AWDirectAction directAction = null;
         try {
             directAction = (AWDirectAction)directActionClass.newInstance();
@@ -390,8 +388,8 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
         catch (AWSiteUnavailableException e) {
             response = handleSiteUnavailableException(requestContext);
         }
-        catch (RuntimeException exception) {
-            response = handleUncaughtException(requestContext, exception);
+        catch (Throwable t) {
+            response = handleUncaughtException(requestContext, t);
         }
         return response;
     }
@@ -493,9 +491,12 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
     }
     
     private AWResponse handleUncaughtException (AWRequestContext requestContext,
-                                                Exception exception)
+                                                Throwable t)
     {
         AWResponse response = null;
+        Exception exception = (t instanceof Exception)
+                ? (Exception)t
+                : new AWGenericException(t);        
         try {
             AWResponseGenerating handleExceptionResults = handleException(requestContext,
                                                                           exception);

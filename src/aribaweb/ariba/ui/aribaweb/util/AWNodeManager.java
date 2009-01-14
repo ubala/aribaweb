@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNodeManager.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNodeManager.java#6 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -54,7 +54,6 @@ public abstract class AWNodeManager
 
     /**
      * Return the default NodeValidator
-     * @return
      * @aribaapi private
      */
     public AWNodeValidator defaultNodeValidator ()
@@ -68,7 +67,6 @@ public abstract class AWNodeManager
      * classname and action name.
      * @param className
      * @param actionName
-     * @return
      * @aribaapi private
      */
     public AWNodeValidator nodeValidatorForDirectAction (String className,
@@ -82,7 +80,6 @@ public abstract class AWNodeManager
      * qualified URL including (in the case of a servlet adaptor) the context root of
      * the servlet.
      * @param nodeId
-     * @return
      * @aribaapi private
      */
     public abstract String adaptorUrlForNode (String nodeId);

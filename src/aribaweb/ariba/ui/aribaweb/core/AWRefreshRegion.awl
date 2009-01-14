@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.awl#27 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.awl#28 $
     </Copyright>
 
     <Overview>
@@ -51,23 +51,26 @@
         Indicates that this AWRefreshRegion wraps other AWRefreshRegion(s).  Causes this
         AWRefreshRegion to render itself if any of its child AWRefreshRegion's are
         rendered.  Example:
-        <a:RefreshRegion tagName="table" isScope="$true">
-            <tr><td> static content </td></tr>
-            <a:RefreshRegion tagName="tr">
-                <td> some changeable content </td>
+
+            <a:RefreshRegion tagName="table" isScope="$true">
+                <tr><td> static content </td></tr>
+                <a:RefreshRegion tagName="tr">
+                    <td> some changeable content </td>
+                </a:RefreshRegion>
             </a:RefreshRegion>
-        </a:RefreshRegion>
 
         If the table AWRefreshRegion does not have isScope="$true", then if the tr AWRefreshRegion
         changed, the following HTML would be rendered:
-        <tr><td> some changeable content</td></tr>
+
+            <tr><td> some changeable content</td></tr>
 
         Alternatively, if the AWRefreshRegion does have isScope="$true", then the HTML output
         would be:
-        <table>
-            <tr><td> static content </td></tr>
-            <tr><td> some changeable content</td></tr>
-        </table>
+
+            <table>
+                <tr><td> static content </td></tr>
+                <tr><td> some changeable content</td></tr>
+            </table>
 
     </Binding>
 

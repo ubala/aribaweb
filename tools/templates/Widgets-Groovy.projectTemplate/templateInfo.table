@@ -1,0 +1,12 @@
+{
+    title = "Groovy AribaWeb/Widgets Application";
+    description = "A starter template for a basic (non-database)\nAribaWeb application that uses the Widgets library\n and supports definition of component in Groovy.";
+    rank = 2;
+    parameters = (
+        {
+            key="ViewPkg";
+            description="Package to use for your AW components/pages";
+            default="app";
+        }
+    );
+}

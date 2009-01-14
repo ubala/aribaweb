@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/DemoShell.java#44 $
+    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/DemoShell.java#49 $
 */
 package ariba.ui.demoshell;
 
@@ -21,11 +21,10 @@ import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWResourceManager;
 import ariba.ui.aribaweb.util.AWNamespaceManager;
+import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.servletadaptor.AWServletApplication;
 import ariba.ui.servletadaptor.AWServletRequest;
-import ariba.ui.widgets.AribaCommandBar;
-import ariba.ui.widgets.AribaNavigationBar;
-import ariba.ui.meta.core.UIMeta;
+import ariba.ui.groovy.AWGroovyLoader;
 import ariba.util.core.MapUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.core.TableUtil;
@@ -83,6 +82,9 @@ public class DemoShell
 
         _sharedInstance = this; // questionable...  but nestedreport relies on this side-effect
 
+        // Support groovy file loads
+        AWGroovyLoader.initialize();
+        
         AWApplication application = application();
 
         ariba.ui.widgets.Widgets.initialize();
@@ -102,9 +104,8 @@ public class DemoShell
         resolver = new AWNamespaceManager.Resolver(resolver);
         resolver.addIncludeToNamespace("x", new AWNamespaceManager.Import(
                 Arrays.asList("ariba.ui.demoshell", "ariba.ui.scratch"),
-                Arrays.asList("AWX")));
+                Arrays.asList("", "AWX")));
         ns.registerResolverForPackage("ariba.ui.demoshell", resolver);
-
         // only init if present...
         String cls = "ariba.ui.scratch.Initialization";
         if (ClassUtil.classForName(cls, false) != null) {

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/NullStringParser.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/NullStringParser.java#6 $
 */
 
 package ariba.util.formatter;
@@ -33,7 +33,6 @@ public class NullStringParser implements StringParser
     /**
         Creates a new NullStringParser.
 
-        @return new NullStringParser
         @aribaapi private
     */
     public NullStringParser ()

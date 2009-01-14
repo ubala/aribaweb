@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/i18n/Support_iw.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/i18n/Support_iw.java#5 $
 */
 
 package ariba.util.i18n;
@@ -40,7 +40,6 @@ public class Support_iw extends I18NSupport
     /**
         Returns the file encoding string for the specified locale
 
-        @param locale the locale to get the encoding string of
         @return the encoding string
         @aribaapi documented    
     */    

@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    $Id:  $
+ -->
+<project name="demoshell-app" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+    <description>
+        Build file for apps depending on demoshell (and metaui, widgets, aribaweb) ...
+
+        Generates jar (and generates aribaweb.properties, if necessary)
+        and war (and generates web.xml, if necessary)
+    </description>
+
+    <!-- aribaweb.properties: defaults  -->
+    <property name="aw.dependsOn" value="ariba.demoshell"/>
+    <property name="servlet.class" value="ariba.ui.demoshell.DispatcherServlet"/>
+    <property name="aw.packagedResourceExtensions" value="awl,oss,csv,xml"/>
+
+    <import file="build-metaui-app.xml"/>
+
+    <fileset id="war.jars" dir="${build.jars.dir}">
+        <include name="ariba.demoshell.jar"/>
+        <include name="${jar.name}"/>
+    </fileset>
+
+    <fileset id="war.resource.jars" dir="${build.jars.dir}">
+        <include name="ariba.aribaweb.jar"/>
+        <include name="ariba.widgets.jar"/>
+        <include name="ariba.metaui.jar"/>
+        <include name="ariba.demoshell.jar"/>
+    </fileset>
+
+    <fileset id="module.libs" dir="${lib.dir}">
+        <include name="js.jar"/>
+    </fileset>
+
+    <fileset id="module.libs2" dir="${lib-internal.dir}">
+        <include name="groovy-all.jar"/>
+    </fileset>
+
+</project>

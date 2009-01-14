@@ -1,0 +1,62 @@
+<a:Singleton>
+    <a:ClientSideScript filename="widg/richtext.js"/>\
+
+    <a:ClientSideScript>
+        _editor_url = "$editorURL";
+        _editor_lang = "";
+        XinhaStrings = [];
+        XinhaStrings["Xinha"] = {
+            "Bold" : '<a:JavascriptString value="$[a001]Bold" escape="$true"/>',
+            "Italic" : '<a:JavascriptString value="$[a002]Italic" escape="$true"/>',
+            "Underline" : '<a:JavascriptString value="$[a003]Underline" escape="$true"/>',
+            "Ordered List" : '<a:JavascriptString value="$[a004]Ordered List" escape="$true"/>',
+            "Bulleted List" : '<a:JavascriptString value="$[a005]Bulleted List" escape="$true"/>',
+            "Font Color" : '<a:JavascriptString value="$[a006]Font Color" escape="$true"/>',
+            "Background Color" : '<a:JavascriptString value="$[a007]Background Color" escape="$true"/>',
+            "&mdash; size &mdash;" : '&mdash; <a:JavascriptString value="$[a008]size" escape="$true"/> &mdash;',
+            "OK" : '<a:JavascriptString value="$[a009]OK" escape="$true"/>',
+            "Click a color..." : '<a:JavascriptString value="$[a010]Click a color" escape="$true"/>',
+            "Sample" : '<a:JavascriptString value="$[a011]Sample" escape="$true"/>',
+            "Color: " : '<a:JavascriptString value="$[a012]Color" escape="$true"/>:',
+            "Close" : '<a:JavascriptString value="$[a013]Close" escape="$true"/>',
+            "&mdash; font &mdash;" : '&mdash; <a:JavascriptString value="$[a015]font" escape="$true"/> &mdash;',
+            "Arial" : '<a:JavascriptString value="$[a016]Arial" escape="$true"/>',
+            "Courier New" : '<a:JavascriptString value="$[a017]Courier New" escape="$true"/>',
+            "Georgia" : '<a:JavascriptString value="$[a018]Georgia" escape="$true"/>',
+            "Tahoma" : '<a:JavascriptString value="$[a019]Tahoma" escape="$true"/>',
+            "Times New Roman" : '<a:JavascriptString value="$[a020]Times New Roman" escape="$true"/>',
+            "Verdana" : '<a:JavascriptString value="$[a021]Verdana" escape="$true"/>',
+            "Impact" : '<a:JavascriptString value="$[a022]Impact" escape="$true"/>',
+            "WingDings" : '<a:JavascriptString value="$[a023]WingDings" escape="$true"/>',
+            "MS UI Gothic" : '<a:JavascriptString value="$[a024]MS UI Gothic" escape="$true"/>',
+            "Remove formatting" : '<a:JavascriptString value="$[a025]Remove formatting" escape="$true"/>',
+            "Are you sure you want to remove all formatting?" : '<a:JavascriptString value="$[a026]Are you sure you want to remove all formatting?" escape="$true"/>'
+        }
+        XinhaStrings["FullScreen"] = {
+            "Maximize/Minimize Editor" : '<a:JavascriptString value="$[a014]Maximize/Minimize Editor" escape="$true"/>'
+        };
+
+    </a:ClientSideScript>
+
+    <a:ClientSideScript filename="xinha/XinhaCore.js"/>\
+    <a:If ifTrue="$isBrowserMicrosoft">
+        <a:ClientSideScript filename="xinha/modules/InternetExplorer/InternetExplorer.js"/>\
+    <a:Else/>
+        <a:ClientSideScript filename="xinha/modules/Gecko/Gecko.js"/>\
+        <a:ClientSideScript filename="xinha/modules/Gecko/paraHandlerBest.js"/>\
+    </a:If>
+    <a:ClientSideScript filename="xinha/modules/GetHtml/TransformInnerHTML.js"/>\
+    <a:ClientSideScript filename="xinha/modules/FullScreen/full-screen.js"/>\
+    <a:ClientSideScript filename="xinha/modules/ColorPicker/ColorPicker.js"/>\
+
+    <a:ClientSideScript>
+        patchXinha();
+    </a:ClientSideScript>
+
+    <!--- Defining these disables Xinha from loading them -->
+    <a:For list="$editorIds" item="$currentEditorId">
+        <a:GenericContainer tagName="script" id="$currentEditorId"></a:GenericContainer>
+    </a:For>
+
+</a:Singleton>
+

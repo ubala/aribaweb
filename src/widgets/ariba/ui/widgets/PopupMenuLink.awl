@@ -13,11 +13,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuLink.awl#30 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuLink.awl#31 $
     </Copyright>
 
     <Overview>
-        see <w:PopupMenu/>
+        see `<w:PopupMenu/>`
     </Overview>
 
     <Binding key="menuId" direction="get" type="String" required="$true">
@@ -70,7 +70,7 @@
 
     <Binding key="tagName" direction="get" type="String" default="span">
         A PopupMenuLink can be any kind of container tag.  By default,
-        it is a <span/>.  The container will be clickable once rendered
+        it is a `<span/>`.  The container will be clickable once rendered
         as a PopupMenuLink.
     </Binding>
 
@@ -83,13 +83,13 @@
     </Binding>
 
     <Binding key="style" direction="get" type="String" required="$false">
-        The style for the <a/> tag inside the PopupMenuLink.  See also
+        The style for the `<a/>` tag inside the PopupMenuLink.  See also
         containerStyle
     </Binding>
 
     <Binding key="class" direction="get" type="String" default="awmenuLink linkArrow">
         Although you cannot provide a "class" for the container, you can provide
-        one for the <a/> inside.
+        one for the `<a/>` inside.
     </Binding>
 
     <Binding key="onMouseOver" direction="get" type="String" required="$false">

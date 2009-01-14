@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ArithmeticOperations.java#3 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ArithmeticOperations.java#4 $
 */
 
 package ariba.util.core;
@@ -48,7 +48,7 @@ public abstract class ArithmeticOperations extends ClassExtension
 
     public static ArithmeticOperations getByName (String name)
     {
-        Class classObj = ClassUtil.classForName(name);
+        Class classObj = ClassUtil.classForName(name, false);
         if (classObj == null) {
             return null;
         }
@@ -56,12 +56,20 @@ public abstract class ArithmeticOperations extends ClassExtension
     }
 
     public abstract Object add (Object obj1, Object obj2);
+    
+    public abstract Class additionReturnType (Class objType1, Class objType2);
 
     public abstract Object substract (Object obj1, Object obj2);
 
+    public abstract Class subtractionReturnType (Class objType1, Class objType2);    
+    
     public abstract Object multiply (Object obj1, BigDecimal factor);
-
+   
+    public abstract Class multiplicationReturnType (Class objType1, Class objType2);
+    
     public abstract Object divide (Object obj1, Object divisor);
-
+    
+    public abstract Class divisionReturnType (Class objType1, Class objType2);
+    
     public abstract boolean canCastFrom (Class fromClass);
 }

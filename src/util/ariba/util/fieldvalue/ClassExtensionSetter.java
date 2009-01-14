@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/ClassExtensionSetter.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/ClassExtensionSetter.java#3 $
 */
 
 package ariba.util.fieldvalue;
@@ -100,7 +100,7 @@ public class ClassExtensionSetter extends ReflectionMethodSetter
     actual target object.
 
     @param target the target object
-    @param fieldName the name of the field for which the accessor applies
+    @param value the value to assign
     */
     protected void invokeSetMethod (Object target, Object value)
         throws InvocationTargetException, IllegalAccessException

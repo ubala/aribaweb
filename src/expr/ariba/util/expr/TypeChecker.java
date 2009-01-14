@@ -12,34 +12,34 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeChecker.java#28 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeChecker.java#29 $
 */
 
 package ariba.util.expr;
 
-import ariba.util.fieldtype.TypeInfo;
+import ariba.util.core.ArithmeticOperations;
+import ariba.util.core.Assert;
+import ariba.util.core.ClassUtil;
+import ariba.util.core.Fmt;
+import ariba.util.core.ListUtil;
+import ariba.util.core.MapUtil;
+import ariba.util.core.SetUtil;
+import ariba.util.core.StringUtil;
+import ariba.util.fieldtype.ContainerTypeInfo;
 import ariba.util.fieldtype.FieldInfo;
 import ariba.util.fieldtype.MethodInfo;
-import ariba.util.fieldtype.TypeRetriever;
+import ariba.util.fieldtype.NullTypeInfo;
 import ariba.util.fieldtype.PrimitiveTypeProvider;
 import ariba.util.fieldtype.PropertyInfo;
-import ariba.util.fieldtype.NullTypeInfo;
-import ariba.util.fieldtype.ContainerTypeInfo;
-import ariba.util.core.Assert;
-import ariba.util.core.ListUtil;
-import ariba.util.core.StringUtil;
-import ariba.util.core.Fmt;
-import ariba.util.core.MapUtil;
-import ariba.util.core.ArithmeticOperations;
-import ariba.util.core.SetUtil;
 import ariba.util.core.FastStringBuffer;
-
-import java.util.Map;
-import java.util.Stack;
-import java.util.List;
+import ariba.util.fieldtype.TypeInfo;
+import ariba.util.fieldtype.TypeRetriever;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 /**
     @aribaapi private
@@ -509,6 +509,26 @@ public class TypeChecker extends ASTNodeVisitor
                             operandTypeInfo = coercedTypeInfo;
                         }
                     }
+                    else if (!(operandTypeInfo instanceof NullTypeInfo) &&
+                             !(info instanceof NullTypeInfo)) {
+                        // if any of the operands is non-numeric type, then
+                        // look for the return type of the arithmetic operations
+                        String operandType = getTypeName(operandTypeInfo);
+                        String infoType = getTypeName(info);
+                        ArithmeticOperations op = 
+                            getArithmeticOperations(node, operandType, infoType);
+                        if (op != null) {
+                            Class operandTypeClass = ClassUtil.classForName(operandType, false);
+                            Class infoTypeClass = ClassUtil.classForName(infoType, false);
+                            if (operandTypeClass != null && infoTypeClass != null) {
+                                Class resultClass = getArithmeticOperationsReturnTypeClass(
+                                        node, op, operandTypeClass, infoTypeClass);                             
+                                if (resultClass != null) {
+                                    operandTypeInfo = getTypeInfo(resultClass.getName());   
+                                }
+                            }
+                        }
+                    }
                 }
                 else {
                     return null;
@@ -518,6 +538,71 @@ public class TypeChecker extends ASTNodeVisitor
             return operandTypeInfo;
         }
         return null;
+    }
+    
+    /**
+        Returns the {@link ArithmeticOperations} for the given
+        <code>node</code> with operands with the given
+        <code>type1</code> and <code>type2</code>.  Please note that
+        this needs to be in sync with the way we get arithmetic
+        operations when the actual operation happens in ExprOps.
+    */
+    private ArithmeticOperations getArithmeticOperations (
+            Node node, String type1, String type2)
+    {
+        ArithmeticOperations result = null;
+        if (node instanceof ASTAdd ||
+            node instanceof ASTSubtract) {
+            result = ExprOps.getArithmeticOperations(type1, type2);         
+        }
+        else if (node instanceof ASTMultiply) {
+            result = ExprOps.getArithmeticOperations(type1);
+            if (result == null) {
+                result = ExprOps.getArithmeticOperations(type2);
+            }
+        }
+        else if (node instanceof ASTDivide) {
+            result = ExprOps.getArithmeticOperations(type1);
+        }
+        return result;
+    }
+    
+    /**
+        Gets the type name for the given <code>info</code>.  If the
+        given <code>info</code> is unboxed type, it returns the
+        equivalent boxed type.
+    */
+    private String getTypeName (TypeInfo info)
+    {
+        if (!PrimitiveTypeProvider.isBoxedType(info)) {
+            TypeInfo boxedTypeInfo =(TypeInfo)PrimitiveTypeProvider.getBoxedTypeInfo(info);
+            if (boxedTypeInfo != null) {
+                return boxedTypeInfo.getName();
+            }
+        }
+        return info.getName();
+    }
+    
+    private Class getArithmeticOperationsReturnTypeClass (
+            Node node,
+            ArithmeticOperations op,
+            Class operandType1,
+            Class operandType2) 
+    {
+        Class result = null;
+        if (node instanceof ASTAdd) {
+            result = op.additionReturnType(operandType1, operandType2);
+        }
+        else if (node instanceof ASTSubtract) {
+            result = op.subtractionReturnType(operandType1, operandType2);
+        }
+        else if (node instanceof ASTMultiply) {
+            result = op.multiplicationReturnType(operandType1, operandType2);
+        }
+        else if (node instanceof ASTDivide) {
+            result = op.divisionReturnType(operandType1, operandType2);
+        }
+        return result;
     }
 
     private void checkOperandsType (Node node,
@@ -1733,7 +1818,8 @@ public class TypeChecker extends ASTNodeVisitor
                 if (record != null) {
                     TypeInfo result = record.getTypeInfo();
                     addSemanticRecordToNode(node, result);
-                } else {
+                }
+                else {
                     if (hasRootType()) {
                         addError(node,
                             Fmt.S("Fail to find type for value in key-value expression '%s'.",

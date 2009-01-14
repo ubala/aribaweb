@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue_Object.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue_Object.java#3 $
 */
 
 package ariba.util.fieldvalue;
@@ -113,7 +113,7 @@ public class FieldValue_Object extends FieldValue
     a multi-node path.
 
     @param target the object on which the value will be set for the field identiifed by fieldPath
-    @param the fieldPath node (which contains a candidate accessor) to be
+    @param fieldPath the fieldPath node (which contains a candidate accessor) to be
     used to set the value on target.
     @param value the value to set on the target
     */

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/ComponentActionTarget.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/ComponentActionTarget.java#3 $
 */
 
 package ariba.ui.wizard.component;
@@ -35,7 +35,7 @@ public final class ComponentActionTarget implements WizardActionTarget
     private WizardFrame _frame;
 
     /**
-        @aribapai ariba
+        @aribaapi ariba
     */
     public ComponentActionTarget (Wizard wizard,
                                   AWComponent component,
@@ -47,7 +47,7 @@ public final class ComponentActionTarget implements WizardActionTarget
     }
 
     /**
-        @aribapai ariba
+        @aribaapi ariba
     */
     public boolean terminatesWizard ()
     {
@@ -55,7 +55,7 @@ public final class ComponentActionTarget implements WizardActionTarget
     }
 
     /**
-        @aribapai private
+        @aribaapi private
     */
     public AWComponent component ()
     {
@@ -63,7 +63,7 @@ public final class ComponentActionTarget implements WizardActionTarget
     }
 
     /**
-        @aribapai private
+        @aribaapi private
     */
     public WizardFrame getOriginatingFrame ()
     {

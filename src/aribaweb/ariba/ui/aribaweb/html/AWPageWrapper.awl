@@ -1,0 +1,108 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPageWrapper.awl#1 $
+    </Copyright>
+
+    <Overview>
+        AWPageWrapper
+    </Overview>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" required="$false">
+        See PageWrapperForm
+    </Binding>
+
+    <Binding key="applicationCSS" direction="get" type="String" default="$null">
+        see applicationCSS ariba.ui.widgets.DocumentHead.awl
+    </Binding>
+
+    <Binding key="debugTitle" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="escapeTitle" direction="get" type="boolean" default="$true">
+        see escapeTitle in ariba.ui.widgets.DocumentHead.awl
+    </Binding>
+
+    <Binding key="sessionless" direction="get" type="boolean" default="$false">
+        see sessionless in ariba.ui.widgets.DocumentHead.awl
+        and also ariba.ui.widgets.AWSessionManager
+    </Binding>
+
+    <Binding key="onLoad" direction="get" type="String" default="$null">
+        see onLoad in ariba.ui.aribaweb.html.AWBody.awl
+    </Binding>
+
+    <Binding key="bodyClass" direction="get" type="String">
+        TBD
+    </Binding>
+
+    <NamedContent name="body" required="$false">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="head" required="$false">
+        Head content
+    </NamedContent>
+
+    <NamedContent name="body" required="$false">
+        body context
+    </NamedContent>
+
+    <NamedContent name="commands" required="$false">
+        Note: see AribaCommandBar.  The Include tag is magic in that it will reach up any number of
+        component-levels to locate a named template with the name "commands".
+    </NamedContent>
+</a:Api>\
+<!--- AWPageWrapper
+
+applicationCSS="$^applicationCSS"
+windowTitle="$windowTitle"
+escapeTitle="$^escapeTitle:$true"
+sessionless="$^sessionless"
+onLoad="$^onLoad"
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="$languageDirection">\
+<head>
+    <meta http-equiv="imagetoolbar" content="no"/>
+    <a:MetaContentType/>
+
+    <x:BasicScriptFunctions sessionless="$^sessionless:$false"/>\
+
+    <a:If notEqualNull="$^applicationCSS">\
+        <a:StyleSheet filename="$^applicationCSS"/>
+    </a:If>\
+    <title>\
+        <a:String value="$^windowTitle" escapeHtml="$^escapeTitle:$true"/>
+    </title>
+    <a:IncludeContent name="head" required="$false"/>
+    <link rel="shortcut icon" href="$favIconUrl" type="image/x-icon"/>
+</head>
+<a:Body onLoad="$^onLoad">\
+    <a:IncludeContent name="body" required="$false"/>
+
+    <!--- NOTE: make sure that the AWRichClientFooter comes after all components which require
+          refreshRegion support.  The AWRichClientFooter completes the incremental
+          update request and cleans up all temporary state so if any components which
+          require refresh region support come after the AWRichClientFooter, there
+          will be a race condition between the incremental update commands and the
+          completion of incremental update. -->
+    <a:If ifFalse="$^sessionless">
+        <a:RichClientFooter/>\
+    </a:If>
+</a:Body>
+</html>
+

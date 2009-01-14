@@ -1,0 +1,118 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AWTestCategoryLinks.awl#1 $
+    </Copyright>
+</a:Api>
+<a:For list="$^categoryTestUnits" item="$currentTestUnit">
+    <table class="testUnit">
+        <tr>
+            <td class="tableHeader">$currentTestUnit.mainName ($currentTestUnit.secondaryName)</td>
+            <td class="tableHeader">Context</td>
+        </tr>
+
+        <tr>
+            <td class="tableCell">
+                <div class="leftLinks">
+                    <a:If ifTrue="$currentTestUnit.hasUiNoParamLinks">
+                        <ul class="testLinkList">
+                            <a:For list="$currentTestUnit.uiNoParamLinks" item="$currentTestUnitLink">
+                                <a:If ifTrue="$currentTestUnitLinkActive">
+                                    <li class="appLink">
+                                        <a:Hyperlink action="$testUnitClick" title="$currentTestUnitLink.secondaryName">
+                                            $currentTestUnitLink.displayName
+                                        </a:Hyperlink>
+                                    </li>
+                                </a:If>
+                                <a:Else>
+                                    <li class="appLink">
+                                        $currentTestUnitLink.displayName
+                                    </li>
+                                </a:Else>
+                            </a:For>
+                        </ul>
+                    </a:If>
+                    <a:If ifTrue="$currentTestUnit.hasUiNoParamLinks">
+                        <a:If ifTrue="$currentTestUnit.hasNoUiNoParamLinks">
+                            <div class="separator"></div>
+                        </a:If>
+                    </a:If>
+                    <a:If ifTrue="$currentTestUnit.hasNoUiNoParamLinks">
+                        <ul class="testLinkList">
+                            <a:For list="$currentTestUnit.noUiNoParamLinks" item="$currentTestUnitLink">
+                                <a:If ifTrue="$currentTestUnitLinkActive">
+                                    <li class="reloadLink">
+                                        <a:Hyperlink action="$testUnitClick" title="$currentTestUnitLink.secondaryName">
+                                            $currentTestUnitLink.displayName
+                                        </a:Hyperlink>
+                                    </li>
+                                </a:If>
+                                <a:Else>
+                                    <li class="appLink">
+                                        $currentTestUnitLink.displayName
+                                    </li>
+                                </a:Else>
+                            </a:For>
+                        </ul>
+                    </a:If>
+                </div>
+            </td>
+            <td class="tableCell">
+                <div class="rightLinks">
+                    <a:If ifTrue="$currentTestUnit.hasUiParamLinks">
+                        <ul class="testLinkList">
+                            <a:For list="$currentTestUnit.uiParamLinks" item="$currentTestUnitLink">
+                                <a:If ifTrue="$currentTestUnitLinkActive">
+                                    <li class="appLink">
+                                        <a:Hyperlink action="$testUnitClick" title="$currentTestUnitLink.secondaryName">
+                                            $currentTestUnitLink.displayName
+                                        </a:Hyperlink>
+                                    </li>
+                                <a:Else/>
+                                    <li class="appLink">
+                                        $currentTestUnitLink.displayName
+                                    </li>
+                                </a:If>
+                            </a:For>
+                        </ul>
+                    </a:If>
+                    <a:If ifTrue="$currentTestUnit.hasUiParamLinks">
+                        <a:If ifTrue="$currentTestUnit.hasNoUiParamLinks">
+                            <div class="separator"></div>
+                        </a:If>
+                    </a:If>
+                    <a:If ifTrue="$currentTestUnit.hasNoUiParamLinks">
+                        <ul class="testLinkList">
+                            <a:For list="$currentTestUnit.noUiParamLinks" item="$currentTestUnitLink">
+                                <a:If ifTrue="$currentTestUnitLinkActive">
+                                    <li class="reloadLink">
+                                        <a:Hyperlink action="$testUnitClick" title="$currentTestUnitLink.secondaryName">
+                                            $currentTestUnitLink.displayName
+                                        </a:Hyperlink>
+                                    </li>
+                                <a:Else/>
+                                    <li class="appLink">
+                                        $currentTestUnitLink.displayName
+                                    </li>
+                                </a:If>
+                            </a:For>
+                        </ul>
+                    </a:If>
+                </div>
+            </td>
+        </tr>
+    </table>
+    &nbsp;
+</a:For>

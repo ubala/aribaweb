@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentInspector.java#8 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentInspector.java#13 $
 */
 package ariba.ui.dev;
 
@@ -23,16 +23,26 @@ import ariba.ui.aribaweb.core.AWComponentReference;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponse;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.aribaweb.core.AWBindableElement;
+import ariba.ui.aribaweb.core.AWSession;
+import ariba.ui.aribaweb.core.AWConstants;
 import ariba.ui.aribaweb.util.AWDebugTrace;
+import ariba.ui.aribaweb.util.AWDebugTrace.ComponentTraceNode;
+import ariba.ui.aribaweb.util.AWDebugTrace.MetadataTraceNode;
+import ariba.ui.aribaweb.util.AWDebugTrace.AssignmentRecorder;
+import ariba.ui.aribaweb.util.AWDebugTrace.AssignmentSource;
+import ariba.ui.aribaweb.util.AWDebugTrace.Assignment;
 import ariba.ui.aribaweb.util.AWEncodedString;
-import ariba.ui.aribaweb.util.AWFileResource;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWUtil;
+import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.outline.OutlineState;
 import ariba.ui.table.AWTDisplayGroup;
 import ariba.ui.widgets.Log;
+import ariba.ui.widgets.AribaPageContent;
 import ariba.util.core.ListUtil;
 import ariba.util.core.URLUtil;
+import ariba.util.core.Fmt;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,7 +50,10 @@ import java.io.StringReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
 import java.net.UnknownHostException;
 import java.net.InetAddress;
 import java.net.URL;
@@ -49,19 +62,51 @@ import java.net.URISyntaxException;
 
 public class AWComponentInspector extends AWComponent
 {    
-    public AWDebugTrace.ComponentTraceNode _traceNode;
-    public AWComponentReference _currentComponentReference;
-    public AWDebugTrace.MetadataTraceNode _metadataNode;
-    public int _tabIndex;
-    public AWTDisplayGroup _traceDisplayGroup, _pathDisplayGroup, _metadataDisplayGroup;
+    public ComponentTraceNode _traceNode;
+    public MetadataTraceNode _metadataNode;
+    public int _tabIndex = -1;
+    public AWTDisplayGroup _traceDisplayGroup = new AWTDisplayGroup();
+    public AWTDisplayGroup _pathDisplayGroup = new AWTDisplayGroup();
+    public AWTDisplayGroup _metadataDisplayGroup = new AWTDisplayGroup();
     public int _fileContentsTabIndex;
+    public int _fileContentsTabIndexLastChosen = -1;
     AWDebugTrace _debugTrace;
+    public boolean _showingMeta;
+
+    public boolean _showProperties;
+    public String _propertyKey;
+    public AssignmentRecorder _recorder;
+    public AssignmentSource _assignmentSource;
+    public Assignment _assignment;
+
+    public static boolean isComponentPathDebuggingEnabled (AWRequestContext requestContext)
+    {
+        AWSession session = requestContext.session(false);
+        if (session == null) {
+            return false;
+        }
+        else {
+            Boolean flag = (Boolean)session.dict().get(AWConstants.ComponentPathDebugFlagKey);
+            return (flag != null) && flag.booleanValue();
+        }
+    }
+
+    public static void togglePathDebugging (AWRequestContext requestContext)
+    {
+        boolean shouldEnable = !isComponentPathDebuggingEnabled(requestContext);
+        AWSession session = requestContext.session(false);
+        if (session != null) {
+            session.dict().put(AWConstants.ComponentPathDebugFlagKey,
+                        (shouldEnable ? Boolean.TRUE: Boolean.FALSE ));
+        }
+        if (shouldEnable) {
+            AribaPageContent.setMessage("Path Debugging Enabled!  You may also Alt-click on elements to see the path to a particular part of the page", session);
+        }
+    }
+
 
     void init (AWDebugTrace debugTrace)
     {
-        _pathDisplayGroup = new AWTDisplayGroup();
-        _metadataDisplayGroup = new AWTDisplayGroup();
-        _traceDisplayGroup = new AWTDisplayGroup();
         setDebugTrace(debugTrace);
         setShowingFileContents(true);
     }
@@ -69,22 +114,77 @@ public class AWComponentInspector extends AWComponent
     void setDebugTrace (AWDebugTrace debugTrace)
     {
         _debugTrace = debugTrace;
-
-        List path = debugTrace.componentPathList();
+        _traceNode = null;
+        _metadataNode = null;
+        
+        List<ComponentTraceNode> path = debugTrace.componentPathList();
         _pathDisplayGroup.setObjectArray(path);
 
-        if (_debugTrace.rootMetadataTraceNode() != null) {
-            _metadataDisplayGroup.setObjectArray(_debugTrace.rootMetadataTraceNode().children());
-        }
+        ComponentTraceNode traceRoot = debugTrace.componentTraceRoot().collapseChildren();
+        setUpTraceDisplayGroup(_traceDisplayGroup,
+                               traceRoot,
+                               path);
 
-        AWDebugTrace.ComponentTraceNode traceRoot = debugTrace.componentTraceRoot();
-        if (traceRoot != null) {
-            _traceDisplayGroup.setObjectArray(ListUtil.list(traceRoot.collapseChildren()));
-            expandIfChildrenReferenceDefinition(traceRoot, _debugTrace.mainComponentDefinition(),
-                    _traceDisplayGroup.outlineState());
-        }
 
-        _tabIndex = (path != null) ? 1 : 0;
+        // if (_debugTrace.rootMetadataTraceNode() != null) {
+        setUpTraceDisplayGroup(_metadataDisplayGroup,
+                               traceRoot.cloneTree().collapseNonMetadataChildren(),
+                               path);
+
+        if (_tabIndex == -1) {
+            _tabIndex = (path != null) ? 1 : 0;
+        }
+        else if (_tabIndex == 1 && (path == null)) {
+            _tabIndex = 0;
+        }
+    }
+
+    void setUpTraceDisplayGroup (AWTDisplayGroup displayGroup, ComponentTraceNode traceRoot,
+                                 List<ComponentTraceNode> path)
+    {
+        if (traceRoot != null && traceRoot.children() != null) {
+            displayGroup.setObjectArray(ListUtil.list(traceRoot));
+
+            if (path != null) {
+                List <ComponentTraceNode>translatedPath = translatePath(traceRoot, path);
+                for (ComponentTraceNode node : translatedPath) {
+                    displayGroup.outlineState().setExpansionState(node, true);
+                }
+                displayGroup.setSelectedObject(ListUtil.lastElement(translatedPath));
+            }
+            else {
+                expandIfChildrenReferenceDefinition(traceRoot, _debugTrace.mainComponentDefinition(),
+                        displayGroup.outlineState());
+            }
+        }
+        else {
+            displayGroup.setObjectArray(null);
+        }
+    }
+
+    List<ComponentTraceNode> translatePath (ComponentTraceNode root, List<ComponentTraceNode>path)
+    {
+        List<ComponentTraceNode>result = new ArrayList();
+        ComponentTraceNode treeNode = root;
+        result.add(root);
+        for (int i = path.size()-1; i >= 0; i--) {
+            ComponentTraceNode pathNode = path.get(i);
+            AWBindableElement element = pathNode.element();
+            for (ComponentTraceNode child : treeNode.children()) {
+                if (child.element() == element
+                        && eq(child.associatedMetadataProvider(), pathNode.associatedMetadataProvider())) {
+                    result.add(child);
+                    treeNode = child;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    boolean eq (Object a, Object b) {
+        return (a == null && b == null)
+                || (a != null && a.equals(b));
     }
 
     public AWComponent refreshPage ()
@@ -94,15 +194,20 @@ public class AWComponentInspector extends AWComponent
         return null;
     }
 
+    public void mainTabSelectionChanged ()
+    {
+        // if (_pathDisplayGroup.allObjects().size() > 0) _selectionPathToRestore = _pathDisplayGroup.allObjects();  
+    }
+
     // Try to do a "smart expand" by auto-opening elements rooted in the main page
-    public static boolean expandIfChildrenReferenceDefinition (AWDebugTrace.ComponentTraceNode node,
+    public static boolean expandIfChildrenReferenceDefinition (ComponentTraceNode node,
                                        AWComponentDefinition componentDefinition, OutlineState outline)
     {
         boolean childMatches = false;
         List children = node.children();
         int i = (children != null) ? children.size() : 0;
         while (i-- > 0) {
-            if (expandIfChildrenReferenceDefinition((AWDebugTrace.ComponentTraceNode)children.get(i),
+            if (expandIfChildrenReferenceDefinition((ComponentTraceNode)children.get(i),
                     componentDefinition, outline)) {
                 childMatches = true;
             }   
@@ -110,53 +215,75 @@ public class AWComponentInspector extends AWComponent
         if (childMatches) outline.setExpansionState(node, true);
 
         // open parent if child matches, or we do
-        return childMatches || (node.componentReference().templateName() == componentDefinition.templateName())
-                || (node.componentReference().componentDefinition() == componentDefinition)
-                || (node.componentReference().componentDefinition().templateName() == componentDefinition.templateName());
+        return childMatches || (node.element().templateName() == componentDefinition.templateName())
+                || (node.componentDefinition() == componentDefinition)
+                || (definitionTemplateName(node.element()) == componentDefinition.templateName());
     }
 
     public AWTDisplayGroup currentDisplayGroup ()
     {
-        return (_tabIndex == 0) ? _traceDisplayGroup : _pathDisplayGroup;
+        return (_tabIndex == 0) ? currentTraceDisplayGroup()
+                                : _pathDisplayGroup;
     }
 
-    public AWComponentReference currentComponentReference ()
+    public AWBindableElement currentElement()
     {
         return (_tabIndex == 0) ? ((_traceNode != null) ?_traceNode.sourceReference() : null)
-                                : _currentComponentReference;
+                                : ((_traceNode != null) ?_traceNode.element() : null);
     }
 
     String currentTemplatePath ()
     {
-        // return (_tabIndex == 0) ? _traceNode.componentReference().componentDefinition().templateName()
-        return (_tabIndex == 0) ? _traceNode.componentReference().componentDefinition().templateName()
-                                : _currentComponentReference.templateName();
+        return (_tabIndex == 0) ? definitionTemplateName(_traceNode.element())
+                                : ((_traceNode != null) ?_traceNode.element().templateName() : null);
+    }
+
+    static String definitionTemplateName (AWBindableElement element)
+    {
+        return (element instanceof AWComponentReference)
+                ? ((AWComponentReference)element).componentDefinition().templateName()
+                : element.templateName();
     }
 
     public String currentResourcePath ()
     {
-        String path = currentComponentReference().componentDefinition().templateName();
+        String path = definitionTemplateName(currentElement());
         if (path == null) path = currentTemplatePath();
         return path;
     }
     
     public String currentReferencePath ()
     {
-        String path = currentComponentReference().templateName();
+        String path = currentElement().templateName();
         if (path == null) path = currentTemplatePath();
         return path;
     }
 
+    public String currentFileLocation ()
+    {
+        return Fmt.S("%s:%s", currentReferencePath(), _traceNode.sourceReference().lineNumber());    
+    }
+
+    public AWTDisplayGroup currentTraceDisplayGroup ()
+    {
+        return (_showingMeta) ? _metadataDisplayGroup : _traceDisplayGroup;
+    }
+
     public void makeSelectionCurrentItem ()
     {
-        if (_tabIndex == 0) {
-            _traceNode = (AWDebugTrace.ComponentTraceNode)_traceDisplayGroup.selectedObject();
-        } else {
-            _currentComponentReference = (AWComponentReference)_pathDisplayGroup.selectedObject();
-        }
+        _traceNode = (ComponentTraceNode)currentDisplayGroup().selectedObject();
 
         // make sure that we're not on the java tab if it's not available
-        if (currentComponentReference() == null || javaFullPath() == null && _fileContentsTabIndex==2) _fileContentsTabIndex = 0;
+        if (currentElement() == null || javaFullPath() == null && _fileContentsTabIndex==2) _fileContentsTabIndex = 0;
+        if (_fileContentsTabIndexLastChosen == -1
+                && _traceNode != null && _traceNode.associatedMetadata() != null) {
+            _fileContentsTabIndex = 4;
+        }
+    }
+
+    public void viewTabSelected ()
+    {
+        _fileContentsTabIndexLastChosen = _fileContentsTabIndex;
     }
 
     public String fileName ()
@@ -167,6 +294,26 @@ public class AWComponentInspector extends AWComponent
     public String filePath ()
     {
         return AWDebugTrace.pathComponent(resourceFullPath(), true);
+    }
+
+    public String nodeTitle ()
+    {
+        String name = AWDebugTrace.elementName(_traceNode.element());
+        MetadataTraceNode meta = _traceNode.associatedMetadata();
+        return (meta != null)
+                ? Fmt.S("%s (%s)", meta.title(_traceNode.element()), name)
+                : name;
+    }
+
+    public boolean canShowAssignments ()
+    {
+        Map assignments = _traceNode.associatedMetadataAssignmentMap();
+        return (assignments != null && assignments.size() > 1);
+    }
+
+    public boolean showProperties ()
+    {
+        return !canShowAssignments() || _showProperties;
     }
 
     public String componentName ()
@@ -198,7 +345,7 @@ public class AWComponentInspector extends AWComponent
 
     public String referenceFileLabel ()
     {
-        return AWDebugTrace.pathComponent(referenceResourceFullPath(), false) + " : " + currentComponentReference().lineNumber();
+        return AWDebugTrace.pathComponent(referenceResourceFullPath(), false) + " : " + currentElement().lineNumber();
     }
 
     public String resourceFileExtension ()
@@ -230,6 +377,7 @@ public class AWComponentInspector extends AWComponent
         File file = fileForURL(resourceFullPath());
         if (file == null) return null;
         file = new File(file.getAbsolutePath().replaceFirst("\\.(\\w)+", ".java"));
+        if (!file.exists()) file = new File(file.getAbsolutePath().replaceFirst("\\.(\\w)+", ".groovy"));
         return (file.exists()) ? file.getAbsolutePath() : null;
     }
     
@@ -277,7 +425,7 @@ public class AWComponentInspector extends AWComponent
 
     public String referenceResourceFileContents ()
     {
-        return fileContents(referenceResourceFullPath(), currentComponentReference().lineNumber());
+        return fileContents(referenceResourceFullPath(), currentElement().lineNumber());
     }
 
     public String resourceFileContents ()
@@ -290,25 +438,44 @@ public class AWComponentInspector extends AWComponent
         return emitAsPreTags(AWUtil.stringWithContentsOfFile(javaFullPath()), -1);
     }
 
-    static AWEncodedString OpenPre = new AWEncodedString("<pre class='pl'>");
-    static AWEncodedString OpenPreSelected = new AWEncodedString("<pre class='plsel'>");
+    static AWEncodedString OpenPre = new AWEncodedString("<pre class='pl prettyprint'>");
+    static AWEncodedString OpenPreSelected = new AWEncodedString("<pre class='plsel prettyprint'>");
     static AWEncodedString ClosePre = new AWEncodedString("</pre>\n");
+
+    // emits lineCount lines and returns false if input ended prematurely
+    boolean emitLines (BufferedReader reader, AWResponse response, int lineCount)
+    {
+        String line = null;
+        try {
+            while (lineCount-- > 0 && (line = reader.readLine()) != null) {
+                response.appendContent(AWUtil.escapeHtml(line));
+                response.appendContent("\n");
+            }
+            return line != null;
+        } catch (IOException e) {
+            throw new AWGenericException(e);
+        }
+    }
 
     protected String emitAsPreTags (String text, int selectedLine)
     {
+        boolean more = true;
         AWResponse response = response();
-        int lineCount = 0;
         BufferedReader reader = new BufferedReader(new StringReader(text));
-        String line;
-        try {
-            while ((line = reader.readLine()) != null) {
-                lineCount++;
-                response.appendContent(lineCount == selectedLine ? OpenPreSelected : OpenPre);
-                response.appendContent(AWUtil.escapeHtml(line));
-                response.appendContent(ClosePre);
-            }
-        } catch (IOException e) {
-            // ignore
+        if (selectedLine > 0) {
+            response.appendContent(OpenPre);
+            more = emitLines(reader, response, selectedLine-1);
+            response.appendContent(ClosePre);
+        }
+        if (selectedLine >=0 && more) {
+            response.appendContent(OpenPreSelected);
+            more = emitLines(reader, response, 1);
+            response.appendContent(ClosePre);
+        }
+        if (more) {
+            response.appendContent(OpenPre);
+            emitLines(reader, response, Integer.MAX_VALUE);
+            response.appendContent(ClosePre);
         }
         return null;
     }
@@ -327,7 +494,9 @@ public class AWComponentInspector extends AWComponent
         // auto-select first item if we're showing details
         if (showingFileContents() && currentDisplayGroup().selectedObject() == null) {
             if (currentDisplayGroup() == _pathDisplayGroup) {
-                currentDisplayGroup().setSelectedObject(currentDisplayGroup().displayedObjects().get(0));
+                if (_pathDisplayGroup.filteredObjects().size() > 0) {
+                    _pathDisplayGroup.setSelectedObject(currentDisplayGroup().displayedObjects().get(0));
+                }
                 _fileContentsTabIndex = 0;
             } else if (_debugTrace != null && _debugTrace.componentTraceRoot() != null) {
                 currentDisplayGroup().setSelectedObject(
@@ -391,9 +560,9 @@ public class AWComponentInspector extends AWComponent
     {
         try {
             String[] cmd = { "runjava", "ariba.ui.awdebugger.core.Launch", "", "" };
-            if (currentComponentReference() != null) {
+            if (currentElement() != null) {
                 cmd[2] = referenceResourceFullPath();
-                cmd[3] = Integer.toString(currentComponentReference().lineNumber());
+                cmd[3] = Integer.toString(currentElement().lineNumber());
             }
                 ProcessBuilder pb = new ProcessBuilder(cmd);
                 pb.environment().put("ARIBA_RUNJAVA_USE_JDI", "false");

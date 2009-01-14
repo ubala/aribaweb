@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/AuditLoggerMessage.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/log/AuditLoggerMessage.java#5 $
 */
 
 package ariba.util.log;
@@ -64,6 +64,8 @@ public interface AuditLoggerMessage
     public Object getEffectiveUserId ();
 
     public String getNodeName ();
+    
+    public String getIPAddress ();
     
     public int getRealmId ();
 

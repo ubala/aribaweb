@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/NonCachingClassLoader.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/core/NonCachingClassLoader.java#9 $
 */
 
 package ariba.util.core;
@@ -173,7 +173,7 @@ public class NonCachingClassLoader extends ClassLoader {
         set as the 'pattern' for the class.
 
         @param className the name of the desired Class
-        @param resolve true if the Class needs to be resolved
+        @param resolveIt true if the Class needs to be resolved
     */
     public synchronized Class loadClass (String className, boolean resolveIt)
       throws ClassNotFoundException

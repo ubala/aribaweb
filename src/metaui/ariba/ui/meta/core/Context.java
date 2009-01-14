@@ -12,11 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#8 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#9 $
 */
 package ariba.ui.meta.core;
 
 import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.ui.aribaweb.util.AWDebugTrace;
+import ariba.ui.aribaweb.core.AWBindableElement;
 import ariba.util.core.Assert;
 import ariba.util.core.Fmt;
 import ariba.util.core.ListUtil;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
@@ -1004,7 +1007,9 @@ public class Context implements Extensible
 
         public String toString()
         {
-            return super.toString() + " - " + ((_cached != null) ? _cached : " (unevaluated)");
+            return Fmt.S("(StaticDynamicWrapper) %s%s", 
+                    ((_cached != null) ? _cached : _orig),
+                    ((_cached == null) ? " (unevaluated)" : ""));
         }
     }
 
@@ -1039,6 +1044,11 @@ public class Context implements Extensible
                 throw new AWGenericException(Fmt.S("Exception evaluating expression '%s' in context: %s --\n",
                         _expression, context), e);
             }
+        }
+
+        public String toString()
+        {
+            return Fmt.S("${%s}", _expression.toString());
         }
 
         /*
@@ -1080,6 +1090,12 @@ public class Context implements Extensible
                 && Meta.objectEquals(_orig, o._orig)
                 && Meta.objectEquals(_override, o._override);
         }
+
+        public String toString()
+        {
+            return Fmt.S("Chain<%s>: %s => %s", _merger, _override, _orig);
+        }
+
     }
 
     // Merge lists
@@ -1171,6 +1187,126 @@ public class Context implements Extensible
         {
             return ((Context.PropertyAccessor)target).get(fieldPath.car());
         }
+    }
+
+    /**
+        Support for Component Inspector (AWDebugTrace.MetaProvider).
+     */
+    protected static class MetaProvider_Context extends AWDebugTrace.MetaProvider
+    {
+        public String title (Object receiver, String title, AWBindableElement element)
+        {
+            return (element instanceof MetaContext)
+                    ? contextTitle((_StaticRec)receiver)
+                    : usageTitle((_StaticRec)receiver);
+        }
+
+        public Map metaProperties (Object receiver, AWBindableElement element)
+        {
+            _StaticRec srec = (_StaticRec)receiver;
+            return (element instanceof MetaContext)
+                    ? metaContext(srec)
+                    : srec.properties();
+        }
+
+        public void recordAssignments (Object receiver, AWDebugTrace.AssignmentRecorder recorder,
+                                       AWBindableElement element)
+        {
+            if (element instanceof MetaContext) {
+                super.recordAssignments(receiver, recorder, element);
+            }
+            else {
+                Meta.MatchResult match = ((_StaticRec)receiver).match;
+                match._meta.propertiesForMatch(match, recorder);
+            }
+        }
+
+        Map metaContext (_StaticRec srec)
+        {
+            Map result = new LinkedHashMap();
+            Activation activation = srec.activation;
+            addContextForActivation(activation, result);
+            return result;
+        }
+
+        private void addContextForActivation (Activation activation, Map map)
+        {
+            if (activation._parent != null) addContextForActivation(activation._parent, map);
+            List<_StaticRec> recs = activation._recs;
+            StringBuffer buf = new StringBuffer();
+            for (_StaticRec srec : recs) {
+                int idx = map.size();
+                int sp = idx; while (sp-- > 0) buf.append(". ");
+                String key = Fmt.S("%s%s", buf.toString(), srec.key);
+                Object val = Fmt.S("%s%s", srec.val, (srec.fromChaining ? " ^" : ""));
+                map.put(key, val);
+                buf.setLength(0);
+            }
+        }
+
+        String contextTitle (_StaticRec focusRec)
+        {
+            // return list of assignments made in this activation (but not propert activation)
+            StringBuffer buf = new StringBuffer();
+            Activation activation = findPropertyActivation(focusRec);
+            activation = (activation != null) ? activation._parent : focusRec.activation;
+            for (_StaticRec srec : activation._recs) {
+                if (buf.length() != 0) buf.append(", ");
+                buf.append(Fmt.S("%s=%s", srec.key, srec.val));
+            }
+
+            return buf.toString();
+        }
+
+        String usageTitle (_StaticRec srec)
+        {
+            // return value of property context key
+            Activation propertyActivation = findPropertyActivation(srec);
+            String propertyScopeKey = (propertyActivation != null)
+                    ? propertyActivation._recs.get(0).key : null;
+            Assert.that(propertyScopeKey != null && propertyScopeKey.endsWith(Meta.ScopeKeySuffix),
+                    "Did not find propertyScopeKey where expected: %s", propertyScopeKey);
+            String propertyKey = propertyScopeKey.substring(0, propertyScopeKey.length()-2);
+
+            _StaticRec assignment = firstRecWithKey(propertyActivation, propertyKey);
+            Assert.that(assignment != null, "Unable to find assignment of key: %s", propertyKey);
+
+            return Fmt.S("%s=%s", assignment.key, assignment.val);
+        }
+
+        Activation findPropertyActivation (_StaticRec srec)
+        {
+            Activation activation = srec.activation;
+            while (activation != null) {
+                if (activation._propertyActivation != null) return activation._propertyActivation;
+                activation = activation._parent;
+            }
+            return null;
+        }
+
+        _StaticRec firstRecWithKey (Activation activation, String key)
+        {
+            while (activation != null) {
+                // iterating forward is okay -- won't assign same key within single activation
+                for (_StaticRec srec : activation._recs) {
+                    if (srec.key.equals(key)) return srec;
+                }
+                activation = activation._parent;
+            }
+            return null;
+        }
+    }
+
+    static {
+        AWDebugTrace.MetaProvider.registerClassExtension(_StaticRec.class, new MetaProvider_Context());
+    }
+
+    protected Object debugTracePropertyProvider ()
+    {
+        Activation activation = currentActivation();
+        Activation propActivation = activation.propertyActivation(this);
+        if (propActivation != null) activation = propActivation;
+        return ListUtil.lastElement(activation._recs);
     }
 }
 

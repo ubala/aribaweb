@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#27 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#28 $
 */
 
 package ariba.util.core;
@@ -1387,7 +1387,7 @@ public final class StringUtil
      * Doesn't break a word, correctly handles punctuation and hyphenated words.
      * @param string
      * @param wrapLength
-     * @return
+     * @return wrapped string
      * @aribaapi private
      */
     public static String wrapHTML (String string, int wrapLength)

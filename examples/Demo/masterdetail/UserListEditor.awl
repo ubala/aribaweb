@@ -1,0 +1,42 @@
+<w:ComplexRepetition list="$users" item="$user" count="$^maxCount:4">\
+    <a:Content name="body">
+        $user.Name\
+    </a:Content>
+
+    <a:Content name="separator">\
+        , \
+    </a:Content>
+
+    <a:Content name="overflow">
+        (More...)
+    </a:Content>
+
+    <a:Content name="empty">
+        (None)
+    </a:Content>
+
+</w:ComplexRepetition>
+[<a:Hyperlink action="$showUserEditor">Edit</a:Hyperlink>]
+\
+<!-- Modal panel for users -->\
+<a:SetValue panelId="$requestContext.nextElementId"/>\
+<w:Confirmation id="$panelId">\
+    <a:Content name="header">Edit User List</a:Content>\
+    <a:Content name="content">
+        <t:DataTable list="$users" item="$user">
+            <t:Column label="Name">
+                <a:TextField value="$user.Name"/>
+            </t:Column>
+            <t:Column label="Title">
+                <a:TextField value="$user.Title"/>
+            </t:Column>
+            <t:Column label="Company">
+                <a:TextField value="$user.Company"/>
+            </t:Column>
+            <t:ButtonArea>
+                <w:TextButton action="$add">Add</w:TextButton>
+            </t:ButtonArea>
+        </t:DataTable>
+        <br/>
+    </a:Content>\
+</w:Confirmation>\

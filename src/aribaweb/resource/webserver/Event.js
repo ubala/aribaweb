@@ -19,7 +19,7 @@ ariba.Event = function() {
     var AWOnRefreshCallbacks;
     var AWVBScriptOnLoad;
     var _ScriptLockCount = 0;
-    var _IdsByEvent = [];
+    var _IdsByEvent = new Object();
     
     // Should fire events -- false on first / native pass.  True when we do our own
     // walk
@@ -207,7 +207,7 @@ ariba.Event = function() {
                 Debug.log("Registering handler for: " + eventName + " -- " + id);
                 var map = _IdsByEvent[eventName];
                 if (!map) {
-                    map = [];
+                    map = new Object();
                     _IdsByEvent[eventName] = map;
                 }
                 map[id] = func || id;

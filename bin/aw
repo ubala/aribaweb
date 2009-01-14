@@ -1,0 +1,174 @@
+#!/bin/sh
+
+##
+## aw
+##
+## Bootstrap script for running AribaWeb ant commands
+##
+## Usages:
+##      aw
+##      aw -help
+##              prints usage info
+##      aw <internal command> [args]
+##              runs ant on default AW build file with target <internal command>
+##      aw <valid exe> [args]
+##              spawns <valid exe> after setting up AW_HOME, etc
+##
+
+DIRNAME=`dirname "$0"`
+
+warn ( ) {
+    echo "Warning: $*"
+}
+
+die ( ) {
+    echo "ERROR: $*"
+    exit 1
+}
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+case "`uname`" in
+  CYGWIN* )
+    cygwin=true
+    ;;
+  Darwin* )
+    darwin=true
+    ;;
+  MINGW* )
+    msys=true
+    ;;
+esac
+
+# For Cygwin, ensure paths are in UNIX format before anything is touched.
+if $cygwin ; then
+    [ -n "$AW_HOME" ] && AW_HOME=`cygpath --unix "$AW_HOME"`
+    [ -n "$JAVACMD" ] && JAVACMD=`cygpath --unix "$JAVACMD"`
+    [ -n "$JAVA_HOME" ] && JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
+    [ -n "$ANT_HOME" ] && ANT_HOME=`cygpath --unix "$ANT_HOME"`
+    [ -n "$CP" ] && CP=`cygpath --path --unix "$CP"`
+fi
+
+if [ "$1" = "-cp" -o "$1" = "-classpath" ] ; then
+    CP=$2
+    shift 2
+fi
+
+# Attempt to set JAVA_HOME if it's not already set.
+if [ -z "$JAVA_HOME" ] ; then
+    if $darwin ; then
+        [ -z "$JAVA_HOME" -a -d "/Library/Java/Home" ] && export JAVA_HOME="/Library/Java/Home"
+        [ -z "$JAVA_HOME" -a -d "/System/Library/Frameworks/JavaVM.framework/Home" ] && export JAVA_HOME="/System/Library/Frameworks/JavaVM.framework/Home"
+    else
+        javaExecutable="`which ant`"
+        [ -z "$javaExecutable" -o "`expr \"$javaExecutable\" : '\([^ ]*\)'`" = "no" ] && die "JAVA_HOME not set and cannot find javac to deduce location, please set JAVA_HOME."
+        # readlink(1) is not available as standard on Solaris 10.
+        readLink=`which readlink`
+        [ `expr "$readLink" : '\([^ ]*\)'` = "no" ] && die "JAVA_HOME not set and readlink not available, please set JAVA_HOME."
+        javaExecutable="`readlink -f \"$javaExecutable\"`"
+        javaHome="`dirname \"$javaExecutable\"`"
+        javaHome=`expr "$javaHome" : '\(.*\)/bin'`
+        export JAVA_HOME="$javaHome"
+    fi
+fi
+
+# Attempt to set AW_HOME if it is not already set.
+if [ -z "$AW_HOME" -o ! -d "$AW_HOME" ] ; then
+    # Resolve links: $0 may be a link to groovy's home.
+    PRG="$0"
+    # Need this for relative symlinks.
+    while [ -h "$PRG" ] ; do
+        ls=`ls -ld "$PRG"`
+        link=`expr "$ls" : '.*-> \(.*\)$'`
+        if expr "$link" : '/.*' > /dev/null; then
+            PRG="$link"
+        else
+            PRG=`dirname "$PRG"`"/$link"
+        fi
+    done
+    SAVED="`pwd`"
+    cd "`dirname \"$PRG\"`/.."
+    export AW_HOME="`pwd -P`"
+    cd "$SAVED"
+    warn "AW_HOME is not set in your environment.  You should do:"
+    echo "    export AW_HOME=\"$AW_HOME\""
+    echo "    export PATH=\"\$AW_HOME/bin:\$PATH\""
+    echo ""
+fi
+
+# Check ANT_HOME
+if [ -z "$ANT_HOME" ] ; then
+    if [ -d "$AW_HOME/tools/ant" ] ; then
+        antHome="$AW_HOME/tools/ant"
+        echo "Setting ANT_HOME to bundled Ant:"
+        echo "    export ANT_HOME=\"$antHome\""
+        echo "    export PATH=\"\$ANT_HOME/bin:\$PATH\""
+        echo ""
+        
+        export PATH="$antHome/bin:$PATH"
+    else
+        antExecutable="`which ant`"
+        [ -z "$antExecutable" -o "`expr \"$antExecutable\" : '\([^ ]*\)'`" = "no" ] && die "ANT_HOME not set and cannot find ant command to deduce location, please set ANT_HOME."
+        # readlink(1) is not available as standard on Solaris 10.
+        readLink=`which readlink`
+        [ `expr "$readLink" : '\([^ ]*\)'` = "no" ] && die "ANT_HOME not set and readlink not available, please set ANT_HOME."
+        if $darwin ; then
+            antExecutable="`readlink \"$antExecutable\"`"
+        else
+            antExecutable="`readlink -f \"$antExecutable\"`"
+        fi
+        antHome="`dirname \"$antExecutable\"`"
+        antHome=`expr "$antHome" : '\(.*\)/bin'`
+        warn "ANT_HOME is not set in your environment.  Doing: "
+        echo "    export ANT_HOME=\"$antHome\""
+    fi
+    export ANT_HOME="$antHome"
+fi
+
+# Check CATALINA_HOME
+if [ -z "$CATALINA_HOME" ] ; then
+    if [ -z "$TOMCAT_HOME" ] ; then
+        if [ -d "$AW_HOME/tools/tomcat" ] ; then
+            export CATALINA_HOME="$AW_HOME/tools/tomcat"
+            echo "Setting CATALINA_HOME to bundled tomcat:"
+            echo "    export CATALINA_HOME=\"$CATALINA_HOME\""
+            echo ""
+        else
+            warn "CATALINA_HOME is not set.  You will not be able to run applications!"
+        fi
+    else
+        export CATALINA_HOME=$TOMCAT_HOME
+        warn "CATALINA_HOME is not set in your environment.  Using your TOMCAT_HOME: $TOMCAT_HOME"
+    fi
+fi
+
+#echo "AW_HOME = $AW_HOME"
+#echo "Arg count=$#"
+
+if [ $# -gt 0 ] ; then
+    CMD=$1
+    shift
+else
+    CMD="help"
+fi
+
+if [ "$CMD" = "-h" ] || [ "$CMD" = "-help" ] ; then
+    CMD="help"
+fi
+
+
+#Check internal targets
+for v in create-project help greeting
+do
+    if [ $v = $CMD ] ; then
+        # echo "Running internal target: $CMD"
+        #ant -f $AW_HOME/build.xml $CMD
+        ant -emacs -logger org.apache.tools.ant.NoBannerLogger -f $AW_HOME/tools/build-commands.xml $CMD
+        exit 0
+    fi
+done
+
+# echo "Running $CMD..."
+$CMD "$@"

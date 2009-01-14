@@ -13,11 +13,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#28 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#31 $
     </Copyright>
 
     <Overview>
-        Renders an <input type="text" .../> tag, which is a standard html text field input form element.  As with other
+        Renders an `<input type="text" .../>` tag, which is a standard html text field input form element.  As with other
             aribaweb form elements, also provides for mapping the input from the request back into the object from which
             it came.  In addition, formatting support is provided to both render and re-map the users String values into
             proper objects suitable for putting back into the source object.
@@ -52,7 +52,7 @@
         Allows for enabling to submit the form with the indicated action.
     </Binding>
 
-    <Binding key="isRefresh" type="AWResponseGenerating" type="boolean" default="$false" direction="get">
+    <Binding key="isRefresh" type="boolean" default="$false" direction="get">
         If set to true, Javascript onKeyDown handler is set to submit the enclosing form.  If set to true
         then the onChange binding is ignored.
     </Binding>
@@ -98,7 +98,7 @@
 <a:If ifTrue="$isEditable">\
     <input type="text" elementId="$elementId" id="$textFieldId" name="$textFieldName"
         value="$formattedValue" formValue="$formValue" onChange="$onChangeString"
-        onKeyDown="$onKeyDownString" invokeAction="$invokeAction" isSender="$isSender"
+        _tf="$tfActionType" invokeAction="$invokeAction" isSender="$isSender"
         awautoselect="$allowAutoFocus"
         disabled="$isDisabled"
         style="$style"

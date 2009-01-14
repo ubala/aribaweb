@@ -99,7 +99,7 @@ void rule (List contextPreds) : {
         )
       |
         (
-            ";" {  _meta.addRule( new Meta.Rule(preds, props)); }
+            ";" {  _meta.addRule( new Meta.Rule(preds, props, 0, token.beginLine)); }
         )
     )
 }
@@ -119,10 +119,10 @@ void processRuleBody(List preds, Map props) : {
         )
       |
         /* flush any current rule to preserve rank */
-        { _meta.addRule( new Meta.Rule(preds, props)); props = null; }
+        { _meta.addRule( new Meta.Rule(preds, props, 0, token.beginLine)); props = null; }
         rule(preds)
     )*
-    { _meta.addRule( new Meta.Rule(preds, props)); }
+    { _meta.addRule(new Meta.Rule(preds, props, 0, token.beginLine)); }
 }
 
 

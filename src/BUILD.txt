@@ -5,63 +5,54 @@ $Id: $
 Basic steps:
   0) Install pre-requisites and set up your environment variables
 
-  1) Download AribaWeb and unpack it
+  1) Download AribaWeb and unzip it
 
   2) In a shell, "cd" to top level AW installation directory
 
-  3) Run ant
+  3) Run bin/start
 
   4) Run test apps (via tomcat)
 
   5) Experiment with making changes!
+
 
 Step 0) Install pre-requisites and set up your environment variables
 
     - Install the Java5 or Java6 JDK (http://java.sun.com/javase/downloads/index_jdk5.jsp)
         - set your JAVA_HOME
 
-    - Install Ant v1.7+ (http://ant.apache.org/)
-        - set your ANT_HOME environment variable to your Ant install directory
-
-        I.e.:
-            export JAVA_HOME='d:/jdk1.5'
-            export ANT_HOME="d:/ant"
-            export PATH="$JAVA_HOME/bin;$ANT_HOME/bin;$PATH"
-
-Like many java projects, AW uses Apache Ant for build
-automation.  Note: you MUST use Ant version 1.7 or greater.
+    - No need to install Ant, or Tomcat -- they're now bundled (in tools/)
+	      If you do want to use your own, make sure your have Ant 1.7.1 (note the ".1"!)
+	      and set your ANT_HOME appropriately.
 
 
 Step 1) Download AribaWeb
 
 Download a zip of the archive, and uncompress it into a directory of your choice.
 
+
 Step 2) CD to the root directory of this AW installation
 
-The root directory contains a top-level build.xml file. By default,
-you do not need to change any of the settings in this file, but you do
-need to run ant from this location so it knows where to find build.xml.
+The root directory contains a top-level build.xml file.  Ant finds the
+build.xml file to process based on the current working directory.
 
-If you would like to change settings you can do so by creating one 
-or more of the following files and placing your own property settings
-in there:
-
-    ~/aribaweb.build.properties
+The default property settings in this file (e.g. for build.dir) should
+work as is.  However, you can override them as you wish by creating a build.properties
+file in one of the following locations:
+    ./build.properties
     ~/build.properties
-    aribaweb-x.y/build.properties
+    ~/aribaweb.build.properties
 
-The first property which is found in the order with which the files are
-loaded becomes the property setting which is used by the Ant build
-system.
+(~ represents your home directory.
 
-NOTE: the ~ character represents your user account home directory.
 
-Step 3) Run ant
+Step 3) Run bin/aw ant
 
-Assuming you have ant in your PATH and have set ANT_HOME to the
-location of your ant installation, typing "ant" at the shell prompt
-and command prompt should run ant.  Ant will by default look for the
-"build.xml" file in your current directory, and invoke the "tomcat-build" target.
+Note: the bin/aw command will ensure that your AW_HOME, ANT_HOME and CATALINA_HOME are set
+correctly before then invoking the ant command.  If you manually / explicitly set these in
+your environment, then you can run ant directly.
+Ant will by default look for the "build.xml" file in your current directory, and invoke the 
+"tomcat-build" target.
 
 Some useful targets include:
     - jars
@@ -75,12 +66,10 @@ Some useful targets include:
         build wars, then run tomcat (default target)
 
 Step 4) Run (via tomcat)
-    - Install Apache Tomcat 5.5** Core (http://tomcat.apache.org/download-55.cgi)
-        - set your CATALINA_HOME environment variable to your tomcat install directory
-            I.e.:
-                export CATALINA_HOME="d:/tomcat5.5"
 
-        ** for Tomcat 6, replace ./conf/catalina.properties with the one from the Tomcat6 distro
+    - You no longer need to install Tomcat -- it's bundled in tools/.
+        However, if you want to your own copy, use version 5.5.x or 6.x and set your
+        CATALINA_HOME environment to point at your tomcat install directory
 
     - Run "ant tomcat"
 
@@ -98,9 +87,11 @@ Step 4) Run (via tomcat)
         	export JPDA_TRANSPORT=dt_socket
       Then you can attach from your IDE.
 
+
 Step 5) Experiment with making changes!
+
     - The code in demoshell/site is automatically enabled for "rapid turnaround" -- i.e.
-      you can edit a .htm file, click refresh (F5) on your browser, and immediately see
+      you can edit a .awl file, click refresh (F5) on your browser, and immediately see
       the change take effect.
 
     - If you are running with the default ant file and source structure, your apps
@@ -117,11 +108,5 @@ Step 5) Experiment with making changes!
 For the time being, if you have questions about aribaweb, contact:
     craigf (at) ariba dot com
 
-    
 ---
-This file is based on a file from the Apache Lucene distribution:
-    - originally written by Steven J. Owens <puff@darksleep.com>.
-    - modified by Jon S. Stevens <jon@latchkey.com>.
-    - adapted for AribaWeb by Craig Federighi <craigf@ariba.com>
-
-Copyright (c) 2001-2005 The Apache Software Foundation.  All rights reserved.
+This software is covered under the Apache License Version 2.0 (see LICENSE.txt)

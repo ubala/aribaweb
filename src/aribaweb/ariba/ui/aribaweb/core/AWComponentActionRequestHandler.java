@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#67 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#71 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -124,7 +124,8 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         return requestHandlerUrl(request, false);
     }
 
-    private String formatUrl (AWEncodedString requestHandlerUrl,
+    private String formatUrl (AWRequestContext requestContext,
+                              AWEncodedString requestHandlerUrl,
                               String senderId, String sessionId,
                               AWEncodedString responseId, AWEncodedString frameName)
     {
@@ -154,6 +155,8 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                     formattedUrl, "&", SenderKey, "=", senderId);
             }
         }
+        formattedUrl = StringUtil.strcat(formattedUrl, "&",
+                AWRequestContext.SessionSecureIdKeyEquals , application().getSessionSecureId(requestContext));
         if (frameName != null) {
             formattedUrl = StringUtil.strcat(formattedUrl, "&",
                 AWRequestContext.FrameNameKey, "=", frameName.string());
@@ -161,10 +164,11 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         return formattedUrl;
     }
 
-    private void appendUrl (AWResponse response, AWEncodedString requestHandlerUrl,
+    private void appendUrl (AWRequestContext requestContext, AWEncodedString requestHandlerUrl,
                             AWEncodedString senderId, String sessionId,
                             AWEncodedString responseId, AWEncodedString frameName)
     {
+        AWResponse response = requestContext.response();
         response.appendContent(requestHandlerUrl);
         response.appendContent(AWConstants.QuestionMark);
         if (senderId != null) {
@@ -179,6 +183,11 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
             response.appendContent(sessionId);
             response.appendContent(AWConstants.Ampersand);
         }
+        response.appendContent(AWRequestContext.SessionSecureIdKey);
+        response.appendContent(AWConstants.Equals);
+        response.appendContent(application().getSessionSecureId(requestContext));
+        response.appendContent(AWConstants.Ampersand);
+
         response.appendContent(AWRequestContext.ResponseIdKey);
         response.appendContent(AWConstants.Equals);
         response.appendContent(responseId);
@@ -208,7 +217,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     public String urlWithSenderId (AWRequestContext requestContext,
                                    AWEncodedString senderId)
     {
-        return formatUrl(urlPrefix(requestContext), senderId.string(),
+        return formatUrl(requestContext, urlPrefix(requestContext), senderId.string(),
                          sessionId(requestContext), requestContext.responseId(),
                          requestContext.frameName());
     }
@@ -216,7 +225,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     public void appendUrlWithSenderId (AWRequestContext requestContext,
                                        AWEncodedString senderId)
     {
-        appendUrl(requestContext.response(), urlPrefix(requestContext), senderId,
+        appendUrl(requestContext, urlPrefix(requestContext), senderId,
             sessionId(requestContext), requestContext.responseId(),
             requestContext.frameName());
     }
@@ -246,7 +255,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     public String fullUrlWithSenderId (AWRequestContext requestContext,
                                        AWEncodedString senderId)
     {
-        return formatUrl(fullRequestHandlerBaseUrl(requestContext), senderId.string(),
+        return formatUrl(requestContext, fullRequestHandlerBaseUrl(requestContext), senderId.string(),
                          sessionId(requestContext), requestContext.responseId(),
                          requestContext.frameName());
     }
@@ -254,7 +263,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     public void appendFullUrlWithSenderId (AWRequestContext requestContext,
                                            AWEncodedString senderId)
     {
-        appendUrl(requestContext.response(), fullRequestHandlerBaseUrl(requestContext),
+        appendUrl(requestContext, fullRequestHandlerBaseUrl(requestContext),
                   senderId, sessionId(requestContext), requestContext.responseId(),
                   requestContext.frameName());
     }
@@ -289,7 +298,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         AWRequest request = requestContext.request();
         String senderId =
                 request.formValueForKey(AWComponentActionRequestHandler.SenderKey);
-        String url = formatUrl(requestHandlerUrlEncoded(request),
+        String url = formatUrl(requestContext, requestHandlerUrlEncoded(request),
                                senderId, sessionId(requestContext), request.responseId(),
                                requestContext.frameName());
         return AWDirectActionUrl.decorateUrl(requestContext, url);
@@ -345,7 +354,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
 
         AWPage page = component.page();
         if (IsFormPostRedirectEnabled &&
-            request.method().equalsIgnoreCase("POST") &&
+            (request.method().equalsIgnoreCase("POST") || !request.hasHandler()) &&
             component.shouldCachePage() &&
             !requestContext.isIncrementalUpdateRequest()) {
             // This saves the actual page and not the redirect page.  When the
@@ -402,30 +411,16 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         if (currentPage == null) {
             // AWReload support
             if (AWConcreteApplication.IsRapidTurnaroundEnabled) AWUtil.getClassLoader().checkForUpdates();
-
-            // ### possible location to determine session restoration exception?
-            AWResponseGenerating mainPage = application.mainPage(requestContext);
-            if (mainPage instanceof AWComponent) {
-                AWComponent mainPageComponent = (AWComponent)mainPage;
-                AWPage newPage = mainPageComponent.page();
-                if (mainPageComponent.shouldValidateSession()) {
-                    mainPageComponent.validateSession(requestContext);
-                }
-
-                formPostFilter(request,  requestContext, mainPageComponent);
-                session.savePage(newPage);
-                return requestContext.generateResponse();
-            }
-            else {
-                application.assertValidSession(requestContext);
-                return mainPage.generateResponse();
-            }
+            return processFrontDoorRequest(requestContext);
         }
         else {
             boolean isInterrupted = false;
             requestContext.setPage(currentPage);
             if (currentPage.pageComponent().shouldValidateSession()) {
                 currentPage.pageComponent().validateSession(requestContext);
+            }
+            if (currentPage.pageComponent().shouldValidateRequest()) {
+                currentPage.pageComponent().validateRequest(requestContext);
             }
             int requestType = session.requestType(request);
 
@@ -577,6 +572,33 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         return response;
     }
 
+    public AWResponse processFrontDoorRequest (AWRequestContext requestContext)
+    {
+        AWRequest request = requestContext.request();
+        AWApplication application = requestContext.application();
+        AWSession session = requestContext.session();
+
+        // ### possible location to determine session restoration exception?
+        AWResponseGenerating mainPage = application.mainPage(requestContext);
+        if (mainPage instanceof AWComponent) {
+            AWComponent mainPageComponent = (AWComponent)mainPage;
+            AWPage newPage = mainPageComponent.page();
+            if (mainPageComponent.shouldValidateSession()) {
+                mainPageComponent.validateSession(requestContext);
+            }
+            if (mainPageComponent.shouldValidateRequest()) {
+                mainPageComponent.validateRequest(requestContext);
+            }
+            formPostFilter(request,  requestContext, mainPageComponent);
+            session.savePage(newPage);
+            return requestContext.generateResponse();
+        }
+        else {
+            application.assertValidSession(requestContext);
+            return mainPage.generateResponse();
+        }
+    }
+
     static class NullResponse extends AWBaseResponse
     {
         public void setStatus (int status)
@@ -629,33 +651,42 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
             boolean repeatAsRefresh = ((Boolean)requestContext.get(
                 AWComponentActionRequestHandler.DebugRerenderAsRefreshKey)).booleanValue();
 
-            // the response that we'll return...
-            AWResponse origResponse = requestContext.response();
 
             Log.aribaweb.debug("Re-rendering page %s times (%s)", repeatCount,
                         (repeatAsRefresh ? "refresh render" : "full init render"));
             while (repeatCount-- > 0) {
-                // swap out the response
-                NullResponse nullResponse = new NullResponse();
-                nullResponse.init();
-                requestContext.setResponse(nullResponse);
-                requestContext.setElementId(new AWElementIdGenerator());
-                if (!repeatAsRefresh) {
-                    AWPage page = new AWPage(actionResultsComponent, requestContext);
-                    actionResultsComponent.ensureAwake(page);
-                    page.ensureAwake(requestContext);
-                    formPostFilter(request,  requestContext, actionResultsComponent);
-                }
-                requestContext.generateResponse();
+                _runNullRender(requestContext, actionResultsComponent, request, repeatAsRefresh);
             }
-            // restore original response
-            requestContext.setElementId(new AWElementIdGenerator());
-            requestContext.setResponse(origResponse);
             requestContext.forceFullPageRefresh();
 
             Log.aribaweb.debug("Stats: %s",
                         PerformanceState.getThisThreadHashtable());
         }
+    }
+
+    protected void _runNullRender(AWRequestContext requestContext,
+                                AWComponent actionResultsComponent, 
+                                AWRequest request,
+                                boolean runAsRefresh)
+    {
+        // swap out the response
+        AWResponse origResponse = requestContext.response();
+        NullResponse nullResponse = new NullResponse();
+        nullResponse.init();
+        requestContext.setResponse(nullResponse);
+        requestContext.setElementId(new AWElementIdGenerator());
+
+        if (!runAsRefresh) {
+            AWPage page = new AWPage(actionResultsComponent, requestContext);
+            actionResultsComponent.ensureAwake(page);
+            page.ensureAwake(requestContext);
+            formPostFilter(request,  requestContext, actionResultsComponent);
+        }
+        requestContext.generateResponse();
+
+        // restore original response
+        requestContext.setElementId(new AWElementIdGenerator());
+        requestContext.setResponse(origResponse);
     }
 
     private AWResponse processExceptionHandlerResults (
@@ -786,7 +817,20 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                 }
             }
         }
-        catch (RuntimeException runtimeException) {
+        catch (ExceptionInInitializerError error) {
+            Throwable throwable = error.getException();
+            if (throwable instanceof Exception) {
+                response = responseForException(requestContext, (Exception)throwable);
+            }
+            else {
+                throwable.printStackTrace();
+            }
+        }
+        catch (Throwable throwable) {
+            Exception runtimeException = (throwable instanceof Exception)
+                    ? (Exception)throwable
+                    : new AWGenericException(throwable);
+
             boolean ignore = false;
             if (runtimeException instanceof WrapperRuntimeException) {
                 WrapperRuntimeException wrapperException =
@@ -801,15 +845,6 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
             }
             if (!ignore) {
                 response = responseForException(requestContext, runtimeException);
-            }
-        }
-        catch (ExceptionInInitializerError error) {
-            Throwable throwable = error.getException();
-            if (throwable instanceof Exception) {
-                response = responseForException(requestContext, (Exception)throwable);
-            }
-            else {
-                throwable.printStackTrace();
             }
         }
         finally {
@@ -856,11 +891,14 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     {
         String requestUrl = requestHandlerUrl(requestContext.request());
         if (AWConcreteApplication.IsCookieSessionTrackingEnabled) {
-            return StringUtil.strcat(requestUrl,"?",HistoryKey, "=", actionName);
+            return StringUtil.strcat(requestUrl,"?",HistoryKey, "=", actionName, "&",
+                    AWRequestContext.SessionSecureIdKey, "=", application().getSessionSecureId(requestContext));
         }
         else {
-            return StringUtil.strcat(requestUrl,"?", HistoryKeyEquals, actionName, "&",
-                                     SessionIdKeyEquals, sessionId(requestContext));
+            String[] strings = {requestUrl,"?", HistoryKeyEquals, actionName, "&",
+                    SessionIdKeyEquals, sessionId(requestContext), "&",
+                    AWRequestContext.SessionSecureIdKeyEquals, application().getSessionSecureId(requestContext)};
+            return StringUtil.strcat(strings);
         }
     }
 
@@ -887,6 +925,10 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
             effectiveUrl = StringUtil.strcat(effectiveUrl, "&",
                                      SessionIdKeyEquals, sessionId(requestContext));
         }
+        effectiveUrl =
+            StringUtil.strcat(effectiveUrl, "&",
+                              AWRequestContext.SessionSecureIdKeyEquals,
+                              application().getSessionSecureId(requestContext));
 
         return AWDirectActionUrl.decorateUrl(requestContext, effectiveUrl, true);
 

@@ -13,27 +13,30 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ClientPanelWrapper.awl#3 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ClientPanelWrapper.awl#4 $
     </Copyright>
 
     <Overview>
         Like ModalPageWrapper, but for use in client-side panels.
 
         The invoking page will do:
-            panelInvokingAction () {
-                panelComp = pageWithName("SomePanelComp");
-                return null;
-            }
+
+                panelInvokingAction () {
+                    panelComp = pageWithName("SomePanelComp");
+                    return null;
+                }
 
         And, in ParentPage.awl:
-            <a:InstanceInclude instance="$panelComp"/>
+
+                <a:InstanceInclude instance="$panelComp"/>
 
         And then, in SomePanelComp.awl:
-            <w:ClientPanelWrapper title="Neat Panel" okAction="$someAction">
-                page content here
-            </w:ClientPanelWrapper>
 
-            This will cause the content of SomePanelComp to be brought up in a modal panel
+                <w:ClientPanelWrapper title="Neat Panel" okAction="$someAction">
+                    page content here
+                </w:ClientPanelWrapper>
+
+        This will cause the content of SomePanelComp to be brought up in a modal panel
     </Overview>
 
     <Binding key="title" direction="get" type="String" default="$null">

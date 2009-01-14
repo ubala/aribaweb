@@ -1,0 +1,26 @@
+<BODY>
+
+Family of components for creating table (grid) controls (including scrolling flat tables,
+outline (grouped) tables, outline (tree) tables, and multi-dimensional pivot tables).
+
+<p/>
+<b>t: namespace -- </b>
+Namespace aware templates typically refer to these components with the "w:" prefix
+(e.g. {@code <t:DataTable/>, <t:Column/>})
+<p/>
+Commonly used tags include:
+<ul>
+    <li><b>{@link ariba.ui.table.AWTDataTable t:DataTable}</b></li>
+    <li>{@link ariba.ui.table.AWTColumn t:Column}</li>
+    <li>{@link ariba.ui.table.AWTHeadingArea t:HeadingArea}</li>
+    <li>{@link ariba.ui.table.AWTButtonArea t:ButtonArea}</li>
+    <li>{@link ariba.ui.table.AWTSelectionButtonArea t:SelectionButtonArea}</li>
+</ul>
+<p/>
+The DataTable list state is managed by the {@link ariba.ui.table.AWTDisplayGroup}.
+For Outline Tables, outline expansion / selection state is managed by the  {@link ariba.ui.outline.OutlineState}
+and for Pivot Tables the pivot grouping state is managed by the {@link ariba.ui.table.AWTPivotState}.
+
+@see ariba.ui.outline
+
+</BODY>

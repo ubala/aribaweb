@@ -12,12 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/GrowOnlyGridTable.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/core/GrowOnlyGridTable.java#6 $
 */
 
 package ariba.util.core;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
     A two-dimensional GrowOnlyHashtable. That is, a collection of
@@ -79,6 +81,59 @@ public class GrowOnlyGridTable
             return null;
         }
         return MapUtil.elementsList(secondaryTable);
+    }
+
+    /**
+        Returns the set of keys in the primary table.
+    */
+    public Set primaryKeySet ()
+    {
+        return primaryTable.keySet();
+    }
+
+    /**
+        Returns the set of keys in the secondary table corresponding to the
+        primary key.
+
+        If the primaryKey is null, throws NullPointerException.
+    */
+    public Set secondaryKeySet (Object primaryKey)
+    {
+        if (primaryKey == null) {
+            throw new NullPointerException();
+        }
+
+        GrowOnlyHashtable secondaryTable 
+            = (GrowOnlyHashtable)primaryTable.get(primaryKey);
+        if (secondaryTable == null) {
+            return null;
+        }
+        return secondaryTable.keySet();
+    }
+
+    /**
+        Return a new GrowOnlyGridTable with reduced content.
+        The returned table will have the same content as the input <code>table</code>
+        but will skip copying the keys in <code>skippedPrimaryKeys</code> 
+    */
+    public GrowOnlyGridTable getReducedTable (List skippedPrimaryKeys)
+    {
+        GrowOnlyGridTable newTable = new GrowOnlyGridTable();
+        Set primaryKeys = primaryKeySet();
+        for (Iterator it = primaryKeys.iterator(); it.hasNext();) {
+            Object tablePrimaryKey = it.next();
+            if (skippedPrimaryKeys.contains(tablePrimaryKey)) {
+                continue;
+            }
+            Set secondaryKeys = secondaryKeySet(tablePrimaryKey);
+            for (Iterator innerIt = secondaryKeys.iterator(); innerIt.hasNext();) {
+                Object secondaryKey = innerIt.next();
+                Object tableValue = get(tablePrimaryKey, secondaryKey);
+                newTable.put(tablePrimaryKey, secondaryKey, tableValue);
+            }
+        }
+
+        return newTable;
     }
 
 }

@@ -419,24 +419,27 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
 
     protected AWTPivotState updateWithEditableConfig (Object[] lists)
     {
-        _dataTable._phasePrepare();
-        _dataTable.invalidateColumns();
-        List optionalAttributeColumns = optionalAttributeColumns();
-        List cols = _dataTable.columns();
-        List hiddenCols = (List)lists[4];
-        for (int i=0,c=cols.size(); i<c; i++) {
-            Column col = (Column)cols.get(i);
-            if (optionalAttributeColumns.contains(col)) {
-                _dataTable.setColumnVisibility(col, !hiddenCols.contains(col));
+        try {
+            _dataTable._phasePrepare();
+            _dataTable.invalidateColumns();
+            List optionalAttributeColumns = optionalAttributeColumns();
+            List cols = _dataTable.columns();
+            List hiddenCols = (List)lists[4];
+            for (int i=0,c=cols.size(); i<c; i++) {
+                Column col = (Column)cols.get(i);
+                if (optionalAttributeColumns.contains(col)) {
+                    _dataTable.setColumnVisibility(col, !hiddenCols.contains(col));
+                }
             }
+
+            _dataTable._pivotState = new AWTPivotState(_dataTable, (List) lists[0], (List) lists[1], (List) lists[2]);
+            _dataTable._pivotState._showingRowAttributes = _showingRowAttributes;
+            _dataTable.pushTableConfig();
+            return _dataTable._pivotState;
         }
-
-        _dataTable._pivotState = new AWTPivotState(_dataTable, (List) lists[0], (List) lists[1], (List) lists[2]);
-        _dataTable._pivotState._showingRowAttributes = _showingRowAttributes;
-        _dataTable.pushTableConfig();
-        _dataTable._phaseComplete();
-
-        return _dataTable._pivotState;
+        finally {
+            _dataTable._phaseComplete();
+        }
     }
 
     protected AWTPivotState updateWithConfig (Object[] lists)

@@ -52,6 +52,7 @@ ariba.Request = function() {
         AWJSDebugEnabled : false,
         AWShowRequestFrame : false,
         AWUpdateCompleteTime : 0,
+        AWSessionSecureId : '',
 
         setDocumentLocation : function (hrefString, windowName, windowAttributes)
         {
@@ -354,7 +355,7 @@ ariba.Request = function() {
         addFormValueForSubmit : function (key, value)
         {
             if (!AWFormValueList) {
-                AWFormValueList = new Array();
+                AWFormValueList = new Object();
             }
             AWFormValueList[key] = value;
         },
@@ -364,6 +365,7 @@ ariba.Request = function() {
             Dom.addFormField(formObject, 'awr', this.AWResponseId);
             Dom.addFormField(formObject, 'awst', Dom.getPageScrollTop());
             Dom.addFormField(formObject, 'awsl', Dom.getPageScrollLeft());
+            Dom.addFormField(formObject, 'awssk', this.AWSessionSecureId);
             if (AWFormValueList) {
                 for (var key in AWFormValueList) {
                     Dom.addFormField(formObject, key, AWFormValueList[key]);
@@ -377,6 +379,7 @@ ariba.Request = function() {
             Dom.removeFormField(formObject, 'awr');
             Dom.removeFormField(formObject, 'awst');
             Dom.removeFormField(formObject, 'awsl');
+            Dom.removeFormField(formObject, 'awssk');
             if (AWFormValueList) {
                 for (var key in AWFormValueList) {
                     Dom.removeFormField(formObject, AWFormValueList[key])
@@ -401,6 +404,9 @@ ariba.Request = function() {
             }
             if (this.AWFrameName) {
                 val += "&awf=" + this.AWFrameName;
+            }
+            if (this.AWSessionSecureId) {
+                val += "&awssk=" + this.AWSessionSecureId;
             }
             return val + "&";
         },

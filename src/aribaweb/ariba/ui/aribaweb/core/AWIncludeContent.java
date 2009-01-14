@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWIncludeContent.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWIncludeContent.java#4 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -120,8 +120,8 @@ public final class AWIncludeContent extends AWBindableElement
                         catch (AWGenericException ag) {
                             throwException(ag, namedSubtemplate);
                         }
-                        catch (RuntimeException re) {
-                            throwException(re, namedSubtemplate);
+                        catch (Throwable t) {
+                            throwException(t, namedSubtemplate);
                         }
                         requestContext.popElementIdLevel(0);
                     }
@@ -150,8 +150,8 @@ public final class AWIncludeContent extends AWBindableElement
                 catch (AWGenericException ag) {
                     throwException(ag, templateElement);
                 }
-                catch (RuntimeException re) {
-                    throwException(re, templateElement);
+                catch (Throwable t) {
+                    throwException(t, templateElement);
                 }
                 requestContext.popElementIdLevel();
             }
@@ -174,8 +174,8 @@ public final class AWIncludeContent extends AWBindableElement
                         catch (AWGenericException ag) {
                             throwException(ag, namedSubtemplate);
                         }
-                        catch (RuntimeException re) {
-                            throwException(re, namedSubtemplate);
+                        catch (Throwable t) {
+                            throwException(t, namedSubtemplate);
                         }
                         requestContext.popElementIdLevel(0);
                     }
@@ -189,8 +189,8 @@ public final class AWIncludeContent extends AWBindableElement
                     catch (AWGenericException ag) {
                         throwException(ag, contentElement);
                     }
-                    catch (RuntimeException re) {
-                        throwException(re, contentElement);
+                    catch (Throwable t) {
+                        throwException(t, contentElement);
                     }
                 }
             }
@@ -225,8 +225,8 @@ public final class AWIncludeContent extends AWBindableElement
                 catch (AWGenericException ag) {
                     throwException(ag, templateElement);
                 }
-                catch (RuntimeException re) {
-                    throwException(re, templateElement);
+                catch (Throwable t) {
+                    throwException(t, templateElement);
                 }
                 requestContext.popElementIdLevel();
             }
@@ -248,8 +248,8 @@ public final class AWIncludeContent extends AWBindableElement
                         catch (AWGenericException ag) {
                             throwException(ag, namedSubtemplate);
                         }
-                        catch (RuntimeException re) {
-                            throwException(re, namedSubtemplate);
+                        catch (Throwable t) {
+                            throwException(t, namedSubtemplate);
                         }
                         requestContext.popElementIdLevel(0);
                     }
@@ -261,17 +261,17 @@ public final class AWIncludeContent extends AWBindableElement
                     catch (AWGenericException ag) {
                         throwException(ag, contentElement);
                     }
-                    catch(RuntimeException re) {
-                        throwException(re, contentElement);
+                    catch(Throwable t) {
+                        throwException(t, contentElement);
                     }
                 }
             }
         }
     }
 
-    private void throwException (RuntimeException re, AWElement element)
+    private void throwException (Throwable t, AWElement element)
     {
-        throwException(new AWGenericException(re), element);
+        throwException(new AWGenericException(t), element);
     }
 
     private void throwException (AWGenericException ag, AWElement element)

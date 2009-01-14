@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/Logger.java#25 $
+    $Id: //ariba/platform/util/core/ariba/util/log/Logger.java#26 $
 */
 
 package ariba.util.log;
@@ -824,7 +824,6 @@ public class Logger extends org.apache.log4j.Logger
         This is API private--the method is only public because it is called
         from the unit tests. Clients should not need access to this.
         @param loggerName the name to check
-        @see test.ariba.util.core.LogTest#main
         @aribaapi private
     */
     public static void checkRegistration (String loggerName, boolean exitOnError)

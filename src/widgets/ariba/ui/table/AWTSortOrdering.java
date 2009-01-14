@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTSortOrdering.java#17 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTSortOrdering.java#18 $
 */
 package ariba.ui.table;
 
@@ -109,7 +109,6 @@ public class AWTSortOrdering
      * deserialization / AWTSortOrdering creation.  Otherwise, after the AWTSortOrdering
      * (sub)class is serialized, the value will be deserialized by the deserialize method
      * found below which creates a basic AWTSortOrdering.
-     * @return
      * @aribaapi private
      */
     protected String getClassName ()
@@ -278,7 +277,6 @@ public class AWTSortOrdering
         /**
          * Format is pipe delimited | values.  First value should be the fully qualified
          * class name of the AWTSortOrdering (sub)class.
-         * @return
          * @aribaapi private
          */
         public String serialize (AWTSortOrdering so)

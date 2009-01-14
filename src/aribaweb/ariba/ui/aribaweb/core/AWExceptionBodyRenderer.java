@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWExceptionBodyRenderer.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWExceptionBodyRenderer.java#9 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -35,11 +35,25 @@ public class AWExceptionBodyRenderer extends AWComponent
     public List<AWGenericException.ParsedException> _parseList;
     ParsedException _parsedException;
     public AWGenericException.FrameInfo _currentFrameInfo;
+    public int _frameIndex;
     public String _exType, _exTitle;
     String _lastMessage, _lastTitle;
     static Pattern _ExceptionTypePattern = Pattern.compile("^([\\w\\.]+)\\:\\s*(.*)");
     static Pattern _ParenthesizedPattern = Pattern.compile("\\((.+?)\\)");
     static Pattern _HeadingPattern = Pattern.compile("(?m)^-- ([\\w\\s]+\\:)");
+
+    public void sleep ()
+    {
+        _exception = null;
+        _stackTrace = null;
+        _parseList = null;
+        _parsedException = null;
+        _currentFrameInfo = null;
+        _exType = null;
+        _exTitle = null;
+        _lastMessage = null;
+        _lastTitle = null;
+    }
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component) {
         _exception = (Throwable)valueForBinding(AWBindingNames.exception);
@@ -107,22 +121,24 @@ public class AWExceptionBodyRenderer extends AWComponent
             msg = _HeadingPattern.matcher(msg).replaceAll("<b><u>$1</u></b>");
             msg = AWUtil.replaceLeadingSpacesWithNbsps(msg);
             msg = msg.replace("\n", "<br/>");
-            msg = _ParenthesizedPattern.matcher(msg).replaceAll("<span class=\"paren\">($1)</span>");
+            msg = _ParenthesizedPattern.matcher(msg).replaceAll("<span class=\"paren\">(<span class=\"ro\" bh=\"_RO\">$1</span>)</span>");
         }
         return msg;
     }
 
-    public void sleep ()
+    // We suppress the innards of reflection and groovy dispatch, since these are
+    // usually noise
+    public boolean shouldDisplayCurrentFrame ()
     {
-        _exception = null;
-        _stackTrace = null;
-        _parseList = null;
-        _parsedException = null;
-        _currentFrameInfo = null;
-        _exType = null;
-        _exTitle = null;
-        _lastMessage = null;
-        _lastTitle = null;
+        String filename = _currentFrameInfo.file;
+        return _frameIndex == 0 ||
+               !(   filename.startsWith("org.codehaus.groovy.runtime.")
+                 || filename.startsWith("org.codehaus.groovy.reflection.")
+                 || filename.startsWith("groovy.lang.Meta")
+                 || filename.startsWith("ariba.util.fieldvalue.Reflection")
+                 || filename.startsWith("sun.reflect.")
+                 || filename.startsWith("java.lang.reflect.")
+               );
     }
 
     public String wrappedMethodString ()

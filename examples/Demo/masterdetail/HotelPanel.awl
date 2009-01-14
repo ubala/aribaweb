@@ -1,0 +1,29 @@
+<w:ModalPageWrapper title="Generate Daily Expenses">
+    <t:DataTable multiSelect="$true" list="$expenseTypes" item="$item" enableScrolling="$true">
+
+        <t:Column label="Type">
+            $item.Type
+        </t:Column>
+
+        <t:Column label="Daily Amount">
+            <a:TextField value="$item.Amount" formatter="$formatters.money"/>
+        </t:Column>
+
+        <t:RowDetail isVisible="$isHotel" nestedTableLayout="$true">
+            <t:DataTable list="$hotelTaxProperites" item="$hotelProp" useParentLayout="$true" rowClass="tableRow1 firstRow">
+                <!-- use label to match with parent -->
+                <t:Column label="Type">\
+                    $hotelProp.label\
+                </t:Column>
+
+                <t:Column label="Daily Amount">\
+                    <a:TextField value="$hotelTaxAmount" formatter="$formatters.money"/>\
+                </t:Column>
+            </t:DataTable>
+        </t:RowDetail>
+        <t:ButtonArea>
+            <w:TextButton action="$null">Generate Daily Expenses</w:TextButton>
+        </t:ButtonArea>
+    </t:DataTable>
+</w:ModalPageWrapper>
+\

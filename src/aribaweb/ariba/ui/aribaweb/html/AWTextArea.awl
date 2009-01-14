@@ -13,15 +13,15 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#21 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#22 $
     </Copyright>
 
     <Overview>
-        Renders an HTML <textarea ...>...</textarea> tag on the page.
+        Renders an HTML `<textarea ...>...</textarea>` tag on the page.
     </Overview>
 
     <Binding key="name" type="String" required="$false" direction="get">
-        Sets the name of the <input ...>...</input> tag that implements the button by
+        Sets the name of the `<input ...>...</input>` tag that implements the button by
         overriding the element id.
     </Binding>
 

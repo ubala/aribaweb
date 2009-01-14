@@ -1,0 +1,15 @@
+<BODY>
+
+The core property access mechanism used by AribaWeb bindings and the Expr
+expression language.  FieldValue provides a uniform Map-like (get/set) interface to
+objects of various sorts (POJOs, Maps, scriptable objects, ...).  {@link ariba.util.fieldvalue FieldValue}
+is implemented as a {@link ariba.util.core.ClassExtension}, meaning that implementation of the FieldValue
+abstraction can be done outside of the target classes, thereby allowing implementations
+on existing core Java classes (Object, Map, etc).
+<p/>
+FieldValue provides optimized access for <i>field paths</i> (e.g. "employee.manager.name")
+via the {@link ariba.util.fieldvalue.FieldPath} class.  FieldPaths are pre-parsed and
+cache the {@link ariba.util.fieldvalue.FieldValueAccessor} to which they last (dynamically)
+resolved, thereby avoiding future lookup/reflection on repeated use.
+
+</BODY>

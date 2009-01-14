@@ -391,6 +391,15 @@ IMG.block {
     font:bold 9px Verdana, Arial, Helvetica, sans-serif;
 }
 
+.apcMessage {
+    position:fixed;
+    top:0px;
+    z-index:10;
+    filter:alpha(opacity=087);
+    -moz-opacity:0.87;
+    width:100%;
+}
+
 .content {
     padding:0px 20px 0px;
     width:99%;
@@ -1662,6 +1671,10 @@ div.tableHead table {
     empty-cells:show;
 }
 
+.tableBodyToggle {
+    float:left;
+}
+
 div.tableBody {
     /* Take our best guess on these settings -- fix up on client */
     width:100%;
@@ -2677,10 +2690,16 @@ a.smLinkVisited:link, a.smLinkVisited:visited {
     background:url(info.gif) no-repeat 5px 5px #DDDDDD;
 }
 
-.toggleBox {
-    border: 1px solid #9C9CB8;
-    margin: 7px 0px 0px 0px;
-    padding: 2px;
+.innerToggleBox td.tableHeader {
+    background-image:none;
+    background-color:transparent;
+    border-top: 1px solid #9C9CB8;
+    border-bottom: none;
+}
+
+.innerToggleBox h2 {
+    color:#999999;
+    display:inline;
 }
 
 /*flags range limited fields in AQS*/
@@ -3560,78 +3579,6 @@ td.btnDisabled .rbB {
     white-space:nowrap;
 }
 
-td.btnApprove .rbB {
-    color:#000000;
-    padding:0px 4px 1px 4px !important;
-    background-color:#D5E9C0;
-    background-image:url("cssBtnApprove.gif");
-    background-repeat:repeat-x;
-    background-position:bottom;
-    white-space:nowrap;
-}
-
-td.btnApprove .rbFC {
-    background-color:#D5E9C0;
-}
-
-td.btnApprove .rbBtFC {
-    background-color:#7CC27C;
-}
-
-td.btnApproveOver .rbB {
-    color:#000000;
-    padding:0px 4px 1px 4px !important;
-    background-color:#CAE3B1;
-    background-image:url("cssBtnApproveOver.gif");
-    background-repeat:repeat-x;
-    background-position:bottom;
-    white-space:nowrap;
-}
-
-td.btnApproveOver .rbFC {
-    background-color:#CAE3B1;
-}
-
-td.btnApproveOver .rbBtFC {
-    background-color:#88B367;
-}
-
-td.btnDeny .rbB {
-    color:#000000;
-    padding:0px 4px 1px 4px !important;
-    background-color:#F0CACA;
-    background-image:url("cssBtnDeny.gif");
-    background-repeat:repeat-x;
-    background-position:bottom;
-    white-space:nowrap;
-}
-
-td.btnDeny .rbFC {
-    background-color:#F0CACA;
-}
-
-td.btnDeny .rbBtFC {
-    background-color:#D37E7F;
-}
-
-td.btnDenyOver .rbB {
-    color:#000000;
-    padding:0px 4px 1px 4px !important;
-    background-color:#E8B5B5;
-    background-image:url("cssBtnDenyOver.gif");
-    background-repeat:repeat-x;
-    background-position:bottom;
-    white-space:nowrap;
-}
-
-td.btnDenyOver .rbFC {
-    background-color:#E8B5B5;
-}
-
-td.btnDenyOver .rbBtFC {
-    background-color:#C06B6C;
-}
-
 td.btnBrand .rbB {
     color:#FFFFFF;
     padding:0px 4px 1px 4px !important;
@@ -3787,46 +3734,6 @@ td.btnSpecial2Over .rbBtFC {
     background-color:#9394C4;
 }
 
-td.btnTotal .rbB {
-    color:#000000;
-    padding:0px 4px 1px 4px !important;
-    font-size:9px;
-    line-height:11px;
-    background-color:#F3F3F3;
-    background-image:url("cssBtnTotal.gif");
-    background-repeat:repeat-x;
-    background-position:bottom;
-    white-space:nowrap;
-}
-
-td.btnTotal .rbFC {
-    background-color:#F3F3F3;
-}
-
-td.btnTotal .rbBtFC {
-    background-color:#D9D9D9;
-}
-
-td.btnTotalOver .rbB {
-    color:#000000;
-    padding:0px 4px 1px 4px !important;
-    font-size:9px;
-    line-height:11px;
-    background-color:#ECECEC;
-    background-image:url("cssBtnTotalOver.gif");
-    background-repeat:repeat-x;
-    background-position:bottom;
-    white-space:nowrap;
-}
-
-td.btnTotalOver .rbFC {
-    background-color:#ECECEC;
-}
-
-td.btnTotalOver .rbBtFC {
-    background-color:#C7C7C7;
-}
-
 td.btnTab,
 td.btnTabOver {
     padding-bottom:3px;
@@ -3914,6 +3821,10 @@ td.btnTabOver .rbBtFC {
 }
 
 /** Rich text **/
+.rtaWrapper {
+    visibility:hidden;
+}
+
 .rtt {
     color:#FFFFFF;
     border:1px solid #7F9DB9;
@@ -3954,4 +3865,71 @@ div.regionWrapper {
 
 div.selectedRegionWrapper {
     border: 2px solid #666699;
+}
+
+.ro {
+    text-decoration:none;
+    cursor:pointer;
+}
+
+.ro:hover {
+    text-decoration:underline;
+}
+
+/* Pretty printing styles. Used with prettify.js. */
+.str { color: #080; }
+.kwd { color: #008; }
+.com { color: #800; }
+.typ { color: #606; }
+.lit { color: #066; }
+.pun { color: #660; }
+.pln { color: #000; }
+.tag { color: #008; }
+.atn { color: #606; }
+.atv { color: #080; }
+.dec { color: #606; }
+pre.prettyprint { }
+
+@media print {
+  .str { color: #060; }
+  .kwd { color: #006; font-weight: bold; }
+  .com { color: #600; font-style: italic; }
+  .typ { color: #404; font-weight: bold; }
+  .lit { color: #044; }
+  .pun { color: #440; }
+  .pln { color: #000; }
+  .tag { color: #006; font-weight: bold; }
+  .atn { color: #404; }
+  .atv { color: #060; }
+}
+
+div.quoteCode {
+    clear:both;
+    padding:5px 25px 5px 25px;
+}
+
+.quoteCode pre {
+    margin:0px;
+    border:1px dashed #333366;
+    padding:10px 25px 10px 25px;
+    background-color:#CCCCFF;
+    overflow-x:hidden;
+}
+
+div.quoteSample {
+    clear:both;
+    padding:10px 10px 10px 45px;
+}
+
+div.doc {
+    margin: 8px 0px;
+}
+
+.doc h2 {
+    font-size:15px;
+    padding:8px 10px 0px 0px;
+}
+
+.doc p {
+    margin: 0.3em 0em 0.5em 0em;
 }

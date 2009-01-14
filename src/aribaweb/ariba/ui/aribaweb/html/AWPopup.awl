@@ -13,11 +13,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.awl#24 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.awl#25 $
     </Copyright>
 
     <Overview>
-        Renders a <select ...>...[<option>...</option>]*...</select> popup menu in the html.
+        Renders a `<select ...>...[<option>...</option>]*...</select>` popup menu in the html.
         The content area of this tag renders the displayble portion of the option menu item.
     </Overview>
 
@@ -43,7 +43,7 @@
     </Binding>
 
     <Binding key="onChange" type="String" default="$null" direction="get" deprecated="$true">
-        Specifies the onChange attribute used in the <select ...>...</select> tag when no action is specified.
+        Specifies the onChange attribute used in the `<select ...>...</select>` tag when no action is specified.
         It is strongly recommended to not use this as it may conflict with internal
         implementation.  If you use the "action" binding, the popup will submit the form
         when the user changes the popup.

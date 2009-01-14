@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextFormSubmitButton.awl#7 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextFormSubmitButton.awl#8 $
     </Copyright>
 
     <Overview>
@@ -22,12 +22,12 @@
 
         Usage:
 
-            <form name="form1" method="POST" action="http://www.amazon.com/somearbitraryurl">
-                <input type="hidden" name="var1" value="val1"/>
-                <input type="hidden" name="var2" value="val2"/>
-                <input type="hidden" name="var3" value="val3"/>
-                <w:TextFormSubmitButton formName="form1" isDisabled="$false">Test Button</w:TextFormSubmitButton>
-            </form>
+                <form name="form1" method="POST" action="http://www.amazon.com/somearbitraryurl">
+                    <input type="hidden" name="var1" value="val1"/>
+                    <input type="hidden" name="var2" value="val2"/>
+                    <input type="hidden" name="var3" value="val3"/>
+                    <w:TextFormSubmitButton formName="form1" isDisabled="$false">Test Button</w:TextFormSubmitButton>
+                </form>
 
     </Overview>
 

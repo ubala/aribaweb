@@ -1,0 +1,13 @@
+<w:BucketsTOC>\
+    <w:BucketHeading label="Browse">
+        <w:BucketItem label="Documentation" action='${pageWithName("SearchSource")}'/>
+        <w:BucketItem label="Component Inspector"
+                      action='${ariba.ui.dev.AWComponentInspector.togglePathDebugging(requestContext())}'/>
+    </w:BucketHeading>
+    <w:BucketHeading label="Try">
+        <w:BucketItem label="Data Tables" action='${pageWithName("TableTabs")}'/>
+        <w:BucketItem label="Pivot Tables" action='${pageWithName("PivotTabs")}'/>
+        <w:BucketItem label="Forms" action='${pageWithName("MetaUIForms")}'/>
+        <w:BucketItem label="Master Detail app" action='${pageWithName("ERPage")}'/>
+    </w:BucketHeading>
+</w:BucketsTOC>\

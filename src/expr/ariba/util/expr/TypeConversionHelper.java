@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeConversionHelper.java#5 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeConversionHelper.java#6 $
 */
 
 package ariba.util.expr;
@@ -37,7 +37,6 @@ public class TypeConversionHelper
      * @param provider
      * @param convertedTo
      * @param convertedFrom
-     * @return
      */
     public static boolean isCompatible (TypeRetriever provider,
                                         String convertedTo,
@@ -64,7 +63,6 @@ public class TypeConversionHelper
      * this method will check if primtive narrowing is possible.
      * @param convertedTo
      * @param convertedFrom
-     * @return
      */
     public static boolean canCastTo (TypeInfo convertedTo,
                                      TypeInfo convertedFrom)
@@ -88,7 +86,6 @@ public class TypeConversionHelper
      * the type <code>convertedTo</code>.
      * @param convertedTo
      * @param convertedFrom
-     * @return
      */
     public static boolean canWideningTo (TypeInfo convertedTo,
                                          TypeInfo convertedFrom)
@@ -117,7 +114,6 @@ public class TypeConversionHelper
      * Find out if the two types are the same.
      * @param convertedTo
      * @param convertedFrom
-     * @return
      */
     public static boolean exactMatch (TypeInfo convertedTo,
                                       TypeInfo convertedFrom)
@@ -132,7 +128,6 @@ public class TypeConversionHelper
      * this method return the <code>source</code> withou conversion.
      * @param convertTo
      * @param source
-     * @return
      */
     public static Object convertPrimitive (TypeInfo convertTo, Object source)
     {
@@ -152,7 +147,6 @@ public class TypeConversionHelper
      *
      * @param convertTo
      * @param source
-     * @return
      */
     public static Object convertPrimitive (String convertTo, Object source)
     {

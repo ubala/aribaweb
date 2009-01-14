@@ -1,0 +1,16 @@
+<BODY>
+Adaptor classes to marry aribaweb with the javax.servlet APIs.
+<p/>
+Since AribaWeb is designed to be independent of the java servlet APIs (so that it can
+be used in alternative environments) this servletadaptor package is necessary to provide
+concrete implementations of abstract aribaweb classes such as AWBaseRequest and AWBaseResponse
+that adapt AW to servlet containers.
+<p/>
+Note:
+    {@link ariba.ui.servletadaptor.AWServletApplication AWServletApplication} can / should
+    serve as the base class for most application-specific application subclasses, and includes
+    overridable defaults for settings such as the resourceUrl and the resourceFilePath()
+    (which determine how where resources in jars/wars are located at how they are
+    referenced in generated URLs).
+
+</BODY>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/core/UrlActionTarget.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/core/UrlActionTarget.java#3 $
 */
 
 package ariba.ui.wizard.core;
@@ -30,7 +30,7 @@ public final class UrlActionTarget implements WizardActionTarget
     private WizardFrame _frame;
 
     /**
-        @aribapai ariba
+        @aribaapi ariba
     */
     public UrlActionTarget (Wizard wizard, String  url, boolean quitWizard)
     {
@@ -40,7 +40,7 @@ public final class UrlActionTarget implements WizardActionTarget
     }
 
     /**
-        @aribapai ariba
+        @aribaapi ariba
     */
     public boolean terminatesWizard ()
     {
@@ -48,7 +48,7 @@ public final class UrlActionTarget implements WizardActionTarget
     }
 
     /**
-        @aribapai private
+        @aribaapi private
     */
     public String getUrl ()
     {
@@ -56,7 +56,7 @@ public final class UrlActionTarget implements WizardActionTarget
     }
 
     /**
-        @aribapai private
+        @aribaapi private
     */
     public WizardFrame getOriginatingFrame ()
     {

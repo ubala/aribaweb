@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#15 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#16 $
 */
 
 package ariba.util.shutdown;
@@ -363,7 +363,7 @@ public class ShutdownManager
      * perdiod.
      * @return warning interval in milliseconds
      * @aribaapi ariba
-     * @see .getWarningPeriod
+     * @see ShutdownManager#getWarningPeriod
      */
     public long getWarningInterval ()
     {

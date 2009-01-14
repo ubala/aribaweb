@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/Application.java#63 $
+    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/Application.java#64 $
 */
 
 package ariba.ui.demoshell;
@@ -114,8 +114,8 @@ public class Application extends AWServletApplication
         //AWMultiLocaleResourceManager.enableFailedResourceLookupLogging();
         AWConcreteServerApplication.IsAutomationTestModeEnabled = false;
 
-        ariba.ui.aribaweb.util.Log.aribaweb.setLevel(ariba.util.log.Log.DebugLevel);
-        ariba.ui.aribaweb.util.Log.domsync.setLevel(ariba.util.log.Log.DebugLevel);
+        // ariba.ui.aribaweb.util.Log.aribaweb.setLevel(ariba.util.log.Log.DebugLevel);
+        // ariba.ui.aribaweb.util.Log.domsync.setLevel(ariba.util.log.Log.DebugLevel);
         // ariba.ui.aribaweb.util.Log.aribaweb_request.setLevel(ariba.util.log.Log.DebugLevel);
 
         // ariba.ui.aribaweb.util.Log.domsync.setLevel(ariba.util.log.Log.DebugLevel);
@@ -124,9 +124,6 @@ public class Application extends AWServletApplication
         // ariba.ui.demoshell.Log.util.setLevel(ariba.util.log.Log.DebugLevel);
 
         Log.demoshell.setLevel(ariba.util.log.Log.DebugLevel);
-        ariba.ui.meta.core.Log.meta.setLevel(ariba.util.log.Log.DebugLevel);
-        ariba.ui.meta.core.Log.meta_detail.setLevel(ariba.util.log.Log.DebugLevel);
-
         Log.demoshell.debug("******** Demoshell Logging!! **********");
     }
 

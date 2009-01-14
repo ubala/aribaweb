@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/CompiledAccessorFactory.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/CompiledAccessorFactory.java#3 $
 */
 
 package ariba.util.fieldvalue;
@@ -67,11 +67,11 @@ to disk.
 public class CompiledAccessorFactory extends Object
 {
     // This is the increment of the moving threshold
-    /** @deprecated: use setAccessThresholdToCompile(int)  */
+    /** @deprecated use setAccessThresholdToCompile(int)  */
     public static int AccessThresholdToCompile = -1;
     // This is the moving threshold.  Set it high to begin with so that all accessors have
     // an opportunity to get used before the threshold starts moving.
-    /** @deprecated: use setAccessThresholdToCompile(int)  */
+    /** @deprecated use setAccessThresholdToCompile(int)  */
     public static int AccessThresholdCurrent = -1;
     // This is the maximum number of accessors to compile
     // -1 means there is no maximum. 0 means no compiled accessor. positive number is a limit

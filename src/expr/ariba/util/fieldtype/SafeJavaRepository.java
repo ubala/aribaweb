@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/SafeJavaRepository.java#13 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/SafeJavaRepository.java#14 $
 */
 
 package ariba.util.fieldtype;
@@ -438,7 +438,6 @@ public class SafeJavaRepository
     /**
      * This method should only be used for testing ONLY.
      * @param file
-     * @return
      * @aribaapi private
      */
     public Map switchSafeJavaRepository (File file)
@@ -450,8 +449,6 @@ public class SafeJavaRepository
 
     /**
      * This method should only be used for testing ONLY.
-     * @param repository
-     * @return
      * @aribaapi private
      */
     public void restoreSafeJavaRepository (Map repository)

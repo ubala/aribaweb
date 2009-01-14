@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/io/Serializer.java#7 $
+    $Id: //ariba/platform/util/core/ariba/util/io/Serializer.java#8 $
 */
 
 package ariba.util.io;
@@ -40,7 +40,6 @@ import java.util.Map;
     representation, use the OutputSerializer class.
 
     @see Deserializer
-    @see OutputSerializer
     @note 1.0 Added several unsafe characters that will always be quoted
     (fixed problem with archiving the @ symbol)
 

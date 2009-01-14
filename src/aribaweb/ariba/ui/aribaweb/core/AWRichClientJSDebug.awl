@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientJSDebug.awl#5 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientJSDebug.awl#6 $
     </Copyright>
 
     <Overview>
@@ -24,7 +24,11 @@
 <a:RefreshRegion>
     <table>
         <tr>
-            <td>RichClient Javascript debug: <w:ToggleImage state="$dict.AWRichClientJSVisible"/></td>
+            <td>RichClient Javascript debug:
+                <a:Hyperlink action="${dict.AWRichClientJSVisible = !dict.AWRichClientJSVisible}">
+                    <a:If ifFalse="$dict.AWRichClientJSVisible">Show<a:Else/>Hide</a:If>
+                </a:Hyperlink>
+            </td>
         </tr>
         <a:If ifTrue="$dict.AWRichClientJSVisible">
             <tr>

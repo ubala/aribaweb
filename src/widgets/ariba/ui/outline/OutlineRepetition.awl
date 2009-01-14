@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/outline/OutlineRepetition.awl#2 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/outline/OutlineRepetition.awl#4 $
     </Copyright>
 
     <Overview>
@@ -21,12 +21,14 @@
         that where an item may have children.
 
         Example usage:
-        <w:OutlineRepetition list="$rootItems" item="$currentObject" children="$childrenOfCurrentObject"
-            hasChildren="$hasChildren">
-            <div style="padding-top:4px">\
-                <w:OutlineControl title="$currentObject.name"/>\
-            </div>
-        </w:OutlineRepetition>
+
+                <w:OutlineRepetition list="$rootItems" item="$currentObject"
+                                     children="$childrenOfCurrentObject"
+                                     hasChildren="$hasChildren">
+                    <div style="padding-top:4px">\
+                        <w:OutlineControl title="$currentObject.name"/>\
+                    </div>
+                </w:OutlineRepetition>
 
         There is a special (behind the scenes) relationship between AWXOutlineControl and AWXOutlineRepetition --
         the OutlineControl looks to its containing OutlineRepetition to determine nesting-level (indentation),
@@ -94,7 +96,13 @@
     </Binding>
 
     <Binding key="expandCurrentItem" type="boolean" required="$false" direction="get">
-        Whether to force open the current item.
+        Whether to force open the current item.  Note that if expandCurrentItem returns
+        true, the corresponding outline item will be *stuck* open - i.e. user clicks on
+        that node will *not* expand the item (thus this option is best used together with
+        `showExpansionControl="$false"`).
+
+        To just *initially* expand a node, get the `outlineState` and call
+        `setExpansionState(node, true)`.
     </Binding>
 
     <Binding key="showExpansionControl" type="boolean" required="$false" direction="get">

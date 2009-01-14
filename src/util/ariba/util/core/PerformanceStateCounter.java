@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateCounter.java#11 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateCounter.java#13 $
 */
 
 package ariba.util.core;
@@ -88,7 +88,11 @@ public class PerformanceStateCounter extends PerformanceStateCore
         operationalObj.addCount(c1, c2);
     }
 
-    // the real instance
+    /**
+     * the real instance
+     * @aribaapi ariba
+     */
+
     public static class Instance extends PerformanceStateCore.Instance
     {
         protected long count = 0;
@@ -144,7 +148,7 @@ public class PerformanceStateCounter extends PerformanceStateCore
         /**
             The string used as a key in the hashtable for the data on this
             object.
-            @see PerformanceStateCore#getData
+            @see PerformanceStateCounter.Instance#getData
         */
         public static final String ColumnNameCount = new String("count"); // OK
 

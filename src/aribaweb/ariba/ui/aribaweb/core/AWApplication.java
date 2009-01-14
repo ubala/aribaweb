@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApplication.java#28 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApplication.java#29 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -127,6 +127,7 @@ public interface AWApplication extends AWServerApplication
     // Request Validation Support
     //////////////////////
     public void validateRequest (AWRequestContext requestContext);
+    public String getSessionSecureId (AWRequestContext requestContext);
 
     //////////////////////
     // Brand Support

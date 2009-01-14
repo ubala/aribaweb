@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#26 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#27 $
     </Copyright>
 
     <Overview>
@@ -59,6 +59,10 @@
         See ariba.ui.widgets.Calendar
     </Binding>
 
+    <Binding key="isRefresh" type="boolean" default="$false" direction="get">
+        See ariba.ui.aribaweb.html.AWTextField
+    </Binding>
+
 </a:Api>\
 <!---
      The nobr is needed for both layout and reference node in dateFieldOnClick and dateFieldMouseDown
@@ -72,7 +76,7 @@
                            formatter="$formatter"
                            size="$^size"
                            awname="$^awname"
-                           isRefresh="$false"
+                           isRefresh="$^isRefresh"
                            action="$textFieldAction"
                            title="$exampleDate"
                            onChange="ariba.Calendar.dateTextChanged(this)"

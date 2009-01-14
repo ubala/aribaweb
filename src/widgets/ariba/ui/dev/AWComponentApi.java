@@ -12,14 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentApi.java#4 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentApi.java#5 $
 */
 
 package ariba.ui.dev;
 
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.util.core.ListUtil;
+import ariba.util.core.StringUtil;
 import ariba.ui.aribaweb.core.AWApi;
+import ariba.ui.aribaweb.core.AWBindingApi;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
@@ -32,7 +35,8 @@ public final class AWComponentApi extends AWComponent
     protected Map _empiricalApiTable = null;
     protected List _empiricalApiBindingList = null;
     protected AWApi _apiContainer = null;
-
+    public AWBindingApi _binding;
+    
     ////////////////////////////////
     // Methods state management
     ////////////////////////////////
@@ -83,5 +87,10 @@ public final class AWComponentApi extends AWComponent
             _apiContainer = (AWApi)valueForBinding(AWApiBinding);
         }
         return _apiContainer;
+    }
+
+    public boolean bindingHasAlternates ()
+    {
+        return !StringUtil.nullOrEmptyString(_binding.alternates());
     }
 }

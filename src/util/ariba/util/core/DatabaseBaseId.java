@@ -1,5 +1,6 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2008 Ariba, Inc.
+    All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +13,8 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/DatabaseBaseId.java#7 $
+    $Id: //ariba/platform/util/core/ariba/util/core/DatabaseBaseId.java#10 $
+    Responsible: bluo
 */
 
 package ariba.util.core;
@@ -87,8 +89,6 @@ abstract public class DatabaseBaseId
     /**
         Converts the type code to a string.
 
-        @param code an integer representing the type code.
-        
         @return a String representation of a type code.
         @aribaapi documented
     */

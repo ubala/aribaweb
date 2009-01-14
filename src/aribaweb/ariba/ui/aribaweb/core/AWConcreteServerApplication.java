@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#47 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#49 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -44,7 +44,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.io.File;
+import java.net.URL;
 
 import org.apache.log4j.Level;
 
@@ -248,6 +253,15 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         }
         resourceManager.registerPackageName("ariba.ui.aribaweb.html", true);
         resourceManager.registerPackageName("ariba.ui.aribaweb.core", true);
+        resourceManager.registerPackageName("ariba.ui.aribaweb.test", true);
+        
+        // initialize the TestLinkManager (if in test mode)
+        String cls = "ariba.ui.aribaweb.test.TestLinkManager";
+        if (allowTestLinkInvokation() && ClassUtil.classForName(cls, false) != null) {
+            ClassUtil.invokeStaticMethod(cls, "initialize",
+                new Class[]{},
+                new Object[]{});
+        }
 
         // Register Elements -- this helps the resourceManager find these
         // classes and avoids our having to scan through all registered packages.
@@ -299,20 +313,60 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         AWClasspathResourceDirectory.autoRegisterJarResources(resourceManager);
     }
 
+    protected boolean allowTestLinkInvokation ()
+    {
+        return true;
+    }
+    
     private static void registerAWSourcePath (AWMultiLocaleResourceManager resourceManager)
     {
         String awSearchPath = AWUtil.getenv("ARIBA_AW_SEARCH_PATH");
         if (awSearchPath != null) {
             String[] paths = AWUtil.componentsSeparatedByString(awSearchPath, ";").array();
+            Set jarNameSuffixes = _awJarNameSuffixes();
 
             // compute a debugging URL for resource lookup from source directory
             String resourceUrl = AWXDebugResourceActions.urlForResourceNamed(null, "");
-            for (int i = 0; i < paths.length; i ++) {
-                if (!StringUtil.nullOrEmptyOrBlankString(paths[i])) {
-                    resourceManager.registerResourceDirectory(paths[i], resourceUrl);
+            for (String path : paths) {
+                if (!StringUtil.nullOrEmptyOrBlankString(path)) {
+                    // we suppress any directories for which we can deduce the
+                    // jar name and can tell that it's not in our search path
+                    String jarSuffix = _jarNameSuffixForSourceDirectory(path);
+                    if (jarSuffix == null || jarNameSuffixes.contains(jarSuffix)) {
+                        resourceManager.registerResourceDirectory(path, resourceUrl);
+                    }
                 }
             }
         }
+    }
+
+    static Set<String> _awJarNameSuffixes ()
+    {
+        Set<String> result = new HashSet();
+        for (String fullName : AWClasspathResourceDirectory.awJarUrlsByName().keySet()) {
+            int index = fullName.indexOf('.');
+            String shortName = (index != -1) ? fullName.substring(index+1) : fullName;
+            result.add(shortName);
+        }
+        return result;
+    }
+
+    private static final Pattern _BuildProjectName = Pattern.compile(
+            "<project.*?\\s+name=\\\"(\\w+)\\\".+?>");
+    /**
+        Attempt to deduce the jar that would be produced by the given source path.
+        Looks for a build.xml at the path and uses the name attribute of the project
+        @return the likely jar name (sans entension) or null
+     */
+    static String _jarNameSuffixForSourceDirectory (String path)
+    {
+        File buildFile = new File(path, "build.xml");
+        if (buildFile.exists()) {
+            String contents = AWUtil.stringWithContentsOfFile(buildFile);
+            Matcher m = _BuildProjectName.matcher(contents);
+            if (m.find()) return m.group(1);
+        }
+        return null;
     }
 
     public String initResourceUrl ()

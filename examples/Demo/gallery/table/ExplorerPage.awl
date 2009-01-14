@@ -1,0 +1,92 @@
+<w:BasicPageWrapper hasForm="$true" isSidebarVisible="$explorerMode">\
+        <a:If ifTrue="$explorerMode">
+            <w:FourZoneLayout widthLeft="150px" widthRight="">
+                <a:Content name="left">
+                    <w:RoundedBox>
+                        <a:RefreshRegion>
+                            <div style="width:200px">
+                            <w:OutlineRepetition list="$rootFiles" item="$currentObject" children="$children"
+                                hasChildren="$hasChildren" selectionPath="$selectionPath" selectedObject="$selectedObject">
+                                <div style="padding-top:4px">\
+                                    <w:OutlineFolderControl title="$currentObject.name" allowSelection="$isDirectory"
+                                        isFolder="$isDirectory"/>\
+                                </div>
+                            </w:OutlineRepetition>
+                            </div>
+                        </a:RefreshRegion>
+                    </w:RoundedBox>
+                </a:Content>
+                <a:Content name="right">
+                    <t:DataTable list="$selectedObjectChildren" enableScrolling="$true"
+                                item="$currentObject" displayGroup="$displayGroup"
+                                title="$selectedObject"
+                                isItemSelectable="$isNotDirectory" multiSelect="$true" valign="middle" >
+                        <t:Column key="name" label="Name"/>
+
+                        <t:Column key="lastModified" label="Last Modified">
+                            <a:String value="$modifiedDate" formatter="$formatters.shortDate"/>
+                        </t:Column>
+
+                        <t:Column label="Silly">
+                            <a:If ifTrue="$currentObject.isDirectory">
+                                Dir!
+                            <a:Else/>
+                                -
+                            </a:If>
+                        </t:Column>
+
+                        <t:Column align="right">
+                            <w:TextButton action="$null">Inspect</w:TextButton>
+                        </t:Column>
+
+                        <t:HeadingArea>
+                            <div style="float:left"><a:Hyperlink action="$toggleMode">Switch to Outline Table Mode</a:Hyperlink></div>
+                        </t:HeadingArea>
+
+                        <t:ButtonArea>
+                            <w:TextButton action="$null">Download</w:TextButton>
+                            <w:TextButton action="$null">Edit</w:TextButton>
+                        </t:ButtonArea>
+                    </t:DataTable>                    
+                </a:Content>
+            </w:FourZoneLayout>
+
+        <a:Else/>
+            <t:DataTable list="$rootFiles" item="$currentObject" children="$children"
+                    hasChildren="$hasChildren" selectionPath="$selectionPath"
+                    displayGroup="$displayGroup"
+                    title="$selectedObject" enableScrolling="$true" showOptionsMenu="$true"
+                    scrollBatchSize="40"
+                    isItemSelectable="$isNotDirectory" multiSelect="$true">
+                <t:Column key="name" label="Name">
+                    <w:OutlineFolderControl title="$currentObject.name" allowSelection="$isDirectory"
+                        isFolder="$isDirectory"/>\
+                </t:Column>
+
+                <t:Column key="lastModified" label="Last Modified">
+                    <a:String value="$modifiedDate" formatter="$formatters.shortDate"/>
+                </t:Column>
+
+                <t:Column label="Silly">
+                    <a:If ifTrue="$currentObject.isDirectory">
+                        Dir!
+                    <a:Else/>
+                        -
+                    </a:If>
+                </t:Column>
+
+                <t:Column align="right">
+                    <w:TextButton action="$null">Inspect</w:TextButton>
+                </t:Column>
+
+                <t:HeadingArea>
+                    <div style="float:left"><a:Hyperlink action="$toggleMode">Switch to Explorer Mode</a:Hyperlink></div>
+                </t:HeadingArea>
+
+                <t:ButtonArea>
+                    <w:TextButton action="$null">Download</w:TextButton>
+                    <w:TextButton action="$null">Edit</w:TextButton>
+                </t:ButtonArea>
+            </t:DataTable>
+        </a:If>
+</w:BasicPageWrapper>

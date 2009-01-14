@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#12 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#13 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -245,7 +245,6 @@ public class AWElementIdPath extends AWBaseObject
     /**
      * This should only be called by AWElementIdGenerator.nextPrefixMatches().
      * Nobody else should have access to the _path directly.
-     * @return
      */
     protected char[] privatePath ()
     {

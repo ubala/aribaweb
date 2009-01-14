@@ -13,11 +13,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuItem.awl#25 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuItem.awl#26 $
     </Copyright>
 
     <Overview>
-        see <w:PopupMenu/>
+        see `<w:PopupMenu/>`
     </Overview>
 
     <Binding key="action" direction="get" type="AWResponseGenerating" alternates="onClick">

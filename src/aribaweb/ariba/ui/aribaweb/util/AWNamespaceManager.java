@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNamespaceManager.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNamespaceManager.java#6 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -29,9 +29,9 @@ import java.util.HashSet;
 
 /*
     Manages resolving namespace-based component references in .awl files.
-        e.g. <a:Hyperlink> could resolve to <AWHyperlink> (in ariba.ui.aribaweb.core)
-        and <a:TextButton> could resolve to <TextButton> (in ariba.ui.widgets)
-        and <x:Form> could resolve to <WRCForm> (in com.customer.mycomponents)
+        e.g. <a:Hyperlink/> could resolve to <AWHyperlink/> (in ariba.ui.aribaweb.core)
+        and <a:TextButton/> could resolve to <TextButton/> (in ariba.ui.widgets)
+        and <x:Form/> could resolve to <WRCForm/> (in com.customer.mycomponents)
 
 
  */
@@ -101,16 +101,16 @@ public class AWNamespaceManager
         }
 
         // turn "a:AWTDataTable" into "DataTable" (or null)
-        public String lookup (String referenence)
+        public String lookup (String reference)
         {
             String result = null;
-            if (referenence.indexOf(':') != -1) {
+            if (reference.indexOf(':') != -1) {
                 // check our cache
-                result = _referenceToComponentName.get(referenence);
+                result = _referenceToComponentName.get(reference);
                 if (result != null) return result;
 
-                String namespace = namespaceString(referenence);
-                String componentName = componentName(referenence);
+                String namespace = namespaceString(reference);
+                String componentName = componentName(reference);
                 if (namespace != null) {
                     List<Import> imports = _includesForNamespace.get(namespace);
                     if (imports != null) {
@@ -122,16 +122,32 @@ public class AWNamespaceManager
                 }
             }
             if (result == null && _fallbackResolver != null) {
-                result = _fallbackResolver.lookup(referenence);
+                result = _fallbackResolver.lookup(reference);
             }
 
             // cache for the future
             if (result != null) {
-                _referenceToComponentName.put(referenence, result);
+                _referenceToComponentName.put(reference, result);
             }
             
-            Log.aribawebResource_lookup.debug ("Namespace lookup %s --> %s", referenence, result);
+            Log.aribawebResource_lookup.debug ("Namespace lookup %s --> %s", reference, result);
             return result;
+        }
+
+        public String referenceNameForClassName (String packageName, String className)
+        {
+            for (Map.Entry<String, List<Import>> e : _includesForNamespace.entrySet()) {
+                for (Import imprt : e.getValue()) {
+                    String stripped = imprt.match(packageName, className);
+                    if (stripped != null) {
+                        String ns = e.getKey();
+                        return (ns.length() > 0) ? (ns + ":" + stripped) : stripped;
+                    }
+                }
+            }
+            return (_fallbackResolver != null)
+                    ? _fallbackResolver.referenceNameForClassName(packageName, className)
+                    : null;
         }
 
         public void addIncludeToNamespace (String namespace, Import anImport)
@@ -219,6 +235,25 @@ public class AWNamespaceManager
                             return name;
                         }
                     }
+                }
+            }
+            return null;
+        }
+
+        public String match (String packageName, String className)
+        {
+            for (String pkgPrefix : _packagePrefixes) {
+                if (packageName.startsWith(pkgPrefix)) {
+                    boolean hasEmptyPrefix = false;
+                    for (String prefix : _prefixes) {
+                        if (prefix.length() == 0) {
+                            hasEmptyPrefix = true;
+                        }
+                        else if (className.startsWith(prefix)) {
+                            return className.substring(prefix.length());
+                        }
+                    }
+                    if (hasEmptyPrefix) return className;
                 }
             }
             return null;

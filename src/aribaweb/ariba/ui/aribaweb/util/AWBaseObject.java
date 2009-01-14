@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBaseObject.java#22 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBaseObject.java#23 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -22,6 +22,7 @@ import ariba.util.core.Vector;
 import ariba.util.core.Fmt;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.ListUtil;
+import ariba.util.core.MultiKeyHashtable;
 import ariba.util.fieldvalue.FieldValue;
 import ariba.ui.aribaweb.core.AWStringLocalizer;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
@@ -306,7 +307,7 @@ abstract public class AWBaseObject extends Object implements AWObject
     }
 
 
-    private static AW2DVector LocalizedStrings;
+    private static MultiKeyHashtable LocalizedStrings;
     private static String StringTableName = "ariba.ui.aribaweb.core";
 
     public static String localizedJavaString (String componentName,
@@ -315,13 +316,13 @@ abstract public class AWBaseObject extends Object implements AWObject
     {
         String localizedString = null;
         if (LocalizedStrings == null) {
-            LocalizedStrings = new AW2DVector();
+            LocalizedStrings = new MultiKeyHashtable(3);
         }
         int resourceManagerIndex = resourceManager.index();
-        localizedString = (String)LocalizedStrings.elementAt(resourceManagerIndex, stringId);
+        localizedString = (String)LocalizedStrings.get(resourceManagerIndex, componentName, stringId);
         if (localizedString == null) {
             synchronized (LocalizedStrings) {
-                localizedString = (String)LocalizedStrings.elementAt(resourceManagerIndex, stringId);
+                localizedString = (String)LocalizedStrings.get(resourceManagerIndex, componentName, stringId);
                 if (localizedString == null) {
                     AWStringLocalizer localizer = AWConcreteApplication.SharedInstance.getStringLocalizer();
                     Map localizedStringsHashtable =
@@ -330,7 +331,7 @@ abstract public class AWBaseObject extends Object implements AWObject
                                                       resourceManager);
 
                     if (localizedStringsHashtable != null) {
-                        AW2DVector localizedStringsCopy = (AW2DVector)LocalizedStrings.clone();
+                        MultiKeyHashtable localizedStringsCopy = (MultiKeyHashtable)LocalizedStrings.clone();
                         Iterator keyEnumerator = localizedStringsHashtable.keySet().iterator();
                         while (keyEnumerator.hasNext()) {
                             String currentStringId = (String)keyEnumerator.next();
@@ -340,13 +341,14 @@ abstract public class AWBaseObject extends Object implements AWObject
                             char firstCharacter = currentStringId.charAt(0);
                             if (firstCharacter >= '0' && firstCharacter <= '9') {
                                 String currentLocalizedString = (String)localizedStringsHashtable.get(currentStringId);
-                                localizedStringsCopy.setElementAt(currentLocalizedString, resourceManagerIndex, Integer.parseInt(currentStringId));
+                                localizedStringsCopy.put(resourceManagerIndex, componentName,
+                                        Integer.parseInt(currentStringId), currentLocalizedString);
                             }
                         }
-                        localizedString = (String)localizedStringsCopy.elementAt(resourceManagerIndex, stringId);
+                        localizedString = (String)localizedStringsCopy.get(resourceManagerIndex, componentName, stringId);
                         if (localizedString == null) {
                             localizedString = originalString;
-                            localizedStringsCopy.setElementAt(localizedString, resourceManagerIndex, stringId);
+                            localizedStringsCopy.put(resourceManagerIndex, componentName, stringId, localizedString);
                         }
                         LocalizedStrings = localizedStringsCopy;
                     }

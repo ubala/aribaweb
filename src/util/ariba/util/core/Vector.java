@@ -1,5 +1,6 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2008 Ariba, Inc.
+    All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +13,8 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Vector.java#23 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Vector.java#24 $
+    Responsible: bluo
 */
 
 package ariba.util.core;
@@ -757,7 +759,7 @@ public class Vector extends AbstractList implements Cloneable, Externalizable
 
         @return the index of <b>element</b> in the Vector.  Returns <b>-1</b>
         if the element is not present.
-        @aribaapi documented
+        @aribaapi ariba
     */
     public int indexOf (Object element)
     {
@@ -848,7 +850,7 @@ public class Vector extends AbstractList implements Cloneable, Externalizable
 
         @return the last index of <b>element</b> in the Vector.
         Returns <b>-1</b> if the element is not present.
-        @aribaapi documented
+        @aribaapi ariba
     */
     public int lastIndexOf (Object element)
     {
@@ -1232,7 +1234,7 @@ public class Vector extends AbstractList implements Cloneable, Externalizable
         @return the element at the specified position in this list.
         @throws IndexOutOfBoundsException if the given index is out of range
                   (<tt>index &lt; 0 || index &gt;= size()</tt>).
-        @aribaapi documented
+        @aribaapi ariba
     */
     public Object get (int index)
     {
@@ -1405,7 +1407,7 @@ public class Vector extends AbstractList implements Cloneable, Externalizable
 
         @throws IndexOutOfBoundsException if the specified index is out of
                   range (<tt>index &lt; 0 || index &gt;= size()</tt>).
-        @aribaapi documented
+        @aribaapi ariba
     */
     public Object remove (int index)
     {

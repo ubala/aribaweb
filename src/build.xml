@@ -21,7 +21,8 @@
  -->
 
 <project name="aribaweb-libs" default="default" basedir=".">
-    <import file="build-support/common-build.xml"/>
+    <property file="version.properties"/>
+    <import file="${aw.home}/tools/build-common.xml"/>
 
     <macrodef name="module-crawl">
         <attribute name="target" default=""/>
@@ -37,14 +38,11 @@
                 <fileset dir="${src.ui.dir}" includes="metaui/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="metaui-jpa/build.xml"/>
                 <fileset dir="${src.ui.dir}" includes="demoshell/build.xml"/>
+                <fileset dir="${src.ui.dir}" includes="ideplugin/build.xml"/>
+                <fileset dir="${src.ui.dir}" includes="awreload/build.xml"/>
             </subant>
         </sequential>
     </macrodef>
-
-    <target name="build-module"
-            description="Builds all module modules and their tests">
-        <module-crawl target="build"/>
-    </target>
 
     <target name="war">
         <subant target="war">
@@ -58,52 +56,99 @@
         <module-crawl target="jar"/>
     </target>
 
+    <target name="awapidocs" description="Generate awapi docs" depends="jar">
+        <echo message="Invoking java..."/>
+        <mkdir dir="${doc.dir}/xsd"/>
+        <java classname="ariba.ui.dev.AWApiDocGenerator" outputproperty="awapi.out">
+            <arg value="${doc.dir}/api"/>
+            <arg value="${doc.dir}/xsd"/>
+            <arg value="${src.ui.dir}/aribaweb"/>
+            <arg value="${src.ui.dir}/widgets"/>
+            <classpath>
+                <path refid="classpath"/>
+            </classpath>
+        </java>
+        <echo message="Output: ${awapi.out}"/>
+    </target>
+
+    <target name="generate-javadocs" description="Generate javadoc" depends="jar">
+        <mkdir dir="${doc.dir}/api"/>
+        <invoke-javadoc
+          access="public"
+          destdir="${doc.dir}/api"
+        />
+    </target>
+
+    <target name="javadocs" description="Generate javadoc" depends="generate-javadocs, awapidocs">
+    </target>
+
+    <target name="javadocs-internal" depends="jar">
+        <mkdir dir="${doc.dir}/api-internal"/>
+        <invoke-javadoc
+          access="package"
+          destdir="${doc.dir}/api-internal"
+        />
+    </target>
+
     <macrodef name="invoke-javadoc">
         <attribute name="access"/>
         <attribute name="destdir"/>
         <sequential>
 
             <javadoc
-                    overview="src/java/overview.html"
-                    packagenames="ariba.ui.aribaweb.*"
+                    overview="${src.ui.dir}/docs/api/overview.html"
+                    packagenames="ariba.ui.*,ariba.util.*"
                     destdir="@{destdir}"
                     access="@{access}"
                     encoding="${build.encoding}"
                     author="true"
                     version="true"
-                    use="true"
+                    use="false"
                     source="${ant.java.version}"
                     link="${javadoc.link}"
                     windowtitle="${Name} ${version} API"
                     doctitle="${Name} ${version} API"
                     bottom="Copyright &amp;copy; ${year} Ariba, Inc.  All Rights Reserved.">
-                <tag name="todo" description="To Do:"/>
+                <tag name="note" description="Note:"/>
+                <tag name="aribaapi" enabled="false"/>
 
 
                 <packageset dir="${src.util.dir}"/>
                 <packageset dir="${src.expr.dir}"/>
                 <packageset dir="${src.ui.dir}/aribaweb"/>
-                <packageset dir="${src.ui.dir}/widgets"/>
+
+                <packageset dir="${src.ui.dir}/widgets">
+                    <exclude name="ariba/ui/dev/**"/>
+                </packageset>
+
                 <packageset dir="${src.ui.dir}/metaui"/>
-                <packageset dir="${src.ui.dir}/demoshell"/>
+                <!--
+                <packageset dir="${src.ui.dir}/demoshell">
+                    <exclude name="ariba/ui/scratch/**"/>
+                    <exclude name="ariba/ui/groovy/**"/>
+                </packageset>
+                -->
 
                 <!-- If the main javadoc Group listing includes an "Other   -->
                 <!-- Packages" group after the ones listed here, then those -->
                 <!-- packages are not being matched by any of these rules   -->
 
-                <group title="util" packages="ariba.util.core.*:ariba.util.fieldvalue.*"/>
-                <group title="expr" packages="ariba.util.expr.*"/>
+                <group title="aribaweb" packages="ariba.ui.aribaweb.*:ariba.ui.servletadaptor"/>
 
-                <group title="aribaweb" packages="ariba.ui.aribaweb.*"/>
                 <group title="widgets"
-                       packages="ariba.ui.widgets.*:ariba.ui.table.*:ariba.ui.outline.*:ariba.ui.wizard.*"/>
+                       packages="ariba.ui.widgets:ariba.ui.table:ariba.ui.outline:ariba.ui.validation:ariba.ui.wizard.*"/>
+
                 <group title="metaui" packages="ariba.ui.meta.*"/>
-                <group title="metaui" packages="ariba.ui.demoshell.*"/>
 
+                <group title="util"
+                       packages="ariba.util.fieldvalue:ariba.util.formatter:ariba.util.core:ariba.util.io:ariba.util.log:ariba.util.i18n:ariba.util.shutdown"/>
+                <group title="expr" packages="ariba.util.expr:ariba.util.fieldtype"/>
+
+                <!--
+                <group title="demoshell" packages="ariba.ui.demoshell"/>
+                -->
                 <classpath refid="javadoc.classpath"/>
-
             </javadoc>
-
         </sequential>
     </macrodef>
 </project>

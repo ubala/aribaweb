@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ChecksumManager.java#10 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ChecksumManager.java#11 $
 */
 
 package ariba.util.core;
@@ -76,7 +76,7 @@ public class ChecksumManager
         Set the instance of the checksum manager.  Only called
         by getChecksumManger
 
-        @param srv The instance
+        @param serv The instance
         @aribaapi private
     */
     public static void setChecksumManager (ChecksumManager serv)
@@ -132,7 +132,7 @@ public class ChecksumManager
         register the component checksum with the manager.  Throws
         ComponentChecksumException if the component is already registered.
 
-        @param ComponentChecksum the component checksum from some package
+        @param cc the component checksum from some package
         @aribaapi ariba
     */
     public void register (ComponentChecksum cc)
@@ -158,7 +158,7 @@ public class ChecksumManager
         re-register the component checksum with the manager.  Replace the
         old value if the component already exists
 
-        @param ComponentChecksum the component checksum from some package
+        @param cc the component checksum from some package
         @aribaapi ariba
     */
     public void reRegister (ComponentChecksum cc)
@@ -236,7 +236,7 @@ public class ChecksumManager
     /**
         set the remote checksum in the Checksum manager, should be only be called by one thread
         @param checksums the List of ComponentChecksums from other nodes
-        @aribaappi ariba
+        @aribaapi ariba
     */
     public void setRemoteChecksums (List checksums)
     {
@@ -246,7 +246,7 @@ public class ChecksumManager
     /**
         get the remote checksum in the Checksum manager
         Return the List of ComponentChecksums from other nodes
-        @aribaappi ariba
+        @aribaapi ariba
     */
 
     public List getRemoteChecksums ()

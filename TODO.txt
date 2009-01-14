@@ -7,7 +7,6 @@ Planned Enhancements:
     - Need documentation
         - Conceptual overview
         - Tutorials
-        - JavaDoc (for key classes) and AW tag reference sheets
 
     - Better Samples (example apps)
         - Focussed examples of use for all key AWComponents

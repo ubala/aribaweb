@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWStaticImage.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWStaticImage.java#10 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -133,6 +133,8 @@ public final class AWStaticImage extends AWBindableElement
             fastStringBuffer.append(borderString);
             fastStringBuffer.append("\"");
         }
+        // no alt binding, so specifying empty string for now
+        fastStringBuffer.append(" alt=\"\"");
         AWBindingDictionary bindingsDictionary = AWBinding.bindingsDictionary(bindingsHashtable);
         appendHtmlAttributes(fastStringBuffer, bindingsDictionary);
         fastStringBuffer.append(">");

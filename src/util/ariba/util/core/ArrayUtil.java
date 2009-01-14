@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ArrayUtil.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ArrayUtil.java#9 $
 */
 
 package ariba.util.core;
@@ -289,7 +289,7 @@ public final class ArrayUtil
     /**
         Returns a String with the array printed as formatted text
         
-        @param head a header to prefix the list with
+        @param header a header to prefix the list with
         @param args the array of Strings to print
 
         @return a String with the array printed as formatted text.

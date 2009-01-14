@@ -520,9 +520,11 @@ ariba.Datatable = function() {
 
         innerSize : function (elm)
         {
-            return [elm.clientWidth - parseInt(Dom.effectiveStyle(elm, "padding-left"))
+            var w = (Dom.isSafari) ? elm.offsetWidth : elm.clientWidth;
+            var h = (Dom.isSafari) ? elm.offsetHeight : elm.clientHeight;
+            return [w - parseInt(Dom.effectiveStyle(elm, "padding-left"))
                     - parseInt(Dom.effectiveStyle(elm, "padding-right")),
-                elm.clientHeight - parseInt(Dom.effectiveStyle(elm, "padding-top"))
+                h - parseInt(Dom.effectiveStyle(elm, "padding-top"))
                         - parseInt(Dom.effectiveStyle(elm, "padding-bottom"))];
         },
 
@@ -599,12 +601,12 @@ ariba.Datatable = function() {
             
             // compute groups by table
             var footerHidden = false;
-            var groups = [];
+            var groups = new Object();
             for (var id in _awtTables) {
                 var info = this.infoForScrollableTable(id);
                 if (info) {
                     var containerId = (info.flexContainer) ? info.flexContainer.getAttribute("_cid") : "00";
-                    var list = (groups[containerId] || (groups[containerId] = []));
+                    var list = (groups[containerId] || (groups[containerId] = new Object()));
                     list[id] = info;
                     if (!footerHidden) {
                         Widgets.hideFloatingFooter();

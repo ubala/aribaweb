@@ -1,0 +1,22 @@
+<t:DataTable csvPath="BidData-Full.csv" displayGroup="$displayGroup"
+        enableScrolling="$true" showOptionsMenu="$true" title="Bid Data!" multiSelect="$true"
+        pivotLayout="$true" rowFields="$(Item, Region, Supplier)" columnFields="$(Year, Quarter)"
+        columnAttributes="$(Price)">
+
+    <t:Column key="Item" nowrap>$displayGroup.currentItem.Item</t:Column>
+    <t:Column key="Region"/>
+    <t:Column key="Year"/>
+    <t:Column key="Quarter"/>
+    <t:Column key="Supplier"/>
+    <t:Column key="Price">
+        <a:TextField value="$displayGroup.currentItem.Price" formatter="$formatters.money" size=9 style="text-align:right"/>
+    </t:Column>
+<!--
+    <t:Column key="Price" formatter="$formatters.money" align="right"/>
+-->
+    <t:Column key="Quantity" formatter="$formatters.integer" align="right"/>
+    <t:Column key="ExtendedPrice" label="E P" formatter="$formatters.money" align="right"/>
+    <t:Column key="Color" initiallyVisible="$false"/>
+    <t:Column key="Description" wantsSpan="$true">My Extended Price is $displayGroup.currentItem.ExtendedPrice</t:Column>
+    <t:Column key="Size"/>
+</t:DataTable>

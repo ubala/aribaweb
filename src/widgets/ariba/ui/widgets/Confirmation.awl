@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#27 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#28 $
     </Copyright>
 
     <Overview>
@@ -23,8 +23,7 @@
 
         There are two distinct patterns for the Confirmation widget.
 
-        -------------------------
-        Client Side Confirmation
+        1. Client Side Confirmation
         -------------------------
         For client side confirmations, the TextButton and the Confirmation widget are
         associated via the "confirmationId" binding on TextButton.  In this case, no java
@@ -33,68 +32,68 @@
         since the server side action is always defined by the buttons in the Confirmation
         widget.
 
-
-        NOTE: the TextButton MUST appear before the Confirmation in this usage.
-
+        **NOTE:** the TextButton MUST appear before the Confirmation in this usage.
 
         Client Side Example 1:
-        <a:SetValue exampleId="$requestContext.nextElementId"/>
-        <w:TextButton confirmationId="$exampleId">Client Side Confirmation</w:TextButton>
-        <w:Confirmation id="$exampleId" okAction="$okAction">
-            <a:Content name="header">\
-                <a:Image align="absmiddle" filename="sso/warning.gif"/>&nbsp;&nbsp;
-                <a:Local key="a001">Confirm Action</a:Local>
-            </a:Content>\
-            <a:Content name="content">\
-                <table>
-                    <tr>
-                        <td><a:Local key="a002">Are you sure?</a:Local></td>
-                    </tr>
-                </table>
-            </a:Content>\
-        </w:Confirmation>
+
+                <a:SetValue exampleId="$requestContext.nextElementId"/>
+                <w:TextButton confirmationId="$exampleId">Client Side Confirmation</w:TextButton>
+                <w:Confirmation id="$exampleId" okAction="$okAction">
+                    <a:Content name="header">\
+                        <a:Image align="absmiddle" filename="sso/warning.gif"/>&nbsp;&nbsp;
+                        <a:Local key="a001">Confirm Action</a:Local>
+                    </a:Content>\
+                    <a:Content name="content">\
+                        <table>
+                            <tr>
+                                <td><a:Local key="a002">Are you sure?</a:Local></td>
+                            </tr>
+                        </table>
+                    </a:Content>\
+                </w:Confirmation>
 
         In the example above, the default ok/cancel buttons are used.  In this case, the
         ok button will call the okAction binding defined on the Confirmation and the
         cancel button will simply close the confirmation (with no server side update).
 
         Client Side Example 2:
-        <a:SetValue exampleId="$requestContext.nextElementId"/>
-        <w:TextButton confirmationId="$exampleId">Client Side Confirmation (Custom buttons)</w:TextButton>
-        <w:Confirmation id="$exampleId">
-            <a:Content name="header">\
-                <a:Image align="absmiddle" filename="sso/warning.gif"/>&nbsp;&nbsp;
-                <a:Local key="a001">Confirm Action</a:Local>
-            </a:Content>\
-            <a:Content name="content">\
-                <table>
-                    <tr>
-                        <td><a:Local key="a002">Are you sure?</a:Local></td>
-                    </tr>
-                </table>
-            </a:Content>\
-            <a:Content name="buttons">
-                <table>
-                    <tr>
-                        <td>
-                            <w:TextButton onClick="ariba.Widgets.cancelConfirmation();">Custom Cancel</w:TextButton>\
-                        </td>
-                        <td>
-                            <w:TextButton action="$postConfirmHome">Go Home</w:TextButton>
-                        </td>
-                        <td>
-                            <w:TextButton action="$clientSideConfirmationRefresh">Redisplay Page</w:TextButton>
-                        </td>
-                    </tr>
-                </table>
-            </a:Content>
-        </w:Confirmation>
 
-        public AWResponseGenerating clientSideConfirmationRefresh ()
-        {
-            Confirmation.hideConfirmation(requestContext());
-            return null;
-        }
+                <a:SetValue exampleId="$requestContext.nextElementId"/>
+                <w:TextButton confirmationId="$exampleId">Client Side Confirmation (Custom buttons)</w:TextButton>
+                <w:Confirmation id="$exampleId">
+                    <a:Content name="header">\
+                        <a:Image align="absmiddle" filename="sso/warning.gif"/>&nbsp;&nbsp;
+                        <a:Local key="a001">Confirm Action</a:Local>
+                    </a:Content>\
+                    <a:Content name="content">\
+                        <table>
+                            <tr>
+                                <td><a:Local key="a002">Are you sure?</a:Local></td>
+                            </tr>
+                        </table>
+                    </a:Content>\
+                    <a:Content name="buttons">
+                        <table>
+                            <tr>
+                                <td>
+                                    <w:TextButton onClick="ariba.Widgets.cancelConfirmation();">Custom Cancel</w:TextButton>\
+                                </td>
+                                <td>
+                                    <w:TextButton action="$postConfirmHome">Go Home</w:TextButton>
+                                </td>
+                                <td>
+                                    <w:TextButton action="$clientSideConfirmationRefresh">Redisplay Page</w:TextButton>
+                                </td>
+                            </tr>
+                        </table>
+                    </a:Content>
+                </w:Confirmation>
+
+                public AWResponseGenerating clientSideConfirmationRefresh ()
+                {
+                    Confirmation.hideConfirmation(requestContext());
+                    return null;
+                }
 
         In the example above, the default ok/cancel buttons are used.  In this case, the
         ok button will call the okAction binding defined on the Confirmation and the
@@ -103,9 +102,9 @@
          Note: Using an action that returns $null will NOT close the confirmation.
                Instead an explicit call to Confirmation.hideConfirmation() is necessary.
                As shown by clientSideConfirmationRefresh.
-        -------------------------
-        Server Side Confirmation
-        -------------------------
+
+        2. Server Side Confirmation
+        ---------------------------
 
         In the second pattern, the display of the Confirmation is explicitly controlled on
         the server side in the "action" method of the TextButton (or other action firing
@@ -114,87 +113,92 @@
 
         Server Side Example 1:
 
-        <a:SetValue exampleId="$requestContext.nextElementId"/>
-        <w:TextButton action="$showConfirmationDiv">Server Side Confirmation</w:TextButton>
-        <w:Confirmation id="$exampleId" okAction="$okAction">
-            <a:Content name="header">Confirm Action</a:Content>\
-            <a:Content name="content">Are you really sure?</a:Content>\
-        </w:Confirmation>
+                <a:SetValue exampleId="$requestContext.nextElementId"/>
+                <w:TextButton action="$showConfirmationDiv">Server Side Confirmation</w:TextButton>
+                <w:Confirmation id="$exampleId" okAction="$okAction">
+                    <a:Content name="header">Confirm Action</a:Content>\
+                    <a:Content name="content">Are you really sure?</a:Content>\
+                </w:Confirmation>
 
-        public AWEncodedString _exampleId;
-        public AWResponseGenerating showConfirmationDiv ()
-        {
-            // make some decision here
-            if (reasonForShowingDiv) {
-                // show the confirmation
-                return Confirmation.showConfirmation(requestContext(), _exampleId);
-            }
-            else {
-                // show some page -- just returning current page in this example
-                return null;
-            }
-        }
+                public AWEncodedString _exampleId;
+                public AWResponseGenerating showConfirmationDiv ()
+                {
+                    // make some decision here
+                    if (reasonForShowingDiv) {
+                        // show the confirmation
+                        return Confirmation.showConfirmation(requestContext(), _exampleId);
+                    }
+                    else {
+                        // show some page -- just returning current page in this example
+                        return null;
+                    }
+                }
 
-        public AWResponseGenerating okAction ()
-        {
-            // hide the confirmation so if the current page is redisplayed the
-            // confirmation will be closed
-            Confirmation.hideConfirmation(requestContext());
-            // show some page -- just returning current page in this example
-            return null;
-        }
+                public AWResponseGenerating okAction ()
+                {
+                    // hide the confirmation so if the current page is redisplayed the
+                    // confirmation will be closed
+                    Confirmation.hideConfirmation(requestContext());
+                    // show some page -- just returning current page in this example
+                    return null;
+                }
 
         Server Side Example 2:
 
         The example below also has a custom button template, a javascript button, and
         examples of how to implement ok / cancel.
 
-        <a:SetValue exampleId="$requestContext.nextElementId"/>
-        <w:TextButton action="$showConfirmationDiv">Server Side Confirmation (Custom buttons)</w:TextButton>
-        <w:Confirmation id="$exampleId">
-            <a:Content name="header">Confirm Action</a:Content>\
-            <a:Content name="content">Are you really sure?</a:Content>\
-            <a:Content name="buttons">
-                <table>
-                    <tr>
-                        <td>
-                            <w:TextButton tabIndex="0" onClick="alert('javascript button');return false;" onKeyPress="alert('javascript button');return false;" buttonClass="btnSpecial1">JS Button</w:TextButton>
-                        </td>
-                        <td>
-                            <w:TextButton action="$cancelConfirmation">Cancel</w:TextButton>
-                        </td>
-                        <td>
-                            <w:TextButton action="$postConfirmHome">Go Home</w:TextButton>
-                        </td>
-                    </tr>
-                </table>
-            </a:Content>
-        </w:Confirmation>
+                <a:SetValue exampleId="$requestContext.nextElementId"/>
+                <w:TextButton action="$showConfirmationDiv">Server Side Confirmation (Custom buttons)</w:TextButton>
+                <w:Confirmation id="$exampleId">
+                    <a:Content name="header">Confirm Action</a:Content>\
+                    <a:Content name="content">Are you really sure?</a:Content>\
+                    <a:Content name="buttons">
+                        <table>
+                            <tr>
+                                <td>
+                                    <w:TextButton tabIndex="0"
+                                                  onClick="alert('javascript button');return false;"
+                                                  onKeyPress="alert('javascript button');return false;"
+                                                  buttonClass="btnSpecial1">
+                                        JS Button
+                                    </w:TextButton>
+                                </td>
+                                <td>
+                                    <w:TextButton action="$cancelConfirmation">Cancel</w:TextButton>
+                                </td>
+                                <td>
+                                    <w:TextButton action="$postConfirmHome">Go Home</w:TextButton>
+                                </td>
+                            </tr>
+                        </table>
+                    </a:Content>
+                </w:Confirmation>
 
-        public AWEncodedString _exampleId;
-        public AWResponseGenerating showConfirmationDiv ()
-        {
-            // make some decision here
-            if (reasonForShowingDiv) {
-                // show the confirmation
-                return Confirmation.showConfirmation(requestContext(), _exampleId);
-            }
-            else {
-                // show something else
-                return null;
-            }
-        }
+                public AWEncodedString _exampleId;
+                public AWResponseGenerating showConfirmationDiv ()
+                {
+                    // make some decision here
+                    if (reasonForShowingDiv) {
+                        // show the confirmation
+                        return Confirmation.showConfirmation(requestContext(), _exampleId);
+                    }
+                    else {
+                        // show something else
+                        return null;
+                    }
+                }
 
-        public AWResponseGenerating cancelConfirmation ()
-        {
-            return Confirmation.hideConfirmation(requestContext());
-        }
+                public AWResponseGenerating cancelConfirmation ()
+                {
+                    return Confirmation.hideConfirmation(requestContext());
+                }
 
-        public AWResponseGenerating postConfirmHome ()
-        {
-            Confirmation.hideConfirmation(requestContext());
-            return pageWithName("HomePage");
-        }
+                public AWResponseGenerating postConfirmHome ()
+                {
+                    Confirmation.hideConfirmation(requestContext());
+                    return pageWithName("HomePage");
+                }
 
     </Overview>
 

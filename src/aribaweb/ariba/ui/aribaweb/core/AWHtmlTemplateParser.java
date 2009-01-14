@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHtmlTemplateParser.java#44 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHtmlTemplateParser.java#47 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -24,7 +24,6 @@ import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWCaseInsensitiveHashtable;
-import ariba.ui.aribaweb.util.Log;
 import ariba.ui.aribaweb.util.AWNamespaceManager;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.FastStringBuffer;
@@ -67,6 +66,7 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
     private Map _containerClassesByName;
     private Map _tagNameAliases;
     private boolean _useXmlEscaping;
+    private int _embeddedKeyPathSuppressCount;
 
     // ** Thread Safety Considerations: this will lock at all the external entry points (ie all public methods) even though that's a huge scope.  Since in a deployed app, the parser is only run at warmup time, this large scope won't hurt things too much.
 
@@ -157,7 +157,9 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
                 elementClass = classForName(tagName);
             }
         }
-        if (elementClass == ObjectClass) {
+        if (elementClass != null && (elementClass == ObjectClass
+                || !AWUtil.classImplementsInterface(elementClass, AWCycleable.class)))
+        {
             elementClass = null;
         }
         return elementClass;
@@ -337,7 +339,7 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
                 int bareStringLength = bareString.length();
                 int currentStartIndex = 0;
                 int indexOfDollar = bareString.indexOf("$", currentStartIndex);
-                boolean allowEmbeddedKeyPaths = (_topOfStack == null || !(_topOfStack instanceof LiteralBody))
+                boolean allowEmbeddedKeyPaths = (_embeddedKeyPathSuppressCount == 0)
                         && (_component == null ? _application.useEmbeddedKeyPathes()
                                                : _component.allowEmbeddedKeyPaths());
                 while (indexOfDollar != -1 && allowEmbeddedKeyPaths) {
@@ -413,6 +415,7 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
         _nameStack.add(elementName);
         _containerStack.add(containableElement);
         setTopOfStack(containableElement);
+        if (containableElement instanceof SupressesEmbeddedKeyPaths) _embeddedKeyPathSuppressCount++;
     }
 
     private void popContainableElementWithName (String elementName)
@@ -428,7 +431,9 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
                            " templateName: \"" + _templateName + "\" lineNumber: "+ _currentLine + "</b></font><br/>");
                 break;
             }
-            _containerStack.remove(index);
+            Object oldTop = _containerStack.remove(index);
+            if (oldTop instanceof SupressesEmbeddedKeyPaths) _embeddedKeyPathSuppressCount--;
+
             _nameStack.remove(index);
             AWElementContaining newTopOfStack = (AWElementContaining)ListUtil.lastElement(_containerStack);
             setTopOfStack(newTopOfStack);
@@ -517,9 +522,18 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
         }
     }
 
+    // Embedded (inline) key paths) should be left alone
+    public interface SupressesEmbeddedKeyPaths {}
+
     // means body should be literal string (bare string) -- not interpreted
-    public interface LiteralBody {}
+    public interface LiteralBody extends SupressesEmbeddedKeyPaths {}
     public static class LiteralContainer extends AWGenericContainer implements LiteralBody {}
+
+    // Hook to filter tag contents during parse (before parsing body)
+    public interface FilterBody
+    {
+        public String filterBody (String bodyString);
+    }
 
     protected void endElement (String elementName)
     {
@@ -737,7 +751,7 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
         return commentBody;
     }
 
-    private void parseLiteralBody (String tagName)
+    private String matchBody (String tagName)
     {
         String bodyString = null;
         String closeTag = Fmt.S("</%s>", tagName);
@@ -747,11 +761,17 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
                 throw new AWGenericException("Error: missing closing element tag. Expected \"" + closeTag + "\" templateName: \"" +
                                              _templateName + "\" line:" + _currentLine);
             }
-            else {
-                bodyString = _templateString.substring(_currentIndex, closeTagIndex);
-                _currentLine += countCarriageReturns(bodyString);
-                _currentIndex = closeTagIndex;
-            }
+            bodyString = _templateString.substring(_currentIndex, closeTagIndex);
+        }
+        return bodyString;
+    }
+
+    private void parseLiteralBody (String tagName)
+    {
+        String bodyString = matchBody(tagName);
+        if (bodyString != null) {
+            _currentLine += countCarriageReturns(bodyString);
+            _currentIndex = _currentIndex + bodyString.length();
         }
         pushString(bodyString);
     }
@@ -937,8 +957,10 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
                             // non AW namespace could be (valid) XML reference
                             Assert.that((openTagName.indexOf(':') == -1), "Failed to resolve reference to %s in component %s",
                                     openTagName, _component);
-                            Assert.that(!Character.isUpperCase(openTagName.charAt(0)),
+                            if(!(!Character.isUpperCase(openTagName.charAt(0)) || _useXmlEscaping)) {
+                                Assert.that(false,
                                     "%s: Namespace-less reference to component '%s' in namespace aware package", _component, openTagName);
+                            }
                             resolvedName = openTagName;
                         }
                     }
@@ -959,6 +981,16 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
                         } else {
                             if (_topOfStack instanceof LiteralBody) {
                                 parseLiteralBody(openTagName);
+                            }
+                            else if (_topOfStack instanceof FilterBody)
+                            {
+                                // filter and insert filtered body
+                                String origBody = matchBody(openTagName);
+                                String newBody = ((FilterBody)_topOfStack).filterBody(origBody);
+                                _templateString = _templateString.substring(0, _currentIndex)
+                                        .concat(newBody)
+                                        .concat(_templateString.substring(_currentIndex + origBody.length()));
+                                _templateStringLength = _templateString.length();
                             }
                         }
                     }
@@ -984,6 +1016,8 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
             }
         }
         endDocument();
+        Assert.that(_embeddedKeyPathSuppressCount==0, "Unbalanced _embeddedKeyPathSuppressCount (== %s)",
+                _embeddedKeyPathSuppressCount);
     }
 
     private void resetParser ()
