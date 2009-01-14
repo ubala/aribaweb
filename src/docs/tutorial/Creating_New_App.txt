@@ -11,7 +11,7 @@ Before Getting Started
 
 2. Make sure that you have the bin directory of you aribaweb installation in your PATH.  e.g. if you unpacked AW in your home directory:
 
-        export PATH="~/aribaweb-0.8.3/bin:$PATH"
+        export PATH="~/aribaweb-0.8.4/bin:$PATH"
 
 
 Creating a Widgets App

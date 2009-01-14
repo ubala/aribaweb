@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/awreload/ariba/awreload/JavaReloadClassLoader.java#2 $
+    $Id: //ariba/platform/ui/awreload/ariba/awreload/JavaReloadClassLoader.java#3 $
 */
 package ariba.awreload;
 
@@ -44,15 +44,19 @@ import java.security.ProtectionDomain;
 
 public class JavaReloadClassLoader extends AWClassLoader.PairedFileLoader implements ClassFactory
 {
-    static String BuildRoot;
-    static String TimestampPath = StringUtil.strcat(BuildRoot, "/lastReload.touch");
-    static List<File> ClassRoots = new ArrayList();;
-    static boolean _IsAntBuild = false;
-    static long _LastClassCheck = 0;
+    String BuildRoot;
+    String TimestampPath = StringUtil.strcat(BuildRoot, "/lastReload.touch");
+    File[] _SingleRoot = null;
+    boolean _IsAntBuild = false;
+    long _LastClassCheck = 0;
+    WatchedDir _BuildRootDir = null;
 
     static {
         HotSwapFactory.instance();
+    }
 
+    public JavaReloadClassLoader ()
+    {
         // "CafePath" is an Ariba-ism
         String root = AWUtil.getenv("AW_RELOAD_CLASSES_ROOT");
         if (!StringUtil.nullOrEmptyString(root)) {
@@ -61,23 +65,24 @@ public class JavaReloadClassLoader extends AWClassLoader.PairedFileLoader implem
             root = AWUtil.getenv("ARIBA_BUILD_ROOT");
         }
         File buildRootDir = new File(root);
-        if (buildRootDir.exists()) {
-            File cafeDir = new File(buildRootDir, "classes/cafe/");
-            if (cafeDir.exists()) {
-                ClassRoots.add(cafeDir);
-                BuildRoot = cafeDir.toString();
-            }
-            else  {
-                BuildRoot = buildRootDir.toString();
-                for (File d : buildRootDir.listFiles()) {
-                    if (d.exists() && d.isDirectory()) ClassRoots.add(d);
-                }
-            }
+        File cafeDir = new File(buildRootDir, "classes/cafe/");
+        if (cafeDir.exists()) {
+            _SingleRoot = new File[] { cafeDir };
+            BuildRoot = cafeDir.toString();
+        }
+        else  {
+            BuildRoot = buildRootDir.toString();
+            _BuildRootDir = new WatchedDir(buildRootDir, DirectoryFilter);
         }
 
         // Count as changed only files updated since now...
         // touch(new File(TimestampPath));
         _LastClassCheck = System.currentTimeMillis();
+    }
+
+    File[] getClassRoots ()
+    {
+        return (_SingleRoot != null) ? _SingleRoot : _BuildRootDir.files();
     }
 
 
@@ -189,6 +194,10 @@ public class JavaReloadClassLoader extends AWClassLoader.PairedFileLoader implem
     protected void compileSourceFromResource (String className, AWResource sourceResource)
     {
         Compiler.compile(sourceResource);
+
+        // in case we haven't seen a class in this build directory before, find it now
+        File classFile = getClassFile(className);
+        if (classFile != null) noteClassDirectory(classFile.getParentFile());
     }
 
     protected void reloadModifiedClasses ()
@@ -219,6 +228,9 @@ public class JavaReloadClassLoader extends AWClassLoader.PairedFileLoader implem
                 // we may have compiled a class into the build root, but the build root
                 // could be outside the class path
 
+                // if file is a modified version, don't try again here
+                if (!name.equals(Factor.getOriginalClassName(name))) continue;
+                
                 // FIXME: we should find another class in this ones package to use
                 // for the protection domain!
                 ProtectionDomain domain = AWConcreteApplication.sharedInstance().getClass().getProtectionDomain();
@@ -261,47 +273,58 @@ public class JavaReloadClassLoader extends AWClassLoader.PairedFileLoader implem
         }
     }
 
-    static class ClassDir
+    static class WatchedDir
     {
         File _dir;
-        File[] _classFiles;
+        File[] _files;
         long _lastCheck;
+        FilenameFilter _filter;
 
-        ClassDir (File dir)
+        WatchedDir(File dir, FilenameFilter filter)
         {
             _dir = dir;
+            _filter = filter;
         }
 
-        File[] classFiles ()
+        File[] files()
         {
-            if (_dir.lastModified() > _lastCheck || _classFiles == null) {
-                _classFiles = _dir.listFiles(new FilenameFilter() {
-                    public boolean accept(File file, String s)
-                    {
-                        return s.endsWith(".class");
-                    }
-                });
+            if ((_dir.lastModified() > _lastCheck || _files == null)) {
+                _files = _dir.exists() ? _dir.listFiles(_filter) : new File[] {};
 
                 _lastCheck = System.currentTimeMillis();
             }
 
-            return _classFiles;
+            return _files;
         }
 
         void addFilesModifiedSince (long time, List<File> list)
         {
-            for (File f: classFiles()) {
+            for (File f: files()) {
                 if (f.lastModified() > time) list.add(f);
             }
         }
     }
 
+    static FilenameFilter ClassFileFilter = new FilenameFilter() {
+            public boolean accept(File file, String s)
+            {
+                return s.endsWith(".class");
+            }
+        };
+
+    static FilenameFilter DirectoryFilter = new FilenameFilter() {
+            public boolean accept(File file, String s)
+            {
+                return file.isDirectory();
+            }
+        };
+
     GrowOnlyHashtable _ClassDirsByPath = new GrowOnlyHashtable();
     protected void noteClassDirectory (File dir)
     {
-        ClassDir classDir = (ClassDir)_ClassDirsByPath.get(dir.getPath());
+        WatchedDir classDir = (WatchedDir)_ClassDirsByPath.get(dir.getPath());
         if (classDir != null) return;
-        classDir = new ClassDir(dir);
+        classDir = new WatchedDir(dir, ClassFileFilter);
         _ClassDirsByPath.put(dir.getPath(), classDir);
     }
 
@@ -309,7 +332,7 @@ public class JavaReloadClassLoader extends AWClassLoader.PairedFileLoader implem
     {
         List<File> list = new ArrayList();
         for (Object v : _ClassDirsByPath.values()) {
-            ((ClassDir)v).addFilesModifiedSince(time, list);
+            ((WatchedDir)v).addFilesModifiedSince(time, list);
         }
         return list;
     }
@@ -336,7 +359,7 @@ public class JavaReloadClassLoader extends AWClassLoader.PairedFileLoader implem
     public File getClassFile (String className)
     {
         String relativePath = className.replace('.','/') + ".class";
-        for (File dir : ClassRoots) {
+        for (File dir : getClassRoots()) {
             if (dir.isDirectory()) {
                 File file = new File(dir, relativePath);
                 if (file.exists()) return file;
@@ -348,7 +371,7 @@ public class JavaReloadClassLoader extends AWClassLoader.PairedFileLoader implem
     public File getClassRootForClass (String className)
     {
         String relativePath = className.replace('.','/') + ".class";
-        for (File dir : ClassRoots) {
+        for (File dir : getClassRoots()) {
             if (dir.isDirectory()) {
                 File file = new File(dir, relativePath);
                 if (file.exists()) return dir;
@@ -392,7 +415,7 @@ public class JavaReloadClassLoader extends AWClassLoader.PairedFileLoader implem
     {
         try {
             String classFilePath = classFile.getCanonicalPath();
-            for (File d : ClassRoots) {
+            for (File d : getClassRoots()) {
                 String rootPath = d.getCanonicalPath();
                 if (classFilePath.startsWith(rootPath)) {
                     String name = classFilePath.substring(rootPath.length()).replace('\\','.').replace('/','.');

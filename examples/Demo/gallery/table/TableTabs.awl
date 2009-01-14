@@ -1,40 +1,25 @@
 <w:BasicPageWrapper hasForm="$true">
-<w:TabSet actionMenuLabel="Actions" actionMenuId="TabMenu">
-    <w:Tab label="Simple Table">
-        <Include name="SimpleTable"/>
-    </w:Tab>
-    <w:Tab label="Advanced Table">
-        <Include name="AdvancedTable"/>
-    </w:Tab>
-    <w:Tab label="Grouping Table">
-        <Include name="GroupingTable"/>
-    </w:Tab>
-    <w:Tab label="Outline Table">
-        <Include name="OutlineTable"/>
-    </w:Tab>
-    <w:Tab label="XML Table">
-        <Include name="XMLDataTable"/>
-    </w:Tab>
-    <w:Tab label="Remote Table">
-        <Include name="MetaContentTable"/>
-    </w:Tab>
-    <w:Tab label="Explorer">
-        <Include name="ExplorerPage"/>
-    </w:Tab>
-</w:TabSet>
-<w:PopupMenu menuId="TabMenu">
-    <w:PopupMenuHeading showSeparator="$false">\
-        Create New Object\
-    </w:PopupMenuHeading>
-
-    <w:PopupMenuItem action="$null" showBullet="$false" disabled="$false">\
-            New Workspace\
-    </w:PopupMenuItem>
-    <w:PopupMenuItem action="$null" showBullet="$false" disabled="$false">\
-            New Document\
-    </w:PopupMenuItem>
-    <w:PopupMenuItem action="$null" showBullet="$false" disabled="$false">\
-            New RFx\
-    </w:PopupMenuItem>    
-</w:PopupMenu>
+    <w:TabSet>
+        <w:Tab label="Simple Table">
+            <a:IncludeComponent name="SimpleTable"/>
+        </w:Tab>
+        <w:Tab label="Advanced Table">
+            <a:IncludeComponent name="AdvancedTable"/>
+        </w:Tab>
+        <w:Tab label="Grouping Table">
+            <a:IncludeComponent name="GroupingTable"/>
+        </w:Tab>
+        <w:Tab label="Outline Table">
+            <a:IncludeComponent name="OutlineTable"/>
+        </w:Tab>
+        <w:Tab label="XML Table">
+            <a:IncludeComponent name="XMLDataTable"/>
+        </w:Tab>
+        <w:Tab label="Remote Table">
+            <a:IncludeComponent name="MetaContentTable"/>
+        </w:Tab>
+        <w:Tab label="Explorer">
+            <a:IncludeComponent name="ExplorerPage"/>
+        </w:Tab>
+    </w:TabSet>
 </w:BasicPageWrapper>

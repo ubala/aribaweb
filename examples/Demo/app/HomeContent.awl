@@ -38,6 +38,14 @@
     and Component Inspector will automatically focus on that path in the component tree.
     <br/><br/>
 
+    <h1>Other Example Apps</h1>
+    In addition to the Demo app, a few other small sample apps are bundled with this
+    distribution.  Check out <b><a href="/GuestBook/AribaWeb">Guest Book</a></b>,
+    a trivial widgets-only app, and <b><a href="/MetaDB/AribaWeb">MetaDB</a></b>,
+    which demonstrates how the MetaUI framework can create a complete database application
+    from just a set of domain POJOs.
+    <br/><br/>
+
     <h1>Creating your own Application</h1>
     Ready to get started building an application of your own?  Check out "Creating_New_App"
     in the doc/Tutorials folder in your AribaWeb installation.

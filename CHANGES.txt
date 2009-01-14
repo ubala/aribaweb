@@ -1,7 +1,7 @@
 CHANGES.txt
 
 
-New in Version 0.8.3 (8/15/2008)
+New in Version 0.8.4 (9/1/2008)
 ---------------------------------
 - Documentation
     - JavaDoc, including inlined AWApi (binding doc)
