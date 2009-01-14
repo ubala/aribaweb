@@ -33,30 +33,19 @@ information can be extracted.
 */
 public class WrapperRuntimeException extends RuntimeException
 {
-    public WrapperRuntimeException (Exception e)
+    public WrapperRuntimeException (Throwable e)
     {
-        super();
-        if (e == null) {
-            return;
-        }
-        if (e instanceof WrapperRuntimeException) {
-            WrapperRuntimeException wrapper = (WrapperRuntimeException)e;
-            Exception cause = wrapper.originalException();
-            if (cause == null) {
-                initCause(e);
-            }
-            else {
-                initCause(cause);
-            }
-        }
-        else {
-            initCause(e);
-        }
+        super(e);
     }
     
     public WrapperRuntimeException (String message)
     {
         super(message);
+    }
+
+    public WrapperRuntimeException (String message, Throwable e)
+    {
+        super(message, e);
     }
 
     /**
@@ -94,7 +83,16 @@ public class WrapperRuntimeException extends RuntimeException
         }
         return null;
     }
-    
+
+    public Throwable originalCause ()
+    {
+        Throwable last = this;
+        while (last.getCause() != null) {
+            last = last.getCause();
+        }
+        return last;
+    }
+
     /**
     Provides access to the original exception, if one exists.
 
@@ -103,64 +101,7 @@ public class WrapperRuntimeException extends RuntimeException
     */
     public Exception originalException ()
     {
-        Throwable cause = getCause();
-        if (cause instanceof Exception) {
-            return (Exception)cause;
-        }
-        return null;
-    }
-
-    /**
-    Cover method for superclass' implementation.  If this is a wrapper
-    for a caught-exception, this forwards to the caught-exception, else it
-    invokes super's implementation.
-
-    @return see Throwable
-    */
-    public void printStackTrace ()
-    {
-        Exception cause = originalException();
-        if (cause != null) {
-            cause.printStackTrace();
-        }
-        else {
-            super.printStackTrace();
-        }
-    }
-
-    /**
-    Cover method for superclass' implementation.  If this is a wrapper
-    for a caught-exception, this forwards to the caught-exception, else
-    it invokes super's implementation.
-
-    @return see Throwable
-    */
-    public void printStackTrace (PrintStream printStream)
-    {
-        Exception cause = originalException();
-        if (cause != null) {
-            cause.printStackTrace(printStream);
-        }
-        else {
-            super.printStackTrace(printStream);
-        }
-    }
-
-    /**
-    Cover method for superclass' implementation.  If this is a wrapper
-    for a caught-exception, this forwards to the caught-exception, else
-    it invokes super's implementation.
-
-    @return see Throwable
-    */
-    public void printStackTrace (PrintWriter printWriter)
-    {
-        Exception cause = originalException();
-        if (cause != null) {
-            cause.printStackTrace(printWriter);
-        }
-        else {
-            super.printStackTrace(printWriter);
-        }
+        Throwable cause = originalCause();
+        return (cause instanceof Exception) ? (Exception)cause : null;
     }
 }

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.awl#3 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.awl#4 $
     </Copyright>
 
     <Overview>
@@ -111,7 +111,7 @@
         <a:String value="$displayValue" formatter="$formatter"/>\
     </w:PopupControl>
 <a:Else isEqual="$type.name" value="Chooser"/>
-    <w:Chooser selectionSource="$chooserSource" state="$chooserState" formatter="$formatter"
+    <w:Chooser selectionSource="$chooserSource" state="$chooserState" formatter="$chooserFormatter"
                multiSelect="$isMulti" disabled="$^disabled" size="$^size"
                selection="$selectedObjects"
                noSelectionString="$^noSelectionString:$[](no selection)"

@@ -12,19 +12,21 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#5 $
 */
 
 package ariba.ui.aribaweb.html;
 
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWRequestContext;
+import ariba.ui.aribaweb.core.AWSession;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWFileData;
 import ariba.ui.aribaweb.util.AWGenericException;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Locale;
 
 /**
  * Because applyValues is overridden and super.applyValues is NOT
@@ -78,10 +80,13 @@ public final class AWFileUploadInternals extends AWComponent
         // if there is a maxLength binding, then throw this value into the HttpSession
         // to allow it be used by the request handler during Mime parsing.  Note that we
         // us the HttpSession so we avoid any issues with locking the AWSession.
+        AWSession session = session();
         if (parent().hasBinding(BindingNames.maxLength)) {
             Integer maxLength = new Integer(intValueForBinding(BindingNames.maxLength));
-            session().httpSession().setAttribute(fileUploadName(),maxLength);
+            session.httpSession().setAttribute(fileUploadName(),maxLength);
         }
+        // stash the user's preferred locale for use to construct localized messages
+        session.httpSession().setAttribute(Locale.class.getName(), session.preferredLocale());
     }
 
     public void applyValues(AWRequestContext requestContext, AWComponent component)

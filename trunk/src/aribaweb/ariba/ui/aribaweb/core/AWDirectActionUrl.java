@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionUrl.java#31 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionUrl.java#32 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -470,8 +470,11 @@ public final class AWDirectActionUrl extends AWBaseObject
 
     public static String fullAdaptorUrlForRequestContext (AWRequestContext requestContext)
     {
+        boolean useSecureScheme = true;
+        AWRequest request = requestContext.request();
+        if (request != null) useSecureScheme = request.isSecureScheme();
         return fullAdaptorUrlForRequestContext(requestContext,
-                                               requestContext.request().isSecureScheme());
+                                               useSecureScheme);
     }
 
     /*  --------------

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#115 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#117 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -886,14 +886,8 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     actionResults = _currentPage.invokeAction();
                 }
             }
-            catch (AWGenericException e)
-            {
-                String message = currentComponentPath();
-                e.addMessage(message);
-                throw e;
-            }
             catch (RuntimeException runtimeException) {
-                String message = currentComponentPath();
+                String message = "-- Component Path:\n" + currentComponentPath();
                 throw AWGenericException.augmentedExceptionWithMessage(message, runtimeException);
             }
             finally {
@@ -1586,6 +1580,18 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     public boolean fullPageRefreshRequired ()
     {
         return _fullRefreshRequired;
+    }
+
+    static final String _ForceReRender = "RR_FoRR";
+    public void forceRerender ()
+    {
+        forceFullPageRefresh();
+        put(_ForceReRender, true);
+    }
+
+    public boolean forceRerenderRequired ()
+    {
+        return fullPageRefreshRequired() && get(_ForceReRender) != null;
     }
 
     public boolean allowIncrementalUpdateApppend ()

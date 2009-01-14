@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/DemoShell.java#42 $
+    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/DemoShell.java#44 $
 */
 package ariba.ui.demoshell;
 
@@ -80,10 +80,6 @@ public class DemoShell
         if (_startPage != null) {
             _startPageIsMain = false;
         }
-
-        Log.demoshell.setLevel(ariba.util.log.Log.DebugLevel);
-        ariba.ui.meta.core.Log.meta.setLevel(ariba.util.log.Log.DebugLevel);
-        ariba.ui.meta.core.Log.meta_detail.setLevel(ariba.util.log.Log.DebugLevel);
 
         _sharedInstance = this; // questionable...  but nestedreport relies on this side-effect
 
@@ -248,9 +244,13 @@ public class DemoShell
             }
 
             // register the demo root as a site root
-            String siteUrl = factory.siteRelativeUrlForFile(new File(siteRoot));
+            File siteRootDirectory = new File(siteRoot);
+            String siteUrl = factory.siteRelativeUrlForFile(siteRootDirectory);
+            if (new File(siteRootDirectory, "resources").exists()) {
+                application.resourceManager().registerPackageName("resources");
+            }
             Log.demoshell.debug("Registering site directory: %s -> %s", siteRoot, siteUrl);
-            application.resourceManager().registerResourceDirectory(siteRoot, siteUrl, false);
+            application.resourceManager().registerResourceDirectory(siteRoot, siteUrl, true);
 
             // if they have a brand directory, register it
             File brandDir = new File(siteRoot, "branding");

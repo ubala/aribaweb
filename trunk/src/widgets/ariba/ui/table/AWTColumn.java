@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTColumn.java#36 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTColumn.java#37 $
 */
 package ariba.ui.table;
 
@@ -220,10 +220,16 @@ public class AWTColumn extends AWTDataTable.Column
         if (key == null) key = keyPathString();
         if (key == null) return null;
         AWTSortOrdering ordering = AWTSortOrdering.sortOrderingWithKey(key, AWTSortOrdering.CompareCaseInsensitiveAscending);
-        Object formatter = table.valueForBinding(_formatterBinding);
-        if (formatter != null && formatter instanceof Compare) ordering.setComparator((Compare)formatter);
+        prepareSortOrdering(table, ordering);
         return ordering;
     }
+
+    public void prepareSortOrdering (AWTDataTable table, AWTSortOrdering ordering)
+    {
+        Object formatter = table.valueForBinding(_formatterBinding);
+        if (formatter != null && formatter instanceof Compare) ordering.setComparator((Compare)formatter);
+    }
+
 
     public Object valueForRow (Object target)
     {

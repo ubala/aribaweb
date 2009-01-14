@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#101 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#104 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -50,6 +50,9 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
+import java.net.URL;
+import java.net.MalformedURLException;
 import javax.servlet.http.HttpSession;
 
 abstract public class AWConcreteApplication
@@ -117,6 +120,7 @@ abstract public class AWConcreteApplication
     // session status
     private AWSessionStatusManager _sessionStatusManager;
     private AWSessionMonitor _sessionMonitor;
+    boolean _didCompleteInit;
 
     // ** Thread Safety Considerations: We need to serialize access to the _componentDefinitionHashtable.
     // The sessionStore offers its own thread saftey as does the timeout manager.
@@ -152,8 +156,34 @@ abstract public class AWConcreteApplication
                 throw new AWGenericException(illegalAccessException);
             }
             application.init();
+            application._didCompleteInit = true;
+            for (DidInitCallback cb : application._PostInitCallbacks) {
+                cb.applicationDidInit(application);
+            }
+            application._PostInitCallbacks = null;
         }
         return application;
+    }
+
+    public interface DidInitCallback {
+        void applicationDidInit (AWConcreteApplication application);
+    }
+
+    List<DidInitCallback> _PostInitCallbacks = ListUtil.list();
+
+    public boolean didCompleteInit ()
+    {
+        return _didCompleteInit;
+    }
+
+    public void registerDidInitCallback (DidInitCallback callback)
+    {
+        if (_didCompleteInit) {
+            callback.applicationDidInit(this);
+        }
+        else {
+            _PostInitCallbacks.add(callback);
+        }
     }
 
     abstract protected String initAdaptorUrl ();
@@ -306,15 +336,15 @@ abstract public class AWConcreteApplication
        read a csv file, and split the contents into an array of String.
        These Strings are trimed and converted into lower case.
     */
-    private static String[] readFileToStrings (File file)
+    private static String[] readFileToStrings (URL url)
     {
         ContentCollector collector = new ContentCollector();
         CSVReader reader = new CSVReader(collector);
         try {
-            reader.read(file, "8859_1");
+            reader.read(url, "8859_1");
         }
         catch (IOException ioe) {
-            Log.aribaweb.warn(Fmt.S("Failed to read from %s", file));
+            Log.aribaweb.warn(Fmt.S("Failed to read from %s", url));
             return null;
         }
         return collector.getResult();
@@ -326,27 +356,35 @@ abstract public class AWConcreteApplication
     /**
        load safe tags and safe attributes definitions
       */
-    private static void loadSafeHtmlConfig ()
+
+    private static URL urlForResource (String relativePath, String fileName)
     {
         File rootDir = SystemUtil.getSystemDirectory();
-        if (rootDir != null && rootDir.isDirectory()) {
-            File configDir = new File(rootDir, "resource/html/");
-            if (configDir.isDirectory()) {
-                String[] safeTags = new String[0];
-                String[] safeAttrs = new String[0];
-                File tagsFile = new File(configDir, SAFE_TAGS_FILE);
-                if (tagsFile.canRead()) {
-                    safeTags = readFileToStrings(tagsFile);
+        File dir = new File(rootDir, relativePath);
+        if (dir.isDirectory()) {
+            File tagsFile = new File(dir, SAFE_TAGS_FILE);
+            if (tagsFile.canRead()) {
+                try {
+                    return dir.toURL();
+                } catch (MalformedURLException e) {
+                    // ignore
                 }
-                File attrsFile = new File(configDir, SAFE_ATTRS_FILE);
-                if (attrsFile.canRead()) {
-                    safeAttrs = readFileToStrings(attrsFile);
-                }
-                HTML.setSafeConfig(safeTags, safeAttrs);
             }
-            else {
-                Log.aribaweb.warn(Fmt.S("Config directory for HTML %s does not exist.", configDir));
-            }
+        }
+        return Thread.currentThread().getContextClassLoader().getResource(new File(relativePath,fileName).getPath());
+    }
+    private static void loadSafeHtmlConfig ()
+    {
+        URL safeAttrsUrl = urlForResource("resource/html/", SAFE_ATTRS_FILE);
+        URL safeTagsUrl = urlForResource("resource/html/", SAFE_TAGS_FILE);
+
+        if (safeAttrsUrl != null || safeTagsUrl != null) {
+            String[] safeTags = (safeTagsUrl != null) ? readFileToStrings(safeTagsUrl) : new String[0];
+            String[] safeAttrs = (safeAttrsUrl != null) ? readFileToStrings(safeAttrsUrl) : new String[0];
+            HTML.setSafeConfig(safeTags, safeAttrs);
+        }
+        else {
+            Log.aribaweb.warn("Failed to load safeHtmlConfig");
         }
     }
 
@@ -452,14 +490,26 @@ abstract public class AWConcreteApplication
         return newComponent;
     }
 
+    protected String _mainPageName = "Main";
+
+    public void setMainPageName (String name)
+    {
+        _mainPageName = name;
+    }
+
     public String mainPageName ()
     {
-        return "Main";
+        return _mainPageName;
     }
 
     public AWResponseGenerating mainPage (AWRequestContext requestContext)
     {
-        return createPageWithName(mainPageName(), requestContext);
+        AWResponseGenerating page = createPageWithName(mainPageName(), requestContext);
+        
+        if (page instanceof AWResponseGenerating.ResponseSubstitution) {
+            page = ((AWResponseGenerating.ResponseSubstitution)page).replacementResponse();
+        }
+        return page;
     }
 
     //////////////////////
@@ -484,6 +534,10 @@ abstract public class AWConcreteApplication
             throw new AWGenericException(message, exception);
         }
         newSession.init(this, requestContext);
+
+        // default the timezone
+        if (newSession.clientTimeZone() == null) newSession.setClientTimeZone(TimeZone.getDefault());
+
         return newSession;
     }
 

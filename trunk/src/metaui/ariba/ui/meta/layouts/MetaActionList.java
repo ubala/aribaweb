@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.java#6 $
 */
 package ariba.ui.meta.layouts;
 
@@ -36,14 +36,11 @@ public class MetaActionList extends AWComponent
     public Object _menuId;
     boolean _isGlobal;
     
-    /////////////
-    // Awake
-    /////////////
     protected void awake()
     {
         super.awake();
         Context context = MetaContext.peekContext(this);
-        _isGlobal = context == null || context.propertyForKey(UIMeta.KeyClass) == null;
+        _isGlobal = context == null || context.values().get(UIMeta.KeyClass) == null;
     }
 
     protected void sleep()

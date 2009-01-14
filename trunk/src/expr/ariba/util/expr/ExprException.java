@@ -43,12 +43,6 @@ public class ExprException extends Exception
        */
     private Evaluation  evaluation;
 
-      /**
-       * Why this exception was thrown.
-       * @serial
-       */
-    private Throwable reason;
-
       /** Constructs an ExprException with no message or encapsulated exception. */
     public ExprException()
     {
@@ -71,17 +65,7 @@ public class ExprException extends Exception
        */
     public ExprException( String msg, Throwable reason )
     {
-        super( msg );
-        this.reason = reason;
-    }
-
-      /**
-       * Returns the encapsulated exception, or null if there is none.
-       * @return the encapsulated exception
-       */
-    public Throwable getReason()
-    {
-        return reason;
+        super( msg, reason );
     }
 
     /**
@@ -101,58 +85,4 @@ public class ExprException extends Exception
         evaluation = value;
     }
 
-      /**
-       * Returns a string representation of this exception.
-       * @return a string representation of this exception
-       */
-    public String toString()
-    {
-        if ( reason == null )
-            return super.toString();
-        return super.toString() + " [" + reason + "]";
-    }
-
-
-      /**
-       * Prints the stack trace for this (and possibly the encapsulated) exception on
-       * System.err.
-       */
-    public void printStackTrace()
-    {
-        printStackTrace( System.err );
-    }
-
-      /**
-       * Prints the stack trace for this (and possibly the encapsulated) exception on the
-       * given print stream.
-       */
-    public void printStackTrace(java.io.PrintStream s)
-    {
-	synchronized (s)
-          {
-            super.printStackTrace(s);
-            if ( reason != null ) {
-                s.println(  "/-- Encapsulated exception ------------\\" );
-                reason.printStackTrace(s);
-                s.println( "\\--------------------------------------/" );
-            }
-          }
-    }
-
-      /**
-       * Prints the stack trace for this (and possibly the encapsulated) exception on the
-       * given print writer.
-       */
-    public void printStackTrace(java.io.PrintWriter s)
-    {
-	synchronized (s)
-          {
-            super.printStackTrace(s);
-            if ( reason != null ) {
-                s.println(  "/-- Encapsulated exception ------------\\" );
-                reason.printStackTrace(s);
-                s.println( "\\--------------------------------------/" );
-            }
-          }
-    }
 }

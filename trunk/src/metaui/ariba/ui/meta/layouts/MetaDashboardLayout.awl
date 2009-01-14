@@ -4,7 +4,7 @@
         <!--- Imagine Something useful here -->
     </td>
 </tr></table>
-<table cellspacing="0"><tr>
+<table cellspacing="0" width="100%"><tr>
     <td class="dbTOC">\
         <div class="flexContainer">\
             <div class="dbTOC">\
@@ -35,12 +35,14 @@
 <a:Block name="portlets">\
     <a:Environment portletWidth="$^portletWidth">\
         <a:For list="$^list" item="$layout">
-            <m:Context restoreActivation="$layout.activation">
-                <a:IncludeComponent name="$layout.properties.wrapperComponent:PortletWrapper"
-                       title="$label"
-                       dragAction='${ariba.ui.widgets.AribaPageContent.setMessage("Dragging portlets not fully implemented yet -- check back later!", session()); null}'>
-                    <m:IncludeComponent awpropertyMap="$propertyMap"/>\
-                </a:IncludeComponent>
+            <m:Context layout="$layout.name">
+                <a:Form omitTags="$!layout.properties.needsForm">
+                    <a:IncludeComponent name="$layout.properties.wrapperComponent:PortletWrapper"
+                           title="$label"
+                           dragAction='${ariba.ui.widgets.AribaPageContent.setMessage("Dragging portlets not fully implemented yet -- check back later!", session()); null}'>
+                        <m:IncludeComponent/>\
+                    </a:IncludeComponent>
+                </a:Form>
             </m:Context>
         </a:For>
     </a:Environment>

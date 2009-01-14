@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWGenericException.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWGenericException.java#9 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -61,19 +61,19 @@ public class AWGenericException extends WrapperRuntimeException
         _additionalMessage = null;
     }
 
-    public AWGenericException (Exception exception)
+    public AWGenericException (Throwable exception)
     {
         super(exception);
         _additionalMessage = null;
     }
 
-    public AWGenericException (String message, Exception exception)
+    public AWGenericException (String message, Throwable exception)
     {
-        super(exception);
-        _additionalMessage = message;
+        super(message, exception);
+        // _additionalMessage = message;
     }
 
-    public static AWGenericException augmentedExceptionWithMessage (String message, Exception exception)
+    public static AWGenericException augmentedExceptionWithMessage (String message, Throwable exception)
     {
         if (exception instanceof AWGenericException) {
             ((AWGenericException)exception).addMessage(message);
@@ -90,7 +90,8 @@ public class AWGenericException extends WrapperRuntimeException
     public void addMessage (String message)
     {
         if (_additionalMessage != null) {
-            message = StringUtil.strcat(_additionalMessage, "\n",message);
+            String sep = (_additionalMessage.endsWith("\n")) ? "\n" : "\n\n";
+            message = StringUtil.strcat(_additionalMessage, sep, message);
         }
         _additionalMessage = message;
     }
@@ -121,16 +122,14 @@ public class AWGenericException extends WrapperRuntimeException
             return;
         }
 
-        Throwable curr = getCause() != null ? getCause() : this;
-
-        printWriter.println(curr);
+        printWriter.println(this);
 
         if (_additionalMessage != null) {
             printWriter.println(_additionalMessage);
         }
         printWriter.println();
         
-        StackTraceElement[] trace = curr.getStackTrace();
+        StackTraceElement[] trace = getStackTrace();
         int pos = 0, ilimit = trace.length - 3;
         // We have componentStack entries of templates for ComponentReference and IncludeContent elements
         for (int i = 0; i < trace.length; i++) {
@@ -177,37 +176,38 @@ public class AWGenericException extends WrapperRuntimeException
             }
         }
 
-        printCause(printWriter, curr);
+        Throwable cause = getCause();
+        if (cause != null) printAsCause(printWriter, cause, trace);
     }
     
-    private void printCause (PrintWriter printWriter, Throwable curr)
+    static private void printAsCause (PrintWriter printWriter, Throwable cause, StackTraceElement[] causedTrace)
     {
-        if (curr.getCause() != null) {
-            StackTraceElement[] currTrace = curr.getStackTrace();
-            StackTraceElement[] causedTrace = curr.getCause().getStackTrace();
-            int m = currTrace.length - 1, n = causedTrace.length - 1;
-            while (m >= 0 && n >= 0 && currTrace[m].equals(causedTrace[n])) {
-                m--; n--;
-            }
-
-            int framesInCommon = causedTrace.length - 1 - n;
-
-            printWriter.println("\nCaused by: " + curr.getCause());
-            for (int i = 0; i <= m; i++)
-                printWriter.println("\tat " + causedTrace[i]);
-            if (framesInCommon != 0) {
-                printWriter.println("\t...  more");
-            }
-
-            printCause(printWriter, curr.getCause());
+        StackTraceElement[] trace = cause.getStackTrace();
+        int m = trace.length - 1, n = causedTrace.length - 1;
+        while (m >= 0 && n >= 0 && trace[m].equals(causedTrace[n])) {
+            m--; n--;
         }
+
+        int framesInCommon = causedTrace.length - 1 - n;
+
+        printWriter.println("\nCaused by: " + cause);
+        for (int i = 0; i <= m; i++)
+            printWriter.println("\tat " + trace[i]);
+        if (framesInCommon != 0) {
+            printWriter.println("\t... " + framesInCommon + " more");
+        }
+
+        Throwable causeCause = cause.getCause();
+        if (causeCause != null) printAsCause(printWriter, causeCause, trace);
     }
 
     public static class ParsedException
     {
         public String title;
         public String additionalMessage;
-        public List <FrameInfo>frames;
+        public List <FrameInfo>frames = new ArrayList();
+
+        ParsedException (String title) { this.title = title; }
     }
 
     public static class FrameInfo
@@ -216,45 +216,57 @@ public class AWGenericException extends WrapperRuntimeException
     }
 
     private static final Pattern _FramePattern
-            = Pattern.compile("^\\s*at\\s+([\\w\\.\\$\\(\\)]+)\\s*\\(([\\w\\.\\:]+)\\)(?:\\<([\\w\\.\\:]+)\\>)?");
+            = Pattern.compile("^\\s*at\\s+([\\w\\.\\$\\:\\(\\)]+)\\s*\\(([\\w\\.\\:\\s]+)\\)(?:\\<([\\w\\.\\:]+)\\>)?");
     private static final Pattern _PackageClassMethodPattern
             = Pattern.compile("(.+\\.)([\\w\\$\\(\\)]+\\.\\w+)");
-
-    public static ParsedException parseException (Throwable e)
+    private static final Pattern _MorePattern
+            = Pattern.compile("^\\s*\\.+\\s+\\d+\\s+more");
+    private static String _CausedByPrefix = "Caused by: ";
+    public static List<ParsedException> parseException (Throwable e)
     {
         StringWriter stringWriter = new StringWriter();
         e.printStackTrace(new PrintWriter(stringWriter));
         String string = stringWriter.toString();
         Scanner scanner = new Scanner(string);
-        ParsedException parse = new ParsedException();
-        parse.frames = new ArrayList();
 
-        parse.title = scanner.nextLine();
-        StringBuffer addMsgBuf = new StringBuffer();
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-            Matcher m = _FramePattern.matcher(line);
-            if (m.matches()) {
-                FrameInfo fi = new FrameInfo();
-                fi.method = m.group(1);
-                fi.file = m.group(2);
-                fi.template = m.group(3);
-                
-                // see if we can move the package to the file
-                m = _PackageClassMethodPattern.matcher(fi.method);
-                if (m.matches()) {
-                    fi.file = m.group(1).concat(fi.file);
-                    fi.method = m.group(2);
+        List<ParsedException> result = new ArrayList();
+        String title = scanner.nextLine();
+        do {
+            ParsedException parse = new ParsedException(title);
+            List <FrameInfo>frames = new ArrayList();
+            StringBuffer addMsgBuf = new StringBuffer();
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.startsWith(_CausedByPrefix)) {
+                    title = line.substring(_CausedByPrefix.length());
+                    break;
                 }
+                Matcher m = _FramePattern.matcher(line);
+                if (m.matches()) {
+                    FrameInfo fi = new FrameInfo();
+                    fi.method = m.group(1);
+                    fi.file = m.group(2);
+                    fi.template = m.group(3);
 
-                parse.frames.add(fi);
-            } else {
-                addMsgBuf.append(line);
-                addMsgBuf.append('\n');
+                    // see if we can move the package to the file
+                    m = _PackageClassMethodPattern.matcher(fi.method);
+                    if (m.matches()) {
+                        fi.file = m.group(1).concat(fi.file);
+                        fi.method = m.group(2);
+                    }
+
+                    frames.add(fi);
+                }
+                else if (!_MorePattern.matcher(line).matches()) {
+                    addMsgBuf.append(line);
+                    addMsgBuf.append('\n');
+                }
             }
-        }
-        parse.additionalMessage = addMsgBuf.toString();
+            parse.frames = frames;
+            parse.additionalMessage = addMsgBuf.toString();
+            result.add(0, parse);
+        } while (scanner.hasNextLine());
 
-        return parse;
+        return result;
     }
 }

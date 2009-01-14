@@ -350,6 +350,7 @@ ariba.Datatable = function() {
                         newHeaderRow.appendChild(th);
                     }
                     var td = document.createElement('TD');
+                    td.appendChild(document.createTextNode(''));
                     td.className = "spacer";
                     newBodyRow.appendChild(td);
 
@@ -364,11 +365,10 @@ ariba.Datatable = function() {
                                 var protoCell = row.cells[row.cells.length - 1];
                                 rowspan = protoCell.rowSpan;
                                 var th = document.createElement(protoCell.tagName);
-                                // th.appendChild(document.createTextNode('&nbsp;'));
+                                th.appendChild(document.createTextNode(''));
                                 if (i > 0) th.innerHTML = "&nbsp;"
                                 th.className = protoCell.className + " thSpacer";
                                 if (rowspan) th.rowSpan = rowspan;
-                                th.style.width = "100%";
                                 row.appendChild(th);
                             }
                         }
@@ -457,7 +457,7 @@ ariba.Datatable = function() {
             //debug("awtPostLoad complete!");
         },
 
-        resizeScrollTable : function (tableInfo)
+        fixHeadingWidths : function (tableInfo)
         {
             if (!tableInfo.headTable) return;
 
@@ -476,7 +476,18 @@ ariba.Datatable = function() {
                 // the old size and the new size
                 headCell.style.paddingRight = newWd + "px";
             }
+            headCells[headCells.length-1].style.width = "100%";
             //debug("--- total = " + totalWd + "  (wrapper=" + tableInfo.wrapperTable.offsetWidth + ")");
+        },
+
+        fixAllHeadingWidths : function ()
+        {
+            for (var id in _awtTables) {
+                var info = this.infoForScrollableTable(id);
+                if (info) {
+                    this.fixHeadingWidths(info);
+                }
+            }
         },
 
         spacerWd : function (tableInfo) {
@@ -584,6 +595,8 @@ ariba.Datatable = function() {
             // This in turn changes the client width, and therefore the horizontal scroll detection.
             // See awtComputeMaxHt
 
+            this.fixAllHeadingWidths();
+            
             // compute groups by table
             var footerHidden = false;
             var groups = [];
@@ -613,7 +626,7 @@ ariba.Datatable = function() {
                     for (var id in groups[g]) {
                         var tableInfo = this.infoForScrollableTable(id);
                         if (tableInfo) {
-                            this.resizeScrollTable(tableInfo);
+                            this.fixHeadingWidths(tableInfo);
                         }
                     }
                 }
@@ -654,11 +667,13 @@ ariba.Datatable = function() {
             // Figure out window / container space
             var flexContainer = tableInfo.flexContainer;
             var positioningParent = tableInfo.positioningParent;
+            var positioningParentHeight = 0;
             if (flexContainer) {
                 Debug.log("flexContainer.clientHeight=" + flexContainer.clientHeight + ", offsetHeight=" + flexContainer.offsetHeight);
 
                 if (Dom.hasClass(positioningParent, "panelContainer")) {
                     Debug.log("&&&& PanelContainer is positioning parent -- height=" + positioningParent.offsetHeight);
+                    positioningParentHeight = Widgets.panelMaxHt(positioningParent);
                 }
 
                 // Iterate up parent boxes accumulating free space
@@ -682,16 +697,16 @@ ariba.Datatable = function() {
                     })) curFC = null;
                 }
             }
-
+            if (positioningParentHeight == 0) positioningParentHeight = positioningParent.clientHeight;
             var container = (positioningParent.tagName == "HTML") ? document.body :
                             ((positioningParent.childNodes.length == 1) ? positioningParent.childNodes[0] : positioningParent);
             var containerContentHeight = container.offsetHeight;
 
-            windowExtra += positioningParent.clientHeight - containerContentHeight;
+            windowExtra += positioningParentHeight - containerContentHeight;
 
-            Debug.log("positioningParent.clientHeight:" + positioningParent.clientHeight + ", content:" + containerContentHeight);
+            Debug.log("positioningParent.clientHeight:" + positioningParentHeight + ", content:" + containerContentHeight);
 
-            Debug.log("--- Resize!  offsetHeight=" + positioningParent.clientHeight
+            Debug.log("--- Resize!  offsetHeight=" + positioningParentHeight
                     + ", totalUsed=" + totalUsed + ", totalReq=" + totalReq + ", windowExtra=" + windowExtra);
     
             // -8 is for padding below the bottom table
@@ -785,7 +800,7 @@ ariba.Datatable = function() {
                     this.checkWidthStrut(tableInfo, positioningParent, this.desiredWidth(tableInfo));
 
                     // force a resize to fix heading width
-                    this.resizeScrollTable(tableInfo);
+                    this.fixHeadingWidths(tableInfo);
                 }
 
                 this.tryScrollSet(tableInfo);

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResourceDirectory.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResourceDirectory.java#9 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -23,6 +23,7 @@ import ariba.util.core.MapUtil;
 import ariba.ui.aribaweb.core.AWConcreteServerApplication;
 import ariba.ui.aribaweb.core.AWBinding;
 import ariba.ui.aribaweb.core.AWApplication;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -219,11 +220,10 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
     public static void autoRegisterJarResources (final AWMultiLocaleResourceManager resourceManager)
     {
         // System.out.println("----------- autoRegisterJarResources ------------");
-        String resourceUrl = ((AWConcreteServerApplication) AWConcreteServerApplication.sharedInstance()).resourceUrl();
+        final String resourceUrl = ((AWConcreteServerApplication) AWConcreteServerApplication.sharedInstance()).resourceUrl();
         // Resource directory for "." (jars)
         final AWClasspathResourceDirectory rd = new AWClasspathResourceDirectory("", resourceUrl);
         rd.setContainsPackagedResources(true);
-        boolean didLoad = false;
 
         Map<String, URL> awJarUrlsByName = new HashMap();
         Set<String> processedJars = new HashSet();
@@ -241,25 +241,34 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
             awJarUrlsByName.put(jarName, url);
         }
 
-        List<String> postInitializers = new ArrayList();
+        final List<String> postInitializers = new ArrayList();
+
+        final boolean didLoad = !awJarUrlsByName.isEmpty();
+
+        // Register post-loads after the application has completed initialization
+        AWConcreteApplication application = (AWConcreteApplication)AWConcreteApplication.sharedInstance();
+        if (!application.didCompleteInit()) {
+            application.registerDidInitCallback(new AWConcreteApplication.DidInitCallback() {
+                public void applicationDidInit (AWConcreteApplication application) {
+                    // Run the post-initializers
+                    for (String postIniter : postInitializers) {
+                        AWBinding.fieldBinding("post-initializer", postIniter, null).value(null);
+                    }
+
+                    if (didLoad) {
+                        // register root resource directory (".")
+                        resourceManager.registerResourceDirectory(rd);
+
+                        // register docroot resource directory
+                        resourceManager.registerResourceDirectory(resourcePrefix(), resourceUrl, true);
+                    }
+                }
+            });
+        }
 
         for (Map.Entry<String, URL> e : awJarUrlsByName.entrySet()) {
             initJar(resourceManager, rd, e.getValue(), e.getKey(), awJarUrlsByName,
                     processedJars, postInitializers);
-            didLoad = true;
-        }
-
-        // Run the post-initializers
-        for (String postIniter : postInitializers) {
-            AWBinding.fieldBinding("post-initializer", postIniter, null).value(null);
-        }
-
-        if (didLoad) {
-            // register root resource directory (".")
-            resourceManager.registerResourceDirectory(rd);
-
-            // register docroot resource directory
-            resourceManager.registerResourceDirectory(resourcePrefix(), resourceUrl, true);
         }
     }
 
@@ -285,6 +294,13 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
                 }
             }
 
+            // fire the initializer (if any)
+            String preInitializer = (String)properties.get("pre-initializer");
+            if (preInitializer != null) {
+                AWBinding.fieldBinding("pre-initializer", preInitializer, null).value(null);
+            }
+
+            final Set<String> loadedPackageNames = new HashSet();
             String extString = (String)properties.get("packaged-resource-extensions");
             if (extString != null) {
                 List exts = new ArrayList();
@@ -292,51 +308,55 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
                     exts.add(ext.startsWith(".") ? ext : ".".concat(ext));
                     resourceManager.registerPackagedResourceExtension(ext);
                 }
-                final Set<String> loadedPackageNames = new HashSet();
                 final List packagedResourceExtensions = exts;
                 URL jar = AWJarWalker.ClasspathUrlFinder.findResourceBase(url, AWJarPropertiesPath);
                 AWJarWalker.StreamIterator iter = AWJarWalker.create(jar, new AWJarWalker.Filter() {
                     public boolean accepts(String filename)
                     {
                         // System.out.println("checking " + filename);
-                        return !filename.endsWith(".class");
+                        return true;
                     }
                 });
 
                 while (iter.next()) {
-                    String urlString = iter.getURLString();
                     String filename = iter.getFilename();
-                    // System.out.println("recording " + filename);
-                    AWClasspathResourceDirectory.recordResourcePath(filename, urlString);
-                    int index = filename.lastIndexOf('.');
-                    if (index > 0) {
-                        String ext = filename.substring(index);
-                        if (packagedResourceExtensions.contains(ext)) {
-                            _registerClassPathResource(filename, rd, resourceManager, loadedPackageNames);
+                    if (filename.endsWith(".class")) {
+                        // System.out.println("recording " + filename);
+                        AWJarWalker.processBytecode(iter, filename);
+                    }
+                    else {
+                        String urlString = iter.getURLString();
+                        AWClasspathResourceDirectory.recordResourcePath(filename, urlString);
+                        int index = filename.lastIndexOf('.');
+                        if (index > 0) {
+                            String ext = filename.substring(index);
+                            if (packagedResourceExtensions.contains(ext)) {
+                                _registerClassPathResource(filename, rd, resourceManager, loadedPackageNames);
+                            }
                         }
                     }
                 }
 
-                // fire the initializer (if any)
-                String initializer = (String)properties.get("initializer");
-                if (initializer != null) {
-                    AWBinding.fieldBinding("initializer", initializer, null).value(null);
-                }
+            }
+            // fire the initializer (if any)
+            String initializer = (String)properties.get("initializer");
+            if (initializer != null) {
+                AWBinding.fieldBinding("initializer", initializer, null).value(null);
+            }
 
-                String postInitializer = (String)properties.get("post-initializer");
-                if (postInitializer != null) {
-                    postInitializers.add(postInitializer);
-                }
+            String postInitializer = (String)properties.get("post-initializer");
+            if (postInitializer != null) {
+                postInitializers.add(postInitializer);
+            }
 
-                // set the namespace resolver for these packages
-                String parentPackage = (String)properties.get("use-namespace-from-package");
-                if (parentPackage != null) {
-                    AWNamespaceManager ns = AWNamespaceManager.instance();
-                    AWNamespaceManager.Resolver resolver = ns.resolverForPackage(parentPackage);
-                    for (String packageName : loadedPackageNames) {
-                        ns.registerResolverForPackage(packageName, resolver);
+            // set the namespace resolver for these packages
+            String parentPackage = (String)properties.get("use-namespace-from-package");
+            if (parentPackage != null) {
+                AWNamespaceManager ns = AWNamespaceManager.instance();
+                AWNamespaceManager.Resolver resolver = ns.resolverForPackage(parentPackage);
+                for (String packageName : loadedPackageNames) {
+                    ns.registerResolverForPackage(packageName, resolver);
 
-                    }
                 }
             }
         } catch (IOException e) {

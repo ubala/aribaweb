@@ -1,0 +1,276 @@
+<?xml version="1.0"?>
+
+<!--
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    (Some contents derived from a parallel Apache Lucene file, also licenced
+     under the same license)
+
+    $Id:  $
+ -->
+
+<!--
+    Should support:
+        - recursion into src to build jars
+        - recursion into examples to build jars/wars
+        - launch tomcat
+-->
+
+<project name="aribaweb-all" default="tomcat-build" basedir=".">
+
+
+    <available file="${basedir}/src/build-support" value="${basedir}/src/build-support" property="make.common.dir"/>
+    <property name="src.dir" location="${basedir}/src"/>
+    <property file="${src.dir}/version.properties"/>
+
+    <import file="build-common.xml"/>
+
+    <property name="demoshell.home" location="${src.samples.dir}/demoshell-site"/>
+
+    <property name="binary.dist.zip" location="${dist.dir}/aribaweb-${version}.zip"/>
+    <property name="src.dist.zip" location="${dist.dir}/aribaweb-src-${version}.zip"/>
+
+    <!-- Javadoc classpath -->
+    <path id="javadoc.classpath">
+        <path refid="classpath"/>
+        <pathelement location="${ant.home}/lib/ant.jar"/>
+
+        <!-- NOTE: gdata jars only used with jdk 5 but include them even for lower jdk -->
+        <fileset dir="module">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- ================================================================== -->
+    <!-- J A R                                                              -->
+    <!-- ================================================================== -->
+    <!--                           `                                         -->
+    <!-- ================================================================== -->
+
+    <target name="jar" depends="jar-module"
+            description="Packages the JAR file">
+    </target>
+
+    <target name="wars" depends="jar">
+        <module-crawl target="war"/>
+    </target>
+
+    <target name="has-tomcat">
+        <property name="env.CATALINA_HOME" value="NOT_SET"/>
+        <condition property="catalina.home.dir" value="${env.CATALINA_HOME}">
+            <not><equals arg1="${env.CATALINA_HOME}" arg2="NOT_SET"/></not>
+        </condition>
+        <fail unless="catalina.home.dir" message="CATALINA_HOME environment var (or catalina.home.dir property) must be set to launch tomcat"/>
+    </target>
+
+    <target name="-tomcat-no-debug" unless="env.JPDA_ADDRESS">
+        <echo message="Launching tomcat with CATALINA_BASE=${catalina.base.dir}, CATALINA_HOME=${catalina.home.dir}, ARIBA_DEMOSHELL_HOME=${demoshell.home} ([CTRL-C] to stop)..."/>
+        <echo message="Setting ARIBA_AW_SEARCH_PATH=${aw.search.path}"/>
+        <echo message="Connect via http://localhost:8080/Demo/AribaWeb"/>
+        <java jar="${catalina.home.dir}/bin/bootstrap.jar" fork="true">
+            <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
+            <env key="ARIBA_AW_SEARCH_PATH" value="${aw.search.path}"/>
+            <jvmarg value="-Dcatalina.home=${env.CATALINA_HOME}"/>
+            <jvmarg value="-Dcatalina.base=${catalina.base.dir}"/>
+        </java>
+    </target>
+
+    <target name="-tomcat-debug" if="env.JPDA_ADDRESS">
+        <echo message="Launching tomcat in debug mode (port ${env.JPDA_ADDRESS}) with CATALINA_BASE=${catalina.base.dir}, ARIBA_DEMOSHELL_HOME=${demoshell.home} ([CTRL-C] to stop)..."/>
+        <echo message="Setting ARIBA_AW_SEARCH_PATH=${aw.search.path}"/>
+        <echo message="Connect via http://localhost:8080/Demo/AribaWeb"/>
+        <java jar="${catalina.home.dir}/bin/bootstrap.jar" fork="true">
+            <env key="CATALINA_HOME" value="${catalina.home.dir}"/>
+            <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
+            <env key="ARIBA_AW_SEARCH_PATH" value="${aw.search.path}"/>
+            <jvmarg value="-Dcatalina.home=${catalina.home.dir}"/>
+            <jvmarg value="-Dcatalina.base=${catalina.base.dir}"/>
+            <jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xrunjdwp:transport=${env.JPDA_TRANSPORT},address=${env.JPDA_ADDRESS},server=y,suspend=n"/>
+        </java>
+    </target>
+
+    <target name="tomcat" depends="has-tomcat, -tomcat-debug, -tomcat-no-debug"
+            description="Start tomcat (wihout rebuilding)"/>
+
+    <target name="tomcat-build" depends="wars, tomcat"
+            description="Rebuild WARs and start Tomcat"/>
+
+    <target name="tomcat-exec" depends="has-tomcat, wars"
+            description="Build, then run Tomcat">
+        <property name="demoshell.home" location="${src.ui.dir}/demoshell/site"/>
+        <condition property="catalina-command" value="catalina.bat">
+            <os family="windows"/>
+        </condition>
+        <property name="catalina-command" value="catalina.sh"/>
+        <echo message="Launching tomcat with CATALINA_BASE=${catalina.base.dir}, ARIBA_DEMOSHELL_HOME=${demoshell.home} ([CTRL-C] to stop)..."/>
+        <echo message="Setting ARIBA_AW_SEARCH_PATH=${aw.search.path}"/>
+        <echo message="Connect via http://localhost:8080/Demo/AribaWeb"/>
+        <exec dir="." executable="${catalina.home.dir}/bin/${catalina-command}">
+            <env key="CATALINA_BASE" value="${catalina.base.dir}"/>
+            <env key="CATALINA_HOME" value="${catalina.home.dir}"/>
+            <env key="ARIBA_DEMOSHELL_HOME" value="${demoshell.home}"/>
+            <env key="ARIBA_AW_SEARCH_PATH" value="${aw.search.path}"/>
+            <arg value="jpda"/>
+            <arg value="run"/>
+        </exec>
+    </target>
+
+    <target name="tomcat-build-exec" depends="wars, tomcat-exec"
+            description="Rebuild WARs and start Tomcat"/>
+
+
+    <target name="groovysh-broken">
+        <echo message="Launching groovy shell"/>
+        <java classpathref="classpath" classname="org.codehaus.groovy.tools.shell.Main" fork="true">
+        </java>
+    </target>
+
+    <target name="groovysh">
+        <pathconvert refid="classpath" property="classpath.string"/>
+        <echo message="Launching groovy shell with classpath: ${classpath.string}"/>
+        <exec dir="." executable="groovyConsole">
+            <arg value="-cp"/>
+            <arg value="${classpath.string}"/>
+        </exec>
+    </target>
+
+
+    <!-- ================================================================== -->
+    <!-- D O C U M E N T A T I O N                                          -->
+    <!-- ================================================================== -->
+    <!--                                                                    -->
+    <!-- ================================================================== -->
+    <target name="javadocs" description="Generate javadoc" depends="build-module">
+        <mkdir dir="${build.dir}/docs/api"/>
+        <module-crawl target="javadocs"/>
+    </target>
+
+    <target name="javadocs-internal" depends="build-module">
+        <mkdir dir="${build.dir}/docs/api-internal"/>
+        <module-crawl target="javadocs-internal"/>
+    </target>
+
+
+    <!-- ================================================================== -->
+    <!-- D I S T R I B U T I O N                                            -->
+    <!-- ================================================================== -->
+    <!--                                                                    -->
+    <!-- ================================================================== -->
+    <target name="package"
+            depends="package-zip, package-src">
+    </target>
+
+    <!-- ================================================================== -->
+    <!-- Packages the distribution with zip                                 -->
+    <!-- ================================================================== -->
+    <!--                                                                    -->
+    <!-- ================================================================== -->
+    <target name="package-zip" depends="wars"
+            description="--> Generates the AribaWeb distribution as .zip">
+        <mkdir dir="${dist.dir}"/>
+        <delete file="${binary.dist.zip}"/>
+        <zip destfile="${binary.dist.zip}">
+            <zipfileset prefix="aribaweb-${version}" dir="${dist.root.dir}">
+                <patternset refid="binary.root.dist.patterns"/>
+            </zipfileset>
+        </zip>
+        <aribaweb-checksum file="${binary.dist.zip}"/>
+    </target>
+
+    <target name="package-src"
+            description="--> Generates the AribaWeb source code distribution as .zip">
+        <mkdir dir="${dist.dir}"/>
+        <delete file="${src.dist.zip}"/>
+        <zip destfile="${src.dist.zip}">
+            <zipfileset prefix="aribaweb-${version}" dir="${dist.root.dir}">
+                <patternset refid="src.dist.patterns"/>
+            </zipfileset>
+        </zip>
+        <aribaweb-checksum file="${src.dist.zip}"/>
+    </target>
+
+
+    <target name="dist-all" depends="package"/>
+
+    <target name="check-ftp">
+        <fail unless="env.ARIBAWEB_FTP_HOST"/>
+        <fail unless="env.ARIBAWEB_FTP_USERNAME"/>
+        <fail unless="env.ARIBAWEB_FTP_PASSWORD"/>
+    </target>
+
+    <target name="ftp-dist" depends="check-ftp, dist-all">
+        <ftp server="${env.ARIBAWEB_FTP_HOST}"
+             remotedir="/incoming"
+             userid="${env.ARIBAWEB_FTP_USERNAME}"
+             password="${env.ARIBAWEB_FTP_PASSWORD}"
+             depends="yes">
+          <fileset dir="${dist.dir}">
+              <include name="*.zip"/>
+          </fileset>
+        </ftp>
+    </target>
+
+    <macrodef name="module-crawl">
+        <attribute name="target" default=""/>
+        <attribute name="failonerror" default="true"/>
+        <sequential>
+            <echo message="Invoking subant for target: @{target}"/>
+            <subant target="@{target}" failonerror="@{failonerror}">
+                <property name="make.common.dir" location="${make.common.dir}"/>
+                <property name="build.dir" value="${build.dir}"/>
+                <fileset dir="${src.dir}" includes="build.xml"/>
+                <fileset dir="${src.samples.dir}" includes="**/build.xml"/>
+                <fileset dir="${src.ui.dir}" includes="*/samples/*/build.xml"/>
+            </subant>
+        </sequential>
+    </macrodef>
+
+    <target name="build-module"
+            description="Builds all module modules and their tests">
+        <module-crawl target="build-module"/>
+    </target>
+
+    <target name="jar-module">
+        <module-crawl target="jar"/>
+    </target>
+
+    <!-- Macro for building checksum files
+        This is only needed until the "format" option is supported
+        by ant's built in checksum task
+    -->
+    <macrodef name="aribaweb-checksum">
+        <attribute name="file"/>
+        <!-- NOTE: we use the value of @{file} in the names any properties
+           set because macro's don't have variables, and otherwise we
+           wouldn't be able to checksum more then one file per build
+        -->
+        <sequential>
+            <checksum file="@{file}"
+                      property="@{file}.sum"
+                      algorithm="${checksum.algorithm}"/>
+            <basename file="@{file}" property="@{file}.base"/>
+            <concat destfile="@{file}.${checksum.algorithm}"
+                    force="yes"
+                    append="false"
+                    fixlastline="yes">
+                <header trimleading="yes">${@{file}.sum}</header>
+                <!-- empty fileset to trick concat -->
+                <fileset dir="." excludes="**"/>
+                <footer trimleading="yes">${@{file}.base}
+                </footer>
+            </concat>
+        </sequential>
+    </macrodef>
+</project>

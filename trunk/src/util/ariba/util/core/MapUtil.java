@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#20 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#21 $
 */
 
 package ariba.util.core;
@@ -461,6 +461,11 @@ public final class MapUtil
     */
     public static Map mergeMapIntoMapWithObjects (Map dest, Map source)
     {
+        return mergeMapIntoMapWithObjects(dest, source, false);
+    }
+
+    public static Map mergeMapIntoMapWithObjects (Map dest, Map source, boolean overwriteMismatchedClasses)
+    {
         Iterator i = source.keySet().iterator();
 
         while (i.hasNext()) {
@@ -551,6 +556,9 @@ public final class MapUtil
             else if ((destValue instanceof String) &&
                      (sourceValue instanceof String))
             {
+                dest.put(key, sourceValue);
+            }
+            else if (overwriteMismatchedClasses) {
                 dest.put(key, sourceValue);
             }
             else {

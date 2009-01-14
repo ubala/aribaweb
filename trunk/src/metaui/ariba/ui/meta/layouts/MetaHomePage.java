@@ -12,16 +12,22 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaHomePage.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaHomePage.java#2 $
 */
 package ariba.ui.meta.layouts;
 
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 
-public class MetaHomePage extends AWComponent
+public class MetaHomePage extends AWComponent implements AWResponseGenerating.ResponseSubstitution
 {
     public ariba.ui.meta.core.ItemProperties currentModule ()
     {
         return MetaNavTabBar.getState(session())._selectedModule;
+    }
+
+    public AWResponseGenerating replacementResponse ()
+    {
+        return MetaNavTabBar.getState(session()).redirectForPage(this);
     }
 }

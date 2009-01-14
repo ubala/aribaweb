@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#28 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#29 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -148,7 +148,7 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
         if (!_isSelfRedirect && _isRefresh) {
             // needed to tell directaction request handler on the other side that this is
             // a refresh request
-            return addQueryParam(url, AWRequestContext.RefreshRequestKey, True);
+            return AWRequestUtil.addQueryParam(url, AWRequestContext.RefreshRequestKey, True);
         }
         else {
             return url;
@@ -345,24 +345,6 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
     protected boolean allowDeferredResponse ()
     {
         return false;
-    }
-
-    //
-    // NOTE: move to AWRedirectUtil when we move AWRedirectUtil out of SSO up to AW
-    //
-    private static final String BeginQueryChar = "?";
-    private static final String QueryDelimiter = "&";
-    private static final String Equals = "=";
-
-    private String addQueryParam (String url, String name, String value)
-    {
-        String delimiter = "";
-        if (url.indexOf(BeginQueryChar) == -1) {
-            delimiter = BeginQueryChar;
-        } else if (!url.endsWith(QueryDelimiter)) {
-            delimiter = QueryDelimiter;
-        }
-        return StringUtil.strcat(url, delimiter, name, Equals, AWUtil.encodeString(value));
     }
 
     public static String escapeJavascript (String receiver)

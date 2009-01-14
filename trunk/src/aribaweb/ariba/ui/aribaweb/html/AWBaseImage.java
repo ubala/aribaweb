@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBaseImage.java#21 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBaseImage.java#22 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -79,14 +79,6 @@ abstract public class AWBaseImage extends AWComponent
     public static String imageUrl (AWRequestContext requestContext, AWComponent component,
                                    String filename, boolean useFullUrl)
     {
-        // If we do not have a request, then we cannot generate a full URL as the
-        // checkoutFullUrl method requires a requestContext
-        // requestContext.request() is null for scheduled-task-generated appends piped
-        // through AWComponent.generateStringContents()
-        if (requestContext.request() == null) {
-            useFullUrl = false;
-        }
-
         String imageUrl = null;
         AWConcreteApplication application =
             (AWConcreteApplication)AWConcreteApplication.sharedInstance();

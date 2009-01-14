@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavCommandBar.java#3 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavCommandBar.java#4 $
 */
 package ariba.ui.meta.layouts;
 
@@ -125,23 +125,6 @@ public class MetaNavCommandBar extends BrandingComponent
                 });
         return page;
         */
-    }
-
-    public static class _ActionRec { ItemProperties action; public String label, providerName; }
-
-    public static List<_ActionRec> actionRecsForActions (List<ItemProperties> actions)
-    {
-        // Flatten list with labels and providerNames
-        List<_ActionRec> typeRecs = new ArrayList();
-        for (ariba.ui.meta.core.ItemProperties action : actions) {
-            _ActionRec rec = new _ActionRec();
-            rec.action = action;
-            rec.label = (String)action.properties().get(UIMeta.KeyLabel);
-            rec.providerName = (String)action.properties().get("package");
-            if (rec.providerName == null) rec.providerName = "Other" /* */;
-            typeRecs.add(rec);
-        }
-        return typeRecs;
     }
 
     public String pageCommandBar ()

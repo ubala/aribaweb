@@ -13,21 +13,13 @@ Planned Enhancements:
         - Focussed examples of use for all key AWComponents
         - Well commented examples for more complex scenarios
 
-    - Ant build files need work
-        - The jars and wars targets always rebuild, even when nothing has changed
-
     - AWReload (java class reloading) support
-
-    - Tweaking to the "branding" (colors, etc) to distance it a bit more from Ariba apps
-
 
 Your Help Requested:
 
     (Would be great if someone chipped in on the following...)
 
     - Running nicely in Eclipse and IDEA (build/run without ANT)
-
-    - A bundled tomcat config that runs straight off of jars instead of wars (without copying)
 
     - Running in app servers other than Tomcat (just need nice Ant rules...)
 

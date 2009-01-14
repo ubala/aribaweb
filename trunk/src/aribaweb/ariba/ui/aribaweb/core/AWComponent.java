@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#100 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#102 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -779,7 +779,9 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         if (resource != null) {
             template = (AWTemplate)resource.object();
             if ((template == null) ||
-                (AWConcreteApplication.IsRapidTurnaroundEnabled && resource.hasChanged())) {
+                (AWConcreteApplication.IsRapidTurnaroundEnabled
+                        && requestContext().currentPhase() == AWRequestContext.Phase_Render
+                        && resource.hasChanged())) {
 
                 // reset needs to be called before template parser since the template parser
                 // can append validation errors
@@ -1343,7 +1345,12 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
 
     public Map dict ()
     {
-        return extendedFields();
+        // don't call extendedFields() so subclasses can implement Extensible
+        // without rerouting dict()
+        if (_extendedFields == null) {
+            _extendedFields = MapUtil.map();
+        }
+        return _extendedFields;
     }
 
     public void dict (String key, Object value)

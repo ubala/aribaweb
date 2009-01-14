@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumn.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumn.java#2 $
 */
 package ariba.ui.meta.layouts;
 
@@ -54,7 +54,8 @@ public final class MetaTableColumn extends AWTDataTable.Column
                        ItemProperties field)
     {
         Context context = MetaContext.currentContext(table);
-        context.restoreActivation(field.activation());
+        context.push();
+        context.set(UIMeta.KeyField, field.name());
 
         _fieldInfo = field;
         _fieldPath = ((UIMeta.UIContext)context).fieldPath();

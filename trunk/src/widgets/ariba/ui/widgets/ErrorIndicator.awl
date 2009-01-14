@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorIndicator.awl#2 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorIndicator.awl#3 $
     </Copyright>
 
     <Overview>
@@ -183,6 +183,6 @@
                  alt="$[a001]Required Field"/>\
     </div>\
 <a:Else/>\
-    <a:Image filename="cleardot.gif" height="11" width="7"/>\
+    <a:Image filename="cleardot.gif" height="11" width="10"/>\
 </a:If>\
 </a:RefreshRegion>\

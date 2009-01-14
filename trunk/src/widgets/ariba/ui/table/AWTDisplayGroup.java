@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#61 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#62 $
 */
 package ariba.ui.table;
 
@@ -32,6 +32,9 @@ import java.util.Iterator;
 public final class AWTDisplayGroup
 {
     protected List _allObjects;
+    protected AWTDataSource _dataSource;
+    protected boolean _didInitialFetch;
+    
     /**
         source of truth on the selection
     */
@@ -252,6 +255,15 @@ public final class AWTDisplayGroup
     {
         if (!orderedListArrayMatch(list, _origAllObjects)) {
             setObjectArray(vectorFromOrderedList(list));
+        }
+    }
+
+    public void checkDataSource ()
+    {
+        if (_dataSource != null && (_dataSource.hasChanges() || !_didInitialFetch)) {
+            _didInitialFetch = true;
+            List list = _dataSource.fetchObjects();
+            checkObjectArray(list);
         }
     }
 
@@ -1205,12 +1217,13 @@ public final class AWTDisplayGroup
     /** FIXME: stub implementations... */
     public AWTDataSource dataSource ()
     {
-        return null;
+        return _dataSource;
     }
 
     public void setDataSource (AWTDataSource dataSource)
     {
-        // ignore...
+        _dataSource = dataSource;
+        _didInitialFetch = false;
     }
 
     // currently same as updateDisplayedObjects (and unused) -- see

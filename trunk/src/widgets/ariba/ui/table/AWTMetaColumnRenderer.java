@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTMetaColumnRenderer.java#15 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTMetaColumnRenderer.java#16 $
 */
 package ariba.ui.table;
 
@@ -174,7 +174,7 @@ public final class AWTMetaColumnRenderer extends AWTDataTable.ColumnRenderer
     {
         Object value = value();
         return (value instanceof String
-                && StringUtil.nullOrEmptyString((String)value)
+                && !StringUtil.nullOrEmptyString((String)value)
                 && ((String)value).indexOf(':') > 0);
     }
 }

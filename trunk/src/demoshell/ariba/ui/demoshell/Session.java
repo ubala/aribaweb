@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/Session.java#6 $
+    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/Session.java#7 $
 */
 
 package ariba.ui.demoshell;
 
 import ariba.ui.aribaweb.core.AWSession;
+import ariba.ui.aribaweb.core.AWSessionValidationException;
 import ariba.util.fieldvalue.Extensible;
 import ariba.util.core.MapUtil;
 
@@ -55,7 +56,7 @@ public class Session extends AWSession
 
     // for testing sso -- serves the same purpose as the existence of a user object
     // in a "real" application.
-    public void isAuthenticated (boolean isAuthenticated)
+    public void setAuthenticated (boolean isAuthenticated)
     {
         _isAuthenticated = isAuthenticated;
     }
@@ -64,4 +65,10 @@ public class Session extends AWSession
     {
         return _isAuthenticated;
     }
+
+    public void assertAuthenticated ()
+    {
+        if (!isAuthenticated()) throw new AWSessionValidationException();
+    }
+
 }

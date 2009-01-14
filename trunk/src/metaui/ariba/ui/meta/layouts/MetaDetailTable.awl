@@ -1,0 +1,22 @@
+<a:SetValue title="$metaContext.properties.label"/>
+<m:Context class="$metaContext.properties.elementType" object="$null">
+    <m:Context displayGroup="$displayGroup" dataSourceType="$dataSourceType"
+               field="*" operation="list"
+               layout="TableRow">\
+        <t:DataTable enableScrolling="$true" displayGroup="$displayGroup" title="$title"
+                     singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true">
+            <m:TableColumns/>
+            <t:SelectionButtonArea>\
+                <m:Context object="$displayGroup.selectedObject" layout="SelectionButtonArea" filterActions="instance">\
+                    <m:IncludeComponent/>\
+                </m:Context>\
+            </t:SelectionButtonArea>
+            <t:ButtonArea>
+                <m:Context layout="ButtonArea">
+                    <m:IncludeComponent/>\
+                </m:Context>
+            </t:ButtonArea>
+        </t:DataTable>
+    </m:Context>
+</m:Context>
+        

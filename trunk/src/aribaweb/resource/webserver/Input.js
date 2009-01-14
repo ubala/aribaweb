@@ -384,77 +384,12 @@ ariba.Input = function() {
         EOF:0};
 
     //
-    // IE - specific methods
+    // IE6 - specific methods
     //
-    if (Dom.IsIE) Util.extend(Input, function () {
-        /**
-         *  focusedElement is the form element which is currently focused.  If non-null, this will be
-         *  restored as the focused element once Input.enableInput() is called.
-         */
-        var AWFocusedElementName = null;
-        var AWFocusedElementId = null;
-        var AWCaptureDiv = null;
+    if (Dom.IsIE6Only) Util.extend(Input, function () {
         var AWDummySelects = new Array();
 
         return {
-            disableInput : function (focusedElement, showWaitAlert)
-            {
-                Event.disableEvents();
-                if (AWCaptureDiv == null) {
-                    AWCaptureDiv = document.createElement("div");
-                    document.body.appendChild(AWCaptureDiv);
-                }
-                AWCaptureDiv.setCapture(false);
-                AWCaptureDiv.style.cursor = "wait";
-                if (showWaitAlert) {
-                    AWCaptureDiv.onmousedown = this.showWaitAlert.bindEventHandler(this);
-                    AWCaptureDiv.onkeydown = this.showWaitAlert.bindEventHandler(this);
-                }                
-                if (focusedElement == null) {
-                    focusedElement = document.activeElement;
-                }
-                if (focusedElement != null) {
-                    AWFocusedElementId = focusedElement.id;
-                    AWFocusedElementName = focusedElement.name;
-                }
-            },
-
-            enableInput : function ()
-            {
-                Event.enableEvents();
-                if (AWCaptureDiv == null) {
-                    return;
-                }
-                AWCaptureDiv.onmousedown = null;
-                AWCaptureDiv.onkeydown = null;
-                AWCaptureDiv.releaseCapture();
-
-                AWCaptureDiv.style.cursor = "pointer";                
-                var element = null;
-                if (AWFocusedElementName) {
-                    var elements = document.getElementsByName(AWFocusedElementName);
-                    if (elements && elements.length > 0) {
-                        element = elements[0];
-                    }
-                }
-                else if (AWFocusedElementId != null) {
-                    element = Dom.getElementById(AWFocusedElementId);
-                }
-                if (element && element.style.visibility == "visible") {
-                    if (element.focus) {
-                        try {
-                            element.focus();
-                        } catch (e) {
-                        }
-                        if (element.select) {
-                            element.select();
-                        }
-                    }
-                }
-                AWFocusedElementName = null;
-                AWFocusedElementId = null;
-            },
-
             hideSelects : function (skipDummySelects)
             {
                 var text;
@@ -529,6 +464,80 @@ ariba.Input = function() {
                 }
                 AWDummySelects = new Array();
             },
+        EOF:0};
+    }());
+
+    //
+    // IE - specific methods
+    //
+    if (Dom.IsIE) Util.extend(Input, function () {
+        /**
+         *  focusedElement is the form element which is currently focused.  If non-null, this will be
+         *  restored as the focused element once Input.enableInput() is called.
+         */
+        var AWFocusedElementName = null;
+        var AWFocusedElementId = null;
+        var AWCaptureDiv = null;
+
+        return {
+            disableInput : function (focusedElement, showWaitAlert)
+            {
+                Event.disableEvents();
+                if (AWCaptureDiv == null) {
+                    AWCaptureDiv = document.createElement("div");
+                    document.body.appendChild(AWCaptureDiv);
+                }
+                AWCaptureDiv.setCapture(false);
+                AWCaptureDiv.style.cursor = "wait";
+                if (showWaitAlert) {
+                    AWCaptureDiv.onmousedown = this.showWaitAlert.bindEventHandler(this);
+                    AWCaptureDiv.onkeydown = this.showWaitAlert.bindEventHandler(this);
+                }                
+                if (focusedElement == null) {
+                    focusedElement = document.activeElement;
+                }
+                if (focusedElement != null) {
+                    AWFocusedElementId = focusedElement.id;
+                    AWFocusedElementName = focusedElement.name;
+                }
+            },
+
+            enableInput : function ()
+            {
+                Event.enableEvents();
+                if (AWCaptureDiv == null) {
+                    return;
+                }
+                AWCaptureDiv.onmousedown = null;
+                AWCaptureDiv.onkeydown = null;
+                AWCaptureDiv.releaseCapture();
+
+                AWCaptureDiv.style.cursor = "pointer";                
+                var element = null;
+                if (AWFocusedElementName) {
+                    var elements = document.getElementsByName(AWFocusedElementName);
+                    if (elements && elements.length > 0) {
+                        element = elements[0];
+                    }
+                }
+                else if (AWFocusedElementId != null) {
+                    element = Dom.getElementById(AWFocusedElementId);
+                }
+                if (element && element.style.visibility == "visible") {
+                    if (element.focus) {
+                        try {
+                            element.focus();
+                        } catch (e) {
+                        }
+                        if (element.select) {
+                            element.select();
+                        }
+                    }
+                }
+                AWFocusedElementName = null;
+                AWFocusedElementId = null;
+            },
+
         EOF:0};
     }());
 

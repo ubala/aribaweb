@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.awl#1 $
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.awl#5 $
     </Copyright>
 
     <Overview>
@@ -25,49 +25,59 @@
     </Binding>
 </a:Api>\
 \
-<a:If ifTrue="$fieldsByZone">\
-    <w:FormTable showErrorFlags="$currentProperties.editing" useFourZones="$true"
-                  leftZoneRowCount="$fieldsByZone.zLeft.size">
-        <a:Content name="top">\
-            <a:For list="$fieldsByZone.zTop" item="$field">
+<m:Context contextKey="class">
+    <!--<b>MetaForm: </b><pre>$metaContext.debugString</pre>-->
+    <a:If ifTrue="$metaContext.properties.fourZoneLayout">\
+        <a:SetValue fieldsByZone="$metaContext.properties.fieldsByZone"/>
+        <w:FormTable showErrorFlags="$currentProperties.editing" useFourZones="$true"
+                      leftZoneRowCount="$fieldsByZone.zLeft.size">
+            <a:Content name="top">\
+                <a:For list="$fieldsByZone.zTop" item="$field">
+                    <a:IncludeBlock name="RowTemplate"/>
+                </a:For>
+            </a:Content>
+            <a:Content name="left">\
+                <a:For list="$fieldsByZone.zLeft" item="$field">
+                    <a:IncludeBlock name="RowTemplate"/>
+                </a:For>
+            </a:Content>
+            <a:Content name="right">\
+                <a:For list="$fieldsByZone.zRight" item="$field">
+                    <a:IncludeBlock name="RowTemplate"/>
+                </a:For>
+            </a:Content>
+            <a:Content name="bottom">\
+                <a:For list="$fieldsByZone.zBottom" item="$field">
+                    <a:IncludeBlock name="RowTemplate"/>
+                </a:For>
+            </a:Content>
+        </w:FormTable>\
+    <a:Else/>\
+        <w:FormTable>
+            <a:For list="$metaContext.properties.fieldsByZone.zLeft" item="$field">
                 <a:IncludeBlock name="RowTemplate"/>
             </a:For>
-        </a:Content>
-        <a:Content name="left">\
-            <a:For list="$fieldsByZone.zLeft" item="$field">
-                <a:IncludeBlock name="RowTemplate"/>
-            </a:For>
-        </a:Content>
-        <a:Content name="right">\
-            <a:For list="$fieldsByZone.zRight" item="$field">
-                <a:IncludeBlock name="RowTemplate"/>
-            </a:For>
-        </a:Content>
-        <a:Content name="bottom">\
-            <a:For list="$fieldsByZone.zBottom" item="$field">
-                <a:IncludeBlock name="RowTemplate"/>
-            </a:For>
-        </a:Content>
-    </w:FormTable>\
-<a:Else/>\
-    <w:FormTable>
-        <a:For list="$allFields" item="$field">
-            <a:IncludeBlock name="RowTemplate"/>
-        </a:For>
-    </w:FormTable>\
-</a:If>
-\
+        </w:FormTable>\
+    </a:If>
+    <!--- Detail fields -->
+    <a:For list="$metaContext.properties.fieldsByZone.zDetail" item="$field">
+        <m:Context field="$field">
+            <a:SetValue properties="$metaContext.properties"/>
+            <m:IncludeComponent/>\
+        </m:Context>
+        <br/>
+    </a:For>
+</m:Context>\
 <a:Block name="RowTemplate">\
-    <m:Context restoreActivation="$field.activation">
-        <w:FormRow label="$metaContext.properties.label"
-                    required="$metaContext.properties.required"
+    <m:Context field="$field">
+        <a:SetValue properties="$metaContext.properties"/>
+        <w:FormRow  hidden="$!properties.visible"
+                    label="$properties.label"
+                    cueTip="$properties.cueTip"
+                    required="$properties.required"
                     errorValueSource="$object"
-                    errorFieldPath="$field.name">\
+                    errorFieldPath="$properties.field">\
                 <m:IncludeComponent/>\
-            <!---
-                <br/>\
-                $field
-            -->\
         </w:FormRow>
     </m:Context>
 </a:Block>

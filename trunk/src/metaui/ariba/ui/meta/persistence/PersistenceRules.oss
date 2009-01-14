@@ -1,0 +1,188 @@
+@actionCategory=Create { }
+@actionCategory=Search { }
+
+actionCategory=Create {
+    action=Create {
+        label:${ariba.ui.meta.core.UIMeta.beautifyClassName(properties.class)};
+    }
+}
+
+class {
+    displayKey:toString;
+}
+
+field {
+    trait=toOneRelationship {
+        editable {
+            component:GenericChooser;
+            bindings:{
+                object:${object};
+                key:${field};
+                destinationClass:${type};
+                displayKey:${ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(type)};
+            };
+        }
+        editable=false {
+            component:AWHyperlink;
+            bindings: {
+                action: ${
+                    set("object", value);
+                    set("actionCategory", "Manage");
+                    set("action", "Inspect");
+                    ariba.ui.meta.core.UIMeta.getInstance().fireAction(this, requestContext)
+                };
+                awcontent: ${value ? ariba.util.fieldvalue.FieldValue.getFieldValue(value, ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(type)) : null};
+            }
+        }
+    }
+    trait=toManyRelationship {
+        editable {
+            component:GenericChooser;
+            bindings:{
+                object:${object};
+                key:${field};
+                destinationClass:${elementType};
+                multiSelect:true;
+                displayKey:${ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(elementType)};
+            };
+        }
+        editable=false {
+            component:AWHyperlink;
+            bindings: {
+                action: ${
+                    set("object", value);
+                    set("actionCategory", "Manage");
+                    set("action", "Inspect");
+                    ariba.ui.meta.core.UIMeta.getInstance().fireAction(this, requestContext)
+                };
+                omitTags:${!value || value.size() ==0};
+                awcontent: ${value ? ("" + value.size() + " items") : (none)};
+            }
+        }
+    }
+}
+
+action {
+    trait=newContext {
+        actionResults:${ariba.ui.meta.persistence.ObjectContext.bindNewContext();
+                    requestContext.pageWithName(properties.pageName)}
+    }
+}
+
+action=Create {
+    visible:true;
+    traits:pageAction, newContext;
+    pageName:MetaContentPage;
+    pageBindings: {
+        /* Should bind a new session */
+        object:${ariba.ui.meta.persistence.ObjectContext.get().create(values().get("class"))};
+        operation:create;
+        layout:Inspect;
+        clientPanel:true;
+    }
+
+    displayGroup dataSourceType {
+        pageBindings: {
+            object:${displayGroup.dataSource.insert()};
+        }
+    }
+}
+
+layout=Inspect {
+    component:MetaForm;
+    modal:true;
+}
+
+layout=Global {
+    @actionCategory=Create {
+        @action=Create { }
+    }
+}
+
+@actionCategory=Manage {
+    layout=(SelectionButtonArea, TableRow) {
+        @action=Inspect {
+            traits:instance, pageAction, newContext;
+            visible:true;
+            component:TextButton;
+            bindings: {
+                awcontent:"Inspect";
+            }
+            pageName:MetaContentPage;
+            pageBindings: {
+                object:${ariba.ui.meta.persistence.ObjectContext.get().merge(object)};
+                layout:Inspect;
+                operation:edit;
+                clientPanel:true;
+            }
+        }
+
+        actionType=Detail {
+            @action=BlowUp {
+                traits:instance;
+                actionResults:${ariba.ui.meta.core.UIMeta.getInstance().throwSampleException()};
+            }
+        }
+
+        @action=Delete {
+            traits:instance;
+            actionResults:${
+                ctx = ariba.ui.meta.persistence.ObjectContext.get();
+                ctx.remove(object);
+                ctx.save();
+                ariba.ui.widgets.AribaPageContent.setMessage("Item Deleted", requestContext.session());
+                null};
+
+            displayGroup dataSourceType {
+                actionResults:${
+                    displayGroup.dataSource.delete(object);
+                    null};
+            }
+        }
+    }
+    layout=ButtonArea {
+        @action=Create { }
+    }
+}
+
+/*
+field { label: ${ariba.ui.meta.core.UIMeta.getInstance().throwSampleException()} }
+*/
+
+operation=list {
+    @actionCategory=Manage { visible:true }
+    
+    @field=ActionCol {
+        visible:true;
+        label:"";
+        after:zBottom;
+        component:MetaActionList;
+        bindings: {
+            renderAsMenu:true;
+        }
+    }
+}
+
+module {
+    trait=ModuleClassPage {
+        homePage:MetaContentPage;
+        pageBindings: {
+            class:${properties.moduleClassName};
+            module:Search;
+        }
+    }
+}
+
+module=Search {
+    @layout=SearchTOC {
+       label:"Actions";
+       component:MetaActionList;
+       after:zToc;
+       area:Global;
+    }
+    @layout=SearchPortlet {
+       label:"Search";
+       component:MetaSearch;
+       after:zTop;
+    }
+}

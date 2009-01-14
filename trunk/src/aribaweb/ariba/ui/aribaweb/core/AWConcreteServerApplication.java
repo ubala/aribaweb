@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#44 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#47 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Arrays;
+import java.io.File;
 
 import org.apache.log4j.Level;
 
@@ -135,6 +136,10 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         if (isDebuggingEnabled()) {
             ariba.ui.aribaweb.util.Log.perf_log.setLevel(ariba.util.log.Log.DebugLevel);
             ariba.ui.aribaweb.util.Log.perf_log_detail.setLevel(ariba.util.log.Log.DebugLevel);
+            // if there's not logs directory, then turn off perf logging by default (for non-Ariba installs)
+            if (!(new File("logs")).exists()) {
+                ariba.ui.aribaweb.util.Log.perf_log_trace.setLevel(ariba.util.log.Log.ErrorLevel);
+            }
         }
 
         // PageGenerationSizeCounter
@@ -377,8 +382,25 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
     protected AWResponse _dispatchRequest (AWRequest request)
     {
         AWResponse response = null;
-        String requestHandlerKey = request.requestHandlerKey();
         AWRequestHandler requestHandler = null;
+        requestHandler = requestHandlerForRequest(request);
+
+        if (requestHandler == null) {
+            response = handleMalformedRequest(request,
+                                              "Unable to locate request handler");
+            debugString(
+                    "Unable to locate request handler for key " + request.requestHandlerKey());
+        }
+        if (response == null) {
+            response = requestHandler.handleRequest(request);
+        }
+        return response;
+    }
+
+    AWRequestHandler requestHandlerForRequest (AWRequest request)
+    {
+        AWRequestHandler requestHandler;
+        String requestHandlerKey = request.requestHandlerKey();
         if (requestHandlerKey == null) {
             requestHandler = defaultRequestHandler();
             if (requestHandler == null) {
@@ -387,17 +409,8 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         }
         else {
             requestHandler = requestHandlerForKey(requestHandlerKey);
-            if (requestHandler == null) {
-                response = handleMalformedRequest(request,
-                                                  "Unable to locate request handler");
-                debugString(
-                        "Unable to locate request handler for key " + requestHandlerKey);
-            }
         }
-        if (response == null) {
-            response = requestHandler.handleRequest(request);
-        }
-        return response;
+        return requestHandler;
     }
 
     public AWResponse handleMalformedRequest (String message)

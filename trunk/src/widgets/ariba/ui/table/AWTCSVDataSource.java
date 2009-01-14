@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTCSVDataSource.java#17 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTCSVDataSource.java#18 $
 */
 package ariba.ui.table;
 
@@ -126,6 +126,11 @@ protected Entity (List keys, List classes)
     public List fetchObjects ()
     {
         return objects();
+    }
+
+    public boolean hasChanges()
+    {
+        return false;
     }
 
     public List headings ()

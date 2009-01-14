@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#5 $
 */
 package ariba.ui.meta.core;
 
@@ -31,13 +31,23 @@ import ariba.util.core.Assert;
 import ariba.util.core.ClassExtension;
 import ariba.util.core.ClassExtensionRegistry;
 import ariba.util.core.Fmt;
+import ariba.util.core.Sort;
+
 import java.util.Map;
+import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
 
 public class MetaContext extends AWContainerElement
 {
     protected static final String EnvKey = "MetaContext";
+    protected static final String ValueMapBindingKey = "valueMap";
+    protected static final String ContextKeyBindingKey = "contextKey";
+    protected static final String PushNewContextBindingKey = "pushNewContext";
     AWBindingDictionary _bindings;
-    AWBinding _restoreActivation;
+    AWBinding _contextKeyBinding;
+    AWBinding _valueMapBinding;
+    AWBinding _pushNewContextBinding;
     int _hasMetaRuleChildren;
 
     static {
@@ -59,7 +69,9 @@ public class MetaContext extends AWContainerElement
 
     public void init (String tagName, Map bindingsHashtable)
     {
-        _restoreActivation = (AWBinding)bindingsHashtable.remove("restoreActivation");
+        _valueMapBinding = (AWBinding)bindingsHashtable.remove(ValueMapBindingKey);
+        _contextKeyBinding = (AWBinding)bindingsHashtable.remove(ContextKeyBindingKey);
+        _pushNewContextBinding = (AWBinding)bindingsHashtable.remove(PushNewContextBindingKey);
         _bindings = AWBinding.bindingsDictionary(bindingsHashtable);
         super.init(tagName, null);
     }
@@ -69,6 +81,7 @@ public class MetaContext extends AWContainerElement
         AWBinding[] superBindings = super.allBindings();
         java.util.List bindingVector = _bindings.elementsVector();
         AWBinding[] myBindings = new AWBinding[bindingVector.size()];
+        // Todo: add back _valueMapBinding
         bindingVector.toArray(myBindings);
         return (AWBinding[])(AWUtil.concatenateArrays(superBindings, myBindings));
     }
@@ -79,37 +92,53 @@ public class MetaContext extends AWContainerElement
         boolean didCreate = false;
         AWEnvironmentStack env = component.env();
         Context context = (Context)env.peek(EnvKey);
-        if (context == null) {
-            Assert.that(isPush, "Should always have context on pop");
+        Assert.that(isPush || context != null, "Should always have context on pop");
+        boolean forceCreate = isPush && (_pushNewContextBinding != null && _pushNewContextBinding.booleanValue(component) );
+        if (context == null || forceCreate) {
             UIMeta meta = UIMeta.getInstance();
             context = meta.newContext();
+            ((UIMeta.UIContext)context).setRequestContext(component.requestContext());
             env.push(EnvKey, context);
             didCreate = true;
         }
 
+        if (component.requestContext().currentPhase() == AWRequestContext.Phase_Render) {
+            // if we haven't checked, look for and init embedded MetaRules tags
+            if (_hasMetaRuleChildren == 0) {
+                _hasMetaRuleChildren = initEmbeddedMetaRules(component, context) ? 1 : -1;
+            }
+        }
+
+        // If we have children, push our template on as context
+        if (_hasMetaRuleChildren == 1) {
+            context.merge(MetaRules.TemplateId, component.templateName());
+        }
+
         AWBindingDictionary bindings = _bindings;
         if (isPush) {
-            Context.Activation activation = (_restoreActivation != null)
-                    ? (Context.Activation)_restoreActivation.value(component)
-                    : null;
-            if (activation != null) {
-                context.restoreActivation(activation);
-            } else {
-                context.push();
+            context.push();
+
+            Map <String, Object> values;
+            if (_valueMapBinding != null && ((values = (Map)_valueMapBinding.value(component)) != null)) {
+                // ToDo: sort based on Meta (KeyData) defined rank (e.g. module -> class -> operation ...)
+                // ToDo: cache sort?
+                List<String> sortedKeys = new ArrayList(values.keySet());
+                Collections.sort(sortedKeys);
+                for (String key : sortedKeys) {
+                    context.set(key, values.get(key));
+                }
             }
+
             for (int index = bindings.size() - 1; index >= 0; index--) {
                 AWBinding currentBinding = bindings.elementAt(index);
                 Object value = currentBinding.value(component);
                 String key = bindings.keyAt(index);
                 context.set(key, value);
             }
-            // if we haven't checked, look for and init embedded MetaRules tags
-            if (_hasMetaRuleChildren == 0) {
-                _hasMetaRuleChildren = initEmbeddedMetaRules(component, context) ? 1 : -1;
-            }
-            // If we have children, push our template on as context
-            if (_hasMetaRuleChildren == 1) {
-                context.merge(MetaRules.TemplateId, component.templateName());
+
+            if (_contextKeyBinding != null) {
+                String key = (String)_contextKeyBinding.value(component);
+                context.setContextKey(key);
             }
         } else {
             context.pop();
@@ -145,7 +174,7 @@ public class MetaContext extends AWContainerElement
             super.renderResponse(requestContext, component);
         }
         catch (Exception e) {
-            throw new AWGenericException(Fmt.S("Meta Context: %s", component.env().peek(EnvKey)), e);
+            throwAugmentedException(e, component);
         }
         finally {
             pushPop(false, needCleanup, component);
@@ -157,6 +186,9 @@ public class MetaContext extends AWContainerElement
         boolean needCleanup = pushPop(true, false, component);
         try {
             super.applyValues(requestContext, component);
+        }
+        catch (Exception e) {
+            throwAugmentedException(e, component);
         }
         finally {
             pushPop(false, needCleanup, component);
@@ -170,12 +202,27 @@ public class MetaContext extends AWContainerElement
         try {
             actionResults = super.invokeAction(requestContext, component);
         }
+        catch (Exception e) {
+            throwAugmentedException(e, component);
+        }
         finally {
             pushPop(false, needCleanup, component);
         }
         return actionResults;
     }
 
+    void throwAugmentedException (Exception e, AWComponent component)
+    {
+        // don't add our context if a deeper context already did
+        if ((e instanceof AWGenericException)
+                && (((AWGenericException)e).additionalMessage() != null)
+                && ((AWGenericException)e).additionalMessage().contains("-- Meta Context:")) {
+            throw (AWGenericException)e;
+        }
+        throw AWGenericException.augmentedExceptionWithMessage(
+                Fmt.S("-- Meta Context: %s", ((Context)component.env().peek(EnvKey)).debugString()), e);
+    }
+    
     // Register the accessor "metaContext" on AWComponent
     public static class ComponentClassExtension extends ClassExtension
     {

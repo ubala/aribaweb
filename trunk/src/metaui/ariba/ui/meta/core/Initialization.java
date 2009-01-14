@@ -12,16 +12,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Initialization.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Initialization.java#7 $
 */
 package ariba.ui.meta.core;
 
 import ariba.ui.aribaweb.core.AWConcreteServerApplication;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWNamespaceManager;
 import ariba.ui.validation.AWVFormatterFactory;
 import ariba.ui.widgets.AribaNavigationBar;
 import ariba.ui.widgets.AribaCommandBar;
+import ariba.ui.meta.layouts.MetaHomePage;
 import ariba.util.fieldvalue.FieldValue;
 
 import java.util.Arrays;
@@ -29,21 +31,15 @@ import java.util.Arrays;
 public class Initialization
 {
     private static boolean _DidInit = false;
-    private static boolean _DidPostInit = false;
 
     public static void init ()
-    {
-        preInit();
-        postInit();
-    }
-
-    public static void preInit ()
     {
         if (!_DidInit) {
             _DidInit = true;
 
             // register our resources with the AW
-            AWConcreteServerApplication application = (AWConcreteServerApplication)AWConcreteServerApplication.sharedInstance();
+            AWConcreteApplication application = (AWConcreteApplication)AWConcreteServerApplication.sharedInstance();
+
             String resourceUrl = (String)FieldValue.getFieldValue(application, "resourceUrl");
             AWMultiLocaleResourceManager resourceManager = application.resourceManager();
 
@@ -76,17 +72,27 @@ public class Initialization
 
             AribaNavigationBar.setGlobalNavigationBar(ariba.ui.meta.layouts.MetaNavTabBar.class.getName());
             AribaCommandBar.setGlobalCommandBar(ariba.ui.meta.layouts.MetaNavCommandBar.class.getName());
-        }
-    }
 
-    public static void postInit ()
-    {
-        if (!_DidPostInit) {
-            _DidPostInit = true;
-            UIMeta.getInstance().loadRuleFile("WidgetsRules.oss", true, Meta.SystemRulePriority);
-            if (!UIMeta.getInstance().loadRuleFile("Application.oss", false, Meta.LowRulePriority)) {
-                UIMeta.getInstance().loadRuleFromResourceNamed("Application.oss");
-            }
+            ariba.ui.meta.core.Log.meta.setLevel(ariba.util.log.Log.DebugLevel);
+            // ariba.ui.meta.core.Log.meta_detail.setLevel(ariba.util.log.Log.DebugLevel);
+            // ariba.ui.meta.core.Log.meta_context.setLevel(ariba.util.log.Log.DebugLevel);
+
+            // force init
+            UIMeta.getInstance();
+
+            application.registerDidInitCallback(new AWConcreteApplication.DidInitCallback() {
+                public void applicationDidInit (AWConcreteApplication application) {
+                    // Default the home page
+                    if (application.resourceManager().packageResourceNamed(application.mainPageName()+".awl") == null) {
+                        application.setMainPageName(MetaHomePage.class.getName());
+                    }
+
+                    UIMeta.getInstance().loadRuleFile("WidgetsRules.oss", true, Meta.SystemRulePriority);
+                    if (!UIMeta.getInstance().loadRuleFile("Application.oss", false, Meta.LowRulePriority)) {
+                        UIMeta.getInstance().loadRuleFromResourceNamed("Application.oss");
+                    }
+                }
+            });
         }
     }
 }

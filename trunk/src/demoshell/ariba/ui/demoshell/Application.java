@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/Application.java#60 $
+    $Id: //ariba/platform/ui/demoshell/ariba/ui/demoshell/Application.java#63 $
 */
 
 package ariba.ui.demoshell;
@@ -29,6 +29,8 @@ import ariba.ui.aribaweb.core.AWResponse;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWSession;
 import ariba.ui.aribaweb.core.AWSessionValidator;
+import ariba.ui.aribaweb.core.AWLocalLoginSessionHandler;
+import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
 import ariba.ui.servletadaptor.AWServletApplication;
 import ariba.ui.servletadaptor.AWServletResourceManager;
 import ariba.ui.widgets.TopFrameRedirect;
@@ -80,6 +82,9 @@ public class Application extends AWServletApplication
         // handle default app actions
         Widgets.initialize();
 
+        // Force initialization now so that resources are registered during init
+        DemoShell.sharedInstance();
+
         // Enable use of BCEL compiled bindings
         // CompiledAccessorFactory.setAccessThresholdToCompile(1);
 
@@ -116,16 +121,26 @@ public class Application extends AWServletApplication
         // ariba.ui.aribaweb.util.Log.domsync.setLevel(ariba.util.log.Log.DebugLevel);
         // ariba.ui.aribaweb.util.Log.servletadaptor.setDebugOn(true);
         ariba.ui.widgets.Log.widgets.setLevel(ariba.util.log.Log.DebugLevel);
-        ariba.ui.demoshell.Log.demoshell.setLevel(ariba.util.log.Log.DebugLevel);
         // ariba.ui.demoshell.Log.util.setLevel(ariba.util.log.Log.DebugLevel);
 
+        Log.demoshell.setLevel(ariba.util.log.Log.DebugLevel);
+        ariba.ui.meta.core.Log.meta.setLevel(ariba.util.log.Log.DebugLevel);
+        ariba.ui.meta.core.Log.meta_detail.setLevel(ariba.util.log.Log.DebugLevel);
+
         Log.demoshell.debug("******** Demoshell Logging!! **********");
-        
-        // turn on perf measurement
-        if (isDebuggingEnabled()) {
-            ariba.ui.aribaweb.util.Log.perf_log.setLevel(ariba.util.log.Log.DebugLevel);
-            // ariba.ui.aribaweb.util.Log.perf_log_detail.setLevel(ariba.util.log.Log.DebugLevel);
-        }
+    }
+
+    public void initSessionValidator ()
+    {
+        if (_sessionValidator == null) setSessionValidator(new AWLocalLoginSessionHandler() {
+            protected AWResponseGenerating showLoginPage (AWRequestContext requestContext,
+                                                          CompletionCallback callback)
+            {
+                LoginPage loginPage = (LoginPage)requestContext.pageWithName(LoginPage.class.getName());
+                loginPage.init(callback);
+                return loginPage;
+            }
+        });
     }
 
     // we override to return an alternate start page

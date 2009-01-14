@@ -1,0 +1,31 @@
+/*
+    Rules.oss -- Meta-data rules
+
+    These are auto-loaded (lazily) when any component in this java package is
+    referenced in the rules
+*/
+
+class=example.ui.busobj.User {
+    field=(firstName, lastName, email, password) { traits:required }
+    field=email { label:"E-mail" }
+    field=bio {
+        editing {
+            editable:${object.rating > 50}
+        }
+    }
+    field=password {
+        valid:${value.length > 5 ? true : "Bad password, dude" }
+        operation=view {  visible:${value && value!=""}; label:"PSS" }
+    }
+
+    operation=edit {
+        field=birthDay { editable:false; }
+    }
+
+    /* Says that if object (User) isSuspended then all fields should be not editable */
+    field {
+        object {
+            editable:${!object.isSuspended};
+        }
+    }
+}

@@ -449,7 +449,7 @@ ariba.Chooser = function() {
                 return e.tagName == "SPAN" && Dom.hasClass(e, "chMatches");
             });
             chooserInfo.searchPattern = '';
-            chooserInfo.validSelection = chooserInfo.textField.value != '' && !isInvalid;
+            chooserInfo.validSelection = this.hasSelection(chooserInfo) && !isInvalid;
             chooserInfo.fullMatchCheckbox = Dom.findChildUsingPredicate(wrapper, function (e) {
                 return e.tagName == "INPUT" && Dom.hasClass(e, "chfullMatch");
             });
@@ -507,6 +507,18 @@ ariba.Chooser = function() {
 
             chooserInfo.textTimeoutId = null;
             chooserInfo.keyDownTimeoutId = null;
+        },
+
+        hasSelection : function (chooserInfo)
+        {
+            var v = chooserInfo.textField.value;
+            return v !='' && v != chooserInfo.noSelectionValue;
+        },
+
+        initiallyHadSelection : function (chooserInfo)
+        {
+            var v = chooserInfo.initValue;
+            return v != '' && v != chooserInfo.noSelectionValue;
         },
 
         getChooserInfo : function (elm)
@@ -603,7 +615,7 @@ ariba.Chooser = function() {
         checkChooserText : function (chooserInfo)
         {
             if (!chooserInfo.validSelection) {
-                if (chooserInfo.initValue != '') {
+                if (this.initiallyHadSelection(chooserInfo)) {
                     if (chooserInfo.multiSelect) {
                         chooserInfo.validSelection = true;
                         chooserInfo.textField.value = chooserInfo.initValue;
@@ -613,9 +625,8 @@ ariba.Chooser = function() {
                 }
                 else {
                     Dom.addClass(chooserInfo.textField, 'chNoSelection');
-                    if (chooserInfo.initValue == '') {
+                    if (chooserInfo.textField.value != chooserInfo.noSelectionValue)
                         chooserInfo.textField.value = chooserInfo.noSelectionValue;
-                    }
                 }
                 this.chooserPickListMode(chooserInfo);
             }
@@ -758,12 +769,12 @@ ariba.Chooser = function() {
             Debug.log('focus ' + sourceElm.tagName + ' ' + sourceElm.id + ' ' + elm.tagName, 5);
             if (chooserInfo.mode == AWChooserPickListMode &&
                 sourceElm == chooserInfo.textField) {
-                if (chooserInfo.textField.value == chooserInfo.noSelectionValue) {
+                if (!this.hasSelection(chooserInfo)) {
                     Dom.removeClass(chooserInfo.textField, 'chNoSelection');
                     chooserInfo.textField.value = '';
                     chooserInfo.searchPattern = '';
                 }
-                chooserInfo.textField.select();
+                // chooserInfo.textField.select();
             }
             return false;
         },
@@ -787,8 +798,9 @@ ariba.Chooser = function() {
                 var chooserBlur = function () {
                     if (this.isValidChooser(chooserInfo)) {
                         if (!chooserInfo.multiSelect || !this.addMode(chooserInfo)) {
-                            if (chooserInfo.textField.value != chooserInfo.initValue ||
-                                chooserInfo.isInvalid) {
+                            if (((this.hasSelection(chooserInfo) || this.initiallyHadSelection(chooserInfo))
+                                    && (chooserInfo.textField.value != chooserInfo.initValue)) ||
+                                        chooserInfo.isInvalid) {
                                 this.initChooserFullMatch(chooserInfo);
                             }
                             else {
@@ -797,7 +809,7 @@ ariba.Chooser = function() {
                         }
                         else {
                             // multi && added
-                            if (chooserInfo.textField.value == '' && !chooserInfo.isInvalid) {
+                            if (!this.hasSelection(chooserInfo) && !chooserInfo.isInvalid) {
                                 this.checkChooserText(chooserInfo);
                             }
                             else {
@@ -915,7 +927,7 @@ ariba.Chooser = function() {
                 if (sourceElm == chooserInfo.textField &&
                     elm == chooserInfo.textField) {
                     Menu.hideActiveMenu();
-                    if (chooserInfo.initValue != '') {
+                    if (this.initiallyHadSelection(chooserInfo)) {
                         this.chooserSetFocus(chooserInfo);
                         this.chooserPickListMode(chooserInfo);
                         chooserInfo.validSelection = false;

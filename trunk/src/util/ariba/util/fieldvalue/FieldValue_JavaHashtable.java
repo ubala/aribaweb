@@ -12,10 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue_JavaHashtable.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue_JavaHashtable.java#4 $
 */
 
 package ariba.util.fieldvalue;
+
+import ariba.util.core.ClassUtil;
 
 import java.util.Map;
 
@@ -47,6 +49,37 @@ public class FieldValue_JavaHashtable extends FieldValue_Object
 
     // Note: Below we reverse the sense of which is a primitive -- the String
     // versions become the primitives and the FieldPath versions call the string versions.
+
+    /**
+     Recursively calls getFieldValuePrimitive() with the head of the fieldPath
+     list up to the last fieldPath node and then calls setFieldValuePrimitive().
+     Each time the recursion iterates, the receiver is the value of the
+     previous getFieldValuePrimitive().
+
+     * Unlike the base implementation, if a dotted path assigment is made to a missing
+       property, the intermediate Map is created on-demand (i.e. a set to "a.b" where
+       there is no "a" defined will create a map for a, then recurse.
+
+    @param target a java.util.Map into which the value will be put at key
+    @param fieldPath the key used to put value into receiver (a java.util.Map)
+    @param value the value to put into the receiver (a java.util.Map)
+    */
+    public void setFieldValue (Object target,
+                               FieldPath fieldPath, Object value)
+    {
+        FieldPath fieldPathCdr = fieldPath._nextFieldPath;
+        if (fieldPathCdr == null) {
+            setFieldValuePrimitive(target, fieldPath, value);
+        }
+        else {
+            Object nextTargetObject = getFieldValuePrimitive(target, fieldPath);
+            if (nextTargetObject == null) {
+                nextTargetObject = ClassUtil.newInstance(target.getClass());
+                ((Map)target).put(fieldPath.car(), nextTargetObject);
+            }
+            fieldPathCdr.setFieldValue(nextTargetObject, value);
+        }
+    }
 
     /**
     Uses the fieldName of the first node of fieldPath as the key to the receiver

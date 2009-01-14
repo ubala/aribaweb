@@ -1,4 +1,4 @@
-AribaWeb README file, May 2008
+AribaWeb README file, June 2008
 
 INTRODUCTION
 
@@ -15,7 +15,7 @@ INTENDED AUDIENCE
     remedied in the next few months.  Until then, if you don't already know how to use
     AribaWeb, you're likely to get discouraged if you try now.  Check back later!  :-)
 
-Version 0.8 (BETA)
+Version 0.8.2 (BETA)
     Although most of the libraries in this distribution has been incorporated in a
     variety of Ariba commercial application releases over as many as 9 years, this
     is its first release in OpenSource form and there are, therefore, likely issues
@@ -27,8 +27,9 @@ Version 0.8 (BETA)
 Running Examples
     - Install the Java5 or Java6 JDK (http://java.sun.com/javase/downloads/index_jdk5.jsp)
         - set your JAVA_HOME
-    - Install Apache Tomcat 5.5 Core (http://tomcat.apache.org/download-55.cgi)
+    - Install Apache Tomcat 5.5** Core (http://tomcat.apache.org/download-55.cgi)
         - set your CATALINA_HOME environment variable to your tomcat install directory
+            ** for Tomcat 6, replace ./conf/catalina.properties with the one from the Tomcat6 distro
     - Install Ant v1.7+ (http://ant.apache.org/)
         - set your ANT_HOME environment variable to your Ant install directory
     I.e.:
@@ -38,7 +39,7 @@ Running Examples
         export PATH="$JAVA_HOME/bin;$ANT_HOME/bin;$PATH"
 
     - from a shell cd'd to the main AW directory do:
-            % ant -f src/build.xml tomcat
+            % ant
             
     - You can now access the samples in your browser)via:
         http://localhost:8080/Simple/AribaWeb
@@ -50,9 +51,13 @@ Running Examples
 Directories
     lib/        The aribaweb jars
     lib-ext/    Third-party libraries used either at build time or runtime
-    src/        Source code for the AribaWeb jars, samples, and build files
+    src/        Source code for the AribaWeb jars
+    examples/   A few examples of using AribaWeb
     webapps/    WAR files for AW sample/demo applications (fully self-contained, with jars and resources)
-
+    conf/       A pre-packaged Tomcat (5.5) BASE directory that allows you to run
+                tomcat directly on this install (without moving files into your
+                default CATALINA_HOME/BASE)
+                
 Lib Details:
     ariba.util.jar
         Low-level utility classes used by the other AW components.  Includes logging,
@@ -104,33 +109,39 @@ Lib Details:
         rapid development of functional prototypes using AW components and server-side
         JavaScript (Rhino) or Groovy scripting.
 
-        This source directory includes a "site" directory containing many examples
-        of using popular Widgets (e.g. DataTable, PivotTable, etc)
+        This examples directory includes a "demoshell-site" directory for use with
+        demoshell (see below)
 
-      Note: this jar contains webserver resources in docroot/** that need to be
-      copied to any application deployment WAR file.
+        Note: this jar contains webserver resources in docroot/** that need to be
+        copied to any application deployment WAR file.
 
-
-Src Details
+Src/ Details
     BUILD.txt
         Read this for instructions on how to build the AribaWeb distribution from source
 
     util, aribaweb, widgets, expr, metaui, demoshell/
         Correspond to the above-described jars
 
-    samples/
-        Contains a few simple AW sample applications
-            simple/
-                A single-component "Guest Book" mini app (see Main.{awl, java})
-            BusObjUI
-                Defines a few business objects (in busobj package) and then uses
-                metaui (in UserForm.*) and hand coded (in StartPage.*) to manipulate them.
-
-                Also includes ExplorerPage.*: a Outline/Table-based file system browser.
-
     build.xml / build-support
         Ant build files.  Each source sub-directory has a build.xml file that references
         shared build rules in the build-support directory
 
+
+examples/
+    Contains a few simple AW sample applications
+        simple/
+            A single-component "Guest Book" mini app (see Main.{awl, java})
+
+        BusObjUI/
+            Defines a few business objects (in busobj package) and then uses
+            metaui (in UserForm.*) and hand coded (in StartPage.*) to manipulate them.
+
+            Also includes ExplorerPage.*: a Outline/Table-based file system browser.
+
+        demoshell-site/
+            A demoshell (Demo.war) "site root" containing many examples of using popular
+            Widgets (e.g. DataTable, PivotTable, etc) and well as some more complex
+            "mini apps" (e.g. The TnE Master Detail editor).  You serve this directory
+            using the Demo.war webapp (and setting ARIBA_DEMOSHELL_HOME appropriately)
 
 This software is covered under the Apache License Version 2.0 (see LICENSE.txt)

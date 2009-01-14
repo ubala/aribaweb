@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#20 $
+    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#21 $
 */
 
 
@@ -297,8 +297,8 @@ public final class IOUtil
             catch (IOException ioe) {
             }
             throw uee;
-       }
-       return result;
+        }
+        return result;
     }
 
     /**
@@ -636,9 +636,13 @@ public final class IOUtil
         int read = 0;
         while (readLength > 0 && (read=input.read(buffer, 0, readLength)) != -1)
         {
-            output.write(buffer, 0, read);
-            if (flushOutput) {
-                output.flush();
+            // there is code which can call spool with null output param
+            // see: inputStreamToOutputStream ()
+            if (output != null) {
+                output.write(buffer, 0, read);
+                if (flushOutput) {
+                    output.flush();
+                }
             }
             result += read;
             readLength = (int)Math.min(buffer.length, length - result);

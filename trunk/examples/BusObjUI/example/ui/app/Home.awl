@@ -1,0 +1,15 @@
+<w:BasicPageWrapper>
+    <h1>Welcome to the BusObjUI Samples!</h1>
+    <w:HintMessage>Please <b>Click one of the tabs above</b>
+    or try one of these buttons...
+    </w:HintMessage>
+    <br/>
+    <br/>
+    <w:TextButton action='${pageWithName("BasicForm")}'>Business Object Form</w:TextButton>
+    <br/>
+    <br/>
+    <w:TextButton action='${pageWithName("MetaUIForms")}'>Meta-Data-generated Form</w:TextButton>
+    <br/>
+    <br/>
+    <w:TextButton action='${pageWithName("ExplorerPage")}'>File Explorer</w:TextButton>
+</w:BasicPageWrapper>

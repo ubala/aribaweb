@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#42 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#44 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -66,6 +66,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public final class AWUtil extends AWBaseObject
 {
@@ -91,6 +93,9 @@ public final class AWUtil extends AWBaseObject
     private static GrowOnlyHashtable EncodedHtmlAttributes = new GrowOnlyHashtable();
     private static AWClassLoader TheClassLoader = new AWDefaultClassLoader();
     private static Map _environment = null;
+    public static final char BeginQueryChar = '?';
+    public static final String TokenizerDelim ="&";
+    public static final char Equals = '=';
 
     // ** Thread Safety Considerations: LocalesByBrowserLanguageString require locking -- everything else is either immutable or not shared.
 
@@ -610,6 +615,28 @@ public final class AWUtil extends AWBaseObject
         }
         buf.appendStringRange(originalString, oldoffset, originalStringLength);
 
+        return buf.toString();
+    }
+
+    static Pattern _LeadingSpacesPattern = Pattern.compile("(?m)^(\\s+)");
+
+    public static String replaceLeadingSpacesWithNbsps (String str)
+    {
+        // todo: support for tabs?
+        Matcher m = _LeadingSpacesPattern.matcher(str);
+        StringBuffer buf = new StringBuffer();
+        while (m.find()) {
+            int spaceCount = m.group(1).length();
+            m.appendReplacement(buf, AWUtil.repeatedString("&nbsp;", spaceCount));
+        }
+        m.appendTail(buf);
+        return buf.toString();
+    }
+
+    public static String repeatedString (String str, int count)
+    {
+        FastStringBuffer buf = new FastStringBuffer(count * str.length());
+        for (int i=0; i<count; i++) buf.append(str);
         return buf.toString();
     }
 
@@ -2050,6 +2077,33 @@ public final class AWUtil extends AWBaseObject
                 }
             }
         }
+    }
+
+    public static Map parseParameters (String url)
+    {
+        Map map = MapUtil.map();
+        int startIndex = url.indexOf(BeginQueryChar);
+        if (startIndex == url.length() -1) {
+            return map;
+        }
+        url = url.substring(startIndex+1);
+        StringTokenizer st = new StringTokenizer(url, TokenizerDelim);
+        while (st.hasMoreTokens()) {
+            String token = st.nextToken();
+            int indexOfEquals = token.indexOf(Equals);
+
+            if (indexOfEquals != -1) {
+                String key = token.substring(0, indexOfEquals);
+                if (indexOfEquals == token.length()) {
+                    map.put(key, "");
+                }
+                else {
+                    String value = token.substring(indexOfEquals+1, token.length());
+                    map.put(key, value);
+                }
+            }
+        }
+        return map;
     }
 
     public static String queryValue (Map queryValues, String key)

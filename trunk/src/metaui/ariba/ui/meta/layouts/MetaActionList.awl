@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.awl#4 $
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.awl#7 $
     </Copyright>
 
     <Overview>
@@ -25,10 +25,18 @@
     </Binding>
 
     <Binding key="renderAsMenu" direction="get" type="boolean" default="$false">
-        Should render as PopupMenu (versus BucketTOC)
+        Should render as PulldownMenuButton (versus BucketTOC)
     </Binding>
 
-    <Binding key="menuButtonLabel" direction="get" type="String" default="$false">
+    <Binding key="renderAsMenuLink" direction="get" type="boolean" default="$false">
+        Should render as PopupMenuLink -- your link label should be the component Content
+    </Binding>
+
+    <Binding key="renderAsButtons" direction="get" type="boolean" default="$false">
+        Should render as set of TextButtons
+    </Binding>
+
+    <Binding key="menuButtonLabel" direction="get" type="String" default="Actions">
         Label for menu button
     </Binding>
 
@@ -36,32 +44,72 @@
         Wrap content in AWLazyDiv (i.e. defer rendering until menu opened)
     </Binding>
 
+    <NamedContent name="menuLabel" required="$false">
+        Content to be placed in the menuLink/Button (after the menuButtonLabel)
+    </NamedContent>
+
+    <NamedContent name="menuItems" required="$false">
+        Extra menu items to be placed at the top of the generated PopupMenu
+    </NamedContent>
 </a:Api>\
-<a:If ifTrue="$^renderAsMenu">\
-    <a:SetValue menuId="$requestContext.nextElementId"/>\
-    <w:PulldownButton menuId="$menuId"><a:String value="$^menuButtonLabel"/></w:PulldownButton>\
-    <w:PopupMenu menuId="$menuId">\
-        <a:LazyDiv ifTrue="$^menuLazy">
-            <a:For list="$actionCategories" item="$actionCategory">\
-                <a:If ifTrue="$actions">\
-                    <w:PopupMenuHeading>$actionCategory.properties.label</w:PopupMenuHeading>
-                    <a:For list="$actions" item="$action">\
-                        <w:PopupMenuItem action="$actionClicked">$action.properties.label"</w:PopupMenuItem>
-                    </a:For>
-                </a:If>
+<a:If ifTrue="$^renderAsButtons">\
+    <a:For list="$actionCategories" item="$actionCategory">\
+        <m:Context actionCategory="$actionCategory.name">
+            <a:For list="$actions" item="$action">\
+                <m:Context action="$action.name">
+                    <w:TextButton action="$actionClicked">$metaContext.properties.label</w:TextButton>
+                </m:Context>
             </a:For>
-        </a:LazyDiv>
-    </w:PopupMenu>\
+        </m:Context>
+    </a:For>
+<a:Else ifTrue="$^renderAsMenu"/>\
+    <a:SetValue menuId="$requestContext.nextElementId"/>\
+    <w:PulldownButton menuId="$menuId">\
+        <a:String value="$^menuButtonLabel:$[]Actions"/>\
+        <a:IncludeContent name="menuLabel" required="$false"/>\
+    </w:PulldownButton>\
+    <a:IncludeBlock name="Menu"><a:IncludeContent name="menuItems" required="$false"/></a:IncludeBlock>
+<a:Else ifTrue="$^renderAsMenuLink"/>\
+    <a:SetValue menuId="$requestContext.nextElementId"/>\
+    <w:PopupMenuLink menuId="$menuId">
+        <a:String value="$^menuButtonLabel:$[]Actions"/>\
+        <a:IncludeContent name="menuLabel"  required="$false"/>\
+    </w:PopupMenuLink>\
+    <a:IncludeBlock name="Menu"><a:IncludeContent name="menuItems" required="$false"/></a:IncludeBlock>
 <a:Else/>\
     <w:BucketsTOC>
         <a:For list="$actionCategories" item="$actionCategory">\
             <a:If ifTrue="$actions">\
-                <w:BucketHeading label="$actionCategory.properties.label">
-                    <a:For list="$actions" item="$action">\
-                        <w:BucketItem label="$action.properties.label" action="$actionClicked"/>
-                    </a:For>
-                </w:BucketHeading>
+                <m:Context actionCategory="$actionCategory.name">
+                    <w:BucketHeading label="$metaContext.properties.label">
+                        <a:For list="$actions" item="$action">\
+                            <m:Context action="$action.name">
+                                <w:BucketItem label="$metaContext.properties.label" action="$actionClicked"/>
+                            </m:Context>
+                        </a:For>
+                    </w:BucketHeading>
+                </m:Context>
             </a:If>
         </a:For>
     </w:BucketsTOC>
 </a:If>\
+\
+<a:Block name="Menu">\
+    <w:PopupMenu menuId="$menuId">\
+        <a:IncludeContent/>
+        <a:LazyDiv ifTrue="$^menuLazy">
+            <a:For list="$actionCategories" item="$actionCategory">\
+                <a:If ifTrue="$actions">\
+                    <m:Context actionCategory="$actionCategory.name">\
+                        <w:PopupMenuHeading>$metaContext.properties.label</w:PopupMenuHeading>
+                        <a:For list="$actions" item="$action">\
+                            <m:Context action="$action.name">
+                                <w:PopupMenuItem action="$actionClicked">$metaContext.properties.label</w:PopupMenuItem>
+                            </m:Context>
+                        </a:For>
+                    </m:Context>
+                </a:If>
+            </a:For>
+        </a:LazyDiv>
+    </w:PopupMenu>\
+</a:Block>\

@@ -213,7 +213,14 @@ ariba.Widgets = function() {
                 if (outer) panelInset += Dom.absoluteLeft(inner) - Dom.absoluteLeft(outer)
                 if (elm) panelInset += Dom.minInsetWidth(inner, elm);
             }
-            return Dom.getWindowSize()[0] - panelInset * 2;
+            // -20 is fudge factor for possible scrollbar
+            return Dom.getWindowSize()[0] - panelInset * 2 - 20;
+        },
+
+        panelMaxHt : function (panel)
+        {
+            var ws = Dom.getWindowSize();
+            return ws[1] - 2;
         },
 
         checkPanelHeight : function (target)
@@ -322,8 +329,8 @@ ariba.Widgets = function() {
         */
         macMozScrollCheck : function ()
         {
-            // Todo: can disable if Firefox 3.0+
-            if (!navigator.userAgent.match(/Mozilla.+Macintosh.+/)) return;
+            // Only apply to Firefox 2.x (Firefox  3.0+ doesn't have the problem)
+            if (!navigator.userAgent.match(/Mozilla.+Macintosh.+Firefox\/2.+/)) return;
 
             var didBlur = true;
             function fix() {

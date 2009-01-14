@@ -37,7 +37,7 @@
 </a:If>\
 \
 <a:Block name="Column">\
-    <m:Context restoreActivation="$thisColumn.fieldInfo.activation" object="$_currentItem">\
+    <m:Context field="$thisColumn.fieldInfo.name" object="$_currentItem">\
         <m:IncludeComponent/>\
     </m:Context>\
 </a:Block>\

@@ -1,0 +1,23 @@
+<w:BasicPageWrapper hasForm="$true">
+    <h1>Hello World!</h1>
+
+    <w:FormTable>
+        <w:FormRow label="Name">
+            <a:TextField value="$current.name"/>
+        </w:FormRow>
+        <w:FormRow label="Comment">
+            <a:TextArea value="$current.comment"/>
+        </w:FormRow>
+        <w:FormRow>
+            <w:TextButton action="$add">Add</w:TextButton>
+        </w:FormRow>
+    </w:FormTable>
+
+    <h2>Past Comments</h2>
+
+    <a:For item="$item" list="$entries">
+        <hr/>
+        <b><a:String value="$item.name"/> </b> wrote:<br/>
+        <i><a:String value="$item.comment"/></i><br/>
+    </a:For>
+</w:BasicPageWrapper>

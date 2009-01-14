@@ -1,0 +1,13 @@
+<w:HintMessage>
+    Simple example of Meta-Data derived form UI.  Try clicking
+    Save to see how the validation framework comes into play.
+</w:HintMessage>
+
+<m:Context object="$user" operation="edit">
+    <!-- The whole from comes from THIS!  The bindings (i.e. user, operation)
+         in its containing context dictate what gets generated here -->
+    <!--<pre>$metaContext.debugString</pre>-->
+    <m:Form/>
+</m:Context>
+
+<w:TextButton action="$save">Save</w:TextButton>

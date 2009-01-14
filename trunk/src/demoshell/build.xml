@@ -38,6 +38,14 @@
         </copy>
     </target>
 
+    <fileset id="module.libs" dir="${lib.dir}">
+        <include name="js.jar"/>
+    </fileset>
+
+    <fileset id="module.libs2" dir="${lib-internal.dir}">
+        <include name="groovy-all.jar"/>
+    </fileset>
+        
     <fileset id="war.jars" dir="${build.jars.dir}">
         <include name="ariba.demoshell.jar"/>
     </fileset>

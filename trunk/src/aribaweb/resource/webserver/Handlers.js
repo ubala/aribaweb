@@ -48,12 +48,12 @@ ariba.Handlers = function() {
                 if (selectedPopupValue == 'awaction') {
                     formObject = popup.form;
                     Dom.addFormField(formObject, Request.AWSenderIdKey, selectedOption.id);
-                    Request.submitForm(formObject);
+                    Request.submitForm(formObject, null, null, true);
                 }
                 else {
                     formObject = popup.form;
                     Dom.addFormField(formObject, Request.AWSenderIdKey, popup.name);
-                    Request.submitForm(formObject);
+                    Request.submitForm(formObject, null, null, true);
                 }
                 return true;
             }

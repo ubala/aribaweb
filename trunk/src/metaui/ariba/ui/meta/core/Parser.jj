@@ -21,7 +21,7 @@
 
 options {
       // Parser options
-    LOOKAHEAD           = 2;
+    LOOKAHEAD = 2;
     // FORCE_LA_CHECK      = true;
     STATIC              = false;
     JAVA_UNICODE_ESCAPE = true;
@@ -33,6 +33,7 @@ PARSER_BEGIN(Parser)
 package ariba.ui.meta.core;
 
 import ariba.util.core.Fmt;
+import ariba.util.core.ListUtil;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.io.BufferedReader;
@@ -78,22 +79,41 @@ void addRulesWithPredicate (List contextPreds) : {
 
 /* one rule */
 void rule (List contextPreds) : {
-    List preds;
+    List preds = null;
+    Token t;
+    Map props = null;
 }
 {
     preds=predicateList() { if (contextPreds != null) preds.addAll(0, contextPreds); }
-    "{" processRuleBody(preds) "}"
+    [ ("#" t=<IDENT>)
+        {
+            props = new HashMap();
+            props.put("traits", t.image);
+            Meta.Predicate p = (Meta.Predicate)ListUtil.lastElement(preds);
+            if (p._value == Meta.KeyAny) p._value = t.image;
+        }
+    ]
+    (
+        (
+            "{" processRuleBody(preds, props) "}"
+        )
+      |
+        (
+            ";" {  _meta.addRule( new Meta.Rule(preds, props)); }
+        )
+    )
 }
 
-void processRuleBody(List preds) : {
-    Map props = null;
+void processRuleBody(List preds, Map props) : {
     Object k, v;
+    boolean isOverride = false;
 }
 {
     (
         (
-            k=key() ":" v=value()
+            k=key() ":" v=value() ["!" { isOverride = true; }]
             { if (props == null) props = new HashMap();
+              if (isOverride) v = new Meta.OverrideValue(v);
               props.put(k, v); }
             [ ";" ]
         )
@@ -122,15 +142,22 @@ List predicateList () : {
 
 Meta.Predicate predicate () : {
     Token t;
-    Object value = Boolean.TRUE;
+    Object value = Meta.KeyAny;
     boolean isDecl = false;
 }
 {
     ["@" { isDecl = true; }]
-    t=<IDENT> ["=" (value=simpleValue() | ( "(" value=valueOrList() ")") )]
-    {
-        return new Meta.Predicate(t.image, value, isDecl);
-    }
+    (
+        t=<IDENT> ["=" (value=simpleValue() | ( "(" value=valueOrList() ")") )]
+        {
+            return new Meta.Predicate(t.image, value, isDecl);
+        }
+      |
+        "~" t=<IDENT>
+        {
+            return new Meta.Predicate(t.image, Meta.NullMarker, isDecl);
+        }
+    )
 }
 
 /* Should add support for Lists and sub-maps */
@@ -219,6 +246,7 @@ Map map () : {
                 k=key() ":" v=value()
                 { m.put(k, v); }
             )
+
             (
                 ";"
                 k=key() ":" v=value()

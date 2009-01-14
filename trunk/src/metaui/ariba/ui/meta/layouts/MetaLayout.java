@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaLayout.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaLayout.java#3 $
 */
 package ariba.ui.meta.layouts;
 
@@ -30,7 +30,7 @@ import java.util.Map;
 public class MetaLayout extends AWComponent
 {
     protected List<ItemProperties> _allLayouts;
-    protected Map<String, List<ariba.ui.meta.core.ItemProperties>> _layoutsByZones;
+    protected Map<String, Object> _layoutsByZones;
     protected ItemProperties _layout;
     protected Meta.PropertyMap _propertyMap;
 
@@ -58,7 +58,7 @@ public class MetaLayout extends AWComponent
         return _allLayouts;
     }
 
-    public Map<String, List<ItemProperties>> layoutsByZones ()
+    public Map<String, Object> layoutsByZones ()
     {
         if (_layoutsByZones == null) {
             Context context = MetaContext.currentContext(this);
@@ -88,8 +88,7 @@ public class MetaLayout extends AWComponent
     {
         if (_propertyMap == null) {
             Context context = MetaContext.currentContext(this);
-            context.push();
-            context.set(UIMeta.KeyLayoutProperties, true);
+            context.push();  
             _propertyMap = context.allProperties();
             context.pop();
         }

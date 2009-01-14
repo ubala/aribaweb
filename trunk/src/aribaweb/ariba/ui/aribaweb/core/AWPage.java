@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#111 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#114 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -45,6 +45,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.io.File;
@@ -602,7 +603,7 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
                 PerformanceState.getThisThreadHashtable().setToBeContinued(true);
             }
             _requestContext.setResponse(redirectResponse);
-            response.setDeferred(true);
+            if (!_requestContext.forceRerenderRequired()) response.setDeferred(true);
 
             browserState._incrementalRefreshCount = 0;
         }
@@ -730,6 +731,10 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
         _foregroundErrorManager = null;
         AWErrorManager.AWNewErrorManager errorManager = (AWErrorManager.AWNewErrorManager)errorManager();
         errorManager.setPhase(AWErrorManager.RenderPhase);
+
+        if (_LifecycleListeners != null) {
+            for (LifecycleListener l : _LifecycleListeners) l.pageWillRender(this);
+        }
 
         _pageComponent._topLevelRenderResponse(_requestContext, _pageComponent);
         if (_requestContext._debugShouldRecord()) {
@@ -888,6 +893,26 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     /////////////////
     // Awake/Sleep
     /////////////////
+    public interface LifecycleListener
+    {
+        // called before awake (but after requestContext assigned)
+        void pageWillAwake (AWPage page);
+
+        // called before render() passed on the pageComponent
+        void pageWillRender (AWPage page);
+
+        // called before sleep (and before requestContext removed)
+        void pageWillSleep (AWPage page);
+    }
+
+    private static List<LifecycleListener> _LifecycleListeners = null;
+
+    public static void registerLifecycleListener (LifecycleListener listener)
+    {
+        if (_LifecycleListeners == null) _LifecycleListeners = new ArrayList();
+        _LifecycleListeners.add(listener);
+    }
+
     public void awake ()
     {
         // default is to do nothing
@@ -908,6 +933,11 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
                         null, _pageComponent, AWElementIdPath.emptyPath());
                 setPageComponent(component);}
         }
+        // pageWillAwake() notification
+        if (_LifecycleListeners != null) {
+            for (LifecycleListener l : _LifecycleListeners) l.pageWillAwake(this);
+        }
+
         _pageComponent.ensureAwake(this);
     }
 
@@ -926,6 +956,9 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
                     AWComponent currentSubcomponent = (AWComponent)subcomponentIterator.next();
                     currentSubcomponent.ensureAsleep();
                 }
+            }
+            if (_LifecycleListeners != null) {
+                for (LifecycleListener l : _LifecycleListeners) l.pageWillSleep(this);
             }
             sleep();
             setRequestContext(null);

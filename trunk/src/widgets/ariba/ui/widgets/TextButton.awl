@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.awl#39 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.awl#40 $
     </Copyright>
 
     <Overview>
@@ -176,11 +176,11 @@
     <a:If ifTrue="$useLeftRightWrapper">\
         <table cellpadding="0" cellspacing="0">\
             <tr>\
-                <td class="btnL"></td>\
+                <td class="btnL"><div></div></td>\
                 <td class="btnC">\
                     <a:IncludeContent/>\
                 </td>\
-                <td class="btnR"></td>\
+                <td class="btnR"><div></div></td>\
             </tr>\
         </table>\
     <a:Else/>\

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaIncludeComponent.java#3 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaIncludeComponent.java#5 $
 */
 package ariba.ui.meta.core;
 
@@ -29,6 +29,7 @@ import ariba.util.core.Fmt;
 import ariba.util.fieldvalue.FieldPath;
 
 import java.util.Map;
+import java.util.List;
 
 public class MetaIncludeComponent extends AWIncludeComponent
 {
@@ -62,7 +63,7 @@ public class MetaIncludeComponent extends AWIncludeComponent
             super.renderResponse(requestContext, component);
         }
         catch (Exception e) {
-            throw new AWGenericException(Fmt.S("Exception during MetaInclude with context: %s",
+            throw AWGenericException.augmentedExceptionWithMessage(Fmt.S("Exception during MetaInclude with context: %s",
                     MetaContext.currentContext(component)),
                     e);
         }
@@ -97,6 +98,11 @@ public class MetaIncludeComponent extends AWIncludeComponent
                 else if (value instanceof Context.DynamicPropertyValue) {
                     binding = new DynamicValueBinding();
                     ((DynamicValueBinding)binding).init(entry.getKey(), (Context.DynamicPropertyValue)value);
+                }
+                // Todo: ack!  Need a more formal packaging of deferred bindings...
+                else if (value instanceof List && ((List)value).size() == 1 && (((List)value).get(0) instanceof Context.DynamicPropertyValue)) {
+                    binding = new DynamicValueBinding();
+                    ((DynamicValueBinding)binding).init(entry.getKey(), (Context.DynamicPropertyValue)((List)value).get(0));
                 }
                 else {
                     binding = AWBinding.bindingWithNameAndConstant(entry.getKey(), value);
