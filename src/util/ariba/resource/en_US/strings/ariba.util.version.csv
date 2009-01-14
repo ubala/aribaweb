@@ -1,0 +1,19 @@
+8859_1,,
+copyright, "Copyright (c) 1996-2005 Ariba, Inc.  All rights reserved.  Patents pending.",
+versionWithSvPackWithDateWithPatchWithLangPack, "{0}.{1}.{2} Service Pack {5} Language Pack {6} (build {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateWithPatchWithLangPack, "{0}.{1}.{2} Service Pack {5} Language Pack {6} (build {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackWithDateNoPatchWithLangPack, "{0}.{1} Service Pack {5} Language Pack {6} (build {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackWithDateWithPatchNoLangPack, "{0}.{1}.{2} Service Pack {5} (build {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateNoPatchWithLangPack, "{0}.{1} Service Pack {5} Language Pack {6} (build {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateWithPatchNoLangPack, "{0}.{1}.{2} Service Pack {5} (build {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackWithDateNoPatchNoLangPack, "{0}.{1} Service Pack {5} (build {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateNoPatchNoLangPack, "{0}.{1} Service Pack {5} (build {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+
+versionNoSvPackWithDateWithPatchWithLangPack, "{0}.{1}.{2} Language Pack {6} (build {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateWithPatchWithLangPack, "{0}.{1}.{2} Language Pack {6} (build {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackWithDateNoPatchWithLangPack, "{0}.{1} Language Pack {6} (build {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackWithDateWithPatchNoLangPack, "{0}.{1}.{2} (build {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateNoPatchWithLangPack, "{0}.{1} Language Pack {6} (build {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateWithPatchNoLangPack, "{0}.{1}.{2} (build {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackWithDateNoPatchNoLangPack, "{0}.{1} (build {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateNoPatchNoLangPack, "{0}.{1} (build {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack

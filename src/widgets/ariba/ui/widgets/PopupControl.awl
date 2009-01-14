@@ -1,0 +1,105 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupControl.awl#4 $
+    </Copyright>
+
+    <Overview>
+        Works like an AWPopup, except using our JavaScript/CSS based PopupMenuLink / PopupMenuButton.
+        This can be useful:
+            1) to workaround the IE SELECT element bug where an incremental refresh that affects
+               a popup causes the browser to do a full screen flash.
+            2) to deal with layouts where the traditional popup control is rendering too wide (i.e.
+               AWPopup renders its control to be as wide as its widest element (not the selected element)
+    </Overview>
+
+    <Binding key="list" type="AWOrderedList" required="$true" direction="get">
+        Ordered list of items displayed in the popup menu.
+    </Binding>
+
+    <Binding key="item" type="Object" direction="set">
+        The current menu item being rendered in the the popup.
+    </Binding>
+
+    <Binding key="index" type="int" direction="set">
+        The current index for the menu item being rendered in the popup.
+    </Binding>
+
+    <Binding key="selection" type="Object" direction="set">
+        The item that was selected by the user in the popup menu.  The is set during the takeValues phase.
+    </Binding>
+
+    <Binding key="noSelectionString" type="String" required="$false" direction="get">
+        The string to be displayed in the popup which allows the user to make "no selection" from the available list.
+        If the user chooses this option, then the selection binding will be pushed as $null.
+    </Binding>
+
+    <Binding key="action" type="AWResponseGenerating" required="$false" direction="get">
+        The action invoked when a popup menu item is changed.
+    </Binding>
+
+    <Binding key="disabled" type="boolean" default="$false" direction="get">
+        Disables the popup menu if true.
+    </Binding>
+
+    <Binding key="size" type="int" default="$null" direction="get" deprecated="$true">
+        Not supported?
+    </Binding>
+
+</a:Api>\
+<a:If ifFalse="$requestContext.isPrintMode">\
+    <a:SetValue menuId="$requestContext.nextElementId"/>\
+    <w:PopupMenuButton menuId="$menuId" omitTags="$disabled" class="$buttonClass">
+        <a:If notEqualNull="$selectedItem">\
+            <a:SetValue currentItem="$selectedItem"/>
+            <a:IncludeContent/>\
+        <a:Else/>
+            <div style="width:60px;"/>
+        </a:If>
+    </w:PopupMenuButton>
+    <a:If ifFalse="$disabled">
+        <w:PopupMenu menuId="$menuId">
+            <a:If notEqualNull="$noSelectionString">\
+                <w:PopupMenuItem action="$itemClickedAction">\
+                    <a:PrimitiveString value="$noSelectionString"/>\
+                </w:PopupMenuItem>
+            </a:If>\
+            <a:For list="$orderedList" item="$currentItem" index="$currentIndex">\
+                <w:PopupMenuItem action="$itemClickedAction" showBullet="$isCurrentItemSelected">\
+                    <a:IncludeContent/>\
+                </w:PopupMenuItem>
+            </a:For>\
+
+            <a:If condition="$actionList.size">
+                <w:PopupMenuHeading showSeparator="$true">\
+                    <!--- ---------\ -->
+                </w:PopupMenuHeading>
+                <a:For list="$actionList" item="$currentAction">\
+                    <a:If ifTrue="$isActionVisible">
+                        <w:PopupMenuItem action="$actionClickedAction">\
+                            <a:IncludeContent template="$currentAction.contentElement"/>\
+                        </w:PopupMenuItem>
+                    </a:If>
+                </a:For>\
+            </a:If>
+        </w:PopupMenu>
+    </a:If>
+<a:Else/>
+    <!--- render print value as string -->
+    <a:If notEqualNull="$selectedItem">\
+        <a:SetValue currentItem="$selectedItem"/>
+        <a:IncludeContent/>\
+    </a:If>
+</a:If>

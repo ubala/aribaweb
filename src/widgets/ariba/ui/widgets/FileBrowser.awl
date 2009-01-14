@@ -1,0 +1,137 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FileBrowser.awl#8 $
+    </Copyright>
+
+    <Overview>
+        FileBrower provides server-side directory browsing.
+
+        The base directory's file listing is displayed initially in a AWTDataTable.
+        The columns are file name, size, and last modified date.  Links on the name
+        allows users to cd down into a sub-directory.  A global button at the bottom
+        allows users to cd up into the parent directory.  Each file has a select button
+        for selection.  Filter can used to filter listings.
+    </Overview>
+
+    <Binding key="baseDirectory" type="File" required="$false" direction="get">
+        The directory to start file listing.  Depending on the value of the binding
+        "allowCdUp", users may or may not cd up above this directory.
+        If not present, the root directory is used.
+    </Binding>
+
+    <Binding key="selection" type="File" required="$true" direction="set">
+        The selected file object that is set after user selects a directory.
+    </Binding>
+
+    <Binding key="action" type="AWResponseGenerating" required="$true" direction="get">
+        This is invoked after the selected file has been set.
+    </Binding>
+
+    <Binding key="fileFilter" type="FileFilter" required="$false" direction="get">
+        If this is present, it is used to filter all listings.
+        Useful for filtering by file properties (ie, isDirectory, size, etc).
+    </Binding>
+
+    <Binding key="filenameFilter" type="FilenameFilter" required="$false" direction="get">
+        If this is present and fileFilter is not, it is used to filter all listings.
+        Useful for filtering by file name patterns (ie, file extensions).
+    </Binding>
+
+    <Binding key="enableScrolling" type="boolean" required="$false" direction="get" default="$false">
+        Determines whether the table adds scrollbars for content that won't fit within browser window.
+    </Binding>
+
+    <Binding key="showOptionsMenu" type="boolean" default="$false" direction="get">
+        Whether the table should provide an "Options" popup menu to support show/hide of columns,
+        grouping, and Excel export.
+    </Binding>
+
+    <Binding key="batchSize" type="int" default="20" direction="get">
+        Number of row per page to display in table.  Default is 20.  This batch size is only used if scrolling
+        is disabled.  If scrolling is enabled, then "scroll faulting" is used instead (with a fixed batch size).
+    </Binding>
+    <Binding key="allowCdUp" type="boolean" default="false" direction="get">
+        Whether users be allowed to cd up from the baseDirectory. The default value
+        is false, or users are not allowed cd up beyond the baseDirectory.
+    </Binding>
+</a:Api>
+
+<t:DataTable
+    displayGroup="$displayGroup"
+    item="$currentFile"
+    enableScrolling="$^enableScrolling"
+    showOptionsMenu="$^showOptionsMenu"
+    batchSize="$^batchSize">\
+    <t:HeadingArea>\
+        <h2 style="float:left">
+            <a:Local key="a001" comment="title followed by directory path">
+                Directory Listing For
+            </a:Local> \
+            <a:For list="$directoryLinks" item="$currentDirectoryLink">
+            <a:Hyperlink action="$cdIntoAction" omitTags="$canNotCdInto">
+                $currentDirectoryLinkName
+            </a:Hyperlink>
+                $separator
+            </a:For>
+            $currentDirectoryName
+        </h2>
+    </t:HeadingArea>\
+    <t:Column label="$[a002]Name" key="name" align="left" valign="top">
+        <a:If ifTrue="$currentFile.isDirectory">
+            <a:Hyperlink action="$cdDownAction">$currentFileName<a:String value="$=java.io.File.separator"/></a:Hyperlink>
+        <a:Else/>
+            $currentFile.name
+        </a:If>
+    </t:Column>
+    <t:Column label="$[a003]Size" key="length" isVisible="$isSizeVisible">
+        <a:If ifFalse="$currentFile.isDirectory">
+            $currentFileSize KB
+        </a:If>
+    </t:Column>
+    <t:Column label="$[a004]Last Modified" key="lastModified">
+            $currentFileLastModified
+    </t:Column>
+    <t:Column align="right">
+        <table>
+            <tr>
+                <td>
+                    <a:If ifTrue="$currentFile.isDirectory">
+                        <w:TextButton plain="$true" action="$openClicked">
+                            <a:Local key="a005" comment="Button to open a file or directory">
+                                Open
+                            </a:Local>
+                        </w:TextButton>
+                    </a:If>
+                </td>
+                <td>
+                    <w:TextButton plain="$true" action="$selectClicked">
+                        <a:Local key="a006" comment="Button to select a file or directory">
+                            Select
+                        </a:Local>
+                    </w:TextButton>
+                </td>
+            </tr>
+        </table>
+    </t:Column>
+    <t:ButtonArea isVisible="$canCdUp">
+        <w:TextButton action="$cdUpAction">
+            <a:Local key="a007" comment="Button to go to parent directory">
+                Up To
+            </a:Local>$currentParentDirectoryName<a:String value="$=java.io.File.separator"/></w:TextButton>
+    </t:ButtonArea>
+    <a:IncludeContent/>
+</t:DataTable>
+

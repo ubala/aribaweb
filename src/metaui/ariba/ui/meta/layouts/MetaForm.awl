@@ -1,0 +1,73 @@
+<a:Api>
+    <Copyright>
+        Copyright 2008 Craig Federighi
+
+        Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License.
+        You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.awl#1 $
+    </Copyright>
+
+    <Overview>
+        Renders a FormTable based on the current MetaContext
+    </Overview>
+
+    <Binding key="useFourZones" direction="get" type="boolean" required="$true">
+        Use a TBLR layout (versus one column)
+    </Binding>
+</a:Api>\
+\
+<a:If ifTrue="$fieldsByZone">\
+    <w:FormTable showErrorFlags="$currentProperties.editing" useFourZones="$true"
+                  leftZoneRowCount="$fieldsByZone.zLeft.size">
+        <a:Content name="top">\
+            <a:For list="$fieldsByZone.zTop" item="$field">
+                <a:IncludeBlock name="RowTemplate"/>
+            </a:For>
+        </a:Content>
+        <a:Content name="left">\
+            <a:For list="$fieldsByZone.zLeft" item="$field">
+                <a:IncludeBlock name="RowTemplate"/>
+            </a:For>
+        </a:Content>
+        <a:Content name="right">\
+            <a:For list="$fieldsByZone.zRight" item="$field">
+                <a:IncludeBlock name="RowTemplate"/>
+            </a:For>
+        </a:Content>
+        <a:Content name="bottom">\
+            <a:For list="$fieldsByZone.zBottom" item="$field">
+                <a:IncludeBlock name="RowTemplate"/>
+            </a:For>
+        </a:Content>
+    </w:FormTable>\
+<a:Else/>\
+    <w:FormTable>
+        <a:For list="$allFields" item="$field">
+            <a:IncludeBlock name="RowTemplate"/>
+        </a:For>
+    </w:FormTable>\
+</a:If>
+\
+<a:Block name="RowTemplate">\
+    <m:Context restoreActivation="$field.activation">
+        <w:FormRow label="$metaContext.properties.label"
+                    required="$metaContext.properties.required"
+                    errorValueSource="$object"
+                    errorFieldPath="$field.name">\
+                <m:IncludeComponent/>\
+            <!---
+                <br/>\
+                $field
+            -->\
+        </w:FormRow>
+    </m:Context>
+</a:Block>

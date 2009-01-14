@@ -1,0 +1,11 @@
+<a:RefreshRegion>
+    <a:If ifTrue="$requiresChangeUpdate">\
+    <a:ClientSideScript>
+        // initiate the polling
+        ariba.Request.setupPoll($initiatePolling, <a:PrimitiveString value="$interval"/>,
+            '<a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWPollInterval.AWPollSenderId"/>',
+            '<a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWPollInterval.AWPollUpdateSenderId"/>');
+        <!--- ariba.Debug.log("AWPollInterval - AWPollEnabled: " + AWPollEnabled); -->
+    </a:ClientSideScript>
+    </a:If>\
+</a:RefreshRegion>

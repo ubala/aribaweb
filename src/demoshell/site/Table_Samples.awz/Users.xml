@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Users>
+    <User id="craigf">
+        <name>Craig Federighi</name>
+        <phone>(650) 390-4002</phone>
+        <email>craigf@ariba.com</email>
+        <etc>
+            <dashboard>Chief</dashboard>
+            <department>R-D</department>
+        </etc>
+
+        <manages>
+            <User id="bhaskarh">
+                <name>Bhaskar Himatsingka</name>
+                <phone>(650) 390-4004</phone>
+                <email>bhaskarh@ariba.com</email>
+                <etc>
+                    <dashboard>Member</dashboard>
+                    <department>R-D</department>
+                </etc>
+                <manages>
+                    <User id="tester">
+                        <name>Joe Tester</name>
+                        <phone>(650) 390-4000</phone>
+                        <email>tester@ariba.com</email>
+                        <etc>
+                            <dashboard>Member</dashboard>
+                            <department>QA</department>
+                        </etc>
+                    </User>
+                    <User id="reload">
+                        <name>Joe Reloader</name>
+                        <phone>(650) 390-4000</phone>
+                        <email>reload@ariba.com</email>
+                        <etc>
+                            <dashboard>Member</dashboard>
+                            <department>QA</department>
+                        </etc>
+                    </User>
+                </manages>
+            </User>
+
+            <User id="admin">
+                <name>System Administrator</name>
+                <phone>(650) 390-0000</phone>
+                <email>admin@ariba.com</email>
+                <etc>
+                    <dashboard>Member</dashboard>
+                    <department>IT</department>
+                </etc>
+            </User>
+        </manages>
+    </User>
+
+
+    <User id="mdao">
+        <name>Mark Dao</name>
+        <phone>(650) 390-4022</phone>
+        <email>mdao@ariba.com</email>
+        <etc>
+            <dashboard>Director</dashboard>
+            <department>R-D</department>
+        </etc>
+        <manages>
+            <User id="kngan">
+                <name>Kingsley Ngan</name>
+                <phone>(415) 555-4199</phone>
+                <email>kngan@ariba.com</email>
+                <etc>
+                    <dashboard>Member</dashboard>
+                    <department>R-D</department>
+                </etc>
+            </User>
+            <User id="dfinlay">
+                <name>Dave Finlay</name>
+                <phone>(650) 390-4022</phone>
+                <email>dfinlay@ariba.com</email>
+                <etc>
+                    <dashboard>Manager</dashboard>
+                    <department>R-D</department>
+                </etc>
+            </User>
+        </manages>
+    </User>
+
+    <User id="clloyd">
+        <name>Charles Lloyd</name>
+        <phone>(650) 390-4003</phone>
+        <email>clloyd@null.com</email>
+        <etc>
+            <dashboard>Member</dashboard>
+            <department>Analysis</department>
+        </etc>
+
+        <manages>
+            <User id="aliu" >
+                <name>Annabel Liu</name>
+                <phone>650-555-1330</phone>
+                <email>aliu@ariba.com</email>
+                <etc>
+                    <dashboard>Live</dashboard>
+                </etc>
+            </User>
+            <User id="dfrazier" >
+                <name>Dustin Frazier</name>
+                <phone>650-555-1330</phone>
+                <email>dfrazier@null.com</email>
+                <etc>
+                    <dashboard>Live</dashboard>
+                </etc>
+            </User>
+        </manages>
+    </User>
+
+    <User id="gtoub">
+        <name>Garrick Toubassi</name>
+        <phone>(650) 390-4001</phone>
+        <email>gtoubassi@null.com</email>
+        <etc>
+            <dashboard>Manager</dashboard>
+            <department>unknown</department>
+        </etc>
+
+        <manages>
+            <User id="live1" >
+                <name>Samuel Johnson</name>
+                <phone>650-555-1330</phone>
+                <email>samuel.johnson@corp.com</email>
+                <etc>
+                    <dashboard>Live</dashboard>
+                    <toc>DashboardToc-NoProjects.htm</toc>
+                    <title>Packaging Sourcing Director</title>
+                    <role>Supervisor</role>
+                </etc>
+            </User>
+
+            <User id="live2" >
+                <name>Samuel Johnson</name>
+                <phone>650-555-1330</phone>
+                <email>samuel.johnson@corp.com</email>
+                <etc>
+                    <dashboard>Live</dashboard>
+                    <title>Packaging Sourcing Director</title>
+                    <role>Supervisor</role>
+                </etc>
+            </User>
+            <User id="Brett_Barber" >
+                <name>Brett Barber</name>
+                <phone>650-555-1357</phone>
+                <email>brett.barber@mycorp.com</email>
+                <etc>
+                    <dashboard>Member</dashboard>
+                    <title>Category Manager</title>
+                    <role>Manager</role>
+                </etc>
+            </User>
+
+            <User id="Janet_Soliski" >
+                <name>Janet Soliski</name>
+                <phone>650-555-1345</phone>
+                <email>janet.soliski@mycorp.com</email>
+                <etc>
+                    <dashboard>Member</dashboard>
+                    <title>Packaging Spend Analyst</title>
+                    <role>Financial Analyst</role>
+                </etc>
+            </User>
+
+            <User id="Xavier_Ramirez" >
+                <name>Xavier Ramirez</name>
+                <phone>650-555-1356</phone>
+                <email>xavier.ramirez@denali.com</email>
+                <etc>
+                    <dashboard>Member</dashboard>
+                    <title>Sourcing Consultant</title>
+                    <role>Consultant</role>
+                </etc>
+            </User>
+
+            <User id="Jim_Spandler" >
+                <name>Jim Spandler</name>
+                <phone>650-555-1313</phone>
+                <email>james.spandler@mycorp.com</email>
+                <etc>
+                    <dashboard>Chief</dashboard>
+                    <title>VP, Materials Sourcing</title>
+                    <role>Supervisor</role>
+                </etc>
+                <manages>
+                    <User id="Jillian_Conner" >
+                        <name>Jillian Conner</name>
+                        <phone>650-555-1331</phone>
+                        <email>jillian.conner@mycorp.com</email>
+                        <etc>
+                            <dashboard>Manager</dashboard>
+                            <title>Packaging Sourcing Director</title>
+                            <role>Supervisor</role>
+                        </etc>
+                    </User>
+
+                    <User id="Samuel_Johnson" >
+                        <name>Samuel Johnson</name>
+                        <phone>650-555-1330</phone>
+                        <email>samuel.johnson@mycorp.com</email>
+                        <etc>
+                            <dashboard>Manager</dashboard>
+                            <title>Packaging Sourcing Director</title>
+                            <role>Supervisor</role>
+                        </etc>
+                    </User>
+
+                    <User id="Minesh_Koneru" >
+                        <name>Minesh Koneru</name>
+                        <phone>612-555-4321</phone>
+                        <email>minesh.koneru@mycorp.com</email>
+                        <etc>
+                            <dashboard>Member</dashboard>
+                            <title>Engineer, Manufacturing</title>
+                            <role>Engineer</role>
+                        </etc>
+                    </User>
+
+                    <User id="Samantha_Boyd" >
+                        <name>Samantha Boyd</name>
+                        <phone>650-555-2366</phone>
+                        <email>samantha.boyd@mycorp.com</email>
+                        <etc>
+                            <dashboard>Member</dashboard>
+                            <title>A/P Analyst</title>
+                            <role>Contributor</role>
+                        </etc>
+                    </User>
+
+                    <User id="Bernice_Faulk" >
+                        <name>Bernice Faulk</name>
+                        <phone>415-555-8934</phone>
+                        <email>bfaulk@earthwise.com</email>
+                        <etc>
+                            <dashboard>Member</dashboard>
+                            <title>Account Manager, Earthwise Packaging</title>
+                            <role>Supplier</role>
+                        </etc>
+                    </User>
+                </manages>
+            </User>
+        </manages>
+    </User>
+    <User id="mcoombs">
+        <name>Michael Coombs</name>
+        <phone>(650) 390-4099</phone>
+        <email>mcoombs@ariba.com</email>
+        <etc>
+            <dashboard>Designer</dashboard>
+            <department>R-D</department>
+        </etc>
+    </User>
+</Users>

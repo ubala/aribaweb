@@ -1,0 +1,3 @@
+<a:PhaseInvocation append="$requestContext.enableComponentPathDebugging"/>\
+<w:WidgetInclude name="$commands"/>\
+<a:PhaseInvocation append="$requestContext.disableComponentPathDebugging"/>\

@@ -1,0 +1,21 @@
+<w:ModalPageWrapper title="Metric Detail">
+    <w:HintMessage>
+        Backtrace capture threshhold currently set to <b>$ariba.util.core.PerformanceStateCore.GlobalStackTraceCaptureThreshold</b>.
+        Change via <a:Hyperlink pageName="AWDebugOptions">AWDebugOptions</a:Hyperlink> page (section called "Performance State Capture").
+        Click expando arrow to see backtrace for metric type.
+    </w:HintMessage>
+    <t:DataTable list="$metric.eventList" displayGroup="$displayGroup"
+            initialSortKey="count" initialSortDirection="descending">
+        <t:Column valign="middle">
+            <a:If notEqualNull="$displayGroup.currentItem.stackTrace">
+                <w:ToggleImage align="absmiddle" state="$displayGroup.currentItemExtras.expando"/>
+            </a:If>
+        </t:Column>
+        <t:Column label="Count" key="count"/>
+        <t:Column label="Type" key="type"/>
+        <t:RowDetail isVisible="$displayGroup.currentItemExtras.expando" showRowLine="$true">
+            <pre>$displayGroup.currentItem.debugState</pre>
+            <pre>$displayGroup.currentItem.stackTrace</pre>
+        </t:RowDetail>
+    </t:DataTable>
+</w:ModalPageWrapper>

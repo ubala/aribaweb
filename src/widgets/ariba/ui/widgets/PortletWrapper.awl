@@ -1,0 +1,125 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PortletWrapper.awl#3 $
+    </Copyright>
+
+    <Overview>
+        A "portlet window" style title bar / content wrapper
+    </Overview>
+
+    <Binding key="title" direction="get" type="String" required="$false">
+        Portlet title string
+    </Binding>
+
+    <Binding key="portletStyle" direction="get" type="String" required="$false">
+        "Normal" or "TOC".  Defaults based on env.portletWidth == "narrow"
+    </Binding>
+
+    <Binding key="isMinimized" direction="get" type="boolean" required="$false">
+        Should portlet be rendered as minimized
+    </Binding>
+
+    <Binding key="toggleMinMaxAction" direction="get" type="void" required="$false">
+        Called to toggle minimization
+    </Binding>
+
+    <Binding key="closeAction" direction="get" type="void" required="$false">
+        Called when user clicks close box
+    </Binding>
+
+    <Binding key="disableDragDrop" direction="get" type="boolean">
+        Allow drag and drop of portlets?
+    </Binding>
+
+    <Binding key="dragAction" direction="get" type="void" required="$false">
+        Called when portlet dragged
+    </Binding>
+
+    <Binding key="dropAction" direction="get" type="AWResponseGenerating" required="$false">
+        Called when portlet dragged
+    </Binding>
+
+    <NamedContent name="actions" required="$false">
+        Content for the upper-right area of the title bar (e.g. an options menu)
+    </NamedContent>
+</a:Api>\
+<a:DropContainer tagName="div"
+    type="RegularPortlet"
+    dropAction="$^dropAction"
+    class="vtDropField"
+    dropClass="vtDropFieldSelected"
+    omitTags="$^disableDragDrop">
+    <a:DragContainer type="RegularPortlet"
+        omitTags="$^disableDragDrop"
+        dragAction="$^dragAction"
+        showParent="$true">
+        <w:RoundedBox class="$portletStyle.containerCssClass" hideGradient="$portletStyle.hideGradient">
+            <table border="0" cellspacing="0" cellpadding="0" width="100%" class="portletTitleBar">\
+                <tr>\
+                    <td align="$languageLeft" width="1%">
+                        <div class="grab">&nbsp;</div>
+                    </td>
+                    <td align="$languageLeft" class="bold portletTitle">\
+                        <w:TruncateString value="$^title" size='${env().peek("portletWidth")=="narrow" ? 20 : 50}'/>\
+                    </td>\
+                    <!---
+                    <a:If ifTrue="$showWarning">
+                        <td align="$languageRight" width="1%" class="titleBarAction" style="cursor:default">\
+                            <span title="$[a004]Content retrieval still in progress -- some items may be missing or out of date.">\
+                                <a:Image filename="$fetchWarningImage"/>\
+                            </span>
+                        </td>\
+                    <a:Else ifTrue="$showError"/>
+                        <td align="$languageRight" width="1%" class="titleBarAction" style="cursor:default">\
+                            <span title="$[a005]An error occurred while retrieving content -- If this problem persists, contact your administrator.">\
+                                <a:Image filename="$fetchErrorImage"/>\
+                            </span>
+                        </td>\
+                    </a:If>
+                    -->
+                    <td align="$languageRight" width="1%" class="titleBarAction">\
+                        <a:IncludeContent name="actions" required="$false"/>
+                    </td>\
+                    <a:If ifTrue="$^showMaxMin">
+                        <td align="$languageRight" width="1%" class="titleBarAction">\
+                            <a:IncludeBlock name="TitleBarAction" action="$^toggleMinMaxAction"
+                                tooltip="$[]Show / Hide content">
+                                <a:Image filename="$minMaxButtonImage"/>
+                            </a:IncludeBlock>
+                        </td>
+                    </a:If>
+                    <td align="$languageRight" width="1%" class="titleBarAction" style="padding-right:2px">\
+                        <a:If ifTrue="$^showClose">\
+                            <a:IncludeBlock name="TitleBarAction" action="$^closeAction"
+                                tooltip="$[]Remove this item">
+                                <a:Image filename="$portletStyle.closeImage"/>
+                            </a:IncludeBlock>
+                        </a:If>
+                    </td>
+                </tr>\
+            </table>\
+            <a:If ifFalse="$^isMinimized">
+                <a:IncludeContent/>\
+            </a:If>
+        </w:RoundedBox>
+    </a:DragContainer>
+</a:DropContainer>
+
+<a:Block name="TitleBarAction">
+    <a:Hyperlink action="$^action" class="btnDashWrap" title="$^tooltip">\
+        <a:IncludeContent/>\
+    </a:Hyperlink>
+</a:Block>

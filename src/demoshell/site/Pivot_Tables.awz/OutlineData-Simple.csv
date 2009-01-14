@@ -1,0 +1,422 @@
+Level,Item,Type,ItemDesc,Commodity Code,Supplier,Region,Year,Quarter,Answer,Price,Quantity,ExtendedPrice,Color,Size,Attachments,Requirements,Description
+0,1,Section,Introduction,,,,,,,,,,,,,,Description of 1: Introduction
+1,1.1,Question,Question #1,,,,,,Four score and seven years ago our RFX designer ...,,,,,,Attachment #1; Attachment #2,,Description of 1.1: Question #1
+1,1.2,Question,Question #2,,,,,,"Another non-matrixed, non-supplier question",,,,,,,,Description of 1.2: Question #2
+1,1.3,Question,Supplier Non-matrixed,,Apple,,,,Nope,,,,,,,,Description of 1.3: Supplier Non-matrixed
+1,1.3,Question,Supplier Non-matrixed,,Dell,,,,Supplier 1 says YES,,,,,,,,Description of 1.3: Supplier Non-matrixed
+1,1.3,Question,Supplier Non-matrixed,,Gateway,,,,Heck yeah,,,,,,,,Description of 1.3: Supplier Non-matrixed
+1,1.3,Question,Supplier Non-matrixed,,HP,,,,Not Even,,,,,,,,Description of 1.3: Supplier Non-matrixed
+1,1.3,Question,Supplier Non-matrixed,,Lenovo,,,,You bet!,,,,,,,,Description of 1.3: Supplier Non-matrixed
+1,1.4,Question,Matrixed question,,Apple,APAC,2006,Q1,Super,,,,,,APAC A1; APAC A2,R1,Description of 1.4: Matrixed question
+1,1.4,Question,Matrixed question,,Apple,EUR,2006,Q1,Superbo,,,,,,EUR A1; EUR A2; EUR A3,R1; R2; R3,Description of 1.4: Matrixed question
+1,1.4,Question,Matrixed question,,Dell,APAC,2006,Q1,Excellent,,,,,,APAC A1; APAC A2,R1,Description of 1.4: Matrixed question
+1,1.4,Question,Matrixed question,,Dell,EUR,2006,Q1,Excellente,,,,,,EUR A1; EUR A2; EUR A3,R1; R2; R3,Description of 1.4: Matrixed question
+1,1.4,Question,Matrixed question,,Gateway,APAC,2006,Q1,Not so hot,,,,,,APAC A1; APAC A2,R1,Description of 1.4: Matrixed question
+1,1.4,Question,Matrixed question,,Gateway,EUR,2006,Q1,Not so calliente,,,,,,EUR A1; EUR A2; EUR A3,R1; R2; R3,Description of 1.4: Matrixed question
+1,1.4,Question,Matrixed question,,HP,APAC,2006,Q1,Nifty,,,,,,APAC A1; APAC A2,R1,Description of 1.4: Matrixed question
+1,1.4,Question,Matrixed question,,HP,EUR,2006,Q1,Nifti,,,,,,EUR A1; EUR A2; EUR A3,R1; R2; R3,Description of 1.4: Matrixed question
+1,1.4,Question,Matrixed question,,Lenovo,APAC,2006,Q1,Bogus,,,,,,APAC A1; APAC A2,R1,Description of 1.4: Matrixed question
+1,1.4,Question,Matrixed question,,Lenovo,EUR,2006,Q1,Bogusso,,,,,,EUR A1; EUR A2; EUR A3,R1; R2; R3,Description of 1.4: Matrixed question
+0,2,Section,Items,,,,,,,10,100,1000,,,,,Description of 2: Items
+1,2.1,Section,Ball Bearings,Ball Bearing Parts,,,,,,,,,,,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Apple,APAC,2006,Q2,,45,6,270,Red,Small,B1; B2,R1,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Apple,EUR,2006,Q1,,21,1075,22575,Red,Huge,C1;C2;C3,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Apple,USA,2006,Q1,,56,31,1736,Green,Huge,D1;D2;D3,R1; R2,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Best,APAC,2006,Q2,,18,707,12726,,Small,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Best,EUR,2006,Q1,,34,399,13566,Red,Huge,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Best,USA,2006,Q1,,18,635,11430,Green,Huge,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Dell,APAC,2006,Q2,,49,425,20825,Red,Medium,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Dell,USA,2006,Q1,,1,38,38,Red,Small,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Gateway,APAC,2006,Q2,,11,679,7469,Red,Medium,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Gateway,EUR,2006,Q1,,104,21,2184,Red,Small,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Gateway,USA,2006,Q1,,82,893,73226,Green,Small,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Historical,APAC,2006,Q2,,70,1083,75810,,Huge,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Historical,EUR,2006,Q1,,32,131,4192,Blue,Large,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Historical,USA,2006,Q1,,55,21,1155,Red,Large,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,HP,APAC,2006,Q2,,64,61,3904,,Huge,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,HP,EUR,2006,Q1,,94,456,42864,Blue,Large,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,HP,USA,2006,Q1,,70,39,2730,Red,Large,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Initial,APAC,2006,Q2,,43,2,86,Green,Large,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Initial,EUR,2006,Q1,,58,237,13746,Green,Medium,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Initial,USA,2006,Q1,,18,103,1854,Blue,Medium,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Lenovo,APAC,2006,Q2,,18,188,3384,,Small,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Lenovo,EUR,2006,Q1,,89,922,82058,Blue,Huge,,,Description of 2.1: Ball Bearings
+2,2.1,Item,Ball Bearings,Ball Bearing Parts,Lenovo,USA,2006,Q1,,20,659,13180,Red,Huge,,,Description of 2.1: Ball Bearings
+1,2.2,Section,Bolts,Bolt Parts,,,,,,,,,,,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Apple,APAC,2006,Q2,,1,1120,1120,Red,Large,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Apple,EUR,2006,Q1,,32,172,5504,Red,Medium,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Apple,USA,2006,Q1,,38,112,4256,Green,Medium,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Best,APAC,2006,Q2,,3,83,249,Green,Huge,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Best,EUR,2006,Q1,,47,496,23312,Green,Large,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Best,USA,2006,Q1,,3,8,24,Blue,Large,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Dell,APAC,2006,Q2,,14,52,728,Green,Small,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Dell,USA,2006,Q1,,2,176,352,Green,Huge,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Gateway,APAC,2006,Q2,,5,142,710,Red,Huge,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Gateway,EUR,2006,Q1,,20,17,340,Red,Large,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Gateway,USA,2006,Q1,,11,142,1562,Green,Large,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Historical,APAC,2006,Q2,,17,24,408,Red,Large,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Historical,EUR,2006,Q1,,2,21,42,Red,Medium,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Historical,USA,2006,Q1,,56,5,280,Green,Medium,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,HP,APAC,2006,Q2,,9,4,36,Blue,Medium,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,HP,EUR,2006,Q1,,48,198,9504,Blue,Small,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,HP,USA,2006,Q1,,13,708,9204,Red,Small,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Initial,APAC,2006,Q2,,69,170,11730,Blue,Medium,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Initial,EUR,2006,Q1,,31,743,23033,Blue,Small,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Initial,USA,2006,Q1,,58,633,36714,Red,Small,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Lenovo,APAC,2006,Q2,,45,235,10575,Blue,Large,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Lenovo,EUR,2006,Q1,,13,376,4888,Blue,Medium,,,Description of 2.2: Bolts
+2,2.2,Item,Bolts,Bolt Parts,Lenovo,USA,2006,Q1,,21,410,8610,Red,Medium,,,Description of 2.2: Bolts
+1,2.3,Section,Nuts,Nut Parts,,,,,,,,,,,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,APAC,2006,Q2,,2,126,252,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,APAC,2006,Q3,,14,205,2870,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,APAC,2006,Q4,,21,471,9891,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,APAC,2007,Q1,,10,360,3600,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,APAC,2007,Q2,,14,155,2170,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,APAC,2007,Q3,,65,331,21515,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,APAC,2007,Q4,,2,59,118,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,EUR,2006,Q1,,49,110,5390,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,EUR,2006,Q2,,37,42,1554,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,EUR,2006,Q3,,23,18,414,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,EUR,2006,Q4,,24,9,216,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,EUR,2007,Q1,,10,135,1350,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,EUR,2007,Q2,,7,155,1085,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,EUR,2007,Q3,,33,115,3795,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,EUR,2007,Q4,,4,681,2724,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,USA,2006,Q1,,13,37,481,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,USA,2006,Q2,,5,42,210,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,USA,2006,Q3,,6,123,738,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,USA,2006,Q4,,18,47,846,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,USA,2007,Q1,,43,389,16727,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,USA,2007,Q2,,48,276,13248,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,USA,2007,Q3,,15,34,510,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Apple,USA,2007,Q4,,19,361,6859,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,APAC,2006,Q2,,43,229,9847,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,APAC,2006,Q3,,39,218,8502,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,APAC,2006,Q4,,39,24,936,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,APAC,2007,Q1,,1,61,61,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,APAC,2007,Q2,,16,127,2032,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,APAC,2007,Q3,,54,58,3132,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,APAC,2007,Q4,,19,402,7638,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,EUR,2006,Q1,,1,129,129,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,EUR,2006,Q2,,43,410,17630,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,EUR,2006,Q3,,11,310,3410,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,EUR,2006,Q4,,17,7,119,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,EUR,2007,Q1,,25,20,500,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,EUR,2007,Q2,,18,79,1422,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,EUR,2007,Q3,,33,200,6600,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,EUR,2007,Q4,,4,15,60,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,USA,2006,Q1,,37,136,5032,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,USA,2006,Q2,,41,337,13817,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,USA,2006,Q3,,52,42,2184,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,USA,2006,Q4,,1,197,197,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,USA,2007,Q1,,5,5,25,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,USA,2007,Q2,,23,254,5842,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,USA,2007,Q3,,1,289,289,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,USA,2007,Q4,,31,24,744,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Best,,2007,Q1,This is the answer!,1,61,61,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,APAC,2006,Q2,,17,18,306,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,APAC,2006,Q3,,29,190,5510,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,APAC,2006,Q4,,4,375,1500,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,APAC,2007,Q1,,1,339,339,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,APAC,2007,Q2,,62,253,15686,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,APAC,2007,Q3,,23,94,2162,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,APAC,2007,Q4,,31,250,7750,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,USA,2006,Q1,,38,293,11134,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,USA,2006,Q2,,17,15,255,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,USA,2006,Q3,,8,36,288,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,USA,2006,Q4,,8,236,1888,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,USA,2007,Q1,,20,289,5780,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,USA,2007,Q2,,17,70,1190,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,USA,2007,Q3,,30,326,9780,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Dell,USA,2007,Q4,,18,10,180,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,APAC,2006,Q2,,14,21,294,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,APAC,2006,Q3,,10,598,5980,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,APAC,2006,Q4,,43,60,2580,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,APAC,2007,Q1,,1,85,85,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,APAC,2007,Q2,,9,112,1008,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,APAC,2007,Q3,,5,107,535,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,APAC,2007,Q4,,37,94,3478,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,EUR,2006,Q1,,33,172,5676,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,EUR,2006,Q2,,2,67,134,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,EUR,2006,Q3,,55,196,10780,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,EUR,2006,Q4,,13,180,2340,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,EUR,2007,Q1,,1,337,337,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,EUR,2007,Q2,,8,307,2456,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,EUR,2007,Q3,,19,73,1387,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,EUR,2007,Q4,,13,125,1625,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,USA,2006,Q1,,44,142,6248,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,USA,2006,Q2,,1,520,520,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,USA,2006,Q3,,1,11,11,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,USA,2006,Q4,,8,308,2464,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,USA,2007,Q1,,14,35,490,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,USA,2007,Q2,,1,217,217,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,USA,2007,Q3,,50,115,5750,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Gateway,USA,2007,Q4,,8,256,2048,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,APAC,2006,Q2,,69,296,20424,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,APAC,2006,Q3,,23,150,3450,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,APAC,2006,Q4,,6,68,408,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,APAC,2007,Q1,,47,148,6956,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,APAC,2007,Q2,,4,373,1492,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,APAC,2007,Q3,,17,437,7429,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,APAC,2007,Q4,,2,14,28,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,EUR,2006,Q1,,46,310,14260,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,EUR,2006,Q2,,3,32,96,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,EUR,2006,Q3,,1,568,568,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,EUR,2006,Q4,,46,132,6072,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,EUR,2007,Q1,,11,17,187,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,EUR,2007,Q2,,1,3,3,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,EUR,2007,Q3,,10,41,410,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,EUR,2007,Q4,,5,109,545,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,USA,2006,Q1,,15,513,7695,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,USA,2006,Q2,,64,155,9920,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,USA,2006,Q3,,1,155,155,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,USA,2006,Q4,,19,89,1691,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,USA,2007,Q1,,2,101,202,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,USA,2007,Q2,,24,46,1104,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,USA,2007,Q3,,41,240,9840,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Historical,USA,2007,Q4,,16,370,5920,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,APAC,2006,Q2,,2,6,12,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,APAC,2006,Q3,,6,214,1284,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,APAC,2006,Q4,,4,372,1488,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,APAC,2007,Q1,,7,24,168,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,APAC,2007,Q2,,8,43,344,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,APAC,2007,Q3,,41,102,4182,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,APAC,2007,Q4,,1,646,646,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,EUR,2006,Q1,,10,230,2300,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,EUR,2006,Q3,,6,294,1764,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,EUR,2006,Q4,,18,88,1584,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,EUR,2007,Q1,,3,61,183,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,EUR,2007,Q2,,33,78,2574,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,EUR,2007,Q3,,1,30,30,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,EUR,2007,Q4,,2,92,184,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,USA,2006,Q1,,5,715,3575,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,USA,2006,Q2,,3,567,1701,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,USA,2006,Q3,,9,1,9,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,USA,2006,Q4,,17,651,11067,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,USA,2007,Q1,,11,45,495,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,USA,2007,Q2,,25,179,4475,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,USA,2007,Q3,,22,564,12408,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,HP,USA,2007,Q4,,2,99,198,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,APAC,2006,Q2,,10,21,210,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,APAC,2006,Q3,,75,204,15300,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,APAC,2006,Q4,,18,278,5004,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,APAC,2007,Q1,,47,164,7708,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,APAC,2007,Q2,,4,241,964,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,APAC,2007,Q3,,5,72,360,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,APAC,2007,Q4,,66,1,66,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,EUR,2006,Q1,,26,188,4888,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,EUR,2006,Q2,,15,254,3810,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,EUR,2006,Q3,,6,19,114,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,EUR,2006,Q4,,26,257,6682,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,EUR,2007,Q1,,35,117,4095,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,EUR,2007,Q2,,16,222,3552,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,EUR,2007,Q3,,20,344,6880,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,EUR,2007,Q4,,9,130,1170,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,USA,2006,Q1,,66,377,24882,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,USA,2006,Q2,,6,255,1530,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,USA,2006,Q3,,70,109,7630,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,USA,2006,Q4,,6,61,366,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,USA,2007,Q1,,1,542,542,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,USA,2007,Q2,,3,105,315,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,USA,2007,Q3,,49,3,147,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Initial,USA,2007,Q4,,8,28,224,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,APAC,2006,Q2,,43,410,17630,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,APAC,2006,Q3,,39,289,11271,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,APAC,2006,Q4,,6,38,228,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,APAC,2007,Q1,,2,149,298,Red,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,APAC,2007,Q2,,9,394,3546,Green,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,APAC,2007,Q3,,26,106,2756,Blue,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,APAC,2007,Q4,,6,532,3192,Red,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,EUR,2006,Q1,,1,16,16,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,EUR,2006,Q2,,9,49,441,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,EUR,2006,Q3,,17,420,7140,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,EUR,2006,Q4,,12,104,1248,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,EUR,2007,Q1,,9,94,846,Green,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,EUR,2007,Q2,,52,23,1196,Blue,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,EUR,2007,Q3,,29,14,406,Red,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,EUR,2007,Q4,,32,73,2336,Green,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,USA,2006,Q1,,24,27,648,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,USA,2006,Q2,,20,273,5460,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,USA,2006,Q3,,14,433,6062,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,USA,2006,Q4,,4,380,1520,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,USA,2007,Q1,,13,34,442,Blue,Medium,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,USA,2007,Q2,,22,255,5610,Red,Large,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,USA,2007,Q3,,13,343,4459,Green,Huge,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,Lenovo,USA,2007,Q4,,15,18,270,Blue,Small,,,Description of 2.3: Nuts
+2,2.3,Item,Nuts,Nut Parts,,,,,,12345,6789,1122334455,Red,Medium,,,Description of 2.3: Nuts
+1,2.4,Section,Screws,Screw Parts,,,,,,,,,,,,,
+2,2.4,Item,Screws,Screw Parts,Apple,APAC,2006,Q2,,1,68,68,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,APAC,2006,Q3,,25,35,875,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,APAC,2006,Q4,,7,50,350,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,APAC,2007,Q1,,3,214,642,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,APAC,2007,Q2,,9,231,2079,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,APAC,2007,Q3,,9,22,198,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,APAC,2007,Q4,,8,62,496,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,EUR,2006,Q1,,17,290,4930,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,EUR,2006,Q2,,17,250,4250,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,EUR,2006,Q3,,1,5,5,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,EUR,2006,Q4,,1,72,72,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,EUR,2007,Q1,,13,86,1118,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,EUR,2007,Q2,,4,29,116,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,EUR,2007,Q3,,1,14,14,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,EUR,2007,Q4,,10,147,1470,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,USA,2006,Q1,,18,41,738,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,USA,2006,Q2,,7,22,154,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,USA,2006,Q3,,10,47,470,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,USA,2006,Q4,,4,75,300,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,USA,2007,Q1,,13,2,26,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,USA,2007,Q2,,9,88,792,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,USA,2007,Q3,,8,49,392,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Apple,USA,2007,Q4,,12,42,504,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,APAC,2006,Q2,,20,113,2260,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,APAC,2006,Q3,,9,40,360,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,APAC,2006,Q4,,2,6,12,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,APAC,2007,Q1,,2,88,176,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,APAC,2007,Q2,,7,88,616,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,APAC,2007,Q3,,5,325,1625,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,APAC,2007,Q4,,12,61,732,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,EUR,2006,Q1,,21,15,315,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,EUR,2006,Q2,,15,117,1755,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,EUR,2006,Q3,,10,0,0,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,EUR,2006,Q4,,22,164,3608,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,EUR,2007,Q1,,8,117,936,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,EUR,2007,Q2,,4,230,920,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,EUR,2007,Q3,,2,155,310,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,EUR,2007,Q4,,17,125,2125,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,USA,2006,Q1,,1,10,10,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,USA,2006,Q2,,1,82,82,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,USA,2006,Q3,,14,24,336,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,USA,2006,Q4,,10,36,360,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,USA,2007,Q1,,1,104,104,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,USA,2007,Q2,,7,122,854,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,USA,2007,Q3,,4,6,24,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Best,USA,2007,Q4,,8,313,2504,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,APAC,2006,Q2,,6,185,1110,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,APAC,2006,Q3,,7,239,1673,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,APAC,2006,Q4,,1,143,143,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,APAC,2007,Q1,,1,69,69,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,APAC,2007,Q2,,1,31,31,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,APAC,2007,Q3,,12,28,336,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,APAC,2007,Q4,,2,147,294,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,USA,2006,Q1,,1,99,99,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,USA,2006,Q2,,12,58,696,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,USA,2006,Q3,,3,114,342,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,USA,2006,Q4,,1,56,56,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,USA,2007,Q1,,1,78,78,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,USA,2007,Q2,,1,89,89,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,USA,2007,Q3,,13,115,1495,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Dell,USA,2007,Q4,,2,73,146,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,APAC,2006,Q2,,28,82,2296,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,APAC,2006,Q3,,3,216,648,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,APAC,2006,Q4,,12,150,1800,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,APAC,2007,Q1,,2,137,274,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,APAC,2007,Q2,,1,86,86,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,APAC,2007,Q3,,4,144,576,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,APAC,2007,Q4,,1,168,168,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,EUR,2006,Q1,,1,66,66,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,EUR,2006,Q2,,16,6,96,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,EUR,2006,Q3,,8,162,1296,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,EUR,2006,Q4,,28,25,700,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,EUR,2007,Q1,,15,223,3345,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,EUR,2007,Q2,,2,29,58,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,EUR,2007,Q3,,2,8,16,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,EUR,2007,Q4,,2,21,42,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,USA,2006,Q1,,14,96,1344,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,USA,2006,Q2,,6,114,684,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,USA,2006,Q3,,13,351,4563,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,USA,2006,Q4,,2,18,36,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,USA,2007,Q1,,2,39,78,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,USA,2007,Q2,,16,6,96,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,USA,2007,Q3,,1,34,34,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Gateway,USA,2007,Q4,,9,156,1404,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,APAC,2006,Q2,,12,31,372,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,APAC,2006,Q3,,3,148,444,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,APAC,2006,Q4,,6,139,834,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,APAC,2007,Q1,,6,127,762,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,APAC,2007,Q2,,39,15,585,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,APAC,2007,Q3,,24,29,696,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,APAC,2007,Q4,,8,96,768,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,EUR,2006,Q1,,15,184,2760,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,EUR,2006,Q2,,4,86,344,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,EUR,2006,Q3,,5,67,335,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,EUR,2006,Q4,,8,49,392,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,EUR,2007,Q1,,1,108,108,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,EUR,2007,Q2,,24,318,7632,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,EUR,2007,Q3,,15,44,660,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,EUR,2007,Q4,,4,68,272,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,USA,2006,Q1,,12,173,2076,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,USA,2006,Q2,,4,76,304,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,USA,2006,Q3,,12,97,1164,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,USA,2006,Q4,,24,24,576,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,USA,2007,Q1,,8,151,1208,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,USA,2007,Q2,,4,61,244,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,USA,2007,Q3,,2,227,454,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Historical,USA,2007,Q4,,19,34,646,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,APAC,2006,Q2,,4,246,984,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,APAC,2006,Q3,,9,145,1305,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,APAC,2006,Q4,,6,207,1242,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,APAC,2007,Q1,,7,66,462,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,APAC,2007,Q2,,8,218,1744,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,APAC,2007,Q3,,14,52,728,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,APAC,2007,Q4,,2,83,166,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,EUR,2006,Q1,,11,74,814,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,EUR,2006,Q3,,2,101,202,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,EUR,2006,Q4,,9,6,54,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,EUR,2007,Q1,,1,146,146,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,EUR,2007,Q2,,11,61,671,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,EUR,2007,Q3,,24,154,3696,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,EUR,2007,Q4,,8,72,576,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,USA,2006,Q1,,12,56,672,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,USA,2006,Q2,,3,196,588,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,USA,2006,Q3,,15,279,4185,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,USA,2006,Q4,,1,5,5,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,USA,2007,Q1,,13,60,780,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,USA,2007,Q2,,1,359,359,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,USA,2007,Q3,,2,60,120,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,HP,USA,2007,Q4,,3,23,69,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,APAC,2006,Q2,,21,258,5418,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,APAC,2006,Q3,,10,157,1570,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,APAC,2006,Q4,,25,54,1350,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,APAC,2007,Q1,,1,64,64,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,APAC,2007,Q2,,5,28,140,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,APAC,2007,Q3,,4,18,72,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,APAC,2007,Q4,,5,80,400,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,EUR,2006,Q1,,2,173,346,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,EUR,2006,Q2,,19,116,2204,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,EUR,2006,Q3,,18,50,900,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,EUR,2006,Q4,,1,94,94,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,EUR,2007,Q1,,40,266,10640,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,EUR,2007,Q2,,13,125,1625,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,EUR,2007,Q3,,11,1,11,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,EUR,2007,Q4,,12,34,408,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,USA,2006,Q1,,6,180,1080,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,USA,2006,Q2,,11,12,132,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,USA,2006,Q3,,8,116,928,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,USA,2006,Q4,,15,55,825,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,USA,2007,Q1,,17,92,1564,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,USA,2007,Q2,,25,180,4500,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,USA,2007,Q3,,15,309,4635,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Initial,USA,2007,Q4,,1,6,6,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,APAC,2006,Q2,,4,48,192,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,APAC,2006,Q3,,17,6,102,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,APAC,2006,Q4,,1,41,41,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,APAC,2007,Q1,,6,51,306,Blue,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,APAC,2007,Q2,,8,5,40,Red,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,APAC,2007,Q3,,1,15,15,Green,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,APAC,2007,Q4,,1,7,7,Blue,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,EUR,2006,Q1,,10,68,680,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,EUR,2006,Q2,,2,19,38,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,EUR,2006,Q3,,7,120,840,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,EUR,2006,Q4,,13,38,494,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,EUR,2007,Q1,,7,124,868,Red,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,EUR,2007,Q2,,1,133,133,Green,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,EUR,2007,Q3,,4,26,104,Blue,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,EUR,2007,Q4,,7,0,0,Red,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,USA,2006,Q1,,2,60,120,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,USA,2006,Q2,,7,6,42,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,USA,2006,Q3,,2,64,128,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,USA,2006,Q4,,11,156,1716,Green,Small,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,USA,2007,Q1,,12,102,1224,Green,Medium,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,USA,2007,Q2,,13,94,1222,Blue,Large,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,USA,2007,Q3,,1,170,170,Red,Huge,,,Description of 2.4: Screws
+2,2.4,Item,Screws,Screw Parts,Lenovo,USA,2007,Q4,,15,28,420,Green,Small,,,Description of 2.4: Screws

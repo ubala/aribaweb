@@ -1,0 +1,140 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorFlag.awl#2 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="colspan" direction="get" type="int" default="1">
+        TBD
+    </Binding>
+
+    <Binding key="emitRow" type="boolean" direction="get" default="false">
+        True if the error should be displayed as a new row in a table.  This
+        assumes that there is a table wrapping.
+    </Binding>
+
+    <Binding key="errorKey" type="Object" direction="get" required="$false">
+        An object that identifies the error that is being displayed by
+        this component.  One of errorKey or errorValueSource must be specified.
+    </Binding>
+
+    <Binding key="errorValueSource" type="Object" direction="get" required="$false">
+        The value source part of the identifier of the error that is being displayed by
+        this component.  One of errorKey or errorValueSource must be specified.
+    </Binding>
+
+    <Binding key="errorFieldPath" type="Object" direction="get" required="$false">
+        The field path part of the identifier of the error that is being displayed by
+        this component.
+    </Binding>
+
+    <Binding key="errorGroupName" type="Object" direction="get" required="$false">
+        The group name part of the identifier of the error that is being displayed by
+        this component.
+    </Binding>
+
+    <Binding key="errorImage" type="String" direction="get" required="$false">
+        Specify a custom image as the indicator in the display.
+    </Binding>
+
+    <Binding key="errorLinkAction" type="action" direction="get" default="$null">
+        Action to be taken when the error (if displayed as a hyperlink) is clicked on.
+        See the errorLinkOn binding.
+    </Binding>
+
+    <Binding key="errorLinkOn" type="boolean" direction="get" default="false">
+        True if the error should be displayed as a hyperlink.  Use in combination with
+        the errorLinkAction binding.
+    </Binding>
+
+    <Binding key="errorLinkSubmitForm" type="boolean" direction="get" default="false">
+        True if we should submit the form if the error hyperlink is clicked.  Use in
+        combination with the errorLinkAction binding.
+    </Binding>
+
+    <Binding key="preBreak" type="boolean" direction="get" default="false">
+        True if we want a emmitted before the error display
+    </Binding>
+
+    <Binding key="showError" type="boolean" direction="get" default="true">
+        True if errors should be displayed.
+    </Binding>
+
+    <Binding key="showWarning" type="boolean" direction="get" default="true">
+        True if warnings should be displayed.
+    </Binding>
+
+
+</a:Api>\
+<a:If ifTrue="$hasErrorsOrWarnings">\
+    <a:If ifTrue="$^emitRow">\
+        <tr>
+            <td colspan="$^colspan:1">\
+                <a:IncludeBlock name="displayError"
+                                errorLinkAction="$^errorLinkAction"
+                                errorLinkOn="$^errorLinkOn"
+                                errorLinkSubmitForm="$^errorLinkSubmitForm"
+                                preBreak="$^preBreak"/>\
+                <a:If ifTrue="$^postBreak">\
+                    <br/>\
+                </a:If>\
+            </td>
+        </tr>\
+    <a:Else/>\
+        <a:IncludeBlock name="displayError"
+                        errorLinkAction="$^errorLinkAction"
+                        errorLinkOn="$^errorLinkOn"
+                        errorLinkSubmitForm="$^errorLinkSubmitForm"
+                        preBreak="$^preBreak"/>\
+        <a:If ifTrue="$^postBreak">\
+            <p/>\
+        </a:If>\
+    </a:If>\
+</a:If>\
+
+<a:Block name="displayError">\
+    <a:If ifTrue="$^preBreak">\
+        <br/>\
+    </a:If>\
+    <a:If ifTrue="$showError">\
+        <span class="invalid">
+            <a:Image align="absmiddle"
+                filename="$^errorImage:error.gif"
+                alt="$[a001]Error"
+                title="$[a001]Error"/> \
+            <a:If ifTrue="$^errorLinkOn">\
+                <a:Hyperlink action="$^errorLinkAction"
+                             submitForm="$requestContext.currentForm">\
+                    <a:String value="$error"/>\
+                </a:Hyperlink>
+            <a:Else/>\
+                <a:String value="$error"/>\
+            </a:If>\
+        </span>
+        <!--- we want to use the messages list here, but it needs to be enhanced to
+              allow an optional action (as for errorLinkAction above)
+        <w:MessagesList message="$error"
+                        isError="$true"/>\
+        -->\
+    </a:If>\
+    <a:If ifTrue="$showWarning">\
+        <w:MessagesList message="$warning"
+            isWarning="$true"/>\
+    </a:If>\
+</a:Block>\

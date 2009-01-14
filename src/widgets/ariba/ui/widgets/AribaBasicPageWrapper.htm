@@ -1,0 +1,167 @@
+<!--- ADA hidden links for screen readers to jump directly to navigation and content -->
+<AribaCondition ifTrue="isAccessibilityEnabled">
+    <AribaCondition ifTrue="isSidebarVisible">\
+        <a href="#navigation" title="Jump to Navigation" accesskey="2">Jump to Navigation</a>
+    </AribaCondition>
+    <a href="#content" title="Jump to Content" accesskey="3">Jump to Content</a>
+</AribaCondition>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <!--- Row 1: Command Bar Top -->
+    <!--- Row 2: Command Bar -->
+    <!--- Row 2': AribaCondition if on non-TOC pages -->
+    <!--- Row 3: subtable with: TOC, Notch, Content -->
+
+    <!--- Row 1: Command Bar Top -->
+    <tr>
+        <td name="mastHeadCmdBarClass" class="cmdBar">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="1px" rowspan="3" style="padding:10px 0px 0px 20px; margin:0px;">
+                        <AribaCondition ifFalse="displayProductImageInBannerArea">
+                            <AribaCondition ifTrue="disableHomeAction">
+                                <AribaImage name="mastHeadProductImage" filename="cmdbar_prod.gif" class="block"/>
+                            </AribaCondition>
+                            <AribaCondition ifFalse="disableHomeAction">
+                                <AribaAction name="home" alwaysVisible="true"><AribaImage name="mastHeadProductImage" filename="cmdbar_prod.gif"/></AribaAction>
+                            </AribaCondition>
+                        </AribaCondition>
+                    </td>
+                    <td width="1%" rowspan="2" style="padding:10px 0px 9px 15px;">
+                        <AribaCondition ifFalse="hideBannerImage">
+                            <AribaImage name="mastHeadBannerImage" filename="cmdbar_banner.gif" class="block"/>
+                        </AribaCondition>
+                        <AribaCondition ifTrue="displayProductImageInBannerArea">
+                            <AribaCondition ifTrue="disableHomeAction">
+                                <AribaImage name="mastHeadBannerImage" filename="cmdbar_prod.gif" class="block"/>
+                            </AribaCondition>
+                            <AribaCondition ifFalse="disableHomeAction">
+                                <AribaAction name="home" alwaysVisible="true"><AribaImage name="mastHeadBannerImage" filename="cmdbar_prod.gif"/></AribaAction>
+                            </AribaCondition>
+                        </AribaCondition>
+                    </td>
+                    <td colspan="2" style="padding:4px 15px 0px 0px;white-space:nowrap;text-align:right;align:right;vertical-align:top">
+                        <span id="cmdlinks">
+                            <AribaCondition ifFalse="disableLogoutAction">\
+                                <AribaCondition ifTrue="enableReturnToServiceManagerAction">
+                                    <AribaAction name="undelegate"><AribaString name="ReturnToServiceManager"/></AribaAction>
+                                    <AribaCondition ifTrue="needsDelimiter"/>\
+                                </AribaCondition>
+                            </AribaCondition>
+                            <AribaCondition ifFalse="nextGenUI">\
+                                <AribaCondition ifFalse="disableHomeAction">\
+                                    <AribaCondition ifTrue="needsWrapperActionDelimiter">&nbsp;|&nbsp;</AribaCondition>\
+                                    <AribaAction name="home"><AribaString name="Home"/></AribaAction>\
+                                    <AribaCondition ifTrue="needsDelimiter"/>\
+                                </AribaCondition>\
+                            </AribaCondition>\
+                            <AribaCondition ifTrue="preferencesEnabled">\
+                                <AribaCondition ifTrue="needsWrapperActionDelimiter">&nbsp;|&nbsp;</AribaCondition>\
+                                <AribaAction name="preferences"><AribaString name="Preferences"/></AribaAction>\
+                                <AribaCondition ifTrue="needsDelimiter"/>\
+                            </AribaCondition>\
+                            <AribaCondition ifFalse="disableHelpAction">\
+                                <AribaCondition ifTrue="needsWrapperActionDelimiter">&nbsp;|&nbsp;</AribaCondition>\
+                                <AribaHelp/>
+                                <AribaCondition ifTrue="needsDelimiter"/>\
+                            </AribaCondition>\
+                            <AribaCondition ifFalse="disableLogoutAction">\
+                                <AribaCondition ifTrue="needsWrapperActionDelimiter">&nbsp;|&nbsp;</AribaCondition>\
+                                <AribaAction name="logout"><AribaString name="Logout"/></AribaAction>\
+                            </AribaCondition>\
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td rowspan="2" style="white-space:nowrap;padding-right:15px" align="right" width="1%">
+                        <AribaCondition ifTrue="showDelegationInfo">
+                            <AribaCondition ifFalse="disableAboutBox">
+                                <a class="greeting greetingSelection"
+                                    onmousedown="return ariba.Widgets.toggleAboutBox('AWAboutDiv',event);"
+                                    onkeydown="return ariba.Widgets.toggleAboutBox('AWAboutDiv',event);"
+                                    href="javascript:void(0);" tabindex="1000"><AribaString name="userDelegationInfo"/></a>
+                            </AribaCondition>
+                            <AribaCondition ifTrue="disableAboutBox">
+                                <AribaString name="userDelegationInfo"/>
+                            </AribaCondition>
+                            <AribaCondition ifTrue="enableUndelegateAction">
+                                <AribaCondition ifFalse="disableLogoutAction">\
+                                    (<AribaAction name="undelegate"><AribaString name="Undelegate"/></AribaAction>)
+                                </AribaCondition>
+                            </AribaCondition>
+                        </AribaCondition>
+                        <AribaCondition ifFalse="showDelegationInfo">
+                            &nbsp;
+                        </AribaCondition>
+                        <br/>
+                        <AribaCondition ifFalse="disableAboutBox">
+                            <a class="greeting greetingSelection"
+                                onmousedown="return ariba.Widgets.toggleAboutBox('AWAboutDiv',event);"
+                                onkeydown="return ariba.Widgets.toggleAboutBox('AWAboutDiv',event);"
+                                href="javascript:void(0);" tabindex="1000"><AribaString name="userGreeting"/></a>
+                        </AribaCondition>
+                        <AribaCondition ifTrue="disableAboutBox">
+                            <AribaString name="userGreeting"/>
+                        </AribaCondition>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="$navTabClass" valign="bottom" colspan="3" width="1%">
+                        <a name="navigation"></a>
+                        <AribaCondition ifTrue="isNavigationBarVisible">
+                            <AribaNavigationBar/>
+                        </AribaCondition>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <!-- Row 2: Command Bar -->
+    <tr class="$cmdBarClass:cmdBarWrapper">
+        <td colspan="4" class="mastCmdContainer">
+            <!--- separate table required to allow toc to fully collapse -->
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td><div class="cmdLeft"></div></td>
+                    <td class="cmdFill" align="right">
+                        <AribaCommandBar/>
+                    </td>
+                    <td><div class="cmdRight"></div></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+
+    <!-- Row 3: TOC, Notch, Content -->
+    <tr>
+        <td>
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <!-- Column 1: TOC -->
+                    <td id="tocAlley" valign="top">\
+                        <AribaCondition ifTrue="isSidebarVisible">\
+                            <AribaToc/>
+                        </AribaCondition>\
+                        <AribaCondition ifTrue="hasLegalContent">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">\
+                                <tr style="height:40px;">
+                                    <!--- space after nbsp required for correct rendering -->
+                                    <!--- style="" required to render line under hyperlink -->
+                                    <td>&nbsp; <AribaAction name="legalNotice" style="">
+                                            <AribaString name="AribaLegalNotice"/>
+                                        </AribaAction>
+                                    </td>
+                                </tr>
+                            </table>
+                        </AribaCondition>
+                    </td>
+
+                    <!-- Column 3: content -->
+                    <td valign="top" class="content">\
+                        <AribaPageContent/>\
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>\

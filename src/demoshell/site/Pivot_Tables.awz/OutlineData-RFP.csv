@@ -1,0 +1,21 @@
+Level,Item,Type,ItemDesc,ItemAttachment,Supplier,Answer,Price,Quantity,ExtendedPrice,Savings,Description,BuyerAttachments,Attachments,Requirements
+0,1,Section,Introduction,,,,,,,,"The purpose of this project is to obtain a reliable supply chain relationship at a competitive price for the list of parts currently being delivered to all of ACME's platforms.  In addition, the following files have been made accessible to all participants",,,
+0,2,Section,Commercial Terms,,,,,,,,,,,
+1,2.1,Question,Are you EDI Capable,,,,,,,,,,,
+1,2.2,Question,Are you a Minority Owned Supplier,,,,,,,,,,,
+1,2.3,Question,Are you an Equal Opportunity Employer?,,,,,,,,,,,
+1,2.4,Question,Read in detail the Terms and Conditions document here:,RFXTemplate[2].doc,,,,,,,,,,
+0,3,Section,ACME Wiring Device Locations Breakdown,,,,,,,,,,,
+1,3.1,Item,HWS Newark NJ Location,,Historic,,690000,10,6900000,0,ACME wiring will have two locations: Newark NJ and Vega Baja PR up for bid,Newark NJ Line Item Detail Spreadsheet [Requirements.xls]; AI Drawings for Both Wiring Locations: [ACME Wiring Drawings.zip]; Must read in Detail Newarks Facility-Level Requirements: [Newark Facility Level Info.doc],,
+1,3.1,Item,HWS Newark NJ Location,,Initial,,680000,10,6900000,10000,ACME wiring will have two locations: Newark NJ and Vega Baja PR up for bid,Newark NJ Line Item Detail Spreadsheet [Requirements.xls]; AI Drawings for Both Wiring Locations: [ACME Wiring Drawings.zip]; Must read in Detail Newarks Facility-Level Requirements: [Newark Facility Level Info.doc],,
+1,3.2,Item,HWS Vega Baja Location,,Historic,,512000,10,5120000,0,PLEASE NOTE: All drawings are located in the ZIP file above,Vega Baja Line Item Detail Spreadsheet [HWS Vega Baja Springs Data Collection template (2).xls],An initial attachment [A File.doc]; And another [Another.ppt],
+1,3.2,Item,HWS Vega Baja Location,,Initial,,500000,10,5120000,120000,PLEASE NOTE: All drawings are located in the ZIP file above,Vega Baja Line Item Detail Spreadsheet [HWS Vega Baja Springs Data Collection template (2).xls],Some supplier attachment [Historical.xls],
+0,4,Section,ACME Power System Locations,,,,,,,,Need to determine HPS Lot Breakdown and Data Collection,,,
+0,5,Section,Item Pricing,,,,,,,,,,,
+1,5.1,Item,Item #1,,Historic,,1234.45,100,123445,,,,,
+1,5.1,Item,Item #1,,Initial,,1200,1000,120000,3445,,,,
+1,5.2,Item,Item #2,,Historic,,1234.45,100,123445,,
+1,5.2,Item,Item #2,,Initial,,1200,1000,120000,3445,
+0,6,Section,ACME Lighting Locations Breakdown,,,,,,,,Need to determine HLI Lot Breakdown and Data Collection
+0,7,Section,ACME Electrical Locations,,,,,,,,Need to determine HEP Lot Breakdown and Data Collection
+0,8,Section,ACME Industrial Tech Locations,,,,,,,,Need to determine HIT Lot Breakdown and Data Collection

@@ -1,0 +1,174 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalWindowWrapper.awl#17 $
+    </Copyright>
+
+    <Overview>
+        To be used as the "page wrapper" for pages accessed via ModalWindowLink.  This
+        displays the Ok and Cancel buttons, provides a place for your content, and title
+        and will take care of clearing the "action blocking cover" which is created
+        by ModalWindowLink before opening the modal window in which this wrapper appears.
+    </Overview>
+
+    <Binding key="hasForm" direction="get" type="boolean" default="$false">
+        See BasicPageWrapper
+    </Binding>
+
+    <Binding key="helpUrl" direction="get" type="String" required="$false">
+        See BasicPageWrapper
+    </Binding>
+
+    <Binding key="title" direction="get" type="String" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="okLabel" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="cancelLabel" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="okAction" direction="get" type="AWComponent" required="$true">
+        The action which is fired when the user clicks "Ok".
+        Users may return a "ModalWindowClose" to allow the window to close or null
+        in the event the current page has errors and needs to be displayed again
+        for user interaction, or possibly even a new page (eg Confirmation).
+        If there are no errors and you're ready to return to the original page,
+        you must return pageWithName("ModalWindowClose").
+    </Binding>
+
+    <Binding key="cancelAction" direction="get" type="AWComponent" required="$true">
+        Same as okAction above, but invoked when the user clicks "Cancel".
+        You may still prevent a Cancel from occurring by returning null or even a new page,
+        but you must return pageWithName("ModalWindowClose") to allow the window to close.
+    </Binding>
+
+    <Binding key="windowClosed" direction="get" type="void" required="$false">
+        When the user closes the window, this action is invoked.  Your method should be of type void.
+    </Binding>
+
+    <Binding key="refreshParent" direction="both" type="boolean" required="$false">
+        If set to true, this binding is an indicator to the ModalWindowWrapper to send a
+        refresh request to the parent window.  Note, as a convenience, this binding acts
+        as a toggle -- if the value of the binding is initially true, then after
+        renderResponse, the value will be set to false.
+    </Binding>
+
+    <Binding key="showTopButtons" direction="get" type="boolean" default="$true">
+        By default buttons are shown on the top and the bottom. Use this binding to
+        disable the top buttons.
+    </Binding>
+    
+    <Binding key="disableCancelButton" direction="get" type="boolean" default="$false">
+        By default both ok and cancel buttons are shown. Use this binding to
+        disable the cancel button.
+    </Binding>
+
+    <NamedContent name="titleArea" required="$false">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="buttons" required="$false">
+        TBD
+    </NamedContent>
+
+</a:Api>\
+
+<a:Environment ModalWindowWrapper="$this">\
+<w:BasicPageWrapper disableLogoutAction="$true"
+    disableHomeAction="$true"
+    hasSidebarNotch="$false"
+    isSidebarVisible="$false"
+    hasForm="$^hasForm:$false"
+    helpUrl="$^helpUrl"
+    omitWrapperFrame="$^omitWrapperFrame:$false"
+    addContentMargin="$false"
+    bodyClass="modalWindow"
+    >\
+    <w:ModalWindowScriptFunctions/>\
+
+    <div style="padding:3px">
+    <w:BasicNavigator showTopButtons="$^showTopButtons">\
+
+        <a:Content name="buttons">\
+            <td align="right" class="wizNavBar">\
+                <table border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td nowrap="awstandalone" style="padding-right:4px">\
+                            <a:RefreshRegion>
+                            <w:TextButton isBrandStyle="$true" action="$okClicked">
+                                <a:If notEqualNull="$^okLabel">
+                                    <a:String value="$^okLabel"/>
+                                <a:Else/>
+                                    <a:Local key="a001">OK</a:Local>
+                                </a:If>
+                            </w:TextButton>\
+                            </a:RefreshRegion>
+                        </td>
+                        <a:If ifFalse="$^disableCancelButton">
+                            <td nowrap="awstandalone">\
+                                <a:RefreshRegion>
+                                <w:TextButton isBrandStyle="$true" action="$cancelClicked" submitForm="$false">
+                                    <a:If notEqualNull="$^cancelLabel">
+                                        <a:String value="$^cancelLabel"/>
+                                    <a:Else/>
+                                        <a:Local key="a002">Cancel</a:Local>
+                                    </a:If>
+                                </w:TextButton>\
+                                </a:RefreshRegion>
+                            </td>
+                        </a:If>
+                    </tr>
+                </table>
+            </td>
+        </a:Content>\
+
+        <a:Content name="titleArea">\
+            <a:IncludeContent name="titleArea" required="$false"/>\
+            <span class="pageHead">
+                <a:String value="$^title"/>
+            </span>\
+        </a:Content>\
+
+        <a:Content name="body">\
+            <a:If equalNull="$runtimeException">\
+                <a:IncludeContent/>\
+            <a:Else/>
+                <pre>\
+                    <a:PrimitiveString value="$stackTrace"/>\
+                </pre>
+            </a:If>\
+        </a:Content>\
+
+        <a:Content name="footerArea">\
+            <a:IncludeContent name="footerArea"
+                                required="$false"/>\
+        </a:Content>\
+
+    </w:BasicNavigator>\
+    </div>\
+
+    <a:RefreshRegion alwaysRender="$refreshParent">
+        <a:If ifTrue="$refreshParent">
+            <a:ClientSideScript>
+                window.opener.ariba.ModalWindow.baseWindowRefresh();
+            </a:ClientSideScript>
+        </a:If>
+    </a:RefreshRegion>
+</w:BasicPageWrapper>\
+</a:Environment>

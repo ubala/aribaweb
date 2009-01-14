@@ -1,0 +1,174 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugOptions.awl#26 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+</a:Api>\
+
+<w:ModalPageWrapper title="AribaWeb -- Debugging Options">
+    <br/>
+    <w:SectionHeading title="Screen Size"/>
+    <w:SectionBody>
+        Open sized window:<br/>
+        <a href="javascript:void(0);" onMouseDown="return ariba.Debug.openSizedWindow(1024,768);">1024x768 (Ariba Standard)</a><br/>
+        <a href="javascript:void(0);" onMouseDown="return ariba.Debug.openSizedWindow(1280,1024);">1280x1024</a><br/>
+        <br/>
+        Resize current window:<br/>
+        <a href="javascript:void(0);" onClick="window.resizeTo(1024,768);">1024x768 (Ariba Standard)</a><br/>
+        <a href="javascript:void(0);" onClick="window.resizeTo(1280,1024);">1280x1024</a><br/>
+    </w:SectionBody>
+    <w:SectionHeading title="General Options"/>
+    <w:SectionBody>
+        <a:Label>
+            <a:Checkbox value="$ComponentPathDebuggingEnabled" action="$null"/> Component Path Debugging enabled
+        </a:Label>
+        <a:If ifTrue="$ComponentPathDebuggingEnabled">
+            <br/>
+            Hold down the ctrl key and mouse over a component to see its component path.
+        </a:If>
+        <br/>
+        <a:Label>
+            <a:Checkbox value="$perfWarningsEnabled" action="$null"/>
+                Performance Warning Panel enabled
+        </a:Label>
+        <br/>
+        <a:Label>
+            <a:Checkbox value="$ElementIdTracingEnabled" action="$null"/>
+                Element Id Tracing enabled
+        </a:Label>
+
+    </w:SectionBody>
+
+    <a:If notEqualNull="$=ariba.ui.widgets.Widgets.AWSessionManager">
+        <a:IncludeComponent awcomponentName="$=ariba.ui.widgets.Widgets.AWSessionManager.DebugOptions"/>
+    </a:If>
+
+    <w:SectionHeading title="Refresh Region Debugging"/>
+    <w:SectionBody>
+        <a:Label>
+            <a:Checkbox value="$session.dict.RefreshRegionsVisible"/> Mark Refresh Regions
+        </a:Label>
+        <br/>
+        <a:Label>
+            <a:Checkbox value="$session.dict.IsRefreshFrameVisible"/> Refresh frame visible
+        </a:Label>
+        <br/>
+        <a:Label>
+            <a:Checkbox value="$ariba.ui.aribaweb.core.AWPage.DEBUG_REFRESH_REGION_TOP_LEVEL_CHANGE"/>
+            Enable Refresh region debugging (display diff of top-level responses)
+        </a:Label>
+        <br/>
+        <b>Command:</b>
+        <a:TextField value="$ariba.ui.aribaweb.core.AWPage.ARIBA_DIFF_TOOL_COMMAND" size="75"/>
+        <br/>
+        eg: "C:/Program Files/Beyond Compare 2/BC2.exe %s %s &"
+        <br/>
+        <i>\
+            To make this permanent, define the environment variable <b>"ARIBA_DIFF_TOOL_COMMAND"</b>
+        </i>
+        <br/>
+        <a:Label>
+            <a:Checkbox value="$ariba.ui.aribaweb.core.AWPage.AllowCrossPageRefresh"/> Allow cross page incremental refresh
+        </a:Label>
+        <br/>
+    </w:SectionBody>
+
+    <w:SectionHeading title="Javascript Debugging"/>
+    <w:SectionBody>
+        <a:Label>
+            <a:Checkbox value="$session.dict.IsJavascriptDebuggingEnabled"/>
+            Show AW Javascript debugging log window
+        </a:Label>
+        <br/>
+        <a:Label>
+            <a:Checkbox value="$session.dict.IsHistoryVisible"/>
+            History frame visible
+        </a:Label>
+        <br/>
+        <a:Label>
+            <a:Checkbox value="$DropDebuggingEnabled"/>
+            Show Drop Regions
+        </a:Label>
+    </w:SectionBody>
+
+    <w:SectionHeading title="Performance State Capture"/>
+    <w:SectionBody>
+        <a:Label>
+            <a:Checkbox value="$perfDetailLoggingEnabled"/>
+            Enable performance event detail capture
+        </a:Label>
+        <br/>
+        Threshold for events of type before stack capture:
+        <w:CueTip>
+            This threshhold determines the number of events of a particular type necessary to trigger
+            the capture of a backtrace.  For instance, if set to 5 and five (or more) AQL identical AQL queries are run
+            then a backtrace will be captured for the 5th time.  You can then see this backtrace by clicking on the
+            Perm Metric on the performance popup and clicking the expando arrow on the resulting page
+        </w:CueTip>
+        <a:TextField value="$ariba.util.core.PerformanceStateCore.GlobalStackTraceCaptureThreshold" formatter="$formatters.integer"/>
+    </w:SectionBody>
+
+    <w:SectionHeading title="ADA Options"/>
+    <w:SectionBody>
+        <table cellpadding="0" cellspacing="0">
+            <tr>
+                <a:Label>
+                    <td><a:Checkbox value="$accessibilityEnabled"/></td>
+                    <td>Accessibility Enabled for this session</td>
+                </a:Label>
+            </tr>
+        </table>
+    </w:SectionBody>
+
+    <w:SectionHeading title="Resource Manager Debugging"/>
+    <w:SectionBody>
+        Information to debug the resource manager:
+        <a:Hyperlink target="awResourceManagerWindow" action="$debugResourceManager">Resource Manager Info</a:Hyperlink>
+    </w:SectionBody>
+
+    <br/>
+    <w:SectionHeading title="Configure Template Validation"/>
+    <w:SectionBody>
+        <w:HintMessage>
+            <b>Strict Tag Naming:</b>
+            Tags in AWL files that do not reference AWComponents will be written out to the response
+            as text strings.  Tags whose names begin with an uppercase character are expected to map
+            to a well defined component.  When Strict Tag Naming is enabled, an error message will be
+            displayed on the page for any tags that violate the Ariba tag naming conventions.
+        </w:HintMessage>
+
+        <table>
+            <tr>
+                <th>Error</th>
+                <!---td>Warning</td--->
+                <th style="padding-left:8px">Strict Tag Naming</th>
+                <th style="padding-left:8px;text-align:left">Package Name</th>
+            </tr>
+            <a:For list="$packageNameList" item="$currentPackageName">
+            <tr>
+                <td align="center"><a:Checkbox value="$currentPackageErrorsEnabled"/></td>
+                <!---td><a:Checkbox value="$currentPackageWarningsEnabled"/></td--->
+                <td align="center"><a:Checkbox value="$currentPackageStrictTagNamingEnabled"/></td>
+                <td style="padding-left:8px">$currentPackageName</td>
+            </tr>
+            </a:For>
+        </table>
+    </w:SectionBody>
+
+</w:ModalPageWrapper>

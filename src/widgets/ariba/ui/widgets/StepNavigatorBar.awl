@@ -1,0 +1,96 @@
+<a:Form omitTags="$!^hasForm">
+    <a:If ifFalse="$^isBottom">
+        <div class="stepNavTop">
+            <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                <tr>
+                    <td valign="bottom">
+                        <a:IncludeContent name="titleArea" required="$false"/>\
+                    </td>
+                    <td>&nbsp;</td>
+                    <a:If ifTrue="$^showButtons:$true">
+                        <td width="1%" align="$languageRight" valign="bottom">
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                                <tr>
+                                    <a:If ifFalse="$showAsDialog">
+                                        <td valign="bottom" class="stepNavRound">
+                                            <b class="rbC">\
+                                                <b class="rbFC rb1"></b>\
+                                                <b class="rbFC rb2"></b>\
+                                                <b class="rbFC rb3"></b>\
+                                                <b class="rbFC rb4"></b>\
+                                            </b>\
+                                        </td>
+                                    </a:If>
+                                    <td valign="bottom">
+                                        <a:Environment stepNavigatorButtonStyle="padding-left:10px;background:transparent;">\
+                                            <a:If ifFalse="$showAsDialog">
+                                                <w:RoundedBox hideGradient="$true" class="stepNavButtons">
+                                                    <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                                                        <tr>
+                                                            <a:IncludeContent name="buttons"/>\
+                                                        </tr>
+                                                    </table>
+                                                </w:RoundedBox>
+                                            <a:Else/>
+                                                <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                                                    <tr>
+                                                        <a:IncludeContent name="buttons"/>\
+                                                    </tr>
+                                                </table>
+                                            </a:If>
+                                        </a:Environment>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </a:If>
+                </tr>
+            </table>
+        </div>
+    <a:Else/>
+        <div class="stepNavBottom">
+            <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                <tr>
+                    <td width="99%"></td>
+                    <a:If ifTrue="$^showButtons:$true">
+                        <td width="1%" align="$languageRight">
+                            <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                                <tr>
+                                    <a:If ifFalse="$showAsDialog">
+                                        <td valign="top" class="stepNavRound">
+                                            <b class="rbC">\
+                                                <b class="rbFC rb4"></b>\
+                                                <b class="rbFC rb3"></b>\
+                                                <b class="rbFC rb2"></b>\
+                                                <b class="rbFC rb1"></b>\
+                                            </b>\
+                                        </td>
+                                    </a:If>
+                                    <td valign="top">
+                                        <a:Environment stepNavigatorButtonStyle="padding-left:10px;background:transparent;">\
+                                            <a:If ifFalse="$showAsDialog">
+                                                <w:RoundedBox hideGradient="$true" class="stepNavButtons" roundStyle="$ariba.ui.widgets.RoundedBox.Bottom">
+                                                    <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                                                        <tr>
+                                                            <a:IncludeContent name="buttons"/>\
+                                                        </tr>
+                                                    </table>
+                                                </w:RoundedBox>
+                                            <a:Else/>
+                                                <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                                                    <tr>
+                                                        <a:IncludeContent name="buttons"/>\
+                                                    </tr>
+                                                </table>
+                                            </a:If>
+                                        </a:Environment>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </a:If>
+                </tr>
+            </table>
+        </div>
+    </a:If>
+</a:Form>

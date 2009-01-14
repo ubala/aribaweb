@@ -1,0 +1,19 @@
+<html>
+<body bgcolor="#ffffff">
+    <table border="0" cellpadding="8">
+        <tr align="left" valign="top">
+            <td>
+                <a:Image filename="awxWarningLarge.gif"/>
+                <br/>
+                Reenter<br/>
+                <a:Hyperlink pageName="$application.mainPageName">
+                    <b><a:String value="$application.name"/></b>
+                </a:Hyperlink>
+            </td>
+            <td>
+                Your session has timed out.
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

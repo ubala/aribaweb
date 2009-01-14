@@ -1,0 +1,117 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.awl#5 $
+    </Copyright>
+
+    <Overview>
+        AWFileUpload wraps the standard html input element for uploading the contents of a file
+        from the client machine.
+
+        By default, the entire contents of a file upload are read into memory while parsing the request.
+        However, if your application expects to upload large amounts of data at any time, you can put the
+        application into a mode whereby it will use a temporary file on disk to store the contents of file
+        uploads.  To enter this mode, simply call ariba.ui.aribaweb.util.AWMimeReader.setFileUploadDirectory(...)
+        and pass in the name of a scratch directory that can be used for temporary files.  Note that
+        any temporary files will be deleted at the end of each request when the request is "disposed", therefore
+        you must always read the entire contents of any temporary files during the current request, or
+        rename the File object to avoid its being deleted.
+    </Overview>
+
+    <Binding key="inputStream" type="java.io.InputStream" direction="set" alternates="bytes,file">
+        If this binding is provided, the contents of the uploaded data will be made available
+        to the application in the form of an InputStream, which can be read by the application.
+        You may use one of three bindings (inputStream, bytes, file) but not more than one.
+
+        Note that, if a temporary file directory has been specified, you must read the entire contents
+        of this inputStream before the end of this request as the file behind this input stream will
+        be deleted.
+    </Binding>
+
+    <Binding key="bytes" type="byte[]" direction="set" alternates="inputStream,file">
+        If this binding is provided, the contents of the uploaded data will be made available
+        to the application in the form of a byte[].  If the application is in the mode which requires
+        it to write all incoming file uploads to disk, this will simply read the contents from disk int a byte[].
+    </Binding>
+
+    <Binding key="file" type="java.io.File" direction="set" alternates="inputStream,bytes">
+        If you have setup a temporary file directory, you may specify the "file" binding
+        and be passed a java.io.File object.  You must either rename the file (to avoid
+        its being deleted at the end of the request) or read its contents into memory.
+        Of course, if you were going to read the contents, you might as well use the
+        inputStream or bytes options as they will make that easier for you.
+    </Binding>
+
+    <Binding key="filename" type="String" direction="set" required="$false">
+        The name of the user's file (from the client machine).
+    </Binding>
+
+    <Binding key="mimeType" type="String" direction="set" required="$false">
+        When the request is processed, if you provide this binding, the mime type
+        of the uploaded data will be set.
+    </Binding>
+
+    <Binding key="fileSizeExceeded" type="boolean" direction="set" required="$false">
+        Returns true (during applyValues) if the size of the file uploaded exceeds
+        the maximum allowed.
+    </Binding>
+
+    <Binding key="name" type="String" direction="get" required="$false">
+        The name of the form input element.  It is not recommended that you use this field as
+        the aribaweb framework prefers to automatically assign names to html elements.
+    </Binding>
+
+    <Binding key="newMode" type="boolean" direction="get" required="$false">
+        The temporary binding to determine the if values are pushed for empty file.
+        In old mode (newMode equals false), null values can mean one of the following:
+        1)	Bad file name
+        2)	Good file name, but empty file
+        3)	Blank (0 or more white spaces) file name
+        In new mode, values are never null.
+        If file is empty and filename is empty, that means 3).
+        If file is empty and filename is not empty, that means either 1) or 2).
+    </Binding>
+
+    <Binding key="maxLength" type="int" direction="get" required="$false">
+        Override the maximum length.
+
+        This binding can be used whether or not there is a static max length currently set
+        so the maxlength can be used to
+        a) ensure that at a certain file upload has does not exceed a certain length while
+           allowing all standard file uploads to be unlimited in length
+        b) (more common) allow a particular file upload control to specify a max length
+           which is greater than the global (system wide) max length
+
+        If there are multiple AWFileUpload controls on a page, the max length for each
+        AWFileUpload can be set independently.  Any AWFileUpload without this binding
+        will have a maxlength based on the global setting for the system.
+    </Binding>
+
+</a:Api>\
+
+<!--- Note: the voodoo for "formValue" is to indicate that this is never evaluated.
+      However, we must indicate to AWGenericElement that it is a form element, otherwise
+      this will be skipped during take values.
+      Note: DO NOT add any additional elements to this template, see javadoc in
+      corresponding java file. -->\
+<input type="file" elementId="$elementId" name="$fileUploadName" otherBindings="$otherBindingsValues"
+       formValue="voodoo" id="$env.awinputId"/>\
+<a:Singleton>
+    <div id="AWFileUploadErrorMessage" style="display:none">
+        <a:Local key="a001">
+            Error: Your request cannot be processed.  Please check that file paths for all file uploads are valid.
+        </a:Local>
+    </div>
+</a:Singleton>

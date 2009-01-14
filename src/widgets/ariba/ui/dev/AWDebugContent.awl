@@ -1,0 +1,8 @@
+<a:If ifTrue="$isDebuggingEnabled">
+    <a:ClientSideScript>
+        var windowTitle = '<a:PrimitiveString value="$^title"/>';
+        if (windowTitle != '') {
+            document.title = windowTitle;
+        }
+    </a:ClientSideScript>
+</a:If>

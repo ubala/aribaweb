@@ -1,0 +1,1912 @@
+/*
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#115 $
+*/
+
+package ariba.ui.aribaweb.core;
+
+import ariba.ui.aribaweb.util.AWArrayManager;
+import ariba.ui.aribaweb.util.AWBaseObject;
+import ariba.ui.aribaweb.util.AWDebugTrace;
+import ariba.ui.aribaweb.util.AWEncodedString;
+import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.ui.aribaweb.util.AWUtil;
+import ariba.ui.aribaweb.util.Log;
+import ariba.util.core.Assert;
+import ariba.util.core.DebugState;
+import ariba.util.core.FastStringBuffer;
+import ariba.util.core.Fmt;
+import ariba.util.core.ListUtil;
+import ariba.util.core.MapUtil;
+import ariba.util.core.PerformanceState;
+import ariba.util.core.StringArray;
+import ariba.util.core.StringUtil;
+import ariba.util.core.SystemUtil;
+import ariba.util.core.ThreadDebugKey;
+import ariba.util.core.ThreadDebugState;
+
+import javax.servlet.http.HttpSession;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Map;
+
+public class AWRequestContext extends AWBaseObject implements DebugState
+{
+    public static final AWEncodedString TopFrameName =
+        AWEncodedString.sharedEncodedString("_top");
+    public static final AWEncodedString SelfFrameName =
+        AWEncodedString.sharedEncodedString("_self");
+    public static final String SessionIdKey = "aws";
+    public static final String ResponseIdKey = "awr";
+    public static final String FrameNameKey = "awf";
+    public static final String PageScrollTopKey = "awst";
+    public static final String PageScrollLeftKey = "awsl";
+    public static final String SessionRendevousKey = "awsr";
+    public static final String IncrementalUpdateKey = "awii";
+    private static final ThreadDebugKey RequestContextID =
+        new ThreadDebugKey("RequestContext");
+    public static final String RefreshRequestKey = "awrr";
+
+    private AWApplication _application;
+    private AWRequest _request;
+    private List _requestSenderIds;
+    private String _currentRequestSenderId;
+    private AWElementIdPath _currentRequestSenderIdPath;
+    private boolean _isBrowserMicrosoft;
+    private boolean _isMetaTemplateMode;
+    private String _browserMinWidth;
+    private String _browserMaxWidth;
+    private AWElementIdGenerator _elementIdGenerator;
+    private HttpSession _httpSession;
+    private String _httpSessionId;
+    private AWSession _awsession;
+    private AWResponse _response;
+    private AWEncodedString _responseId;
+    private AWEncodedString _frameName;
+    private Map _userState;
+    private AWHtmlForm _currentForm;
+    private AWPage _currentPage;
+    private AWPage _requestPage;
+    private AWPage _responsePage;
+    private AWBacktrackState _backtrackState;
+    private int _formIndex;
+    private AWArrayManager _newPages;
+    private AWComponent _currentComponent;
+    private AWBaseElement _currentElement;
+    private boolean _isDebuggingEnabled = AWConcreteApplication.IsDebuggingEnabled;
+    private List _cookies;
+    private boolean _didAddCookies;
+    // form input paths
+    private AWArrayManager _formInputIds;
+    private int _targetFormIdIndex;
+    private AWElementIdPath _targetFormIdPath;
+    private boolean _dataValuePushedInInvokeAction;
+
+    // history requests
+    private boolean _isHistoryRequest = false;
+    private int     _historyAction = -1;
+
+    // record and playback
+    private boolean _debugShouldRecord = false;
+    private boolean _debugIsInPlaybackMode = false;
+    private boolean _debugIsInRecordingMode = false;
+    // debugging / validation
+    private boolean _componentPathDebuggingEnabled = false;
+    private boolean _pageRequiresPreGlidCompatibility = false;
+    private boolean _allowsSkipping = true;
+
+    // generating printable rendering, or data export?
+    private boolean _isPrintMode;
+    private boolean _isExportMode;
+
+    private boolean _initializingSession = false;
+    private boolean _isContentGeneration = false;
+    private boolean _fullRefreshRequired = false;
+
+    private boolean _allowIncrementalUpdateApppend = true;
+    private AWBaseResponse.AWResponseCompleteCallback _responseCompleteCallback;
+
+    private List _globalFormInputIdPaths;
+
+    private boolean _disableElementIdGeneration;
+
+    private String _directActionClassName;
+    private String _directActionName;
+
+    private int _currentPhase;
+    public static final int Phase_Render = 0;
+    public static final int Phase_ApplyValues = 1;
+    public static final int Phase_InvokeAction = 2;
+
+    public void init (AWApplication application, AWRequest request)
+    {
+        this.init();
+        _application = application;
+        _request = request;
+        if (_request != null) {
+            _isBrowserMicrosoft = _request.isBrowserMicrosoft();
+            _frameName = request.frameName();
+            _debugIsInPlaybackMode = AWRecordingManager.isInPlaybackMode(_request);
+            _debugIsInRecordingMode = AWRecordingManager.isInRecordingMode(_request);
+            _debugShouldRecord = _debugIsInPlaybackMode || _debugIsInRecordingMode;
+            String[] requestSenderIds = ((AWBaseRequest)request).senderIds();
+            if (requestSenderIds != null) {
+                String currentRequestSenderId = requestSenderIds[0];
+                setCurrentRequestSenderId(currentRequestSenderId);
+                if (requestSenderIds.length > 1) {
+                    _requestSenderIds = ListUtil.arrayToList(requestSenderIds);
+                    // pop the first -- it's set
+                    ListUtil.removeFirstElement(_requestSenderIds);
+                }
+            }
+        }
+        else {
+            _isBrowserMicrosoft = true;
+        }
+        _browserMinWidth = _isBrowserMicrosoft ? "1%" : "1";
+        _browserMaxWidth = _isBrowserMicrosoft ? "99%" : "100%";
+        _elementIdGenerator = createElementIdGenerator();
+        _isMetaTemplateMode = false;
+        ThreadDebugState.set(RequestContextID, this);
+        _dataValuePushedInInvokeAction = false;
+        _disableElementIdGeneration = false;
+    }
+
+    public AWValidationContext validationContext ()
+    {
+        return page().validationContext();
+    }
+
+    public boolean isDebuggingEnabled ()
+    {
+        return _isDebuggingEnabled;
+    }
+
+    public void setIsDebuggingEnabled (boolean state)
+    {
+       _isDebuggingEnabled = state;
+    }
+
+    public void setMetaTemplateMode (boolean flag)
+    {
+        _isMetaTemplateMode = flag;
+    }
+
+    public boolean isMetaTemplateMode ()
+    {
+        return _isMetaTemplateMode;
+    }
+
+    protected AWElementIdGenerator createElementIdGenerator ()
+    {
+        return new AWElementIdGenerator();
+    }
+
+    private boolean elementIdTracingEnabled ()
+    {
+        if (_awsession == null) {
+            return false;
+        }
+        else {
+            Boolean flag = ((Boolean)session().dict().get(AWConstants.ElementIdTracingEnabled));
+            boolean flagValue = flag != null ? flag.booleanValue() : false;
+            return flagValue && _isDebuggingEnabled;
+        }
+    }
+
+    public void setPage (AWPage page)
+    {
+        if (page != _currentPage) {
+            _currentPage = page;
+            _pageRequiresPreGlidCompatibility = _currentPage.requiresPreGlidCompatibility();
+            if (_allowsSkipping) {
+                _allowsSkipping = !_pageRequiresPreGlidCompatibility;
+            }
+        }
+    }
+
+    public AWPage page ()
+    {
+        return _currentPage;
+    }
+
+    public AWComponent pageComponent ()
+    {
+        return _currentPage.pageComponent();
+    }
+
+    public AWComponent pageWithName (String pageName)
+    {
+        return _application.createPageWithName(pageName, this);
+    }
+
+    public void setRequestPage (AWPage page)
+    {
+        _requestPage = page;
+    }
+
+    public AWPage requestPage ()
+    {
+        return _requestPage;
+    }
+
+    public AWEncodedString responseId ()
+    {
+        if (_responseId == null) {
+            AWSession session = session();
+            int nextResponseId = session.nextResponseId();
+            String responseIdString = AWUtil.integerIdString(nextResponseId);
+            _responseId = AWEncodedString.sharedEncodedString(responseIdString);
+        }
+        return _responseId;
+    }
+
+    public void setFrameName (AWEncodedString frameName)
+    {
+        if (frameName != null) {
+            if ((frameName == TopFrameName) || frameName.equals(TopFrameName)
+                    || (frameName == SelfFrameName) || frameName.equals(SelfFrameName)) {
+                _frameName = null;
+            }
+            else {
+                _frameName = frameName;
+            }
+        }
+    }
+
+    public void setFrameName (String frameName)
+    {
+        setFrameName(AWEncodedString.sharedEncodedString(frameName));
+    }
+
+    public AWEncodedString frameName ()
+    {
+        return _frameName;
+    }
+
+    public void registerNewPageComponent (AWComponent pageComponent)
+    {
+        if (_newPages == null) {
+            _newPages = new AWArrayManager(AWComponent.ClassObject);
+        }
+        _newPages.addElement(pageComponent);
+    }
+
+    /**
+     * The name of this "setElementId" is retained for backward compatibility with code in the ariba.encoder.xml
+     * package.  It would be better to call it "setElementIdGenerator", but then I've have to change more code
+     * in ariba.encoder.xml.
+     * @param elementIdGenerator
+     */
+    public void setElementId (AWElementIdGenerator elementIdGenerator)
+    {
+        _elementIdGenerator = elementIdGenerator;
+    }
+
+    public AWElementIdGenerator _getElementIdGenerator ()
+    {
+        return _elementIdGenerator;
+    }
+
+    //////////////////
+    // BacktrackState
+    //////////////////
+    public void setBacktrackState (AWBacktrackState backtrackState)
+    {
+        _backtrackState = backtrackState;
+    }
+
+    public AWBacktrackState backtrackState ()
+    {
+        return _backtrackState;
+    }
+
+    //////////////////////////
+    // Application/Session
+    //////////////////////////
+    public AWApplication application ()
+    {
+        return _application;
+    }
+
+    /**
+     * Returns the session currently associated with this request context.  Only returns
+     * a session if a previous call has associated the session with this request.  This
+     * means that even if there is a valid session for this request, this method could
+     * return null if there has not been a previous call to session() or httpSession().
+     *
+     * Should only be used by calls made during session initialization (since
+     * circular calls to session(false) are not allowed).  All other checks for
+     * session should use session(false).
+     *
+     * @aribaapi private
+     */
+    public AWSession existingSession ()
+    {
+        return _awsession;
+    }
+
+    public void setHttpSession (HttpSession httpSession)
+    {
+        _httpSession = httpSession;
+        if (_httpSession == null) {
+            _awsession = null;
+        }
+        else {
+            // Note that we do not null out the sessionId as we need that to checkin and avoid deadlock.
+            _httpSessionId = _httpSession.getId();
+        }
+    }
+
+    public HttpSession existingHttpSession ()
+    {
+        return _httpSession;
+    }
+
+    public HttpSession createHttpSession ()
+    {
+        HttpSession httpSession = _application.createHttpSession(_request);
+        String sessionId = httpSession.getId();
+        // Take the lock for the sessionId
+        _application.checkoutHttpSessionId(sessionId);
+
+        setHttpSession(httpSession);
+        int sessionTimeout = _application.sessionTimeout();
+        if (sessionTimeout != -1) {
+            // A value of -1 means to use the sevlet engines default (which is
+            // usually controlled through some other mechanism like an admin app).
+            httpSession.setMaxInactiveInterval(sessionTimeout);
+        }
+        initSession(httpSession);
+        return httpSession;
+    }
+
+    protected void initSession (HttpSession httpSession)
+    {
+        _awsession = AWSession.session(httpSession);
+        if (_awsession == null) {
+            _awsession = createSessionForHttpSession(httpSession);
+        }
+        else {
+            // This path used in conjunction with UIToolkit
+            _awsession.ensureAwake(this);
+        }
+    }
+
+    public HttpSession restoreHttpSessionForId (String sessionId,
+                                                boolean checkRemoteHostAddress,
+                                                boolean throwException)
+    {
+        HttpSession httpSession = _application.restoreHttpSession(_request, sessionId);
+        if (httpSession == null) {
+            _request.resetRequestId();
+            if (throwException) {
+                throw new AWSessionRestorationException("Unable to restore session with sessionId: \"" + sessionId + ".\"  Session possibly timed out.");
+            }
+            else {
+                return null;
+            }
+        }
+        // Take the lock for the sessionId
+        _application.checkoutHttpSessionId(httpSession.getId());
+        setHttpSession(httpSession);
+        _awsession = AWSession.session(httpSession);
+        if (_awsession == null) {
+            _awsession = createSessionForHttpSession(httpSession);
+        }
+        if (!AWRecordingManager.isInPlaybackMode(request())) {
+            checkRemoteHostAddress(_awsession, sessionId, checkRemoteHostAddress);
+        }
+        _awsession.ensureAwake(this);
+        return httpSession;
+    }
+
+    private void checkRemoteHostAddress (AWSession session, String sessionId, boolean checkRemoteHostAddress)
+    {
+        if (checkRemoteHostAddress) {
+            InetAddress sessionRemoteIPAddress = session.remoteIPAddress();
+            int remoteHostMask = AWConcreteApplication.RemoteHostMask;
+            if (sessionRemoteIPAddress != null && remoteHostMask != 0) {
+                boolean remoteHostsMatch = false;
+                String remoteHostAddress = _request.remoteHostAddress();
+                if (remoteHostAddress != null) {
+                    remoteHostsMatch = checkHostsAgainstMask(sessionRemoteIPAddress, remoteHostAddress, remoteHostMask);
+                }
+                if (!remoteHostsMatch) {
+                    checkInExistingHttpSession();
+                    setHttpSession(null);
+                    String message = Fmt.S("Unable to restore session with sessionId: '%s'.  The remote address of the current request '%s' does not match the remote address of the initial request '%s' with mask '%s'.",
+                        sessionId, remoteHostAddress, sessionRemoteIPAddress.getHostAddress(), String.valueOf(remoteHostMask));
+                    Log.aribaweb_session.debug(message);
+                    throw new AWSessionRestorationException(message);
+                }
+            }
+        }
+    }
+
+    protected AWSession createSessionForHttpSession (HttpSession httpSession)
+    {
+        AWSession session = _application.createSession(this);
+        AWSession.setSession(httpSession, session);
+        return session;
+    }
+
+    public HttpSession restoreHttpSessionForId (String sessionId)
+    {
+        return restoreHttpSessionForId(sessionId, true, true);
+    }
+
+    public HttpSession httpSession ()
+    {
+        return httpSession(true);
+    }
+
+    public HttpSession httpSession (boolean required)
+    {
+        if (_httpSession == null) {
+            String sessionId = _request != null ? _request.sessionId() : null;
+
+            if (sessionId == null) {
+                if (required) {
+                    createHttpSession();
+                }
+            }
+            else {
+                restoreHttpSessionForId(sessionId, true, required);
+            }
+        }
+        return _httpSession;
+    }
+
+    /**
+     * Returns the current AWSession associated with the client making the request or,
+     * if if there is no current AWSession and required is true, throws
+     * AWSessionRestorationException.
+     * If required is false and the client making this request does not have a valid
+     * AWSession, this method returns null.
+     *
+     * @param required
+     * @return
+     * @aribaapi private
+     */
+    public AWSession session (boolean required)
+    {
+        if (_initializingSession) {
+            // if we're in the middle of initializing and we get a call for an optional session, no need to blow up
+            if (!required) return null;
+            _initializingSession = false;
+            throw new AWGenericException("Circular call to session(boolean flag) detected.  Ensure that session initialization does not call session(boolean flag).");
+        }
+
+        _initializingSession = true;
+        try {
+            if (_awsession == null && _request != null) {
+                if (required && StringUtil.nullOrEmptyOrBlankString(_request.sessionId())) {
+                    _request.resetRequestId();
+                    _initializingSession = false;
+                    throw new AWSessionRestorationException("Unable to restore session, no sessionId.");
+                }
+                else {
+                    HttpSession httpSession = httpSession(required);
+                    if (httpSession != null) {
+                        initSession(httpSession);
+                    }
+                }
+            }
+        }
+        finally {
+            _initializingSession = false;
+        }
+
+        return _awsession;
+    }
+
+    public AWSession session ()
+    {
+        return session(true);
+    }
+
+    /**
+     * Associates and returns a new AWSession.  If an existing session has been associated
+     * with the current request, a FatalAssertionException will be thrown.
+     *
+     * @return newly created AWSession
+     * @aribaapi private
+     */
+    public AWSession createSession ()
+    {
+        Assert.that(session(false) == null,
+                    "createSession() called but request already has a valid AWSession");
+        HttpSession httpSession = createHttpSession();
+        initSession(httpSession);
+        return _awsession;
+    }
+
+    ////////////////////
+    // Request/Response
+    ////////////////////
+    public AWRequest request ()
+    {
+        return _request;
+    }
+
+    // AW internal method for temporarilty overriding the request -- used for internal dispatch of direct actions
+    protected void _overrideRequest (AWRequest newRequest)
+    {
+        _request = newRequest;
+    }
+
+    public void setResponse (AWResponse response)
+    {
+        _response = response;
+        if (_responseCompleteCallback != null) {
+            if (response instanceof AWBaseResponse) {
+                ((AWBaseResponse)response).setResponseCompleteCallback(_responseCompleteCallback);
+            }
+        }
+    }
+
+    public AWResponse response ()
+    {
+        return _response;
+    }
+
+    public boolean isBrowserMicrosoft ()
+    {
+        return _isBrowserMicrosoft;
+    }
+
+    public String browserMinWidth ()
+    {
+        return _browserMinWidth;
+    }
+
+    public String browserMaxWidth ()
+    {
+        return _browserMaxWidth;
+    }
+
+    ///////////////
+    // SenderId
+    ///////////////
+    private void setCurrentRequestSenderId (String requestSenderId)
+    {
+        _currentRequestSenderId = requestSenderId;
+        _currentRequestSenderIdPath = AWElementIdPath.lookup(requestSenderId);
+        if (_currentRequestSenderIdPath == null) {
+            // If the requestSenderId is invalid and no path can be found,
+            // the skipping algorithm will use this empty array and invokeAction
+            // will fail in the normal way -- no sender is found and no action is fired.
+            _currentRequestSenderIdPath = AWElementIdPath.emptyPath();
+        }
+    }
+
+    public String requestSenderId ()
+    {
+        return _currentRequestSenderId;
+    }
+
+    public AWElementIdPath requestSenderIdPath ()
+    {
+        return _currentRequestSenderIdPath;
+    }
+
+    public void dequeueSenderId ()
+    {
+        String nextId = null;
+        if (_requestSenderIds != null && !_requestSenderIds.isEmpty()) {
+            nextId = (String)ListUtil.removeFirstElement(_requestSenderIds);
+        }
+        setCurrentRequestSenderId(nextId);
+    }
+
+    public void enqueueSenderId (String newId)
+    {
+        if (_requestSenderIds == null) {
+            _requestSenderIds = ListUtil.list();
+        }
+        _requestSenderIds.add(newId);
+    }
+
+    public boolean hasMoreSenderIds ()
+    {
+        return (_requestSenderIds != null) && (!_requestSenderIds.isEmpty());
+    }
+
+    /////////////////////
+    // Element Id
+    /////////////////////
+    public AWElementIdPath nextElementIdPath ()
+    {
+        _elementIdGenerator.increment(1);
+        return _elementIdGenerator.currentElementIdPath();
+    }
+
+    public AWEncodedString nextElementId ()
+    {
+        return nextElementIdPath().elementId();
+    }
+
+    public AWElementIdPath currentElementIdPath ()
+    {
+        return _elementIdGenerator.currentElementIdPath();
+    }
+
+    public AWEncodedString currentElementId ()
+    {
+        return currentElementIdPath().elementId();
+    }
+
+    public int currentElementIdPathLength ()
+    {
+        return _elementIdGenerator.currentLevel();
+    }
+
+    public void incrementElementId ()
+    {
+        _elementIdGenerator.increment(1);
+    }
+
+    public void incrementElementId (int amount)
+    {
+        _elementIdGenerator.increment(amount);
+    }
+
+    public void pushElementIdLevel (int elementIdComponent)
+    {
+        _elementIdGenerator.pushLevel(elementIdComponent);
+    }
+
+    public void pushElementIdLevel ()
+    {
+        _elementIdGenerator.pushLevel();
+    }
+
+    public void popElementIdLevel ()
+    {
+        _elementIdGenerator.popLevel();
+    }
+
+    public void popElementIdLevel (int elementIdComponent)
+    {
+        _elementIdGenerator.popLevel(0);
+    }
+
+    public int currentElementIdLevel ()
+    {
+        return _elementIdGenerator.currentLevel();
+    }
+
+    protected boolean nextPrefixMatches (AWElementIdPath elementIdPath)
+    {
+        return elementIdPath == null ? false : _elementIdGenerator.nextPrefixMatches(elementIdPath);
+    }
+
+    /**
+        Disable element id generation is used for non-interactive page rendering
+     */
+    public void disableElementIdGeneration ()
+    {
+        _disableElementIdGeneration = true;
+    }
+
+    public String currentElementIdTrace ()
+    {
+        return _elementIdGenerator.toString();
+    }
+
+    ////////////////////
+    // Glid Form Support
+    ////////////////////
+    public void setFormInputIds (AWArrayManager formInputIds)
+    {
+        _formInputIds = formInputIds;
+        _targetFormIdIndex = 0;
+        _targetFormIdPath = _formInputIds == null ? null : (AWElementIdPath)_formInputIds.objectAt(_targetFormIdIndex);
+    }
+
+    public void recordFormInputId (AWElementIdPath elementIdPath)
+    {
+        Assert.that(_currentForm != null, "Attempt to record form input id outside AWForm.");
+        if (_isExportMode) {
+            Log.aribawebvalidation_exportMode.debug("Attempt to record form input id in export mode.");
+        }
+        else {
+            _formInputIds.addElement(elementIdPath);
+        }
+    }
+
+
+    /**
+     * Keeps track of this element id for all subsequent forms and add the element id to
+     * all existing forms.
+     * @param elementIdPath
+     * @aribaapi private
+     */
+    public void recordGlobalFormInputId (AWElementIdPath elementIdPath)
+    {
+        if (!_isExportMode) {
+            if (_globalFormInputIdPaths == null) {
+                _globalFormInputIdPaths = ListUtil.list();
+            }
+            _globalFormInputIdPaths.add(elementIdPath);
+            _currentPage.addGlobalFormInputIdPath(elementIdPath);
+        }
+    }
+
+    public List getGlobalFormInputIdPaths ()
+    {
+        return _globalFormInputIdPaths;
+    }
+
+    public AWElementIdPath targetFormIdPath ()
+    {
+        return _targetFormIdPath;
+    }
+
+    public void popFormInputElementId ()
+    {
+        _targetFormIdIndex++;
+        _targetFormIdPath = _targetFormIdIndex < _formInputIds.size() ?
+            (AWElementIdPath)_formInputIds.objectAt(_targetFormIdIndex) :
+            null;
+    }
+
+    //////////////
+    // Cycling
+    //////////////
+    public void resetForNextCycle ()
+    {
+        if (elementIdTracingEnabled()) {
+            _elementIdGenerator = new DebugElementIdGenerator(this);
+        }
+        if (_disableElementIdGeneration) {
+            _elementIdGenerator = new NoOpElementIdGenerator();
+        }
+        _elementIdGenerator.reset();
+        setFormIndex(0);
+    }
+
+    private void logActivityBegin (String phaseName)
+    {
+        String sessionId = _httpSession == null ? "-none-" : _httpSession.getId();
+        String responseId = _awsession == null ? "-none-" : responseId().string();
+        String actionLogMessage = Fmt.S("** sessionId: \"%s\" responseId: \"%s\" BEGIN: \"%s\" pageName: \"%s\"", sessionId, responseId, phaseName, _currentPage.pageComponent().name());
+        _application.logActionMessage(actionLogMessage);
+    }
+
+    private void logActivityEnd (String phaseName)
+    {
+        String sessionId = _httpSession == null ? "-none-" : _httpSession.getId();
+        String responseId = _awsession == null ? "-none-" : responseId().string();
+        String actionLogMessage = Fmt.S("** sessionId: \"%s\" responseId: \"%s\" END:   \"%s\" pageName: \"%s\" **", sessionId, responseId, phaseName, _currentPage.pageComponent().name());
+        _application.logActionMessage(actionLogMessage);
+    }
+
+    private String currentComponentPath ()
+    {
+        return _currentComponent == null ? "No current component" : _currentComponent.componentPath("\n").toString();
+    }
+
+    public void applyValues()
+    {
+        resetForNextCycle();
+        _currentPhase = Phase_ApplyValues;
+        boolean isActionLoggingEnabled = AWConcreteApplication.IsActionLoggingEnabled;
+        if (isActionLoggingEnabled) {
+            logActivityBegin("applyValues");
+        }
+        if (isPollRequest()) {
+            ;
+        }
+        else if (isPollUpdateRequest()) {
+            ;
+        }
+        else {
+            // normal case
+           _requestPage = _currentPage;
+            try {
+                String formSender = _request.formValueForKey(AWComponentActionRequestHandler.FormSenderKey);
+                if (formSender != null) {
+                    AWArrayManager formInputIds = _requestPage.getFormIds(formSender);
+                    setFormInputIds(formInputIds);
+                }
+                _currentPage.applyValues();
+            }
+            catch (RuntimeException runtimeException) {
+                String message = currentComponentPath();
+                throw AWGenericException.augmentedExceptionWithMessage(message, runtimeException);
+            }
+        }
+        if (isActionLoggingEnabled) {
+            logActivityEnd("applyValues");
+        }
+    }
+
+    public AWResponseGenerating invokeActionForRequest ()
+    {
+        AWResponseGenerating actionResults = null;
+        resetForNextCycle();
+        _currentPhase = Phase_InvokeAction;
+        boolean isActionLoggingEnabled = AWConcreteApplication.IsActionLoggingEnabled;
+        if (isActionLoggingEnabled) {
+            logActivityBegin("invokeAction");
+        }
+        _requestPage = _currentPage;
+
+        boolean moreSenderIds = true;
+        AWResponseGenerating previousActionResults = null;
+
+        do {
+            try {
+                if (isPollRequest()) {
+                    _response = _application.createResponse(_request);
+                    actionResults = _response;
+                    boolean hasSessionChanged = false;
+                    AWSession session = session(false);
+                    if (session != null) {
+                        hasSessionChanged = session.hasChanged();
+                    }
+                    if (hasSessionChanged || _currentPage.hasChanged()) {
+                        _response.appendContent("<AWPoll state='update'/>");
+                    }
+                    else {
+                        _response.appendContent("<AWPoll state='nochange'/>");
+                    }
+
+                    // Record perf trace info
+                    if (PerformanceState.threadStateEnabled()) {
+                        PerformanceState.Stats stats = PerformanceState.getThisThreadHashtable();
+                        String sourcePage = _currentPage.pageComponent().namePath();
+                        stats.setSourcePage(sourcePage);
+                        stats.setSourceArea("poll");
+                        stats.setDestinationPage(sourcePage);
+                        stats.setType(PerformanceState.Type_User);
+                    }
+                }
+                else if (isPollUpdateRequest()) {
+                    // if we're doing a poll update, then just return null and rerender
+                    // the current page
+                    return null;
+                }
+                else {
+                    actionResults = _currentPage.invokeAction();
+                }
+            }
+            catch (AWGenericException e)
+            {
+                String message = currentComponentPath();
+                e.addMessage(message);
+                throw e;
+            }
+            catch (RuntimeException runtimeException) {
+                String message = currentComponentPath();
+                throw AWGenericException.augmentedExceptionWithMessage(message, runtimeException);
+            }
+            finally {
+                // clear the form input ids only if we have a component result.
+                if (_formInputIds != null &&
+                    actionResults instanceof AWComponent) {
+                    _formInputIds.reset();
+                    setFormInputIds(null);
+                }
+            }
+            // if we need to invoke again, move on to the next senderId
+            moreSenderIds = hasMoreSenderIds();
+            if (moreSenderIds) {
+                previousActionResults = actionResults;
+                dequeueSenderId();
+                resetForNextCycle();
+            }
+            if ((previousActionResults != null) && ((actionResults == null) ||
+                (actionResults == _currentPage.pageComponent()))) {
+                actionResults = previousActionResults;
+            }
+        }
+        while (moreSenderIds);
+
+        if (isActionLoggingEnabled) {
+            logActivityEnd("invokeAction");
+        }
+        return actionResults;
+    }
+
+    private void assignCharacterEncoding (AWResponse response)
+    {
+        response.setCharacterEncoding(_currentPage.characterEncoding());
+    }
+
+//    private int _requestInterval = -1;
+//    public void setRequestInterval (int requestInterval)
+//    {
+//        if (_requestInterval == -1 ||
+//            requestInterval < _requestInterval) {
+//            _requestInterval = requestInterval;
+//        }
+//    }
+
+    private void updateRequestInterval ()
+    {
+        AWSession session = session(false);
+        if (session != null) {
+            AWPage page = page();
+            if (page.isPollingInitiated()) {
+                session.setRequestInterval(page.getPollInterval());
+            }
+        }
+    }
+
+    private boolean isPollRequest()
+    {
+        return AWPollInterval.AWPollSenderId.equals(requestSenderId());
+    }
+
+    public boolean isPollUpdateRequest()
+    {
+        return AWPollInterval.AWPollUpdateSenderId.equals(requestSenderId());
+    }
+
+
+    public AWResponse generateResponse (AWResponse response)
+    {
+        try {
+            resetForNextCycle();
+            _currentPhase = Phase_Render;
+            boolean isActionLoggingEnabled = AWConcreteApplication.IsActionLoggingEnabled;
+            if (isActionLoggingEnabled) {
+                logActivityBegin("renderResponse");
+            }
+            _responsePage = _currentPage;
+            _response = (response != null) ? response : _application.createResponse(_request);
+            if (_cookies != null) {
+                for (int i = 0, size = _cookies.size(); i < size; i++) {
+                    _response.addCookie((AWCookie)_cookies.get(i));
+                }
+            }
+            _currentPage.ensureAwake(this);
+            _currentPage.renderResponse();
+            if (isActionLoggingEnabled) {
+                logActivityEnd("renderResponse");
+            }
+            assignCharacterEncoding(_response);
+
+            updateRequestInterval();
+        }
+        catch (RuntimeException runtimeException) {
+            Log.aribaweb.info(9023,
+                              "Runtime exception in AWRequestContext.generateResponse",
+                              SystemUtil.stackTrace(runtimeException));
+            String message = currentComponentPath();
+            throw AWGenericException.augmentedExceptionWithMessage(message, runtimeException);
+        }
+        finally {
+            // Note: we only clear the _userState at the end of renderResponse which means the app
+            // can pass values from one phase to the next in this hashtable.
+            clear();
+        }
+
+        // stash debug trace for debug panel
+        if (_debugTrace != null) session().dict().put("_AWLastDebugTrace", _debugTrace);
+
+        return _response;
+    }
+
+    public void addCookie (AWCookie cookie)
+    {
+        _didAddCookies = true;
+        if (_response != null) {
+            // if a response is already available, then just add the cookie
+            _response.addCookie(cookie);
+        }
+        else {
+            // otherwise, store cookies until generateResponse
+            if (_cookies == null) {
+                _cookies = ListUtil.list();
+            }
+            _cookies.add(cookie);
+        }
+    }
+
+    public boolean didAddCookies ()
+    {
+        return _didAddCookies;
+    }
+
+    public AWResponse generateResponse ()
+    {
+        return generateResponse(_response);
+    }
+
+    public AWResponse handleRequest (AWRequest request, AWRequestHandler requestHandler)
+    {
+        // subclasses can overide this method to have access to both the request and
+        // response in the same scope on a per request basis.
+        return requestHandler.handleRequest(request, this);
+    }
+
+    public void checkInExistingHttpSession ()
+    {
+        try {
+            if (_httpSession != null) {
+                _application.archiveHttpSession(_httpSession);
+            }
+        } finally {
+            if (_httpSessionId != null) {
+                _application.checkinHttpSessionId(_httpSessionId);
+                if (_httpSession == null) {
+                    logString("Error: httpSessionId exists but httpSession is null.");
+                }
+            }
+        }
+    }
+
+    private RuntimeException putToSleep (AWPage page, RuntimeException existingExcpetion)
+    {
+        RuntimeException sleepException = existingExcpetion;
+        if (page != null) {
+            try {
+                page.ensureAsleep();
+            }
+            catch (RuntimeException runtimeException) {
+                if (sleepException == null) {
+                    sleepException = runtimeException;
+                }
+            }
+        }
+        return sleepException;
+    }
+
+    public void sleep ()
+    {
+        cleanupThreadLocalState();
+        try {
+            RuntimeException sleepException = null;
+            sleepException = putToSleep(_requestPage, sleepException);
+            if (_responsePage != _requestPage) {
+                sleepException = putToSleep(_responsePage, sleepException);
+            }
+            if (_currentPage != _responsePage && _currentPage != _requestPage) {
+                sleepException = putToSleep(_currentPage, sleepException);
+            }
+            if (_newPages != null) {
+                AWComponent[] newPagesArray = (AWComponent[])_newPages.array();
+                for (int index = _newPages.size() - 1; index >= 0; index--) {
+                    try {
+                        AWComponent newPageComponent = newPagesArray[index];
+                        // temporary workaround              ////////////////////////////
+                        if (newPageComponent == null) break; ////////////////////////////
+                        newPageComponent.ensureAsleep();
+                    }
+                    catch (RuntimeException runtimeException) {
+                        if (sleepException == null) {
+                            sleepException = runtimeException;
+                        }
+                    }
+                }
+            }
+
+            if (_awsession != null) {
+                _awsession.ensureAsleep();
+            }
+            if (sleepException != null) {
+                throw sleepException;
+            }
+        }
+        finally {
+            _currentPage = null;
+            _request = null;
+            _response = null;
+            _responseId = null;
+            _elementIdGenerator = null;
+            _userState = null;
+            _currentForm = null;
+            _requestPage = null;
+            _responsePage = null;
+            _requestSenderIds = null;
+            _frameName = null;
+            _backtrackState = null;
+            _newPages = null;
+            _currentComponent = null;
+            /* NOTE: The following code should not be executed.
+            // The _httpSession is needed in here after sleep executes
+            // Do not remove this comment.
+            //_httpSession = null;
+            */
+        }
+    }
+
+    //////////////////
+    // User State
+    //////////////////
+    public Object get (String keyString)
+    {
+        return (_userState == null) ? null : _userState.get(keyString);
+    }
+
+    public void put (String keyString, Object objectValue)
+    {
+        if (_userState == null) {
+            _userState = MapUtil.map();
+        }
+        if (objectValue == null) {
+            _userState.remove(keyString);
+        }
+        else {
+            _userState.put(keyString, objectValue);
+        }
+    }
+
+    public Object remove (String keyString)
+    {
+        return (_userState == null) ? null : _userState.remove(keyString);
+    }
+
+    public void clear ()
+    {
+        if (_userState != null) {
+            _userState.clear();
+        }
+        if (_cookies != null) {
+            _cookies.clear();
+        }
+    }
+
+    protected Map userData ()
+    {
+        return _userState;
+    }
+
+    ////////////////////
+    // Form Handling
+    ////////////////////
+    public void setCurrentForm (AWHtmlForm currentForm)
+    {
+        if (currentForm != null && _currentForm != null) {
+            throw new AWGenericException("Nested forms detected.");
+        }
+        _currentForm = currentForm;
+    }
+
+    public AWHtmlForm currentForm ()
+    {
+        return _currentForm;
+    }
+
+    public void incrementFormIndex ()
+    {
+        setFormIndex(_formIndex + 1);
+    }
+
+    private void setFormIndex (int index)
+    {
+        _formIndex = index;
+    }
+
+    public int formIndex ()
+    {
+        return _formIndex;
+    }
+
+    /**
+        This could live in a util module.
+    */
+    private boolean checkHostsAgainstMask (InetAddress address1, String hostAddress, int mask)
+    {
+        InetAddress address2 = null;
+
+        try {
+            address2 = InetAddress.getByName(hostAddress);
+
+            byte[] bytes1 = address1.getAddress();
+            int addr1  = bytes1[3] & 0xff;
+            addr1 |= ((bytes1[2] << 8) & 0xff00);
+            addr1 |= ((bytes1[1] << 16) & 0xff0000);
+            addr1 |= ((bytes1[0] << 24) & 0xff000000);
+
+            byte[] bytes2 = address2.getAddress();
+            int addr2  = bytes2[3] & 0xff;
+            addr2 |= ((bytes2[2] << 8) & 0xff00);
+            addr2 |= ((bytes2[1] << 16) & 0xff0000);
+            addr2 |= ((bytes2[0] << 24) & 0xff000000);
+
+            return (addr1 & mask) == (addr2 & mask);
+
+        } catch (UnknownHostException e) {
+            // this should never happen because the string should be %d.%d.%d.%d;
+            e = null;
+        }
+        return false;
+    }
+
+    /////////////////////
+    // Debug State
+    /////////////////////
+    public Object debugState ()
+    {
+        Map ht = MapUtil.map();
+        String componentPath = _currentComponent == null ?
+            "-- no current component --" : _currentComponent.componentPath().toString();
+        ht.put("AWComponentPath", componentPath);
+        return ht;
+    }
+
+    public void setCurrentDirectAction(String directActionClassName,
+            String directActionName)
+    {
+        _directActionClassName = directActionClassName;
+        _directActionName = directActionName;
+    }
+
+    public String getDirectActionClassName ()
+    {
+        return _directActionClassName;
+    }
+
+    public String getDirectActionName ()
+    {
+        return _directActionName;
+    }
+
+    public void setCurrentComponent (AWComponent currentComponent)
+    {
+        _currentComponent = currentComponent;
+    }
+
+    public AWComponent getCurrentComponent ()
+    {
+        return _currentComponent;
+    }
+
+    /**
+     * @deprecated use pushCurrentElement / popCurrentElement instead
+     * @return
+     */
+    public void setCurrentElement (AWBaseElement element)
+    {
+        _currentElement = element;
+    }
+
+    public AWBaseElement pushCurrentElement (AWBaseElement element)
+    {
+        AWBaseElement old = _currentElement;
+        _currentElement = element;
+        return old;
+    }
+
+    public void popCurrentElement (AWBaseElement prev)
+    {
+        if (_componentPathDebuggingEnabled) debugTrace().existingElement(_currentElement);
+        _currentElement = prev;
+    }
+
+
+    public AWBaseElement getCurrentElement ()
+    {
+        return _currentElement;
+    }
+
+    /**
+     * This may change during a request as not all components want this enabled.
+     */
+    public void enableComponentPathDebugging ()
+    {
+        AWSession session = session(false);
+        if (session == null) {
+            _componentPathDebuggingEnabled = false;
+        }
+        else {
+            Boolean flag = ((Boolean)session().dict().get(AWConstants.ComponentPathDebugFlagKey));
+            boolean flagValue = flag != null ? flag.booleanValue() : false;
+            _componentPathDebuggingEnabled = flagValue && isDebuggingEnabled();
+        }
+    }
+
+    public void disableComponentPathDebugging ()
+    {
+        _componentPathDebuggingEnabled = false;
+    }
+
+    public boolean componentPathDebuggingEnabled ()
+    {
+        return _componentPathDebuggingEnabled;
+    }
+
+    protected AWDebugTrace _debugTrace;
+
+    public AWDebugTrace debugTrace ()
+    {
+        if (_debugTrace == null) _debugTrace = new AWDebugTrace(this);
+        return _debugTrace;
+    }
+
+    public int currentPhase ()
+    {
+        return _currentPhase;
+    }
+    
+    public AWDebugTrace lastDebugTrace ()
+    {
+        return (AWDebugTrace)session().dict().get("_AWLastDebugTrace");
+    }
+
+    public void pushCurrentComponent (AWComponent component)
+    {
+        setCurrentComponent(component);
+        if (_componentPathDebuggingEnabled && (_currentPhase == Phase_Render)) {
+            debugTrace().pushTraceNode(component);
+        }
+    }
+
+    public void popCurrentComponent (AWComponent parent)
+    {
+        if (_currentPhase == Phase_Render && _debugShouldRecord()) {
+            _currentComponent._debugRecordMapping (this, _currentComponent);
+        }
+        setCurrentComponent(parent);
+        if (_componentPathDebuggingEnabled && (_currentPhase == Phase_Render)) {
+            debugTrace().popTraceNode();
+        }
+    }
+
+    public void suppressTraceForCurrentScopingElement ()
+    {
+        if (_componentPathDebuggingEnabled) debugTrace().suppressTraceForCurrentScopingElement();
+    }
+    
+    public void markNextComponentAsMainInTrace ()
+    {
+        if (_componentPathDebuggingEnabled) debugTrace().markNextComponentAsMainInTrace();
+    }
+
+    int _isPathDebugRequest = -1;
+
+    public boolean isPathDebugRequest ()
+    {
+        if (_isPathDebugRequest == -1) {
+            _isPathDebugRequest = _isDebuggingEnabled && formValueForKey("cpDebug") != null ? 1 : 0;
+        }
+        return _isPathDebugRequest != 0;
+    }
+
+    public void stopComponentPathRecording ()
+    {
+        _isPathDebugRequest = 0;
+    }
+    
+        //////////////////////
+        // Record and Playback
+        ///////////////////////
+    private StringArray _semanticKeyPrefixes = new StringArray();
+
+    public void _debugPushSemanticKeyPrefix ()
+    {
+        _semanticKeyPrefixes.add(null);
+    }
+
+    public void _debugPopSemanticKeyPrefix ()
+    {
+        int currentLevel = _semanticKeyPrefixes.inUse() - 1;
+        if (currentLevel < 0) {
+            Assert.assertNonFatal(false, "unbalanced AWFor level push/pop");
+        }
+        else {
+            _semanticKeyPrefixes.remove(currentLevel);
+        }
+    }
+
+    public void _debugSetSemanticKeyPrefix (String prefix)
+    {
+        int currentLevel = _semanticKeyPrefixes.inUse() - 1;
+        if (currentLevel >= 0) {
+            _semanticKeyPrefixes.array()[currentLevel] = prefix;
+        }
+        else {
+            Assert.assertNonFatal(false, "can't increment without pushing");
+        }
+    }
+
+    public String _debugSemanticKeyPrefix ()
+    {
+        FastStringBuffer sb = null;
+        int currentLevel = _semanticKeyPrefixes.inUse() - 1;
+        String[] array = _semanticKeyPrefixes.array();
+        for (int index = 0; index <= currentLevel; index++) {
+            String prefix = array[index];
+            if (prefix != null) {
+                if (sb == null) {
+                    sb = new FastStringBuffer(prefix);
+                }
+                else {
+                    sb.append("_");
+                    sb.append(prefix);
+                }
+            }
+        }
+        return sb == null ? null : sb.toString();
+    }
+
+    // record & playback, need to responseId for this requestContext without incrementing it
+    public AWEncodedString _debugResponseIdAsIs ()
+    {
+        return _responseId;
+    }
+
+    public boolean _debugIsInPlaybackMode ()
+    {
+        return _debugIsInPlaybackMode;
+    }
+
+    public boolean _debugIsInRecordingMode ()
+    {
+        return _debugIsInRecordingMode;
+    }
+
+    public void setDebugIsInRecordingMode (boolean value)
+    {
+        _debugIsInRecordingMode = value;
+    }
+
+    // this is need to turn
+    public void _debugSkipRecordPlayback ()
+    {
+        _debugShouldRecord = false;
+        _debugIsInRecordingMode = false;
+        _debugIsInPlaybackMode = false;
+    }
+
+    public boolean _debugShouldRecord ()
+    {
+        return _debugShouldRecord;
+    }
+
+    public static void cleanupThreadLocalState ()
+    {
+        ThreadDebugState.remove(RequestContextID);
+    }
+
+    //////////////////////
+    // SSORequestContext
+    ///////////////////////
+    public String cookieValueForKey (String key)
+    {
+        return request().cookieValueForKey(key);
+    }
+
+    public String formValueForKey (String key)
+    {
+        return request().formValueForKey(key);
+    }
+
+    public Map formValues ()
+    {
+        return request().formValues();
+    }
+
+    public boolean isRequestSecure ()
+    {
+        return request().isSecureScheme();
+    }
+
+    public AWComponent createPageWithName (String name)
+    {
+        return application().createPageWithName(name, this);
+    }
+
+    public int sessionTimeout ()
+    {
+        return application().sessionTimeout();
+    }
+
+    public String requestUrl ()
+    {
+        return request().requestString();
+    }
+
+    public boolean isPrintMode ()
+    {
+        return _isPrintMode;
+    }
+
+    public void setIsPrintMode (boolean isPrintMode)
+    {
+        _isPrintMode = isPrintMode;
+    }
+
+    public boolean isExportMode ()
+    {
+        return _isExportMode;
+    }
+
+    public void setExportMode (boolean isExportMode)
+    {
+        _isExportMode = isExportMode;
+    }
+
+    protected boolean pageRequiresPreGlidCompatibility ()
+    {
+        return _pageRequiresPreGlidCompatibility;
+    }
+
+    protected boolean allowsSkipping ()
+    {
+        return _allowsSkipping;
+    }
+
+        // Called by components that require a data value to be pushed
+        // in invoke action instead of during take values. One reason why
+        // this may be necessary is that the data value from input controls like radio buttons, check
+        // boxes, and popup menus, may change the structure of the page, and interfere with take values.
+        // setting this flag will tell the application that triggers need to fire after the action has
+        // already been invoked.
+
+    public void setDataValuePushedInInvokeAction (boolean value)
+    {
+        _dataValuePushedInInvokeAction = value;
+    }
+
+    public boolean dataValuePushedInInvokeAction ()
+    {
+        return _dataValuePushedInInvokeAction;
+    }
+
+    public boolean isIncrementalUpdateRequest ()
+    {
+        return _request != null &&
+               _request.formValuesForKey(IncrementalUpdateKey) != null;
+    }
+
+    public boolean isContentGeneration ()
+    {
+        return _isContentGeneration;
+    }
+
+    public void isContentGeneration (boolean flag)
+    {
+        _isContentGeneration = flag;
+    }
+
+    public void forceFullPageRefresh ()
+    {
+        _fullRefreshRequired = true;
+    }
+
+    public boolean fullPageRefreshRequired ()
+    {
+        return _fullRefreshRequired;
+    }
+
+    public boolean allowIncrementalUpdateApppend ()
+    {
+        // NOTE: this defaults to true.  If set to false and the request is initiated
+        // via an incrementalUpdateRequest, then the response will be generated directly
+        // into the incrementalRequest iframe.
+        return _allowIncrementalUpdateApppend;
+    }
+
+    public void allowIncrementalUpdateApppend (boolean flag)
+    {
+        _allowIncrementalUpdateApppend = flag;
+    }
+
+    public void setHistoryRequest (boolean historyRequest)
+    {
+        _isHistoryRequest = historyRequest;
+    }
+    public boolean isHistoryRequest ()
+    {
+        return _isHistoryRequest;
+    }
+
+    public void setHistoryAction (int historyAction)
+    {
+        _historyAction = historyAction;
+        setHistoryRequest(true);
+    }
+
+    public int historyAction ()
+    {
+        return _historyAction;
+    }
+
+    /**
+     * @deprecated use put(key,value) and get(key) API's directly
+     * @return
+     */
+    public Map dict ()
+    {
+        if (_userState == null) {
+            _userState = MapUtil.map();
+        }
+        return _userState;
+    }
+
+    public void setResponseCompleteCallback (AWBaseResponse.AWResponseCompleteCallback callback)
+    {
+        _responseCompleteCallback = callback;
+    }
+
+//    private void responseCompleted ()
+//    {
+//        if (_responseCompleteCallback != null) {
+//            _responseCompleteCallback.responseCompleted();
+//        }
+//    }
+
+    public boolean isAccessibilityEnabled ()
+    {
+        AWSession session = session(false);
+        return (session != null) ? session.isAccessibilityEnabled() : false;
+    }
+
+
+    /*
+        Support for item-scoped subcomponent state.
+        See AWFor scopeSubcomponentsByItem for more details.
+
+        We are keying subcomponent state trees by a combo-key of elementId *prefix* (parent path)
+        and object (item) identity, so that subcomponent lookup will map based on the object (item
+        of the For) rather than *position* -- inserting / removing objects from the array
+        of the For (or re-ordering the array via a sort) will thereby not disturb the rendezvous
+        with existing stateful components.
+
+        We accomplish this by storing an <item, id-suffix> subcomponent state map, keyed by the id of the parent --
+        ** we effectively ignore the part of the elementId that contains the position in the For, instead
+        using the item (object) identity, in the lookup key.
+
+        To make this (reasonably) efficient we:
+            - Are lazy in creating scope objects -- we only create the scope if stateful components
+                (or other sub-scopes) are actually accessed.
+            - Are lazy in creating scope hashtables -- we only create them when used.
+        So, a leaf For that actually contains no stateful sub-components consumes no overhead, and one
+        with subcomponents results in a single allocation of a scope and MultiKeyHashTable (plus entries
+        in the hashtable for any stateful components -- but we had those in the base case).
+     */
+    private SubcomponentScope _currentSubcomponentScope = null;
+    private Object _scopeItem;
+    private AWElementIdPath _scopeParentPath;
+
+    protected void _pushSubcomponentScope(AWElementIdPath parentPath, Object item)
+    {
+        // we're lazy about actually instantiating scopes.  We'll push remember the leaf scope params
+        // until we're either ased for the scope, or are asked to push another child.
+
+        // force resolution of existing parent, if any
+        if (_scopeParentPath != null) _currentLookupScope();
+        _scopeParentPath = parentPath;
+        _scopeItem = item;
+    }
+
+    protected void _popSubcomponentScope()
+    {
+        if (_scopeParentPath != null) {
+            _scopeItem = null;
+            _scopeParentPath = null;
+        } else {
+            _SubcomponentLookup prev = _currentSubcomponentScope._prevScope;
+            _currentSubcomponentScope = (prev instanceof SubcomponentScope) ? (SubcomponentScope)prev : null;
+        }
+    }
+
+    protected _SubcomponentLookup _currentLookupScope ()
+    {
+        // Lazily instantiate sub scope if necessary
+        if (_scopeParentPath != null) {
+            _SubcomponentLookup prevScope = (_currentSubcomponentScope != null) ? (_SubcomponentLookup)_currentSubcomponentScope : page();
+
+            _currentSubcomponentScope = (SubcomponentScope)prevScope.get(_scopeParentPath);
+            if (_currentSubcomponentScope == null) {
+                _currentSubcomponentScope = new SubcomponentScope(_scopeParentPath);
+                prevScope.put(_scopeParentPath, _currentSubcomponentScope);
+            }
+            _currentSubcomponentScope.prepare(_scopeItem, prevScope);
+            _scopeItem = null;
+            _scopeParentPath = null;
+        }
+        return (_currentSubcomponentScope != null)
+                ? (_SubcomponentLookup)_currentSubcomponentScope : page();
+    }
+
+    protected AWComponent getStatefulComponent(AWElementIdPath path)
+    {
+        return _currentLookupScope().getStatefulComponent(path);
+    }
+
+    protected void putStatefulComponent(AWElementIdPath path, AWComponent instance)
+    {
+        _currentLookupScope().putStatefulComponent(path, instance);
+    }
+
+    // implemented by SubcomponentScope and AWPage
+    public interface _SubcomponentLookup
+    {
+        public AWComponent getStatefulComponent(AWElementIdPath path);
+        public void putStatefulComponent(AWElementIdPath path, AWComponent instance);
+        public Object get (Object key);
+        public void put (Object key, Object value);
+    }
+
+    protected static class SubcomponentScope implements _SubcomponentLookup
+    {
+        protected AWElementIdPath _parentPath;
+        protected ScopedIdMap _map;
+        protected Object _currentItem;
+        protected _SubcomponentLookup _prevScope;
+
+        public SubcomponentScope (AWElementIdPath parentPath)
+        {
+            _parentPath = parentPath;
+        }
+
+        public void prepare (Object item, _SubcomponentLookup prevScope)
+        {
+            _currentItem = item;
+            _prevScope = prevScope;
+        }
+
+        protected ScopedIdMap mapForCurrentItem ()
+        {
+            if (_map == null) {
+                _map = new ScopedIdMap(_parentPath.privatePath().length + 2);
+            }
+            return _map;
+        }
+
+        public AWComponent getStatefulComponent(AWElementIdPath path)
+        {
+            return (AWComponent)mapForCurrentItem().get(_currentItem, path);
+        }
+
+        public void putStatefulComponent(AWElementIdPath path, AWComponent instance)
+        {
+            mapForCurrentItem().put(_currentItem, path, instance);
+        }
+
+        public Object get (Object key)
+        {
+            return mapForCurrentItem().get(_currentItem, key);
+        }
+
+        public void put (Object key, Object value)
+        {
+            mapForCurrentItem().put(_currentItem, key, value);
+        }
+    }
+
+    /*
+        Multi-key hashmap: <Item, ElementIdPath>
+            Item uses identity equality.
+            ElementIdPath limits comparisons to the path elements after skipping prefixLength elements
+    */
+    protected static class ScopedIdMap extends ariba.util.core.MultiKeyHashtable {
+        int _prefixLength;
+
+        public ScopedIdMap (int prefixLength)
+        {
+            super(2);
+            _prefixLength = prefixLength;
+        }
+
+        protected int getHashValueForObject (Object o, int index)
+        {
+            return (index == 0) ? System.identityHashCode(o) : ((AWElementIdPath)o).hashCodeSkipping(_prefixLength);
+        }
+
+        protected boolean objectsAreEqualEnough (Object obj1, Object obj2, int index)
+        {
+            return (obj1 == obj2)
+                    || ((index == 1) && (obj1 != null)
+                         && ((AWElementIdPath)obj1).equalsSkipping((AWElementIdPath)obj2, _prefixLength));
+        }
+    }
+
+    static class NoOpElementIdGenerator extends AWElementIdGenerator
+    {
+        protected void increment (int amount)
+        {
+            return;
+        }
+
+        public void pushLevel ()
+        {
+            return;
+        }
+
+        public void popLevel ()
+        {
+            return;
+        }
+
+        public void pushLevel (int elementIdComponent)
+        {
+            return;
+        }
+
+        public void popLevel (int elementIdComponent)
+        {
+            return;
+        }
+
+        public AWElementIdPath currentElementIdPath ()
+        {
+            return AWElementIdPath.noOpPath();
+        }
+    }
+
+    static class DebugElementIdGenerator extends AWElementIdGenerator
+    {
+        private AWRequestContext _requestContext;
+        private List _trace;
+
+        public DebugElementIdGenerator (AWRequestContext requestContext)
+        {
+            super();
+            _requestContext = requestContext;
+            _trace = ListUtil.list();
+        }
+
+        public void reset ()
+        {
+            _trace = ListUtil.list();
+            super.reset();
+        }
+
+        protected void increment (int amount)
+        {
+            String traceElement = Fmt.S("\nincrement %s\n", amount);
+            addTraceElement(traceElement);
+            addContextToTrace();
+            super.increment(amount);
+        }
+
+        public void pushLevel ()
+        {
+            addTraceElement("\npushLevel\n");
+            addContextToTrace();
+            super.pushLevel();
+        }
+
+        public void popLevel ()
+        {
+            addTraceElement("\npopLevel\n");
+            addContextToTrace();
+            super.popLevel();
+        }
+
+        private void addContextToTrace ()
+        {
+            AWBaseElement element = _requestContext.getCurrentElement();
+            if (element != null) {
+                addTraceElement(element.toString());
+            }
+            else {
+                addTraceElement("no element");
+            }
+        }
+
+        private void addTraceElement (String traceElement)
+        {
+            if (_trace.size() > 200) {
+                ListUtil.removeFirstElement(_trace);
+            }
+            _trace.add(traceElement);
+        }
+
+        public String toString ()
+        {
+            return _trace.toString();
+        }
+    }
+}

@@ -1,0 +1,114 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWCheckbox.awl#22 $
+    </Copyright>
+
+    <Overview>
+        Provides for a standard HTML checkbox.
+
+        There are three types of AWCheckbox, a form checkbox, a refresh form
+        checkbox, and an action checkbox.
+
+        A form checkbox is used retrieve/display values in a form.  In the case
+        of a form checkbox, the "value" binding is read/set. The actual value
+        read/set is determined by the "type" binding as described below.
+
+        A refresh form checkbox is used in the same way as a form checkbox.  In
+        addition, when the value of the checkbox is changed, the form in which
+        the checkbox resides is immediately submitted and the page is refreshed.
+        Note that this behavior is different from an ActionCheckbox in since
+        the form value is pushed via the "value" binding during
+        applyValues()
+
+        An action checkbox is used to invoke an action when the checkbox state
+        changes (checked to unchecked or vice versa) using the "action" binding.
+        The action checkbox does not act like a "regular" form value in that
+        a) the value of the checkbox is set via the "checked" binding
+        b) the "checked" binding is set during invokeAction
+        c) the value of the checked binding is NOT set (changed) if the
+           enclosing form is submitted via another controller in the form
+
+    </Overview>
+
+    <Binding key="type" direction="get" type="String" default="boolean">
+        Determines the datatype used when reading / setting the "value" binding.
+        "boolean" -- true (checked)       / false (unchecked)
+        "int"     -- 1    (checked)       / 0     (unchecked)
+        "number"  -- Integer(1) (checked) / Integer(0) (unchecked)
+    </Binding>
+
+    <Binding key="value" direction="both" type="Object" required="$false" alternate="checked">
+        Read / set if the checkbox is not an "action" checkbox.  See "type" binding for
+        appropriate values.
+
+        Should be used rather than checked except if an "action" is defined.
+    </Binding>
+
+    <Binding key="checked" direction="both" type="boolean" default="$false" alternate="value">
+        This binding is read / set when this is an action checkbox. Reads / sets
+        a boolean value -- true (checked) / flase (unchecked).  The AWCheckbox is
+        an action checkbox if there is an action binding or if isRefresh binding is
+        set to true.
+
+        Should only be used if an "action" is defined.  Should not be used at
+        concurrently with "value" binding.
+    </Binding>
+
+    <Binding key="isExternal" direction="get" type="boolean" default="$false">
+        If true, and action or refresh is set, does not maintain its own checked/unchecked state
+        but refreshes it from the "checked" binding passed in. If false, only inquires
+        the "checked" binding upon initialization, then maintains the state itself.
+    </Binding>
+
+    <Binding key="onClick" direction="get" type="String" default="$null" deprecated="$true">
+        You should not use this onClick binding, rather, you should use the
+        "action" binding and, if necessary, binding it to $null (if all you
+        want to do is to submit the form and you do not care to handle an
+        action).
+    </Binding>
+
+    <Binding key="isRefresh" direction="get" type="boolean" default="$false">
+        Causes the checkbox to submit the enclosing form on change.  NOTE that
+        this is NOT the equivalent to setting action binding to $null.  See
+        Overview for additional information.
+    </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null">
+        Action to invoke when the value of the checkbox changes.  Causes the AWCheckbox
+        to behave as an action checkbox.
+    </Binding>
+
+    <Binding key="disabled" direction="get" type="boolean" default="$false">
+        Allows the checkbox to be disabled.
+    </Binding>
+
+    <Binding key="name" direction="get" type="String" required="$false" deprecated="$true">
+        Not recommended.  Allows you to override the system generated name.
+    </Binding>
+
+    <Binding key="awname" direction="get" type="String">
+        For Winrunner and LoadRunner
+    </Binding>
+    
+</a:Api>\
+
+<a:If ifTrue="$hasAction">\
+    <a:ActionCheckbox action="$^action:$null" checked="$checked" awname="$^awname"
+        disabled="$disabledString" otherBindings="$otherBindingsValues" isExternal="$^isExternal"/>\
+<a:Else/>\
+    <input type="checkbox" name="$^name" disabled="$disabledString" formValue="$formValue" value="1"
+        checked="$checkedString" onClick="$onClick" otherBindings="$otherBindingsValues" id="$env.awinputId"/>\
+</a:If>\

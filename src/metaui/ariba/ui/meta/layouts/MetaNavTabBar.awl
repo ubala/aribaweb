@@ -1,0 +1,4 @@
+<m:Context>\
+    <w:MRUTabList list="$state.modules" item="$currentModule" selection="$state.selectedModule"
+           label="$currentModule.properties.label" action="$moduleClicked" disabled="$disabled"/>
+</m:Context>

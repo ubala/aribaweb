@@ -1,0 +1,22 @@
+8859_1,,
+401, "Language for locale {0} is {1}", 0-locale 1-language name
+402, "No languages loaded in system. Check that languages.csv files are configured correctly.", 
+403, "Could not map locale {0} to a language", 0-localeName
+404, "Could not find language object for {0}, returning null", 0-languageName
+,,
+,,Multilingual catalog editor log messages
+,,
+405, "Invalid format for key: {0}", Keys should be in the format '@table/key'
+406, "The active language must be the default language, when adding a new object.", Can't add a new node or key-value pair in non-default language.
+407, "Attempt to edit node {0} not initialized in default language.  The migration to 7.x format may have failed.", 0-name of the node which we are attempting to edit
+408, "Please do not try to paste nodes into lists.", List nodes can only have key-value string pairs attached to them
+409, "Invalid string entry in node: {0}", nodes have string entries
+410, "Error in accessing csv file: {0}", 0 - filename
+411, "No write permission for csv file: {0}",0 - filename
+4255, "Default language not found in list of languages.  Please check default language in Parameters.table and examine your language.csv files.",
+4256, "Reverse lookup from language to preferred locale failed for language: {0}",{0}-language name
+4260, "Error while retrieving the list of available system languages: {0}",{0} - error string
+6995, "Cannot find Language for Locale Null LocaleMap",
+6996, "Null Locale cannot return Language for null Locale",
+7823, "Cannot set language string to {0} because locale to language mapping is not found for locale {1} ", 0-languageString 1-localeName
+7824, "Value cannot be present both in primary string and translation. id: {0}, oldId: {1}, newId: {2} oldPrimaryString: {3} oldTranslationId: {4}", 0 - MultiLingualString Id 1 - old language id 2 - new language id 3 - old primary string 4 - old translation id  

@@ -1,0 +1,88 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentApi.awl#7 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="awApi" direction="get" type="AWApi" alternates="empiricalApi">
+        TBD
+    </Binding>
+
+    <Binding key="empiricalApi" direction="get" type="String" alternates="awApi">
+        TBD
+    </Binding>
+</a:Api>\
+
+<a:If notEqualNull="$empiricalApiTable">
+    <t:DataTable title="Empirical API" multiSelect="$false"
+                  batchSize="20" valign="middle"
+                  list="$empiricalApiBindingList"
+                  showOptionsMenu="$false"
+                  showBatchNavigation="$false">
+        <t:Column key="bindingName" label="Binding Name" align="left"/>
+        <t:Column key="printReferencedBy" label="Referenced By" align="left"/>
+    </t:DataTable>
+
+    <a:For list="$empiricalApiBindingList" item="$dict.currentItem" >
+        &lt;Binding key="$dict.currentItem.bindingName" direction="get" type="??" required="\$false"&gt;
+        <br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        TBD
+        <br/>
+        &lt;/Binding&gt;
+        <br/>
+        <br/>
+    </a:For>
+
+</a:If>
+<a:If notEqualNull="$apiContainer">
+    <b>Overview:</b>
+    <pre>$apiContainer.overview.bareStringContent</pre>
+    <t:DataTable title="Bindings" multiSelect="$false"
+                      batchSize="20" valign="middle"
+                      list="$apiContainer.bindingApis"
+                      showOptionsMenu="$false"
+                      showBatchNavigation="$false"
+                      item="$dict.currentApiBinding"
+                      indentDetailRow="$true">
+        <t:Column key="key" label="Binding Name" align="left" style="font-weight:bold"/>
+        <t:Column key="typeString" label="Type" align="left"/>
+        <t:Column key="directionString" label="Direction" align="left"/>
+        <t:Column key="isRequired" label="Required" align="left"/>
+        <t:Column key="defaultValue" label="Default Val" align="left"/>
+        <t:Column key="alternates" label="Alternates" align="left"/>
+        <t:RowDetail style="font-style:italic;padding:4px;">$dict.currentApiBinding.description</t:RowDetail>
+    </t:DataTable>
+
+    <a:If condition="$apiContainer.contentApis.size">
+        <br/>
+        <t:DataTable title="Named Templates" multiSelect="$false"
+                batchSize="20" valign="middle"
+                list="$apiContainer.contentApis"
+                showOptionsMenu="$false"
+                showBatchNavigation="$false"
+                width="67%"
+                item="$dict.currentContentApi"
+                indentDetailRow="$true">
+            <t:Column key="name" label="Template Name" align="left" style="font-weight:bold"/>
+            <t:Column key="required" label="Required" align="left"/>
+            <t:RowDetail style="font-style:italic;padding:4px;">$dict.currentContentApi.description</t:RowDetail>
+        </t:DataTable>
+    </a:If>
+</a:If>

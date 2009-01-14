@@ -1,0 +1,6 @@
+<a:If notEqualNull="$instance">
+    <a:Environment awInstanceInclude="$this">
+        <a:IncludeComponent awcomponentReference="$instanceReference"/>\
+    </a:Environment>
+    <a:PhaseInvocation append="$checkClear" take="$checkClear" invoke="$checkClear"/>
+</a:If>\

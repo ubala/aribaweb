@@ -1,0 +1,5 @@
+<w:BasicPageWrapper>
+    <m:Context module="$currentModule.name">\
+        <m:IncludeComponent/>\
+    </m:Context>\
+</w:BasicPageWrapper>\

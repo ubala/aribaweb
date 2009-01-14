@@ -1,0 +1,74 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PulldownButton.awl#12 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="menuId" direction="get" type="String" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="buttonClass" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="buttonWrapperStyle" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="style" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="hilite" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="title" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="plain" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="isBrandStyle" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="hideArrow" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+</a:Api>\
+
+<w:PopupMenuLink tagName="span" menuId="$^menuId" class="" position="this">\
+    <w:TextButton disableClick="$true"
+                style="$^style"
+                buttonClass="$^buttonClass"
+                buttonWrapperStyle="$^buttonWrapperStyle"
+                title="$^title"
+                hilite="$^hilite"
+                plain="$^plain"
+                isBrandStyle="$^isBrandStyle">\
+        <a:IncludeContent/>\
+        <a:If ifFalse="$^hideArrow">\
+            <a:Image filename="$pullDownImage"/>\
+        </a:If>\
+    </w:TextButton>\
+</w:PopupMenuLink>\

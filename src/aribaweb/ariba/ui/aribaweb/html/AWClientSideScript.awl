@@ -1,0 +1,208 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWClientSideScript.awl#26 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="filename" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="language" direction="get" type="String" default="Javascript">
+        TBD
+    </Binding>
+
+    <Binding key="isSingleton" direction="get" type="boolean" default="$true">
+        Only meaningful when not using scriptFile binding and the
+        AWClientSideScript is used to render a script block.  By default, the
+        value of this binding is $true.  If a resusable component uses an
+        AWClientSideScript to define a block of inline script this binding
+        should most likely be set binding to false or else only a single
+        instance of the script block will be rendered per page.  When this
+        binding is set to $false, care should be taken with the declaration of
+        global variables as the declaration may be rendered multiple times.
+    </Binding>
+
+    <Binding key="scriptFile" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="scriptString" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="elementId" direction="set" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="invokeAction" direction="get" type="method" required="$false">
+        TBD
+    </Binding>
+    <Binding key="executeOnIncrementalUpdate" direction="get" type="boolean" default="$true">
+        Indicates that this script should be executed on a full page refresh as well
+        an incremental update of an AWRefreshRegion including this script.  In the
+        incremental update case, all DOM updates will be applied before
+        AWClientSideScript's are executed.  AWClientSideScript's are executed in the
+        context of the main application window.
+
+        In order to have a method execute on every refresh of a page, regardless of
+        whether or not its containing AWRefreshRegion is rendered, use
+        executeOnIncrementalUpdate=false and call the Event.registerRefreshCallback() to
+        register the method to call, or use executeOn="onupdate".
+    </Binding>
+
+    <Binding key="globalScope" direction="get" type="boolean" default="$false">
+        Implies that the script should be run inline (immediately when
+        encountered whether that is in the refresh frame or in the main
+        document window).
+    </Binding>
+
+    <Binding key="forceDirectInclude" direction="get" type="boolean" default="$false">
+        Include file directly (instead of via async XMLHTTP).
+    </Binding>
+
+    <Binding key="synchronous" direction="get" type="boolean" default="$false">
+        Execute inline scripts synchronously (instead of after dom update complete).
+    </Binding>
+
+    <Binding key="executeOn" direction="get" type="String" required="$false">
+        If specified, then this script will be run upon the specified window / document event.
+        Supported events include: "onfocusin", "onload"
+    </Binding>
+
+    <Binding key="handle" direction="set" type="String" required="$false">
+        If bound, will push a string that can be used in an event handler to invoke this code.  E.g.
+        <a:ClientSideScript handle="$dict.handle"> some script here ... </a:ClientSideScript>
+        <td onKeyPress="$dict.handler"></td>
+    </Binding>
+</a:Api>\
+<a:If notEqualNull="$filename">\
+    <a:Singleton key="$filename">\
+            <!--- AWClientSideScript - js urls -->\
+        <a:If ifTrue="$useDirectInclude">\
+            <a:RefreshRegion forceRefreshOnChange="$true" useId="$filename">
+                <a:GenericContainer tagName="script" language="$^language:JavaScript" src="$scriptFileUrl">\
+                    <!--- this should always be empty -->\
+                </a:GenericContainer>\
+            </a:RefreshRegion>\
+        <a:Else/>\
+            <a:ClientSideScript executeOnIncrementalUpdate="$true" isSingleton="$false" synchronous="$true">\
+                ariba.Refresh.loadJSFile("$scriptFileUrl");
+            </a:ClientSideScript>\
+        </a:If>\
+    </a:Singleton>\
+<a:Else/>\
+    <!--- AWClientSideScript - no file name binding -->\
+    <a:If ifTrue="$^isSingleton:$true">\
+        <a:Singleton key="$componentReference">\
+            <!--- AWClientSideScript - Singleton -->\
+            <a:IncludeBlock name="ScriptTemplate"
+                elementId="$^elementId" invokeAction="$^invokeAction"
+                language="$^language" otherBindingsValues="$otherBindingsValues"
+                executeOnIncrementalUpdate="$^executeOnIncrementalUpdate:$true"
+                synchronous="$^synchronous:$false">\
+                <a:IncludeContent/>\
+            </a:IncludeBlock>\
+        </a:Singleton>\
+    <a:Else/>\
+        <!--- AWClientSideScript - not singleton -->\
+        <a:IncludeBlock name="ScriptTemplate"
+            elementId="$^elementId" invokeAction="$^invokeAction"
+            language="$^language" otherBindingsValues="$otherBindingsValues"
+            executeOnIncrementalUpdate="$^executeOnIncrementalUpdate:$true"
+            synchronous="$^synchronous:$false">\
+            <a:IncludeContent/>\
+        </a:IncludeBlock>\
+    </a:If>\
+</a:If>\
+<a:Block name="ScriptTemplate">\
+    <a:If ifFalse="$hasScriptBinding">\
+        <a:If ifFalse="$isVBScript">
+            <a:If ifTrue="$useDirectGlobalScript">\
+                <a:RefreshRegion forceRefreshOnChange="$true">
+                    <a:GenericContainer tagName="script" elementId="$^elementId" invokeAction="$^invokeAction">\
+                        RJS(<a:String value="$^executeOnIncrementalUpdate:$true"/>, \
+                            <a:String value="$^synchronous:$false"/>, \
+                            <a:String value="$isGlobalScope"/>, \
+                           function(){<a:IncludeContent/>});\
+                    </a:GenericContainer>\
+                </a:RefreshRegion>\
+            <a:Else/>\
+                <a:If ifFalse="$formatInPre">\
+                    <a:GenericContainer tagName="script" elementId="$^elementId" invokeAction="$^invokeAction">\
+                        RJS(<a:String value="$^executeOnIncrementalUpdate:$true"/>, \
+                            <a:String value="$^synchronous:$false"/>, \
+                            <a:String value="$isGlobalScope"/>, \
+                           function(){<a:IncludeContent/>});\
+                    </a:GenericContainer>\
+                <a:Else/>
+                    <a:MethodInvocation invoke="$setupSpanId"/>\
+                    <pre id="$spanId" style="display:none">\
+                        <a:IncludeContent/>\
+                    </pre>\
+                    <a:If notEqualNull="$executeOn">\
+                        <a:ClientSideScript isSingleton="$false">
+                            ariba.Event.registerHandler("$spanId", "$executeOn");
+                        </a:ClientSideScript>\
+                    </a:If>\
+                </a:If>\
+            </a:If>\
+        <a:Else/>\
+            <a:If ifTrue="$requestContext.componentPathDebuggingEnabled">
+                <div style="border:1px solid gray; background-color:yellow">VB</div>
+            </a:If>
+            <a:If ifTrue="$useDirectGlobalScript">\
+                <a:RefreshRegion forceRefreshOnChange="$true" useId="">
+                    <a:GenericContainer tagName="script" language="$^language:JavaScript"
+                        otherBindings="$otherBindingsValues">\
+                        <a:IncludeContent/>\
+                    </a:GenericContainer>\
+                </a:RefreshRegion>
+            <a:Else/>\
+                <a:MethodInvocation invoke="$setupSpanId"/>\
+                <!--- Needed for ACM DFS: they're inconsistent about what's global script so we have to tread non
+                     globalScope script as if it is... When we fix them, and switch to full dynamic script loading, then
+                     we'll want to switch this off to avoid unnecessary FPRs
+                -->\
+                <pre id="$spanId" style="display:none">\
+                    <a:RefreshRegion forceRefreshOnChange="$true">
+                        <a:IncludeContent/>\
+                    </a:RefreshRegion>\
+                </pre>\
+                <a:GenericContainer tagName="script">\
+                    if (window.name != "AWRefreshFrame") {\
+                        ariba.Refresh.RVBS('$spanId', <a:String value="$isGlobalScope"/>);\
+                    }\
+                    <a:If ifTrue="$^executeOnIncrementalUpdate:$true">\
+                        else {\
+                            parent.ariba.Refresh.RVBS('$spanId', <a:String value="$isGlobalScope"/>);\
+                        }\
+                    </a:If>\
+                </a:GenericContainer>\
+            </a:If>\
+        </a:If>\
+    <a:Else/>\
+        <!--- AWClientSideScript - script binding-->\
+        <!--- FIXME!  Is this implcitly GlobalScope?  I.e. should we forceRefreshOnChange? -->\
+        <a:GenericContainer tagName="script" language="$^language:JavaScript"
+            otherBindings="$otherBindingsValues">\
+            <a:PrimitiveString value="$scriptString"/>\
+        </a:GenericContainer>\
+    </a:If>\
+</a:Block>\

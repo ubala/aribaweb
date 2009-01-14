@@ -1,0 +1,306 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#93 $
+    </Copyright>
+
+    <Overview>
+        BasicPageWrapper should be used on virtually every page of the application
+        as the outer tag for the page.  This widget provides a consistent look and feel
+        to the navigation of all pages of all applications (except, the Login Page).
+        Each application will have a different left-side menu ("toc") and
+        toolbar options ("commands"), and these can be specified per the api listed below.
+    </Overview>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" required="$false">
+        See PageWrapperForm
+    </Binding>
+
+    <Binding key="commands" direction="get" type="String" default="$null">
+        The commands is the name of the "Toolbar" component.  You needn't provide the package
+        name of the component, just the component's class name without the packag will suffice.
+        If commands is null or unspecified, the toolbar's commands region will be blank.
+    </Binding>
+
+    <Binding key="toc" direction="get" type="String" default="$null">
+        The toc is the name of the "Table of Contents" component, which is often called the
+        left side menu.  You needn't provide the package name of the component, just the
+        component's class name without the packag will suffice.  If toc is null or unspecified,
+        the left side region will be blank.
+    </Binding>
+
+    <Binding key="applicationCSS" direction="get" type="String" default="$null">
+        see applicationCSS ariba.ui.widgets.DocumentHead.awl
+    </Binding>
+
+    <Binding key="debugTitle" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="escapeTitle" direction="get" type="boolean" default="$true">
+        see escapeTitle in ariba.ui.widgets.DocumentHead.awl
+    </Binding>
+
+    <Binding key="sessionless" direction="get" type="boolean" default="$false">
+        see sessionless in ariba.ui.widgets.DocumentHead.awl
+        and also ariba.ui.widgets.AWSessionManager
+    </Binding>
+
+    <Binding key="onLoad" direction="get" type="String" default="$null">
+        see onLoad in ariba.ui.aribaweb.html.AWBody.awl
+    </Binding>
+
+    <Binding key="submitFormDefault" direction="get" type="boolean" default="$false">
+        see submitFormDefault in ariba.ui.widgets.PageWrapperForm.awl
+    </Binding>
+
+    <Binding key="disableLogoutAction" direction="get" type="boolean" default="$false">
+        Removes the Logout button from the page wrapper.  (see AribaBasicPageWrapper.htm)
+    </Binding>
+
+    <Binding key="disableHomeAction" direction="get" type="boolean" default="$false">
+        Removes the Home button from the page wrapper.  (see AribaBasicPageWrapper.htm)
+    </Binding>
+
+    <Binding key="disableHelpAction" direction="get" type="boolean" default="$false">
+        Removes the Help button from the page wrapper.  (see AribaBasicPageWrapper.htm)
+    </Binding>
+
+    <Binding key="disableUndelegateAction" direction="get" type="boolean" default="$false">
+        Removes the undelegate icon from the page wrapper.  (see AribaBasicPageWrapper.htm)
+    </Binding>
+
+    <Binding key="disableFooter" direction="get" type="boolean" default="$false">
+        Removes the footer from the page wrapper.
+    </Binding>
+
+    <Binding key="disableProfile" direction="get" type="boolean" default="$false">
+        Removes the preferences link.
+    </Binding>
+
+    <Binding key="hasSidebarNotch" direction="get" type="boolean" default="$true">
+        Determines whether or not the SidebarNotch is visible.  AribaBasicPageWrapper
+        uses the HasSidebarNotchConditionHandler to evaluate this binding so if no value
+        is provided, this value defaults to true.  (see AribaBasicPageWrapper.htm)
+    </Binding>
+
+    <Binding key="isSidebarVisible" direction="get" type="boolean" default="$true">
+        Specifies the initial visibility of the side bar (aka TOC).  If hasSidebarNotch is
+        set to $false then the user will not be able to control the visibility of the
+        side bar.  (see AribaBasicPageWrapper.htm)
+    </Binding>
+
+    <Binding key="disableAboutBox" direction="get" type="boolean" default="$false">
+        Disables the AboutBox.  If set to $true, the userGreeting will still be visible
+        but will not display the AboutBox when clicked.  (see AribaBasicPageWrapper.htm)
+    </Binding>
+
+    <Binding key="isDebugVisible" direction="get" type="boolean" default="$true">
+        Controls the visibility of the AWDebugPane.
+    </Binding>
+
+    <Binding key="isNavigatorVisible" direction="get" type="boolean" default="$true">
+        Specifies the visibility of the nagivator bar.
+        (see AribaBasicPageWrapper.htm)
+    </Binding>
+
+    <Binding key="overrideGlobalCommandBar" direction="get" type="boolean" default="$true">
+        The template/component from the commands binding will be used instead of the global command bar.
+        (see AribaCommandBar)
+    </Binding>
+
+    <Binding key="hasForm" direction="get" type="boolean" default="$false">
+        If hasForm is true, an html form tag is provided in the page wrapper
+        and will serve as the form container for the entire page.
+    </Binding>
+
+    <Binding key="formActionUrl" direction="get" type="String" default="$null">
+        If formActionUrl is not null, the PageWrapperForm will be rendered (even if hasForm=$false).
+        see also ariba.ui.widgets.PageWrapperForm.awl
+    </Binding>
+
+    <Binding key="formEncodingType" direction="get" type="String" default="$null">
+        If formEncodingType is not null, the PageWrapperForm will be rendered (even if hasForm=$false).
+        see also ariba.ui.widgets.PageWrapperForm.awl
+    </Binding>
+
+    <Binding key="omitWrapperFrame" direction="get" type="boolean" default="$false">
+        If omitWrapperFrame is true, the top and left side regions of the page wrapper
+        will not be rendered.  However, the form container will still be rendered if it otherwise
+        would have been rendered.  By default, this turned off, however, if the "isPrintMode" flag
+        is enabled on the requestContext, then the wrapper frame is omitted regardless of the
+        setting of this flag.
+    </Binding>
+
+    <Binding key="helpUrl" direction="get" type="String" required="$false">
+        Deprecated.  No longer used, use helpKey.
+    </Binding>
+
+    <Binding key="helpKey" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="formName" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="addContentMargin" direction="get" type="boolean" default="$true">
+        TBD
+    </Binding>
+
+    <Binding key="bodyClass" direction="get" type="String">
+        TBD
+    </Binding>
+
+    <NamedContent name="body" required="$false">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="styles" required="$false">
+        Allows for passing CSS styles into the head tag
+    </NamedContent>
+
+    <NamedContent name="script" required="$false">
+        Allows for passing inline javascript into the head tag
+    </NamedContent>
+
+    <NamedContent name="commands" required="$false">
+        Note: see AribaCommandBar.  The Include tag is magic in that it will reach up any number of
+        component-levels to locate a named template with the name "commands".
+    </NamedContent>
+
+    <NamedContent name="toc" required="$false">
+        Note: see AribaToc.  The Include tag is magic in that it will reach up any number of
+        component-levels to locate a named template with the name "toc".
+    </NamedContent>
+</a:Api>\
+<a:If ifTrue="$alreadyInPageWrapper">
+    <a:Environment nestedPageWrapper="$true">
+        <a:If ifTrue="$^hasForm">
+            <a:If ifTrue="$requestContext.currentForm">
+                <AribaPageContent/>
+            <a:Else/>
+                <a:Form><AribaPageContent/></a:Form>
+            </a:If>
+        <a:Else/>
+            <AribaPageContent/>
+        </a:If>
+    </a:Environment>
+<a:Else/>
+<a:PhaseInvocation append="$requestContext.disableComponentPathDebugging"/>\
+<a:Environment PageWrapper="$this" nestedPageWrapper="$false">\
+<w:DocumentContainer>
+<w:DocumentHead applicationCSS="$^applicationCSS" windowTitle="$windowTitle" escapeTitle="$^escapeTitle:$true" sessionless="$^sessionless">
+    <!---   Note: [Also see comment below] Note the "required" attribute here.  In
+            Buyer world, these will be defined.  However, in Jsp world, they will
+            not be defined, but that's okay since they are not required.  This stuff
+            (styles and script) is invisble to the user anyway. -->\
+    <a:IncludeContent name="styles" required="$false"/>
+    <a:IncludeContent name="script" required="$false"/>
+</w:DocumentHead>
+    <a:Body onLoad="$^onLoad">\
+        <w:WaterMark/>\
+        <a:RefreshRegion useId="BPR_Body" class="rr relocdest">
+            <a:ClientSideScript synchronous="$true">
+                ariba.Dom.setBodyClass("$bodyClass");
+            </a:ClientSideScript>
+          <w:PageWrapperForm action="$^action" formName="$formName" formActionUrl="$formActionUrl" formEncodingType ="$formEncodingType" submitFormDefault="$^submitFormDefault" omitTags="$omitFormTags">\
+            <a:If ifTrue="$omitWrapperBoilerplate">\
+                <a:DevErrorIndicator/>
+                <table cellpadding="0" cellspacing="0" width="100%"><tr><td>\
+                    <AribaPageContent addContentMargin="$^addContentMargin:$true"/>
+                </td></tr></table>
+            <a:Else/>\
+                <a:DevErrorIndicator/>
+                <AribaBasicPageWrapper disableLogoutAction="$^disableLogoutAction"
+                                       disableHomeAction="$^disableHomeAction"
+                                       disableHelpAction="$^disableHelpAction"
+                                       disableUndelegateAction="$^disableUndelegateAction"
+                                       hasSidebarNotch="$^hasSidebarNotch"
+                                       isSidebarVisible="$^isSidebarVisible"
+                                       disableAboutBox="$^disableAboutBox"
+                                       isNavigatorVisible="$^isNavigatorVisible"                
+                                       overrideGlobalCommandBar="$^overrideGlobalCommandBar">\
+                    <!---   Note: Nothing should be put inside the AribaBasicPageWrapper
+                            other than a ref to AWComponentContent.  If you put something else
+                             in here it won't get rendered if component content is named templates
+                            because nobody will every do <a:IncludeContent/>, they will just
+                            do <a:IncludeContent name="body"/> -->\
+                    <!---   Note: [Also see comment above] Pass the entire content to the
+                            AribaBasicPageWrapper.  This content may or may not contain named
+                            templates.  For example, In Jsp world is will *not* contain named
+                            temples (just the content of the ref).  In the Buyer world, it will
+                            contain several named templates.  The AribaPageContent tag in
+                            AribaBasicPageWrapper will reference the namedTemplate which it
+                            wants from the various namedTemplates of the entire ComponentContent. -->\
+                    <!---   Note: In the expanded remote page wrapper, we will not have any named templates.
+                            The 'api' for the remote usage of the page wrapper is to only provide the
+                            body of the application itself and nothing within the wrapper. -->\
+                    <a:IncludeContent/>\
+                </AribaBasicPageWrapper>\
+                <a:RefreshRegion useId="BPR_FLs">\
+                    <w:FooterLinks/>\
+                </a:RefreshRegion>\
+            </a:If>\
+          </w:PageWrapperForm>\
+          <a:DebugContent title="$debugTitle"/>\
+        </a:RefreshRegion>
+        <!--- Add in modal panels (if any) -->
+        <a:RefreshRegion useId="BPR_Panels" class="rr relocdest">
+            <a:If notEqualNull="$page.topPanel">\
+                <a:PhaseInvocation append="$requestContext.enableComponentPathDebugging"/>\
+                <a:InstanceInclude instance="$page.topPanel"/>\
+                <a:PhaseInvocation append="$requestContext.disableComponentPathDebugging"/>\
+            </a:If>
+            <w:PageErrorPanel/>
+        </a:RefreshRegion>
+        <a:RefreshRegion useId="BPR_Footer" disabled="$!ariba.ui.aribaweb.core.AWPage.AllowIncrementalScriptLoading" class="rr relocdest">
+            <a:If ifTrue="$requestContext.isPrintMode">\
+                <a:ClientSideScript>
+                    ariba.Widgets.printContents();
+                </a:ClientSideScript>
+            <a:Else/>
+                <!--- Footer components -->
+                <AribaAboutBox/>
+                <AribaContactBox/>
+                <AribaNotificationDialog/>
+                <AribaShutdownWarning/>
+                <w:ErrorBubble/>
+                <a:If ifFalse="$^sessionless">
+                    <a:If ifFalse="$omitWrapperBoilerplate">
+                        <a:If ifTrue="$^isDebugVisible:$true">\
+                            <a:DebugPane/>\
+                        </a:If>\
+                    </a:If>
+                </a:If>
+                <w:SessionManagerInclude sessionless="$^sessionless"/>
+                <a:PollInterval/>\
+            </a:If>\
+            <w:ClientSideTemplates/>
+            <!--- NOTE: make sure that the AWRichClientFooter comes after all components which require
+                        refreshRegion support.  The AWRichClientFooter completes the incremental
+                        update request and cleans up all temporary state so if any components which
+                        require refresh region support come after the AWRichClientFooter, there
+                        will be a race condition between the incremental update commands and the
+                        completion of incremental update. -->
+            <a:If ifFalse="$^sessionless">
+                <a:RichClientFooter/>\
+            </a:If>
+        </a:RefreshRegion>
+        <w:ImagePrefetch/>
+    </a:Body>\
+</w:DocumentContainer>\
+</a:Environment>
+</a:If>

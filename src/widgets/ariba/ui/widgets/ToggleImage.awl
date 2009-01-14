@@ -1,0 +1,87 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ToggleImage.awl#3 $
+    </Copyright>
+
+    <Overview>
+        Provides a way to easily control the visibility of a block of html.  This component is in one of two states:
+        true or false.  By default, a triangle image indicates these states is displayed and, when clicked, will toggle
+        to the other state.  For each phase of the request-response loop, this component pushes its current state into
+        the referring component so it may be used downstream in, for example, an AWConditional to control the visibility
+        of of a block of html.
+
+        By default the images used for true/false is the toggle arrow. If the useCheckboxIcon
+        binding is used, then a checkbox image will be used to represent true (checked)
+        and false (unchecked). You may also provide your own images to represet true/false.
+    </Overview>
+
+    <Binding key="state" type="boolean" required="$true" direction="either">
+        For each phase of the request-response loop, this component pushes its internal state (either true or false)
+        into the referring component.  This may then be used to control an AWConditional or other values.  Note that,
+        to initalizae the state, you must use initState.  Once the state has been initialized, the only way to change
+        it is for the end-user to click on the image and, thus, toggle the value.
+    </Binding>
+
+    <Binding key="initState" type="boolean" default="$false" direction="get">
+        When the component is first created, this value is used to initalize the internal state of the component.  This
+        is only evaluated one time in the life of the component.
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" default="$true">
+        Allows for submitting the form in which the tag is defined.  If specified and evaluates to true, javascript will
+        be used to submit the enclosing form.
+    </Binding>
+
+    <Binding key="align" direction="get" type="String" default="$null">
+        Allows for specifying the "align" attribute of the image used to indicate the state.  This does not apply for
+        submitForm="$true".
+    </Binding>
+
+    <Binding key="scrollToVisible" direction="get" type="boolean" default="$false" deprecated="$true">
+        If true, upon returning the response page, will attempt to position the page back to the location where the
+        toggle image was clicked.  This has been deprecated in favor of the new page scroll maintenance capability of
+        aribaweb.  [Note: we can remove this attribute entirely once that feature is fully functional]
+    </Binding>
+
+    <Binding key="isExternal" direction="get" type="boolean" default="$false">
+        If true, reverses the functionality of this component so that, rather than maintaining its own state, it merely
+        reflects the state of some external object.  It will still toggle the state of that object when clicked, but it
+        will not set the state on each phase.
+    </Binding>
+
+    <Binding key="useCheckboxIcon" direction="get" type="boolean" default="$false" alternates="trueImageName&&falseImageName">
+        Uses a checked checkbox for true and unchecked checkbox for false.
+    </Binding>
+
+    <Binding key="trueImageName" direction="get" type="String" default="awxToggleImageTrue.gif" alternates="useCheckboxIcon">
+        The name of the image to be displayed when the state is true.  This uses AWImage internally, so the same rules
+        apply to this binding as for AWImage's filename binding.
+    </Binding>
+
+    <Binding key="falseImageName" direction="get" type="String" default="awxToggleImageFalse.gif" alternates="useCheckboxIcon">
+        The name of the image to be displayed when the state is false.  This uses AWImage internally, so the same rules
+        apply to this binding as for AWImage's filename binding.
+    </Binding>
+
+    <Binding key="title" direction="get" type="String" default="Open/Close">
+        Tooltip for the toggle control.
+    </Binding>
+</a:Api>\
+
+<a:MethodInvocation invoke="$resetToggleValue"/>\
+<a:PrivateHyperlink action="$toggleImageClicked" submitForm="$^submitForm">\
+    <a:Image filename="$currentImageFilename" align="$^align" alt="$^title:$[a001]Open/Close"/>\
+</a:PrivateHyperlink>\

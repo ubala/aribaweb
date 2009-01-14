@@ -1,0 +1,76 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWSubmitButton.awl#7 $
+    </Copyright>
+
+    <Overview>
+        Native HTML input type=submit element (but with AW javascript handlers).
+
+        Note: This component is essentially dead: we strongly recommend TextButton in its place.
+    </Overview>
+
+    <Binding key="value" type="String" required="$false" direction="get">
+        Determines the text that is displayed for the button.
+    </Binding>
+
+    <Binding key="action" type="AWResponseGenerating" default="$null" direction="get">
+        Action invoked when the button is clicked.
+    </Binding>
+
+    <Binding key="style" type="String" required="$null" direction="get" deprecated="$true">
+        TBD
+    </Binding>
+
+    <Binding key="disabled" type="String" required="$null" direction="get" deprecated="$true">
+        TBD
+    </Binding>
+
+    <Binding key="class" type="String" required="$null" direction="get" deprecated="$true">
+        HTML pass through
+    </Binding>
+
+    <Binding key="title" direction="get" type="String" required="$false">
+        HTML pass through
+    </Binding>
+
+    <Binding key="target" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="windowAttributes" direction="get" type="String" required="$false" >
+        If the target binding is used, you may specify the window attributes with this binding.  See
+        book on html/javascript and look for window.open(...) for details.
+    </Binding>
+
+    <Binding key="name" direction="get" type="String" required="$false">
+        TBD
+    </Binding>    
+</a:Api>\
+<a:GenericActionTag
+    tagName="input"
+    type="submit"
+    value="$^value:Submit"
+    bh="GAT"
+    action="$^action"
+    disabled="$^disabled"
+    submitForm="$^submitForm"
+    class="$^class"
+    awname="$^awname" _awname="$^action"
+    disableClick="$^disabled"
+    target="$^target"
+    windowAttributes="$^windowAttributes"
+    title="$^title"
+    name="$^name"/>\

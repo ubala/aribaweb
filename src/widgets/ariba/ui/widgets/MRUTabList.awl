@@ -1,0 +1,101 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MRUTabList.awl#3 $
+    </Copyright>
+
+    <Overview>
+        A tab list that displays the "highest ranked" (most recently used) tabs inline
+        and renders the others via a "More..." popup menu.
+
+        The visible subset is displayed in the order they appear in the list returned
+        by the list binding.
+    </Overview>
+
+    <Binding key="list" type="List" direction="get" required="$true">
+        The list of items over which to iterate.  Each item in the list represents one
+        tab in the tabset.  The items in the list may be of any type.  The list itself
+        can be any of the supported classes which has a class extension of type AWOrderedList.
+        By default, this includes all primitive arrays, java.util.List, java.util.Vector, and
+        all implementations of List-like classes which Ariba has implemented.
+    </Binding>
+
+    <Binding key="item" type="java.lang.Object" direction="set" required="$true">
+        For each item in the "list", this is pushed into the referring component's scope.
+        It can then be used for dereferencing things like the label of the tab.
+    </Binding>
+
+    <Binding key="label" type="String" direction="get">
+        The string to display on each label.  The string is html-escaped before rendering.
+    </Binding>
+
+    <Binding key="rank" type="int" direction="get">
+        The rank (e.g. MRU position) of the tab.  If there are many tabs, only those
+        with the highest rank are displayed (and the others are in the More... menu).
+
+        If the rank binding is not provided, then a session-level MRU is maintained
+        (and initial rank defaults to index in the the list array)
+    </Binding>
+
+    <Binding key="selection" type="java.lang.Object" direction="both">
+        During renderResponse, the selection is used to determine which tab to display as selected.
+        When the user clicks an unselected tab, we set the selection in the referring component's
+        context.  This is a stateless component, so the referring component (or a parent thereof)
+        must maintain the selection for subsequent requests.
+    </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null">
+        Fired when tab clicked
+    </Binding>
+
+    <Binding key="maxWidthChars" direction="get" type="int" default="100">
+        How many characters wide (in aggregate label width) to render the tabs.
+        When determining how many tabs will "fit" the tab list counts the string length of the
+        labels, plus 4 for each tab separator.  As many high ranked tabs as possible
+        will be rendered until this total is reached.
+    </Binding>
+
+    <Binding key="actionMenuId" type="String" direction="get">
+        Id for an action menu.  If this exists, an Action Menu Button will be displayed.
+        The button uses the optional label actionMenuLabel or "Actions" by default.
+    </Binding>
+
+    <Binding key="actionMenuLabel" type="String" direction="get" default="Actions">
+        Optional label for the Action Menu Button.
+    </Binding>
+
+    <Binding key="class" type="String" direction="get">
+        Probably ignored.  Just make sure to wrap your tab list in a TD or div with
+        a class like "pageTabWrapper"
+    </Binding>
+
+    <Binding key="dropType" type="String" direction="get">
+        see AWDropContainer's "type" binding.
+    </Binding>
+
+    <Binding key="dropAction" type="AWResponseGenerating" direction="get">
+        see AWDropContainer's "dropAction" binding.
+    </Binding>
+
+    <Binding key="disabled" type="boolean" direction="get">
+        Render as (and behave as) disabled.
+    </Binding>
+</a:Api>\
+\
+<w:TabList list="$all" visibles="$visibles" item="$currentTab" selection="$selectedTab"
+           label="$currentTabLabel" action="$tabSelected" disabled="$^disabled"
+           class="$^class:pageTabWrapper" dropType="$^dropType" dropAction="$^dropAction"
+           actionMenuId="$^actionMenuId" actionMenuLabel="$^actionMenuLabel"/>
+\

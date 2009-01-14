@@ -1,0 +1,9 @@
+<a:RefreshRegion useId="BPR_Prefetch" class="hide">
+    <a:If ifFalse="$imagePretched">
+        <a:MethodInvocation invoke="$setPreteched"/>
+        <a:For list="$=Images"
+                      item="$currentImage">
+            <a:Image filename="$currentImage"/>
+        </a:For>
+    </a:If>
+</a:RefreshRegion>

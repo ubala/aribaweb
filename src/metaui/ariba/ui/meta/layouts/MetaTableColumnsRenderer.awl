@@ -1,0 +1,3 @@
+<a:Environment metaTableRenderer="$this">\
+    <a:IncludeContent/>\
+</a:Environment>\

@@ -1,0 +1,4 @@
+<w:TabList list="$allLayouts" item="$tabLayout" label="$tabLabel" selection="$selectedLayout"/>\
+<m:Context restoreActivation="$layout.activation">
+    <m:IncludeComponent awpropertyMap="$propertyMap"/>\
+</m:Context>

@@ -1,0 +1,39 @@
+<w:BasicFrameWrapper>
+    <span class="pageHead">$rootPage.selectedObject</span>
+    <br/>
+    <a:If ifTrue="$rootPage.selectedObjectIsComponent">
+        <b>File Location:</b> $rootPage.selectedObjectFileLocation
+        <br/>
+        <br/>
+        <a:If ifFalse="$rootPage.selectedObjectHasEmpiricalApi">
+            <w:SectionHeading title="AWApi"/>
+            <w:SectionBody>
+                <b>Responsible:</b>
+                $rootPage.selectedObjectAWApi.responsible
+                <br/>
+                <a:ComponentApi awApi="$rootPage.selectedObjectAWApi"/>
+            </w:SectionBody>
+        <a:Else/>
+            <w:SectionHeading title="Empirical Api"/>
+            <w:SectionBody>
+                <a:ComponentApi empiricalApi="$rootPage.selectedObjectEmpiricalApi"/>
+            </w:SectionBody>
+        </a:If>
+        <w:SectionHeading title="Used by"/>
+        <w:SectionBody>
+            <a:If ifTrue="$rootPage.isSelectedObjectPageLevel">
+                Used as a Page Level Component
+            </a:If>
+            <a:If ifTrue="$rootPage.selectedObjectHasReferences">
+                <t:DataTable batchSize="20" valign="middle"
+                              list="$rootPage.selectedObjectReferencedByList"
+                              showOptionsMenu="$false"
+                              showBatchNavigation="$false"
+                              width="100%">
+                    <t:Column key="componentName" label="Component Name" align="left"/>
+                    <t:Column key="lineNumbers" label="Line Number" align="left"/>
+                </t:DataTable>
+            </a:If>
+        </w:SectionBody>
+    </a:If>
+</w:BasicFrameWrapper>

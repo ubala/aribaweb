@@ -1,0 +1,29 @@
+<a:If ifTrue="$isDialogContentAllowed">
+    <a:Environment showAsDialog="$!hasTOCContent">
+        <a:If ifTrue="$!hasTOCContent">
+            <a:IncludeBlock name="content" showWrapper="$true">\
+                <w:DialogBox class="dialogContentWrapper">\
+                    <div class="dialogInnerWrapper">\
+                        <a:IncludeContent/>\
+                    </div>\
+                </w:DialogBox>\
+            </a:IncludeBlock>\
+        <a:Else/>
+            <a:IncludeBlock name="content" showWrapper="$false">\
+                <a:IncludeContent/>\
+            </a:IncludeBlock>\
+        </a:If>
+    </a:Environment>
+<a:Else/>
+    <a:IncludeBlock name="content" showWrapper="$false">\
+        <a:IncludeContent/>\
+    </a:IncludeBlock>\
+</a:If>\
+\
+<a:Block name="content">\
+    <a:ClientSideScript>
+        ariba.Widgets.updateDialogWrapperClass($^showWrapper);
+    </a:ClientSideScript>\
+    <a:IncludeContent/>\
+</a:Block>\
+

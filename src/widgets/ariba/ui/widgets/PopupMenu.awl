@@ -1,0 +1,128 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.awl#19 $
+    </Copyright>
+
+    <Overview>
+        A PopupMenu is a container for PopupMenuItem's.  To define a menu, you only need to provide a menuId, and then
+        define a series of PopupMenuItem's within the PopupMenu contiainer.  Since the menu definition may appear in a
+        repetition and, therefore, must have a unique menuId for each menu rendered, you may also provide an index for
+        the menuId which will be used by PopupMenu to build a menuId from the concateation of the menuId and the index.
+        For example:
+
+       <a:For list="$list" item="$currentItem" index="$currentIndex">
+           <w:PopupMenu menuId="Move" index="$currentIndex">
+               <w:PopupMenuItem action="$moveLeftClicked">\
+                   Move Left\
+               </w:PopupMenuItem>
+               <w:PopupMenuItem action="$moveRightClicked">\
+                   Move Right\
+               </w:PopupMenuItem>
+           </w:PopupMenu>
+               :
+        </a:For>
+
+        Of course, you will need to define a reference to the menu using a PopupMenuLink (or PopupMenuButton) and
+        provide the same menuId (and optional index):
+
+               :
+        <w:PopupMenuLink menuId="Move" index="$currentIndex">\
+            $currentItem\
+        </w:PopupMenuLink>
+               :
+
+        There are two modes in which you can use these menus -- shared or 1:1.  The above axample shows how to use the
+        menu in 1:1 mode (one menu per menu reference).  [Actually, in 1:1 mode, the PopupMenu and PopupMenuLink
+        usually appear within the same repetition, so the context for both is identical]
+
+        For 1:1 mode, it does not matter whether then PopupMenu comes before the PopupMenuLink since the context
+        of the action bound to the PopupMenuItem will be the same in either case (assuming they are defined within
+        the same repetition as they generally will be).  However, in shared-menu mode, the PopupMenuLink should appear
+        before the PopupMenu so that the link can provide the proper setup before the action of the PopupMenuItem
+        is invoked (more on this below).  Also in shared mode, the PopupMenu and its corresponding PopupMenuLink's
+        are not within the same repetition (or context).
+
+        What does it mean for a PopupMenuLink to 'setup' before the action of the PopupMenuItem?  Well, when you
+        click on the PopupMenuLink in a shared scenario, that link represents some object that you are selecting
+        on which you want one of the operations defined in the menu to operate.  However, since the context of
+        the link is separate from the context of the Menu itself, you must stash the value(s) you want from the
+        link's context so they'll be available in the PopupMenuItem's context.  To make this easy to do, you can
+        define "assignment bindings" on the link itself and stash away these values.  An assignment binding is
+        one where the left hand side of the binding expression is the name of a variable in your component.
+        For example:
+
+            <w:PopupMenuLink menuId="Foo" actionSetup="$actionSetup"/>
+               :
+
+        In this case, when this link is clicked, no action will be invoked, but the $currentItem will be evaluated
+        and pushed into the "selectedItem" variable in your component and the same for $currentValue -> selectedValue.
+        Of course, you may use any names you want on the left side as long as there's ivar's in your component with
+        those names.  Now that the selectedItem and selectedValue are stashed away, you can use them in whatever
+        actions are defined on the shared component that displays when this PopupMenuLink is clicked.
+    </Overview>
+
+    <Binding key="menuId" direction="get" type="String" required="$true">
+        The menuId is used to associate a PopupMenuLink and its
+        corresponding PopupMenu.  You must avoid name collisions with other
+        menus (especially menus you import into your application via
+        reusable components).  One way to do this is to get an elementId
+        from the requestContext and use this for both the PopupMenuLink
+        and the PopupMenu.  Note that a single PopupMenu may be shared by
+        many PopupMenuLinks -- all those links will have the same id as their
+        shared PopupMenu.
+    </Binding>
+
+    <Binding key="index" direction="get" type="int" required="$false">
+        If you are generating PopupMenu/Links in a repetition, each iteration
+        will require a different menuId.  The index binding makes this easy
+        as you can provide a static menuId and pass the index from the
+        repetition and let PopupMenu/Link do the concatenation for you
+        (in a more efficient way, as well).
+    </Binding>
+    <Binding key="onDisplayHandler" direction="get" type="String" required="$false">
+        Javascript function name which is invoked everytime the popup menu is displayed.
+        Will be passed the element for the menu div as the argument to the handler.
+        Note if the PopupMenu contains an AWLazyDiv, then the contents of the PopupMenu may
+        not be retrieved the first time this method is called.  In this case, the act of
+        retrieving content for the AWLazyDiv should probably also call this same
+        javascript statement(s).
+    </Binding>
+
+    <Binding key="class" direction="get" type="String" required="$false">
+        Override the default css class (awmenu)
+    </Binding>
+</a:Api>
+
+<t:ExportConditional>\
+    <a:Singleton>\
+        <w:WidgetsJavaScript/>\
+    </a:Singleton>\
+    <a:RelocatableDiv id="$menuId" class="$^class:awmenu" style="display:none;" onDisplay="$^onDisplayHandler">
+        <!--- This dummy image works around a bug and is required to make entire div clickable -->\
+        <div><img width="0" height="0" border="0"/></div>\
+        <!--- put ourselves on environment so PopupItem call call us back with setHasCollapedItem() -->
+        <a:Environment popupMenu="$this">\
+            <a:IncludeContent/>\
+        </a:Environment>\
+        <a:If ifTrue="$hasCollapsed">\
+            <a:GenericContainer tagName="A" tabindex="99" href="#"
+                class="awmenuCell cellO" bh="PMIO"
+                title="$[a001]Show all menu items">\
+                <a:Image filename="doubleDownArrow.gif"/>
+            </a:GenericContainer>\
+        </a:If>\
+    </a:RelocatableDiv>
+</t:ExportConditional>\

@@ -1,0 +1,11 @@
+8859_1
+,,
+8906, "Deleted {0} file(s) from local temp directory ""{1}"".", 0-file count 1-directory name
+8907, "I/O error while trying to get the files from directory: {0}.", 0-File object (should be a directory)
+8908, "Security or other exceptions kept {0} file(s) from being deleted from directory {1}.", 0-number of files 1-File object (should be directory)
+8909, "Deleted {0} file(s) from shared temp directory ""{1}"".", 0-file count 1-directory name
+8910, "Security or other exceptions occured while removing the file {0}.", 0-File object 
+8911, "Security exceptions occured while listing the files in directory {0}.", 0-File object (should be directory)
+8912, "Shared Temp Directory is not specified",
+
+

@@ -1,0 +1,51 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWJSListRepetition.awl#3 $
+    </Copyright>
+
+    <Overview>
+        Used to create a javascript array declaration.  E.g.
+            <a:ClientSideScript>
+                var arr = <a:JSListRepetition list="$list" item="$item" condition="$isRelevant">\
+                    $item.aMetric\
+                </a:JSListRepetition>;
+                ... use arr...
+            <a:ClientSideScript>
+
+        The value-add of this component (over using AWRepetition directly) is that it puts commas
+        in the right places (i.e. only between items, taking account of omitted item (via condition binding)
+    </Overview>
+
+    <Binding key="list" type="AWOrderedList" required="$true" direction="get">
+        Ordered list of items.
+    </Binding>
+
+    <Binding key="item" type="Object" direction="set">
+        The current  item.
+    </Binding>
+
+    <Binding key="condition" type="boolean" direction="set">
+        Optional -- should current item be included
+    </Binding>
+</a:Api>\
+[\
+<a:For list="$^list" item="$^item">\
+    <a:If ifTrue="$^condition:$true">\
+        $prefixComma\
+        <a:IncludeContent/>\
+    </a:If>\
+</a:For>\
+]\

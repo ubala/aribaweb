@@ -1,0 +1,120 @@
+Department,Category,Year,Amount,ValidationErrorMessage
+Business Administration,Unclassified,1/5/03,8365.5
+Business Administration,Facilities and Equipment,1/6/03,181803251.9
+Business Administration,Facilities and Equipment,1/7/03,157868112.4
+Business Administration,Internal Technology,1/8/03,100764238.1
+Business Administration,Internal Technology,1/9/03,79847835.6
+Business Administration,Marketing,1/10/03,2420041.05,"Date is out of range"
+Business Administration,Marketing,1/11/03,763542.6
+Business Administration,Misc,1/12/03,8638.5
+Business Administration,Network Infrastructure,1/13/03,203748000
+Business Administration,Network Infrastructure,1/14/03,238335750
+Business Administration,Office Equipment/Supplies,1/15/03,9808426.95
+Business Administration,Office Equipment/Supplies,1/16/03,23015762.25
+Business Administration,Services,1/17/03,340669244.3
+Business Administration,Services,1/18/03,282477370
+Engineering,Unclassified,1/19/03,1592.7,"Funny looking spend!"
+Engineering,Facilities and Equipment,1/20/03,67255029.5
+Engineering,Facilities and Equipment,1/21/03,12593587.2
+Engineering,Internal Technology,1/22/03,43525693.35
+Engineering,Internal Technology,1/23/03,95036909.4
+Engineering,Marketing,1/24/03,242747.4
+Engineering,Marketing,1/25/03,296837.85
+Engineering,Misc,1/26/03,1236144.6
+Engineering,Misc,1/27/03,347511.9
+Engineering,Network Infrastructure,1/28/03,295778500
+Engineering,Network Infrastructure,1/29/03,48243750
+Engineering,Office Equipment/Supplies,1/30/03,2172216.6
+Engineering,Office Equipment/Supplies,1/31/03,2413873.35
+Engineering,Services,2/1/03,170682858.4
+Engineering,Services,2/2/03,67456468.35
+Marketing,Facilities and Equipment,2/3/03,1730368.05
+Marketing,Facilities and Equipment,2/4/03,3086873.85
+Marketing,Internal Technology,2/5/03,5674835.1
+Marketing,Internal Technology,2/6/03,8199897.3
+Marketing,Marketing,2/7/03,77158353.75
+Marketing,Marketing,2/8/03,69182556.45
+Marketing,Misc,2/9/03,2818228.65
+Marketing,Misc,2/10/03,82265.4
+Marketing,Office Equipment/Supplies,2/11/03,11506197.3
+Marketing,Office Equipment/Supplies,2/12/03,4278631.35
+Marketing,Services,2/13/03,186252939.8
+Marketing,Services,2/14/03,34421730.6
+Prof Svcs Management,Facilities and Equipment,2/15/03,120726
+Prof Svcs Management,Facilities and Equipment,2/16/03,67565.7
+Prof Svcs Management,Internal Technology,2/17/03,9807441.45
+Prof Svcs Management,Internal Technology,2/18/03,3981942.45
+Prof Svcs Management,Marketing,2/19/03,2941921.65
+Prof Svcs Management,Marketing,2/20/03,188351.7
+Prof Svcs Management,Network Infrastructure,2/21/03,24340000
+Prof Svcs Management,Network Infrastructure,2/22/03,104090250
+Prof Svcs Management,Office Equipment/Supplies,2/23/03,503887.35
+Prof Svcs Management,Office Equipment/Supplies,2/24/03,461622.45
+Prof Svcs Management,Services,2/25/03,27766480.95
+Prof Svcs Management,Services,2/26/03,18386057.85
+Sales,Unclassified,2/27/03,1591.2
+Sales,Facilities and Equipment,2/28/03,599522.7
+Sales,Facilities and Equipment,3/1/03,1783169.85
+Sales,Internal Technology,3/2/03,4577383.95
+Sales,Internal Technology,3/3/03,8653997.25
+Sales,Marketing,3/4/03,10753573.95
+Sales,Marketing,3/5/03,14101590.6
+Sales,Network Infrastructure,3/6/03,6250000
+Sales,Network Infrastructure,3/7/03,12845625
+Sales,Office Equipment/Supplies,3/8/03,2011867.05
+Sales,Office Equipment/Supplies,3/9/03,3294830.55
+Sales,Services,3/10/03,26425376.4
+Sales,Services,3/11/03,30171017.25
+Tech Support / Education,Facilities and Equipment,3/12/03,499494.15
+Tech Support / Education,Facilities and Equipment,3/13/03,202201.8
+Tech Support / Education,Internal Technology,3/14/03,14673250.8
+Tech Support / Education,Internal Technology,3/15/03,11122165.95
+Tech Support / Education,Marketing,3/16/03,1995051.15
+Tech Support / Education,Marketing,3/17/03,839077.95
+Tech Support / Education,Misc,3/18/03,3970909.8
+Tech Support / Education,Misc,3/19/03,957254.15
+Tech Support / Education,Office Equipment/Supplies,3/20/03,5916150.6
+Tech Support / Education,Office Equipment/Supplies,3/21/03,4821685.05
+Tech Support / Education,Services,3/22/03,12410413.35
+Tech Support / Education,Services,3/23/03,15963941.1
+Worldwide Operations Mgmt,Facilities and Equipment,3/24/03,1383202.8
+Worldwide Operations Mgmt,Internal Technology,3/25/03,141569.55
+Worldwide Operations Mgmt,Internal Technology,3/26/03,60419.7
+Worldwide Operations Mgmt,Marketing,3/27/03,51926.1
+Worldwide Operations Mgmt,Marketing,3/28/03,71609.4
+Worldwide Operations Mgmt,Office Equipment/Supplies,3/29/03,20741.1
+Worldwide Operations Mgmt,Office Equipment/Supplies,3/30/03,21398.1
+Worldwide Operations Mgmt,Services,3/31/03,1141525.35
+Worldwide Operations Mgmt,Services,4/1/03,26004277.5
+G & A,Internal Technology,3/14/03,14673250.8
+G & A,Internal Technology,3/15/03,11122165.95
+G & A,Marketing,3/16/03,1995051.15
+G & A,Marketing,3/17/03,839077.95
+G & A,Misc,3/18/03,3970909.8
+G & A,Misc,3/19/03,957254.15
+G & A,Office Equipment/Supplies,3/20/03,5916150.6
+G & A,Office Equipment/Supplies,3/21/03,4821685.05
+G & A,Services,3/22/03,12410413.35
+G & A,Services,3/23/03,15963941.1
+G & A,Facilities and Equipment,3/24/03,1383202.8
+G & A,Internal Technology,3/25/03,141569.55
+Corp Development,Misc,2/10/03,82265.4
+Corp Development,Office Equipment/Supplies,2/11/03,11506197.3
+Corp Development,Office Equipment/Supplies,2/12/03,4278631.35
+Corp Development,Services,2/13/03,186252939.8
+Corp Development,Services,2/14/03,34421730.6
+Human Resources,Facilities and Equipment,2/15/03,120726
+Human Resources,Facilities and Equipment,2/16/03,67565.7
+Human Resources,Internal Technology,2/17/03,9807441.45
+Human Resources,Internal Technology,2/18/03,3981942.45
+Human Resources,Marketing,2/19/03,2941921.65
+Human Resources,Marketing,2/20/03,188351.7
+Human Resources,Network Infrastructure,2/21/03,24340000
+Human Resources,Network Infrastructure,2/22/03,104090250
+Human Resources,Office Equipment/Supplies,2/23/03,503887.35
+Human Resources,Office Equipment/Supplies,2/24/03,461622.45
+Human Resources,Services,2/25/03,27766480.95
+Human Resources,Services,2/26/03,18386057.85
+Human Resources,Unclassified,2/27/03,1591.2
+Human Resources,Facilities and Equipment,2/28/03,599522.7
+Human Resourceses,Facilities and Equipment,3/1/03,1783169.85

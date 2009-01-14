@@ -1,0 +1,55 @@
+<w:BasicPageWrapper>
+
+   <w:TabSet>
+      <w:Tab label="Table">
+          <p>What were you expecting?
+      </w:Tab>
+      <w:Tab label="Pie Chart">
+          <p>What were you expecting?
+      </w:Tab>
+      <w:Tab label="Bar Chart">
+          <p>What were you expecting?
+      </w:Tab>
+      <w:Tab label="Excel">
+      <h2 class="pageHead">Analyze Data in Excel</h2>
+      <br/>
+   <w:HintMessage>
+     Select the Excel template you would like to use to analyze the data you have selected.
+   </w:HintMessage>
+<br/>
+
+  <p align="center">
+    <select name="select" size="10">
+      <option>Pivot and Chart</option>
+      <option>Leakage Calculations</option>
+      <option>Management Indicators</option>
+    </select>
+  </p>
+  <p align="center">
+<input id=button1 name=button1 type=button value=Extract>
+  </p>
+
+<w:ExcelCreate downloadURL="$downloadURL" rowFields="$rowFields" columnFields="$columnFields" dataFields="$dataFields"/>
+
+<br/>
+<br/>
+   <w:HintMessage>
+Note: To run this script you will need the security settings in Internet Explorer set
+to allow ("enable" or "prompt) download of unsigned ActiveX controls, and to enable
+execution of ActiveX controls not marked as safe (again, "enable" or "prompt).  You can
+restrict that setting to just the domain that includes this site (e.g. Intranet) or
+"trusted sites" (presuming you add this site to the list of trusted sites).
+</w:HintMessage>
+
+
+      </w:Tab>
+   </w:TabSet>
+
+<a:ClientSideScript language="VBScript">
+    sub button1_onclick()
+        Excel_Create
+    end sub
+</a:ClientSideScript>
+
+
+</w:BasicPageWrapper>

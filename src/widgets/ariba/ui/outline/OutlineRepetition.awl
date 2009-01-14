@@ -1,0 +1,138 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/outline/OutlineRepetition.awl#2 $
+    </Copyright>
+
+    <Overview>
+        AWXOutlineRepetition is like AWRepetition, but for hierarchical (outline/tree) structures -- i.e. those
+        that where an item may have children.
+
+        Example usage:
+        <w:OutlineRepetition list="$rootItems" item="$currentObject" children="$childrenOfCurrentObject"
+            hasChildren="$hasChildren">
+            <div style="padding-top:4px">\
+                <w:OutlineControl title="$currentObject.name"/>\
+            </div>
+        </w:OutlineRepetition>
+
+        There is a special (behind the scenes) relationship between AWXOutlineControl and AWXOutlineRepetition --
+        the OutlineControl looks to its containing OutlineRepetition to determine nesting-level (indentation),
+        whether it hasChildren (i.e. should display an expansion arrow), etc.
+
+        Behind the scenes the OutlineRepetition uses the AWXOutlineState to handle most of the heavy lifting
+        (includingsorting, tracking which nodes are open, etc).  Bind to it directly to get detail.
+
+        Note also that AWXOutlineRepetition is used inside AWTDataTable for tables that display an tree in one
+        of the columns.  DataTable simply passing on its outline-related bindings to its OutlineRepetition.
+    </Overview>
+
+    <Binding key="item" type="Object" required="$false" direction="set">
+        The current item in the repetition.  The tail of outlineState.currentPath() reflects this value.
+    </Binding>
+
+    <Binding key="list" type="AWOrderedList" required="$false" direction="get">
+        The list (Vector, Java Array, ...).
+    </Binding>
+
+    <Binding key="children" type="AWOrderedList" required="$false" direction="get">
+        Should return the array of child objects for the current item.
+
+        Bind 'hasChildren' to avoid unnecessary calls to this binding.
+    </Binding>
+
+    <Binding key="hasChildren" type="boolean" required="$false" direction="get">
+        Should indicate whether the current item has children (i.e. is "expandable").  If not implemented,
+        $^children.count will be used instead.  Implementing hasChildren will cause 'children' to be
+        evaluated only if a node is actually expanded (important if you are doing lazy fetching).
+    </Binding>
+
+    <Binding key="outlineState" type="AWXOutlineState" required="$false" direction="both">
+        AWXOutlineState object that manages the state for the OutlineRepetition.  Uses the one provide
+        if bound (and not null), creates and pushes otherwise.
+    </Binding>
+
+    <Binding key="selectionPath" type="List" required="$false" direction="both">
+        If bound, selectionPath with pre-open the path, and select the tail object.
+        When a node is opened/closed the path to that node is pushed to this binding.
+    </Binding>
+
+    <Binding key="selectedObject" type="Object" required="$false" direction="both">
+        Bound to outlineState.selectedObject() -- i.e. the most recent selected object.
+
+        todo: this should probably be changed to "selection" to be consistent with other parts of system
+    </Binding>
+
+    <Binding key="expandAll" type="boolean" required="$false" direction="get">
+        Pre-open all tree nodes.
+
+        This is ignored if we're in "print mode."
+    </Binding>
+
+    <Binding key="maxLevels" type="int" required="$false" direction="get">
+        When doing expandAll, the max number of levels that will be pre-opened.
+    </Binding>
+
+    <Binding key="outlineIndex" direction="set" type="int" required="$false">
+        The overall index of the current item (independent of nesting).
+
+        Note: we did not use "index" for this binding because, unlike other uses of
+        index this *does not* map to a valid index within the provided "list".
+        todo: this should be changed to "index" to be consistent with other parts of system
+    </Binding>
+
+    <Binding key="expandCurrentItem" type="boolean" required="$false" direction="get">
+        Whether to force open the current item.
+    </Binding>
+
+    <Binding key="showExpansionControl" type="boolean" required="$false" direction="get">
+        Whether to show the expansion control (can be used in concert with expandCurrentItem to
+        display a set of children that must always be displayed).
+    </Binding>
+
+    <Binding key="fullList" type="List" required="$false" direction="set">
+        If bound, the OutlineRepetition will fully "unwind" the items in the outline
+        (as they will be rendered) and push the fully flattened array.  The 'start' and
+        'count' bindings can then be used to limit the subset of these items that will
+        be rendered.
+
+        This is used by AWTDataTable to do scroll faulting.
+    </Binding>
+
+    <Binding key="start" type="int" required="$false" direction="get">
+        As with AWRepetition, this indicates the item index (relative to the flattened
+        fullList) to begin rendering.
+    </Binding>
+
+    <Binding key="count" type="int" required="$false" direction="get">
+        As with AWRepetition, this indicates how many items after start (see above) to
+        render.
+    </Binding>
+
+    <Binding key="scopeSubcomponentsByItem" type="boolean" default="$false" required="$false" direction="get">
+        Whether stateful subcomponents in table cells should be scoped based on item/column
+        (instead of position).  In the AW default behavior (positional), the addition of a column or row
+        will cause a shift in the position of objects relative to the stateful components which will cause a
+        different (and possibly incorrect) subcomponent to be used for the object.
+    </Binding>
+
+</a:Api>\
+<a:If equalNull="$fullList">\
+<a:Environment awxOutlineRepetition="$this">
+    <w:OutlineInnerRepetition list="$rootList" scopeSubcomponentsByItem="$^scopeSubcomponentsByItem:$false">
+        <a:IncludeContent/>
+    </w:OutlineInnerRepetition>
+</a:Environment>\
+</a:If>\

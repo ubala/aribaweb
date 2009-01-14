@@ -1,0 +1,56 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StepNavigatorButton.awl#19 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="label" direction="get" type="String" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="hint" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="isDefault" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="disabled" direction="get" type="boolean" required="$false">
+        See TextButton
+    </Binding>
+
+    <Binding key="name" direction="get" type="String" required="$false">
+        See TextButton
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" required="$false">
+        See TextButton
+    </Binding>
+</a:Api>\
+\
+<td style="$env.stepNavigatorButtonStyle">\
+    <w:TextButton isBrandStyle="$true" submitForm="$^submitForm" action="$^action" title="$^hint" buttonClass="$buttonClass" style="$^style" disabled="$^disabled" name="$^name">\
+        <w:StepNavigatorButtonContent value="$^label"/>\
+    </w:TextButton>\
+</td>\

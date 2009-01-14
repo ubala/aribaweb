@@ -1,0 +1,837 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#110 $
+    </Copyright>
+
+    <Overview>
+        AWTDataTable provides an Ariba branded, paginated, sortable, user-configurable table.
+
+        The content of the table is processed unconventionally, somewhat like TabSet.  E.g.:
+        <t:DataTable multiSelect="$true" batchSize="10" list="$myList" displayGroup="$displayGroup">
+            <t:Column key="Department" label="Big D!" action="$goto.Home"/>
+            <t:Column label="Category">
+                $displayGroup.currentItem.Category
+            </t:Column>
+            <t:Column key="Amount" formatter="$formatters.money" align="right"/>
+            <t:Column key="Year" formatter="$formatters.shortDate" align="right"/>
+            <t:Column label="Actions">
+                <w:TextButton action="$null">Inspect</w:TextButton>
+            </t:Column>
+            <t:ButtonArea>
+                <w:TextButton action="$null">Delete</w:TextButton>
+                <w:TextButton action="$null">Edit</w:TextButton>
+            </t:ButtonArea>
+        </t:DataTable>
+
+        AWTColumn, AWTButtonArea, and AWTRowDetail are special "column types" that can appear in the
+        body of the table tag.  Other tags (e.g. AWConditional, ...) appearing in the top level of the content
+        are not supported (although they may appear in the body of a Column, ButtonArea, etc.
+
+        See Also:
+            AWTDisplayGroup
+            AWXOutlineControl
+            AWTOptionsMenuButton
+            AWTScrollTableWrapper
+
+        Scrolling / Pagination:
+        Scrolling is used if all the following are true:
+        -	the developer turned it on for that table (enableScrolling="$true"
+        -	the browser is IE on Windows
+        -	ADA accessibility is not enabled
+
+        When scrolling is enabled:
+        -	If the data won't fit in the current view (i.e. the scrollbar is visible) then the maximize control will appear.
+        **	Note: the appearance of the maximize control is tied to the presence of the AWTOptionsMenuButton ( )  If the
+            page is not configured to show this, it will also not show the min/max control.
+
+        -	If the result set is large (i.e. the number of rows is greater that 40), then a technique called
+            "scroll faulting" is used to bring data is.  I.e. the first 40 rows are initially shown, but the scrollbar
+            is sized as it all of the data is there.  The user can then scroll to anywhere in the larger data set (past
+            the first 40, to the end, etc) and the missing rows will be faulted in to the client.  Thus, the scrollbar
+            takes the place of the pagination control.
+
+        When scrolling is not enabled (Netscape, Accessibility, etc):
+        -	There's no scrollbar, and thus no min/max control
+        -	The number of rows per page is set by the "batchSize"
+        -	If the result set is large (i.e. the number of rows is greater that the batch size), then the traditional
+            pagination control will display, and can be used to move to subsequent pages.
+
+    </Overview>
+
+    <Binding key="list" type="AWOrderedList" required="$false" direction="get" alternates="displayGroup">
+        The list (Vector, Java Array, ...) to be rendered in the table.  This can change after initialization
+        (in response to a deletion, etc) and the table will attempt to detect it and setObjectArray() on
+        the display group.
+
+        Not necessary if a initialized display group is already bound.
+    </Binding>
+
+    <Binding key="displayGroup" type="AWTDisplayGroup" required="$false" direction="either" alternates="list">
+        AWTDisplayGroup is the controller that maintains much of the state associated with the
+        DataTable, including sorting, batching (pagination), selection, ...
+
+        If displayGroup is null or not bound upon initialization, one will be created (and pushed).
+    </Binding>
+
+    <Binding key="showOptionsMenu" type="boolean" default="$false" direction="get">
+        Whether the table should provide an "Options" popup menu to support show/hide of columns,
+        grouping, and Excel export.
+    </Binding>
+
+    <Binding key="showBatchNavigation" type="boolean" default="$true" direction="get">
+        Whether the table should display the batch navigation control.  Should only be set to
+        false if the container of the AWTDataTable is going to provide a batch navigation bar
+        in an alternate location.
+    </Binding>
+
+    <Binding key="singleSelect" type="boolean" required="$false" direction="get">
+        Indicates whether the table should have a radio button selection row (which is bound to displayGroup.selectedObject).
+    </Binding>
+
+    <Binding key="multiSelect" type="boolean" required="$false" direction="get">
+        Indicates whether the table should have a checkbox selection row (which is bound to displayGroup.selection).
+    </Binding>
+
+    <Binding key="showSelectionColumn" type="boolean" default="$true" direction="get">
+        Indicates whether the table should display the radio button column or the checkbox
+        selection column enabled via the singleSelect/multiSelect binding.  If
+        showSelectionColumn is $false, singleSelect/multiSelect behavior will continue
+        to handle user selection (row click), row highlighting, and updating of
+        displayGroup.selectedObject / displayGroup.selection but the actual
+        radio button / checkbox column will be hidden.
+    </Binding>
+
+    <Binding key="showSelectionControl" type="boolean" default="$true" direction="get">
+        Determines whether the current row should have a selection control.  This differs from disableRowSelection
+        in that the control is not rendered at all (as opposed to being rendered but disabled).
+    </Binding>
+
+    <Binding key="disableRowSelection" type="boolean" default="$false" direction="get">
+        Indicates whether the table should allow row selection through row click which is enabled
+        via singleSelect/multiSelect binding. If disableRowSection is $true, singleSelect/multiSelect
+        behavior will continue to handle row highlighting, show selection column via
+        displayGroup.selectedObject / displayGroup.selection but row click will
+        be disabled. To hide the radio button/checkbox column, use binding showSelectionColumn
+    </Binding>
+
+    <Binding key="submitOnSelectionChange" type="boolean" required="$false" direction="get">
+        Indicates whether a change in the selection (i.e. the user clicking on a checkbox) should
+        force immediate submission of the form.  The default value for this binding is $false
+        for multiSelect and $true for singleSelect (for backward compatibility).  ie, if
+        this binding does not exist, multiSelect does not auto-submit and
+        singleSelect does auto-submit.
+    </Binding>
+
+    <Binding key="initialSortKey" type="String" required="$false" direction="get">
+        Key for the initial item sort (done by AWTDisplayGroup).  If omitted, and the display group
+        does not already have a sort, then the first data column is used.
+        Note: you can bind this to "" (empty string, not null) to force no sorting.
+    </Binding>
+
+    <Binding key="initialSortDirection" type="String" default="ascending" direction="get">
+        Direction for the initial sort.  Default is "ascending".
+    </Binding>
+
+    <Binding key="groupByColumn" type="String" required="$false" direction="get">
+        Key for an initial groupBy.
+    </Binding>
+
+    <Binding key="showGroupCounts" type="boolean" required="$false" direction="get">
+        Determines whether the total number of items within a group is displayed next to the
+        group heading.  E.g.: "Sales (12)".
+    </Binding>
+
+    <Binding key="showColumnLabelWhenGrouping" type="boolean" required="$false" direction="get">
+        Determines whether column label is rendered as prefix in group by section heading.
+    </Binding>
+
+    <Binding key="batchSize" type="int" default="20" direction="get">
+        Number of row per page to display in table.  Default is 20.  This batch size is only used if scrolling
+        is disabled.  If scrolling is enabled, then "scroll faulting" is used instead (with a fixed batch size).
+    </Binding>
+
+    <Binding key="scrollBatchSize" type="int" default="50" direction="get">
+        Number of rows to set to client when using scrolling.  One must be careful to set
+        this large enough to be at least one screenful of data so that the user doesn't see
+        fault rows upon initial display.  If rows are min-height, 40 is a safe number.
+        If, however, the app has "tall rows" (wrapping content, detail rows, sub-tables)
+        then this can be set to significantly lower number to reduce html page size.
+    </Binding>
+
+    <Binding key="item" type="Object" required="$false" direction="set">
+        The current item in the repetition.  $displayGroup.currentItem works just as well.
+    </Binding>
+
+    <Binding key="disableChildrenBinding" type="boolean" default="$false" direction="get">
+        Indicates if the children binding should be used.  The existence of the children
+        binding is used as an indicator of hierarchical table display.  If the component
+        using the AWTDataTable needs to conditionalize the hierarchical display, then
+        the disableChildrenBinding binding should be used.
+    </Binding>
+
+    <Binding key="children" type="AWOrderedList" required="$false" direction="get">
+        Should return the array of child objects for the current item ($displayGroup.currentItem).
+        If bound, the table will use AWXOutlineRepetition to render its rows -- i.e. the table
+        will behave like a tree view.  This should be used in combination with AWXOutlineControl
+        in one of the columns.
+
+        Bind 'hasChildren' to avoid unnecessary calls to this binding.
+    </Binding>
+
+    <Binding key="hasChildren" type="boolean" required="$false" direction="get">
+        Should indicate whether the current item has children (i.e. is "expandable").  If not implemented,
+        $^children.count will be used instead.  Implementing hasChildren will cause 'children' to be
+        evaluated only if a node is actually expanded.
+    </Binding>
+
+    <Binding key="expandAll" type="boolean" required="$false" direction="get">
+        See AWXOutlineRepetition -- used only in tree mode.
+    </Binding>
+
+    <Binding key="maxLevels" type="int" required="$false" direction="get">
+        See AWXOutlineRepetition -- used only in tree mode.
+    </Binding>
+
+    <Binding key="selectionPath" type="AWOrderedList" required="$false" direction="both">
+        See AWXOutlineRepetition -- used only in tree mode.
+    </Binding>
+
+    <Binding key="expandCurrentItem" type="boolean" required="$false" direction="get">
+        See AWXOutlineRepetition -- used only in tree mode.
+    </Binding>
+
+    <Binding key="showExpansionControl" type="boolean" required="$false" direction="get">
+        See AWXOutlineRepetition -- used only in tree mode.
+    </Binding>
+
+    <Binding key="showTotalItems" type="String" required="$false" direction="get">
+        Whether the batch navigation bar should show the number of items.
+    </Binding>
+
+    <Binding key="isItemSelectable" type="boolean" required="$false" direction="get">
+        Should return whether the current item should be selectable.
+    </Binding>
+
+    <Binding key="csvPath" type="String" required="$false" direction="get">
+        Demo feature -- path to a CSV file that will be used to initialize the item list of the table.
+    </Binding>
+
+    <Binding key="width" type="String" required="$false" direction="get">
+        Passed on to the <table/> width property.
+    </Binding>
+
+    <Binding key="valign" type="String" required="$false" direction="get">
+        Default valign setting for all columns (i.e. 'td' tags).
+    </Binding>
+
+    <Binding key="showColumnHeader" type="boolean" required="$false"  default="$true" direction="get">
+        Whether the table should display the column headers.
+    </Binding>
+
+    <Binding key="showVerticalTableBorder" type="boolean" required="$false" default="$false" direction="get">
+        Whether the table should display a vertical border before the first row of data
+        and after the last row of data.  If showColumnHeader == false, then this value
+        defaults to true.
+    </Binding>
+
+    <Binding key="class" type="String" required="$false" direction="get">
+        Override the CSS style used for the data table (default is "scrollTableWrapper").
+        CSS supports multiple class names on a single class binding, so you can override styles for inner elements
+        of the table by putting you override wrapper class before the main class and then defining override styles
+        for the inner classes in that scope.
+
+        Inner classes that could be overriden/augmented (see ariba.css for a complete list):
+                th.tableHead, tr.tableBody, td.tableBody td.tableHeader td.tableFooter
+                tr.tableGroupBy td.tableGroupBy
+
+        For instance, "noBox scrollTableWrapper" will remove the box around the table, and remove the crome around
+        the tableHeader.
+
+        A more sophisticated example: if you want to remove the background color on the grouping rows in the table,
+        try something like this:
+        <style>
+            .oTableWrapper tr.tableGroupBy {
+                background-color:#FFFFFF;
+            }
+        </style>
+
+        <t:DataTable class="oTableWrapper scrollTableWrapper"/>
+            ...
+    </Binding>
+
+    <Binding key="rowClass" type="String" required="$false" direction="get" default="dynamic">
+        The CSS class to use for table TRs.
+    </Binding>
+
+    <Binding key="detailRowClass" type="String" required="$false" direction="get" default="null">
+        The CSS class to use for table TRs for details rows.  Default is to use rowClass.
+    </Binding>
+
+    <Binding key="tdClass" type="String" required="$false" direction="get" default="null">
+        The default class for all TDs in the table.
+    </Binding>
+
+    <Binding key="submitForm" type="boolean" required="$false" direction="get">
+        Determines whether the batch navigation control should submit the form upon navigation.
+        Default is $true if there is a current form.
+    </Binding>
+
+    <Binding key="tableConfig" type="Hashtable" required="$false" direction="both">
+        Push pull a hashtable format externalization of and customizations that the
+        user made to the table (e.g. hidden columns, group-by, etc).
+        tableConfig and tableConfigName cannot co-exist.
+    </Binding>
+
+    <Binding key="tableConfigName" type="String" required="$false" direction="get">
+        Name used to load/save from the AWComponentConfigurationSource a hashtable format externalization of
+        and customizations that the user made to the table (e.g. hidden columns, group-by, etc).
+        tableConfig and tableConfigName cannot co-exist.
+    </Binding>
+
+    <Binding key="indentDetailRow" type="boolean" required="$false" direction="get" default="$false">
+        Indicates whether or not the detail row should be indented by one column.  By default, this is
+        false and the left edge of the detail row is flush with the left edge of the table.
+    </Binding>
+
+    <Binding key="forceColumnUpdate" type="boolean" required="$false" direction="both" default="$false">
+        This binding is an indicator to the AWTDataTable that an update has been made to
+        its cached column information.  The AWTDataTable will read this value during
+        the renderResponse phase and if it evaluates to true, then all cached column
+        information will be flushed and reread.  In addition, the AWTDataTable will
+        automatically reset this value to false.
+
+        NOTE: This binding is read / reset during the appendToResponse phase.  This means
+        1) the value passed in must be set appropriately at the beginning of
+           renderResponse and
+        2) the value passed in should not be used for any other purpose since it WILL be
+           modified in the midst of the renderResponse phase
+        Using this value for any other purpose (such as an AWConditional) will cause
+        undefined (and most likely invalid) behavior.
+    </Binding>
+
+    <Binding key="forceRenderRows" type="boolean" required="$false" direction="get" default="$false">
+        If true, the current rows will always be rendered regardless of whether
+        or not the contents have changed since the last rendering.
+    </Binding>
+
+    <Binding key="useRefresh" type="boolean" required="$false" direction="get" default="$true">
+        Determines whether the table and each of its rows are RefreshRegions (allowing incremental refresh when
+        items are added/removed/edited).  This is not necessary for tables that are read-only (e.g. search results).
+    </Binding>
+
+    <Binding key="enableScrolling" type="boolean" required="$false" direction="get" default="$false">
+        Determines whether the table adds scrollbars for content that won't fit within browser window.
+    </Binding>
+
+    <Binding key="useParentLayout" type="boolean" required="$false" direction="get" default="$false">
+        If $true, the table will supress output of table tag, and headings.  For this to
+        make sense, this table should be in the body of an
+        (AWTDetailRow nestedTableLayout="$true") tag, and should have a column list
+        that aligns with its parent (i.e. same number of TDs).
+    </Binding>
+
+    <Binding key="title" type="String" required="$false" direction="get">
+        If provided, this will go in the heading area of the table.  Note: AWTHeadingArea
+        takes precedence (i.e. an AWTHeadingArea is provided, then the title is not shown).
+    </Binding>
+
+    <Binding key="dragAction" type="void" required="$false" direction="get">
+        Method to be invoked when a row in the AWTDataTable is dragged and dropped on a
+        valid AWDropContainer (may be a row in an AWTDataTable).  The dragAction is a
+        pseudo-action, which should be used to setup any state required by the drop action.
+
+        For example when a row A is dropped on a drop container B, the
+        dragAction for row A is invoked.  At this point, the dragAction for A should store
+        some state which will be accessible to the dropAction of B (for example, the
+        requestContext.dict() or in some cross component data structure -- parent
+        component, global data, etc.)
+
+        *** NOTE: This action is guaranteed to be invoked before the drop action is
+        invoked on a AWDropContainer.  This pseudo-action is invoked prior to the
+        real action (drop action) so it should not change any object state which will
+        affect the invokeActionForRequest() phase.
+
+        General AWTDataTable drag/drop usage:
+        -------------------------------------
+        If a dragType is available, then is used.  If no dragType is defined, but a
+        reorderAction exists, then the id of the AWTDataTable is used as the
+        dragType (allowing drap/drop only within the current AWTDataTable).
+
+        If a dropType(s) binding is defined, then these values are used as the valid
+        dropTypes for the AWTDataTable.  If no dropType(s) are defined and a reorderAction
+        exists, then the dragType is used as the dropType.
+
+        If dropType(s) is defined in conjunction with a reorderAction binding, then the
+        dragType should be explicitly defined in order to allow drag/drop within the
+        AWTDataTable.
+    </Binding>
+
+    <Binding key="dropAction" type="AWResponseGenerating" required="$false" direction="get">
+
+        (see dragAction above for usage scenarios)
+    </Binding>
+
+    <Binding key="reorderAction" type="AWResponseGenerating" required="$false" direction="get">
+        Convenience binding to enable reordering of rows in an AWTDataTable.  If a
+        dropAction is bound, then this binding not invoked.  Should only be used on a
+        non-hierarchichal, non-sorted table.
+        (see dragAction above for usage scenarios)
+    </Binding>
+
+    <Binding key="dragType" type="String" direction="get" required="$false">
+        Drag/Drop type of objects contained in the AWTDataTable.  This value is used to
+        determine which drop containers are valid drop locations for when a drag gesture
+        is initiated on a row of the AWTDataTable.
+        (see dragAction above for usage scenarios)
+    </Binding>
+
+    <Binding key="dropType" type="String" direction="get" required="$false">
+        Drag/Drop type of objects allowed to be dropped in the AWTDataTable.  This value
+        is used to determine whether or not a draggable element can be dropped on the
+        AWTDataTable.
+        (see dragAction above for usage scenarios)
+    </Binding>
+
+    <Binding key="dropTypes" type="List or String" direction="get" required="$false">
+        This binding allows a list of valid Drag/Drop types to be defined for an
+        AWTDataTable allowing multiple types of draggable objects to be dropped on the
+        AWTDataTable.
+
+        The type is either a List or a comma delimited String.
+        (see dragAction above for usage scenarios)
+    </Binding>
+
+    <Binding key="isDragDropEnabled" type="boolean" direction="get" default="$true">
+        Conditionalizes drag/drop behavior of this table.  If this binding is set to
+        $false, then drag/drop is disabled for this AWTDataTable.
+    </Binding>
+
+    <Binding key="minHeight" type="int" required="$false" direction="get">
+        Minimum size of a scrolling table.  Default is 100 (px).
+    </Binding>
+
+    <Binding key="maxHeight" type="int" required="$false" direction="get">
+        Maxnimum size of a scrolling table in pixels.
+    </Binding>
+
+    <Binding key="scrollFaultAction" type="AWResponseGenerating" required="$false" direction="get" default="$null">
+
+    </Binding>
+
+    <Binding key="showSelectAll" type="boolean" direction="get" default="$true">
+        The flag to hide the select all checkbox when there is a multi-selection column.
+    </Binding>
+
+    <Binding key="groupId" type="String" required="$false" direction="get">
+        Obsolete.
+        Vertical table stacks are grouped based on appearing under a common div with
+        class="flexContainer" and a parent TD.  This structure is already applied by
+        default in the page wrapper for the TOC and Body.
+    </Binding>
+
+    <Binding key="awname" type="String" required="$false" direction="get">
+        The semantic key to use for UI testing tools.
+    </Binding>
+
+    <Binding key="emptyTableMessage" type="String" required="$false" direction="get">
+        If provided, this will go in the body area of the table when there are no items.  If this
+        value is not provided the default "No items" string is used.
+    </Binding>
+
+    <Binding key="pivotLayout" type="boolean" required="$false" direction="get" default="$false">
+        Pivot mode?
+        Must trip forceColumnUpdate to trigger update if this value is changed.
+    </Binding>
+
+    <Binding key="columnFields" type="List" required="$false" direction="get">
+        List of keys for Columns to group on the column edge
+    </Binding>
+
+    <Binding key="rowFields" type="List" required="$false" direction="get">
+        List of keys for "Columns" to render values as detail on the leaf of the row edge
+    </Binding>
+
+    <Binding key="columnAttributes" type="List" required="$false" direction="get">
+        List of keys for Columns to use to render values on the leaf of the column edge.
+    </Binding>
+
+    <Binding key="overrideAttribute" type="String" required="$false" direction="get">
+        Column to use for current item in place of this all other columnAttribute columns for this item.
+        E.g. if you had Price & Quantity fields on the columns, but for this object wanted to show "Answer"
+        then this column would be used in place of both Price and Quantity (the others would be considered blank).
+    </Binding>
+
+    <Binding key="filteredColumnAttributes" type="List" required="$false" direction="get">
+        List of subset of attributeColumns to render for currentItem's set of columnField values.
+        (Example: table should display ExtendedPrice only for "My Bid" and not for other suppliers' bids).
+        Implementor should get AWTDataTable.currentInstance(this).pivotState().columnAttributes() and filter
+        the list based on displayGroup.currentItem().
+
+        Be careful only to elide columns that you understand (e.g. don't filter out the selection column
+        unless you really want to).
+    </Binding>
+
+    <Binding key="shouldCollapseColumnLevel" type="boolean" required="$false" direction="get">
+        Called when a columnField (or ColumnAttribute list) has only zero or one members and therefore
+        could potentially be suppressed from rendering, thereby saving vertical space.
+
+        Implementor should get AWTDataTable.currentInstance(this).pivotState().collapseCheckColumnKey()
+        and AWTDataTable.currentInstance(this).pivotState().collapseCheckMemberCount()
+        to get context for determing whether to collapse.
+
+        Default is:
+            For ColumnAttribute do collapse single attribute
+            For ColumnField level, collapse if 0 but not if one
+    </Binding>
+
+    <Binding key="showRowAttributes" type="boolean" default="$false" required="$false" direction="get">
+        Whether to display remaining non-Column attributes (visible columns) as detail rows
+    </Binding>
+
+    <Binding key="scopeSubcomponentsByColumn" type="boolean" default="$false" required="$false" direction="get">
+        Whether stateful subcomponents in table cells should be scoped based on column *identity*
+        (instead of position).  In the AW default behavior (positional), the addition or removal of a column
+        will cause a shift in the position of objects relative to the stateful components which will cause a
+        different (and possibly incorrect) subcomponent to be used for the object.
+    </Binding>
+
+    <Binding key="scopeSubcomponentsByItem" type="boolean" default="$false" required="$false" direction="get">
+        Whether stateful subcomponents in table cells should be scoped based on item (in the row) *object identity*
+        (instead of position).  In the AW default behavior (positional), the addition or removal of a row
+        will cause a shift in the position of objects relative to the stateful components which will cause a
+        different (and possibly incorrect) subcomponent to be used for the object.
+
+        WARNING: Because, when enabled, item *object identity* is used to key subcomponent state, this mode
+        may be a poor choice if you have a table that is constantly refreshing with new object instances
+        (e.g. Sourcing swapping in new ItemValueProxies for the same items upon a new bid) -- the result is that
+        the old items are retained (as keys) as well as their subcomponents, and new subcomponents are allocated.
+        (You both lose your relevant subcomponent state -- invalidating the whole value of this feature -- and
+        baloon your page memory usage)
+    </Binding>
+
+    <NamedContent name="optionsMenu" required="$false">
+        Enable override of optionsMenu without needing to build entire header area.
+        For example, the following has an options menu with only the excel export menu items.
+        <t:DataTable list="$data" showOptionsMenu="$true">
+           <t:Column key="key1"/>
+           <t:Column key="key2"/>
+           <a:Content name="optionsMenu">
+               <t:OptionsMenuButton showHideColumns="$false"
+                                     showGroupBy="$false"
+                                     showOutlineExpansion="$false"
+                                     showExcelExport="$true"/>\
+           </a:Content>
+        </t:DataTable>
+    </NamedContent>
+
+</a:Api>\
+\
+<a:SetValue tableId="$requestContext.nextElementId"/>
+<t:ExcelWrapper renderToExcel="$renderToExcel">
+
+<a:IncludeComponent awcomponentName="$wrapperColumnComponentName">
+
+<a:If ifFalse="$useParentLayout">
+    <a:If ifTrue="$isOutline">\
+        <!--- Unwind the full list so we can do scroll faulting / pagination -->
+        <a:PhaseInvocation append="$beginSelectableObjectAccumulation"/>\
+        <w:OutlineRepetition list="$displayGroup.allObjects" item="$currentItem"
+                outlineState="$displayGroup.outlineState"
+                children="$currentItemChildren" hasChildren="$currentItemHasChildren"
+                expandAll="$expandAll" maxLevels="$^maxLevels"
+                expandCurrentItem = "$^expandCurrentItem"
+                selectionPath="$^selectionPath" outlineIndex="$currentRowIndex"
+                fullList="$outlineAllObjects"/>\
+        <a:PhaseInvocation append="$endSelectableObjectAccumulation"/>\
+    </a:If>\
+\
+    <!--- Pre-Table heading area -->\
+    <t:ScrollTableWrapper enableScrolling="$enableScrolling" class="$tableClass" style="$style"
+            width="$^width"
+            showColumnHeader="$showColumnHeader" showHeader="$showNavigationRowTop" showFooter="$showNavigationRowBottom"
+            useRefresh="$useRefresh" isDragDropEnabled="$isDragDropEnabled" minHeight="$^minHeight" maxHeight="$^maxHeight"
+            topCount="$displayGroup.scrollTopCount" bottomCount="$displayGroup.scrollBottomCount" scrollFaultAction="$scrollFaultAction"
+            topOffset="$displayGroup.scrollTopOffset" topIndex="$scrollTopIndex"
+            isMaximized="$isMaximized" elementIdForVisibleRow="$elementIdForVisibleRow"
+            disableRowSelection="$disableRowSelection" checkNbsps="$false" checkSelectionStyle="$false"
+            updateSelectAllAction="$updateSelectAllAction"
+            useScrollFaulting="$useScrollFaulting"
+        awname="$awname">
+
+        <a:Content name="headerArea">\
+            <a:If ifTrue="$showHeadingArea">
+                <a:MethodInvocation invoke="$makeHeadingAreaColumnCurrent"/>\
+                <a:IncludeComponent awcomponentName="$headingAreaColumn.rendererComponentName" table="$this"/>\
+            <a:Else ifTrue="$showTitle"/>
+                <h2 style="float:left">$^title</h2>
+            </a:If>
+            <a:IncludeBlock name="BatchNavRow" isTop="$true" showTotalItems="$^showTotalItems"/>
+        </a:Content>
+
+        <a:Content name="headingRows">\
+            <a:SetValue renderingHeader="$true"/>\
+            <!--- Pivot mode content -- should be factored to component included by PivotState -->
+            <a:If ifTrue="$hasPivotHeadingRows">\
+                <a:SetValue currentItem="$null"/>\
+                <tr>\
+                    <a:For count="$displayedColumns.size">\
+                        <td style="line-height:0px"></td>\
+                    </a:For>\
+                </tr>
+                <a:While notEqualNull="$pivotState.nextLevel">\
+                    <tr>
+                        <th class="tableHead" colspan="$pivotState.preEdgeColSpan">&nbsp;</th>
+                        <a:For list="$pivotState.currentLevelEdgeCells" item="$pivotState.currentEdgeCell">\
+                            <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName" tagName="th" class="tableHead pivotCell"
+                                    table="$this" colspan="$pivotState.currentEdgeCell.span"/>\
+                        </a:For>\
+                    </tr>\
+                </a:While>\
+                <tr>
+                    <a:For list="$displayedColumns" item="$currentColumn">\
+                        <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName" table="$this" tagName="th" class="$pivotState.leafCellHeaderClass" isHeader="$pivotState.renderAsHeader"/>\
+                    </a:For>\
+                </tr>
+                <a:SetValue currentItem="$null"/>
+            <a:Else/>\
+                <tr>\
+                    <a:For list="$displayedColumns" item="$currentColumn">\
+                        <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName" table="$this" isHeader="$true"/>\
+                    </a:For>\
+                </tr>
+            </a:If>\
+            <a:SetValue renderingHeader="$false"/>
+        </a:Content>
+
+        <a:Content name="bodyRows">\
+            <a:If ifTrue="$isEmpty">\
+                <a:If ifTrue="$isDragDropEnabled">\
+                    <a:RefreshRegion tagName="tr" disabled="$disableRefresh" class="$rowClass" elementId="$currentItemElementId"
+                        dropAction="$dropAction" dragAction="$dragAction" dr="$primaryDataRowIndicator">\
+                        <td class="empty tableBody" colspan="$tableColumnCount">
+                            <a:If notEqualNull="$^emptyTableMessage">\
+                                <a:String value="$^emptyTableMessage"/>
+                            <a:Else/>\
+                                <a:Local key="a002">No items</a:Local>\
+                            </a:If>\
+                        </td>\
+                    </a:RefreshRegion>\
+                <a:Else/>
+                    <a:RefreshRegion tagName="tr" class="$rowClass" disabled="$disableRefresh">
+                        <td class="empty tableBody" colspan="$tableColumnCount">\
+                            <a:If notEqualNull="$^emptyTableMessage">\
+                                <a:String value="$^emptyTableMessage"/>
+                            <a:Else/>\
+                                <a:Local key="a002">No items</a:Local>\
+                            </a:If>\
+                        </td>\
+                    </a:RefreshRegion>
+                </a:If>
+            <a:Else/>
+                <a:If ifTrue="$isOutline">
+                    <w:OutlineRepetition list="$displayGroup.allObjects" item="$currentItem"
+                            scopeSubcomponentsByItem="$^scopeSubcomponentsByItem:$false"
+                            outlineState="$displayGroup.outlineState"
+                            children="$currentItemChildren" hasChildren="$currentItemHasChildren"
+                            expandAll="$expandAll" maxLevels="$^maxLevels"
+                            expandCurrentItem = "$^expandCurrentItem"
+                            showExpansionControl = "$^showExpansionControl"
+                            selectionPath="$^selectionPath" outlineIndex="$currentRowIndex"
+                            start="$batchStartIndex" count="$batchEndIndex">\
+                        <a:IncludeBlock name="RowTemplate"/>
+                        <a:MethodInvocation invoke="$requestContext.suppressTraceForCurrentScopingElement"/>\
+                    </w:OutlineRepetition>\
+                <a:Else/>
+                    <a:For list="$displayGroup.filteredObjects" item="$currentItem" index="$currentRowIndex"
+                                  start="$batchStartIndex" count="$batchEndIndex" scopeSubcomponentsByItem="$^scopeSubcomponentsByItem:$false">\
+                        <a:IncludeBlock name="RowTemplate" showGroupCounts="$^showGroupCounts"/>
+                        <a:MethodInvocation invoke="$requestContext.suppressTraceForCurrentScopingElement"/>\
+                    </a:For>\
+                </a:If>
+                <a:SetValue currentItem="$null"/>
+                <a:If ifTrue="$hasMinWidths">
+                    <a:RefreshRegion tagName="tr" class="hiddenRow" disabled="$disableRefresh">
+                        <a:For list="$displayedColumns" item="$currentColumn">\
+                            <td style="$curColMinWidthStyle"> </td>\
+                        </a:For>\
+                    </a:RefreshRegion>
+                </a:If>
+            </a:If>\
+        </a:Content>
+
+        <a:Content name="footerArea">\
+            <a:IncludeBlock name="BatchNavRow" isTop="$false" showTotalItems="$^showTotalItems"/>
+        </a:Content>
+
+        <a:Content name="footerAreaRight">\
+            <a:If ifTrue="$showRightButtonArea">\
+                <a:IncludeComponent awcomponentName="$rightButtonArea.rendererComponentName" table="$this"/>\
+            </a:If>\
+            <a:IncludeContent name="footerAreaRight" required="$false"/>
+        </a:Content>
+
+    </t:ScrollTableWrapper>\
+<a:Else/>
+    <!--- todo: This is an EXACT COPY of code above.  Need to factor into a sub-template -->
+    <a:If ifTrue="$isOutline">
+        <w:OutlineRepetition list="$displayGroup.allObjects" item="$currentItem"
+                scopeSubcomponentsByItem="$^scopeSubcomponentsByItem:$false"
+                outlineState="$displayGroup.outlineState"
+                children="$currentItemChildren" hasChildren="$currentItemHasChildren"
+                expandAll="$expandAll" maxLevels="$^maxLevels"
+                expandCurrentItem = "$^expandCurrentItem"
+                showExpansionControl = "$^showExpansionControl"
+                selectionPath="$^selectionPath" outlineIndex="$currentRowIndex">\
+            <a:IncludeBlock name="RowTemplate"/>
+            <a:MethodInvocation invoke="$requestContext.suppressTraceForCurrentScopingElement"/>\
+        </w:OutlineRepetition>\
+    <a:Else/>
+        <a:For list="$displayGroup.filteredObjects" item="$currentItem" index="$currentRowIndex"
+                     start="$batchStartIndex" count="$batchEndIndex" scopeSubcomponentsByItem="$^scopeSubcomponentsByItem:$false">\
+            <a:IncludeBlock name="RowTemplate" showGroupCounts="$^showGroupCounts"/>
+            <a:MethodInvocation invoke="$requestContext.suppressTraceForCurrentScopingElement"/>\
+        </a:For>\
+    </a:If>
+    <a:SetValue currentItem="$null"/>
+</a:If>
+\
+</a:IncludeComponent>\
+\
+</t:ExcelWrapper>
+\
+\
+<a:Block name="RowTemplate">\
+    <!--- this heuristic for auto focus should be removed once Dom.visibleInScrollArea
+         has been enhanced for textfields in nested containers. -->
+    <a:Environment awAllowAutoFocus="$!useScrollFaulting">\
+        <a:If ifTrue="$displayGroup.isCurrentItemGrouping">\
+            <a:MethodInvocation invoke="$makeGroupingRowCurrent"/>
+            <a:RefreshRegion tagName="tr" disabled="$disableRefresh" class="tableGroupBy" dr="$groupingRowIndicator">
+                <td colspan="$colspanMinusOne" class="$groupByTDClass">\
+                    <t:ExportConditional>\
+                        <w:ToggleImage state="$displayGroup.currentGroupingExpanded" isExternal="$true"
+                            trueImageName="AWXArrowDown.gif" falseImageName="AWXArrowRight.gif" submitForm="$true"/>\
+                                       &nbsp;\
+                    </t:ExportConditional>\
+                    <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName"
+                        table="$this" isHeader="$false" omitTD="$true" showLabelPrefix="$showColumnLabelWhenGrouping" isGroupHeading="$true"/>\
+                    <a:If ifTrue="$^showGroupCounts:$true">\
+                        &nbsp;(<a:String value="$displayGroup.currentItemGroupingCount"/>)\
+                    </a:If>\
+                </td>
+            </a:RefreshRegion>
+        </a:If>
+    <a:While notEqualNull="$renderCurrentRow">
+        <a:If ifTrue="$displayGroup.isCurrentItemVisible">\
+            <a:If ifTrue="$activateDetailColumnTop">\
+                <!--- more of a "detail row" really -->
+                <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName" table="$this"/>
+                <a:If ifTrue="$activateSecondDetailColumn">\
+                    <!--- more of a "detail row" really -->
+                    <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName" table="$this"/>
+                </a:If>\
+                <a:MethodInvocation invoke="$didRenderDetail"/>\
+            </a:If>\
+            \
+            <a:If ifTrue="$isDragDropEnabled">\
+                <!--- todo: sub-template column repetition -->
+                <a:RefreshRegion tagName="tr" disabled="$disableRefresh" class="$rowClass" elementId="$currentItemElementId"
+                    dropAction="$dropAction" dragAction="$dragAction" dr="$primaryDataRowIndicator"
+                    alwaysRender="$forceRenderRows">\
+                    <a:For list="$displayedColumns" index="$currentColumnIndex" scopeSubcomponentsByItem="$^scopeSubcomponentsByColumn:$false">\
+                        <a:If ifFalse="$skippingColumn">\
+                            <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName" table="$this"
+                                isHeader="$false" hasColumnHeading="$showColumnHeader" rowIndex="$currentRowIndex"
+                                colspan="$dynamicColspan"/>\
+                        </a:If>\
+                    </a:For>\
+                </a:RefreshRegion>\
+            <a:Else/>\
+                <a:RefreshRegion tagName="tr" disabled="$disableRefresh" class="$rowClass" elementId="$currentItemElementId"
+                        dr="$primaryDataRowIndicator"
+                        alwaysRender="$forceRenderRows">
+                    <a:For list="$displayedColumns" index="$currentColumnIndex" scopeSubcomponentsByItem="$^scopeSubcomponentsByColumn:$false">\
+                        <a:If ifFalse="$skippingColumn">\
+                            <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName" table="$this"
+                                               isHeader="$false" hasColumnHeading="$showColumnHeader" rowIndex="$currentRowIndex"
+                                               colspan="$dynamicColspan"/>\
+                        </a:If>\
+                    </a:For>\
+                </a:RefreshRegion>\
+            </a:If>\
+            \
+            <a:If ifTrue="$activateDetailColumnBottom">\
+                <!--- more of a "detail row" really -->
+                <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName" table="$this"/>
+                <a:If ifTrue="$activateSecondDetailColumn">\
+                    <!--- more of a "detail row" really -->
+                    <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName" table="$this"/>
+                </a:If>\
+                <a:MethodInvocation invoke="$didRenderDetail"/>\
+            </a:If>\
+            \
+            <a:MethodInvocation invoke="$didRenderRow"/>\
+        </a:If>\
+    </a:While>
+    </a:Environment>\
+</a:Block>
+\
+\
+<a:Block name="BatchNavRow">\
+    <a:SetValue isTopBar="$^isTop"/>\
+    <a:If ifTrue="$showButtonColumns">\
+        <table cellspacing="0" cellpadding="0">
+            <tr>
+            <a:If ifTrue="$showSelectionButtonArea">\
+                <td style="padding-left:7px">\
+                    <a:Image filename="$cornerImage"/>\
+                </td>\
+                <td nowrap>\
+                    <a:IncludeComponent awcomponentName="$selectionButtonArea.rendererComponentName" table="$this"/>\
+                </td>\
+                <a:If ifTrue="$showGlobalButtonArea">\
+                    <td nowrap>\
+                        &nbsp; | &nbsp;\
+                    </td>\
+                </a:If>\
+            </a:If>\
+            <a:If ifTrue="$showGlobalButtonArea">\
+                <td nowrap>\
+                    <a:IncludeComponent awcomponentName="$globalButtonArea.rendererComponentName" table="$this"/>\
+                </td>\
+            </a:If>\
+            </tr>
+        </table>
+    </a:If>\
+\
+    <a:If ifTrue="$showOptionsMenu">\
+        <a:If ifTrue="$^isTop">\
+            <div style="float:right;padding-left:5px">\
+                <a:If ifTrue="$hasOptionsMenuTemplate">
+                    <a:IncludeContent name="optionsMenu" required="$false" context="$this"/>\
+                <a:Else/>
+                    <t:OptionsMenuButton/>\
+                </a:If>
+            </div>\
+        </a:If>\
+    </a:If>\
+\
+    <a:If condition="$showNavigationBar">\
+        <div style="float:right;">
+            <t:BatchNavigationBar displayGroup="$displayGroup" showTotalItems="$^showTotalItems" submitForm="$multiSelectOrSubmitForm"/>\
+        </div>
+    </a:If>\
+</a:Block>

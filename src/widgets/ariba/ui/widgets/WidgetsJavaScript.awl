@@ -1,0 +1,44 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/WidgetsJavaScript.awl#18 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="sessionless" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+</a:Api>\
+
+<a:Singleton>\
+    <x:BasicScriptFunctions sessionless="$^sessionless:$false"/>\
+    <!--- dateformat.js is localized, so must include it separately -->
+    <a:ClientSideScript filename="widg/dateformat.js"/>\
+    <a:If ifTrue="$includeIndividualJSFiles">
+        <!--- This MUST match the files AND ORDER in the Makefile -->
+        <a:ClientSideScript filename="widg/DragDrop.js"/>\
+        <a:ClientSideScript filename="widg/Widgets.js"/>\
+        <a:ClientSideScript filename="widg/Menu.js"/>\
+        <a:ClientSideScript filename="widg/Chooser.js"/>\
+        <a:ClientSideScript filename="widg/Datatable.js"/>\
+        <a:ClientSideScript filename="widg/Calendar.js"/>\
+    <a:Else/>
+        <a:ClientSideScript filename="widg/widgets_all.js"/>\
+    </a:If>
+
+</a:Singleton>\

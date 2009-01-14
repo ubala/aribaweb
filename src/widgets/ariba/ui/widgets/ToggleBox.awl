@@ -1,0 +1,111 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ToggleBox.awl#4 $
+    </Copyright>
+
+    <Overview>
+        Provides a way to easily control the visibility of a block of html within a boxed container.
+        This component is in one of two states:
+        true or false.  By default, a triangle image indicates these states is displayed and, when clicked, will toggle
+        to the other state.  For each phase of the request-response loop, this component pushes its current state into
+        the referring component so it may be used downstream in, for example, an AWConditional to control the visibility
+        of of a block of html.
+
+        Use ToggleBoxBody to provide the main content.
+
+        By default the images used for true/false is the toggle arrow. If the useCheckboxIcon
+        binding is used, then a checkbox image will be used to represent true (checked)
+        and false (unchecked). You may also provide your own images to represent true/false.
+
+        By default, a h2 is used around the title in the heading.  To provide a custom heading, use ToggleBoxHeading:
+
+        Example:
+        <w:ToggleBox state="$state">
+            <w:ToggleBoxHeading>
+                <w:TextButton>Custom Heading</w:TextButton>
+            </w:ToggleBoxHeading>
+            <w:ToggleBoxBody>
+                ...
+            </w:ToggleBoxBody>
+        </w:ToggleBox>
+
+    </Overview>
+
+    <Binding key="title" direction="get" type="String">
+        Title
+    </Binding>
+
+    <Binding key="state" type="boolean" required="$true" direction="either">
+        For each phase of the request-response loop, this component pushes and pull its internal state (either true or false)
+        into and from the referring component.  This may then be used to control an AWConditional or other values.
+    </Binding>
+
+    <Binding key="trueImageName" direction="get" type="String" default="awxToggleImageTrue.gif" alternates="useCheckboxIcon">
+        The name of the image to be displayed when the state is true.  This uses AWImage internally, so the same rules
+        apply to this binding as for AWImage's filename binding.
+    </Binding>
+
+    <Binding key="falseImageName" direction="get" type="String" default="awxToggleImageFalse.gif" alternates="useCheckboxIcon">
+        The name of the image to be displayed when the state is false.  This uses AWImage internally, so the same rules
+        apply to this binding as for AWImage's filename binding.
+    </Binding>
+
+    <Binding key="useCheckboxIcon" direction="get" type="boolean" default="$false" alternates="trueImageName&&falseImageName">
+        Uses a checked checkbox for true and unchecked checkbox for false.
+    </Binding>
+
+    <Binding key="controlTitle" direction="get" type="String" default="Open/Close">
+        Tooltip for the toggle control.
+    </Binding>
+
+    <Binding key="class" direction="get" type="String" default="toggleBox">
+        Overrides the default class.
+    </Binding>
+
+    <Binding key="style" direction="get" type="String">
+        Style
+    </Binding>
+
+</a:Api>
+
+<a:RefreshRegion>\
+    <div class="$^class:toggleBox" style="$^style">\
+        <table cellspacing="0" cellpadding="0" border="0" width="100%" class="grayVeryLt">\
+            <tr>\
+                <td width="1%" style="padding:3px 2px 3px 2px;">\
+                    <w:ToggleImage state="$^state"
+                                   isExternal="$true"
+                                   trueImageName="$^trueImageName"
+                                   falseImageName="$^falseImageName"
+                                   useCheckboxIcon="$^useCheckboxIcon"
+                                   title="$^controlTitle"/>\
+                </td>\
+                <td width="99%">\
+                    <a:If notEqualNull="$headingContentElement">
+                        <a:IncludeContent template="$headingContentElement"/>\
+                    <a:Else/>
+                        <h2 style="float:left">$^title</h2>
+                    </a:If>
+                </td>\
+            </tr>\
+        </table>\
+        <a:If ifTrue="$^state">
+            <a:If notEqualNull="$bodyContentElement">
+                    <a:IncludeContent template="$bodyContentElement"/>\
+            </a:If>
+        </a:If>
+    </div>\
+</a:RefreshRegion>

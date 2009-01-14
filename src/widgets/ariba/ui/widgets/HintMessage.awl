@@ -1,0 +1,159 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.awl#23 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="showFooterMessage" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="showTopLine" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="howToUrl" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="screenDetailsUrl" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="isVisible" direction="get" type="boolean" required="$false">
+        TBD
+        If you do not provide this binding, its value will be determine by
+        looking at WidgetsDelegate.hintMessagesVisible();
+    </Binding>
+
+    <NamedContent name="LowerLeft" required="$false">
+        TBD
+    </NamedContent>
+</a:Api>\
+
+<a:If ifTrue="$isVisible">\
+    <a:ClientSideScript>\
+        function auiOpenHelpWindow (helpUrl)
+        {
+            var newWindow = ariba.Dom.openWindow(helpUrl, '', 'toolbar=no,location=no,directories=no,status=no,scrollbars=yes,menubar=no,resizable=yes,width=700px,height=720px');
+            newWindow.focus();
+        }
+    </a:ClientSideScript>\
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+        <a:If ifTrue="$showTopLine">\
+        <tr>
+            <td colspan="4" class="brandMd hintTopLine">\
+                <a:Image filename="cleardot.gif" class="block" height="1" width="1"/>\
+            </td>
+        </tr>
+        </a:If>\
+        <tr>
+            <td colspan="4" class="hint">\
+                <a:Image filename="cleardot.gif" class="block" width="10" height="6"/>\
+            </td>
+        </tr>
+        <tr>
+            <td width="1px" class="hint">\
+                &nbsp;\
+            </td>
+
+            <td class="hint" colspan="3">
+                <div class="hintBox" id="$elementId" elementId="$elementId">
+                    <span class="hintExpand">\
+                        <a href="javascript:void(0);" style="text-decoration:none;padding:right:1px"
+                            bh="HME">
+                            &nbsp;
+                            <span style="vertical-align:super">...</span>
+                            &nbsp;&nbsp;&nbsp;
+                            <a:Image filename="cssDoubleDownArrow.gif"/>
+                        </a></span>
+                    <span class="hintCollapse">\
+                        <a href="javascript:void(0);" style="text-decoration:none;padding:right:1px"
+                            bh="HMC">
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <a:Image filename="cssDoubleUpArrow.gif"/>
+                        </a></span>
+                    <a:IncludeContent/>\
+                </div>
+                <a:ClientSideScript isSingleton="$false">\
+                    ariba.Widgets.registerHintMessage('$elementId');
+                </a:ClientSideScript>
+            </td>
+        </tr>
+        <a:If ifTrue="$hasFooterText">\
+            <tr>
+                <td colspan="4" class="hint">\
+                    <a:Image filename="cleardot.gif" class="block" width="10" height="10"/>\
+                </td>
+            </tr>
+            <tr>
+                <td width="1px" class="hint">\
+                    &nbsp;\
+                </td>
+                <td class="hint" width="49%" align="$languageLeft">\
+                    <a:If ifTrue="$showFooterMessage">\
+                        <i>\
+                            <a:Local key="a001">\
+                                * indicates required field\
+                            </a:Local>\
+                        </i>\
+                    <a:Else/>\
+                        <a:Image filename="cleardot.gif" class="block" width="1" height="1"/>\
+                    </a:If>\
+                </td>
+                <td class="hint" width="49%" align="$languageRight">\
+                    <a:If notEqualNull="$howToUrl">\
+                        <a onClick="$onClickHowTo" href="javascript:void(0);">\
+                            <a:Local key="a002">\
+                                How to\
+                            </a:Local>\
+                        </a>\
+                    </a:If>\
+                    &nbsp;\
+                    <a:If notEqualNull="$screenDetailsUrl">\
+                        &nbsp;&nbsp;&nbsp;\
+                        <a onClick="$onClickScreenDetails" href="javascript:void(0);">\
+                            <a:Local key="a003">\
+                                Screen Details\
+                            </a:Local>\
+                        </a>\
+                    </a:If>\
+                </td>
+                <td width="1px" class="hint">\
+                    &nbsp;\
+                </td>
+            </tr>
+        </a:If>\
+        <tr>
+            <td valign="top" width="1px">\
+                <a:Image filename="hint_lc.gif"/>\
+            </td>
+            <td class="hint" width="50%">\
+               <a:Image filename="cleardot.gif" class="block" width="1" height="1"/>\
+            </td>
+            <td class="hint" width="50%">\
+                <a:Image filename="cleardot.gif" class="block" width="1" height="1"/>\
+            </td>
+            <td align="$languageRight" valign="top" width="1px">\
+                <a:Image filename="hint_rc.gif"/>\
+            </td>
+        </tr>
+    </table>
+</a:If>\
+<br/>

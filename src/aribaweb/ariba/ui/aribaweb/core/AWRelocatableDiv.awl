@@ -1,0 +1,61 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRelocatableDiv.awl#8 $
+    </Copyright>
+
+    <Overview>
+        Due an firefox bug (https://bugzilla.mozilla.org/show_bug.cgi?id=329548),
+        the z-index of an absolute positioned div was not honor
+        if it generated inside a inline (ie, position != absolute) container div that has the overflow style set.
+        Changing the div's parent to a regular div removes the effects from the original parent element.
+    </Overview>
+
+    <Binding key="id" direction="get" type="String" required="$false">
+        html id of the div.
+    </Binding>
+
+    <Binding key="class" direction="get" type="String" required="$false">
+        css class of the div
+    </Binding>
+
+    <Binding key="style" direction="get" type="String" required="$false">
+        css style of the div
+    </Binding>
+
+</a:Api>
+
+<a:If ifTrue="$true">\
+    <a:RefreshRegion
+         useId="$^id"
+         class="$^class"
+         style="$^style"
+         otherBindings="$otherBindingsValues"
+         _reloc="1">\
+        <a:IncludeContent/>\
+    </a:RefreshRegion>\
+    <a:GenericContainer tagName="script">
+        if (window.name == "AWRefreshFrame") {
+            parent.ariba.Dom.removeRelocatedCopy('$^id');
+        }
+    </a:GenericContainer>
+<a:Else/>
+    <div id="$^id"
+         class="$^class"
+         style="$^style"
+         otherBindings="$otherBindingsValues">
+        <a:IncludeContent/>
+    </div>
+</a:If>

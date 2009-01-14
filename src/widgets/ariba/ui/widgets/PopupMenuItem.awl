@@ -1,0 +1,131 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuItem.awl#25 $
+    </Copyright>
+
+    <Overview>
+        see <w:PopupMenu/>
+    </Overview>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" alternates="onClick">
+        The action that fires when the MenuItem is clicked.
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" default="$true">
+        If the PopupMenuItem is within an AWForm, clicking it will automatically
+        submit the form.  If you want to disable this on a given menu-item
+        use submitForm="$false"
+    </Binding>
+
+    <Binding key="indentation" direction="get" type="int" default="0">
+        The number of pixels to indent the display region of the PopupMenuItem.
+    </Binding>
+
+    <Binding key="showCheck" direction="get" type="boolean" default="$false">
+        Optionally shows a check mark on the left of MenuItem.  The meaning
+        of the checkmark is application specific, but it usually means some
+        option is toggled true.
+    </Binding>
+
+    <Binding key="showBullet" direction="get" type="boolean" default="$false">
+        Optionally shows a bullet on the left of MenuItem.  The meaning
+        of the bullet is application specific, but it usually means some
+        (mutually exclusive) option is toggled true.  By mutually exclusive
+    </Binding>
+
+    <Binding key="title" direction="get" type="String" required="$false">
+        The "Tool tip" that displays when the mouse hovers over the MenuItem
+    </Binding>
+
+    <Binding key="disabled" direction="get" type="boolean" required="$false">
+        Makes the MenuItem unclickable and greys out its appearance.
+    </Binding>
+
+    <Binding key="collapsed" direction="get" type="boolean" required="$false">
+        Should the item be initially hidden (and only revealed when the user clicks
+        the expand arrow within the menu).  Used for long menus with some menu items
+        "overflowed" out of the MRU.
+    </Binding>
+
+    <Binding key="clientTrigger" direction="get" type="String" required="$false">
+        clientTrigger js executed on client before AW handling invocation
+        of action binding.  May be arbitrary javascript expression.
+        Note that, if you specify an onClick or onKeyPress binding, this
+        binding is ignored.
+    </Binding>
+
+    <Binding key="style" direction="get" type="String" required="$false">
+        The style which applies to the container of the PopupMenuItem.
+        Use this to override the "awmenuCell" class setting which
+        apply by default.
+    </Binding>
+
+    <Binding key="onKeyPress" direction="get" type="String" required="$false">
+        Allows for overridding the default onKeyDown behavior (Menu.menuKeyDown()).
+    </Binding>
+
+    <Binding key="onClick" direction="get" type="String" alternates="action">
+        Allows for overridding the default onClick behavior (Menu.menuClicked()).
+    </Binding>
+
+    <Binding key="target" direction="get" type="String" required="$false">
+        Todo: This binding is not implemented.  We need to determine
+        if Safari (Macintosh) still needs special handling (ie the div
+        rather than the 'anchor').  If Safari can work with the anchor, we
+        can eliminate that special case and simply pass the target to the
+        anchor as an attribute (ie <a ... target="..."/>) and tell
+        the requestContext about the frameName.  However, if Safari still
+        requires special handling, then we'll need to handle the proper
+        behavior code.
+        On the other hand, since we are not passing an href to the anchor, we may be able
+        to do the same thing for both the div and the anchor.  In any case, its
+        more than I can address at the present moment.
+
+        If you provide the target binding, the response (from clicking
+        the PopupMenuItem) will appear in a new window named by the value
+        of your target binding.
+    </Binding>
+</a:Api>
+<a:If ifTrue="$disabled">\
+    <div nowrap="awstandalone" class="$disabledClassString" style="$^style">\
+        <a:IncludeBlock name="Preface"/>\
+        <a:IncludeContent/>\
+    </div>\
+<a:Else/>\
+    <!--- the following link is used to handle keyboard menu events. The tabindex=1000 is required
+      for Netscape browsers because when a user tries to tab off of the menu, the event handler
+      resets the focus to the first or last item in the menu, but this screws up the tab traversal
+      order unless all items in the menu have the same tab order --->\
+    <a:GenericContainer tagName="$tagName" tabindex="99" href="#"
+        class="$classString" style="$^style"
+        bh="PMI"
+        _sf="$bhSubmitForm"
+        _ct="$^clientTrigger"
+        _t="$frameName"
+        elementId="$elementId"
+        id="$elementId"
+        invokeAction="$invokeAction"
+        awname="$^awname" title="$^title" target="$^target">\
+        <a:IncludeBlock name="Preface"/>\
+        <a:IncludeContent/>\
+    </a:GenericContainer>\
+</a:If>\
+
+<a:Block name="Preface">\
+    <a:If ifTrue="$indentation">\
+        <a:Image filename="cleardot.gif" height="1" width="$indentation"/>\
+    </a:If>\
+</a:Block>\

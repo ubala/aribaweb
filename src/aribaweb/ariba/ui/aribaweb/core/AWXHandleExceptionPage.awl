@@ -1,0 +1,25 @@
+<html>
+<head>
+    <x:BasicScriptFunctions sessionless="$^sessionless:$false"/>\
+</head>
+<body bgcolor="#ffffff">
+    <table border="0" cellpadding="8">
+        <tr align="left" valign="top">
+            <td>
+                <a:Image filename="awxWarningLarge.gif"/>
+                <br/>
+                Reenter<br/>
+                <a:PrivateHyperlink pageName="$application.mainPageName">
+                    <b><a:String value="$application.name"/></b>
+                </a:PrivateHyperlink>
+            </td>
+            <td>
+                <b>Exception encountered.</b><br/>
+                <a:If ifTrue="$displayStackTrace">
+                    <a:ExceptionBodyRenderer exception="$exception"/>
+                </a:If>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

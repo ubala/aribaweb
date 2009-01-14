@@ -1,0 +1,64 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageWrapperForm.awl#12 $
+    </Copyright>
+
+    <Overview>
+        Provides a form tag for use within the BasicPageWrapper component and other page wrapper components.
+        Not intended for use outside the widgets package.
+    </Overview>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" required="$false">
+        In the event that no button is clicked in order to submit the form (ie a carriage return can be used form some
+        browsers), no other element will handle the action phase of the request, so you may bind an action to the form
+        itself.  You should return the new page (or null to cycle the page) from your method bound to this action.
+        This will only work if hasForm is true.
+    </Binding>
+    
+    <Binding key="formActionUrl" direction="get" type="String" default="$null">
+        If this value is non-null, the String value will be used as the url for the form's action attribute.
+        This prevents the use of AWForm and allows for more raw control over the form (eg as a directAtion).
+    </Binding>
+
+    <Binding key="formName" direction="get" type="String" default="$null">
+        If you are providing a formActionUrl, you may also provide a formName, which will be used for
+        both the name and id attributes fo the form tag.
+    </Binding>
+
+    <Binding key="formEncodingType" direction="get" type="String" default="$null">
+        When the form is being used to submit multi-part encoded form posts (eg file upload),
+        you can specify the form's enctyp with this parameter.
+    </Binding>
+
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        Allows for unwrapping the content so that no form tag is rendered, regardless of other
+        values such as formActionUrl.
+    </Binding>
+
+    <Binding key="submitFormDefault" direction="get" type="boolean" default="$false">
+        see ariba.ui.aribaweb.html.AWForm
+    </Binding>
+</a:Api>\
+
+<a:If ifTrue="$useHtmlForm">\
+   <form method="post" action="$^formActionUrl" name="$^formName" id="$^formName" enctype="$^formEncodingType" omitTags="$^omitTags">\
+       <a:IncludeContent/>
+   </form>
+<a:Else/>\
+   <a:Form action="$^action" omitTags="$^omitTags" enctype="$^formEncodingType" submitFormDefault="$^submitFormDefault:$false" style="margin:0px;padding:0px;">\
+       <a:IncludeContent/>
+   </a:Form>
+</a:If>\

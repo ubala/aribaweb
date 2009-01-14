@@ -1,0 +1,65 @@
+<w:FormTable showErrorFlags="$true">
+    <w:FormRow label="Date">
+        <w:DateField value="$^currentItem.Year" size="17"/>
+    </w:FormRow>
+    <w:FormRow label="Amount" size="17">
+        <a:TextField value="$^currentItem.Amount" formatter="$formatters.money"/>
+    </w:FormRow>
+    <w:FormRow label="Attendees">
+        <a:IncludeComponent awcomponentName="UserListEditorControl.htm" list="$attendees"/>
+    </w:FormRow>
+    <w:FormRow label="Accounting">
+        <div style="float:right">
+            <w:TextButton action="$null">Edit</w:TextButton>
+        </div>
+    </w:FormRow>
+</w:FormTable>
+<br/>
+
+<w:TextButton action="$itemize">Itemize</w:TextButton><br/>
+
+<a:SetValue panel1Id="$requestContext.nextElementId"/>\
+<w:Confirmation id="$panel1Id">\
+    <a:Content name="header">Example Panel</a:Content>\
+    <a:Content name="content">
+        This is just a simple panel with a long, long, long, long string that I hope will wrap in this panel...
+        I don't know -- what do you think?  Anything?  <a:Hyperlink action="$null">Hello?</a:Hyperlink>
+        <a href="TETestPanel.htm#panel">Popup Panel ...</a>
+    </a:Content>\
+</w:Confirmation>\
+<a:Hyperlink action="$showPanel1">Show long string panel</a:Hyperlink>
+<br/>
+
+<a:SetValue panel2Id="$requestContext.nextElementId"/>\
+<w:Confirmation id="$panel2Id">\
+    <a:Content name="header">Example Panel</a:Content>\
+    <a:Content name="content">
+        <a href="TETestPanel.htm">Visit modal page...</a>
+    </a:Content>\
+</w:Confirmation>\
+<a:Hyperlink action="$showPanel2">Show short string panel</a:Hyperlink>
+<br/>
+
+
+<groovy>
+    def panel1Id, panel2Id, errorKey;
+
+    def attendees () {
+        def item = valueForBinding("currentItem");
+        if (item.Attendees == null) { item.Attendees = []; }
+        return item.Attendees;
+    }
+    def showPanel1() {
+        return Confirmation.showConfirmation(requestContext(), panel1Id);
+    }
+
+    def showPanel2() {
+        return Confirmation.showConfirmation(requestContext(), panel2Id);
+    }
+
+    def itemize () {
+        def p = pageWithName("HotelPanel.htm");
+        p.setClientPanel(true);
+        return p;
+    }
+</groovy>

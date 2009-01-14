@@ -1,0 +1,29 @@
+<html>
+<head>
+</head>
+<body>
+
+<table>
+    <tr>
+        <a:For item="$currentDimension" list="$dimensionLabels">
+            <th>$currentDimension</th>
+        </a:For>
+        <th>Amount</th>
+    </tr>
+
+    <a:For item="$currentSupplier" list="$supplierValues">
+    <a:For item="$currentCommodity" list="$commodityValues">
+    <a:For item="$currentQuarter" list="$quarterValues">
+        <a:If ifTrue="$hasValue">
+            <tr>
+                <td>$currentSupplier</td> <td>$currentCommodity</td> <td>$currentQuarter</td>
+                <td>$currentValue</td>
+            </tr>
+        </a:If>
+    </a:For>
+    </a:For>
+    </a:For>
+</table>
+
+</body>
+</html>

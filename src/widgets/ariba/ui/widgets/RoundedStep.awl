@@ -1,0 +1,3 @@
+<w:RoundedBox class="$currentCssClass" roundStyle="$ariba.ui.widgets.RoundedBox.Left" hideGradient="$true">
+    <a:IncludeContent/>
+</w:RoundedBox>

@@ -1,0 +1,175 @@
+/*
+    Copyright 2008 Craig Federighi
+
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+    file except in compliance with the License.
+    You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    $Id:  $
+*/
+object { class: ${object.getClass().getName()} }
+
+operation=(edit, create) {
+    editing:true;
+    field="*" { editable:true; }
+}
+operation=(view, list) {
+    editing:false;
+    field="*" { editable:false; }
+}
+
+field="*" {
+    type="*"                    { component:AWString; bindings:{value:$value} }
+    type=boolean { 
+        bindings:{formatter:$component.formatters.boolean};
+        editable { component:AWCheckbox }
+    }
+    type=ariba.util.core.Date   {
+        bindings:{formatter:$component.formatters.dateTime};
+        editable                { component:DateField }
+    }
+    type=java.math.BigDecimal   {
+        bindings:{formatter:$component.formatters.money};
+        editable                {
+            component:AWTextField;
+            bindings:{
+                style:"text-align:right";
+                size:13;
+            };
+        }
+    }
+    type=java.lang.Enum   {
+        editable                {
+            component:GenericChooser;
+            bindings:{
+                object:${object};
+                key:${field};
+                destinationClass:${type};
+                displayKey:"name";
+                formatter:$component.formatters.identifier;
+            };
+        }
+    }
+
+    type=java.util.List {
+        trait=enum editable {
+            component:GenericChooser;
+            bindings:{
+                object:${object};
+                key:${field};
+                multiSelect:true;
+                destinationClass:${properties.enumClass};
+                displayKey:"name";
+                formatter:$component.formatters.identifier;
+            };
+        }
+    }
+    type=(java.math.Integer, int) {
+        bindings:{formatter:$component.formatters.integer};
+        editable                { component:AWTextField; bindings:{style:"text-align:right"; size:13} }
+    }
+    type=java.lang.String {
+        editable                { component:AWTextField }
+        trait=richtext {
+            bindings:{escapeUnsafeHtml:true}
+            editable            { component:${ariba.util.core.ClassUtil.classForName("ariba.ui.richtext.RichTextArea", false) ? "RichTextArea" : "AWTextArea" };
+                                  bindings:{cols:60; rows:10} }
+            operation=list      { visible:false }
+        }
+        trait=secret       {
+            bindings:{formatter:$component.formatters.hiddenPassword};
+            editable   { component:AWPasswordField; bindings:{formatter:null} }
+        }
+        trait=longtext editable { component:AWTextArea; bindings:{cols:60; rows:10} }
+        trait=truncated    { component:TruncateString; bindings:{size:10} }
+    }
+
+    trait=derived {
+        editable:false;
+        visible:true;
+        editing { visible:false; }
+    }
+
+    trait=required editable {
+        required:true;
+        valid: ${(value != null && value !="") ? true : "Answer required"}
+    }
+
+    trait=enumeration {
+        editable { component:GenericChooser; bindings:{
+                    object:${object}; key:${properties.field}; list:${properties.choices};
+                }
+        }
+    }
+
+    trait=noCreate operation=create { visible:false }
+}
+
+action="*" {
+    visible:true;
+
+    trait=pageAction {
+        actionResults:[${requestContext.pageWithName(properties.pageName)}]
+    }
+
+    trait=modalComponentPage {
+        actionResults:[${requestContext.pageWithName("MetaModalPage")}];
+        pageBindings:{
+            componentName:${properties.componentName};
+            title:${properties.title};
+        }
+    }
+    
+    trait=modalComponentPanel {
+        actionResults:[${requestContext.pageWithName("MetaModalPage")}];
+        pageBindings:{
+            componentName:${properties.componentName};
+            title:${properties.title};
+            clientPanel:true;
+        }
+    }
+
+    trait=messageResults {
+        message:"Action Performed: %s";
+        actionResults:[${
+            def c = ariba.util.core.ClassUtil.classForName(properties.class);
+            def v = ariba.util.fieldvalue.FieldValue.getFieldValue(c, properties.action);
+            def m = ariba.util.core.Fmt.S(properties.message, v);
+            ariba.ui.widgets.AribaPageContent.setMessage(m, requestContext.session());
+            null}];
+        object {
+            actionResults:[${
+                def v = ariba.util.fieldvalue.FieldValue.getFieldValue(object, properties.action);
+                def m = ariba.util.core.Fmt.S(properties.message, v);
+                ariba.ui.widgets.AribaPageContent.setMessage(m, requestContext.session());
+                null}];
+        }
+    }
+
+    trait=instance {
+    	visible:${object != null};
+    	isInstanceAction:true;
+    }
+
+    filterActions=instance {
+    	visible:${properties.isInstanceAction}
+    }
+}
+
+module="*" {
+    visible:true;
+    homePage:MetaHomePage;
+    component:MetaDashboardLayout;
+    layout="*" { visible:true }
+}
+
+actionCategory="*" {
+    visible:true;
+}

@@ -1,0 +1,115 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.awl#23 $
+    </Copyright>
+
+    <Overview>
+        Renders a <form ...>...</form> container in the html and must be used anytime a form is to be submitted from an
+        aribaweb application.  AWForm also renders several hidden fields that pass along critical information to the
+        server about the state of the application.  Of course, these hiden fields are transparent to the developer, but
+        you should be aware of these to understand why AWForm must be used for the state to be properly maintained.
+    </Overview>
+
+    <Binding key="action" type="AWResponseGenerating" default="$null" direction="get">
+        In the event that no button is clicked in order to submit the form (ie a carriage return can be used form some
+        browsers), no other element will handle the action phase of the request, so you may bind an action to the form
+        itself.  You should return the new page (or null to cycle the page) from your method bound to this action.
+    </Binding>
+
+    <Binding key="target" type="String" default="$null" direction="get">
+        The name of the window in which you want the response to be displayed.  This also has the effect of creating a
+        new pageCache for this window as each window must maintain its own page cache (in order to model the behavior
+        of the browser).  This is only evaluated during renderResponse.
+    </Binding>
+
+    <Binding key="fragmentIdentifier" type="String" default="$null" direction="get">
+        The name of a link on the destination page to which the form should be scrolled when the response is displayed.
+        This may be obsoleted by the scrollToVisible feature of TextButton when available.
+    </Binding>
+
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        Allows for not rendering the opening/closing tags of the <form/> nor any of its hidden fields.  This makes it
+        easy to avoid duplicating the body of the form just to turn off the form itself.  If true, only the body is
+        rendered.  Since, the tags are not rendered, the form elements will not behave as form elements, from the user's
+        persepctive.
+    </Binding>
+
+    <Binding key="method" direction="get" type="String" default="POST">
+        Allows for forcing the form post Method to GET.  Due to restrictions on the size of urls in some browsers,
+        this is strongly discouraged.  This may be desirable as a temporary setting for debugging, but should only be
+        temporarily emplyed.  In addition to url length issues, the url which is constructed may leave sensitive
+        information visible int he browsers url text field.
+    </Binding>
+
+    <Binding key="onSubmit" direction="get" type="String" default="$null">
+        Allows for providing your own onSubmit event handler in JavaScript.  As with any Javascript overrides in the
+        context of AribaWeb, this is strongly discouraged.
+    </Binding>
+
+    <Binding key="submitFormDefault" direction="get" type="boolean" default="$false">
+        If you set this to true, you are telling all widgets within the scope
+        of this form that they should behave as though they has submitForm=$true.
+        This way, we can avoid needing to know if the widget is within a form
+        or not.
+    </Binding>
+
+    <Binding key="id" direction="get" type="String" default="" deprecated="$true">
+        Not supported?
+    </Binding>
+
+    <Binding key="name" direction="get" type="String" default="id" deprecated="$false">
+        Allows override of form name attribute -- use for script based manipulation of
+        AWForm.  If not present, then name is set to the value as id.
+    </Binding>
+
+    <Binding key="onKeyPress" direction="get" type="String" default="" deprecated="$true">
+        Not supported?
+    </Binding>
+</a:Api>\
+
+<a:If ifTrue="$emitTags">\
+<a:MetaTemplateConditional>\
+<form action="$formActionUrl" method="$^method:POST" onSubmit="$^onSubmit"
+      onKeyDown="$keyPressString" target="$frameName" id="$formId" name="$formName"
+      otherBindings="$otherBindingsValues" class="relocdest">\
+    <a:IncludeContent/>\
+
+    <a:RefreshRegion>
+        <input type="hidden" name="$=ariba.ui.aribaweb.core.AWComponentActionRequestHandler.FormSenderKey" value="$formElementId"/>\
+        <input type="hidden" name="awfa" elementId="$hiddenFieldElementId" value="$hiddenFieldElementId" invokeAction="$^action" isSender="$isFormSender"/>\
+        <input type="hidden" name="$=ariba.ui.aribaweb.core.AWComponentActionRequestHandler.FormComponentIdKey" value="true"/>\
+        <a:If ifFalse="$=ariba.ui.aribaweb.core.AWConcreteApplication.IsCookieSessionTrackingEnabled">\
+            <input type="hidden" name="$=ariba.ui.aribaweb.core.AWRequestContext.SessionIdKey" value="$httpSession.getId"/>\
+        </a:If>\
+        <a:If notEqualNull="$requestContext.frameName">\
+            <input type="hidden" name="$=ariba.ui.aribaweb.core.AWRequestContext.FrameNameKey" value="$requestContext.frameName"/>\
+        </a:If>\
+        <input type="hidden" name="$=ariba.ui.aribaweb.core.AWBaseRequest.CharacterEncodingKey" value="$session.characterEncoding.name"/>\
+        <a:For list="$hiddenValueHandlers" item="$curHiddenValueHandler">
+            <a:HiddenFormValue value="$curHiddenValueHandler"/>
+        </a:For>
+    </a:RefreshRegion>
+</form>\
+<a:Else/>\
+    <a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWRemotePageWrapper.DynamicTagMarker"/>\
+    <a:GenericContainer tagName="AWForm">\
+        <a:IncludeContent/>\
+    <a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWRemotePageWrapper.DynamicTagMarker"/>\
+    </a:GenericContainer>
+</a:MetaTemplateConditional>\
+<a:Else/>\
+    <a:IncludeContent/>\
+</a:If>\

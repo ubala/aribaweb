@@ -1,0 +1,60 @@
+<w:ModalPageWrapper title="Generate Daily Expenses">
+    <t:DataTable multiSelect="$true" list="$expenseTypes" item="$item" enableScrolling="$true">
+
+        <t:Column label="Type">
+            $item.Type
+        </t:Column>
+
+        <t:Column label="Daily Amount">
+            <a:TextField value="$item.Amount" formatter="$formatters.money"/>
+        </t:Column>
+
+        <t:RowDetail isVisible="$isHotel" nestedTableLayout="$true">
+            <t:DataTable list="$hotelTaxProperites" item="$hotelProp" useParentLayout="$true" rowClass="tableRow1 firstRow">
+                <!-- use label to match with parent -->
+                <t:Column label="Type">\
+                    $hotelProp.label\
+                </t:Column>
+
+                <t:Column label="Daily Amount">\
+                    <a:TextField value="$hotelTaxAmount" formatter="$formatters.money"/>\
+                </t:Column>
+            </t:DataTable>
+        </t:RowDetail>
+        <t:ButtonArea>
+            <w:TextButton action="$null">Generate Daily Expenses</w:TextButton>
+        </t:ButtonArea>
+    </t:DataTable>
+</w:ModalPageWrapper>
+\
+<groovy>
+    def hotelProp;
+    def item;
+
+    // fake items (as maps...)
+    def expenseTypes = [
+        [Type:"Hotel", Amount:0.0, RoomTax:0.0, OtherTax:0.0],
+        [Type:"Breakfast", Amount:0.0],
+        [Type:"Lunch", Amount:0.0],
+        [Type:"Laundry", Amount:0.0]
+    ];
+
+    def isHotel () { return item.Type == "Hotel" }
+
+    // Fake row objects that we can feed the nested table.  Enough info to tell us what to get from the parent hotel item
+    def hotelTaxProperites = [
+        [label:"Room Tax", key:"RoomTax"],
+        [label:"Other Tax", key:"OtherTax"]
+    ];
+
+    // Accessor for the Amount field -- forward to the parent hotel item to get the right value
+    // you'd use FieldValue.get() here... (not item[])
+    def hotelTaxAmount () { return item[hotelProp.key]; }
+    def setHotelTaxAmount (amt) { item[hotelProp.key] = amt; }
+
+    def okAction ()
+    {
+        // show some page -- just returning current page in this example
+        return null;
+    }
+</groovy>

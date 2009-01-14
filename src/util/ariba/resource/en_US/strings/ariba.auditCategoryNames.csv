@@ -1,0 +1,16 @@
+8859_1,
+, This file is a of audit categories (from the logger names) to friendlier names
+
+aribaAudit, "General"
+aribaAuditCommitNow, "General"
+aribaAudit.admin, "Admin"
+aribaAuditCommitNow.admin, "Admin (tasks/files)"
+aribaAuditCommitNow.sso, "SSO"
+aribaAuditCommitNow.exception, "Exception"
+aribaAuditCommitNow.parameters, "Parameters"
+aribaAuditCommitNow.approvable, "General"
+aribaAuditCommitNow.realmPurge, "Realm Purge"
+aribaAuditCommitNow.integration, "Integration"
+aribaAuditCommitNow.reportTimeout, "Report Timeout"
+aribaAuditCommitNow.schemaRealmMapping, "Schema Realm Mapping"
+aribaAuditCommitNow.cdsSyncVerifier, "CDS Sync Verifier"

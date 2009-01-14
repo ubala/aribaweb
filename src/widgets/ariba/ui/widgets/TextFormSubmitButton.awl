@@ -1,0 +1,49 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextFormSubmitButton.awl#7 $
+    </Copyright>
+
+    <Overview>
+        Provides a button with the same visual appearance as a TextButton, but allows developers
+        to submit an arbitrary form specified by name.
+
+        Usage:
+
+            <form name="form1" method="POST" action="http://www.amazon.com/somearbitraryurl">
+                <input type="hidden" name="var1" value="val1"/>
+                <input type="hidden" name="var2" value="val2"/>
+                <input type="hidden" name="var3" value="val3"/>
+                <w:TextFormSubmitButton formName="form1" isDisabled="$false">Test Button</w:TextFormSubmitButton>
+            </form>
+
+    </Overview>
+
+    <Binding key="formName" type="String" required="$true" direction="get">
+        The name of the form to be submitted.
+    </Binding>
+
+    <Binding key="isDisabled" type="boolean" required="$false" direction="get" default="$false">
+        The button is disabled if this value is set to true.
+    </Binding>
+
+</a:Api>\
+
+<w:TextButton disabled="$^isDisabled" isBrandStyle="$^isBrandStyle"
+            hilite="$^hilite" buttonClass="$^buttonClass"
+            buttonOverClass="$^buttonOverClass" title="$^title"
+            behavior="TFSB" _fn="$^formName">\
+    <a:IncludeContent/>\
+</w:TextButton>

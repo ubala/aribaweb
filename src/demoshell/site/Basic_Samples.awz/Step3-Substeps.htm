@@ -1,0 +1,96 @@
+<table><tr>
+<td>
+    <br/>
+
+    <w:StepHeader label="This is a simple step header"/>
+    <br/>
+    <br/>
+
+    <w:StepHeader label="This is a dialogStyle step header" dialogStyle="$true"/>
+    <br/>
+    <br/>
+
+    <w:StepHeader label="This is a numbered step header (5)" stepIndex="4"/>
+    <br/>
+    <br/>
+
+    <w:StepHeader label="This step header has substeps">
+        <w:Substep action="$oneClicked" label="Substep One" isSelected="$isOneSelected"/>
+        <w:Substep action="$twoClicked" label="Substep Two" isSelected="$isTwoSelected"/>
+        <w:Substep action="$threeClicked" label="Substep Three" isSelected="$isThreeSelected"/>
+    </w:StepHeader>
+
+    <w:StepHeader stepIndex="4"
+                label="This step header has many substeps (via AWRepetition)">
+        <a:For list="$substeps" item="$currentSubstep">
+            <w:Substep action="$substepClicked"
+                    label="$currentSubstep"
+                    isSelected="$isCurrentSubstepSelected"/>
+        </a:For>
+    </w:StepHeader>\
+</td>
+<td valign="top" background="widg/arrowcolor.gif">
+    This is some text!
+</td>
+</tr></table>
+<server>
+    var selected = 1;
+    var selectedSubstep = null;
+    var substeps = null;
+    var currentSubstep = null;
+
+    function initX () {
+        substeps = ariba.util.core.ListUtil.list();
+        var i = 0;
+        while (i != 26) {
+            substeps.addElement("Example Substep " + i);
+            i++;
+        }
+        selectedSubstep = substeps.firstElement();
+    }
+
+    function oneClicked ()
+    {
+        selected = 1;
+        return null;
+    }
+
+    function isOneSelected ()
+    {
+        return selected == 1;
+    }
+
+    function twoClicked ()
+    {
+        selected = 2;
+        return null;
+    }
+
+    function isTwoSelected ()
+    {
+        return selected == 2;
+    }
+
+    function threeClicked ()
+    {
+        selected = 3;
+        return null;
+    }
+
+    function isThreeSelected ()
+    {
+        return selected == 3;
+    }
+
+    function isCurrentSubstepSelected ()
+    {
+        return currentSubstep == selectedSubstep;
+    }
+
+    function substepClicked ()
+    {
+        selectedSubstep = currentSubstep;
+        return null;
+    }
+
+</server>

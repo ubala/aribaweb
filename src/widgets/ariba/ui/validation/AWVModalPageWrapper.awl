@@ -1,0 +1,73 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVModalPageWrapper.awl#6 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="toc" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <NamedContent name="buttons" required="$false">
+        TBD
+    </NamedContent>
+</a:Api>\
+
+<w:BasicPageWrapper toc="$^toc" hasForm="$^hasForm:$true">\
+    <table border="0" cellspacing="0" width="100%">
+        <tr>
+            <td class="pageHead">\
+                $^title
+            </td>
+            <td align="right">\
+                <a:IncludeBlock name="ActionButtons" hasOkay="$^hasOkay" hasCancel="$^hasCancel" />
+            </td>
+        </tr>
+    </table>
+    <a:IncludeContent/>\
+
+    <br/>
+    <table border="0" cellspacing="0" cellpadding="0" width="100%">
+        <tr>
+            <td class="brandMd">\
+                <a:Image filename="cleardot.gif" class="block" height="1" width="1"/>\
+            </td>
+        </tr>
+        <tr>
+            <td align="right">\
+                <a:IncludeBlock name="ActionButtons" hasOkay="$^hasOkay" hasCancel="$^hasCancel" />
+            </td>
+        </tr>
+    </table>
+</w:BasicPageWrapper>\
+\
+<a:Block name="ActionButtons">\
+    <a:If ifTrue="$^hasCancel:$false">
+        <w:TextButton action="$cancelClicked">\
+            <a:String value="$^cancelTitle:Cancel"/>
+        </w:TextButton>
+    </a:If>
+    <a:If ifTrue="$^hasOkay:$true">
+        &nbsp;\
+        <w:TextButton action="$okayClicked">\
+            <a:String value="$^okayTitle:Done"/>
+        </w:TextButton>
+    </a:If>
+    <a:IncludeContent name="buttons" required="$false"/>\
+</a:Block>\

@@ -1,0 +1,119 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ClientPanelWrapper.awl#3 $
+    </Copyright>
+
+    <Overview>
+        Like ModalPageWrapper, but for use in client-side panels.
+
+        The invoking page will do:
+            panelInvokingAction () {
+                panelComp = pageWithName("SomePanelComp");
+                return null;
+            }
+
+        And, in ParentPage.awl:
+            <a:InstanceInclude instance="$panelComp"/>
+
+        And then, in SomePanelComp.awl:
+            <w:ClientPanelWrapper title="Neat Panel" okAction="$someAction">
+                page content here
+            </w:ClientPanelWrapper>
+
+            This will cause the content of SomePanelComp to be brought up in a modal panel
+    </Overview>
+
+    <Binding key="title" direction="get" type="String" default="$null">
+        TBD
+    </Binding>
+
+    <Binding key="editable" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="okHint" direction="get" type="String" default="OK BUtton">
+        TBD
+    </Binding>
+
+    <Binding key="okTitle" direction="get" type="String" default="OK">
+        TBD
+    </Binding>
+
+    <Binding key="cancelHint" direction="get" type="String" default="Cancel BUtton">
+        TBD
+    </Binding>
+
+    <Binding key="okAction" direction="get" type="AWResponseGenerating" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="cancelAction" direction="get" type="AWResponseGenerating" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="cancelTitle" direction="get" type="String" default="Cancel">
+        TBD
+    </Binding>
+
+    <Binding key="doneHint" direction="get" type="String" default="Done BUtton">
+        TBD
+    </Binding>
+
+    <Binding key="doneTitle" direction="get" type="String" default="Done">
+        TBD
+    </Binding>
+
+    <NamedContent name="buttons" required="$false">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="titleArea" required="$false">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="bodyArea" required="$false">
+        TBD
+    </NamedContent>
+</a:Api>\
+
+<a:Environment ClientPanelWrapper="$this">\
+    <a:SetValue panelId="$requestContext.nextElementId"/>
+    <w:Confirmation id="$panelId">
+        <a:Content name="header">\
+            <a:String value="$^title"/>\
+            <a:IncludeContent name="titleArea" required="$false"/>\
+        </a:Content>\
+
+        <a:Content name="content">\
+            <a:If equalNull="$bodyTemplateContext">
+                <a:IncludeContent/>
+            <a:Else/>
+                <a:IncludeContent name="bodyArea"/>\
+            </a:If>
+        </a:Content>\
+
+        <a:Content name="buttons">
+            <a:If ifTrue="$^editable">\
+                <w:TextButton action="$okClicked" title="$^okHint:$[a001]OK Button"><a:String value="$^okTitle:$[a002]OK"/></w:TextButton>\
+                <w:TextButton action="$cancelClicked" title="$^cancelHint:$[a003]Cancel Button"><a:String value="$^cancelTitle:$[a004]Cancel"/></w:TextButton>\
+            <a:Else/>\
+                <w:TextButton action="$okClicked" title="$^doneHint:$[a005]Done Button" submitForm="$^submitForm"><a:String value="$^doneTitle:$[a006]Done"/></w:TextButton>\
+            </a:If>\
+            <a:IncludeContent name="buttons" required="$false"/>\
+        </a:Content>
+    </w:Confirmation>
+</a:Environment>\
+\

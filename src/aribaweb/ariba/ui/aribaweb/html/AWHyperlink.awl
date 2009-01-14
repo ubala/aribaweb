@@ -1,0 +1,138 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.awl#29 $
+    </Copyright>
+
+    <Overview>
+        Provides for a standard Html hyperlink.  AWHyperlink may be wrapped around anything that a normal <a/> tag could
+            be around.  Allows for binding and action or specifying a pageName so that whe the usre clicks, the action
+            is fired or the named page is displayed.  Optionally, you may use AWHyperlink to submit a form.  Bindings
+            which are not mentioned belowed may be passed-though to the opening <a/> as arbitrary attributes in the html
+                tag.
+    </Overview>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null" alternates="pageName,href">
+        Will be evaluated when the invokeAction phase detects that the hyperlink was clicked.  A value of null should be
+        returned to cycle the current page.  Note: it is recommended that you declare your return type to be either
+        AWComponent or AWResponse, unless you cannot be sure because you are deferring to another method for the action.
+    </Binding>
+
+    <Binding key="pageName" direction="get" type="String" required="$false" alternates="action,href">
+        In the event you don't need to do anything to setup the state for the returned page, this may be more convenient
+        than 'action' since you don't need to write any java code.  This will be evaluated during the invokeAction phase
+        in order to get the name of the page to create and return.
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" default="$false">
+        Allows for submitting the form in which the hyperlink is defined.  If specified and evaluates to true, javascript
+        will be used to submit the enclosing form.  Do not use onClick with AWHyperlink along with submitForm.  [In fact,
+        its generally a bad idea to use javascript with any awf components as it conflicts with intenal implementation.]
+    </Binding>
+
+    <Binding key="onClick" direction="get" type="string" default="$null">
+        As long as submitForm is false, you may associate an onClick with the AWHyperlink, but it is strongly discouraged.
+        It would be better to use an AWGenericContainer and build your own at that point.
+    </Binding>
+
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        Allows for not rendering the opening/closing tags of the <a/>.  This makes it easy to avoid duplicating the body
+            of the hyperlink just to turn off the link itself.  If true, only the body is rendered.  Since, the tags are
+            not rendered, the user cannot click the link so none of the bindings which would apply then have any effect.
+    </Binding>
+
+    <Binding key="senderId" direction="get" type="String" deprecated="$true">
+        Allows for providing your own senderId (eg to allow for human readable senderid).  It is strongly recommended
+        that this not be used as the system cannot guarantee proper results if used incorrectly.
+    </Binding>
+
+    <Binding key="href" direction="get" type="String" default="$null" alternates="action,pageName" deprecated="$true">
+        Provide your own href.  Rather than use this, you should consider using a GenericContainer and making your own.
+    </Binding>
+
+    <Binding key="scrollToVisible" direction="get" type="boolean" default="$false">
+        When the link is clicked and the page cycled (same page returned), it will attempt to scroll the page to where
+        the link is at the top of the page.
+    </Binding>
+
+    <Binding key="target" direction="get" type="String" default="$null">
+        If provided, will put a target attribute in the tag so the browser will open the returned page in this new window.
+        This is not recommened for nor application usage as multi-window apps are problematic.  In any case, we do
+        maintain a separate page cache for newly created windows, so this will also place the returned page in that
+        separate page cache.
+    </Binding>
+
+    <Binding key="windowAttributes" direction="get" type="String" default="$null">
+        If the target binding is used, you may specify the window attributes with this binding.  See
+        book on html/javascript and look for window.open(...) for details.
+    </Binding>
+
+    <Binding key="fragmentIdentifier" direction="get" type="String">
+        If specified, must be the name of another anchor tag on the destination page so the browser can scroll to that link.
+    </Binding>
+
+    <Binding key="onMouseDown" direction="get" type="String" deprecated="$true">
+        Not supported?
+    </Binding>
+
+    <Binding key="behavior" direction="get" type="String">
+
+    </Binding>
+
+</a:Api>\
+\
+<a:If ifTrue="$omitLink">\
+    <!--- we're in export mode and should render our content as plain text -->\
+    <a:IncludeContent/>\
+<a:Else ifFalse="$isSubmitForm"/>\
+    <!--- regular hyperlink -->\
+    <a:If ifFalse="$^omitTags">\
+        <a:MetaTemplateConditional>\
+            <a elementId="$elementId" href="#" id="$elementId" bh="$^behavior:HL"
+                    _t="$frameName" _w="$^windowAttributes"
+                    onKeyPress="$^onKeyPress" onClick="$^onClick"
+                    invokeAction="$invokeAction" isSender="$isSender" omitTags="$^omitTags" otherBindings="$otherBindingsValues">\
+                <a:IncludeContent/>\
+            </a>\
+        <a:Else/>\
+            <a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWRemotePageWrapper.DynamicTagMarker"/>\
+            <a:GenericContainer tagName="AWRemoteLink" elementId="$elementId" href="$remoteLinkUrl">\
+                <a:IncludeContent/>\
+            <a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWRemotePageWrapper.DynamicTagMarker"/>\
+            </a:GenericContainer>\
+        </a:MetaTemplateConditional>\
+    <a:Else/>\
+        <a:IncludeContent/>\
+    </a:If>\
+<a:Else ifFalse="$^omitTags"/>\
+    <a:MetaTemplateConditional>\
+        <!--- isSubmit: this href is *only* thing we found that works on IE, NS, and IE/Mac
+            which has proper link coloring and does not adversely affect backtracking -->\
+        <a href="#" elementId="$elementId" id="$elementId" bh="$^behavior:HL"
+                _t="$frameName" _w="$^windowAttributes" _sf="true"
+                onKeyPress="$^onKeyPress" onClick="$^onClick"
+                isSender="$isHiddenFieldSender" invokeAction="$invokeAction" otherBindings="$otherBindingsValues">\
+            <a:IncludeContent/>\
+        </a>\
+    <a:Else/>\
+        <a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWRemotePageWrapper.DynamicTagMarker"/>\
+        <a:GenericContainer tagName="AWRemoteLink" elementId="$elementId" href="$remoteLinkUrl">\
+            <a:IncludeContent/>\
+        <a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWRemotePageWrapper.DynamicTagMarker"/>\
+        </a:GenericContainer>\
+    </a:MetaTemplateConditional>\
+<a:Else/>\
+    <a:IncludeContent/>\
+</a:If>\

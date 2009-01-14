@@ -1,0 +1,64 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPrivateHyperlink.awl#2 $
+    </Copyright>
+
+    <Overview>
+        This component is for internal (platform/ui) use only.  All application developers should use AWHyperlink.
+        Eventually, we will rework AWHyperlink to be more efficient, but we do not want people to build in dependencies
+        on this api.
+    </Overview>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null" alternates="pageName">
+        Will be evaluated when the invokeAction phase detects that the hyperlink was clicked.  A value of null should be
+        returned to cycle the current page.  Note: it is recommended that you declare your return type to be either
+        AWComponent or AWResponse, unless you cannot be sure because you are deferring to another method for the action.
+    </Binding>
+
+    <Binding key="pageName" direction="get" type="String" required="$false" alternates="action">
+        In the event you don't need to do anything to setup the state for the returned page, this may be more convenient
+        than 'action' since you don't need to write any java code.  This will be evaluated during the invokeAction phase
+        in order to get the name of the page to create and return.
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" default="$true">
+        By default, PrivateHyperlink will detect if its used within a form and will submit.  Otherwise this is a
+        normal hyperlink that performs a GET.  To prevent form submission (eg for implementing a Cancel operation),
+        use this binding and return true.
+    </Binding>
+
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        Allows for not rendering the opening/closing tags of the <a/>.  This makes it easy to avoid duplicating the body
+        of the hyperlink just to turn off the link itself.  If true, only the body is rendered.  Since, the tags are not
+        rendered, the user cannot click the link so none of the bindings which would apply then have any effect.
+    </Binding>
+
+    <Binding key="target" direction="get" type="String" default="$null">
+        If provided, will put a target attribute in the tag so the browser will open the returned page in this new window.
+        This is not recommened for nor application usage as multi-window apps are problematic.  In any case, we do maintain
+        a separate page cache for newly created windows, so this will also place the returned page in that separate page cache.
+    </Binding>
+</a:Api>\
+
+<a:GenericActionTag tagName="a" href="#"
+    action="$linkClicked"
+    submitForm="$submitForm"
+    target="$^target"
+    omitTags="$omitTags"
+    awname="$^awname"
+    otherBindings="$otherBindingsValues">\
+        <a:IncludeContent/>\
+</a:GenericActionTag>\

@@ -1,0 +1,39 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Tab.awl#3 $
+    </Copyright>
+
+    <Overview>
+        To be used in concert with TabSet.  This component defines a single tab within a TabSet.
+        See TabSet for more details of how the two work together.
+    </Overview>
+
+    <Binding key="label" type="String" required="$true" direction="get">
+        The String that renders on the tab itself.
+    </Binding>
+
+    <Binding key="isVisible" type="boolean" default="$true" direction="get">
+        Controls whether or not the tab can be seen.
+    </Binding>
+
+    <Binding key="dropAction" direction="get" type="AWResponseGenerating" required="$false">
+    </Binding>
+
+    <Binding key="dropType" direction="get" type="String" required="$false">
+    </Binding>
+</a:Api>\
+<a:MethodInvocation invoke="$requestContext.markNextComponentAsMainInTrace"/>\
+<a:IncludeContent/>\

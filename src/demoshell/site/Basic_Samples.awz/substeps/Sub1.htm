@@ -1,0 +1,13 @@
+<!--- Note: this in included with container="$true" so the links and buttons will nest the content that
+we link to *within* this include (inside this same page) unless we put "#top" on the end of our links -->
+        
+        <w:HintMessage showTopLine="$true"> This is a new hint message!</w:HintMessage> <br/>
+        <br/>
+        Here's a link to <a href="Sub2.htm">Sub2</a> <br/>
+        (note that it stays in the tab)<br/>
+        <br/>
+        And a link back <a href="/MetaHomePage#top">Home</a> <br/>
+        (note: site-relative href)
+        <br/>
+        <br/>
+        <w:TextButton class="btnWrapx" action="$goto.Preferences#top">Go to Preferences!</w:TextButton>

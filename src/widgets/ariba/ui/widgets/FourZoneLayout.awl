@@ -1,0 +1,67 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FourZoneLayout.awl#1 $
+    </Copyright>
+
+    <Overview>
+        Top, Bottom, Left, Right box layout
+    </Overview>
+
+    <NamedContent name="top" required="$false">
+        Top zone
+    </NamedContent>
+
+    <NamedContent name="bottom" required="$false">
+        Bottom zone
+    </NamedContent>
+
+    <NamedContent name="left" required="$false">
+        Left zone
+    </NamedContent>
+
+    <NamedContent name="right" required="$false">
+        Right zone
+    </NamedContent>
+</a:Api>\
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+    <tr>
+        <td colspan="3" valign="top">\
+            <a:IncludeContent name="top" required="$false"/>
+        </td>
+    </tr>
+    <tr>
+        <td width="50%" valign="top">\
+            <div class="flexContainer">
+                <a:IncludeContent name="left" required="$false"/>
+            </div>
+        </td>
+
+        <td width="1%">\
+            <div style="width:20px"/>\
+        </td>
+
+        <td width="50%" valign="top">\
+            <div class="flexContainer">
+                <a:IncludeContent name="right" required="$false"/>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3" valign="top">\
+            <a:IncludeContent name="bottom" required="$false"/>
+        </td>
+    </tr>
+</table>\

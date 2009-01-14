@@ -1,0 +1,94 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BucketItem.awl#25 $
+    </Copyright>
+
+    <Overview>
+        BucketItem is a sub-item for a BucketHeading in a BucketsTOC.
+
+        See Also BucketsTOC and BucketHeading.
+    </Overview>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" alternates="pageName">
+        The action to fire when the BucketItem is clicked.
+    </Binding>
+
+    <Binding key="pageName" direction="get" type="String" alternates="action">
+        The name of the response page for when the BucketItem is clicked.  This is
+        provided for convenience as an alternative to "action" since it doesn't
+        require implementation of any java method.  Its rarely used, though
+        since you usually need to get involved in the action before transitioning
+        to another page.
+    </Binding>
+
+    <Binding key="flashing" direction="get" type="boolean" default="$false">
+        If desired, the BucketItem can be made to flash repeatedly while the page is displaying.
+        You may want to do this for for the BucketItem which corresponds to the current page.
+    </Binding>
+
+    <Binding key="flashSet" direction="get" type="int" default="6">
+        If you enable flashing, this control the number of times the flashing will occur.
+    </Binding>
+
+    <Binding key="label" direction="get" type="String" required="$true">
+        The string which displays on the item and is clickable.  (This also serves as the id for the element)
+    </Binding>
+
+    <Binding key="labelRight" direction="get" type="String" required="$false">
+        The strings that displays on the right side of the BucketItem.  This is often used
+        to display counts of items under this heading.
+    </Binding>
+
+    <Binding key="isSelected" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" required="$false">
+        If the BucketItem is within an AWForm and you do not provide the submitForm binding this
+        will automatically submit.  If you do provide the binding, your value takes precedence.
+        See AWHyperlink for more.
+    </Binding>
+
+    <Binding key="enabled" direction="get" type="boolean" default="$true">
+        Controls if the BucketItem is clickable.
+    </Binding>
+</a:Api>\
+
+<a:If ifTrue="$^flashing:$false">\
+    <a:ClientSideScript >\
+        ariba.Widgets.blinkItem("<a:PrimitiveString value="$^label"/>", <a:PrimitiveString value="$^flashSet:6"/>);
+    </a:ClientSideScript>\
+</a:If>\
+<tr id="^label" class="$styleClass" bh="$behaviorName">\
+    <td>\
+        &nbsp;\
+    </td>
+
+    <td style="padding-left:4px;">\
+        <a:Hyperlink omitTags="$disabled" submitForm="$^submitForm:$hasForm" action="$linkClicked" awname="$^awname">\
+            <a:String value="$^label"/>\
+        </a:Hyperlink>\
+    </td>
+
+    <td align="$languageRight">\
+        <a:String value="$labelRight"/>\
+        <a:PrimitiveString value="$spaceRight"/>\
+    </td>\
+
+    <td style="line-height:20px;">\
+        &nbsp;\
+    </td>
+</tr>

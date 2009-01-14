@@ -1,0 +1,124 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.awl#24 $
+    </Copyright>
+
+    <Overview>
+        Renders a <select ...>...[<option>...</option>]*...</select> popup menu in the html.
+        The content area of this tag renders the displayble portion of the option menu item.
+    </Overview>
+
+    <Binding key="list" type="AWOrderedList" required="$true" direction="get">
+        Ordered list of items displayed in the popup menu.
+    </Binding>
+
+    <Binding key="item" type="Object" direction="set">
+        The current menu item being rendered in the the popup.
+    </Binding>
+
+    <Binding key="index" type="int" direction="set">
+        The current index for the menu item being rendered in the popup.
+    </Binding>
+
+    <Binding key="selection" type="Object" direction="set">
+        The item that was selected by the user in the popup menu.  The is set during the applyValues phase.
+    </Binding>
+
+    <Binding key="noSelectionString" type="String" required="$false" direction="get">
+        The string to be displayed in the popup which allows the user to make "no selection" from the available list.
+        If the user chooses this option, then the selection binding will be pushed as $null.
+    </Binding>
+
+    <Binding key="onChange" type="String" default="$null" direction="get" deprecated="$true">
+        Specifies the onChange attribute used in the <select ...>...</select> tag when no action is specified.
+        It is strongly recommended to not use this as it may conflict with internal
+        implementation.  If you use the "action" binding, the popup will submit the form
+        when the user changes the popup.
+    </Binding>
+
+    <Binding key="action" type="AWResponseGenerating" required="$false" direction="get">
+        The action invoked when a popup menu item is changed.
+        This usurps the onChange attribute and will cause the form to be submited immediately
+        upon user changing the popup.
+        Note that action="$null" is different from no action binding at all.  If you have
+        action="$null", it will submit the form and cycle the page upon change to the popup,
+        while no action at all makes the popup passive (ie. user must click a button to submt the form).
+    </Binding>
+
+    <Binding key="isRefresh" type="boolean" default="$false" direction="get">
+        Convenience binding that is the same as action="$null".  See action binding
+        for more information on action="$null".
+    </Binding>
+
+    <Binding key="disabled" type="boolean" default="$false" direction="get">
+        Disables the popup menu if true.
+    </Binding>
+
+    <Binding key="delayTakeValues" type="boolean" default="$true" direction="get">
+        If the 'action' binding is bound, this determines if the push of the new value is defered until
+        after the reset of the applyValues phase is complete.  (This is generally what you want).
+    </Binding>
+
+    <Binding key="name" type="String" default="$null" direction="get" deprecated="$true">
+        Not supported?
+    </Binding>
+
+    <Binding key="size" type="int" default="$null" direction="get" deprecated="$true">
+        Not supported?
+    </Binding>
+
+</a:Api>\
+<a:If ifFalse="$requestContext.isPrintMode">\
+    <x:BasicScriptFunctions/>\
+    <!--- Todo: switch to behaviors -->
+    <!--- Todo: switch to behaviors -->
+    <select disabled="$isDisabled" elementId="$elementId" id="$popupId" name="$elementId" size="1"
+            onChange="$onChangeString" onKeyDown="$onKeyDownString"
+            onmousewheel="$onMouseWheelString" onMouseDown="ariba.Handlers.AWActionPopupEnabled=true;"
+            isSender="$isHiddenFieldSender" invokeAction="$regularItemClicked"
+            formValue="$formValue" otherBindings="$otherBindingsValues">
+        <a:If notEqualNull="$noSelectionString">\
+            <option value="$=NoSelectionString">\
+                <a:PrimitiveString value="$noSelectionString"/>\
+            </option>
+        </a:If>\
+        <a:For list="$orderedList" item="$currentItem" index="$currentIndex">\
+            <option value="$currentIndex" selected="$isCurrentItemSelected">\
+                <a:IncludeContent/>\
+            </option>
+        </a:For>\
+
+        <a:If condition="$actionList.size">
+            <option value="awnop">\
+                ---------\
+            </option>
+            <a:For list="$actionList" item="$currentAction">\
+                <a:If ifTrue="$isActionVisible">
+                    <option value="$=ActionIndicator" invokeAction="$actionItemClicked"
+                         elementId="$currentOptionId" id="$currentOptionId">\
+                        <a:IncludeContent template="$currentAction.contentElement"/>\
+                    </option>
+                </a:If>
+            </a:For>\
+        </a:If>
+    </select>\
+<a:Else/>
+    <!--- render print value as string -->
+    <a:If notEqualNull="$selectedItem">\
+        <a:SetValue currentItem="$selectedItem"/>
+        <a:IncludeContent/>\
+    </a:If>
+</a:If>

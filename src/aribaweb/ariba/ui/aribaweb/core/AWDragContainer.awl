@@ -1,0 +1,107 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDragContainer.awl#13 $
+    </Copyright>
+
+    <Overview>
+        An AWDragContainer can act as an area of draggable content (Drag Container) and as
+        a draggable control (Drag Control). The Drag Control defines a 'draggable' region
+        that can be selected and dragged by the user.  The Drag Container defines the
+        region of content that is moved during the drag.  Typically, an AWDragContainer
+        acts as both both a Drag Control and a Drag Container.  In other words, the
+        draggable region is the same as the region that will be affected by
+        the drag gesture.  In some cases, it is desireable to have a Drag Control that is
+        a subset of the Drag Container.  For example, dragging a portlet in the dashboard
+        can be initiated by dragging the menu bar of the portlet (Drag Control) while the
+        drag gesture will affect the entire portlet (Drag Container).
+
+        An AWDragContainer is considered to be only a Drag Container if it does not have a
+        drag action defined.
+
+        An AWDragContainer acts as a Drag Control if the showParent binding is set to
+        $true.  In this case, the AWDragContainer will use its parent AWDragContainer
+        (next component higher in the hierarchy with the the same drag type) as its
+        Drag Container (ie, what is move during the drag gesture).
+    </Overview>
+
+    <Binding key="tagName" direction="get" type="String" default="div">
+        The tag used as the container for the AWDragContainer.  This affects the layout of
+        the draggable content in the page.  The allowed values are span or div.
+    </Binding>
+
+    <Binding key="class" direction="get" type="String" required="$false">
+        CSS class of the container.
+    </Binding>
+
+    <Binding key="bh" direction="get" type="String" required="$false">
+        Behavior (JavaScript) to use for element.  Default is DrG (and any
+        override should extend this).
+    </Binding>
+
+    <Binding key="dragAction" direction="get" type="void" required="$false">
+        Method to be invoked when an AWDragContainer is dragged and dropped on a valid
+        AWDropContainer.  The dragAction is a pseudo-action, which should be used
+        to setup any state required by the drop action.
+
+        For example when a drag container A is dropped on a drop container B, the
+        dragAction for A is invoked.  At this point, the dragAction for A should store
+        some state which will be accessible to the dropAction of B (for example, the
+        requestContext.dict() or in some cross component data structure -- parent
+        component, global data, etc.)
+
+        *** NOTE: This action is guaranteed to be invoked before the drop action is
+        invoked on a AWDropContainer.  This pseudo-action is invoked prior to the
+        real action (drop action) so it should not change any object state which will
+        affect the invokeActionForRequest() phase.
+
+        If no dragAction is bound, then this AWDragContainer is assumed to only be a Drag
+        Container and is used to define the content to be moved when a drag gesture is
+        initiated.  In this case, this AWDragContainer must contain another
+        AWDragContainer which does define a dragAction in order to be dragged.
+    </Binding>
+
+    <Binding key="type" direction="get" type="String" required="$true">
+        Type of object in the drag container.  This value is used to determine which drop
+        containers are valid drop locations for when a drag gesture is initiated on this
+        container.
+    </Binding>
+
+    <Binding key="showParent" direction="get" type="boolean" default="$false">
+        Indicates that the AWDragContainer is a Drag Control.  When a drag gesture is
+        initiated, the next AWDragContainer with the same drag type in the component
+        hierarchy is used as the Drag Container for the gesture.
+    </Binding>
+
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        Conditionalizes the AWDragContainer.  If this binding is set to $false, then
+        the AWDragContainer does nothing more than render its component content.
+    </Binding>
+</a:Api>\
+<a:If ifTrue="$^omitTags">\
+    <a:IncludeContent/>\
+<a:Else ifTrue="$isContainer"/>\
+    <a:GenericContainer tagName="$^tagName:div" class="$cssClass"
+                        otherBindings="$otherBindingsValues">\
+        <a:IncludeContent/>\
+    </a:GenericContainer>\
+<a:Else/>\
+    <a:GenericContainer tagName="$^tagName:div" class="$cssClass" bh="$^bh:DrG"
+                        elementId="$elementId" id="$elementId"
+                        otherBindings="$otherBindingsValues"
+                        invokeAction="$fireAction">\
+        <a:IncludeContent/>\
+    </a:GenericContainer>\
+</a:If>\

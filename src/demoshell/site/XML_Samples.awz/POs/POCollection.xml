@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!---
+    This is an array of references to POs
+-->
+<POList>
+    <PurchaseOrder src="PO1.xml"/>
+    <PurchaseOrder src="PO2.xml"/>
+    <PurchaseOrder src="PO3.xml"/>
+</POList>

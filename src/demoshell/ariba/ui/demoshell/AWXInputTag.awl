@@ -1,0 +1,10 @@
+<a:If value="$^type" isEqual="text">\
+    <a:TextField value="$value" size="^size"/>\
+<a:Else value="$^type" isEqual="submit"/>\
+    <a:SubmitButton action="$action" value="$^value"/>\
+<a:Else value="$^type" isEqual="image"/>\
+    <x:ImgTag src="$^src" border="$^border"/>\
+<a:Else/>\
+    <a:GenericElement tagName="input" type="$^type" value="$^value" name="^name" checked="^checked" disabled="$^disabled"
+        onClick="$^onClick"/>\
+</a:If>\

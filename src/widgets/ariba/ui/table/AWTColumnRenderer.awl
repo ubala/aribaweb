@@ -1,0 +1,91 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTColumnRenderer.awl#25 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="isHeader" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+    <Binding key="class" direction="get" type="String" default="tableHead/tableBody">
+        TBD
+    </Binding>
+    <Binding key="tagName" direction="get" type="String" default="td">
+        TBD
+    </Binding>
+</a:Api>\
+
+<a:If ifTrue="$^isHeader">\
+    <a:If ifTrue="$table.renderToExcel">\
+        <th class="tableHead" width="$columnWidth" style="$cc_style" nowrap="$cc_nowrap" align="$cc_align:left" x:autofilter="all" colspan="$^colspan">\
+            <b>\
+                <a:String value="$cc_label"/>\
+            </b>\
+        </th>
+    <a:Else/>
+        <th class="$^class:tableHead" width="$columnWidth" style="$cc_style" nowrap="$cc_nowrap" align="$cc_align:left" colspan="$^colspan">\
+        <a:OutputRangeCheck contentIterator="$table.iteratorForTDContentCheck">
+            <a:If ifTrue="$showColumnHeader">\
+                <t:SortHeading displayGroup="$table.displayGroup" createSortOrdering="$cc_sortOrdering"
+                         caseSensitiveSort="$cc_sortCaseSensitively"
+                         disabled="$disableSort" submitForm="$table.multiSelectOrSubmitForm">\
+                    <a:String value="$cc_label"/>\
+                </t:SortHeading>\
+            <a:Else/>\
+                &nbsp;\
+            </a:If>\
+        </a:OutputRangeCheck>
+        </th>\
+    </a:If>
+<a:Else/>\
+    <a:MethodInvocation invoke="$prepare"/>\
+    <a:GenericContainer tagName="$^tagName:td" class="$cc_class:$table.tdClass" width="$dataRowColumnWidth" style="$cc_style" align="$cc_align" valign="$columnVAlignment"
+            colspan="$^colspan" nowrap="$cc_nowrap" omitTags="$^omitTD">\
+        <a:OutputRangeCheck contentIterator="$table.iteratorForTDContentCheck">
+            <a:If ifTrue="$^showLabelPrefix">\
+                <a:String value="$cc_label"/>: \
+            </a:If>\
+            <a:If notEqualNull="$column.contentElement">\
+                <!--- NOTE: $parent.this is equalvalent to $parent.parent since $parent is an AWSubcomponent and since
+                      AWSubcomponent's always forward messages to them to their parent.  If we used $parent.parent
+                      (which is what we really want), we would effectively have $parent.parent.parent.  At some point
+                      I will fix AWSubcomponets to not incur a component in the chain, so this will break at that time
+                      (when we can probably completely remove the 'context' binding).  Another point to realize is that
+                      someday I will be using the new awcomponentReference feature of AWSwitchComponent and we'll eliminate
+                      these Control/Renderer distinctions and that will present a different issue as well. -->\
+                <a:IncludeContent template="$column.contentElement" context="$parent.this"/>\
+            <a:Else/>\
+                <a:If ifTrue="$omitAction">\
+                    <a:If ifFalse="$isBlank">\
+                        <a:String value="$value" formatter="$cc_formatter"/>\
+                    <a:Else/>\
+                        &nbsp;
+                    </a:If>\
+                <a:Else/>\
+                    <a:Hyperlink action="$cc_action">\
+                        <a:String value="$value" formatter="$cc_formatter"/>\
+                    </a:Hyperlink>\
+                </a:If>\
+            </a:If>\
+            <!--- Netscape 4.7 needs something to make the bgcolor show up, but this screws up alignment.
+              We'll see if Netscape 6.0 has the same problem. -->\
+            <!--- &nbsp;\-->\
+        </a:OutputRangeCheck>\
+    </a:GenericContainer>
+</a:If>\

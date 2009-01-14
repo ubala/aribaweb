@@ -1,0 +1,9 @@
+8859_1
+9023,"Exception: {0} {1}", 0-error 1-stack trace
+9240,"Failed to initialize session validator: {0}.  Server will retry initialization", 0-exception message
+9282,"Invalid formValuesString -- missing ''='', skipping: ''{0}''", 0-query string key
+9339,"General warning: {0}", 0-warning message
+9370,"Maximum number of waiting threads exceeded.  Last request: {0}", 0-request information
+9527,"Trying to unregister an error navigation handler that hasn't been registered: {0}", 0-handler
+9535,"Expected the old error to be an AWErrorInfo but it is not. {0}", 0-the unexpected object
+9570,"Trying to unregister a full-validation handler that hasn't been registered: {0}", 0-handler

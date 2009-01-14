@@ -1,0 +1,78 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTBatchNavigationBar.awl#7 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="showTotalItems" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="displayGroup" direction="get" type="AWTDisplayGroup" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" default="$false">
+        TBD
+        See AWHyperlink
+    </Binding>
+</a:Api>\
+
+<a:If condition="$showNavigationBar">
+    <a:If ifTrue="$^showTotalItems">
+        <a:If notEqualNull="$^captionFormat">
+           <a:String value="$caption"/>
+        <a:Else/>
+           <a:String value="$displayGroup.allObjects.size"/> \
+           <a:String value="$itemsString"/>\
+        </a:If>
+        &nbsp;&nbsp;
+    </a:If>
+
+    <a:If ifFalse="$isFirstBatchDisplayed">\
+        <a:Hyperlink action="$displayPreviousBatchClicked" submitForm="$^submitForm">\
+            <a:Image filename="anxPageLeft.gif" align="absmiddle"/>\
+        </a:Hyperlink>\
+    </a:If>\
+\
+    <a:Local key="a001">\
+        Page \
+    </a:Local>\
+\
+\
+\
+    <a:If notEqualNull="$requestContext.currentForm">\
+        <a:Popup list="$batchLabels" item="$currentBatchLabel" selection="$selectedBatchLabel" action="$batchSelected">
+            $currentBatchLabel\
+        </a:Popup>\
+    <a:Else/>\
+        <a:Form>
+            <a:Popup list="$batchLabels" item="$currentBatchLabel" selection="$selectedBatchLabel" action="$batchSelected">
+                $currentBatchLabel\
+            </a:Popup>\
+        </a:Form>
+    </a:If>\
+\
+    <a:If ifFalse="$isLastBatchDisplayed">\
+        <a:Hyperlink action="$displayNextBatchClicked" submitForm="$^submitForm">\
+            <a:Image filename="anxPageRight.gif" align="absmiddle"/>\
+        </a:Hyperlink>\
+    </a:If>
+\
+</a:If>\

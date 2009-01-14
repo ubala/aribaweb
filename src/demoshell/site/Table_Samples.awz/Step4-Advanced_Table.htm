@@ -1,0 +1,257 @@
+<!--#include virtual="/templates/WizardHeader.htm" -->
+    <w:HintMessage showTopLine="$true">
+        <a:RefreshRegion>
+            ANXDataTable!<br/>
+        </a:RefreshRegion>
+    </w:HintMessage>
+
+<x:WizardAction pageName="/Preferences.htm" label="Submit" image="/images/btn_done"
+                  hintKey="That's a wrap" afterName="Exit"/>
+
+<x:LoadXML filename="Users.xml" value="$users"/>
+
+<a:SetValue descMinWidth="$intZero"/>
+
+    <t:DataTable enableScrolling="$true" multiSelect="$isMultiSelect" singleSelect="$!isMultiSelect" 
+                 showSelectionColumn="$showSelectionControl" submitOnSelectionChange="$true"
+                 forceColumnUpdate="$layoutChanged"
+                 batchSize="30"  submitForm="$true"
+                 displayGroup="$displayGroup" list="$list" item="$item"
+                 isItemSelectable="$currentNotMoved"
+                 tableConfig="$tableConfig"
+                 dragAction="$itemDragged" dragType="lineItem" dropAction="$null" dropType="lineItem">
+
+        <t:HeadingArea>
+            <w:SectionHeading title="Critical Information">
+                <div style="float:right">
+                    <div style="float:left">
+                        $displayGroup.batchStartIndex - $displayGroup.batchEndIndex of $displayGroup.filteredObjects.size
+                        <a:TextField value="$rowNum" formatter="$formatters.intFormatter" size="3"/>
+                    </div>
+                    <w:TextButton action="$gotoRow">Go</w:TextButton>\
+                    <w:PulldownButton menuId="MyMenu">Selection Type...</w:PulldownButton>\
+                    <t:OptionsMenuButton>\
+                        <span style="padding-left:5px">\
+                            <b>Some Label</b>\
+                        </span>\
+                    </t:OptionsMenuButton>\
+                </div>
+            </w:SectionHeading>
+        </t:HeadingArea>
+
+        <t:Column valign="middle">
+            <w:ToggleImage align="absmiddle" state="$displayGroup.currentItemExtras.expando"/>
+        </t:Column>
+
+        <t:Column label="Department!" key="Department" nowrap>
+            <a:SetValue menuId="$requestContext.nextElementId"/>
+            <w:PopupMenuLink class="awmenuLink hoverLink hoverArrow" menuId="$menuId" position="this">
+                <a:String value="$displayGroup.currentItem.Department"/>
+            </w:PopupMenuLink>
+            <a:If ifTrue="$displayGroup.currentItemExtras.expando">(expanded)</a:If>
+
+            <w:PopupMenu menuId="$menuId">
+                <a:LazyDiv>
+                    <w:PopupMenuHeading showSeparator="$false">\
+                        Options for $displayGroup.currentItem.Department\
+                    </w:PopupMenuHeading>
+                    <w:PopupMenuItem action="$null" showBullet="$false" disabled="$false">\
+                            New Workspace\
+                    </w:PopupMenuItem>
+                    <w:PopupMenuItem action="$null" showBullet="$false" disabled="$false">\
+                            New Document\
+                    </w:PopupMenuItem>
+                    <w:PopupMenuItem action="$null" showBullet="$false" disabled="$false">\
+                            New RFx\
+                    </w:PopupMenuItem>
+                </a:LazyDiv>
+            </w:PopupMenu>
+        </t:Column>
+
+        <t:Column key="Category">
+            <a:TextField value="$displayGroup.currentItem.Category"/>
+        </t:Column>
+
+        <t:Column label="Description" minWidthPx="$descMinWidth">
+            This is some long text that could be wrapped mercilessly
+            <a:PhaseInvocation append="$checkDescMinWidth"/>
+        </t:Column>
+
+        <t:Column key="Year" formatter="$formatters.shortDate" nowrap/>
+
+        <t:Column key="Amount" formatter="$formatters.money" align="right" nowrap/>
+
+        <t:Column>
+            <a:If ifTrue="$displayGroup.currentItemExtras.moved">\
+                <i>Moved</i>
+            </a:If>
+        </t:Column>
+
+        <!--- Nested table as conditional detail -->
+        <t:RowDetail isVisible="$displayGroup.currentItemExtras.expando" showRowLine="$false">
+            <t:DataTable multiSelect="$true" batchSize="9999" list="$users.children" item="$item"
+                    children="$item.manages.children">
+
+                <t:Column key="name.text" label="Name" valign="bottom">\
+                    <w:OutlineFolderControl title="$item.name.text"/>\
+                </t:Column>
+
+                <t:Column key="phone.text" label="Phone"/>
+
+                <t:Column key="email.text" label="Email"/>
+
+                <t:Column align="right">
+                    <div style="float:right">
+                        <w:TextButton action="$null">Inspect</w:TextButton>
+                    </div>
+                </t:Column>
+
+                <t:ButtonArea>
+                    <w:TextButton action="$null">Delete</w:TextButton>\
+                    <w:TextButton action="$null">Edit</w:TextButton>
+                </t:ButtonArea>
+
+            </t:DataTable>
+        </t:RowDetail>
+        <t:SelectionButtonArea isVisible="$true">
+            <w:TextButton action="$inspectClicked" disabled="$!displayGroup.selectedObject">inspect</w:TextButton>\
+            <w:TextButton action="$simulateMove" disabled="$!displayGroup.selectedObject">Move</w:TextButton>\
+            <w:TextButton action="$simulateDelete" disabled="$!displayGroup.selectedObject">Delete</w:TextButton>
+        </t:SelectionButtonArea>
+
+        <t:ButtonArea isVisible="$true">
+            <w:TextButton action="$null">Add</w:TextButton>
+            <w:PopupMenuLink class="awmenuLink hoverLink hoverArrow" menuId="MyMenu" position="this">Do something</w:PopupMenuLink>
+            &nbsp;
+            <w:PopupMenuLink class="awmenuLink hoverArrow" menuId="MyMenu" position="this">Do something else</w:PopupMenuLink>
+        </t:ButtonArea>
+
+        <t:RightButtonArea>
+            <div nowrap>
+                Text
+                <w:PopupMenuLink class="awmenuLink hoverArrow" menuId="MyMenu" position="this">Do something right</w:PopupMenuLink>                
+            </div>
+        </t:RightButtonArea>
+
+    </t:DataTable>
+    <a:RefreshRegion>
+        <br/>
+        <b>Selection:</b> <a:String value="$displayGroup.selectedObjects"/><br/>
+    </a:RefreshRegion>
+<w:PopupMenu menuId="MyMenu">
+    <w:PopupMenuHeading showSeparator="$false">\
+        Selection Mode\
+    </w:PopupMenuHeading>
+    <w:PopupMenuItem action="${isMultiSelect=true; layoutChanged=true; null}" showBullet="$isMultiSelect">\
+        Multi-Select\
+    </w:PopupMenuItem>
+    <w:PopupMenuItem action="${isMultiSelect=false; layoutChanged=true; null}" showBullet="$!isMultiSelect">\
+        Single-Select\
+    </w:PopupMenuItem>
+
+    <w:PopupMenuHeading showSeparator="$false">\
+        Selection Control\
+    </w:PopupMenuHeading>
+    <w:PopupMenuItem action="${showSelectionControl=true; layoutChanged=true; null}" showBullet="$showSelectionControl">\
+        Visible\
+    </w:PopupMenuItem>
+    <w:PopupMenuItem action="${showSelectionControl=false; layoutChanged=true; null}" showBullet="$!showSelectionControl">\
+        Hidden\
+    </w:PopupMenuItem>
+</w:PopupMenu>\
+
+
+<server>
+    var isMultiSelect = true;
+    var showSelectionControl = true;
+    var layoutChanged = false;
+    var item = null;
+    var list;
+    var displayGroup = null;
+    var rowNum = null;
+    var draggedItem = null;
+    var descMinWidth = null;
+    var intZero = ariba.util.core.Constants.getInteger(0);
+
+    function init () {
+        // initialize the display group and fetch objects ourselves so we can pre-select all
+        list = ariba.ui.table.AWTCSVDataSource.dataSourceForPath("SampleSpend.csv", component).fetchObjects();
+        displayGroup = new ariba.ui.table.AWTDisplayGroup();
+        // displayGroup.setObjectArray(list);
+        // displayGroup.setSelectedObjects(list);
+    }
+
+    function checkDescMinWidth () {
+        if (get(displayGroup.currentItemExtras(), "moved")) {
+            descMinWidth = ariba.util.core.Constants.getInteger(300);
+        }
+    }
+
+    function itemDragged () {
+        draggedItem = displayGroup.currentItem();
+        return null;
+    }
+
+    function itemDropped () {
+        var v = displayGroup.allObjects();
+        ariba.util.core.ListUtil.removeElementIdentical(v, draggedItem);
+        displayGroup.setObjectArray(v);
+        return null;
+    }
+
+    function gotoRow () {
+        if (rowNum) {
+            var list = displayGroup.filteredObjects();
+            var item = list.get(Math.min(rowNum, list.size()-1));
+            Log.demoshell.debug("Row (%s): %s", rowNum, item);
+            // displayGroup.checkObjectArray(list);
+            displayGroup.setItemToForceVisible(item);
+            displayGroup.setSelectedObject(item); // highlight it
+        }
+        return null;
+    }
+
+    function inspectClicked () {
+        var item = displayGroup.selectedObject();
+        ariba.ui.widgets.AribaPageContent.setMessage("You last inspected: " + item, component.session());
+        return null;
+    }
+
+    function simulateMove () {
+        var e = displayGroup.selectedObjects().iterator();
+        while (e.hasNext()) {
+            set(displayGroup.extrasForItem(e.next()), "moved", true);
+        }
+        displayGroup.clearSelection();
+        return null;
+    }
+
+    function simulateDelete () {
+        var v = displayGroup.allObjects();
+        var e = displayGroup.selectedObjects().iterator();
+        while (e.hasNext()) {
+            ariba.util.core.ListUtil.removeElementIdentical(v, e.next());
+        }
+        displayGroup.setObjectArray(v);
+        return null;
+    }
+
+    function currentNotMoved () {
+        return !get(displayGroup.currentItemExtras(), "moved");
+    }
+
+    function setTableConfig (config)
+    {
+        Log.demoshell.debug("Table Config: %s", config);
+        set(component.session(), "tableConf", config);
+    }
+
+    function tableConfig ()
+    {
+        try {
+            return get(component.session(), "tableConf");
+        } catch (e) {
+        }
+        return null;
+    }
+</server>

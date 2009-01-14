@@ -1,0 +1,9 @@
+<span style="display:none" id="AWDummySelect">
+    <table cellspacing="0" cellpadding="0">
+        <tr>
+            <td><a:Image filename="widg/popupLeft.gif"/></td>
+            <td class="dummySelect" width="100%" nowrap="awstandalone"></td>
+            <td><a:Image filename="widg/popupRight.gif"/></td>
+        </tr>
+    </table>
+</span>

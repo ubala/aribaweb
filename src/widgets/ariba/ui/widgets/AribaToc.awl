@@ -1,0 +1,30 @@
+<a:PhaseInvocation append="$requestContext.enableComponentPathDebugging"/>\
+<a:If notEqualNull="$toc">
+    <div class="flexContainer tocContent">
+    <a:If ifFalse="$hasTOCContainer">
+        <div class="tocSpacer"></div>\
+            <a:OutputRangeCheck contentIterator="$iteratorForTOCContentCheck">
+                <div style="padding-top:13px;padding-left:20px">
+                    <w:RoundedBox class="flexContainer tocBox">
+                        <a name="navigation"></a>\
+                        <w:WidgetInclude name="$toc"/>\
+                        <a:If notEqualNull="$ariba.ui.widgets.Widgets.TocBottomComponent">
+                            <a:IncludeComponent name="$ariba.ui.widgets.Widgets.TocBottomComponent" isLoginPage="$false"/>
+                        </a:If>
+                    </w:RoundedBox>\
+                </div>
+            </a:OutputRangeCheck>
+        <a:GenericContainer tagName="script">
+            if (window.name == "AWRefreshFrame") parent.ariba.Widgets.updateTOC(parent.ariba.Dom.getDocumentElementById(document, "tocAlley"), $hasVisibleContent);
+            else ariba.Widgets.updateTOC(ariba.Dom.getElementById("tocAlley"), $hasVisibleContent);
+        </a:GenericContainer>        
+    <a:Else/>
+        <a name="navigation"></a>\
+        <w:WidgetInclude name="$toc"/>\
+        <a:If notEqualNull="$ariba.ui.widgets.Widgets.TocBottomComponent">
+            <a:IncludeComponent name="$ariba.ui.widgets.Widgets.TocBottomComponent" isLoginPage="$false"/>
+        </a:If>
+    </a:If>
+    </div>
+</a:If>
+<a:PhaseInvocation append="$requestContext.disableComponentPathDebugging"/>\

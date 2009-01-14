@@ -1,0 +1,5 @@
+<w:ModalWindowWrapper title="Modal Window Exception">
+    <pre>\
+        <a:PrimitiveString value="$stackTrace"/>\
+    </pre>
+</w:ModalWindowWrapper>

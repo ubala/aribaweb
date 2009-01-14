@@ -1,0 +1,150 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDragList.awl#5 $
+    </Copyright>
+
+    <Overview>
+        A component for reordering / drag/dropping a list of items.
+
+        NOTE:
+        Passes through other bindings to container element (e.g. width, height, ...)
+    </Overview>
+
+
+    <Binding key="list" type="AWOrderedList" required="$false" direction="get">
+        The list (Vector, Java Array, ...) to be rendered for drag / drop.
+    </Binding>
+
+    <Binding key="item" type="Object" required="$false" direction="set">
+        The current item in the repetition.
+    </Binding>
+
+    <Binding key="dragAction" direction="get" type="void" required="$false">
+        See AWDragContainer
+    </Binding>
+
+    <Binding key="dropAction" direction="get" type="AWResponseGenerating" required="$true">
+        See AWDropContainer.
+        Note: When item dropped "at end" called with item set to null.
+
+        Client is responsible for handling drag/drop to reorder the list.
+    </Binding>
+
+    <Binding key="type" type="String" required="$false" direction="get">
+        Drag type.
+    </Binding>
+
+    <Binding key="isHoriz" type="boolean" required="$false" default="false" direction="get">
+        Is layout horizontal?
+    </Binding>
+
+    <Binding key="tagName" type="String" required="$false" default="div" direction="get">
+        Tag for the container element
+    </Binding>
+
+    <Binding key="class" type="String" required="$false" direction="get">
+        Css class for the container element.  The drag and drop classes are parented off of this class.
+        I.e., by default this class is vtList or hzList and drop styles are ".vtList .drop" etc
+    </Binding>
+
+    <Binding key="label" type="String" required="$false" direction="get">
+        Label to render in box
+    </Binding>
+
+    <Binding key="itemTagName" type="String" required="$false" direction="get">
+        Default is div for vert, span for horiz
+    </Binding>
+
+    <Binding key="dropTypes" type="List" required="$false" direction="get">
+        List of accepted drop types.  If not provided, type is used.
+    </Binding>
+
+
+    <Binding key="width" type="int" required="$false" direction="get">
+        Pass through.
+    </Binding>
+    <Binding key="height" type="int" required="$false" direction="get">
+        Pass through.
+    </Binding>
+    <Binding key="colspan" type="int" required="$false" direction="get">
+        Pass through.
+    </Binding>
+    <Binding key="rowspan" type="int" required="$false" direction="get">
+        Pass through.
+    </Binding>
+    <Binding key="title" type="String" required="$false" direction="get">
+        Pass through.
+    </Binding>
+    <Binding key="align" type="String" required="$false" direction="get">
+        Pass through.
+    </Binding>
+    <Binding key="valign" type="String" required="$false" direction="get">
+        Pass through.
+    </Binding>
+</a:Api>\
+
+<a:DropContainer tagName="$^tagName:div"
+    type="$dropType"
+    types="$^dropTypes"
+    class="$containerClass"
+    dropClass="dcDrop"
+    dropAction="$dropAtEnd"
+    width="$^width"
+    height="$^height"
+    title="$^title"
+    rowspan="$^rowspan"
+    colspan="$^colspan"
+    valign="$^valign:top"
+    align="$^align">
+    <table valign="top" cellpadding=0 cellspacing=0>
+        <a:If notEqualNull="$^label">
+            <tr>
+                <td class="dcLabel" align="center">\
+                    $^label\
+                </td>
+            </tr>
+        </a:If>
+        <tr>
+            <td align="left">\
+                <a:RefreshRegion style="white-space:nowrap;">\
+                    <a:For list="$^list" item="$^item">\
+                        <a:DropContainer tagName="$itemTagName"
+                            type="$dropType"
+                            types="$^dropTypes"
+                            disableDrop="$!enabled"
+                            dropAction="$^dropAction"
+                            class="dcField" dropClass="dcFieldDrop">\
+                            <a:DragContainer
+                                type="$^type" omitTags="$!enabled"
+                                dragAction="$^dragAction">\
+                                <a:IncludeContent/>\
+                            </a:DragContainer>\
+                        </a:DropContainer>\
+                    </a:For>\
+                    <a:If ifTrue="$isHoriz">\
+                        <a:GenericContainer tagName="$itemTagName" class="dcHorizDropArea">\
+                            &nbsp;\
+                        </a:GenericContainer>\
+                    <a:Else/>\
+                        <a:GenericContainer tagName="$itemTagName" class="dcVertDropArea">\
+                            <a:Image filename="cleardot.gif" align="absmiddle" style="height:2px;width:12px;"/>\
+                        </a:GenericContainer>\
+                    </a:If>\
+                </a:RefreshRegion>\
+            </td>\
+        </tr>\
+    </table>
+</a:DropContainer>\

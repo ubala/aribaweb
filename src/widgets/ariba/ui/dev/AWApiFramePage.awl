@@ -1,0 +1,11 @@
+<w:DocumentContainer>
+<w:DocumentHead windowTitle="AWApi" escapeTitle="$true">
+</w:DocumentHead>
+<frameset cols="240, 100%">
+  <a:Frame name="treeFrame" action="$treePage"/>
+  <a:Frame name="bodyFrame" action="$bodyPage"/>
+  <noframes>
+      <p>This page requires frames.
+  </noframes>
+</frameset>
+</w:DocumentContainer>

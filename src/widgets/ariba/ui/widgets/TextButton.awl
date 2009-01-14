@@ -1,0 +1,191 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.awl#39 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null">
+        TBD
+    </Binding>
+
+    <Binding key="target" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="windowAttributes" direction="get" type="String" required="$false" >
+        If the target binding is used, you may specify the window attributes with this binding.  See
+        book on html/javascript and look for window.open(...) for details.
+    </Binding>
+
+    <Binding key="title" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="isBrandStyle" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="hilite" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="disabled" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="disableClick" direction="get" type="boolean" default="$false">
+        TBD
+        todo: why do we have two different "disabled" bindings?
+    </Binding>
+
+    <Binding key="onKeyPress" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="tabIndex" direction="get" type="int" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="buttonClass" direction="get" type="String" default="btn">
+        TBD
+    </Binding>
+
+    <Binding key="buttonOverClass" direction="get" type="String" default="btn">
+        TBD
+    </Binding>
+
+    <Binding key="buttonWrapperStyle" direction="get" type="String" default="RoundedBox">
+        "LeftRight" and "RoundedBox"
+    </Binding>
+
+    <Binding key="onClick" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="style" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="plain" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="onKeyPress" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="name" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="formName" direction="set" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="formValue" direction="set" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="confirmationId" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="behavior" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+</a:Api>\
+
+<table class="$wrapClassString" cellspacing="0" cellpadding="0" border="0" style="$appendStyleString">\
+<tr>\
+    <a:If ifTrue="$requestContext.isPrintMode">\
+        <td class="$buttonClassString">
+            <a:IncludeBlock name="wrapper">\
+                <a:IncludeContent/>\
+            </a:IncludeBlock>\
+        </td>
+    <a:Else/>\
+        <a:If ifTrue="$useActionButton">\
+            <!--- standard text button -->\
+            <a:GenericActionTag
+                tagName="td"
+                action="$action" submitForm="$^submitForm"
+                class="$buttonClassString"
+                _cl="$buttonClassString"
+                bh="$^behavior:$behaviorName"
+                _cnf="$confirmationId"
+                awname="$^awname" _awname="$^action"
+                disableClick="$^disableClick"
+                target="$^target"
+                windowAttributes="$^windowAttributes"
+                title="$^title"
+                name="$^name"
+                formValue="$formValue"
+                isTrigger="$isTrigger">\
+                <a:IncludeBlock name="wrapper">\
+                    <a:IncludeContent/>\
+                </a:IncludeBlock>\
+            </a:GenericActionTag>\
+        <a:Else/>\
+            <!---
+                Text Button used when there is a named form which is not an AWForm,
+                for disabled buttons, or when an onClick binding is defined.
+
+                Note: Do not change the following tag to a 'td' because 'td' has been
+                aliased.
+            -->
+            <a:GenericContainer
+                onClick="$onClickString"
+                onKeyPress="$^onKeyPress"
+                tagName="td"
+                class="$buttonClassString"
+                _cl="$buttonClassString"
+                awname="$^awname"
+                title="$^title"
+                bh="$behaviorName"
+                _cnf="$confirmationId"
+                tabIndex="$^tabIndex">\
+                <a:IncludeBlock name="wrapper">\
+                    <a:IncludeContent/>\
+                </a:IncludeBlock>
+            </a:GenericContainer>\
+        </a:If>\
+    </a:If>\
+</tr>\
+</table>\
+<a:Block name="wrapper">\
+    <a:If ifTrue="$useLeftRightWrapper">\
+        <table cellpadding="0" cellspacing="0">\
+            <tr>\
+                <td class="btnL"></td>\
+                <td class="btnC">\
+                    <a:IncludeContent/>\
+                </td>\
+                <td class="btnR"></td>\
+            </tr>\
+        </table>\
+    <a:Else/>\
+        <w:RoundedBox roundStyle="$=ariba.ui.widgets.RoundedBox.SmallAll" hideGradient="$true">\
+            <a:IncludeContent/>\
+        </w:RoundedBox>\
+    </a:If>\
+</a:Block>

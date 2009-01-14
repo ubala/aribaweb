@@ -1,0 +1,33 @@
+<a:Hyperlink action="$openPrintWindow" submitForm="$submitForm" class="$^class">\
+   <a:If ifTrue="$^showIcon"><a:Image filename="widg/icn_print.gif"/> </a:If>\
+   <a:IncludeContent/>\
+</a:Hyperlink>\
+<!---
+<a:SetValue menuId="$requestContext.nextElementId"/>\
+\
+<w:PopupMenuLink menuId="$menuId">\
+    <a:IncludeContent/>\
+</w:PopupMenuLink>\
+\
+<w:PopupMenu menuId="$menuId">\
+    <w:PopupMenuHeading showSeparator="$false">\
+        Show Printable Version\
+    </w:PopupMenuHeading>
+
+    <w:PopupMenuItem action="$openPrintWindow">\
+            Web Page
+    </w:PopupMenuItem>
+
+    <w:PopupMenuItem action="$openMSWord">\
+            Microsoft Word
+    </w:PopupMenuItem>
+</w:PopupMenu>\
+-->\
+<a:RefreshRegion alwaysRender="$shouldOpenPrintWindow">\
+        <a:ClientSideScript>\
+            var rppId = '<a:ActionId action="$renderPrintPage"/>';
+            <a:If ifTrue="$shouldOpenPrintWindow">\
+            ariba.Widgets.openPrintWindow(rppId);
+            </a:If>\
+        </a:ClientSideScript>\
+</a:RefreshRegion>\

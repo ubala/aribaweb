@@ -1,0 +1,32 @@
+<html>
+<head>
+    <title>$title</title>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <meta http-equiv="Expires" content="-1"/>
+</head>
+<body>
+    <form method="post" id="form1" action="$formActionUrl" name="form1" target="$target">
+        <a:For list="$formValues" index="$currIndex">\
+            <input type="hidden" name="$currentName" value="$currentValue"/>
+        </a:For>\
+    </form>\
+    <a:IncludeContent/>
+    <a:GenericContainer tagName="script" type="text/javascript">
+    if (window.name == "AWRefreshFrame") {
+        //alert("in iframe " + parent.ariba.Dom.getElementById("AWRefreshFrame").style.display);
+
+        <a:CurrWindowDecl/>
+        ariba.awCurrWindow.ariba.Request.prepareRedirectRequest();
+
+        // if we're in a refresh frame, then post the form through the parent.
+        // since we use display:none on the refresh frame, firefox does not allow
+        // form submits in the iframe.
+        parent.ariba.Refresh.iFrameFormSubmit(document.form1);
+    }
+    else {
+        document.form1.submit();
+    }
+
+    </a:GenericContainer>
+</body>
+</html>

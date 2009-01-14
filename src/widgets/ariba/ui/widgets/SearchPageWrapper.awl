@@ -1,0 +1,59 @@
+<!---
+
+<w:SearchPageWrapper>
+
+    <a:Content name="topRightArea">
+    </a:Content>
+
+    <a:Content name="bottomLeftArea">
+    </a:Content>
+
+    <a:Content name="bottomRightArea">
+    </a:Content>
+
+</w:SearchPageWrapper>
+
+-->
+
+<w:BasicPageWrapper commands="$^commands"
+                  hasForm="$^hasForm">\
+    <w:CornerLayout>
+
+        <a:Content name="topLeftArea">
+            <div class="searchTOCHeader">
+                <table cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>
+                            <a:Image filename="searchLg.gif"/>
+                        </td>
+                        <td style="padding-left:5px">
+                            <h2 style="font-size:15px"><a:Local key="a001">Search</a:Local></h2>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </a:Content>
+
+        <a:Content name="topRightArea">
+            <div class="searchHeader">
+                <a:IncludeContent name="topRightArea" required="$false"/>\
+            </div>
+        </a:Content>
+
+        <a:Content name="bottomLeftArea">
+            <w:RoundedStepsBox>
+                <div style="padding:0px 0px 5px 5px;">
+                    <a:IncludeContent name="bottomLeftArea" required="$false"/>\
+                    <div style="width:160px">&nbsp;</div>
+                </div>
+            </w:RoundedStepsBox>
+        </a:Content>
+
+        <a:Content name="bottomRightArea">
+            <div class="searchBody">
+                <a:IncludeContent name="bottomRightArea" required="$false"/>\
+            </div>
+        </a:Content>
+
+    </w:CornerLayout>
+</w:BasicPageWrapper>\

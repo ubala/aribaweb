@@ -1,0 +1,125 @@
+AribaWeb Build Instructions
+
+$Id: $
+
+Basic steps:
+  0) Install pre-requisites and set up your environment variables
+
+  1) Download AribaWeb and unpack it
+
+  2) CD to "src" subdirectory of AW installation
+        i.e. cd <aw dir>/src
+
+  3) Run ant
+
+  4) Run test apps (via tomcat)
+
+  5) Experiment with making changes!
+
+Step 0) Install pre-requisites and set up your environment variables
+
+    - Install the Java5 or Java6 JDK (http://java.sun.com/javase/downloads/index_jdk5.jsp)
+        - set your JAVA_HOME
+
+    - Install Ant v1.7+ (http://ant.apache.org/)
+        - set your ANT_HOME environment variable to your Ant install directory
+
+        I.e.:
+            export JAVA_HOME='d:/jdk1.5'
+            export ANT_HOME="d:/ant"
+            export PATH="$JAVA_HOME/bin;$ANT_HOME/bin;$PATH"
+
+Like many java projects, AW uses Apache Ant for build
+automation.  Note: you MUST use Ant version 1.7 or greater.
+
+
+Step 1) Download AribaWeb
+
+Download either a zip or a tarred/gzipped version of the archive, and
+uncompress it into a directory of your choice.
+
+Step 2) CD to "src" subdirectory of AW installation
+
+AW's src directory contains the build.xml file. By default,
+you do not need to change any of the settings in this file, but you do
+need to run ant from this location so it knows where to find build.xml.
+
+If you would like to change settings you can do so by creating one 
+or more of the following files and placing your own property settings
+in there:
+
+    ~/aribaweb.build.properties
+    ~/build.properties
+    aribaweb-x.y/build.properties
+
+The first property which is found in the order with which the files are
+loaded becomes the property setting which is used by the Ant build
+system.
+
+NOTE: the ~ character represents your user account home directory.
+
+Step 3) Run ant
+
+Assuming you have ant in your PATH and have set ANT_HOME to the
+location of your ant installation, typing "ant" at the shell prompt
+and command prompt should run ant.  Ant will by default look for the
+"build.xml" file in your current directory, and invoke the "jars" target.
+
+Some useful targets include:
+    - jar
+        Compile AW, create jars in lib/ directory
+    - wars
+        jars + create demo wars in the webapps/ directory
+    - tomcat
+        invoke tomcat using the AW top-level dir as the CATALINA_BASE
+        (and setting ARIBA_DEMOSHELL_HOME to ./src/demoshell/site)
+    - tomcat-build
+        build wars, then run tomcat
+
+Step 4) Run (via tomcat)
+    - Install Apache Tomcat 5.5 Core (http://tomcat.apache.org/download-55.cgi)
+        - set your CATALINA_HOME environment variable to your tomcat install directory
+            I.e.:
+                export CATALINA_HOME="d:/tomcat5.5"
+
+    - Run "ant tomcat"
+
+    - Once the apps are running, try to click on the "AW Options" link at the
+      top center of the window and select "Show Component Inspector".  A window will open
+      (if you instruct your browser popup blocker to allow it) showing the hierarchical
+      component structure of whatever page you are on in the other window.  As you click
+      in the main window, this "Inspector" will update.  Now, click on one of the rows
+      in the inspector table and you will be able to see the .awl template for that
+      part of the page.  This is an excellent way to browse the code behind the examples.
+
+      TO DEBUG:
+      Set the following variables in your environment:
+	        export JPDA_ADDRESS=8000
+        	export JPDA_TRANSPORT=dt_socket
+      Then you can attach from your IDE.
+
+Step 5)Experiment with making changes!
+    - The code in demoshell/site is automatically enabled for "rapid turnaround" -- i.e.
+      you can edit a .htm file, click refresh (F5) on your browser, and immediately see
+      the change take effect.
+
+    - For other AW code (or samples) to get rapid-turnaround you need to tell AW where,
+      to find your source directories (to it looks at those copies of the files instead
+      of the resources compiled into your jars).  Just set the ARIBA_AW_SEARCH_PATH as follows:
+
+        export ARIBA_AW_SEARCH_PATH="$AW_HOME/src/samples/simple;$AW_HOME/src/aribaweb;..."
+
+      (Assuming you've set an AW_HOME variable to point at the root directory of your
+       AribaWeb installation)
+
+
+For further information on AW, go to:
+  http://aribaweb.ariba.com/
+
+---
+This file is based on a file from the Apache Lucene distribution:
+    - originally written by Steven J. Owens <puff@darksleep.com>.
+    - modified by Jon S. Stevens <jon@latchkey.com>.
+    - adapted for AribaWeb by Craig Federighi <craigf@ariba.com>
+
+Copyright (c) 2001-2005 The Apache Software Foundation.  All rights reserved.

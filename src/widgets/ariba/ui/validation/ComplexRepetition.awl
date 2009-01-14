@@ -1,0 +1,79 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/ComplexRepetition.awl#2 $
+    </Copyright>
+
+    <Overview>
+        Repetition for intelligently handling cases with no items, or too many items.
+
+        Sample use case: a multi-chooser where we want to display a list of the first three items (separated by a comma)
+        and "..." if there are more, but just "(none)" if there are none.
+    </Overview>
+
+    <Binding key="item" direction="set" type="Object" required="$true">
+        Like in AWRepetition
+    </Binding>
+
+    <Binding key="list" direction="get" type="List" required="$true">
+        Like in AWRepetition
+    </Binding>
+
+    <Binding key="count" direction="get" type="int" required="$true">
+        Should be called "maxCount" -- the max number of items to render before truncating
+        (and displaying "overflow")
+    </Binding>
+
+    <NamedContent name="empty" required="$false">
+        What to render when list has no items.  E.g. "(none)"
+    </NamedContent>
+
+    <NamedContent name="prefix" required="$false">
+        What to render before the first item
+    </NamedContent>
+
+    <NamedContent name="body" required="$true">
+        The renderer for the item
+    </NamedContent>
+
+    <NamedContent name="separator" required="$false">
+        Separator between items (e.g. " ,")
+    </NamedContent>
+
+    <NamedContent name="overflow" required="$false">
+        What to render if there are more than "count" items -- e.g.: "...", or a hyperlink for "more..."
+    </NamedContent>
+
+    <NamedContent name="suffix" required="$false">
+        What to render after the last item
+    </NamedContent>
+
+</a:Api>\
+
+<a:If ifTrue="$isEmpty">\
+    <a:IncludeContent name="empty" required="$false"/>\
+<a:Else/>
+    <a:IncludeContent name="prefix" required="$false"/>\
+    <a:For list="$list" item="$^item" index="$index" count="$maxCount">\
+        <a:IncludeContent name="body"/>\
+        <a:If ifFalse="$isLast">\
+            <a:IncludeContent name="separator" required="$false"/>\
+        </a:If>\
+    </a:For>\
+    <a:If ifTrue="$didTruncateList">\
+        <a:IncludeContent name="overflow" required="$false"/>\
+    </a:If>\
+    <a:IncludeContent name="suffix" required="$false"/>\
+</a:If>

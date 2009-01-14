@@ -1,0 +1,18 @@
+<a:If ifTrue="$^usesPanelContainer">\
+    <table id="$^id" class="$^class" style="$^style"><tr><td class="panel">
+        <div class="$^wrapperClass:dialogWrapper" style="$^wrapperStyle">\
+            <a:IncludeContent/>\
+        </div>\
+    </td></tr></table>\
+<a:Else/>\
+    <div id="$^id" class="$^class" style="$^style">
+        <div class="$^wrapperClass:dialogWrapper" style="$^wrapperStyle">\
+            <a:IncludeContent/>\
+        </div>\
+        <!---b class="d1"></b>\
+        <b class="d2"></b>\
+        <b class="d3"></b>\
+        <b class="d4"></b>\
+        <b class="d5"></b-->\
+    </div>\
+</a:If>\

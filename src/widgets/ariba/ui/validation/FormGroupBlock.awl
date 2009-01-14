@@ -1,0 +1,11 @@
+<a:If ifTrue="$alreadyInFormTable">\
+    <tr>
+        <td colspan=4>\
+            <a:IncludeContent/>\
+        </td>\
+    </tr>
+<a:Else/>
+    <div>\
+        <a:IncludeContent/>\
+    </div>
+</a:If>

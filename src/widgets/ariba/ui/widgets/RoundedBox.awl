@@ -1,0 +1,31 @@
+<div class="$cssClass" otherBindings="$otherBindingsValues">\
+    <a:If ifTrue="$style.showTop">\
+        <b class="rbC">\
+            <b class="rbBC rb1"></b>\
+            <b class="rbBC rbFC rb2"></b>\
+            <a:If ifFalse="$style.isSmall">\
+                <b class="rbBC rbFC rb3"></b>\
+                <b class="rbBC rbFC rb4"></b>\
+            </a:If>\
+        </b>\
+    </a:If>\
+    <a:If ifTrue="$^hideGradient">\
+        <div class="rbBC rbBFC rbB">\
+            <a:IncludeContent/>\
+        </div>\
+    <a:Else/>\
+        <w:GradientBox class="rbBC rbBFC rbB">\
+            <a:IncludeContent/>\
+        </w:GradientBox>\
+    </a:If>\
+    <a:If ifTrue="$style.showBottom">\
+        <b class="rbC">\
+            <a:If ifFalse="$style.isSmall">\
+                <b class="rbBC rbFC rbBtFC rb4"></b>\
+                <b class="rbBC rbFC rbBtFC rb3"></b>\
+            </a:If>\
+            <b class="rbBC rbFC rbBtFC rb2"></b>\
+            <b class="rbBC rb1"></b>\
+        </b>\
+    </a:If>\
+</div>\

@@ -1,0 +1,10 @@
+<w:ModalPageWrapper title="$[a001]Show / Hide Columns"
+                  editable="$true"
+                  okAction="$toggleColumns">
+    <t:DataTable item="$currentColumn"
+                  displayGroup="$displayGroup"
+                  enableScrolling="$true"
+                  multiSelect="$true">
+       <t:Column label="$[a002]Column Name">$currentColumnLabel</t:Column>
+    </t:DataTable>
+</w:ModalPageWrapper>

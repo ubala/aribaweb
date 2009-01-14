@@ -1,0 +1,6 @@
+<w:ModalPageWrapper title="$title">
+<!--
+    <a:IncludeComponent name="$componentName"/>
+-->
+    <a:InstanceInclude instance="$instance"/>
+</w:ModalPageWrapper>

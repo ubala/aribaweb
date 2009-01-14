@@ -1,0 +1,179 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#6 $
+    </Copyright>
+
+    <Overview>
+        This is the core of the TabSet suite of components.  This renders a list of overlapping tab cells
+        with labels and, when clicked, tells the developer which tab was clicked/selected.  This is not a
+        container-type component, but can be used within container type components (such as AWXBaseTabSet)
+        to render the tabs themselves.
+    </Overview>
+
+    <Binding key="actionMenuId" type="String" direction="get">
+        Id for an action menu.  If this exists, an Action Menu Button will be displayed.
+        The button uses the optional label actionMenuLabel or "Actions" by default.
+    </Binding>
+
+    <Binding key="actionMenuLabel" type="String" direction="get" default="Actions">
+        Optional label for the Action Menu Button.
+    </Binding>
+
+    <Binding key="class" type="String" direction="get">
+        Note: it appears the value of this binding is ignored -- only used to determine if
+        using classic look or square tabs?
+    </Binding>
+
+    <Binding key="dropType" type="String" direction="get">
+        see AWDropContainer's "type" binding.
+    </Binding>
+
+    <Binding key="dropAction" type="AWResponseGenerating" direction="get">
+        see AWDropContainer's "dropAction" binding.
+    </Binding>
+
+    <Binding key="list" type="ariba.util.fieldvalue.OrderedList" direction="get" required="$true">
+        The list of items over which to iterate.  Each item in the list represents one
+        tab in the tabset.  The items in the list may be of any type.  The list itself
+        can be any of the supported classes which has a class extension of type AWOrderedList.
+        By default, this includes all primitive arrays, java.util.List, java.util.Vector, and
+        all implementations of List-like classes which Ariba has implemented.
+    </Binding>
+
+    <Binding key="visibles" type="ariba.util.fieldvalue.OrderedList" direction="get" required="$false">
+        If specified, tabs in this list will be be displayed.
+        Others will be under the "More..." menu tab.  
+    </Binding>
+
+    <Binding key="submitForm" type="boolean" direction="get">
+        see AWHyperlink's submitForm attribute.
+    </Binding>
+
+    <Binding key="item" type="java.lang.Object" direction="set" required="$true">
+        For each item in the "list", this is pushed into the referring component's scope.
+        It can then be used for dereferencing things like the label of the tab.
+    </Binding>
+
+    <Binding key="selection" type="java.lang.Object" direction="both">
+        During renderResponse, the selection is used to determine which tab to display as selected.
+        When the user clicks an unselected tab, we set the selection in the referring component's
+        context.  This is a stateless component, so the referring component (or a parent thereof)
+        must maintain the selection for subsequent requests.
+    </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null">
+        Fired when tab clicked
+    </Binding>
+
+    <Binding key="index" type="int" direction="set">
+        The index of the current tab.  While rendering the list of tabs, we push the index
+        into the referring parent's context in case its useful in that context.
+    </Binding>
+ 
+    <Binding key="label" type="String" direction="get">
+        The string to display on each label.  The string is html-escaped before rendering.
+    </Binding>
+
+    <Binding key="disabled" type="boolean" direction="get">
+        Render as (and behave as) disabled.
+    </Binding>    
+</a:Api>\
+
+<a:If ifTrue="$requestContext.isPrintMode">\
+    <a:For list="$visibleTabDefinitions" item="$currentTabDefinition" index="$currentIndex">\
+        <a:If ifTrue="$currentTabSelected">
+            <div class="brandDk bigBodyBoldRev" style="padding:3px">$currentLabel</div>
+        </a:If>
+    </a:For>
+<a:Else/>\
+    <div class="tabListWrapper">
+    <table class="tabBox" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td width="1%" class="tabBoxLeft"></td>
+            <td width="1%" class="tabBox">
+                <table cellpadding="0" cellspacing="0" border="0" width="1%">
+                    <tr>
+                        <a:For list="$visibleTabDefinitions" item="$currentTabDefinition" index="$currentIndex">\
+                            <a:If notEqualNull="$currentTabDefinition">\
+                                <a:DropContainer type="$^dropType" omitTags="$isNotDropTarget" dropAction="$^dropAction">
+                                    <a:If ifTrue="$currentTabSelected">
+                                        <td class="$currentTabCssClass"><div class="tabSelectedLeft"></div></td>
+                                        <td>
+                                            <w:RoundedBox class="$currentTabCssClass" hideGradient="$true">\
+                                                <a:Hyperlink omitTags="$^disabled" action="$tabClicked" class="$currentTabCssClass" submitForm="$isSubmitForm">\
+                                                    <a:String value="$currentLabel"/>\
+                                                </a:Hyperlink>\
+                                            </w:RoundedBox>\
+                                        </td>
+                                        <td class="$currentTabCssClass"><div class="tabSelectedRight"></div></td>
+                                        <td>
+                                            <div class="tabShadow">&nbsp;</div>
+                                        </td>
+                                    <a:Else/>
+                                        <td class="$currentTabCssClass"><div class="tabLeft"></div></td>\
+                                        <td>
+                                            <div class="$currentTabCssClass">\
+                                                <a:Hyperlink omitTags="$^disabled" action="$tabClicked" class="$currentTabCssClass" submitForm="$isSubmitForm">\
+                                                    <a:String value="$currentLabel"/>\
+                                                </a:Hyperlink>\
+                                            </div>\
+                                        </td>
+                                        <td class="$currentTabCssClass"><div class="tabRight"></div></td>\
+                                    </a:If>
+                                </a:DropContainer>
+                            </a:If>\
+                        </a:For>\
+                        <a:If ifTrue="$hasHiddenTabs">
+                            <a:SetValue allTabsMenuId="$requestContext.nextElementId"/>
+                            <td>
+                                <div class="lastTab tab">\
+                                    <w:PopupMenuLink menuId="$allTabsMenuId"
+                                                   omitTags="$^disabled"
+                                                   class="lastTab tab"
+                                                   submitForm="$isSubmitForm"
+                                                   position="this">\
+                                        <a:Local key="a002">More</a:Local>...\
+                                    </w:PopupMenuLink>\
+                                </div>\
+                                <w:PopupMenu menuId="$allTabsMenuId">
+                                    <a:For list="$tabDefinitions" item="$currentTabDefinition">
+                                        <w:PopupMenuItem action="$tabClicked"
+                                                       style="$currentTabMenuItemStyle">\
+                                            $currentLabel
+                                        </w:PopupMenuItem>
+                                    </a:For>
+                                </w:PopupMenu>
+                            </td>
+                        </a:If>
+                    </tr>
+                </table>
+            </td>
+            <td width="1%" class="tabBoxRight"></td>
+            <a:If notEqualNull="$^actionMenuId">
+                <td>
+                    <div style="float:right;">\
+                        <w:PulldownButton menuId="$^actionMenuId" buttonClass="btnTab" isBrandStyle="$true">\
+                            <a:String value="$^actionMenuLabel:$[a001]Actions"/>\
+                        </w:PulldownButton>\
+                    </div>
+                </td>
+            <a:Else/>
+                <td class="tabBoxSpacer">&nbsp;</td>
+            </a:If>
+        </tr>
+    </table>
+    </div>
+</a:If>\

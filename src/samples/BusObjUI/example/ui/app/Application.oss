@@ -1,0 +1,102 @@
+/*
+    Application.oss
+
+    Define app-global rules (e.g. for the layout of app tabs)
+
+    These rules are loaded upon app start up.
+*/
+/*
+    MODULES
+    (i.e. global navigation tabs)
+*/
+@module="Meta UI Form"  {
+    showsClasses: "*";
+
+    @layout=Stuff {
+       component:"UserForm";
+       wrapperComponent:AWForm;
+       after:zTop;
+    }
+}
+
+@module="Basic Form"  {
+    homePage:BasicForm;
+}
+
+@module="File Explorer"  {
+    homePage:ExplorerPage;
+}
+
+
+/*
+    ACTIONS
+*/
+/* Generic Action Set up */
+@actionCategory=Create { }
+@actionCategory=Search { }
+@actionCategory=Manage { }
+
+action=create {
+    actionCategory:Create;
+    label:${ariba.ui.meta.core.UIMeta.beautifyClassName(properties.class)};
+}
+
+action=search {
+    actionCategory:Search;
+    label:${ariba.ui.meta.core.UIMeta.beautifyClassName(properties.class)};
+}
+
+/* Tie into permissions */
+action="*" {
+    visible:${ properties.permissions == null
+        || example.ui.busobj.User.getEffectiveUser().hasPermissions(properties.permissions)};
+}
+
+/* Class-specific Action decls (should be in class meta files) */
+class=example.ui.busobj.User {
+    @action=create {
+        traits:pageAction;
+        pageName:"Meta/Form.htm";
+        permissions: [UserAdmin];
+    }
+    @action=search { }
+    object {
+        @action=delete { }
+    }
+}
+
+class=example.ui.busobj.Project {
+    @action=create { label:"Contract Workspace (Procurement)"}
+    @action=search { }
+    actionCategory=Manage {
+        @action=groupTable {
+            traits:modalComponentPage;
+            componentName:"Table_Samples.awz/Step1.3-Grouping_Table.htm";
+            label:"Grouping Table";
+            title:"Manage Grouping Table";
+        }
+
+        @action=groupTablePanel {
+            traits:modalComponentPanel;
+            componentName:"Table_Samples.awz/Step1.3-Grouping_Table.htm";
+            label:"Grouping Table (Panel)";
+            title:"Manage Grouping Table";
+        }
+    }
+}
+
+actionCategory=Manage {
+    @action=editER {
+        traits:pageAction;
+        pageName:"TnE/ERPage.htm";
+        label:"Edit Expense Report";
+    }
+}
+
+class=example.ui.busobj.Deal {
+    @action=create { }
+    @action=search { }
+    @action=submitForApproval {
+        traits:instance;
+    }
+}
