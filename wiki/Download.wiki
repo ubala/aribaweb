@@ -1,7 +1,2 @@
-#summary One-sentence summary of this page.
 #labels Download
-
-= Introduction =
-
 Download the latest version of AribaWeb [https://sourceforge.net/project/showfiles.php?group_id=227584 here] ([http://aribaweb.org/tutorial/CHANGES.html Version History])
-= Details =
