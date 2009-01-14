@@ -1,0 +1,107 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#26 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="value" direction="both" type="ariba.util.Date" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="formatter" direction="get" type="ariba.ui.aribaweb.util.AWFormatting" required="$false">
+        todo: is this true?
+        Note that ariba.util.DateFormatter has been adapted to AWFormatting
+    </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="showYearNavigation" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="size" direction="get" type="int" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="textFieldType" direction="get" type="String" default="AWTextField">
+        The name of a component to use as the TextField portion of the DateField.
+        For example, AN needs to use ANVTextField, so they would have something like:
+        <w:DateField textFieldType="ANVTextField" .../>
+        This is temporary until the new errorManager scheme is promulgated.
+    </Binding>
+
+    <Binding key="disabled" type="boolean" default="$false" direction="get">
+        Disables the date field if true.
+    </Binding>
+
+    <Binding key="errorKey" type="String" default="$false" direction="get">
+    </Binding>
+
+    <Binding key="calendarDate" direction="get" type="boolean" required="$false">
+        See ariba.ui.widgets.Calendar
+    </Binding>
+
+</a:Api>\
+<!---
+     The nobr is needed for both layout and reference node in dateFieldOnClick and dateFieldMouseDown
+-->
+<nobr elementId="$menuId">\
+    <!--- textFieldType is provided to allow AN to use ANVTextField.  Once we have a unified
+          error-handling model, we can eliminate this AWSwitchCompoent and just use AWTextField directly -->
+    <a:RefreshRegion alwaysRender="$true">
+        <a:IncludeComponent awcomponentName="$^textFieldType:AWTextField"
+                           value="$date"
+                           formatter="$formatter"
+                           size="$^size"
+                           awname="$^awname"
+                           isRefresh="$false"
+                           action="$textFieldAction"
+                           title="$exampleDate"
+                           onChange="ariba.Calendar.dateTextChanged(this)"
+                           disabled="$^disabled"
+                           class="$^class"
+                           errorKey="$^errorKey"
+                           id="$dateTextFieldId"/>\
+    </a:RefreshRegion>\
+    <a:If ifFalse="$^disabled">\
+        <a href="javascript:void(0);"
+           class="awmenuLink"
+           elementId="$linkId"
+           id="$linkId"
+           awmenuId="$menuId"
+           onClick="return ariba.Calendar.dateFieldOnClick(this, event)">\
+            <a:Image align="absmiddle" style="margin:3px" filename="widg/calendar.gif" alt="$[a001]Select a date from the calendar"/>\
+        </a>\
+    <a:Else/>\
+        <a:Image align="absmiddle" style="margin:3px" filename="widg/calendar.gif" alt="$[a002]Calendar is disabled"/>\
+    </a:If>\
+<w:PopupMenu menuId="$menuId">
+    <a:RefreshRegion>
+        <w:Calendar selection="$date" action="$calendarAction" showYearNavigation="$^showYearNavigation"
+                  dateFactory="$dateFactory" bodyBehavior="DFB"/>
+        <a:If ifTrue="$showCalendar">
+            <a:ClientSideScript>
+                ariba.Calendar.showCalendar('$linkId');
+            </a:ClientSideScript>
+        </a:If>
+    </a:RefreshRegion>
+</w:PopupMenu>\
+</nobr>

@@ -1,0 +1,221 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#18 $
+    </Copyright>
+
+    <Overview>
+    </Overview>
+
+    <Binding key="selections" type="AWOrderedList" direction="get">
+        TBD
+    </Binding>
+
+    <Binding key="selectionSource" type="ChooserSelectionSource" direction="get">
+        TBD
+    </Binding>
+
+    <Binding key="state" type="ChooserState" direction="both">
+        TBD
+    </Binding>
+
+    <Binding key="noSelectionString" type="String" direction="get" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="formatter" type="Formatter" direction="get" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="disabled" type="boolean" direction="get" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="size" type="int" direction="get" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="multiSelect" type="boolean" direction="get">
+        TBD
+    </Binding>
+
+    <Binding key="searchAction" type="AWResponseGenerating" required="$false" direction="get" default="$null">
+        TBD
+    </Binding>
+
+    <Binding key="maxLength" type="int" direction="get">
+        TBD
+    </Binding>
+
+    <Binding key="errorKey" type="Object" direction="get">
+        TBD
+    </Binding>
+
+    <Binding key="allowFullMatchOnInput" type="boolean" required="$false" direction="get" default="$false">
+        Temp binding to allow full match on input.  Later it will be true always.
+    </Binding>
+</a:Api>
+<span class="chWrapper"
+      elementId="$chooserId"
+      id="$chooserId"
+      _ns="$noSelectionString"
+      _mrs="$maxRecentSelected"
+      bh="$behavior">
+    <a:If ifTrue="$isReadOnly">
+        <table cellspacing="0" cellpadding="0">
+            <tr><td>$displayValue</td></tr>
+        </table>
+    <a:Else/>
+        <a:RefreshRegion alwaysRender="$chooserState.render">
+            <table cellspacing="0" cellpadding="0" awmenuId="$menuId" class="chWrap">
+                <tr>
+                    <td class="chWrapLeft">
+                        <a:TextField class="chText"
+                                     value="$displayValue"
+                                     behavior="$behavior"
+                                     onFOcus="return ariba.Chooser.chooserFocus(this, event);"
+                                     onBLur="return ariba.Chooser.chooserBlur(this, event);"
+                                     autocomplete="off"
+                                     disabled="$^disabled"
+                                     size="$^size"/>
+                    </td>
+                    <td class="chWrapRight">
+                        <a href="javascript:void(0);" omitTags="$^disabled" tabindex="-1">
+                            <a:Image class="chModeLink" filename="pull_down.gif" title="$[a002]Select from the list"/>
+                        </a>
+                        <a:Image class="chPickListImg hide" filename="pull_down.gif" title="$[a002]Select from the list"/>
+                        <a:Image class="chSearchImg hide" filename="search.gif" title="$[a001]Search for more"/>
+                    </td>
+                    <a:If ifTrue="$chooserState.multiSelect">
+                        <td>
+                            <a href="javascript:void(0);" omitTags="$^disabled" tabindex="-1">
+                                <a:Image class="chAddLink" filename="add_off.gif"/>
+                            </a>
+                            <a:Image class="chAddOffImg hide" filename="add_off.gif" title="$[a005]Multiple selections allowed"/>
+                            <a:Image class="chAddOnImg hide" filename="add_on.gif" title="$[a003]Add another selection"/>
+                            <a:Checkbox class="chAddMode hide" value="$chooserState.addMode"/>
+                        </td>
+                    </a:If>
+                    <td>
+                        <a:IncludeContent/>
+                    </td>
+                </tr>
+                <a:If ifTrue="$chooserState.multiSelect">
+                    <a:For list="$chooserState.recentSelectedObjects"
+                                  item="$chooserState.currentItem">\
+                    <tr class="chMultiSpacer" style="$recentSelectedStyle"><td></td></tr>
+                    <tr class="chMultiRow"
+                        style="$recentSelectedStyle"
+                        bh="CHM">
+                        <td class="chMultiWrap chMultiWrapLeft">
+                            <input class="chMultiText chValidSelection"
+                                   type="text"
+                                   value="$currentItemString"
+                                   size="$^size"
+                                   readonly="awstandalone"
+                                   tabindex="-1"/>\
+                        </td>
+                        <td class="chMultiWrap chMultiWrapRight">
+                            <span class="chSelectionContainer">\
+                                <a:Checkbox class="chRemove hide" value="$removeValue"/>\
+                                <a:Hyperlink action="$null" omitTags="$^disabled" tabindex="-1" submitForm="$true" behavior="CHR">\
+                                    <a:Image class="chRemoveLink" filename="remove_off.gif"/>
+                                    <a:Image class="chRemoveOffImg hide" filename="remove_off.gif"/>
+                                    <a:Image class="chRemoveOnImg hide" filename="remove_on.gif" title="$[a004]Remove selection"/>
+                                </a:Hyperlink>
+                            </span>
+                        </td>
+                    </tr>
+                    </a:For>\
+                    <a:If ifTrue="$showMoreSelected">
+                        <tr class="chMoreSelectedRow">
+                            <td>
+                                <a:Hyperlink action="$searchAction">
+                                    <span class="chMoreSelected">$moreSelectedString</span>\
+                                    <span class="chMoreSelectedPlusOne" style="display:none">$moreSelectedStringPlusOne</span>\
+                                    <span class="chMoreSelectedPlusTwo" style="display:none">$moreSelectedStringPlusTwo</span>\
+                                </a:Hyperlink>
+                            </td>
+                        </tr>
+                    </a:If>
+                </a:If>
+            </table>\
+            <w:PopupMenu menuId="$menuId" class="awmenu">\
+                <a:IncludeBlock name="SelectionContainer"
+                                value="$toggleValue">\
+                    <span class="chSelections">\
+                        <a:IncludeBlock name="ChooserList"
+                            list="$^selections"
+                            showBullet="$showBullet"
+                            showCheck="$showCheck">\
+                            $currentItemString\
+                        </a:IncludeBlock>\
+                    </span>\
+                </a:IncludeBlock>\
+                <a:IncludeBlock name="SelectionContainer"
+                                value="$selectValue"
+                                selectionList="$selectionList">\
+                    <span class="chMatches"></span>\
+                </a:IncludeBlock>
+                <div class="chSeperator"></div>\
+                <w:PopupMenuItem action="$searchAction">
+                    <div class="chSearchLink"><a:String value="$[a001]Search for more"/>...</div>\
+                </w:PopupMenuItem>
+            </w:PopupMenu>\
+            <a:ClientSideScript isSingleton="$false">\
+                ariba.Chooser.initChooser('$chooserId', $chooserState.multiSelect, $chooserState.focus, $chooserState.isInvalid);
+            </a:ClientSideScript>\
+            <a:Checkbox class="chfullMatch hide" value="$fullMatchValue"></a:Checkbox>
+        </a:RefreshRegion>\
+    </a:If>
+</span>
+<span isSender="$isSender"
+      invokeAction="$matchAction"
+      omitTags="$true">
+    <!-- chooser match -->
+    <a:IncludeBlock templateName="ChooserList"
+                    list="$chooserState.filteredSelections"
+                    name="$=FilteredSelections">
+        <a:PrimitiveString value="$currentItemHighlightedString"/>
+    </a:IncludeBlock>
+    <div class="chSeperator"></div>
+    <a:IncludeBlock templateName="ChooserList"
+                    list="$chooserState.matches"
+                    name="$=Matches">
+        <a:PrimitiveString value="$currentItemHighlightedString"/>
+    </a:IncludeBlock>
+</span>
+<a:Block name="ChooserList">
+    <span class="chList" chlname="$^name">
+        <a:For list="$^list"
+                      item="$chooserState.currentItem">
+            <w:PopupMenuItem action="$null"
+                           showBullet="$^showBullet:$false"
+                           showCheck="$^showCheck:$false"
+                           clientTrigger="ariba.Chooser.chooserMenuTrigger(event)">\
+                <a:IncludeContent/>\
+            </w:PopupMenuItem>
+        </a:For>
+    </span>
+</a:Block>
+<a:Block name="SelectionContainer">
+    <span class="chSelectionContainer">\
+        <a:IncludeContent/>\
+        <a:TextField class="chSelectList hide"
+                     value="$^selectionList"/>\
+        <a:TextField class="chSelectIndex hide"
+                     value="$^value"/>\
+    </span>\
+</a:Block>

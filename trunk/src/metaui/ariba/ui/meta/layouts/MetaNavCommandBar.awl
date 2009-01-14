@@ -1,0 +1,69 @@
+<table border="0" cellPadding="2" cellSpacing="0" width="100%">\
+    <tr>\
+     <a:If ifTrue="$showMenus">
+        <td width="1%" class="mastCmd">
+            <a:If ifTrue="$showHomeIcon">\
+                <w:AribaAction name="home">\
+                    <a:Image filename="$dashboardIcon" title="$[a001]Return to Home"/>
+                </w:AribaAction>\
+            <a:Else/>\
+                &nbsp;\
+            </a:If>\
+        </td>
+         <a:For list="$actionCategories" item="$actionCategory">\
+            <a:If ifTrue="$showCurrentCategory">\
+                <td align="left" class="mastCmd" width="1%">\
+                    <a:SetValue currentMenuId="$requestContext.nextElementId"/>\
+                    <w:PopupMenuLink class="mastCmdMenu" awname="$actionCategory.properties.label"
+                                   menuId="$currentMenuId" position="this" omitTags="$disabled">\
+                        <a:String value="$actionCategory.properties.label"/>\
+                    </w:PopupMenuLink>\
+                    <a:If ifFalse="$disabled">
+                        <w:PopupMenu menuId="$currentMenuId">\
+                            <a:For list="$actions" item="$action">\
+                                <a:If ifTrue="$currentItemIsInTop">\
+                                    <w:PopupMenuItem action="$currentItemClicked"
+                                                   awname="$action.name">\
+                                        $action.properties.label\
+                                    </w:PopupMenuItem>\
+                                <a:Else/>\
+                                    <w:PopupMenuItem action="$overflowItemClicked"
+                                                   awname="action.name"
+                                                   collapsed="$true">\
+                                        $action.properties.label\
+                                    </w:PopupMenuItem>\
+                                </a:If>\
+                            </a:For>\
+                            <a:If notEqualNull="$overflowActions">
+                                <w:PopupMenuItem action="$showAllClicked"
+                                               collapsed="$true">\
+                                    <i><a:Local>More...</a:Local></i>
+                                </w:PopupMenuItem>\
+                            </a:If>
+                        </w:PopupMenu>\
+                    </a:If>
+                </td>\
+            </a:If>\
+        </a:For>
+     <a:Else/>\
+         <td align="left" width="25px" class="mastCmd">
+             <a:If ifTrue="$showHomeIcon">\
+                 <AribaAction name="home">\
+                     <a:Image filename="icn_home_arrow.gif"/>
+                     <a:Local key="a004">Home</a:Local>\
+                 </AribaAction>\
+             <a:Else/>
+                 <div style="width:1px;height:20px"/>
+             </a:If>\
+         </td>
+    </a:If>\
+    <td>&nbsp;</td>
+    <a:If ifTrue="$pageCommandBar">\
+        <a:Environment disableNav="$disabled">
+            <td style="padding-right:15px" width="1%" align="right">
+                <Include name="$pageCommandBar"/>\
+            </td>
+        </a:Environment>
+    </a:If>\
+    </tr>\
+</table>\

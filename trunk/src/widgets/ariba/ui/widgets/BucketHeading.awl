@@ -1,0 +1,92 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BucketHeading.awl#22 $
+    </Copyright>
+
+    <Overview>
+        A BucketHeading is a row in a BucketsTOC table which provides a toggle image, label, and optional count field.
+
+        The toggle image is used to control the display of the BucketItems which fall under this BucketHeading.
+        When the user clicks the toggle image, it toggles between showing/hiding the BucketItems.
+
+        The label always displays for the heading.
+
+        The optional labelRight is used to indicate how many items appear under this heading.  The true meaning of this
+        is application defined.
+
+        See Also BucketsTOC and BucketItem.
+    </Overview>
+
+    <Binding key="isExternal" direction="get" type="boolean" default="$false">
+        See AWToggleImage
+    </Binding>
+
+    <Binding key="initState" direction="get" type="boolean" default="$true">
+        See AWToggleImage
+    </Binding>
+
+    <Binding key="state" direction="set" type="boolean" required="$false">
+        See AWToggleImage
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" required="$false">
+        If you do not provide this binding, we determine if the current BucketHeading
+        is within an AWForm and, if so, we submit the submit automatically.
+        If you do specify this binding, your value takes precedence.
+    </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" required="$false">
+        The action to take when the label of the BucketHeading is clicked.
+        If you do not specify this binding, the label will not be clickable.
+    </Binding>
+
+    <Binding key="label" direction="get" type="String" required="$false">
+        The strings that displays in the BucketHeading.  This string forms a hyperlink
+        when the action binding is provided.
+    </Binding>
+
+    <Binding key="isSelected" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="labelRight" direction="get" type="String" required="$false">
+        The strings that displays on the right side of the BucketHeading.  This is often used
+        to display counts of items under this heading.
+    </Binding>
+</a:Api>\
+
+<tr>
+    <td colspan="4" class="tocTitle">\
+        <a:Image filename="cleardot.gif" class="block" width="1" height="6" align="absmiddle" hspace="0"/>\
+    </td>
+</tr>
+<tr class="$styleClass" onMouseOver="$onMouseOver" onMouseOut="$onMouseOut">
+    <td width="1%" align="center" style="padding-left:2px;">\
+        <w:ToggleImage align="absmiddle" isExternal="$^isExternal" initState="$^initState:$true" state="$^state:$isOpen"/>\
+    </td>
+    <td class="bodyBold" width="97%" style="padding-left:3px;">\
+        <a:Hyperlink omitTags="$isNotHyperlink" submitForm="$^submitForm:$hasForm" action="$^action" awname="$^awname">\
+            <a:String value="$^label"/>\
+        </a:Hyperlink>\
+    </td>
+    <td class="bodyBold" align="$languageRight" style="line-height:16px;">\
+        <a:String value="$labelRight"/>\
+        <a:PrimitiveString value="$spaceRight"/>\
+    </td>
+</tr>
+<a:If ifTrue="$isOpenState">\
+    <a:IncludeContent/>
+</a:If>\

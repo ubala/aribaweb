@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<xml>
+    <monitorSessionStatus>
+        <a:For list="$sessions" item="$currentSession">\
+            <session name="$currentSession.sessionId">
+                <state>$currentState</state>
+            </session>
+        </a:For>\
+    </monitorSessionStatus>
+</xml>

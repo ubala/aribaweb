@@ -1,0 +1,7 @@
+8859_1
+,,
+2867, "ThreadPool {0} encountered a problem while running {1}\n{2}", 0-threadPool name 1-target class name 2-stack trace(exception)
+9031, "ThreadPool {0} queue size {1} is growing too fast!", 0-threadPool name 1-queue size
+9032, "ThreadPool {0}: extra thread {1} added, total of {2} threads", 0-threadPool name 1-thread name -2-total number of threads
+9033, "ThreadPool {0}: thread {1} removed, total of {2} threads", 0-threadPool name 1-thread name -2-total number of threads
+9863, "ThreadPool {0}: cannot create new thread, currently there are {1} threads, exception: {2}", 0-threadPool name 1-number of threads 2-stack trace

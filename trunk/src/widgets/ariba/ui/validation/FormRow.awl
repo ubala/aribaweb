@@ -1,0 +1,88 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.awl#4 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="label" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="required" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="errorValueSource" direction="get" type="Object" default="$false">
+        See AWHighLightedErrorScope
+    </Binding>
+    
+    <Binding key="errorFieldPath" direction="get" type="String" default="$false">
+        See AWHighLightedErrorScope
+    </Binding>
+
+    <Binding key="errorGroupName" direction="get" type="String" default="$false">
+        See AWHighLightedErrorScope
+    </Binding>
+</a:Api>\
+
+<tr valign="middle">
+    <td class="top">\
+        <a:If notEqualNull="$^label">
+            <label elementId="$elementId" for="$elementId">\
+                <a:String value="$^label"/>\
+                :\
+            </label>\
+        </a:If>\
+    </td>
+
+    <a:If ifTrue="$env.showErrorFlags">
+        <a:HighLightedErrorScope errorValueSource="$^errorValueSource"
+                                 errorFieldPath="$^errorFieldPath"
+                                 errorGroupName="$^errorGroupName">
+            <td class="top">\
+                <w:ErrorIndicator showRequired="$^required"/>
+            </td>
+            <td class="top label" style="padding-right:25px" nowrap="$^nowrap" colspan="$env.formRowTrailingColspan">\
+                <!--- the environment variable "awinputId" is used to associate an input element with a label
+                      all input elements use this value to make this association --->
+                <a:AppendEnvironment awinputId="$inputId">\
+                    <a:IncludeContent/>\
+                </a:AppendEnvironment>\
+            </td>
+        </a:HighLightedErrorScope>
+    <a:Else/>
+        <td>\
+            <a:If ifTrue="$^required">\
+                <div class="required"
+                     style="display:inline;">\
+                    <a:Image filename="requiredAsterisk.gif"
+                             style="margin-top:2px;"
+                             alt="$[a001]Required Field"/>\
+                </div>\
+            </a:If>
+        </td>
+        <td class="top label" style="padding-right:25px" nowrap="$^nowrap" colspan="$env.formRowTrailingColspan">\
+            <!--- the environment variable "awinputId" is used to associate an input element with a label
+                  all input elements use this value to make this association --->
+            <a:AppendEnvironment awinputId="$inputId">\
+                <a:IncludeContent/>\
+            </a:AppendEnvironment>\
+        </td>
+    </a:If>
+</tr>

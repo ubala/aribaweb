@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<xml>
+    <monitorStatus>    
+        <a:IncludeContent name="applicationExtension"/>
+        <a:For list="$itemsToDisplay" item="$item">
+        <$item.name>$item.value</$item.name>
+        </a:For>
+        <sessions>$monitorStats.activeSessionCount</sessions>
+        <state>\
+            <a:If ifTrue="$monitorStats.isInShutdownWarningPeriod">\
+            shutdown pending/warning period (less than $monitorStats.remainingShutdownPeriod millis remaining)\
+            <a:Else ifTrue="$monitorStats.isGracefulShutdown"/>\
+            shutdown pending (less than $monitorStats.remainingShutdownPeriod millis remaining)\
+            <a:Else ifTrue="$monitorStats.isRefusingNewSessions"/>\
+            refusing new connections\
+            <a:Else/>\
+            running\
+            </a:If>\
+        </state>
+    </monitorStatus>
+</xml>

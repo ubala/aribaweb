@@ -1,0 +1,8 @@
+<a:For list="$tokens" item="$currentToken" index="$index">\
+    <a:If notEqualNull="$currentImage">\
+        <a:Image filename="$currentImage"/> \
+    <a:Else/>\
+        $currentToken\
+        $spaceIfAny\
+    </a:If>\
+</a:For>

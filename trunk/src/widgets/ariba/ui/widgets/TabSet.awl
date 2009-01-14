@@ -1,0 +1,86 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabSet.awl#2 $
+    </Copyright>
+
+    <Overview>
+        Provides a set of "tabs" which can be clicked to change what is viewed.  This is a stateful component so it can
+        remember what tab is currently selected even though the tab isn't clicked.  You may determine what tab is
+        selected externally by providing the (optional) "index" binding and setting it to one of the tabs (zero-based
+        indexing)s.
+
+        An example of the usage is as follows:
+
+        <w:TabSet index="$selectedTabIndex">
+            <w:Tab label="Alpha">
+                This will show when Alpha is clicked
+            </w:Tab>
+
+            <w:Tab label="Beta" isVisible="$isBetaVisible">
+                This will show when Beta is clicked
+            </w:Tab>
+
+            <w:Tab label="Delta">
+                This will show when Delta is clicked
+            </w:Tab>
+        </w:TabSet>
+    </Overview>
+
+    <Binding key="index" type="int" required="$false" direction="both">
+        The index of the currently selected tab.  This will be set when the user clicks on a tab, and will be retrieved
+        when the tabset is to be displayed again in renderResponse.  By implementing the setIndex() method in your
+        component, you may prevent the tab from changing in the event some content of the tab is invalid.
+    </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null">
+        Fired when tab clicked
+    </Binding>
+    
+    <Binding key="submitForm" type="boolean" required="$false" direction="get">
+        If true, will respond to all clicks on tabs themselves by submitting
+        the enclosing form.  Note that, if the enclosing form tag itself has
+        submitFormDefault=true, then this tabset will automatically submit
+        the form -- no need to specify this binding.  However, if you want to
+        guarantee that this TabSet cannot submit its enclosing form, you can
+        set this to false.  [A rare case, indeed]
+    </Binding>
+
+    <Binding key="class" type="String" required="$false" direction="get" default="pageTabWrapper">
+        For default style tabs this is null.  For override, this
+        specifies the CSS style to use to create the tab look ("tabWrapper" is the option defined in ariba.css).        
+    </Binding>
+
+    <Binding key="contentClass" type="String" required="$false" direction="get">
+        If you want a box around the content of the tab, then use "tabContentWrapper".
+    </Binding>
+
+    <Binding key="actionMenuId" type="String" required="$false" direction="get">
+        If specified, a type of PulldownButton will be rendered within the
+        tab bar.
+    </Binding>
+    <Binding key="actionMenuLabel" type="String" required="$false" direction="get">
+        If actionMenuId specified, this is the label for the Actions button.  Default is "Actions". 
+    </Binding>
+</a:Api>\
+<w:BaseTabSet list="$tabs" item="$currentTab" index="$currentIndex" label="$currentTabLabel" selection="$selectedTab"
+        submitForm="$^submitForm" awname="$^awname" class="$^class:pageTabWrapper" contentClass="$^contentClass"
+        dropType="$currentTabDropType" dropAction="$currentTabDropAction" action="$^action"
+        actionMenuId="$^actionMenuId" actionMenuLabel="$^actionMenuLabel">\
+    <!---AWDropContainer tagName="div" omitTags="$isSelectedTabNotDropTarget"
+         type="$selectedTabDropType" dropAction="$selectedTabDropAction"-->
+        <a:IncludeComponent awcomponentReference="$selectedTab" awcomponent="$parent"/>\
+    <!---/AWDropContainer-->
+</w:BaseTabSet>

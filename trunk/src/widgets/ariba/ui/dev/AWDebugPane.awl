@@ -1,0 +1,189 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.awl#34 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+</a:Api>\
+
+<a:If ifTrue="$isDebuggingEnabled">
+    <a:RefreshRegion>
+        <a:If ifTrue="$hasWarnings">
+            <div id="debugBar" class="debugBarVis">
+                <table cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td>
+                            <w:PopupMenuLink class="hoverLink hoverArrow" style="font:9px Verdana, Arial, Helvetica, sans-serif"
+                                           menuId="awDebugPane" position="this">\
+                                <b>AW Options...</b>\
+                            </w:PopupMenuLink>
+                        </td>
+                        <a:For list="$warningList" item="$curWarning">
+                            <td class="$warningClass">
+                                $curWarning.check.metricName:<br/>
+                                $curWarning.valueString
+                            </td>
+                        </a:For>
+                        <td id="FPR_Warning">\
+                            $page.fullPageRefreshCause\
+                        </td>
+                        <a:If ifTrue="$showValidationDisplayWarning">
+                            <td class="debugWarning">
+                                <a:Image filename="widg/DebugVError.gif"
+                                         alt="Validation errors on the previous page were never displayed."/>
+                            </td>
+                        </a:If>
+                        <td valign="top" style="padding-left:4px">
+                            <a:ActiveImage filename="awxCloseButton.gif" action="$disablePerfWarnings" style="padding:2px"
+                                title="Hide performance warnings from now on (see AWOptions pane to re-enable)"/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        <a:Else/>
+            <div id="debugBar" class="debugBar" onMouseOver="this.className='debugBarVis';" onMouseOut="this.className='debugBar';">
+                <div style="float:left">\
+                    <w:PopupMenuLink class="hoverLink hoverArrow" style="font:9px Verdana, Arial, Helvetica, sans-serif"
+                                   menuId="awDebugPane" position="this">\
+                        <b>AW Options...</b>\
+                    </w:PopupMenuLink></div>
+                <div id="FPR_Warning" style="float:left">$page.fullPageRefreshCause</div>
+            </div>
+        </a:If>
+        <a:ClientSideScript>
+            ariba.Debug._AWShowComponentPathAction='<a:ActionId action="$showComponentPath"/>';
+            ariba.Debug.updateComponentInspector('$request.sessionId', '<a:ActionId action="$updateComponentInspector"/>', $isComponentPathDebuggingEnabled);
+        </a:ClientSideScript>
+    </a:RefreshRegion>
+    <w:PopupMenu menuId="awDebugPane">
+        <a:LazyDiv>
+            <!--- Title section -->
+            <table border="0" cellspacing="0" cellpadding="0">\
+                <tr>\
+                    <td nowrap="nowrap"
+                        align="$languageLeft"
+                        class="grayLt"
+                        style="color:#ffffff;padding:4px 7px 3px 5px;width:450px">
+                        <span class="bodyBoldRev">\
+                            Debugging
+                        </span>\
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:5px;text-align:left">
+                        <a:If ifTrue="$isOpen">
+                            <table width="100%">
+                                <tr>
+                                    <td align="middle">
+                                        <w:PopupMenuItem action="$debugAWOptions">\
+                                            AW Config Panel...\
+                                        </w:PopupMenuItem>
+                                    </td>
+                                    <td align="middle">
+                                        <w:PopupMenuItem target="awComponentApiWindow" action="$openComponentApiPage">\
+                                            Component APIs\
+                                        </w:PopupMenuItem>
+                                    </td>
+                                    <td align="middle">
+                                        <a:If ifTrue="$isComponentPathDebuggingEnabled">
+                                            <w:PopupMenuItem action="$togglePathDebugging">\
+                                                Disable Component Inspector\
+                                            </w:PopupMenuItem>
+                                            <a:Else/>
+                                            <w:PopupMenuItem action="$togglePathDebugging">\
+                                                Show Component Inspector\
+                                            </w:PopupMenuItem>
+                                        </a:If>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span onMouseDown="ariba.Debug.viewSource();">
+                                            <w:PopupMenuItem>\
+                                                View Source
+                                            </w:PopupMenuItem>
+                                        </span>
+                                    </td>
+                                    <td colspan="2">
+                                        <w:PopupMenuItem action="$reRender">\
+                                            Re-Render $rerenderCount times ($rerenderMode)
+                                        </w:PopupMenuItem>
+                                    </td>
+                                </tr>
+                            </table>
+                        </a:If>\
+                    </td>
+                </tr>
+                <a:If notEqualNull="$=ariba.ui.widgets.Widgets.AWSessionManager">
+                    <a:If ifTrue="$session.dict.IsSessionKeepAliveDebuggingEnabled">
+                        <tr>
+                            <td style="padding-left:10px;text-align:left">
+                                <a:IncludeComponent awcomponentName="$=ariba.ui.widgets.Widgets.AWSessionManager.DebugDisplay"/>
+                            </td>
+                        </tr>
+                    </a:If>
+                </a:If>
+                <a:If notEqualNull="$=ariba.ui.widgets.Widgets.AppDebug">
+                <tr>
+                    <td style="padding-left:10px;text-align:left">
+                        <a:IncludeComponent awcomponentName="$=ariba.ui.widgets.Widgets.AppDebug"/>
+                    </td>
+                </tr>
+                </a:If>
+                <a:If notEqualNull="$=ariba.ui.widgets.Widgets.DashboardDebug">
+                <tr>
+                    <td style="padding-left:10px;text-align:left">
+                        <a:IncludeComponent awcomponentName="$=ariba.ui.widgets.Widgets.DashboardDebug"/>
+                    </td>
+                </tr>
+                </a:If>
+                <tr>
+                    <td>
+                        <a:PerfPane/>
+                    </td>
+                </tr>
+            </table>\
+        </a:LazyDiv>
+    </w:PopupMenu>
+    <a:RefreshRegion style="display:none;">
+        <a:If ifTrue="$hasValidationItems">\
+            <div id="AWValidationIndicatorContent">
+                <a:If ifTrue="$hasValidationErrors">\
+                    <div style="$errorWarningStyle">
+                        Validation errors found on page.  &nbsp;&nbsp;
+                        <a:PrivateHyperlink target="awValidationErrorPage" action="$openValidationErrorPage">
+                            View Errors
+                        </a:PrivateHyperlink>
+                    </div>
+                </a:If>
+                <a:If ifTrue="$hasGeneralErrors">\
+                    <div style="$ErrorStyle">
+                        <a:For list="$requestContext.validationContext.generalErrors" item="$dict.currItem">$dict.currItem<br/></a:For>
+                    </div>
+                </a:If>
+            </div>
+            <a:ClientSideScript>\
+                var errorIndicator = ariba.Dom.getElementById('AWDevErrorIndicator');
+                var indicatorContent = ariba.Dom.getElementById('AWValidationIndicatorContent');
+                errorIndicator.innerHTML = indicatorContent.innerHTML;
+            </a:ClientSideScript>\
+        </a:If>\
+        <div id="AWJSValidationMessage" style="$=ariba.ui.dev.AWDebugPane.ErrorStyle"
+             onClick="ariba.DebugValidation.showValidationDetail(this);"></div>
+    </a:RefreshRegion>
+</a:If>

@@ -1,0 +1,700 @@
+Region,Year,Quarter,Commodity Code,Item,Supplier,Price,Quantity,ExtendedPrice
+APAC,2007,Q1,Screw Parts,Screws,Best,2,88,176
+APAC,2007,Q1,Nut Parts,Nuts,Best,1,61,61
+APAC,2007,Q1,Bolt Parts,Bolts,Best,91,67,6097
+APAC,2007,Q1,Ball Bearing Parts,Ball Bearings,Best,57,2,114
+APAC,2006,Q2,Screw Parts,Screws,Best,20,113,2260
+APAC,2006,Q2,Nut Parts,Nuts,Best,43,229,9847
+APAC,2006,Q2,Bolt Parts,Bolts,Best,3,83,249
+APAC,2006,Q2,Ball Bearing Parts,Ball Bearings,Best,18,707,12726
+APAC,2007,Q2,Screw Parts,Screws,Best,7,88,616
+APAC,2007,Q2,Nut Parts,Nuts,Best,16,127,2032
+APAC,2007,Q2,Bolt Parts,Bolts,Best,24,383,9192
+APAC,2007,Q2,Ball Bearing Parts,Ball Bearings,Best,4,564,2256
+APAC,2006,Q3,Screw Parts,Screws,Best,9,40,360
+APAC,2006,Q3,Nut Parts,Nuts,Best,39,218,8502
+APAC,2006,Q3,Bolt Parts,Bolts,Best,1,639,639
+APAC,2006,Q3,Ball Bearing Parts,Ball Bearings,Best,15,890,13350
+APAC,2007,Q3,Screw Parts,Screws,Best,5,325,1625
+APAC,2007,Q3,Nut Parts,Nuts,Best,54,58,3132
+APAC,2007,Q3,Bolt Parts,Bolts,Best,7,339,2373
+APAC,2007,Q3,Ball Bearing Parts,Ball Bearings,Best,12,454,5448
+APAC,2006,Q4,Screw Parts,Screws,Best,2,6,12
+APAC,2006,Q4,Nut Parts,Nuts,Best,39,24,936
+APAC,2006,Q4,Bolt Parts,Bolts,Best,14,83,1162
+APAC,2006,Q4,Ball Bearing Parts,Ball Bearings,Best,33,779,25707
+APAC,2007,Q4,Screw Parts,Screws,Best,12,61,732
+APAC,2007,Q4,Nut Parts,Nuts,Best,19,402,7638
+APAC,2007,Q4,Bolt Parts,Bolts,Best,58,130,7540
+APAC,2007,Q4,Ball Bearing Parts,Ball Bearings,Best,66,858,56628
+EUR,2006,Q1,Screw Parts,Screws,Best,21,15,315
+EUR,2006,Q1,Nut Parts,Nuts,Best,1,129,129
+EUR,2006,Q1,Bolt Parts,Bolts,Best,47,496,23312
+EUR,2006,Q1,Ball Bearing Parts,Ball Bearings,Best,34,399,13566
+EUR,2007,Q1,Screw Parts,Screws,Best,8,117,936
+EUR,2007,Q1,Nut Parts,Nuts,Best,25,20,500
+EUR,2007,Q1,Bolt Parts,Bolts,Best,41,390,15990
+EUR,2007,Q1,Ball Bearing Parts,Ball Bearings,Best,3,391,1173
+EUR,2006,Q2,Screw Parts,Screws,Best,15,117,1755
+EUR,2006,Q2,Nut Parts,Nuts,Best,43,410,17630
+EUR,2006,Q2,Bolt Parts,Bolts,Best,25,82,2050
+EUR,2006,Q2,Ball Bearing Parts,Ball Bearings,Best,24,85,2040
+EUR,2007,Q2,Screw Parts,Screws,Best,4,230,920
+EUR,2007,Q2,Nut Parts,Nuts,Best,18,79,1422
+EUR,2007,Q2,Bolt Parts,Bolts,Best,2,128,256
+EUR,2007,Q2,Ball Bearing Parts,Ball Bearings,Best,28,23,644
+EUR,2006,Q3,Screw Parts,Screws,Best,10,0,0
+EUR,2006,Q3,Nut Parts,Nuts,Best,11,310,3410
+EUR,2006,Q3,Bolt Parts,Bolts,Best,82,378,30996
+EUR,2006,Q3,Ball Bearing Parts,Ball Bearings,Best,28,959,26852
+EUR,2007,Q3,Screw Parts,Screws,Best,2,155,310
+EUR,2007,Q3,Nut Parts,Nuts,Best,33,200,6600
+EUR,2007,Q3,Bolt Parts,Bolts,Best,50,179,8950
+EUR,2007,Q3,Ball Bearing Parts,Ball Bearings,Best,88,8,704
+EUR,2006,Q4,Screw Parts,Screws,Best,22,164,3608
+EUR,2006,Q4,Nut Parts,Nuts,Best,17,7,119
+EUR,2006,Q4,Bolt Parts,Bolts,Best,26,297,7722
+EUR,2006,Q4,Ball Bearing Parts,Ball Bearings,Best,12,821,9852
+EUR,2007,Q4,Screw Parts,Screws,Best,17,125,2125
+EUR,2007,Q4,Nut Parts,Nuts,Best,4,15,60
+EUR,2007,Q4,Bolt Parts,Bolts,Best,58,75,4350
+EUR,2007,Q4,Ball Bearing Parts,Ball Bearings,Best,7,61,427
+USA,2006,Q1,Screw Parts,Screws,Best,1,10,10
+USA,2006,Q1,Nut Parts,Nuts,Best,37,136,5032
+USA,2006,Q1,Bolt Parts,Bolts,Best,3,8,24
+USA,2006,Q1,Ball Bearing Parts,Ball Bearings,Best,18,635,11430
+USA,2007,Q1,Screw Parts,Screws,Best,1,104,104
+USA,2007,Q1,Nut Parts,Nuts,Best,5,5,25
+USA,2007,Q1,Bolt Parts,Bolts,Best,51,114,5814
+USA,2007,Q1,Ball Bearing Parts,Ball Bearings,Best,36,231,8316
+USA,2006,Q2,Screw Parts,Screws,Best,1,82,82
+USA,2006,Q2,Nut Parts,Nuts,Best,41,337,13817
+USA,2006,Q2,Bolt Parts,Bolts,Best,12,702,8424
+USA,2006,Q2,Ball Bearing Parts,Ball Bearings,Best,53,632,33496
+USA,2007,Q2,Screw Parts,Screws,Best,7,122,854
+USA,2007,Q2,Nut Parts,Nuts,Best,23,254,5842
+USA,2007,Q2,Bolt Parts,Bolts,Best,93,252,23436
+USA,2007,Q2,Ball Bearing Parts,Ball Bearings,Best,26,202,5252
+USA,2006,Q3,Screw Parts,Screws,Best,14,24,336
+USA,2006,Q3,Nut Parts,Nuts,Best,52,42,2184
+USA,2006,Q3,Bolt Parts,Bolts,Best,17,298,5066
+USA,2006,Q3,Ball Bearing Parts,Ball Bearings,Best,1,750,750
+USA,2007,Q3,Screw Parts,Screws,Best,4,6,24
+USA,2007,Q3,Nut Parts,Nuts,Best,1,289,289
+USA,2007,Q3,Bolt Parts,Bolts,Best,21,661,13881
+USA,2007,Q3,Ball Bearing Parts,Ball Bearings,Best,6,100,600
+USA,2006,Q4,Screw Parts,Screws,Best,10,36,360
+USA,2006,Q4,Nut Parts,Nuts,Best,1,197,197
+USA,2006,Q4,Bolt Parts,Bolts,Best,10,536,5360
+USA,2006,Q4,Ball Bearing Parts,Ball Bearings,Best,10,327,3270
+USA,2007,Q4,Screw Parts,Screws,Best,8,313,2504
+USA,2007,Q4,Nut Parts,Nuts,Best,31,24,744
+USA,2007,Q4,Bolt Parts,Bolts,Best,96,259,24864
+USA,2007,Q4,Ball Bearing Parts,Ball Bearings,Best,39,538,20982
+APAC,2007,Q1,Screw Parts,Screws,Historical,6,127,762
+APAC,2007,Q1,Nut Parts,Nuts,Historical,47,148,6956
+APAC,2007,Q1,Bolt Parts,Bolts,Historical,40,16,640
+APAC,2007,Q1,Ball Bearing Parts,Ball Bearings,Historical,87,1162,101094
+APAC,2006,Q2,Screw Parts,Screws,Historical,12,31,372
+APAC,2006,Q2,Nut Parts,Nuts,Historical,69,296,20424
+APAC,2006,Q2,Bolt Parts,Bolts,Historical,17,24,408
+APAC,2006,Q2,Ball Bearing Parts,Ball Bearings,Historical,70,1083,75810
+APAC,2007,Q2,Screw Parts,Screws,Historical,39,15,585
+APAC,2007,Q2,Nut Parts,Nuts,Historical,4,373,1492
+APAC,2007,Q2,Bolt Parts,Bolts,Historical,4,664,2656
+APAC,2007,Q2,Ball Bearing Parts,Ball Bearings,Historical,17,175,2975
+APAC,2006,Q3,Screw Parts,Screws,Historical,3,148,444
+APAC,2006,Q3,Nut Parts,Nuts,Historical,23,150,3450
+APAC,2006,Q3,Bolt Parts,Bolts,Historical,94,30,2820
+APAC,2006,Q3,Ball Bearing Parts,Ball Bearings,Historical,142,172,24424
+APAC,2007,Q3,Screw Parts,Screws,Historical,24,29,696
+APAC,2007,Q3,Nut Parts,Nuts,Historical,17,437,7429
+APAC,2007,Q3,Bolt Parts,Bolts,Historical,9,239,2151
+APAC,2007,Q3,Ball Bearing Parts,Ball Bearings,Historical,48,69,3312
+APAC,2006,Q4,Screw Parts,Screws,Historical,6,139,834
+APAC,2006,Q4,Nut Parts,Nuts,Historical,6,68,408
+APAC,2006,Q4,Bolt Parts,Bolts,Historical,1,119,119
+APAC,2006,Q4,Ball Bearing Parts,Ball Bearings,Historical,7,538,3766
+APAC,2007,Q4,Screw Parts,Screws,Historical,8,96,768
+APAC,2007,Q4,Nut Parts,Nuts,Historical,2,14,28
+APAC,2007,Q4,Bolt Parts,Bolts,Historical,40,511,20440
+APAC,2007,Q4,Ball Bearing Parts,Ball Bearings,Historical,79,339,26781
+EUR,2006,Q1,Screw Parts,Screws,Historical,15,184,2760
+EUR,2006,Q1,Nut Parts,Nuts,Historical,46,310,14260
+EUR,2006,Q1,Bolt Parts,Bolts,Historical,2,21,42
+EUR,2006,Q1,Ball Bearing Parts,Ball Bearings,Historical,32,131,4192
+EUR,2007,Q1,Screw Parts,Screws,Historical,1,108,108
+EUR,2007,Q1,Nut Parts,Nuts,Historical,11,17,187
+EUR,2007,Q1,Bolt Parts,Bolts,Historical,50,406,20300
+EUR,2007,Q1,Ball Bearing Parts,Ball Bearings,Historical,76,92,6992
+EUR,2006,Q2,Screw Parts,Screws,Historical,4,86,344
+EUR,2006,Q2,Nut Parts,Nuts,Historical,3,32,96
+EUR,2006,Q2,Bolt Parts,Bolts,Historical,53,19,1007
+EUR,2006,Q2,Ball Bearing Parts,Ball Bearings,Historical,23,92,2116
+EUR,2007,Q2,Screw Parts,Screws,Historical,24,318,7632
+EUR,2007,Q2,Nut Parts,Nuts,Historical,1,3,3
+EUR,2007,Q2,Bolt Parts,Bolts,Historical,11,34,374
+EUR,2007,Q2,Ball Bearing Parts,Ball Bearings,Historical,10,773,7730
+EUR,2006,Q3,Screw Parts,Screws,Historical,5,67,335
+EUR,2006,Q3,Nut Parts,Nuts,Historical,1,568,568
+EUR,2006,Q3,Bolt Parts,Bolts,Historical,3,78,234
+EUR,2006,Q3,Ball Bearing Parts,Ball Bearings,Historical,12,68,816
+EUR,2007,Q3,Screw Parts,Screws,Historical,15,44,660
+EUR,2007,Q3,Nut Parts,Nuts,Historical,10,41,410
+EUR,2007,Q3,Bolt Parts,Bolts,Historical,79,209,16511
+EUR,2007,Q3,Ball Bearing Parts,Ball Bearings,Historical,114,92,10488
+EUR,2006,Q4,Screw Parts,Screws,Historical,8,49,392
+EUR,2006,Q4,Nut Parts,Nuts,Historical,46,132,6072
+EUR,2006,Q4,Bolt Parts,Bolts,Historical,13,278,3614
+EUR,2006,Q4,Ball Bearing Parts,Ball Bearings,Historical,136,401,54536
+EUR,2007,Q4,Screw Parts,Screws,Historical,4,68,272
+EUR,2007,Q4,Nut Parts,Nuts,Historical,5,109,545
+EUR,2007,Q4,Bolt Parts,Bolts,Historical,102,316,32232
+EUR,2007,Q4,Ball Bearing Parts,Ball Bearings,Historical,7,52,364
+USA,2006,Q1,Screw Parts,Screws,Historical,12,173,2076
+USA,2006,Q1,Nut Parts,Nuts,Historical,15,513,7695
+USA,2006,Q1,Bolt Parts,Bolts,Historical,56,5,280
+USA,2006,Q1,Ball Bearing Parts,Ball Bearings,Historical,55,21,1155
+USA,2007,Q1,Screw Parts,Screws,Historical,8,151,1208
+USA,2007,Q1,Nut Parts,Nuts,Historical,2,101,202
+USA,2007,Q1,Bolt Parts,Bolts,Historical,71,392,27832
+USA,2007,Q1,Ball Bearing Parts,Ball Bearings,Historical,17,41,697
+USA,2006,Q2,Screw Parts,Screws,Historical,4,76,304
+USA,2006,Q2,Nut Parts,Nuts,Historical,64,155,9920
+USA,2006,Q2,Bolt Parts,Bolts,Historical,38,763,28994
+USA,2006,Q2,Ball Bearing Parts,Ball Bearings,Historical,16,387,6192
+USA,2007,Q2,Screw Parts,Screws,Historical,4,61,244
+USA,2007,Q2,Nut Parts,Nuts,Historical,24,46,1104
+USA,2007,Q2,Bolt Parts,Bolts,Historical,43,212,9116
+USA,2007,Q2,Ball Bearing Parts,Ball Bearings,Historical,51,1096,55896
+USA,2006,Q3,Screw Parts,Screws,Historical,12,97,1164
+USA,2006,Q3,Nut Parts,Nuts,Historical,1,155,155
+USA,2006,Q3,Bolt Parts,Bolts,Historical,26,460,11960
+USA,2006,Q3,Ball Bearing Parts,Ball Bearings,Historical,58,1234,71572
+USA,2007,Q3,Screw Parts,Screws,Historical,2,227,454
+USA,2007,Q3,Nut Parts,Nuts,Historical,41,240,9840
+USA,2007,Q3,Bolt Parts,Bolts,Historical,4,101,404
+USA,2007,Q3,Ball Bearing Parts,Ball Bearings,Historical,52,634,32968
+USA,2006,Q4,Screw Parts,Screws,Historical,24,24,576
+USA,2006,Q4,Nut Parts,Nuts,Historical,19,89,1691
+USA,2006,Q4,Bolt Parts,Bolts,Historical,32,382,12224
+USA,2006,Q4,Ball Bearing Parts,Ball Bearings,Historical,83,32,2656
+USA,2007,Q4,Screw Parts,Screws,Historical,19,34,646
+USA,2007,Q4,Nut Parts,Nuts,Historical,16,370,5920
+USA,2007,Q4,Bolt Parts,Bolts,Historical,2,16,32
+USA,2007,Q4,Ball Bearing Parts,Ball Bearings,Historical,26,492,12792
+APAC,2007,Q1,Screw Parts,Screws,Initial,1,64,64
+APAC,2007,Q1,Nut Parts,Nuts,Initial,47,164,7708
+APAC,2007,Q1,Bolt Parts,Bolts,Initial,20,382,7640
+APAC,2007,Q1,Ball Bearing Parts,Ball Bearings,Initial,89,1454,129406
+APAC,2006,Q2,Screw Parts,Screws,Initial,21,258,5418
+APAC,2006,Q2,Nut Parts,Nuts,Initial,10,21,210
+APAC,2006,Q2,Bolt Parts,Bolts,Initial,69,170,11730
+APAC,2006,Q2,Ball Bearing Parts,Ball Bearings,Initial,43,2,86
+APAC,2007,Q2,Screw Parts,Screws,Initial,5,28,140
+APAC,2007,Q2,Nut Parts,Nuts,Initial,4,241,964
+APAC,2007,Q2,Bolt Parts,Bolts,Initial,27,77,2079
+APAC,2007,Q2,Ball Bearing Parts,Ball Bearings,Initial,26,366,9516
+APAC,2006,Q3,Screw Parts,Screws,Initial,10,157,1570
+APAC,2006,Q3,Nut Parts,Nuts,Initial,75,204,15300
+APAC,2006,Q3,Bolt Parts,Bolts,Initial,8,232,1856
+APAC,2006,Q3,Ball Bearing Parts,Ball Bearings,Initial,12,271,3252
+APAC,2007,Q3,Screw Parts,Screws,Initial,4,18,72
+APAC,2007,Q3,Nut Parts,Nuts,Initial,5,72,360
+APAC,2007,Q3,Bolt Parts,Bolts,Initial,92,53,4876
+APAC,2007,Q3,Ball Bearing Parts,Ball Bearings,Initial,8,827,6616
+APAC,2006,Q4,Screw Parts,Screws,Initial,25,54,1350
+APAC,2006,Q4,Nut Parts,Nuts,Initial,18,278,5004
+APAC,2006,Q4,Bolt Parts,Bolts,Initial,44,378,16632
+APAC,2006,Q4,Ball Bearing Parts,Ball Bearings,Initial,3,997,2991
+APAC,2007,Q4,Screw Parts,Screws,Initial,5,80,400
+APAC,2007,Q4,Nut Parts,Nuts,Initial,66,1,66
+APAC,2007,Q4,Bolt Parts,Bolts,Initial,112,412,46144
+APAC,2007,Q4,Ball Bearing Parts,Ball Bearings,Initial,90,233,20970
+EUR,2006,Q1,Screw Parts,Screws,Initial,2,173,346
+EUR,2006,Q1,Nut Parts,Nuts,Initial,26,188,4888
+EUR,2006,Q1,Bolt Parts,Bolts,Initial,31,743,23033
+EUR,2006,Q1,Ball Bearing Parts,Ball Bearings,Initial,58,237,13746
+EUR,2007,Q1,Screw Parts,Screws,Initial,40,266,10640
+EUR,2007,Q1,Nut Parts,Nuts,Initial,35,117,4095
+EUR,2007,Q1,Bolt Parts,Bolts,Initial,44,502,22088
+EUR,2007,Q1,Ball Bearing Parts,Ball Bearings,Initial,11,133,1463
+EUR,2006,Q2,Screw Parts,Screws,Initial,19,116,2204
+EUR,2006,Q2,Nut Parts,Nuts,Initial,15,254,3810
+EUR,2006,Q2,Bolt Parts,Bolts,Initial,52,14,728
+EUR,2006,Q2,Ball Bearing Parts,Ball Bearings,Initial,121,379,45859
+EUR,2007,Q2,Screw Parts,Screws,Initial,13,125,1625
+EUR,2007,Q2,Nut Parts,Nuts,Initial,16,222,3552
+EUR,2007,Q2,Bolt Parts,Bolts,Initial,77,614,47278
+EUR,2007,Q2,Ball Bearing Parts,Ball Bearings,Initial,39,227,8853
+EUR,2006,Q3,Screw Parts,Screws,Initial,18,50,900
+EUR,2006,Q3,Nut Parts,Nuts,Initial,6,19,114
+EUR,2006,Q3,Bolt Parts,Bolts,Initial,47,279,13113
+EUR,2006,Q3,Ball Bearing Parts,Ball Bearings,Initial,63,461,29043
+EUR,2007,Q3,Screw Parts,Screws,Initial,11,1,11
+EUR,2007,Q3,Nut Parts,Nuts,Initial,20,344,6880
+EUR,2007,Q3,Bolt Parts,Bolts,Initial,14,219,3066
+EUR,2007,Q3,Ball Bearing Parts,Ball Bearings,Initial,41,70,2870
+EUR,2006,Q4,Screw Parts,Screws,Initial,1,94,94
+EUR,2006,Q4,Nut Parts,Nuts,Initial,26,257,6682
+EUR,2006,Q4,Bolt Parts,Bolts,Initial,76,146,11096
+EUR,2006,Q4,Ball Bearing Parts,Ball Bearings,Initial,9,200,1800
+EUR,2007,Q4,Screw Parts,Screws,Initial,12,34,408
+EUR,2007,Q4,Nut Parts,Nuts,Initial,9,130,1170
+EUR,2007,Q4,Bolt Parts,Bolts,Initial,1,800,800
+EUR,2007,Q4,Ball Bearing Parts,Ball Bearings,Initial,18,35,630
+USA,2006,Q1,Screw Parts,Screws,Initial,6,180,1080
+USA,2006,Q1,Nut Parts,Nuts,Initial,66,377,24882
+USA,2006,Q1,Bolt Parts,Bolts,Initial,58,633,36714
+USA,2006,Q1,Ball Bearing Parts,Ball Bearings,Initial,18,103,1854
+USA,2007,Q1,Screw Parts,Screws,Initial,17,92,1564
+USA,2007,Q1,Nut Parts,Nuts,Initial,1,542,542
+USA,2007,Q1,Bolt Parts,Bolts,Initial,25,111,2775
+USA,2007,Q1,Ball Bearing Parts,Ball Bearings,Initial,23,574,13202
+USA,2006,Q2,Screw Parts,Screws,Initial,11,12,132
+USA,2006,Q2,Nut Parts,Nuts,Initial,6,255,1530
+USA,2006,Q2,Bolt Parts,Bolts,Initial,16,282,4512
+USA,2006,Q2,Ball Bearing Parts,Ball Bearings,Initial,28,768,21504
+USA,2007,Q2,Screw Parts,Screws,Initial,25,180,4500
+USA,2007,Q2,Nut Parts,Nuts,Initial,3,105,315
+USA,2007,Q2,Bolt Parts,Bolts,Initial,1,690,690
+USA,2007,Q2,Ball Bearing Parts,Ball Bearings,Initial,46,505,23230
+USA,2006,Q3,Screw Parts,Screws,Initial,8,116,928
+USA,2006,Q3,Nut Parts,Nuts,Initial,70,109,7630
+USA,2006,Q3,Bolt Parts,Bolts,Initial,63,137,8631
+USA,2006,Q3,Ball Bearing Parts,Ball Bearings,Initial,26,863,22438
+USA,2007,Q3,Screw Parts,Screws,Initial,15,309,4635
+USA,2007,Q3,Nut Parts,Nuts,Initial,49,3,147
+USA,2007,Q3,Bolt Parts,Bolts,Initial,18,809,14562
+USA,2007,Q3,Ball Bearing Parts,Ball Bearings,Initial,27,44,1188
+USA,2006,Q4,Screw Parts,Screws,Initial,15,55,825
+USA,2006,Q4,Nut Parts,Nuts,Initial,6,61,366
+USA,2006,Q4,Bolt Parts,Bolts,Initial,9,485,4365
+USA,2006,Q4,Ball Bearing Parts,Ball Bearings,Initial,67,21,1407
+USA,2007,Q4,Screw Parts,Screws,Initial,1,6,6
+USA,2007,Q4,Nut Parts,Nuts,Initial,8,28,224
+USA,2007,Q4,Bolt Parts,Bolts,Initial,30,93,2790
+USA,2007,Q4,Ball Bearing Parts,Ball Bearings,Initial,40,2,80
+APAC,2007,Q1,Screw Parts,Screws,Supplier1,1,69,69
+APAC,2007,Q1,Nut Parts,Nuts,Supplier1,1,339,339
+APAC,2007,Q1,Bolt Parts,Bolts,Supplier1,18,304,5472
+APAC,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier1,30,330,9900
+APAC,2006,Q2,Screw Parts,Screws,Supplier1,6,185,1110
+APAC,2006,Q2,Nut Parts,Nuts,Supplier1,17,18,306
+APAC,2006,Q2,Bolt Parts,Bolts,Supplier1,14,52,728
+APAC,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier1,49,425,20825
+APAC,2007,Q2,Screw Parts,Screws,Supplier1,1,31,31
+APAC,2007,Q2,Nut Parts,Nuts,Supplier1,62,253,15686
+APAC,2007,Q2,Bolt Parts,Bolts,Supplier1,56,356,19936
+APAC,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier1,64,243,15552
+APAC,2006,Q3,Screw Parts,Screws,Supplier1,7,239,1673
+APAC,2006,Q3,Nut Parts,Nuts,Supplier1,29,190,5510
+APAC,2006,Q3,Bolt Parts,Bolts,Supplier1,21,31,651
+APAC,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier1,31,23,713
+APAC,2007,Q3,Screw Parts,Screws,Supplier1,12,28,336
+APAC,2007,Q3,Nut Parts,Nuts,Supplier1,23,94,2162
+APAC,2007,Q3,Bolt Parts,Bolts,Supplier1,38,21,798
+APAC,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier1,52,582,30264
+APAC,2006,Q4,Screw Parts,Screws,Supplier1,1,143,143
+APAC,2006,Q4,Nut Parts,Nuts,Supplier1,4,375,1500
+APAC,2006,Q4,Bolt Parts,Bolts,Supplier1,52,435,22620
+APAC,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier1,40,46,1840
+APAC,2007,Q4,Screw Parts,Screws,Supplier1,2,147,294
+APAC,2007,Q4,Nut Parts,Nuts,Supplier1,31,250,7750
+APAC,2007,Q4,Bolt Parts,Bolts,Supplier1,10,125,1250
+APAC,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier1,26,561,14586
+USA,2006,Q1,Screw Parts,Screws,Supplier1,1,99,99
+USA,2006,Q1,Nut Parts,Nuts,Supplier1,38,293,11134
+USA,2006,Q1,Bolt Parts,Bolts,Supplier1,2,176,352
+USA,2006,Q1,Ball Bearing Parts,Ball Bearings,Supplier1,1,38,38
+USA,2007,Q1,Screw Parts,Screws,Supplier1,1,78,78
+USA,2007,Q1,Nut Parts,Nuts,Supplier1,20,289,5780
+USA,2007,Q1,Bolt Parts,Bolts,Supplier1,1,213,213
+USA,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier1,53,311,16483
+USA,2006,Q2,Screw Parts,Screws,Supplier1,12,58,696
+USA,2006,Q2,Nut Parts,Nuts,Supplier1,17,15,255
+USA,2006,Q2,Bolt Parts,Bolts,Supplier1,22,580,12760
+USA,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier1,9,894,8046
+USA,2007,Q2,Screw Parts,Screws,Supplier1,1,89,89
+USA,2007,Q2,Nut Parts,Nuts,Supplier1,17,70,1190
+USA,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier1,97,345,33465
+USA,2006,Q3,Screw Parts,Screws,Supplier1,3,114,342
+USA,2006,Q3,Nut Parts,Nuts,Supplier1,8,36,288
+USA,2006,Q3,Bolt Parts,Bolts,Supplier1,19,10,190
+USA,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier1,37,255,9435
+USA,2007,Q3,Screw Parts,Screws,Supplier1,13,115,1495
+USA,2007,Q3,Nut Parts,Nuts,Supplier1,30,326,9780
+USA,2007,Q3,Bolt Parts,Bolts,Supplier1,9,60,540
+USA,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier1,12,161,1932
+USA,2006,Q4,Screw Parts,Screws,Supplier1,1,56,56
+USA,2006,Q4,Nut Parts,Nuts,Supplier1,8,236,1888
+USA,2006,Q4,Bolt Parts,Bolts,Supplier1,16,85,1360
+USA,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier1,22,233,5126
+USA,2007,Q4,Screw Parts,Screws,Supplier1,2,73,146
+USA,2007,Q4,Nut Parts,Nuts,Supplier1,18,10,180
+USA,2007,Q4,Bolt Parts,Bolts,Supplier1,23,575,13225
+USA,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier1,29,44,1276
+APAC,2007,Q1,Screw Parts,Screws,Supplier2,3,214,642
+APAC,2007,Q1,Nut Parts,Nuts,Supplier2,10,360,3600
+APAC,2007,Q1,Bolt Parts,Bolts,Supplier2,8,890,7120
+APAC,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier2,68,42,2856
+APAC,2006,Q2,Screw Parts,Screws,Supplier2,1,68,68
+APAC,2006,Q2,Nut Parts,Nuts,Supplier2,2,126,252
+APAC,2006,Q2,Bolt Parts,Bolts,Supplier2,1,1120,1120
+APAC,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier2,45,6,270
+APAC,2007,Q2,Screw Parts,Screws,Supplier2,9,231,2079
+APAC,2007,Q2,Nut Parts,Nuts,Supplier2,14,155,2170
+APAC,2007,Q2,Bolt Parts,Bolts,Supplier2,92,520,47840
+APAC,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier2,13,90,1170
+APAC,2006,Q3,Screw Parts,Screws,Supplier2,25,35,875
+APAC,2006,Q3,Nut Parts,Nuts,Supplier2,14,205,2870
+APAC,2006,Q3,Bolt Parts,Bolts,Supplier2,8,220,1760
+APAC,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier2,23,44,1012
+APAC,2007,Q3,Screw Parts,Screws,Supplier2,9,22,198
+APAC,2007,Q3,Nut Parts,Nuts,Supplier2,65,331,21515
+APAC,2007,Q3,Bolt Parts,Bolts,Supplier2,103,72,7416
+APAC,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier2,24,188,4512
+APAC,2006,Q4,Screw Parts,Screws,Supplier2,7,50,350
+APAC,2006,Q4,Nut Parts,Nuts,Supplier2,21,471,9891
+APAC,2006,Q4,Bolt Parts,Bolts,Supplier2,22,90,1980
+APAC,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier2,31,506,15686
+APAC,2007,Q4,Screw Parts,Screws,Supplier2,8,62,496
+APAC,2007,Q4,Nut Parts,Nuts,Supplier2,2,59,118
+APAC,2007,Q4,Bolt Parts,Bolts,Supplier2,29,780,22620
+APAC,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier2,30,95,2850
+EUR,2006,Q1,Screw Parts,Screws,Supplier2,17,290,4930
+EUR,2006,Q1,Nut Parts,Nuts,Supplier2,49,110,5390
+EUR,2006,Q1,Bolt Parts,Bolts,Supplier2,32,172,5504
+EUR,2006,Q1,Ball Bearing Parts,Ball Bearings,Supplier2,21,1075,22575
+EUR,2007,Q1,Screw Parts,Screws,Supplier2,13,86,1118
+EUR,2007,Q1,Nut Parts,Nuts,Supplier2,10,135,1350
+EUR,2007,Q1,Bolt Parts,Bolts,Supplier2,73,780,56940
+EUR,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier2,15,133,1995
+EUR,2006,Q2,Screw Parts,Screws,Supplier2,17,250,4250
+EUR,2006,Q2,Nut Parts,Nuts,Supplier2,37,42,1554
+EUR,2006,Q2,Bolt Parts,Bolts,Supplier2,48,581,27888
+EUR,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier2,54,1182,63828
+EUR,2007,Q2,Screw Parts,Screws,Supplier2,4,29,116
+EUR,2007,Q2,Nut Parts,Nuts,Supplier2,7,155,1085
+EUR,2007,Q2,Bolt Parts,Bolts,Supplier2,22,355,7810
+EUR,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier2,22,23,506
+EUR,2006,Q3,Screw Parts,Screws,Supplier2,1,5,5
+EUR,2006,Q3,Nut Parts,Nuts,Supplier2,23,18,414
+EUR,2006,Q3,Bolt Parts,Bolts,Supplier2,4,447,1788
+EUR,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier2,47,789,37083
+EUR,2007,Q3,Screw Parts,Screws,Supplier2,1,14,14
+EUR,2007,Q3,Nut Parts,Nuts,Supplier2,33,115,3795
+EUR,2007,Q3,Bolt Parts,Bolts,Supplier2,3,307,921
+EUR,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier2,15,1326,19890
+EUR,2006,Q4,Screw Parts,Screws,Supplier2,1,72,72
+EUR,2006,Q4,Nut Parts,Nuts,Supplier2,24,9,216
+EUR,2006,Q4,Bolt Parts,Bolts,Supplier2,58,243,14094
+EUR,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier2,22,467,10274
+EUR,2007,Q4,Screw Parts,Screws,Supplier2,10,147,1470
+EUR,2007,Q4,Nut Parts,Nuts,Supplier2,4,681,2724
+EUR,2007,Q4,Bolt Parts,Bolts,Supplier2,15,673,10095
+EUR,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier2,73,172,12556
+USA,2006,Q1,Screw Parts,Screws,Supplier2,18,41,738
+USA,2006,Q1,Nut Parts,Nuts,Supplier2,13,37,481
+USA,2006,Q1,Bolt Parts,Bolts,Supplier2,38,112,4256
+USA,2006,Q1,Ball Bearing Parts,Ball Bearings,Supplier2,56,31,1736
+USA,2007,Q1,Screw Parts,Screws,Supplier2,13,2,26
+USA,2007,Q1,Nut Parts,Nuts,Supplier2,43,389,16727
+USA,2007,Q1,Bolt Parts,Bolts,Supplier2,14,861,12054
+USA,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier2,11,84,924
+USA,2006,Q2,Screw Parts,Screws,Supplier2,7,22,154
+USA,2006,Q2,Nut Parts,Nuts,Supplier2,5,42,210
+USA,2006,Q2,Bolt Parts,Bolts,Supplier2,15,55,825
+USA,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier2,2,1051,2102
+USA,2007,Q2,Screw Parts,Screws,Supplier2,9,88,792
+USA,2007,Q2,Nut Parts,Nuts,Supplier2,48,276,13248
+USA,2007,Q2,Bolt Parts,Bolts,Supplier2,56,487,27272
+USA,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier2,6,688,4128
+USA,2006,Q3,Screw Parts,Screws,Supplier2,10,47,470
+USA,2006,Q3,Nut Parts,Nuts,Supplier2,6,123,738
+USA,2006,Q3,Bolt Parts,Bolts,Supplier2,1,232,232
+USA,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier2,98,207,20286
+USA,2007,Q3,Screw Parts,Screws,Supplier2,8,49,392
+USA,2007,Q3,Nut Parts,Nuts,Supplier2,15,34,510
+USA,2007,Q3,Bolt Parts,Bolts,Supplier2,7,133,931
+USA,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier2,14,562,7868
+USA,2006,Q4,Screw Parts,Screws,Supplier2,4,75,300
+USA,2006,Q4,Nut Parts,Nuts,Supplier2,18,47,846
+USA,2006,Q4,Bolt Parts,Bolts,Supplier2,58,321,18618
+USA,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier2,47,204,9588
+USA,2007,Q4,Screw Parts,Screws,Supplier2,12,42,504
+USA,2007,Q4,Nut Parts,Nuts,Supplier2,19,361,6859
+USA,2007,Q4,Bolt Parts,Bolts,Supplier2,11,927,10197
+USA,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier2,6,938,5628
+APAC,2007,Q1,Screw Parts,Screws,Supplier3,7,66,462
+APAC,2007,Q1,Nut Parts,Nuts,Supplier3,7,24,168
+APAC,2007,Q1,Bolt Parts,Bolts,Supplier3,1,265,265
+APAC,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier3,2,742,1484
+APAC,2006,Q2,Screw Parts,Screws,Supplier3,4,246,984
+APAC,2006,Q2,Nut Parts,Nuts,Supplier3,2,6,12
+APAC,2006,Q2,Bolt Parts,Bolts,Supplier3,9,4,36
+APAC,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier3,64,61,3904
+APAC,2007,Q2,Screw Parts,Screws,Supplier3,8,218,1744
+APAC,2007,Q2,Nut Parts,Nuts,Supplier3,8,43,344
+APAC,2007,Q2,Bolt Parts,Bolts,Supplier3,10,1047,10470
+APAC,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier3,13,988,12844
+APAC,2006,Q3,Screw Parts,Screws,Supplier3,9,145,1305
+APAC,2006,Q3,Nut Parts,Nuts,Supplier3,6,214,1284
+APAC,2006,Q3,Bolt Parts,Bolts,Supplier3,22,555,12210
+APAC,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier3,11,216,2376
+APAC,2007,Q3,Screw Parts,Screws,Supplier3,14,52,728
+APAC,2007,Q3,Nut Parts,Nuts,Supplier3,41,102,4182
+APAC,2007,Q3,Bolt Parts,Bolts,Supplier3,22,932,20504
+APAC,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier3,8,403,3224
+APAC,2006,Q4,Screw Parts,Screws,Supplier3,6,207,1242
+APAC,2006,Q4,Nut Parts,Nuts,Supplier3,4,372,1488
+APAC,2006,Q4,Bolt Parts,Bolts,Supplier3,1,363,363
+APAC,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier3,14,709,9926
+APAC,2007,Q4,Screw Parts,Screws,Supplier3,2,83,166
+APAC,2007,Q4,Nut Parts,Nuts,Supplier3,1,646,646
+APAC,2007,Q4,Bolt Parts,Bolts,Supplier3,1,357,357
+APAC,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier3,20,148,2960
+EUR,2006,Q1,Screw Parts,Screws,Supplier3,11,74,814
+EUR,2006,Q1,Nut Parts,Nuts,Supplier3,10,230,2300
+EUR,2006,Q1,Bolt Parts,Bolts,Supplier3,48,198,9504
+EUR,2006,Q1,Ball Bearing Parts,Ball Bearings,Supplier3,94,456,42864
+EUR,2007,Q1,Screw Parts,Screws,Supplier3,1,146,146
+EUR,2007,Q1,Nut Parts,Nuts,Supplier3,3,61,183
+EUR,2007,Q1,Bolt Parts,Bolts,Supplier3,18,581,10458
+EUR,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier3,37,269,9953
+EUR,2006,Q2,Bolt Parts,Bolts,Supplier3,11,30,330
+EUR,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier3,2,244,488
+EUR,2007,Q2,Screw Parts,Screws,Supplier3,11,61,671
+EUR,2007,Q2,Nut Parts,Nuts,Supplier3,33,78,2574
+EUR,2007,Q2,Bolt Parts,Bolts,Supplier3,78,180,14040
+EUR,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier3,128,378,48384
+EUR,2006,Q3,Screw Parts,Screws,Supplier3,2,101,202
+EUR,2006,Q3,Nut Parts,Nuts,Supplier3,6,294,1764
+EUR,2006,Q3,Bolt Parts,Bolts,Supplier3,35,10,350
+EUR,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier3,56,155,8680
+EUR,2007,Q3,Screw Parts,Screws,Supplier3,24,154,3696
+EUR,2007,Q3,Nut Parts,Nuts,Supplier3,1,30,30
+EUR,2007,Q3,Bolt Parts,Bolts,Supplier3,19,444,8436
+EUR,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier3,50,581,29050
+EUR,2006,Q4,Screw Parts,Screws,Supplier3,9,6,54
+EUR,2006,Q4,Nut Parts,Nuts,Supplier3,18,88,1584
+EUR,2006,Q4,Bolt Parts,Bolts,Supplier3,12,554,6648
+EUR,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier3,7,6,42
+EUR,2007,Q4,Screw Parts,Screws,Supplier3,8,72,576
+EUR,2007,Q4,Nut Parts,Nuts,Supplier3,2,92,184
+EUR,2007,Q4,Bolt Parts,Bolts,Supplier3,91,673,61243
+EUR,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier3,2,1309,2618
+USA,2006,Q1,Screw Parts,Screws,Supplier3,12,56,672
+USA,2006,Q1,Nut Parts,Nuts,Supplier3,5,715,3575
+USA,2006,Q1,Bolt Parts,Bolts,Supplier3,13,708,9204
+USA,2006,Q1,Ball Bearing Parts,Ball Bearings,Supplier3,70,39,2730
+USA,2007,Q1,Screw Parts,Screws,Supplier3,13,60,780
+USA,2007,Q1,Nut Parts,Nuts,Supplier3,11,45,495
+USA,2007,Q1,Bolt Parts,Bolts,Supplier3,80,535,42800
+USA,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier3,20,525,10500
+USA,2006,Q2,Screw Parts,Screws,Supplier3,3,196,588
+USA,2006,Q2,Nut Parts,Nuts,Supplier3,3,567,1701
+USA,2006,Q2,Bolt Parts,Bolts,Supplier3,10,342,3420
+USA,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier3,63,438,27594
+USA,2007,Q2,Screw Parts,Screws,Supplier3,1,359,359
+USA,2007,Q2,Nut Parts,Nuts,Supplier3,25,179,4475
+USA,2007,Q2,Bolt Parts,Bolts,Supplier3,4,583,2332
+USA,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier3,99,97,9603
+USA,2006,Q3,Screw Parts,Screws,Supplier3,15,279,4185
+USA,2006,Q3,Nut Parts,Nuts,Supplier3,9,1,9
+USA,2006,Q3,Bolt Parts,Bolts,Supplier3,31,450,13950
+USA,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier3,52,1059,55068
+USA,2007,Q3,Screw Parts,Screws,Supplier3,2,60,120
+USA,2007,Q3,Nut Parts,Nuts,Supplier3,22,564,12408
+USA,2007,Q3,Bolt Parts,Bolts,Supplier3,6,486,2916
+USA,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier3,1,709,709
+USA,2006,Q4,Screw Parts,Screws,Supplier3,1,5,5
+USA,2006,Q4,Nut Parts,Nuts,Supplier3,17,651,11067
+USA,2007,Q4,Screw Parts,Screws,Supplier3,3,23,69
+USA,2007,Q4,Nut Parts,Nuts,Supplier3,2,99,198
+USA,2007,Q4,Bolt Parts,Bolts,Supplier3,3,238,714
+USA,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier3,33,308,10164
+APAC,2007,Q1,Screw Parts,Screws,Supplier4,2,137,274
+APAC,2007,Q1,Nut Parts,Nuts,Supplier4,1,85,85
+APAC,2007,Q1,Bolt Parts,Bolts,Supplier4,10,39,390
+APAC,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier4,10,82,820
+APAC,2006,Q2,Screw Parts,Screws,Supplier4,28,82,2296
+APAC,2006,Q2,Nut Parts,Nuts,Supplier4,14,21,294
+APAC,2006,Q2,Bolt Parts,Bolts,Supplier4,5,142,710
+APAC,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier4,11,679,7469
+APAC,2007,Q2,Screw Parts,Screws,Supplier4,1,86,86
+APAC,2007,Q2,Nut Parts,Nuts,Supplier4,9,112,1008
+APAC,2007,Q2,Bolt Parts,Bolts,Supplier4,58,3,174
+APAC,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier4,16,62,992
+APAC,2006,Q3,Screw Parts,Screws,Supplier4,3,216,648
+APAC,2006,Q3,Nut Parts,Nuts,Supplier4,10,598,5980
+APAC,2006,Q3,Bolt Parts,Bolts,Supplier4,16,176,2816
+APAC,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier4,71,166,11786
+APAC,2007,Q3,Screw Parts,Screws,Supplier4,4,144,576
+APAC,2007,Q3,Nut Parts,Nuts,Supplier4,5,107,535
+APAC,2007,Q3,Bolt Parts,Bolts,Supplier4,55,87,4785
+APAC,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier4,10,129,1290
+APAC,2006,Q4,Screw Parts,Screws,Supplier4,12,150,1800
+APAC,2006,Q4,Nut Parts,Nuts,Supplier4,43,60,2580
+APAC,2006,Q4,Bolt Parts,Bolts,Supplier4,24,330,7920
+APAC,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier4,85,174,14790
+APAC,2007,Q4,Screw Parts,Screws,Supplier4,1,168,168
+APAC,2007,Q4,Nut Parts,Nuts,Supplier4,37,94,3478
+APAC,2007,Q4,Bolt Parts,Bolts,Supplier4,14,292,4088
+APAC,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier4,21,301,6321
+EUR,2006,Q1,Screw Parts,Screws,Supplier4,1,66,66
+EUR,2006,Q1,Nut Parts,Nuts,Supplier4,33,172,5676
+EUR,2006,Q1,Bolt Parts,Bolts,Supplier4,20,17,340
+EUR,2006,Q1,Ball Bearing Parts,Ball Bearings,Supplier4,104,21,2184
+EUR,2007,Q1,Screw Parts,Screws,Supplier4,15,223,3345
+EUR,2007,Q1,Nut Parts,Nuts,Supplier4,1,337,337
+EUR,2007,Q1,Bolt Parts,Bolts,Supplier4,20,616,12320
+EUR,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier4,52,633,32916
+EUR,2006,Q2,Screw Parts,Screws,Supplier4,16,6,96
+EUR,2006,Q2,Nut Parts,Nuts,Supplier4,2,67,134
+EUR,2006,Q2,Bolt Parts,Bolts,Supplier4,7,488,3416
+EUR,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier4,63,424,26712
+EUR,2007,Q2,Screw Parts,Screws,Supplier4,2,29,58
+EUR,2007,Q2,Nut Parts,Nuts,Supplier4,8,307,2456
+EUR,2007,Q2,Bolt Parts,Bolts,Supplier4,91,122,11102
+EUR,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier4,28,338,9464
+EUR,2006,Q3,Screw Parts,Screws,Supplier4,8,162,1296
+EUR,2006,Q3,Nut Parts,Nuts,Supplier4,55,196,10780
+EUR,2006,Q3,Bolt Parts,Bolts,Supplier4,13,575,7475
+EUR,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier4,34,15,510
+EUR,2007,Q3,Screw Parts,Screws,Supplier4,2,8,16
+EUR,2007,Q3,Nut Parts,Nuts,Supplier4,19,73,1387
+EUR,2007,Q3,Bolt Parts,Bolts,Supplier4,19,439,8341
+EUR,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier4,55,207,11385
+EUR,2006,Q4,Screw Parts,Screws,Supplier4,28,25,700
+EUR,2006,Q4,Nut Parts,Nuts,Supplier4,13,180,2340
+EUR,2006,Q4,Bolt Parts,Bolts,Supplier4,35,983,34405
+EUR,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier4,115,12,1380
+EUR,2007,Q4,Screw Parts,Screws,Supplier4,2,21,42
+EUR,2007,Q4,Nut Parts,Nuts,Supplier4,13,125,1625
+EUR,2007,Q4,Bolt Parts,Bolts,Supplier4,1,19,19
+EUR,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier4,15,98,1470
+USA,2006,Q1,Screw Parts,Screws,Supplier4,14,96,1344
+USA,2006,Q1,Nut Parts,Nuts,Supplier4,44,142,6248
+USA,2006,Q1,Bolt Parts,Bolts,Supplier4,11,142,1562
+USA,2006,Q1,Ball Bearing Parts,Ball Bearings,Supplier4,82,893,73226
+USA,2007,Q1,Screw Parts,Screws,Supplier4,2,39,78
+USA,2007,Q1,Nut Parts,Nuts,Supplier4,14,35,490
+USA,2007,Q1,Bolt Parts,Bolts,Supplier4,17,24,408
+USA,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier4,1,0,0
+USA,2006,Q2,Screw Parts,Screws,Supplier4,6,114,684
+USA,2006,Q2,Nut Parts,Nuts,Supplier4,1,520,520
+USA,2006,Q2,Bolt Parts,Bolts,Supplier4,45,597,26865
+USA,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier4,57,0,0
+USA,2007,Q2,Screw Parts,Screws,Supplier4,16,6,96
+USA,2007,Q2,Nut Parts,Nuts,Supplier4,1,217,217
+USA,2007,Q2,Bolt Parts,Bolts,Supplier4,2,389,778
+USA,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier4,49,18,882
+USA,2006,Q3,Screw Parts,Screws,Supplier4,13,351,4563
+USA,2006,Q3,Nut Parts,Nuts,Supplier4,1,11,11
+USA,2006,Q3,Bolt Parts,Bolts,Supplier4,2,91,182
+USA,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier4,64,737,47168
+USA,2007,Q3,Screw Parts,Screws,Supplier4,1,34,34
+USA,2007,Q3,Nut Parts,Nuts,Supplier4,50,115,5750
+USA,2007,Q3,Bolt Parts,Bolts,Supplier4,15,420,6300
+USA,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier4,47,577,27119
+USA,2006,Q4,Screw Parts,Screws,Supplier4,2,18,36
+USA,2006,Q4,Nut Parts,Nuts,Supplier4,8,308,2464
+USA,2006,Q4,Bolt Parts,Bolts,Supplier4,32,52,1664
+USA,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier4,49,471,23079
+USA,2007,Q4,Screw Parts,Screws,Supplier4,9,156,1404
+USA,2007,Q4,Nut Parts,Nuts,Supplier4,8,256,2048
+USA,2007,Q4,Bolt Parts,Bolts,Supplier4,78,97,7566
+USA,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier4,78,516,40248
+APAC,2007,Q1,Screw Parts,Screws,Supplier5,6,51,306
+APAC,2007,Q1,Nut Parts,Nuts,Supplier5,2,149,298
+APAC,2007,Q1,Bolt Parts,Bolts,Supplier5,55,332,18260
+APAC,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier5,39,310,12090
+APAC,2006,Q2,Screw Parts,Screws,Supplier5,4,48,192
+APAC,2006,Q2,Nut Parts,Nuts,Supplier5,43,410,17630
+APAC,2006,Q2,Bolt Parts,Bolts,Supplier5,45,235,10575
+APAC,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier5,18,188,3384
+APAC,2007,Q2,Screw Parts,Screws,Supplier5,8,5,40
+APAC,2007,Q2,Nut Parts,Nuts,Supplier5,9,394,3546
+APAC,2007,Q2,Bolt Parts,Bolts,Supplier5,63,440,27720
+APAC,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier5,13,456,5928
+APAC,2006,Q3,Screw Parts,Screws,Supplier5,17,6,102
+APAC,2006,Q3,Nut Parts,Nuts,Supplier5,39,289,11271
+APAC,2006,Q3,Bolt Parts,Bolts,Supplier5,34,707,24038
+APAC,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier5,81,471,38151
+APAC,2007,Q3,Screw Parts,Screws,Supplier5,1,15,15
+APAC,2007,Q3,Nut Parts,Nuts,Supplier5,26,106,2756
+APAC,2007,Q3,Bolt Parts,Bolts,Supplier5,9,51,459
+APAC,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier5,54,1123,60642
+APAC,2006,Q4,Screw Parts,Screws,Supplier5,1,41,41
+APAC,2006,Q4,Nut Parts,Nuts,Supplier5,6,38,228
+APAC,2006,Q4,Bolt Parts,Bolts,Supplier5,4,79,316
+APAC,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier5,3,74,222
+APAC,2007,Q4,Screw Parts,Screws,Supplier5,1,7,7
+APAC,2007,Q4,Nut Parts,Nuts,Supplier5,6,532,3192
+APAC,2007,Q4,Bolt Parts,Bolts,Supplier5,14,114,1596
+APAC,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier5,2,99,198
+EUR,2006,Q1,Screw Parts,Screws,Supplier5,10,68,680
+EUR,2006,Q1,Nut Parts,Nuts,Supplier5,1,16,16
+EUR,2006,Q1,Bolt Parts,Bolts,Supplier5,13,376,4888
+EUR,2006,Q1,Ball Bearing Parts,Ball Bearings,Supplier5,89,922,82058
+EUR,2007,Q1,Screw Parts,Screws,Supplier5,7,124,868
+EUR,2007,Q1,Nut Parts,Nuts,Supplier5,9,94,846
+EUR,2007,Q1,Bolt Parts,Bolts,Supplier5,29,12,348
+EUR,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier5,4,475,1900
+EUR,2006,Q2,Screw Parts,Screws,Supplier5,2,19,38
+EUR,2006,Q2,Nut Parts,Nuts,Supplier5,9,49,441
+EUR,2006,Q2,Bolt Parts,Bolts,Supplier5,30,445,13350
+EUR,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier5,3,824,2472
+EUR,2007,Q2,Screw Parts,Screws,Supplier5,1,133,133
+EUR,2007,Q2,Nut Parts,Nuts,Supplier5,52,23,1196
+EUR,2007,Q2,Bolt Parts,Bolts,Supplier5,12,15,180
+EUR,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier5,52,453,23556
+EUR,2006,Q3,Screw Parts,Screws,Supplier5,7,120,840
+EUR,2006,Q3,Nut Parts,Nuts,Supplier5,17,420,7140
+EUR,2006,Q3,Bolt Parts,Bolts,Supplier5,13,344,4472
+EUR,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier5,8,190,1520
+EUR,2007,Q3,Screw Parts,Screws,Supplier5,4,26,104
+EUR,2007,Q3,Nut Parts,Nuts,Supplier5,29,14,406
+EUR,2007,Q3,Bolt Parts,Bolts,Supplier5,64,799,51136
+EUR,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier5,35,278,9730
+EUR,2006,Q4,Screw Parts,Screws,Supplier5,13,38,494
+EUR,2006,Q4,Nut Parts,Nuts,Supplier5,12,104,1248
+EUR,2006,Q4,Bolt Parts,Bolts,Supplier5,1,568,568
+EUR,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier5,25,9,225
+EUR,2007,Q4,Screw Parts,Screws,Supplier5,7,0,0
+EUR,2007,Q4,Nut Parts,Nuts,Supplier5,32,73,2336
+EUR,2007,Q4,Bolt Parts,Bolts,Supplier5,8,652,5216
+EUR,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier5,41,91,3731
+USA,2006,Q1,Screw Parts,Screws,Supplier5,2,60,120
+USA,2006,Q1,Nut Parts,Nuts,Supplier5,24,27,648
+USA,2006,Q1,Bolt Parts,Bolts,Supplier5,21,410,8610
+USA,2006,Q1,Ball Bearing Parts,Ball Bearings,Supplier5,20,659,13180
+USA,2007,Q1,Screw Parts,Screws,Supplier5,12,102,1224
+USA,2007,Q1,Nut Parts,Nuts,Supplier5,13,34,442
+USA,2007,Q1,Bolt Parts,Bolts,Supplier5,5,418,2090
+USA,2007,Q1,Ball Bearing Parts,Ball Bearings,Supplier5,3,160,480
+USA,2006,Q2,Screw Parts,Screws,Supplier5,7,6,42
+USA,2006,Q2,Nut Parts,Nuts,Supplier5,20,273,5460
+USA,2006,Q2,Bolt Parts,Bolts,Supplier5,1,597,597
+USA,2006,Q2,Ball Bearing Parts,Ball Bearings,Supplier5,57,173,9861
+USA,2007,Q2,Screw Parts,Screws,Supplier5,13,94,1222
+USA,2007,Q2,Nut Parts,Nuts,Supplier5,22,255,5610
+USA,2007,Q2,Bolt Parts,Bolts,Supplier5,2,97,194
+USA,2007,Q2,Ball Bearing Parts,Ball Bearings,Supplier5,7,623,4361
+USA,2006,Q3,Screw Parts,Screws,Supplier5,2,64,128
+USA,2006,Q3,Nut Parts,Nuts,Supplier5,14,433,6062
+USA,2006,Q3,Bolt Parts,Bolts,Supplier5,104,317,32968
+USA,2006,Q3,Ball Bearing Parts,Ball Bearings,Supplier5,122,143,17446
+USA,2007,Q3,Screw Parts,Screws,Supplier5,1,170,170
+USA,2007,Q3,Nut Parts,Nuts,Supplier5,13,343,4459
+USA,2007,Q3,Bolt Parts,Bolts,Supplier5,78,137,10686
+USA,2007,Q3,Ball Bearing Parts,Ball Bearings,Supplier5,9,998,8982
+USA,2006,Q4,Screw Parts,Screws,Supplier5,11,156,1716
+USA,2006,Q4,Nut Parts,Nuts,Supplier5,4,380,1520
+USA,2006,Q4,Bolt Parts,Bolts,Supplier5,26,20,520
+USA,2006,Q4,Ball Bearing Parts,Ball Bearings,Supplier5,110,174,19140
+USA,2007,Q4,Screw Parts,Screws,Supplier5,15,28,420
+USA,2007,Q4,Nut Parts,Nuts,Supplier5,15,18,270
+USA,2007,Q4,Bolt Parts,Bolts,Supplier5,75,264,19800
+USA,2007,Q4,Ball Bearing Parts,Ball Bearings,Supplier5,33,226,7458

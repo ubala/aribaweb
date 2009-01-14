@@ -1,0 +1,292 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#50 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" required="$false">
+        See PageWrapperForm
+    </Binding>
+
+    <Binding key="title" direction="get" type="String" default="$null">
+        TBD
+    </Binding>
+
+    <Binding key="disableHelpAction" direction="get" type="boolean" default="$false">
+        Override to disableHelpAction binding on BasicPageWrapper.
+    </Binding>
+
+    <Binding key="disableLogoutAction" direction="get" type="boolean" default="$true">
+        Depreciated.  Logout action will always be disabled.
+    </Binding>
+
+    <Binding key="disableHomeAction" direction="get" type="boolean" default="$true">
+        Depreciated.  Home action will always be disabled.
+    </Binding>
+
+    <Binding key="hasSidebarNotch" direction="get" type="boolean" default="$false">
+        See BasicPageWrapper
+    </Binding>
+
+    <Binding key="isSidebarVisible" direction="get" type="boolean" default="$false">
+        See BasicPageWrapper
+    </Binding>
+
+    <Binding key="toc" direction="get" type="String" default="$null">
+        See BasicPageWrapper
+    </Binding>
+
+    <Binding key="formEncodingType" direction="get" type="String" default="$null">
+        See BasicPageWrapper
+    </Binding>
+
+    <Binding key="hasForm" direction="get" type="boolean" default="$true">
+        See BasicPageWrapper
+    </Binding>
+
+    <Binding key="submitFormDefault" direction="get" type="boolean" default="$false">
+        See BasicPageWrapper
+    </Binding>
+
+    <Binding key="editable" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="okHint" direction="get" type="String" default="OK BUtton">
+        TBD
+    </Binding>
+
+    <Binding key="okTitle" direction="get" type="String" default="OK">
+        TBD
+    </Binding>
+
+    <Binding key="cancelHint" direction="get" type="String" default="Cancel BUtton">
+        TBD
+    </Binding>
+
+    <Binding key="okAction" direction="get" type="AWResponseGenerating" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="cancelAction" direction="get" type="AWResponseGenerating" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="cancelTitle" direction="get" type="String" default="Cancel">
+        TBD
+    </Binding>
+
+    <Binding key="doneHint" direction="get" type="String" default="Done BUtton">
+        TBD
+    </Binding>
+
+    <Binding key="doneTitle" direction="get" type="String" default="Done">
+        TBD
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="helpUrl" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="helpKey" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="showTopButtons" direction="get" type="boolean" default="$true">
+        See BasicNavigator
+    </Binding>
+
+    <Binding key="showBottomButtons" direction="get" type="boolean" default="$true">
+        See BasicNavigator
+    </Binding>
+
+    <Binding key="commands" direction="get" type="String" default="$null">
+        The commands is the name of the "Toolbar" component.  You needn't provide the package
+        name of the component, just the component's class name without the packag will suffice.
+        If commands is null or unspecified, the toolbar's commands region will be blank.
+    </Binding>
+
+    <Binding key="preventBackTrack" direction="get" type="boolean" default="$false">
+        Prevents the user from using the browser back button to move off the modal page.
+    </Binding>
+
+    <NamedContent name="buttons" required="$false">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="titleArea" required="$false">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="bodyArea" required="$false">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="commands" required="$false">
+        Note: see AribaCommandBar.  The Include tag is magic in that it will reach up any number of
+        component-levels to locate a named template with the name "commands".
+    </NamedContent>
+</a:Api>\
+\
+<a:Environment ModalPageWrapper="$this">\
+<a:If ifFalse="$inClientPanel">\
+<w:BasicPageWrapper action="$^action"
+                  debugTitle="$^title"
+                  disableHelpAction="$^disableHelpAction"
+                  disableLogoutAction="$true"
+                  disableHomeAction="$true"
+                  disableUndelegateAction="$true"
+                  hasSidebarNotch="$^hasSidebarNotch"
+                  isSidebarVisible="$^isSidebarVisible"
+                  toc="$^toc"
+                  formEncodingType="$^formEncodingType"
+                  hasForm="$^hasForm:$true"
+                  submitFormDefault="$^submitFormDefault:$false"
+                  helpKey="$^helpKey">\
+
+    <a:If ifFalse="$hasBottomLeftAreaSubTemplate">
+        <w:BasicNavigator showTopButtons="$^showTopButtons" showBottomButtons="$^showBottomButtons">\
+
+            <!-- button area -->
+            <a:Content name="buttons">\
+                <a:IncludeBlock name="buttons" editable="$^editable"
+                                okHint="$^okHint" okTitle="$^okTitle"
+                                cancelHint="$^cancelHint" cancelTitle="$^cancelTitle"
+                                doneHint="$^doneHint" doneTitle="$^doneTitle"
+                                submitForm="$^submitForm"/>
+                <a:IncludeContent name="buttons" required="$false"/>\
+            </a:Content>\
+
+            <!-- title area -->
+            <a:Content name="titleArea">\
+                <a:IncludeContent name="titleArea" required="$false"/>\
+                <span class="pageHead"><a:String value="$^title"/></span>\
+            </a:Content>\
+
+            <!-- content area -->
+            <a:Content name="body">\
+                <a:If ifFalse="$hasBodyAreaSubTemplate">
+                    <a:IncludeContent/>
+                <a:Else/>
+                    <a:IncludeContent name="bodyArea"/>\
+                </a:If>
+            </a:Content>\
+
+            <a:Content name="footerArea">\
+                <a:IncludeContent name="footerArea"
+                                    required="$false"/>\
+            </a:Content>\
+            \
+        </w:BasicNavigator>\
+    <a:Else/>
+        <w:CornerLayout>
+
+            <a:Content name="topLeftArea">
+                <a:IncludeContent name="topLeftArea" required="$false"/>\
+            </a:Content>
+
+            <a:Content name="topRightArea">
+                <w:StepNavigatorBar showButtons="$^showTopButtons">
+                    <a:Content name="titleArea">
+                        <a:IncludeContent name="titleArea" required="$false"/>\
+                        <span class="pageHead"><a:String value="$^title"/></span>\
+                    </a:Content>\
+                    <a:Content name="buttons">\
+                        <a:IncludeBlock name="buttons" editable="$^editable"
+                                        okHint="$^okHint" okTitle="$^okTitle"
+                                        cancelHint="$^cancelHint" cancelTitle="$^cancelTitle"
+                                        doneHint="$^doneHint" doneTitle="$^doneTitle"
+                                        submitForm="$^submitForm"/>
+                        <a:IncludeContent name="buttons" required="$false"/>\
+                    </a:Content>
+                </w:StepNavigatorBar>
+            </a:Content>
+
+            <a:Content name="bottomLeftArea">
+                <a:IncludeContent name="bottomLeftArea" required="$false"/>\
+            </a:Content>
+
+            <a:Content name="bottomRightArea">
+                <a:If ifFalse="$hasBodyAreaSubTemplate">
+                    <a:IncludeContent/>
+                <a:Else/>
+                    <a:IncludeContent name="bodyArea"/>\
+                </a:If>
+                <br/>
+                <w:StepNavigatorBar isBottom="$true" showButtons="$^showBottomButtons" >
+                    <a:Content name="buttons">\
+                        <a:IncludeBlock name="buttons" editable="$^editable"
+                                        okHint="$^okHint" okTitle="$^okTitle"
+                                        cancelHint="$^cancelHint" cancelTitle="$^cancelTitle"
+                                        doneHint="$^doneHint" doneTitle="$^doneTitle"
+                                        submitForm="$^submitForm"/>
+                        <a:IncludeContent name="buttons" required="$false"/>\
+                    </a:Content>
+                </w:StepNavigatorBar>
+                <a:IncludeContent name="footerArea"
+                                    required="$false"/>\
+            </a:Content>
+
+        </w:CornerLayout>
+    </a:If>
+</w:BasicPageWrapper>\
+<a:Else/>\
+    <w:PageWrapperForm action="$^action" formEncodingType ="$^formEncodingType" submitFormDefault="$^submitFormDefault" omitTags="$!^hasForm:$false">\
+        <a:SetValue panelId="$requestContext.nextElementId"/>
+        <w:Confirmation id="$panelId">
+            <a:Content name="header">\
+                <a:String value="$^title"/>\
+                <a:IncludeContent name="titleArea" required="$false"/>\
+            </a:Content>\
+
+            <a:Content name="content">\
+                <a:If ifFalse="$hasBodyAreaSubTemplate">
+                    <a:IncludeContent/>
+                <a:Else/>
+                    <a:IncludeContent name="bodyArea"/>\
+                </a:If>
+            </a:Content>\
+
+            <a:Content name="buttons">
+                <a:If ifTrue="$^editable">\
+                    <w:TextButton action="$okClicked" title="$^okHint:$[a001]OK Button"><a:String value="$^okTitle:$[a002]OK"/></w:TextButton>\
+                    <w:TextButton action="$cancelClicked" title="$^cancelHint:$[a003]Cancel Button"><a:String value="$^cancelTitle:$[a004]Cancel"/></w:TextButton>\
+                <a:Else/>\
+                    <w:TextButton action="$okClicked" title="$^doneHint:$[a005]Done Button" submitForm="$^submitForm"><a:String value="$^doneTitle:$[a006]Done"/></w:TextButton>\
+                </a:If>\
+                <a:IncludeContent name="buttons" required="$false"/>\
+            </a:Content>
+        </w:Confirmation>
+    </w:PageWrapperForm>
+</a:If>\
+\
+</a:Environment>\
+
+<a:Block name="buttons">\
+    <a:If ifTrue="$^editable">\
+        <w:StepNavigatorButton action="$okClicked" hint="$^okHint:$[a001]OK Button" label="$^okTitle:$[a002]OK" isDefault="$true"/>\
+        <w:StepNavigatorButton action="$cancelClicked" hint="$^cancelHint:$[a003]Cancel Button" label="$^cancelTitle:$[a004]Cancel" submitForm="$false"/>\
+    <a:Else/>\
+        <w:StepNavigatorButton action="$okClicked" hint="$^doneHint:$[a005]Done Button" label="$^doneTitle:$[a006]Done" submitForm="$^submitForm"/>\
+    </a:If>\
+</a:Block>

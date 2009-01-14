@@ -1,0 +1,302 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#27 $
+    </Copyright>
+
+    <Overview>
+        Displays a confirmation dialog with Header, Content, and Buttons.  By default
+        there are two buttons, Ok and Cancel.  Cancel will close the Confirmation dialog
+        and redisplay the current page.
+
+        There are two distinct patterns for the Confirmation widget.
+
+        -------------------------
+        Client Side Confirmation
+        -------------------------
+        For client side confirmations, the TextButton and the Confirmation widget are
+        associated via the "confirmationId" binding on TextButton.  In this case, no java
+        code needs to be written and the Confirmation widget will always be displayed when
+        the TextButton is clicked.  Note that there is no "action" binding on TextButton
+        since the server side action is always defined by the buttons in the Confirmation
+        widget.
+
+
+        NOTE: the TextButton MUST appear before the Confirmation in this usage.
+
+
+        Client Side Example 1:
+        <a:SetValue exampleId="$requestContext.nextElementId"/>
+        <w:TextButton confirmationId="$exampleId">Client Side Confirmation</w:TextButton>
+        <w:Confirmation id="$exampleId" okAction="$okAction">
+            <a:Content name="header">\
+                <a:Image align="absmiddle" filename="sso/warning.gif"/>&nbsp;&nbsp;
+                <a:Local key="a001">Confirm Action</a:Local>
+            </a:Content>\
+            <a:Content name="content">\
+                <table>
+                    <tr>
+                        <td><a:Local key="a002">Are you sure?</a:Local></td>
+                    </tr>
+                </table>
+            </a:Content>\
+        </w:Confirmation>
+
+        In the example above, the default ok/cancel buttons are used.  In this case, the
+        ok button will call the okAction binding defined on the Confirmation and the
+        cancel button will simply close the confirmation (with no server side update).
+
+        Client Side Example 2:
+        <a:SetValue exampleId="$requestContext.nextElementId"/>
+        <w:TextButton confirmationId="$exampleId">Client Side Confirmation (Custom buttons)</w:TextButton>
+        <w:Confirmation id="$exampleId">
+            <a:Content name="header">\
+                <a:Image align="absmiddle" filename="sso/warning.gif"/>&nbsp;&nbsp;
+                <a:Local key="a001">Confirm Action</a:Local>
+            </a:Content>\
+            <a:Content name="content">\
+                <table>
+                    <tr>
+                        <td><a:Local key="a002">Are you sure?</a:Local></td>
+                    </tr>
+                </table>
+            </a:Content>\
+            <a:Content name="buttons">
+                <table>
+                    <tr>
+                        <td>
+                            <w:TextButton onClick="ariba.Widgets.cancelConfirmation();">Custom Cancel</w:TextButton>\
+                        </td>
+                        <td>
+                            <w:TextButton action="$postConfirmHome">Go Home</w:TextButton>
+                        </td>
+                        <td>
+                            <w:TextButton action="$clientSideConfirmationRefresh">Redisplay Page</w:TextButton>
+                        </td>
+                    </tr>
+                </table>
+            </a:Content>
+        </w:Confirmation>
+
+        public AWResponseGenerating clientSideConfirmationRefresh ()
+        {
+            Confirmation.hideConfirmation(requestContext());
+            return null;
+        }
+
+        In the example above, the default ok/cancel buttons are used.  In this case, the
+        ok button will call the okAction binding defined on the Confirmation and the
+        cancel button will simply close the confirmation (with no server side update).
+
+         Note: Using an action that returns $null will NOT close the confirmation.
+               Instead an explicit call to Confirmation.hideConfirmation() is necessary.
+               As shown by clientSideConfirmationRefresh.
+        -------------------------
+        Server Side Confirmation
+        -------------------------
+
+        In the second pattern, the display of the Confirmation is explicitly controlled on
+        the server side in the "action" method of the TextButton (or other action firing
+        widget).  Using this pattern, the Confirmation is displayed by using the
+        showConfirmation static utility method.
+
+        Server Side Example 1:
+
+        <a:SetValue exampleId="$requestContext.nextElementId"/>
+        <w:TextButton action="$showConfirmationDiv">Server Side Confirmation</w:TextButton>
+        <w:Confirmation id="$exampleId" okAction="$okAction">
+            <a:Content name="header">Confirm Action</a:Content>\
+            <a:Content name="content">Are you really sure?</a:Content>\
+        </w:Confirmation>
+
+        public AWEncodedString _exampleId;
+        public AWResponseGenerating showConfirmationDiv ()
+        {
+            // make some decision here
+            if (reasonForShowingDiv) {
+                // show the confirmation
+                return Confirmation.showConfirmation(requestContext(), _exampleId);
+            }
+            else {
+                // show some page -- just returning current page in this example
+                return null;
+            }
+        }
+
+        public AWResponseGenerating okAction ()
+        {
+            // hide the confirmation so if the current page is redisplayed the
+            // confirmation will be closed
+            Confirmation.hideConfirmation(requestContext());
+            // show some page -- just returning current page in this example
+            return null;
+        }
+
+        Server Side Example 2:
+
+        The example below also has a custom button template, a javascript button, and
+        examples of how to implement ok / cancel.
+
+        <a:SetValue exampleId="$requestContext.nextElementId"/>
+        <w:TextButton action="$showConfirmationDiv">Server Side Confirmation (Custom buttons)</w:TextButton>
+        <w:Confirmation id="$exampleId">
+            <a:Content name="header">Confirm Action</a:Content>\
+            <a:Content name="content">Are you really sure?</a:Content>\
+            <a:Content name="buttons">
+                <table>
+                    <tr>
+                        <td>
+                            <w:TextButton tabIndex="0" onClick="alert('javascript button');return false;" onKeyPress="alert('javascript button');return false;" buttonClass="btnSpecial1">JS Button</w:TextButton>
+                        </td>
+                        <td>
+                            <w:TextButton action="$cancelConfirmation">Cancel</w:TextButton>
+                        </td>
+                        <td>
+                            <w:TextButton action="$postConfirmHome">Go Home</w:TextButton>
+                        </td>
+                    </tr>
+                </table>
+            </a:Content>
+        </w:Confirmation>
+
+        public AWEncodedString _exampleId;
+        public AWResponseGenerating showConfirmationDiv ()
+        {
+            // make some decision here
+            if (reasonForShowingDiv) {
+                // show the confirmation
+                return Confirmation.showConfirmation(requestContext(), _exampleId);
+            }
+            else {
+                // show something else
+                return null;
+            }
+        }
+
+        public AWResponseGenerating cancelConfirmation ()
+        {
+            return Confirmation.hideConfirmation(requestContext());
+        }
+
+        public AWResponseGenerating postConfirmHome ()
+        {
+            Confirmation.hideConfirmation(requestContext());
+            return pageWithName("HomePage");
+        }
+
+    </Overview>
+
+    <Binding key="id" direction="get" type="String" required="$false">
+        Id of this Confirmation Dialog.  This value is used by
+        Confirmation.showConfirmation to detrmine which confirmation dialog to display.
+    </Binding>
+
+    <Binding key="okAction" direction="get" type="AWResponseGenerating" required="$false">
+        Action to take when Ok is clicked
+    </Binding>
+
+    <Binding key="cancelAction" direction="get" type="AWResponseGenerating" required="$false">
+        Action to take when Cancel is clicked
+    </Binding>
+
+    <Binding key="lazyLoadConfirmation" direction="get" type="boolean" default="$true">
+        Determines whether or not Client Side Confirmations are lazily loaded (by default
+        this is true).
+    </Binding>
+
+    <NamedContent name="header" required="$false">
+        Use to define content to display in header area.
+    </NamedContent>
+
+    <NamedContent name="content" required="$false">
+        Define content to display in body of the dialog.
+    </NamedContent>
+
+    <NamedContent name="buttons" required="$false">
+        Override default "Ok" "Cancel" buttons by passing in this named template.
+    </NamedContent>
+
+</a:Api>\
+<a:RefreshRegion>\
+    <a:If ifTrue="$hideConfirmation">\
+        <a:RefreshRegion alwaysRender="$true">\
+            <a:ClientSideScript>\
+                ariba.Widgets.cancelConfirmation();
+            </a:ClientSideScript>\
+        </a:RefreshRegion>
+    </a:If>\
+\
+    <a:If ifTrue="$renderConfirmation">\
+        <a:RelocatableDiv class="panelContainer" id="$confId">\
+        <w:DialogBox id="$^id" class="panel" wrapperClass="dialogWrapper" usesPanelContainer="$true">\
+            <div class="dialogInnerWrapper">
+            <a:LazyDiv ifTrue="$useLazyDiv">\
+                <table class="dialogWrapper" border="0" cellspacing="0" cellpadding="0">\
+                    <tr>\
+                        <td nowrap="nowrap"
+                            align="$languageLeft"
+                            class="bold bodyRev alertTitleBar">\
+                            <a:IncludeContent name="header" required="$false"/>\
+                        </td>\
+                    </tr>\
+                    <tr>\
+                        <td>\
+                            <div class="confSpacer"/>
+                        </td>\
+                    </tr>\
+                    <tr>\
+                        <td class="body" style="padding:5px 5px 5px 5px;">
+                            <div class="flexContainer">\
+                                <a:RefreshRegion>\
+                                    <a:IncludeContent name="content" required="$false"/>\
+                                    <a:ClientSideScript>\
+                                        ariba.Event.eventEnqueue(ariba.Input.selectFirstText.bind(ariba.Input), null, true);
+                                    </a:ClientSideScript>\
+                                </a:RefreshRegion>\
+                            </div>\
+                        </td>\
+                    </tr>\
+                    <tr>\
+                        <td style="padding:8px 5px 8px 5px">
+                            <div style="float:right">
+                                <a:If ifTrue="$hasButtonsTemplate">\
+                                    <a:IncludeContent name="buttons" required="$true"/>\
+                                <a:Else/>
+                                    <w:TextButton action="$okAction"><a:Local key="a003">OK</a:Local></w:TextButton>\
+                                    <a:If ifTrue="$isClientSideConfirmation">
+                                        <w:TextButton onClick="ariba.Widgets.cancelConfirmation();"><a:Local key="a004">Cancel</a:Local></w:TextButton>\
+                                    <a:Else/>
+                                        <w:TextButton action="$cancelAction"><a:Local key="a005">Cancel</a:Local></w:TextButton>\
+                                    </a:If>
+                                </a:If>
+                            </div>
+                        </td>\
+                    </tr>\
+                </table>\
+            </a:LazyDiv>\
+        </div>\
+        </w:DialogBox>\
+        </a:RelocatableDiv>\
+    </a:If>\
+    <!--- show is only used for server side confirmation -->\
+    <a:If ifTrue="$showConfirmation">\
+        <a:RefreshRegion alwaysRender="$true">\
+            <a:ClientSideScript isSingleton="$false">\
+                ariba.Widgets.showConfirmation('$^id', true);\
+            </a:ClientSideScript>\
+        </a:RefreshRegion>
+    </a:If>\
+\
+</a:RefreshRegion>\

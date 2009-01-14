@@ -1,0 +1,67 @@
+<a:Api>
+    <Copyright>
+        Copyright 2008 Craig Federighi
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.awl#4 $
+    </Copyright>
+
+    <Overview>
+        List actions in TOC or Menu form
+    </Overview>
+
+    <Binding key="showOnly" direction="get" type="List">
+        List of categories to show (shows all if not specified
+    </Binding>
+
+    <Binding key="renderAsMenu" direction="get" type="boolean" default="$false">
+        Should render as PopupMenu (versus BucketTOC)
+    </Binding>
+
+    <Binding key="menuButtonLabel" direction="get" type="String" default="$false">
+        Label for menu button
+    </Binding>
+
+    <Binding key="menuLazy" direction="get" type="boolean" default="$true">
+        Wrap content in AWLazyDiv (i.e. defer rendering until menu opened)
+    </Binding>
+
+</a:Api>\
+<a:If ifTrue="$^renderAsMenu">\
+    <a:SetValue menuId="$requestContext.nextElementId"/>\
+    <w:PulldownButton menuId="$menuId"><a:String value="$^menuButtonLabel"/></w:PulldownButton>\
+    <w:PopupMenu menuId="$menuId">\
+        <a:LazyDiv ifTrue="$^menuLazy">
+            <a:For list="$actionCategories" item="$actionCategory">\
+                <a:If ifTrue="$actions">\
+                    <w:PopupMenuHeading>$actionCategory.properties.label</w:PopupMenuHeading>
+                    <a:For list="$actions" item="$action">\
+                        <w:PopupMenuItem action="$actionClicked">$action.properties.label"</w:PopupMenuItem>
+                    </a:For>
+                </a:If>
+            </a:For>
+        </a:LazyDiv>
+    </w:PopupMenu>\
+<a:Else/>\
+    <w:BucketsTOC>
+        <a:For list="$actionCategories" item="$actionCategory">\
+            <a:If ifTrue="$actions">\
+                <w:BucketHeading label="$actionCategory.properties.label">
+                    <a:For list="$actions" item="$action">\
+                        <w:BucketItem label="$action.properties.label" action="$actionClicked"/>
+                    </a:For>
+                </w:BucketHeading>
+            </a:If>
+        </a:For>
+    </w:BucketsTOC>
+</a:If>\

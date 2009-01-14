@@ -1,0 +1,73 @@
+<html>
+<head>
+    <title>Statistics Page</title>
+</head>
+<body>
+<center><b>AWStats</b></center>
+<p/>
+<table border="0" cellpadding="4" cellspacing="0">
+<tr bgcolor="#cccccc">
+    <th align="center">
+        Page Name
+    </th>
+    <th align="center" colspan="2" width="150">
+        takeValues
+    </th>
+    <th align="center" colspan="2" width="150">
+        invokeAction
+    </th>
+    <th align="center" colspan="2" width="150">
+        appendToResponse
+    </th>
+</tr>
+<tr bgcolor="#cccccc">
+    <th>
+    </th>
+    <th align="right">
+        count
+    </th>
+    <th align="right">
+        avg sec
+    </th>
+    <th align="right">
+        count
+    </th>
+    <th align="right">
+        avg sec
+    </th>
+    <th align="right">
+        count
+    </th>
+    <th align="right">
+        avg sec
+    </th>
+</tr>
+<a:For list="$application.globalStatisticsStore.pageStatistics" item="$dict.currentItem" index="$dict.index">
+    <x:AlternatingColorRow index="$dict.index">
+        <td bgcolor="#cccccc">
+            <a:String value="$dict.currentItem.pageName"/>
+        </td>
+        <td align="right">
+            <a:String value="$dict.currentItem.applyValuesCount"/>
+        </td>
+        <td align="right">
+            <a:String value="$dict.currentItem.applyValuesSecondsAverage" formatter="$=MillisecondsFormatter"/>
+        </td>
+        <td align="right">
+            <a:String value="$dict.currentItem.invokeActionCount"/>
+        </td>
+        <td align="right">
+            <a:String value="$dict.currentItem.invokeActionSecondsAverage" formatter="$=MillisecondsFormatter"/>
+        </td>
+        <td align="right">
+            <a:String value="$dict.currentItem.renderResponseCount"/>
+        </td>
+        <td align="right">
+            <a:String value="$dict.currentItem.renderResponseSecondsAverage" formatter="$=MillisecondsFormatter"/>
+        </td>
+    </x:AlternatingColorRow>
+</a:For>
+</table>
+
+</body>
+</html>

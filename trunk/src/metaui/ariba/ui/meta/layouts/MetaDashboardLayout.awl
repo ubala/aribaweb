@@ -1,0 +1,47 @@
+<table cellspacing="0" width="100%"><tr>
+    <td class="dbTitle">$metaContext.properties.label <b><a:Local>Dashboard</a:Local></b></td>
+    <td align="right" nowrap>\
+        <!--- Imagine Something useful here -->
+    </td>
+</tr></table>
+<table cellspacing="0"><tr>
+    <td class="dbTOC">\
+        <div class="flexContainer">\
+            <div class="dbTOC">\
+                <a:IncludeBlock name="portlets" list="$layoutsByZones.zToc" portletWidth="narrow"/>
+            </div>
+        </div>
+    </td>
+    <td width="99%" valign="top">\
+        <div class="flexContainer">\
+            <w:FourZoneLayout>
+                <a:Content name="top">
+                    <a:IncludeBlock name="portlets" list="$layoutsByZones.zTop" portletWidth="wide"/>
+                </a:Content>
+                <a:Content name="left">
+                    <a:IncludeBlock name="portlets" list="$layoutsByZones.zLeft" portletWidth="normal"/>
+                </a:Content>
+                <a:Content name="right">
+                    <a:IncludeBlock name="portlets" list="$layoutsByZones.zRight" portletWidth="normal"/>
+                </a:Content>
+                <a:Content name="bottom">
+                    <a:IncludeBlock name="portlets" list="$layoutsByZones.zBottom" portletWidth="wide"/>
+                </a:Content>
+            </w:FourZoneLayout>
+        </div>
+    </td>
+</tr></table>
+\
+<a:Block name="portlets">\
+    <a:Environment portletWidth="$^portletWidth">\
+        <a:For list="$^list" item="$layout">
+            <m:Context restoreActivation="$layout.activation">
+                <a:IncludeComponent name="$layout.properties.wrapperComponent:PortletWrapper"
+                       title="$label"
+                       dragAction='${ariba.ui.widgets.AribaPageContent.setMessage("Dragging portlets not fully implemented yet -- check back later!", session()); null}'>
+                    <m:IncludeComponent awpropertyMap="$propertyMap"/>\
+                </a:IncludeComponent>
+            </m:Context>
+        </a:For>
+    </a:Environment>
+</a:Block>

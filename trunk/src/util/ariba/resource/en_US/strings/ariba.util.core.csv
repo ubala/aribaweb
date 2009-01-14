@@ -1,0 +1,40 @@
+8859_1,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+TemplateParserPageTitle,"Template Parser Error","Page title for the error message; "
+TemplateParserTitle,"Template Parser Error","Title for the template parser error; "
+FileErrorMsg,"Template Parser: File error: the template file doesn't exist or isn't readable.","Invalid template name encountered; "
+IOErrorMsg,"TemplateParser: IO Error: an error occurred while reading the template file.","Error while trying to read template file; IO stands for Input / Output; "
+,,
+BlockoutChar,"X","default blockout character for SecureStringFormatter; Do we have to translate this ?; "
+,,
+,,
+,,
+,,
+,,
+ListSeparator,", ","used to delimit a series of strings when presented "
+DayAbbrev,"d","abbreviation for day; "
+HourAbbrev,"hr","abbreviation for hours; "
+MinutesAbbrev,"min","abbreviation for minutes; "
+,,
+,, keys used in formatters
+,,
+BooleanTrue,"Yes","This is used from BooleanFormatter; "
+BooleanFalse,"No","This is used from BooleanFormatter; "
+BooleanTrueOrFalse,"Booleans must be 'true' or 'false'","error when a boolean doesn't contain true or false string"
+CannotParseDate,"Cannot parse the string ''{0}'' as a date","error when a date cannot be parsed - 0: the date string"
+InvalidCharacterInNumber,"Invalid character in number","error when there is a non-numeric character in a number"
+InvalidYear,"Invalid Year","error when the year is invalid in a date"
+NoDigitsFound,"Numeric value required","error when a number is required and no digits are entered"
+NumberFormatError,"The numeric value is not in the appropriate format.","friendly error msg for NumberFormatException"
+MaxValueExceeded,"Value ''{0}'' is greater than the maximum allowed value ''{1}''.", "Error when value is greater than allowed (integer overflow)"
+MinValueExceeded,"Value ''{0}'' is less than the minimum allowed value ''{1}''.", "Error when value is less than allowed (integer underflow)"
+WholeNumberRequiredKey,"Value ''{0}'' must be a whole number.", "Error when integer value contains fractions"

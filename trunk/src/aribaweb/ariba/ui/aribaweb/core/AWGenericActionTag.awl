@@ -1,0 +1,125 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericActionTag.awl#11 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="tagName" direction="get" type="String" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="bh" direction="get" type="String" required="$false">
+        Behavior name.
+    </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null">
+        TBD
+    </Binding>
+
+    <Binding key="disableClick" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="disabled" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="formValue" direction="set" type="Object" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="isTrigger" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="name" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="target" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="windowAttributes" direction="get" type="String" required="$false">
+        If the target binding is used, you may specify the window attributes with this binding.  See
+        book on html/javascript and look for window.open(...) for details.
+    </Binding>
+    
+    <Binding key="tabIndex" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="disableKeyPress" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="onClick" direction="get" type="String" required="$false">
+        Note that onClick is not available for application developer use.
+        This Binding def is just here to satisfy the binding checking system.
+    </Binding>
+
+    <Binding key="onKeyPress" direction="get" type="String" required="$false">
+        Note that onKeyPress is not available for application developer use.
+        This Binding def is just here to satisfy the binding checking system.
+    </Binding>
+</a:Api>\
+<a:If ifTrue="$isTrigger">\
+    <a:GenericContainer tagName="$^tagName" elementId="$elementId" id="$elementId"
+        bh="$^bh:GAT"
+        _sf="$bhSubmitForm"
+        _dC="$^disableClick"
+        _dK="$^disableKeyPress"
+        _t="$^target"
+        _w="$^windowAttributes"
+        _a="$^name"
+        _av="$^isTrigger:$null"
+        isSender="$isSender" invokeAction="$^action"
+        disabled="$disabledString"
+        tabIndex="$^tabIndex:0"
+        omitTags="$^omitTags"
+        formValue="$^formValue"
+        otherBindings="$otherBindingsValues">\
+            <a:IncludeContent/>\
+    </a:GenericContainer>\
+<a:Else/>\
+    <a:GenericContainer tagName="$^tagName" elementId="$elementId" id="$elementId"
+        bh="$^bh:GAT"
+        _sf="$bhSubmitForm"
+        _dC="$^disableClick"
+        _dK="$^disableKeyPress"
+        _t="$^target"
+        _w="$^windowAttributes"
+        _a="$^name"
+        _av="$^isTrigger"
+        isSender="$isSender" invokeAction="$^action"
+        disabled="$disabledString"
+        tabIndex="$^tabIndex:0"
+        omitTags="$^omitTags"
+        otherBindings="$otherBindingsValues">\
+            <a:IncludeContent/>\
+    </a:GenericContainer>\
+</a:If>\

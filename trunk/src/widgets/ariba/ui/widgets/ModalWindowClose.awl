@@ -1,0 +1,12 @@
+<html>
+    <head>
+    </head>
+    <body>
+
+    <sCript>
+    window.opener.ariba.ModalWindow.modalComplete();
+    window.close();
+    </sCript>
+
+    </body>
+</html>

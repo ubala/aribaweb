@@ -1,0 +1,105 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#3 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="actionMenuId" type="String" direction="get">
+        See TabList.actionMenuId
+    </Binding>
+
+    <Binding key="actionMenuLabel" type="String" direction="get" default="Actions">
+        See TabList.actionMenuLabel
+    </Binding>
+
+    <Binding key="label" type="String" direction="get" required="$true" alternates="displayString">
+        TBD
+    </Binding>
+
+    <Binding key="displayString" type="String" direction="get" required="$true" alternates="label">
+        TBD
+    </Binding>
+
+    <Binding key="selection" type="Object" direction="both" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null">
+        Fired when tab clicked
+    </Binding>
+
+    <Binding key="item" type="Object" direction="set" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="list" type="AWOrderedList" direction="get" required="$true">
+        TBD
+    </Binding>
+    
+    <Binding key="visibles" type="ariba.util.fieldvalue.OrderedList" direction="get" required="$false">
+        If specified, tabs in this list will be be displayed.
+        Others will be under the "More..." menu tab.  
+    </Binding>    
+
+    <Binding key="class" type="String" direction="get" default="$null">
+        TBD
+    </Binding>
+
+    <Binding key="contentClass" type="String" direction="get" default="$null">
+        TBD
+    </Binding>
+
+    <Binding key="dropAction" type="AWResponseGenerating" direction="get" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="dropType" type="String" direction="get" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="index" type="int" direction="set" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="submitForm" type="boolean" direction="get" default="$false">
+        TBD
+    </Binding>
+</a:Api>\
+
+<a:RefreshRegion>\
+    <table cellspacing="0" cellpadding="0" width="100%">\
+        <tr>\
+            <td class="$^class:pageTabWrapper">\
+                <w:TabList list="$tabList" visibles="$^visibles" item="$^item" index="$^index" label="$^label:^displayString"
+                    selection="$selectedTab" submitForm="$^submitForm" awname="$^awname" class="$^class:pageTabWrapper"
+                    dropType="$^dropType" dropAction="$^dropAction" action="$^action"
+                    actionMenuId="$^actionMenuId" actionMenuLabel="$^actionMenuLabel"/>\
+            </td>\
+        </tr>
+        <tr>\
+            <td class="$^contentClass">\
+                <div class="tabPanel" emitTags="$true">\
+                    <a:MethodInvocation invoke="$pushElementId"/>\
+                    <a:IncludeContent/>\
+                    <a:MethodInvocation invoke="$popElementId"/>\
+                </div>
+            </td>\
+        </tr>
+    </table>
+</a:RefreshRegion>\

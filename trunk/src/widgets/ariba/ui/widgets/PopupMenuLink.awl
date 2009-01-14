@@ -1,0 +1,134 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuLink.awl#30 $
+    </Copyright>
+
+    <Overview>
+        see <w:PopupMenu/>
+    </Overview>
+
+    <Binding key="menuId" direction="get" type="String" required="$true">
+        The menuId is used to associate the current PopupMenuLink and its
+        corresponding PopupMenu.  You must avoid name collisions with other
+        menus (especially menus you import into your application via
+        reusable components).  One way to do this is to get an elementId
+        from the requestContext and use this for both the PopupMenuLink
+        and the PopupMenu.  Note that a single PopupMenu may be shared by
+        many PopupMenuLinks -- all those links will have the same id as their
+        shared PopupMenu.
+    </Binding>
+
+    <Binding key="index" direction="get" type="int" required="$false">
+        If you are generating PopupMenu/Links in a repetition, each iteration
+        will require a different menuId.  The index binding makes this easy
+        as you can provide a static menuId and pass the index from the
+        repetition and let PopupMenu/Link do the concatenation for you
+        (in a more efficient way, as well).
+    </Binding>
+
+    <Binding key="actionSetup" direction="get" type="void" required="$false">
+        When a PopupMenu is shared by many PopupMenuLinks, the actions
+        of the PopupMenuItems may be ambiguous -- you need to know which
+        link was clicked in order to know what to do.  When you click a
+        PopupMenuLink, its id is passed into the server (along with the id
+        of the PopupMenuItem) and this binding will be evaluated in your
+        component.  So you should bind a method that returns null to this
+        bindings and, in that method, stash away some state information
+        (such as the current object in a repetition) which can be used by
+        the PopupMenuItem's action.
+
+        Note that, if this binding is being employed, you MUST place the
+        PopupMenu after all occurrences of the corresponding PopupMenuLinks.
+        This is because actionSetup must occur before the action itself
+        fires, and the action is always bound to a PopupMeuItem within the
+        PopupMenu.
+    </Binding>
+
+    <Binding key="title" direction="get" type="String" required="$false">
+        The tooltip for this PopupMenuLink; displays when you hover over
+        the link itself.
+    </Binding>
+
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        If you need to disable the link, pass true to omitTags.  The content
+        of the link (ie text or images) will still display, but will not
+        be (or appear to be) clickable.
+    </Binding>
+
+    <Binding key="tagName" direction="get" type="String" default="span">
+        A PopupMenuLink can be any kind of container tag.  By default,
+        it is a <span/>.  The container will be clickable once rendered
+        as a PopupMenuLink.
+    </Binding>
+
+    <Binding key="containerStyle" direction="get" type="String" default="$null" deprecated="$true">
+        Note: This is ignored at the present time.
+        Former usage:
+        The container tag for the PopupMenuLink has no "class" assigned to it,
+        but you can provide style attributes for this container via this
+        binding.
+    </Binding>
+
+    <Binding key="style" direction="get" type="String" required="$false">
+        The style for the <a/> tag inside the PopupMenuLink.  See also
+        containerStyle
+    </Binding>
+
+    <Binding key="class" direction="get" type="String" default="awmenuLink linkArrow">
+        Although you cannot provide a "class" for the container, you can provide
+        one for the <a/> inside.
+    </Binding>
+
+    <Binding key="onMouseOver" direction="get" type="String" required="$false">
+        By default, this component does no mouseOver behavior.  You can
+        add this via these bindings.  [Please refrain from using these
+        as we will probably want to usurp them in the future.]
+    </Binding>
+
+    <Binding key="onMouseOut" direction="get" type="String" required="$false">
+        see onMouseOver (above)
+    </Binding>
+
+    <Binding key="position" direction="get" type="String" required="$false">
+        Tells the menu link where to position the PopupMenu itself.
+        By default, the PopupMenu appears under the cursor at its upper left.
+        To simulate a Windows ComboBox control, we allow you to specify
+        an html element under which the PopupMenu will appear.  If so,
+        the upper-left corner fo the PopupMenu will be positioned at the
+        lower left corner of the element in question.
+    </Binding>
+</a:Api>
+<!--- Note that we generate a span to handle key clicks, and an anchor to handle mouse down events
+      for compatibility with IE on Mac OS, which does not allow click events from being handled in anchors -->\
+<!--- Note we must have the "a" for ADA compliance since we cannot tab into a span! -->\
+
+<a:GenericContainer tagName="$^tagName:a" elementId="$elementId"
+    otherBindings="$otherBindingsValues"
+    invokeAction="$null"
+    isSender="$isSender"
+    id="$elementId"
+    bh="PML"
+    _pos="$position"
+    _mid="$menuId"
+    onMouseOver="$^onMouseOver"
+    onMouseOut="$^onMouseOut"
+    class="$^class:awmenuLink linkArrow"
+    style="$^style"
+    title="$^title"
+    href="#"
+    omitTags="$omitTags">\
+    <a:IncludeContent/>\
+</a:GenericContainer>\

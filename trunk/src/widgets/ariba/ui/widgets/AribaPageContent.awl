@@ -1,0 +1,77 @@
+<!---
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->\
+<a:PhaseInvocation append="$requestContext.enableComponentPathDebugging"/>\
+<div class="flexContainer" omitTags="$isNested">\
+<a:Environment inAPageContent="$true">
+<a name="content"></a>\
+<a:RefreshRegion>
+<a:If notEqualNull="$message">\
+        <div id="apcMessage" style="position:fixed; top:0px; z-index:10; filter:alpha(opacity=087);-moz-opacity:0.87;">
+        <table border="0" cellspacing="0" cellpadding="0" style="width:100%; align:center;">\
+            <tr>\
+                <td class="brandAccent" valign="bottom" width="1%" border="0">\
+                    <a:Image filename="awxMessageCornerLeft.gif"/>\
+                </td>\
+                <td class="brandAccent" style="padding:3px 8px 2px 0px;" width="1%">\
+                    <a:Image filename="awxMessageIcon.gif" align="absmidle"/>\
+                </td>\
+                <td class="brandAccent" style="padding:3px 0px 2px 0px" width="75%">\
+                    <a:If ifTrue="$isTextMessage">\
+                        <a:String escapeUnsafeHtml="$true" value="$message"/>\
+                    <a:Else/>\
+                        <a:ComponentInclude awcomponent="$message"/>
+                    </a:If>\
+                </td>\
+                <td class="brandAccent" align="right">\
+                    <a:Image filename="portletCloseGray.gif"
+                             onClick="ariba.Dom.getElementById('apcMessage').style.display='none'"/>\
+                </td>
+                <td class="brandAccent" valign="bottom" width="1%" align="right"  border="0">\
+                    <a:Image filename="awxMessageCornerRight.gif"/>\
+                </td>\
+            </tr>\
+        </table>\
+        </div>
+</a:If>\
+<a:If ifTrue="$addContentMargin">\
+    <a:Image filename="cleardot.gif" width="1" height="10" class="block" />\
+</a:If>\
+    <w:DialogContentWrapper>
+        <!--- wrap for print mode so we can find and extract it. -->\
+        <div id="AWPrintContent" style="padding:10px" emitTags="$requestContext.isPrintMode">\
+            <a:If equalNull="$contentTemplateName">\
+                <!---   Note:  Re isMeta: In the expanded remote pagewrapper, the slave
+                        will just specify a body.  No named templates. --->\
+               <a:IncludeContent context="$parent" isMeta="$true"/>\
+            <a:Else/>\
+                <!---   Note:  Re isMeta: In the expanded remote pagewrapper, the slave
+                        will specify a NamedTemplate (body) as well as any other named templates
+                        that the app expects. --->\
+                    <a:IncludeContent name="body" context="$context" isMeta="$true"/>\
+            </a:If>\
+        </div>\
+    </w:DialogContentWrapper>
+    <!--- changes in this refresh region approximates a page transition -->
+    <a:ClientSideScript synchronous="$true">
+        ariba.Widgets.clearDialog();
+    </a:ClientSideScript>
+    <a:ClientSideScript>
+          <!--- select first input field when page load complete -->
+          ariba.Input.postLoadSelectFirstText();
+    </a:ClientSideScript>
+</a:RefreshRegion>
+</a:Environment>
+</div>
+<a:PhaseInvocation append="$requestContext.disableComponentPathDebugging"/>\

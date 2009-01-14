@@ -1,0 +1,217 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Calendar.awl#33 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="selection" direction="both" type="ariba.util.Date" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="showYearNavigation" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="dateFactory" direction="get" type="AWDateFactory" required="$false">
+        An optional object that implements the AWDateFactory interface, which provides
+        a way to specify what type of Date class to create when the Calendar is clicked.
+        If no dateFactory is provided, the DefaultDateFactory creates a ariba.util.core.Date.
+    </Binding>
+
+    <Binding key="calendarDate" direction="get" type="boolean" required="$false">
+        If true and no dateFactory is provided, the date factory used will create a
+        ariba.util.core.Date with calendarDate equals true.
+    </Binding>
+
+    <Binding key="bodyBehavior" direction="get" type="String" required="$false">
+        For internal use: Allow for override of calendar body behavior.
+        Used by DateField.
+    </Binding>
+
+</a:Api>\
+
+<a:IncludeBlock name="TableWrapper">
+    <tbody>
+        <tr class="navigation">
+            <a:If ifTrue="$^showYearNavigation:$false">
+                <td>\
+                    <a class="awnavLink" bh="CPY">\
+                        <a:Image filename="awxCalendarPrevYear.gif" class="calendarPreviousYear"/>\
+                    </a>\
+                </td>
+                <td>\
+                    <a class="awnavLink" bh="CPM">\
+                        <a:Image filename="awxCalendarPrevMonth.gif" class="calendarPreviousMonth"/>\
+                    </a>\
+                </td>
+
+                <a:Else/>\
+
+                <td>\
+                    <a class="awnavLink" bh="CPM">\
+                        <a:Image filename="awxCalendarPrevMonth.gif" class="calendarPreviousMonth"/>\
+                    </a>\
+                </td>
+
+                <td>\
+                    &nbsp;\
+                </td>
+            </a:If>\
+
+            <td colspan="3" align="center">\
+            </td>
+
+            <a:If ifTrue="$^showYearNavigation:$false">
+                <td>\
+                    <a class="awnavLink" bh="CNM">\
+                        <a:Image filename="awxCalendarNextMonth.gif" class="calendarNextMonth"/>\
+                    </a>\
+                </td>
+
+                <td>\
+                    <a class="awnavLink" bh="CNY">\
+                        <a:Image filename="awxCalendarNextYear.gif" class="calendarNextYear"/>\
+                    </a>\
+                </td>
+                <a:Else/>\
+
+                <td>\
+                    &nbsp;\
+                </td>
+
+                <td>\
+                    <a class="awnavLink" bh="CNM">\
+                        <a:Image filename="awxCalendarNextMonth.gif" class="calendarNextMonth"/>\
+                    </a>\
+                </td>
+            </a:If>\
+        </tr>
+    </tbody>
+
+    <!---
+            Note: the reason all the following empty rows/cells are inlined here in html
+            rather than dynamically created in javascript is because it looks pretty bad
+            when we dynamically generate -- the size the table is very small until the rows
+            are added and this makes the screen flash badly.  I attempted to fix the size
+            of the table which helped, but its not good to hard-code the size of the table.
+
+            Also note that the <a href="#"></a> is also useful for preventing screen flash (on IE).
+
+    -->
+
+    <tbody>
+        <tr class="header">
+            <th width="30"></th>
+            <th width="30"></th>
+            <th width="30"></th>
+            <th width="30"></th>
+            <th width="30"></th>
+            <th width="30"></th>
+            <th width="30"></th>
+        </tr>
+    </tbody>
+
+    <tbody bh="$^bodyBehavior:CB">
+        <tr>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+        </tr>
+
+        <tr>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+        </tr>
+
+        <tr>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+        </tr>
+
+        <tr>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+        </tr>
+
+        <tr>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+        </tr>
+
+        <tr>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+            <td><a href="#"></a></td>
+        </tr>
+    </tbody>
+</a:IncludeBlock>\
+
+<a:RefreshRegion>
+    <a:ClientSideScript isSingleton="$false">
+        new ariba.Calendar.Control('$elementId', new Date($selectedYear, $selectedMonth, $selectedDayOfMonth));
+    </a:ClientSideScript>
+</a:RefreshRegion>
+
+<a:Block name="TableWrapper">
+    <!--- WARNING:  Be sure to keep the set of bindings in these two consistent - only the formValue binding is missing in the AWElse  -->\
+    <a:If notEqualNull="$requestContext.currentForm">\
+        <!--- If inside a form, must force takeValues phase to visit us (thus the formValue binding) -->\
+        <table elementId="$elementId" id="$elementId" class="calendar" border="0" cellspacing="0" cellpadding="0"
+            invokeAction="$dateClicked" formValue="$formValueDummy">
+            <a:IncludeContent/>\
+        </table>\
+    <a:Else/>\
+        <table elementId="$elementId" id="$elementId" class="calendar" border="0" cellspacing="0" cellpadding="0"
+            invokeAction="$dateClicked">
+            <a:IncludeContent/>\
+        </table>\
+    </a:If>\
+</a:Block>

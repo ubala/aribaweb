@@ -1,0 +1,6 @@
+<a:MethodInvocation invoke="$requestContext.markNextComponentAsMainInTrace"/>\
+<a:If notEqualNull="$context">\
+    <a:IncludeContent name="$^name" context="$context"/>\
+<a:Else/>
+    <a:IncludeComponent awcomponentName="$componentName" />\
+</a:If>\

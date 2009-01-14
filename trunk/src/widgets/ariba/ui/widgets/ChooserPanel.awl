@@ -1,0 +1,69 @@
+<w:ModalPageWrapper title="$title" editable="$true" okAction="$okClicked" action="$searchClicked">
+    <table>
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <td>
+                            <a:TextField value="$chooserState.pattern"
+                                         size="$searchFieldSize"/>
+                        </td>
+                        <td>
+                            <w:TextButton action="$searchClicked"><a:Local key="a002">Search</a:Local></w:TextButton>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <a:If ifTrue="$chooserState.multiSelect">
+                <td></td>
+            </a:If>
+        </tr>
+        <tr>
+            <a:If ifTrue="$chooserState.multiSelect">
+                <td valign="top">
+                    <t:DataTable item="$chooserState.currentItem"
+                                  displayGroup="$displayGroup"
+                                  multiSelect="$true"
+                                  submitOnSelectionChange="$false"
+                                  showSelectionColumn="$true"
+                                  enableScrolling="$true">
+                        <t:HeadingArea>
+                                <h2><a:Local key="a003">Add to Currently Selected</a:Local></h2>
+                        </t:HeadingArea>
+                        <t:Column label="$[a005]Value" formatter="$formatter" key="self">
+                            $currentItemString
+                        </t:Column>
+                    </t:DataTable>
+                </td>
+                <td valign="top">
+                    <t:DataTable item="$chooserState.currentItem"
+                                 displayGroup="$selectedDisplayGroup"
+                                 multiSelect="$true"
+                                 submitOnSelectionChange="$false"
+                                 showSelectionColumn="$true"
+                                 enableScrolling="$true">
+                        <t:HeadingArea>
+                            <h2><a:Local key="a004">Currently Selected</a:Local></h2>
+                        </t:HeadingArea>
+                        <t:Column label="$[a005]Value" formatter="$formatter" key="self">
+                            $currentItemString
+                        </t:Column>
+                    </t:DataTable>
+                </td>
+            <a:Else/>
+                <td colspan="2">
+                    <t:DataTable item="$chooserState.currentItem"
+                                  displayGroup="$displayGroup"
+                                  singleSelect="$true"
+                                  submitOnSelectionChange="$false"
+                                  showSelectionColumn="$true"
+                                  enableScrolling="$true">
+                        <t:Column label="$[a005]Value" formatter="$formatter" key="self">
+                            $currentItemString
+                        </t:Column>
+                    </t:DataTable>
+                </td>
+            </a:If>
+        </tr>
+    </table>
+</w:ModalPageWrapper>

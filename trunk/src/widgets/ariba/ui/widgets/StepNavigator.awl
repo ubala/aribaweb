@@ -1,0 +1,131 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StepNavigator.awl#16 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="stepIndex" direction="get" type="String" required="$false">
+        See StepHeader
+    </Binding>
+
+    <Binding key="label" direction="get" type="String" default="$true">
+        See StepHeader
+    </Binding>
+
+    <Binding key="hasSubsteps" direction="get" type="String" required="$false">
+        See StepHeader
+    </Binding>
+
+    <Binding key="dialogStyle" direction="get" type="String" default="$false">
+        TBD
+    </Binding>
+
+    <NamedContent name="summary" required="$false">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="buttons" required="$true">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="substeps" required="$false">
+        TBD
+    </NamedContent>
+
+    <NamedContent name="body" required="$true">
+        TBD
+    </NamedContent>
+</a:Api>\
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+    <tr>
+        <td valign="top" align="$languageLeft">\
+            <a:Image filename="cleardot.gif" class="block" height="52" width="1" align="$languageLeft" hspace="0"/>\
+            <a:If ifFalse="$^dialogStyle">\
+                <a:IncludeContent name="summary" required="$false"/>\
+            </a:If>\
+        </td>
+        <td align="$languageRight" valign="bottom" width="1">\
+            <table border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="wizNavBar" valign="top">\
+                        <a:Image filename="widg/wiznav_tls.gif" class="block"/>\
+                    </td>
+                    <a:Environment stepNavigatorButtonStyle="padding:6px 3px 2px 3px;">
+                        <a:IncludeContent name="buttons"/>\
+                    </a:Environment>
+                    <td class="wizNavBar" valign="top">\
+                        <a:Image filename="widg/wiznav_trs.gif" class="block"/>\
+                    </td>
+                </tr>
+            </table>\
+        </td>
+    </tr>
+    <tr>
+        <td class="wizNavBar" colspan="2">\
+            <a:Image filename="cleardot.gif" class="block" height="2" width="1"/>\
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">\
+            <a:Image filename="cleardot.gif" class="block" height="2"/>\
+        </td>
+    </tr>
+</table>\
+
+<w:StepHeader dialogStyle="$^dialogStyle"
+            stepIndex="$^stepIndex"
+            label="$^label"
+            hasSubsteps="$^hasSubsteps">
+    <a:IncludeContent name="substeps" required="$false"/>\
+</w:StepHeader>\
+
+<a:IncludeContent name="body"/>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+    <tr>
+        <td colspan="2">\
+            <a:Image filename="cleardot.gif" class="block" height="10"/>\
+        </td>
+    </tr>
+    <tr>
+        <td class="wizNavBar" colspan="2">\
+            <a:Image filename="cleardot.gif" class="block" width="2" height="2"/>\
+        </td>
+    </tr>
+    <tr>
+        <td>\
+            <a:Image filename="cleardot.gif" class="block"/>\
+        </td>
+        <td align="$languageRight" valign="top" width="1">\
+            <table border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="wizNavBar" valign="bottom">\
+                        <a:Image filename="widg/wiznav_bls.gif" class="block"/>\
+                    </td>
+                    <a:Environment stepNavigatorButtonStyle="padding:2px 3px 6px 3px;">
+                        <a:IncludeContent name="buttons"/>\
+                    </a:Environment>
+                    <td class="wizNavBar" valign="bottom">\
+                        <a:Image filename="widg/wiznav_brs.gif" class="block"/>\
+                    </td>
+                </tr>
+            </table>\
+        </td>
+    </tr>
+</table>

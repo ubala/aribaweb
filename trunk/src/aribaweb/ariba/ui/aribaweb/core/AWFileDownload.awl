@@ -1,0 +1,52 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFileDownload.awl#2 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="action" type="AWResponseGenerating" direction="get" default="$null">
+        TBD
+    </Binding>
+
+    <Binding key="completeAction" type="AWResponseGenerating" direction="get" required="$false">
+        TBD
+    </Binding>
+</a:Api>\
+
+<a:ClientSideScript>\
+    <!--- awDownloadContent creates an iframe with name "AWDownload" and gets the
+          AWActionUrl through that iframe.  Using a different iframe name for the download
+          allows two things to occur.  First, the request is not tagged with awii so
+          the request is not treated as an incremental update capable request.  This allows
+          the download request to bypass all the diff / incremental update code found in
+          AWPage.  Second, using a different iframe allows the subsequent completeAction
+          AWActionUrl to be fired through the normal refresh iframe without terminating
+          the initial download request.  This completeAction request is queued up behind
+          the completion of the file download (based on session id request serialization)
+          which gives the behavior that the completeAction is not fired until the file
+          download is complete. -->\
+    setTimeout("ariba.Request.downloadContent('<a:ActionUrl action="$downloadContentAction"/>')", 100);
+    <a:If ifTrue="$hasCompleteAction">\
+        <a:If ifTrue="$request.isBrowserMicrosoft">\
+            ariba.Request.fileDownloadCompleteCheck('<a:PrimitiveString value="$statusCheckUrl"/>', '<a:ActionUrl action="$^completeAction"/>', 5000);
+        <a:Else/>\
+            ariba.Request.fileDownloadCompleteCheck('<a:PrimitiveString value="$statusCheckUrl"/>', '<a:ActionUrl action="$^completeAction"/>', 15000);
+        </a:If>\
+    </a:If>\
+</a:ClientSideScript>\

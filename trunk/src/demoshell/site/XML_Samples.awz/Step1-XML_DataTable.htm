@@ -1,0 +1,71 @@
+<w:HintMessage showTopLine="$true">
+    XML Driven Form and Table
+</w:HintMessage>
+<br/>
+    <x:LoadXML filename="POs/PO1.xml" value="$po"/>
+
+    <span class="pageHead">$po.Request.OrderRequest.OrderRequestHeader.orderID</span>
+    <br/>
+    <w:FormTable>
+        <w:FormRow label="Sender">$po.Header.Sender.Credential.Identity.text</w:FormRow>
+        <w:FormRow label="Total"><a:TextField value="$po.Request.OrderRequest.OrderRequestHeader.Total.Money.text"/></w:FormRow>
+        <w:FormRow label="Time"><a:TextField value="$po.timestamp"/></w:FormRow>
+    </w:FormTable>
+    <a:SubmitButton action="$null"/>
+<br/><br/>
+
+<w:TabSet>
+    <w:Tab label="Line Items">
+        <br/>
+        <t:DataTable singleSelect="$true" batchSize="10" list="$po.Request.OrderRequest.ItemOut[]">
+
+            <t:Column key="ItemDetail.Description.text" label="Description" action="$goto.Home"/>
+
+            <t:Column key="quantity" label="Quantity"/>
+
+            <t:Column key="ItemDetail.UnitPrice.Money.text" label="Price"
+                 formatter="$formatters.xml.money"/>
+
+            <t:Column>
+                <w:TextButton action="$null">Inspect</w:TextButton>
+            </t:Column>
+
+            <t:ButtonArea>
+                <w:TextButton action="$null">Delete</w:TextButton>\
+                &nbsp;\
+                <w:TextButton action="$null">Edit</w:TextButton>
+            </t:ButtonArea>
+
+        </t:DataTable>
+    </w:Tab>
+
+    <w:Tab label="Ship To">
+        <a:SetValue address="$po.Request.OrderRequest.OrderRequestHeader.ShipTo.Address"/>
+        <br/>
+        <w:FormTable>
+            <w:FormRow label="Name">$address.Name.text</w:FormRow>
+            <a:For list="$address.PostalAddress.DeliverTo[]" item="$item">
+                <w:FormRow label="Deliver To">$item.text</w:FormRow>
+            </a:For>
+            <w:FormRow label="Street">$address.PostalAddress.Street.text</w:FormRow>
+            <w:FormRow label="City">$address.PostalAddress.City.text</w:FormRow>
+            <w:FormRow label="State">$address.PostalAddress.State.text</w:FormRow>
+            <w:FormRow label="Zip">$address.PostalAddress.PostalCode.text</w:FormRow>
+        </w:FormTable>
+    </w:Tab>
+
+    <w:Tab label="Bill To">
+        <a:SetValue address="$po.Request.OrderRequest.OrderRequestHeader.BillTo.Address"/>
+        <br/>
+        <w:FormTable>
+            <w:FormRow label="Name">$address.Name.text</w:FormRow>
+            <a:For list="$address.PostalAddress.DeliverTo[]" item="$item">
+                <w:FormRow label="Deliver To">$item.text</w:FormRow>
+            </a:For>
+            <w:FormRow label="Street">$address.PostalAddress.Street.text</w:FormRow>
+            <w:FormRow label="City">$address.PostalAddress.City.text</w:FormRow>
+            <w:FormRow label="State">$address.PostalAddress.State.text</w:FormRow>
+            <w:FormRow label="Zip">$address.PostalAddress.PostalCode.text</w:FormRow>
+        </w:FormTable>
+    </w:Tab>
+</w:TabSet>

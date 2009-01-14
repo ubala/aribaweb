@@ -1,0 +1,130 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.awl#27 $
+    </Copyright>
+
+    <Overview>
+        Note the "ignore" binding is not listed in the AWApi but is a valid binding.  This
+        binding is passed through to the HTML and is used to indicate to the update code
+        that this AWRefreshRegion should be ignored during incremental updates.
+    </Overview>
+
+    <Binding key="tagName" direction="get" type="String" default="div">
+        By default we use an div with an inline display style to as the container
+        for the refresh region.  Span has a problem if the content contains block elements on IE,
+        so it's not recommended for use.
+    </Binding>
+
+    <Binding key="elementId" direction="set" type="String" required="$false">
+    </Binding>
+
+    <Binding key="useId" direction="get" type="String" required="$false">
+        id to use for refresh region (instead of a dynamically constructed elementId.
+        Used by BasicPageWrapper to force stable cross-page RefreshRegions ids (to
+        enable incremental refresh even when page structure may have caused elementId
+        misalignment).
+    </Binding>
+
+    <Binding key="style" direction="get" type="String">
+        Inline styles for the refresh region.
+    </Binding>
+
+    <Binding key="class" direction="get" type="String" default="rr">
+        The default class (rr) keeps the default container type (div) from disturbing the
+        content surrounding the AWRefreshRegion.
+    </Binding>
+
+    <Binding key="isScope" direction="get" type="String" default="$false">
+        Indicates that this AWRefreshRegion wraps other AWRefreshRegion(s).  Causes this
+        AWRefreshRegion to render itself if any of its child AWRefreshRegion's are
+        rendered.  Example:
+        <a:RefreshRegion tagName="table" isScope="$true">
+            <tr><td> static content </td></tr>
+            <a:RefreshRegion tagName="tr">
+                <td> some changeable content </td>
+            </a:RefreshRegion>
+        </a:RefreshRegion>
+
+        If the table AWRefreshRegion does not have isScope="$true", then if the tr AWRefreshRegion
+        changed, the following HTML would be rendered:
+        <tr><td> some changeable content</td></tr>
+
+        Alternatively, if the AWRefreshRegion does have isScope="$true", then the HTML output
+        would be:
+        <table>
+            <tr><td> static content </td></tr>
+            <tr><td> some changeable content</td></tr>
+        </table>
+
+    </Binding>
+
+    <Binding key="alwaysRender" direction="get" type="boolean" default="$false">
+        Causes the contents of this AWRefreshRegion to always be rendered regardless of whether
+        or not the contents have changed since the last rendering.
+    </Binding>
+
+    <Binding key="dropAction" direction="get" type="AWResponseGenerating" required="$false">
+        Action to invoke.
+    </Binding>
+
+    <Binding key="dragAction" direction="get" type="void" required="$false">
+        Action to invoke.
+    </Binding>
+
+    <Binding key="disabled" direction="get" type="boolean" default="$false">
+        If set to true, causes the AWRefreshRegion to act like an AWGenericContainer.
+    </Binding>
+
+    <Binding key="ignore" direction="get" type="boolean" default="$false">
+        Indicates that this AWRefreshRegion should be ignored during incremental updates.
+    </Binding>
+
+    <Binding key="forceRefreshOnChange" direction="get" type="boolean" default="$false">
+        If true, we will force an FPR if this region changes across pages (useful, for instance,
+        on global-scoped JavaScript / VBScript (see AWClientsideScript...)
+    </Binding>
+
+</a:Api>\
+<a:If ifFalse="$^disabled:$false">\
+    <a:PhaseInvocation append="$pushBuffer"/>\
+    <!--- todo: conditionalize domsync="**** debug ****" -->\
+    <a:If ifTrue="$dragEnabled">\
+        <a:GenericContainer tagName="$^tagName:div" id="$elementId"
+            class="$className"
+            style="$style"
+            otherBindings="$otherBindingsValues" invokeAction="$fireAction"
+            awname="$^awname" ignore="$^ignore">\
+            <a:IncludeContent/>\
+        </a:GenericContainer>\
+    <a:Else/>\
+        <a:GenericContainer tagName="$^tagName:div" id="$elementId"
+            omitTags="$^forceRefreshOnChange"
+            class="$className"
+            style="$style"
+            otherBindings="$otherBindingsValues"
+            awname="$^awname" ignore="$^ignore">\
+            <a:IncludeContent/>\
+        </a:GenericContainer>\
+    </a:If>\
+    <a:PhaseInvocation append="$popBuffer"/>\
+<a:Else/>\
+    <a:GenericContainer tagName="$^tagName:div" style="$style" id="$elementId"
+                        class="$className"
+                        otherBindings="$otherBindingsValues"
+                        awname="$^awname" ignore="$^ignore">\
+        <a:IncludeContent/>\
+    </a:GenericContainer>\
+</a:If>\

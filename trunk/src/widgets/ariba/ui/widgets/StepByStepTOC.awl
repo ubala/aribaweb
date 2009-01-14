@@ -1,0 +1,206 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StepByStepTOC.awl#30 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="label" direction="get" type="String" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="steps" direction="get" type="AWOrdererdList" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="step" direction="set" type="Object" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="stepLabel" direction="get" type="String" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="stepIsNumbered" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="stepIsVisible" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="stepIndex" direction="get" type="int" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="visibleStepCount" direction="get" type="int" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="isClickable" direction="get" type="boolean" default="$true">
+        TBD
+    </Binding>
+
+    <Binding key="stepAction" direction="get" type="AWResponseGenerating" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="selectionsLabel" direction="get" type="String" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="showSelections" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="selectionsIcon" direction="get" type="String" required="$false">
+        Note: Although this is declared to be require=false, this is required iff
+        showSelections is true.
+    </Binding>
+
+    <Binding key="selectionsAction" direction="get" type="AWResponseGenerating" required="$false">
+        Note: Although this is declared to be require=false, this is required iff
+        showSelections is true.
+    </Binding>
+
+    <Binding key="selectedStep" direction="both" type="Object" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="selectionsAlt" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="navigateStepIndexMax" direction="get" type="int" required="$false">
+        Only effective when isClickable=$false.  When isClickable=$false, this binding
+	can be used to pass in the index of the max step which is clickable.  NOTE: if
+        isClickable="$false" and navigateStepIndexMax is not specified, then none of the
+	steps will be clickable.  
+    </Binding>
+</a:Api>\
+
+<w:RoundedStepsBox>
+    <a:For list="$^steps" item="$currentStep" namePrefix="$currentStepLabel.string">\
+        <a:If ifTrue="$currentStepIsVisible">
+            <w:RoundedStep selected="$currentStepSelected">
+                <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                    <tr>
+                        <td width="1%">
+                            <a:PrivateHyperlink action="$stepClicked" namePrefix="stepNumberClicked" omitTags="$!curIsClickable">\
+                               <a:Image filename="$currentStepNumberImageName" alt="$currentStepNumberHint"/>\
+                            </a:PrivateHyperlink>\
+                        </td>
+                        <td class="wizLink">\
+                            <a:PrivateHyperlink action="$stepClicked" namePrefix="stepClicked" omitTags="$!curIsClickable">\
+                                <a:String value="$currentStepLabel"/>\
+                            </a:PrivateHyperlink>\
+                        </td>
+                    </tr>
+                </table>
+            </w:RoundedStep>
+        </a:If>\
+    </a:For>\
+    <!---label: $^label, showSelections: $showSelections, selectionsLabel: $^selectionsLabel, selectionsIcon: $^selectionsIcon, currentStepNumberImageName: $currentStepNumberImageName-->
+</w:RoundedStepsBox>
+
+<!---table border="0" cellspacing="0" cellpadding="0" width="100%" awname="$awname" style="padding:0px 5px 0px">
+
+    <tr>
+        <td colspan="2" class="tocTitle" style="padding: 0px 3px 6px 3px;">\
+            <a:If ifTrue="$showSelections">\
+                <a:String value="$^label"/>\
+            </a:If>\
+        </td>
+    </tr>
+
+    <a:If ifTrue="$showSelections">\
+        <tr>\
+            <td class="tocTitle" colspan="2">\
+                <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                    <tr>\
+                        <td background="widg/dLine9.gif" style="padding: 0px 3px 0px 3px;">\
+                            <a:Image filename="cleardot.gif" class="block" width="1" height="1" />\
+                        </td>\
+                    </tr>\
+                </table>\
+            </td>
+        </tr>
+        <tr>\
+            <td colspan="2">\
+                <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                    <tr>\
+                        <td class="tocTitle" width="1%">\
+                            <a:Image filename="cleardot.gif" class="block" width="3" height="28"/>\
+                        </td>\
+                        <td class="tocTitle">\
+                            <a:Hyperlink submitForm="$true" action="$^selectionsAction">\
+                                <span class="wizSelectionsLink">\
+                                    <a:String value="$^selectionsLabel"/>\
+                                </span>\
+                            </a:Hyperlink>\
+                        </td>\
+                        <td class="tocTitle" align="$languageRight">\
+                            <a:Hyperlink submitForm="$true" action="$^selectionsAction">\
+                                <a:Image alt="$^selectionsAlt" filename="$^selectionsIcon" style="margin-right:8px;"/>\
+                            </a:Hyperlink>\
+                        </td>\
+                    </tr>\
+                </table>\
+            </td>
+        </tr>
+        <tr>\
+            <td class="tocTitle" colspan="2">\
+                <table border="0" cellspacing="0" cellpadding="0" width="100%">\
+                    <tr>\
+                        <td background="widg/dLine9.gif" style="padding: 0px 3px 0px 3px;">\
+                            <a:Image filename="cleardot.gif" class="block" width="1" height="1"/>\
+                        </td>\
+                    </tr>\
+                </table>\
+            </td>
+        </tr>
+        <tr>\
+            <td class="tocTitle" colspan="2">\
+                <a:Image filename="cleardot.gif" class="block" width="1" height="10"/>\
+            </td>
+        </tr>
+    <a:Else/>\
+        <tr>\
+            <td class="tocTitle" colspan="2" style="padding: 0px 3px 6px 3px;">\
+                <a:String value="$^label"/>\
+            </td>
+        </tr>
+    </a:If>\
+
+    <a:For list="$^steps" item="$currentStep" namePrefix="$currentStepLabel.string">\
+        <a:If ifTrue="$currentStepIsVisible">
+            <tr class="$currentStyle" onMouseOver="$currentMouseOver" onMouseOut="$currentMouseOut">
+                <td background="$verticalLineImageName" valign="top" width="1%">\
+                    <a:PrivateHyperlink action="$stepClicked" namePrefix="stepNumberClicked" omitTags="$!curIsClickable">\
+                       <a:Image filename="$currentStepNumberImageName" alt="$currentStepNumberHint"/>\
+                    </a:PrivateHyperlink>\
+                </td>
+                <td>\
+                    <a:PrivateHyperlink action="$stepClicked" namePrefix="stepClicked" omitTags="$!curIsClickable">\
+                        <a:String value="$currentStepLabel"/>\
+                    </a:PrivateHyperlink>\
+                </td>
+            </tr>
+        </a:If>\
+    </a:For>\
+</table-->

@@ -1,0 +1,51 @@
+<a:Form action="$^searchButtonAction" omitTags="$^omitForm:$false">\
+    <div class="searchBox">
+        <table class="searchBoxHeader" cellpadding="0" cellspacing="0" width="100%">
+            <tr>\
+                <td width="99%">\
+                    <a:IncludeContent name="headerLeftArea" required="$false"/>\
+                </td>
+                <td>
+                    <a:IncludeContent name="headerRightArea" required="$false"/>\
+                </td>
+            </tr>
+        </table>
+        <table class="searchBoxBody" cellpadding="0" cellspacing="0" width="100%">
+            <a:If ifTrue="$showBodyTopArea">
+                <tr>\
+                    <td width="100%" valign="top" colspan="2">\
+                        <a:IncludeContent name="bodyTopArea" required="$false"/>\
+                    </td>
+                </tr>
+            </a:If>
+            <tr>\
+                <td width="50%" valign="top">\
+                    <a:IncludeContent name="bodyLeftArea" required="$false"/>\
+                </td>
+                <td width="50%" valign="top">\
+                    <a:IncludeContent name="bodyRightArea" required="$false"/>\
+                </td>
+            </tr>
+            <tr>\
+                <td width="50%" valign="top" style="padding-right:0px">\
+                    <a:IncludeContent name="bodyBottomLeftArea" required="$false"/>\
+                </td>
+                <td width="50%" valign="top" style="padding-left:0px">\
+                    <a:IncludeContent name="bodyBottomRightArea" required="$false"/>\
+                </td>
+            </tr>
+        </table>
+        <a:If ifTrue="$showFooterArea">
+            <table class="searchBoxFooter" cellpadding="0" cellspacing="0" width="100%">
+                <tr>\
+                    <td width="99%">\
+                        <a:IncludeContent name="footerLeftArea" required="$false"/>\
+                    </td>
+                    <td>
+                        <a:IncludeContent name="footerRightArea" required="$false"/>\
+                    </td>
+                </tr>
+            </table>
+        </a:If>
+    </div>
+</a:Form>

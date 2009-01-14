@@ -1,0 +1,136 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/outline/OutlineControl.awl#3 $
+    </Copyright>
+
+    <Overview>
+        AWXOutlineControl renders the indentation, arrow, and text for a node in an outline.
+        It should be used either in the body of an AWXOutlineRepetition, or in the first column
+        of an AWTDataTable (that set to act as an outline via the children binding).
+
+        AWComponentContent is supported as an alternative to the title.
+        The named template "icon" can be provided for an icon image to be rendering between the outline arrow
+        and the title text (or rest of component content).
+    </Overview>
+
+    <Binding key="renderAsTable" direction="get" type="boolean" default="$true">
+        Should the control (arrow, icon (if any) and title) be rendered as a nested HTML table.
+        This is (sadly) often necessary to force a wrapping title to wrap under the start of the
+        text from the line abover (i.e. the the right of the indented arrow) instead of left justified.
+    </Binding>
+
+    <Binding key="title" type="String" required="$false" direction="get">
+        The title (label) on the node.
+    </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null">
+        Seldom used: fired whenever and outline node is expanded/collapsed.
+    </Binding>
+
+    <Binding key="selectAction" direction="get" type="AWResponseGenerating" default="$null" alternates="expansionLinkAction">
+        If allowSelection=$true, this action is fired when a node is "selected" (i.e. the title text was clicked on).
+    </Binding>
+
+    <Binding key="indentationPerLevel" type="int" required="$false" direction="get">
+        Number of pixels to indent each level of the outline.
+    </Binding>
+
+    <Binding key="allowSelection" type="boolean" required="$false" direction="get">
+        Allow clicking on the title string to "select" a node (and visually reflect that selection).
+    </Binding>
+
+    <Binding key="expansionLinkAction" direction="get" type="AWResponseGenerating" alternates="selectAction">
+        If allowSelection=$false,  this action is fired when a node is "expanded" (i.e. the title text is clicked on).
+    </Binding>
+    
+    <Binding key="addSelectionPadding" direction="get" type="boolean" default="$false">
+        Whether to wrap the title of the selected item with a span that includes a padded highlight box.
+    </Binding>
+
+    <Binding key="style" direction="get" type="String" default="$null">
+        TBD
+    </Binding>
+
+    <Binding key="valign" direction="get" type="String" default="middle">
+        TBD
+    </Binding>
+
+    <NamedContent name="icon" required="$false">
+        TBD
+    </NamedContent>
+
+</a:Api>\
+\
+<table border="0" cellpadding="0" cellspacing="0" emitTags="$renderInTable"><tr emitTags="$renderInTable">
+<a:If ifTrue="$showExpansionControl">\
+    <td emitTags="$renderInTable" valign="$^valign:middle">\
+        <a:Hyperlink action="$toggleExpansion" submitForm="$true">\
+            <a:Image filename="$currentToggleImageName" style="$indentationWithControlStyle" border="0" align="middle"/>\
+        </a:Hyperlink>\
+    </td>\
+<a:Else/>\
+    <a:If ifTrue="$renderInTable">\
+        <td style="$indentationWithoutControlStyle"></td>\
+    <a:Else/>\
+        <a:If ifTrue="$requestContext.isExportMode">\
+            $spacePadding\
+        <a:Else/>\
+            <span style="$indentationWithoutControlStyle"></span>\
+        </a:If>\
+    </a:If>\
+</a:If>\
+\
+<td emitTags="$renderInTable">\
+    <a:IncludeContent name="icon" required="$false"/>\
+</td>\
+\
+<td emitTags="$renderInTable" nowrap="$^nowrap">\
+<a:If ifTrue="$^allowSelection:$false">\
+    <a:If ifTrue="$isSelected">\
+        <span class="wizSubstepCurrent noWrap" style="$^style">\
+            <a:If ifTrue="$hasTitle">\
+                <a:String value="$title"/>\
+            <a:Else/>\
+                <a:IncludeContent/>\
+            </a:If>\
+        </span>\
+    <a:Else/>\
+        <span class="wizSubstep nav noWrap" style="$^style" bh="OutC">\
+            <a:Hyperlink nowrap="awstandalone" action="$select">\
+                <a:If ifTrue="$hasTitle">\
+                    <a:String value="$title"/>\
+                <a:Else/>\
+                    <a:IncludeContent/>\
+                </a:If>\
+            </a:Hyperlink>\
+        </span>\
+    </a:If>\
+<a:Else/>\
+    <span class="wizSubstep nav noWrap" style="$^style" emitTags="$^addSelectionPadding">\
+    <span style="$^style" omitTags="$^addSelectionPadding">\
+        <a:Hyperlink action="$^expansionLinkAction:$toggleExpansion" omitTags="$noLinkOnTitle">\
+            <a:If ifTrue="$hasTitle">\
+                <a:String value="$title"/>\
+            <a:Else/>\
+                <a:IncludeContent/>\
+            </a:If>\
+        </a:Hyperlink>\
+    </span>\
+    </span>\
+</a:If>\
+</td>
+</tr></table>\
+\

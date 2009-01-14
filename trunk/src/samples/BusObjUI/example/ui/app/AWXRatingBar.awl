@@ -1,0 +1,4 @@
+<!--- Simple component for rendering a bar indicator -->\
+<div style="border:1px solid gray;display:block;float:left;">\
+    <a:PrimitiveString value="$divHTML"/>
+</div>\

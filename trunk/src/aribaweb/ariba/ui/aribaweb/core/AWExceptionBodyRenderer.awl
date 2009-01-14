@@ -1,0 +1,69 @@
+<style>
+    span.ex {
+        font:bold 12px Verdana, Arial, Helvetica, sans-serif;
+        color:blue;
+    }
+
+    span.ext {
+        font:bold 14px Verdana, Arial, Helvetica, sans-serif;
+        color:red;
+    }
+
+    div.ex {
+        background-color:#EEEEEE;
+        margin-top:8px;
+        padding:8px;
+        font:normal 11px/125% Verdana, Arial, Helvetica, sans-serif;
+    }
+
+    span.paren {
+        color:#888888;
+        font:italic 10px/125% Verdana, Arial, Helvetica, sans-serif;
+    }
+
+    table.ex {
+        padding:8px;
+        font:10px Verdana, Arial, Helvetica, sans-serif;
+    }
+
+    table.ex td {
+         border-bottom:1px solid #999999;
+    }
+
+    table.ex th {
+        background-color:#DDDDDD;
+        border-bottom:2px solid #999999;
+    }
+</style>
+<div style="border:1px solid gray; margin:15px;padding:15px">
+    <span class="ext"><a:String value="$exType"/>:</span><br/>
+    <span class="ex">$exTitle</span>
+    <div class="ex"><a:PrimitiveString value="$additionalMessage"/></div>
+    <br/>
+
+    <div style="text-align:right">
+        <a href="#" oncLick='document.getElementById("rawStackTrace").style.display="block"'>Show Raw Stack Trace</a>
+    </div>
+    <form id="rawStackTrace" style="display:none; margin:20px">
+        <textarea rows="30" cols="100">
+            <a:String value="$stackTrace" escapeHtml="$true"/>\
+        </textarea>
+    </form>
+
+    <table class="ex">
+        <tr>
+            <th>Template</th>
+            <th>Method</th>
+            <th>Java File</th>
+        </tr>
+        <a:For list="$parsedException.frames" item="$currentFrameInfo">
+            <tr>
+                <td><b>$currentFrameInfo.template</b></td>
+                <td><a:PrimitiveString value="$wrappedMethodString"/>()</td>
+                <td>$currentFrameInfo.file</td>
+            </tr>
+        </a:For>
+    </table>
+</div>
+<br/>
+<br/>

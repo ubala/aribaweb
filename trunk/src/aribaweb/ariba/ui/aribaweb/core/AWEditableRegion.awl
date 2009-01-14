@@ -1,0 +1,67 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWEditableRegion.awl#4 $
+    </Copyright>
+
+    <Overview>
+        An AWEditableRegion is used to control the editability of a group of controls.
+        It puts a flags in the environment stack and any controls within the region reads the flags,
+        and renders accordingly.
+
+        Reading the flags in custom controls -
+
+        In Java, custom controls can call:
+
+            AWEditableRegion.disabled(requestContext());
+
+            AWEditableRegion.readonly(requestContext());
+
+        In AWL, controls can use $env.disable and $env.readonly
+
+    </Overview>
+
+    <Binding key="disabled" direction="get" type="boolean" required="$false">
+        From w3c:
+
+        When set for a form control, this boolean attribute disables the control for user input.
+        When set, the disabled attribute has the following effects on an element:
+
+        Disabled controls do not receive focus.
+        Disabled controls are skipped in tabbing navigation.
+        Disabled controls cannot be successful.
+
+        The following elements support the disabled attribute: BUTTON, INPUT, OPTGROUP, OPTION, SELECT, and TEXTAREA.
+    </Binding>
+
+    <Binding key="readonly" direction="get" type="boolean" required="$false">
+        From w3c:
+
+        The readonly attribute specifies whether the control may be modified by the user.
+
+        When set, the readonly attribute has the following effects on an element:
+
+        Read-only elements receive focus but cannot be modified by the user.
+        Read-only elements are included in tabbing navigation.
+        Read-only elements may be successful.
+
+        The following elements support the readonly attribute: INPUT and TEXTAREA.
+    </Binding>
+
+</a:Api>\
+
+<a:Environment disabled="$^disabled" readonly="$^readonly">\
+    <a:IncludeContent/>\
+</a:Environment>\

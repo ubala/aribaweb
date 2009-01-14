@@ -1,0 +1,60 @@
+/*
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWJSDebug.java#4 $
+*/
+package ariba.ui.aribaweb.core;
+
+import ariba.ui.aribaweb.util.AWGenericException;
+
+public final class AWJSDebug extends AWComponent
+{
+    private static final String JSDebugWindowJavascriptFileName = "AWJSDebugWin.js";
+
+    public String getDebugJavascriptUrl ()
+    {
+        String debugJavascriptUrl = null;
+        if (((AWConcreteApplication)application()).allowsJavascriptUrls()) {
+            debugJavascriptUrl = urlForResourceNamed(JSDebugWindowJavascriptFileName);
+            if (debugJavascriptUrl == null) {
+                throw new AWGenericException(getClass().getName() + ": unable to locate file named 'JSDebugWindowJavascriptFileName'");
+            }
+        }
+        else {
+            debugJavascriptUrl = AWXDebugResourceActions.urlForResourceNamed(requestContext(),
+                                                             JSDebugWindowJavascriptFileName);
+        }
+        return debugJavascriptUrl;
+    }
+
+    public boolean enabled ()
+    {
+        return booleanValueForBinding("enabled");
+    }
+
+    public boolean showRequestFrame ()
+    {
+        return booleanValueForBinding("showRequestFrame");
+    }
+
+    public boolean showHistoryFrame ()
+    {
+        return booleanValueForBinding("showHistoryFrame");
+    }
+
+    public boolean markRefreshUpdates ()
+    {
+        return booleanValueForBinding("markRefreshUpdates");
+    }
+}

@@ -1,0 +1,4 @@
+<w:RoundedBox class="wizBox" roundStyle="$ariba.ui.widgets.RoundedBox.BottomLeft" hideGradient="$true">
+    <a:IncludeContent/>
+    <div class="tocSpacer" style="width:150px"></div>\
+</w:RoundedBox>

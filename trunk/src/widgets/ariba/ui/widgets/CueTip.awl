@@ -1,0 +1,80 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/CueTip.awl#11 $
+    </Copyright>
+
+    <Overview>
+
+        Usage:
+        <w:CueTip value="$value"/>
+        or
+        <w:CueTip>My cue tip string</w:CueTip>
+
+
+        The tip string passed as a value binding
+        <w:CueTip value="$value"/>
+
+        In this usage, the value binding is used as the tip string. The value binding is
+        parsed and verified for "safeHTML" as defined by the "escapeUnsafeHtml" binding in
+        AWString. As a convenience, "\n" is converted to a "<br/>" before rendering.
+
+        By default, a CueTip is automatically sized based on the current window size.
+        Autosizing occurs irrespective of any HTML content in the value string or in the
+        component content. This allows the <b></b> and <i></i> tags to be used in
+        conjunction with autosizing.
+
+        If explicit formatting is desired, the autoSize binding can be set to $false.
+        Alternatively for the string passed in via the "value" binding can be wrapped by
+        <html></html> which will disable autosizing of the tip dialog. In this case the
+        sizing of the tip dialog is the responsibility of the user (for example, the tip
+        string can contain <br/> and <p/> tags).
+
+        For ease of translation, most developers should use the value binding method and
+        not include any HTML in the tip string.
+    </Overview>
+
+    <Binding key="value" type="String" direction="get" required="$false">
+        String content used as CueTip content.  This string value will be passed through
+        the AWString escapeUnsafeHtml parser so only "safe" HTML will be allowed.  All
+        other HTML will be escaped.  See AWString for more information.
+
+        If no value binding is passed in then the component content is used as the
+        value for the CueTip.
+    </Binding>
+
+    <Binding key="autoSize" type="boolean" direction="get" default="$true">
+        Determines whether or not the CueTip is automatically sized.  True by default.
+    </Binding>
+
+    <Binding key="image" type="String" direction="get" required="$false">
+        Image to override default icon
+    </Binding>
+
+</a:Api>\
+<a:RefreshRegion>
+    <w:PopupMenuLink menuId="$menuId" position="this"><a:Image class="cueTipIcon" filename="$^image:cueTip.gif"/></w:PopupMenuLink>\
+    <w:PopupMenu menuId="$menuId" onDisplayHandler="$onDisplayHandler">
+        <a:LazyDiv>
+            <div id="$divId" class="cueTipText" style="$style">
+                <a:If notEqualNull="$^value">
+                    <a:String value="$value" escapeUnsafeHtml="$true"/>
+                <a:Else/>
+                    <a:IncludeContent/>
+                </a:If>
+            </div>
+        </a:LazyDiv>
+    </w:PopupMenu>
+</a:RefreshRegion>

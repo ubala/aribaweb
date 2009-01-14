@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cXML SYSTEM "http://xml.cXML.org/schemas/cXML/1.2.014/cXML.dtd">
+<cXML payloadID="456778-199@cxml.workchairs.com"
+      xml:lang="en-US" timestamp="1999-03-12T18:39:09-08:00">
+    <w:Response>
+        <w:Status code="200" text="OK"/>
+        <w:PunchOutSetupResponse>
+            <w:StartPage>
+                <w:URL>$returnURL</w:URL>
+            </w:StartPage>
+        </w:PunchOutSetupResponse>
+    </w:Response>
+</cXML>

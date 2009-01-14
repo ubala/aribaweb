@@ -1,0 +1,60 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorBubble.awl#12 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+</a:Api>\
+<a:RefreshRegion>
+    <div id="bubble_tooltip_fade" class="bubble_tooltip dialogShadowFade">
+        <div id="bubble_body" class="bubble_body">
+            <b class="rtop"><b class="errBg" style="margin: 0 8px 0 8px"></b><b class="errBg" style="margin: 0 6px 0 6px"></b><b class="errBg" style="margin: 0 5px 0 5px"></b><b class="r4 errBg" style="margin: 0 4px 0 4px"></b></b>
+            <div class="bubble_middle" style="margin: 0 3px 0 3px">
+                <table border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td style="padding-left:5px; padding-right:5px">
+                            <div id="bubble_tooltip_content" class="bubbleText">Loading content ...</div>
+                        </td>
+                        <td valign="top" nowrap="1" align="center" width="1%" class="bubbleText" style="padding-left:0px; padding-right:0px">
+                            <span id="bubble_close_control" style="display:none">
+                                <a:Image filename="cleardot.gif" width="1"/>
+                                <a:Hyperlink onClick="ariba.Widgets.hideBubble();">
+                                    <a:Image filename="bubbleClose.gif" align="center"/>
+                                </a:Hyperlink>
+                                <a:Image filename="cleardot.gif" width="1"/>
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="bubble_bottom_left">
+                <b class="rbottom"><b class="r4 errBg" style="margin: 0 4px 0 3px"></b><b class="errBg" style="margin: 0 5px 0 3px"></b><b class="errBg" style="margin: 0 6px 0 3px"></b><b class="errBg" style="margin: 0 8px 0 3px"></b></b>
+            </div>
+            <div id="bubble_bottom_right" style="display:none">
+                <b class="rbottom"><b class="r4 errBg" style="margin: 0 3px 0 4px"></b><b class="errBg" style="margin: 0 3px 0 5px"></b><b class="errBg" style="margin: 0 3px 0 6px"></b><b class="errBg" style="margin: 0 3px 0 8px"></b></b>
+            </div>
+        </div>
+        <div id="bubble_tip_left">
+            <div class="bubble_tip_left" style="left:0">&nbsp;</div>
+        </div>
+        <div id="bubble_tip_right" style="display:none">
+            <div class="bubble_tip_right" style="background-position:top right">&nbsp;</div>
+        </div>
+     </div>
+</a:RefreshRegion>
+

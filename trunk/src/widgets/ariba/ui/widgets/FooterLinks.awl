@@ -1,0 +1,55 @@
+<!---
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<a:If ifTrue="$hasFooterLinks">
+    <div id="FloatingFooter" class="floatingFooter"></div>
+    <div class="footerTopPadding">&nbsp;</div>
+    <div id="Footer" class="footerSpacer">
+        <table cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+                <td class="footerBody">
+                    <a:IncludeComponent awcomponentName="$footerLinksComponent" doubleHeight="$dict.doubleHeight"/>\
+                </td>
+                <td class="footerBody" width="1px" style="padding-right:10px;">
+                    <table border="0" cellspacing="0" cellpadding="0" height="15">
+                        <tr align="center" valign="middle" height="15">
+                            <td><a:Image filename="poweredByLeft.gif"/></td>
+                            <td nowrap="nowrap" class="poweredBy"><a:String value="$[a001]POWERED BY"/></td>
+                            <td ><a:Image filename="poweredByRight.gif"/></td>
+                        </tr>
+                    </table>
+                </td>
+                <td class="footerBody footerClose">
+                    <a:Hyperlink action="$hideFooter">
+                        <a:Image id="FooterClose" filename="footer_close.gif"/>
+                    </a:Hyperlink>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <a:If ifTrue="$footerMenusComponent">
+        <a:IncludeComponent awcomponentName="$footerMenusComponent"/>\
+    </a:If>
+    <a:ClientSideScript>
+        ariba.Widgets.initFooter($dict.doubleHeight);
+    </a:ClientSideScript>
+    <a:ClientSideScript executeOn="onupdate">
+        ariba.Event.eventEnqueue(ariba.Widgets.updateFooter.bind(ariba.Widgets));
+        ariba.Event.eventEnqueue(ariba.Widgets.updateFooterBottom.bind(ariba.Widgets));
+    </a:ClientSideScript>
+<a:Else/>
+    <a:ClientSideScript synchronous="$true">
+        ariba.Widgets.hideFooter();
+    </a:ClientSideScript>
+</a:If>

@@ -1,0 +1,590 @@
+<?xml version="1.0"?>
+
+<!--
+    Copyright 1996-2008 Ariba, Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    (Some contents derived from a parallel Apache Lucene file, also licenced
+     under the same license)
+
+    $Id:  $
+ -->
+
+<project name="common" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+    <description>
+        This file is designed for importing into a main build file, and not intended
+        for standalone use.
+    </description>
+
+    <dirname file="${ant.file.common}" property="common.dir"/>
+
+    <!-- Give user a chance to override without editing this file
+(and without typing -D each time it compiles it -->
+    <property file="${user.home}/aribaweb.build.properties"/>
+    <property file="${user.home}/build.properties"/>
+    <property file="${basedir}/build.properties"/>
+    <property file="${common.dir}/build.properties"/>
+
+    <tstamp>
+        <format property="current.year" pattern="yyyy"/>
+        <format property="DSTAMP" pattern="yyyy-MM-dd"/>
+        <format property="TSTAMP" pattern="HH:mm:ss"/>
+    </tstamp>
+
+    <!--- Set certain vars from Ariba internal environment defaults -->
+    <property environment="env"/>
+    <property name="env.ARIBA_INSTALL_ROOT" value="NOT_SET"/>
+    <property name="env.ARIBA_BUILD_ROOT" value="NOT_SET"/>
+
+    <condition property="lib-internal.dir"
+               value="${env.ARIBA_INSTALL_ROOT}/internal/classes">
+        <not>
+            <equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/>
+        </not>
+    </condition>
+    <property name="lib-internal.dir" location="${make.common.dir}/../../lib-ext"/>
+
+    <condition property="lib.dir" value="${env.ARIBA_INSTALL_ROOT}/classes">
+        <not>
+            <equals arg1="${env.ARIBA_INSTALL_ROOT}" arg2="NOT_SET"/>
+        </not>
+    </condition>
+    <property name="lib.dir" location="${make.common.dir}/../../lib-ext"/>
+
+    <condition property="build.dir" value="${env.ARIBA_BUILD_ROOT}">
+        <not>
+            <equals arg1="${env.ARIBA_BUILD_ROOT}" arg2="NOT_SET"/>
+        </not>
+    </condition>
+    <property name="build.dir" location="${make.common.dir}/../../"/>
+    <property name="dist.root.dir" location="${make.common.dir}/../../"/>
+
+    <!-- YUI - try both lib dir and ariba internal build location -->
+    <available file="${make.common.dir}/../../lib-ext/yuicompressor-2.3.5.jar"
+              value="${make.common.dir}/../../lib-ext/yuicompressor-2.3.5.jar"
+           property="yuicompressor.jar"/>
+    <available file="${make.common.dir}/../../aribaweb/bin/yuicompressor-2.3.5.jar"
+              value="${make.common.dir}/../../aribaweb/bin/yuicompressor-2.3.5.jar"
+           property="yuicompressor.jar"/>
+
+    <!-- JavaCC -->
+    <available file="${make.common.dir}/../../lib-ext/javacc.jar"
+              value="${make.common.dir}/../../lib-ext"
+           property="javacc.home"/>
+    <available file="${make.common.dir}/../../../util/expr/javacc/javacc.jar"
+              value="${make.common.dir}/../../../util/expr/javacc"
+           property="javacc.home"/>
+
+    <property name="name" value="${ant.project.name}"/>
+    <property name="Name" value="AribaWeb"/>
+    <property name="version" value="1.0-dev"/>
+    <property name="year" value="2000-${current.year}"/>
+    <property name="final.name" value="ariba.${name}"/> <!-- -${version} -->
+
+    <property name="javac.deprecation" value="off"/>
+    <property name="javac.debug" value="on"/>
+    <property name="javac.source" value="1.5"/>
+    <property name="javac.target" value="1.5"/>
+
+    <property name="project.name" value="site"/>
+    <property name="build.encoding" value="utf-8"/>
+
+    <property name="src.dir" location="${basedir}"/>
+    <property name="src.resource.path" value="resource/ariba"/>
+    <property name="dist.dir" location="${dist.root.dir}/dist"/>
+    <property name="maven.dist.dir" location="dist/maven"/>
+
+    <property name="junit.output.dir" location="${build.dir}/test"/>
+    <property name="junit.reports" location="${build.dir}/test/reports"/>
+    <property name="junit.includes" value="**/Test*.java,**/*Test.java"/>
+    <property name="junit.excludes" value=""/>
+
+    <property name="src.derived.dir" value="${build.dir}/derived-src/${name}"/>
+    <property name="build.classes.dir" value="${build.dir}/classes/${name}"/>
+    <property name="build.docroot.dir" value="${build.classes.dir}/docroot"/>
+    <property name="build.jars.dir" value="${build.dir}/lib"/>
+    <property name="build.wars.dir" value="${build.dir}/webapps"/>
+    <property name="catalina.base.dir" value="${build.dir}"/>
+
+    <!-- Dependencies classpath -->
+    <fileset id="build.deps" dir="${lib.dir}">
+        <include name="log4j.jar"/>
+        <include name="jakarta-oro.jar"/>
+        <include name="bcel.jar"/>
+        <include name="javax.servlet.zip"/>
+        <include name="mail.jar"/>
+
+        <!-- demoshell only... -->
+        <include name="js.jar"/>
+    </fileset>
+
+    <fileset id="build.deps-internal" dir="${lib-internal.dir}">
+        <!-- demoshell only... -->
+        <include name="groovy-all.jar"/>
+    </fileset>
+
+    <!-- ToDo: derive a module specific list from a list declared within each module -->
+    <fileset id="build.jars" dir="${build.jars.dir}">
+        <include name="ariba.util.jar"/>
+        <include name="ariba.expr.jar"/>
+        <include name="ariba.aribaweb.jar"/>
+        <include name="ariba.widgets.jar"/>
+        <include name="ariba.metaui.jar"/>
+    </fileset>
+
+    <fileset id="war.jars" dir="${build.jars.dir}">
+        <include name="ariba.demoshell.jar"/>
+    </fileset>
+        
+    <patternset id="jar.resource.patterns"
+                includes="**/*.awl,**/*.htm,**/*.oss,**/*.awz,**/*.afr"
+                excludes=""
+            />
+
+    <fileset id="jar.resources" dir="${basedir}">
+        <patternset refid="jar.resource.patterns"/>
+    </fileset>
+
+    <resources id="aw.resources">
+        <fileset dir="${build.dir}/classes/aribaweb/" includes="docroot/**/*"/>
+        <fileset dir="${build.dir}/classes/widgets/" includes="docroot/**/*"/>
+        <fileset dir="${build.dir}/classes/metaui/" includes="docroot/**/*"/>
+
+        <!--  Should pull them from the jar... But for some reason this is very slow
+                - see http://www.mail-archive.com/dev@ant.apache.org/msg36450.html
+              We could just jar xf foo.jar docroot into the file system and then do
+              Something like the above...
+        <zipfileset src="${build.jars.dir}/ariba.aribaweb.jar" includes="docroot/**/*"/>
+        <zipfileset src="${build.jars.dir}/ariba.widgets.jar" includes="docroot/**/*"/>
+        <zipfileset src="${build.jars.dir}/ariba.metaui.jar" includes="docroot/**/*"/>
+        -->
+    </resources>
+    
+    <patternset id="src.dist.patterns"
+                includes="src/,*,lib-ext/, conf/"
+                excludes="dist/, webapps/, lib/, work/, classes/, derived-src/"
+            />
+    <patternset id="binary.build.dist.patterns"
+                includes="${final.name}.jar,docs/,module/*/*.jar"
+            />
+    <patternset id="binary.root.dist.patterns"
+                includes="**"
+                excludes="dist/, work/, classes/, derived-src/"
+            />
+
+    <patternset id="metainf.includes">
+        <exclude name="**/*"/>
+    </patternset>
+
+    <condition property="build-1-5-contrib">
+        <equals arg1="1.5" arg2="${ant.java.version}"/>
+    </condition>
+
+    <property name="clover.db.dir" location="${build.dir}/test/clover/db"/>
+    <property name="clover.report.dir" location="${build.dir}/test/clover/reports"/>
+
+    <available
+            property="clover.present"
+            classname="com.cenqua.clover.tasks.CloverReportTask"
+            />
+    <condition property="clover.enabled">
+        <and>
+            <isset property="run.clover"/>
+            <isset property="clover.present"/>
+        </and>
+    </condition>
+
+
+    <available
+            property="junit.present"
+            classname="junit.framework.TestCase"
+            />
+
+    <available
+            property="maven.ant.tasks.present"
+            classname="ariba.ui.maven.artifact.ant.Pom"
+            />
+
+    <target name="clean"
+            description="Removes contents of build and dist directories">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete file="velocity.log"/>
+    </target>
+
+    <target name="init">
+        <!-- Need to build this even if we won't use it or the compiler will complain... -->
+        <mkdir dir="${src.derived.dir}"/>
+        <mkdir dir="${build.jars.dir}"/>
+    </target>
+
+    <target name="javacc-tree" if="src.jjt.path">
+      <dirname property="jjt.dest.path" file="${src.derived.dir}/${src.jjt.path}"/>
+      <invoke-javacc-tree target="${src.jjt.path}"
+                     outputDir="${jjt.dest.path}"/>
+    </target>
+
+    <target name="javacc" if="src.jj.path">
+        <dirname property="jj.dest.path" file="${src.derived.dir}/${src.jj.path}"/>
+        <invoke-javacc target="${src.jj.path}"
+                     outputDir="${jj.dest.path}"/>
+    </target>
+
+    <target name="compile" depends="init, javacc, javacc-tree"
+            description="Compiles core classes">
+        <compile destdir="${build.classes.dir}" srcdir="${basedir}:${src.derived.dir}">
+            <classpath refid="classpath"/>
+        </compile>
+    </target>
+
+    <target name="merge-js" if="js.merge.destfile" description="merges js files">
+        <property name="js.merge.fullpath" location="${src.derived.dir}/${js.merge.destpath}/${js.merge.destfile}"/>
+        <property name="js.compact.fullpath" location="${build.docroot.dir}/${js.merge.destpath}/${js.merge.destfile}"/>
+        <echo message="Creating merged JS file: ${js.merge.fullpath}"/>
+        <mkdir dir="${src.derived.dir}/${js.merge.destpath}"/>
+        <concat destfile="${js.merge.fullpath}">
+            <filelist refid="merge.js.filelist"/>
+        </concat>
+        <echo message="Compacting to: ${js.compact.fullpath}"/>
+        <mkdir dir="${build.docroot.dir}/${js.merge.destpath}"/>
+        <java jar="${yuicompressor.jar}" fork="true" failonerror="true" inputstring="">
+            <arg value="--line-break"/>
+            <arg value="0"/>
+            <arg value="${js.merge.fullpath}"/>
+            <arg value="-o"/>
+            <arg value="${js.compact.fullpath}"/>
+        </java>
+
+        <echo message="Copying other JS files..."/>
+        <copy todir="${build.docroot.dir}/${js.merge.destpath}">
+            <filelist refid="unmerged.js.filelist"/>
+        </copy>
+    </target>
+
+    <target name="copy-docroot-resources" if="docroot.destpath">
+        <copy todir="${build.classes.dir}/${docroot.destpath}" failonerror="false">
+            <resources refid="src.docroot.resources"/>
+        </copy>
+    </target>
+
+    <target name="copy-resources" depends="merge-js,copy-docroot-resources"
+            description="Copy resources into classes directory">
+        <copy todir="${build.classes.dir}" failonerror="false">
+            <fileset dir="${src.dir}/${src.resource.path}" includes="resource/**/*"/>
+            <fileset refid="jar.resources"/>
+        </copy>
+    </target>
+
+    <target name="jar" depends="compile, copy-resources"
+            description="Packages the JAR file">
+        <jarify/>
+    </target>
+
+    <target name="war" depends="jar" if="war.name">
+        <mkdir dir="${build.wars.dir}"/>
+        <!-- delete expanded war if present -->
+        <delete dir="${build.wars.dir}/${war.name}" quiet="true"/>
+        <!-- build new war -->
+        <war destfile="${build.wars.dir}/${war.name}.war"
+             webxml="${src.dir}/web.xml">
+            <lib refid="build.deps"/>
+            <lib refid="build.deps-internal"/>
+            <lib refid="build.jars"/>
+            <lib refid="war.jars"/>
+            <resources refid="war.resources"/>
+            <manifest>
+                <attribute name="Specification-Title"
+                           value="AribaWeb application"/>
+                <!-- spec version must match "digit+{.digit+}*" -->
+                <attribute name="Specification-Version" value="${version}"/>
+                <attribute name="Specification-Vendor"
+                           value="Ariba, Inc."/>
+                <attribute name="Implementation-Title" value="ariba.ui.aribaweb"/>
+                <!-- impl version can be any string -->
+                <attribute name="Implementation-Version"
+                           value="${version}"/>
+                <attribute name="Implementation-Vendor"
+                           value="Ariba, Inc."/>
+                <attribute name="X-Compile-Source-JDK"
+                           value="${javac.source}"/>
+                <attribute name="X-Compile-Target-JDK"
+                           value="${javac.target}"/>
+            </manifest>
+            <metainf dir="${common.dir}">
+                <include name="LICENSE.txt"/>
+                <include name="NOTICE.txt"/>
+            </metainf>
+        </war>
+    </target>
+
+
+    <target name="maven.ant.tasks-check">
+        <fail unless="maven.ant.tasks.present">
+            ##################################################################
+            Maven ant tasks not found.
+            Please make sure the maven-ant-tasks jar is in ANT_HOME/lib, or made
+            available to Ant using other mechanisms like -lib or CLASSPATH.
+            ##################################################################
+        </fail>
+    </target>
+
+    <property name="pom.xml" value="pom.xml"/>
+
+    <macrodef name="m2-deploy" description="Builds a Maven artifact">
+        <attribute name="pom.xml" default="${pom.xml}"/>
+        <sequential>
+            <copy file="@{pom.xml}" tofile="${build.dir}/@{pom.xml}">
+                <filterset begintoken="@" endtoken="@">
+                    <filter token="version" value="${version}"/>
+                </filterset>
+            </copy>
+            <artifact:pom id="maven.project" file="${build.dir}/@{pom.xml}"/>
+            <artifact:install file="${build.dir}/${maven.project.build.finalName}.jar">
+                <localRepository location="${maven.dist.dir}"/>
+                <pom refid="maven.project"/>
+            </artifact:install>
+        </sequential>
+    </macrodef>
+
+
+    <macrodef name="jarify" description="Builds a JAR file">
+        <attribute name="title" default="AribaWeb: ${ant.project.name}"/>
+        <element name="manifest-attributes" optional="yes"/>
+        <sequential>
+            <jar destfile="${build.jars.dir}/${final.name}.jar">
+                <fileset dir="${build.classes.dir}"/>
+                <manifest>
+                    <!--
+                    http://java.sun.com/j2se/1.5.0/docs/guide/jar/jar.html#JAR%20Manifest
+                    http://java.sun.com/j2se/1.5.0/docs/guide/versioning/spec/versioning2.html
+                    http://java.sun.com/j2se/1.5.0/docs/api/java/lang/Package.html
+                    http://java.sun.com/j2se/1.5.0/docs/api/java/util/jar/package-summary.html
+                    http://java.sun.com/developer/Books/javaprogramming/JAR/basics/manifest.html
+                    -->
+                    <!-- Don't set 'Manifest-Version' it identifies the version of the
+                         manifest file format, and should allways be 1.0 (the default)
+
+                         Don't set 'Created-by' attribute, it's purpose is
+                         to identify the version of java used to build the jar,
+                         which ant will do by default.
+
+                         Ant will happily override these with bogus strings if you
+                         tell it to, so don't.
+
+                         NOTE: we don't use section info because all of our manifest data
+                         applies to the entire jar/war ... no package specific info.
+                    -->
+                    <attribute name="Specification-Title" value="@{title}"/>
+                    <!-- spec version must match "digit+{.digit+}*" -->
+                    <attribute name="Specification-Version" value="${version}"/>
+                    <attribute name="Specification-Vendor"
+                               value="Ariba, Inc."/>
+                    <attribute name="Implementation-Title" value="ariba.ui.aribaweb"/>
+                    <!-- impl version can be any string -->
+                    <attribute name="Implementation-Version"
+                               value="${version} - ${DSTAMP} ${TSTAMP}"/>
+                    <attribute name="Implementation-Vendor"
+                               value="Ariba, Inc."/>
+                    <attribute name="X-Compile-Source-JDK"
+                               value="${javac.source}"/>
+                    <attribute name="X-Compile-Target-JDK"
+                               value="${javac.target}"/>
+                    <manifest-attributes/>
+                </manifest>
+                <metainf dir="${common.dir}">
+                    <include name="LICENSE.txt"/>
+                    <include name="NOTICE.txt"/>
+                </metainf>
+                <metainf dir="${src.dir}">
+                    <patternset refid="metainf.includes"/>
+                </metainf>
+                <metainf dir="${src.dir}">
+                    <include name="aribaweb.properties"/>
+                </metainf>
+            </jar>
+        </sequential>
+    </macrodef>
+
+    <target name="compile-test" depends="compile">
+    </target>
+
+    <target name="test" depends="compile-test" description="Runs unit tests">
+        <fail unless="junit.present">
+            ##################################################################
+            JUnit not found.
+            Please make sure junit.jar is in ANT_HOME/lib, or made available
+            to Ant using other mechanisms like -lib or CLASSPATH.
+            ##################################################################
+        </fail>
+        <mkdir dir="${junit.output.dir}"/>
+        <junit printsummary="off" haltonfailure="no"
+               errorProperty="tests.failed" failureProperty="tests.failed">
+            <classpath refid="junit.classpath"/>
+            <assertions>
+                <enable package="ariba.ui.aribaweb"/>
+            </assertions>
+            <!-- TODO: create propertyset for test properties, so each project can have its own set -->
+            <sysproperty key="dataDir" file="src/test"/>
+            <sysproperty key="tempDir" file="${build.dir}/test"/>
+            <sysproperty key="java.io.tmpdir" file="${build.dir}/test"/>
+
+            <!-- set as a system property so contrib testss can have a fixed root
+                to reference file paths from, and "ant test" can work from
+                anywhere.
+            -->
+            <sysproperty key="aribaweb.common.dir" file="${common.dir}"/>
+
+            <!-- contrib/ant IndexTaskTest needs these two system properties -->
+            <sysproperty key="docs.dir" file="src/test"/>
+            <sysproperty key="index.dir" file="${build.dir}/test/index"/>
+
+            <!-- contrib/benchmark uses this system property to locate docs data and defined tasks -->
+            <sysproperty key="tasks.dir"
+                         file="${build.classes.dir}/java/org/apache/aribaweb/benchmark/byTask/tasks"/>
+            <sysproperty key="benchmark.work.dir"
+                         file="${common.dir}/contrib/benchmark/work"/>
+
+            <formatter type="xml"/>
+            <formatter type="brief" usefile="false"/>
+            <batchtest fork="yes" todir="${junit.output.dir}" unless="testcase">
+                <fileset dir="src/test" includes="${junit.includes}"
+                         excludes="${junit.excludes}"/>
+            </batchtest>
+            <batchtest fork="yes" todir="${junit.output.dir}" if="testcase">
+                <fileset dir="src/test" includes="**/${testcase}.java"/>
+            </batchtest>
+        </junit>
+        <!-- create this file, then if we don't fail, delete it -->
+        <!-- this meme makes it easy to tell if contribs have failed later -->
+        <echo file="${build.dir}/test/junitfailed.flag">MAYBE</echo>
+        <fail if="tests.failed">Tests failed!</fail>
+        <!-- life would be easier if echo had an 'if' attribute like fail -->
+        <delete file="${build.dir}/test/junitfailed.flag"/>
+
+    </target>
+
+    <target name="clover" depends="clover.setup" if="clover.enabled"
+            description="Instrument the Unit tests using Clover.  Requires a Clover license and clover.jar in the ANT classpath.  To use, specify -Drun.clover=true on the command line."/>
+
+    <target name="clover.setup" if="clover.enabled">
+        <taskdef resource="clovertasks"/>
+        <mkdir dir="${clover.db.dir}"/>
+        <clover-setup initString="${clover.db.dir}/aribaweb_coverage.db">
+            <fileset dir="src/java"/>
+        </clover-setup>
+    </target>
+
+    <target name="clover.check">
+        <fail unless="clover.present">
+            ##################################################################
+            Clover not found.
+            Please make sure clover.jar is in ANT_HOME/lib, or made available
+            to Ant using other mechanisms like -lib or CLASSPATH.
+            ##################################################################
+        </fail>
+    </target>
+    <!--
+     Run after Junit tests.
+     -->
+    <target name="generate-clover-reports" depends="clover.check, clover">
+        <mkdir dir="${clover.report.dir}"/>
+        <clover-report>
+            <current outfile="${clover.report.dir}" title="${final.name}">
+                <format type="html"/>
+            </current>
+        </clover-report>
+    </target>
+
+    <target name="generate-test-reports" description="Generates test reports">
+        <mkdir dir="${junit.reports}"/>
+        <junitreport todir="${junit.output.dir}">
+            <!-- this fileset let's the task work for individual contribs,
+                as well as the project as a whole
+            -->
+            <fileset dir="${build.dir}">
+                <include name="**/test/TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${junit.reports}"/>
+        </junitreport>
+    </target>
+
+    <target name="jar-src" depends="init">
+        <jar destfile="${build.dir}/${final.name}-src.jar">
+            <fileset dir="." includes="src/"/>
+        </jar>
+    </target>
+
+    <target name="default" depends="jar"/>
+
+    <!--+
+    | M A C R O S
+    +-->
+    <macrodef name="compile">
+        <attribute name="srcdir"/>
+        <attribute name="destdir"/>
+        <element name="nested" implicit="yes" optional="yes"/>
+
+        <sequential>
+            <mkdir dir="@{destdir}"/>
+            <javac
+                    encoding="${build.encoding}"
+                    srcdir="@{srcdir}"
+                    destdir="@{destdir}"
+                    deprecation="${javac.deprecation}"
+                    debug="${javac.debug}"
+                    source="${javac.source}"
+                    target="${javac.target}">
+                <nested/>
+            </javac>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="invoke-javacc">
+        <attribute name="target"/>
+        <attribute name="outputDir"/>
+        <sequential>
+            <mkdir dir="@{outputDir}"/>
+            <javacc
+                    target="@{target}"
+                    outputDirectory="@{outputDir}"
+                    debugTokenManager="${javacc.debug.tokenmgr}"
+                    debugParser="${javacc.debug.parser}"
+                    debuglookahead="${javacc.debug.lookahead}"
+                    javacchome="${javacc.home}"
+                    />
+            <fixcrlf srcdir="@{outputDir}" includes="*.java">
+                <containsregexp expression="Generated.*By.*JavaCC"/>
+            </fixcrlf>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="invoke-javacc-tree">
+        <attribute name="target"/>
+        <attribute name="outputDir"/>
+        <sequential>
+            <mkdir dir="@{outputDir}"/>
+            <jjtree
+                    target="@{target}"
+                    outputDirectory="@{outputDir}"
+                    buildnodefiles="false"
+                    javacchome="${javacc.home}"
+                    />
+            <!-- BOGUS: convert target to .java? -->
+            <basename property="jjt.filename" file="@{target}" suffix=".jjt"/>
+            <invoke-javacc target="@{outputDir}/${jjt.filename}.jj" outputDir="@{outputDir}"/>
+        </sequential>
+    </macrodef>
+
+</project>
+
+

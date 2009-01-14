@@ -1,0 +1,46 @@
+<!---
+
+Used internally by the wizard and search page
+
+<w:CornerLayout showLeftAreas="$showLeftAreas">
+
+    <a:Content name="topLeftArea">
+    </a:Content>
+
+    <a:Content name="topRightArea">
+    </a:Content>
+
+    <a:Content name="bottomLeftArea">
+    </a:Content>
+
+    <a:Content name="bottomRightArea">
+    </a:Content>
+
+</w:CornerLayout>
+-->
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+        <a:If ifTrue="$^showLeftAreas:$true">
+            <td valign="bottom" style="padding-right:20px">
+                <a:IncludeContent name="topLeftArea" required="$false"/>\
+            </td>
+        </a:If>
+        <td width="99%" valign="bottom">
+            <a:IncludeContent name="topRightArea" required="$false"/>\
+         </td>
+    </tr>
+    <tr>
+        <a:If ifTrue="$^showLeftAreas:$true">
+            <td valign="top" style="padding-right:20px">
+                <div class="flexContainer">\
+                    <a:IncludeContent name="bottomLeftArea" required="$false"/>\
+                </div>
+            </td>
+        </a:If>
+        <td valign="top">
+            <div class="flexContainer">\
+                <a:IncludeContent name="bottomRightArea" required="$false"/>\
+            </div>
+        </td>
+    </tr>
+</table>

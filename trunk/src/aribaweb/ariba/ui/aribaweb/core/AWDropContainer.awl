@@ -1,0 +1,85 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDropContainer.awl#15 $
+    </Copyright>
+
+    <Overview>
+        An AWDropContainer is a drop target for draggable elements (objects of type
+        AWDragComponent -- AWDragContainer / AWDataTable rows).  The AWDropContainer is
+        by default a span but can be implemented using a div if desired.
+
+        When a valid draggable object is dropped on the AWDropContainer, the dropAction
+        binding is invoked allowing application logic to handle the drag/drop action.
+
+        See AWDragContainer for information on setting up draggable content.
+    </Overview>
+    <Binding key="tagName" direction="get" type="String" default="span">
+        The tag used as the container for the AWDragContainer.  This affects the layout of
+        the drop container in the page.  The allowed values are span or div.
+    </Binding>
+    <Binding key="class" direction="get" type="String" required="$false">
+        CSS class for the drop container.
+    </Binding>
+    <Binding key="style" direction="get" type="String" required="$false">
+        Inline styles for the drop container.
+    </Binding>
+    <Binding key="dropClass" direction="get" type="String" required="$false">
+        The dropClass is used to define a style which should be applied to the
+        AWDropContainer when it is "active", ie, when a valid AWDragContainer is being
+        dragged over the drop container
+    </Binding>
+    <Binding key="dropAction" direction="get" type="AWResponseGenerating" required="$true">
+        Action that is invoked when a draggable object is dropped on this drop container.
+    </Binding>
+    <Binding key="type" direction="get" type="String" required="$false">
+        Drag/Drop type of objects allowed to be dropped in the AWTDataTable.  This value
+        is used to determine whether or not a draggable element can be dropped on the
+        AWTDataTable.
+    </Binding>
+    <Binding key="types" direction="get" type="List" required="$false">
+        This binding allows a list of valid Drag/Drop types to be defined for an
+        AWTDataTable allowing multiple types of draggable objects to be dropped on the
+        AWTDataTable.
+    </Binding>
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        If $true, effectively removes the AWDropContainer tag.  If an explicit tagName is
+        specified, and the desire is to still have the tag rendered, but not have the drop
+        container, then use the disableDrop binding instead.
+    </Binding>
+    <Binding key="disableDrop" direction="get" type="boolean" default="$false">
+        If $true, disables the drop region, but still renders the container tag (either
+        $tagName or span if no $tagName is specified).  See omitTags binding.
+    </Binding>
+    <Binding key="*" type="String" default="$null" direction="get">
+        Arbitrary key/value pairs may be passed-through to the \<span.../> or tagName tag.
+    </Binding>
+</a:Api>\
+<a:If ifTrue="$^omitTags">\
+    <a:IncludeContent/>\
+<a:Else ifTrue="$disableDrop"/>
+    <a:GenericContainer tagName="$^tagName:span" class="$^class" style="$^style"
+        otherBindings="$otherBindingsValues">\
+        <a:IncludeContent/>\
+    </a:GenericContainer>\
+<a:Else/>\
+    <a:GenericContainer tagName="$^tagName:span" class="$cssClass" bh="DrP"
+                        elementId="$elementId" id="$elementId"
+                        style="$style"
+                        invokeAction="$^dropAction"
+                        otherBindings="$otherBindingsValues">\
+        <a:IncludeContent/>\
+    </a:GenericContainer>\
+</a:If>\

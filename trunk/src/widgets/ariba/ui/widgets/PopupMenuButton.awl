@@ -1,0 +1,115 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuButton.awl#19 $
+    </Copyright>
+
+    <Overview>
+        see <w:PopupMenu/>
+    </Overview>
+
+    <Binding key="menuId" direction="get" type="String" required="$true">
+        see PopupMenuLink
+    </Binding>
+
+    <Binding key="index" direction="get" type="int" required="$false">
+        see PopupMenuLink
+    </Binding>
+
+    <Binding key="actionSetup" direction="get" type="void" required="$false">
+        see PopupMenuLink
+    </Binding>
+
+    <Binding key="title" direction="get" type="String" required="$false">
+        The tooltip for this PopupMenuButton; displays when you hover over
+        the button itself.
+    </Binding>
+
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        see PopupMenuLink
+    </Binding>
+
+    <Binding key="style" direction="get" type="String" required="$false">
+        The container around the PopupMenuLink is (by default) of style-class
+        "popupMenuButton".  If you want to modify that style slightly
+        for this instance of the PopupMenuButton, use
+        the "style" binding.
+
+        Note that application developers are discouraged
+        from using this binding as you may affect the look and feel of
+        this instance of PopupMenuButton.  Seek UCDG approval first.
+    </Binding>
+
+    <Binding key="class" direction="get" type="String" default="popupMenuButton">
+        The "class" attribute defaults to the UCDG approved "popupMenuButton"
+        style.  You may completely change the look of the button with this
+        binding by passing a different style-class.
+
+        Note that application developers are discouraged
+        from using this binding as you may affect the look and feel of
+        this instance of PopupMenuButton.  Seek UCDG approval first.
+    </Binding>
+
+    <Binding key="justify" direction="get" type="boolean" default="$false">
+        TBD -- need to add explanation of when to use this.
+
+        Changes the class from popupMenuButton to popupMenuButtonJustify.
+        Ordinarily, the size of a PopupMenuButton is determined by how large
+        the text is within the PopupMenuButton.  If you use justify="$true",
+        the PopupMenuButton will stretch to fit the entire width of its
+        parent container.
+    </Binding>
+
+    <NamedContent name="controlImage" required="$false">
+        TBD
+    </NamedContent>
+</a:Api>
+
+<a:If ifFalse="$^justify:$false">\
+    <table border="0" cellspacing="0" cellpadding="0" style="display:inline">\
+        <tr>\
+            <td valign="center">\
+                <div class="$^class:popupMenuButton" style="$^style" omitTags="$isIE4" title="$^title">\
+                    <w:PopupMenuLink
+                        omitTags="$^omitTags" menuId="$^menuId" class="awmenuLink"
+                        index="$^index" style="text-decoration:none" position="this"
+                        actionSetup="$^actionSetup">\
+                        <nobr>\
+                            <a:IncludeContent/>\
+                            <a:Image filename="widg/arrowcolor.gif" align="absmiddle" style="margin-bottom:1px;"/>\
+                        </nobr>\
+                    </w:PopupMenuLink>\
+                </div>\
+            </td>\
+        </tr>\
+    </table>\
+<a:Else/>
+                <div class="popupMenuButtonJustify" style="$^style" omitTags="$isIE4" title="$^title">\
+                    <w:PopupMenuLink tagName="div"
+                        omitTags="$^omitTags" menuId="$^menuId" class="awmenuLink"
+                        index="$^index" style="text-decoration:none;" position="this"
+                        actionSetup="$^actionSetup">\
+                        <nobr>\
+                            <a:IncludeContent/>\
+                            <a:If ifTrue="$hasControlImage">
+                                <a:IncludeContent name="controlImage" required="$true"/>\
+                            <a:Else/>
+                                <a:Image filename="widg/arrowcolor.gif" align="absmiddle"
+                                    style="position:absolute;top:1px;right:1px;margin-bottom:1px;"/>\
+                            </a:If>
+                        </nobr>\
+                    </w:PopupMenuLink>\
+                </div>\
+</a:If>

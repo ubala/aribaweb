@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html>
+    <head>
+        <title></title>
+        <script type="text/javascript">
+            function init(){
+                document.designMode = 'On';
+                if (document.all) {
+                    document.onkeypress = autoComplete;
+                }
+                else {
+                    document.addEventListener("keypress", autoComplete, true);
+                }
+            }
+            window.onload = init;
+            function autoComplete (evt)
+            {
+                var evt = (evt) ? evt : event;
+                alert(parent.awkeyCode(evt));
+                var srcElement = parent.aweventSourceElement(evt);
+                var newTop = parent.awabsoluteTop(srcElement);
+                var newLeft = parent.awabsoluteLeft(srcElement);
+                var div = parent.document.getElementById('ac');
+                var frame = parent.document.getElementById('chooser');
+                div.style.top = newTop + parent.awabsoluteTop(frame) + 20 + 'px';
+                div.style.left = newLeft + parent.awabsoluteLeft(frame) + 10 + 'px';
+                //div.style.display = '';
+
+            }
+        </script>
+    </head>
+    <body style="padding:0px;margin:0px;" contenteditable="true">
+       <span contenteditable="false" style="color:purple">Mark Dao;</span><div></div>
+    </body>
+</html>

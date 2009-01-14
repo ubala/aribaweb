@@ -1,0 +1,96 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalWindowLink.awl#12 $
+    </Copyright>
+
+    <Overview>
+
+        <!-- Commenting out to prevent validation errors.
+        <w:ModalWindowLink id="foo">
+            Click this to see ModalDialogBox "foo"
+        </w:ModalWindowLink>
+
+        <w:ModalWindowLink id="foo">
+            This is the content of ModalDialogBox foo
+        </w:ModalWindowLink>
+        -->
+    </Overview>
+
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="omitTags" direction="get" type="boolean" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="size" direction="get" type="String" default="medium">
+        There are three standard sizes: "small", "medium", "large"
+    </Binding>
+
+    <Binding key="height" direction="get" type="String" required="$false">
+        Overrides the default height.
+        A value less than 1 is treated as a fraction of the window height.
+        Otherwise, it specifies the height in pixels.
+    </Binding>
+
+    <Binding key="width" direction="get" type="String" required="$false">
+        Overrides the default width.
+        A value less than 1 is treated as a fraction of the window width.
+        Otherwise, it specifies the width in pixels.
+    </Binding>
+
+    <Binding key="windowOpen" direction="get" type="void" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="windowRefresh" direction="get" type="void" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="windowCloseAction" direction="get" type="AWResponseGenerating" required="$false">
+        Action invoked when the modal window closes.
+    </Binding>
+
+    <Binding key="tile" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+    <Binding key="submitForm" direction="get" type="boolean" required="$false">
+        TBD
+    </Binding>
+
+</a:Api>\
+
+<w:ModalWindowScriptFunctions/>\
+
+<a:Hyperlink onClick="$onClick"><a:IncludeContent/></a:Hyperlink>
+
+<!--- only on full page refresh -->
+<a:RefreshRegion>
+    <a:ClientSideScript>
+        <a:If ifTrue="$isRefreshRequest">
+            ariba.ModalWindow.resyncModalWindow("$elementId");
+        </a:If>
+    </a:ClientSideScript>
+</a:RefreshRegion>
+
+<a:RefreshRegion alwaysRender="$true">
+    <a:ClientSideScript>
+        ariba.ModalWindow.rehideSelects();
+    </a:ClientSideScript>
+</a:RefreshRegion>

@@ -1,0 +1,46 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/WizardTOC.awl#3 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+</a:Api>\
+
+
+<a:If notEqualNull="$wizard.preTocSource">\
+    <w:WidgetInclude name="$wizard.preTocSource"/>\
+</a:If>\
+<w:StepByStepTOC
+    label="$label"
+    steps="$wizard.steps"
+    step="$currentStep"
+    visibleStepCount="$wizard.visibleTopLevelStepSize"
+    stepIsVisible="$currentStep.isVisible"
+    stepLabel="$currentStep.label"
+    stepIndex="$currentStep.index"
+    stepIsNumbered="$currentStep.isNumbered"
+    selectedStep="$selectedStep"
+    stepAction="$stepClicked"
+    showSelections="$wizard.selectionsFrame"
+    selectionsLabel="$wizard.selectionsLabel"
+    selectionsIcon="$wizard.selectionsIcon"
+    selectionsAction="$selectionsClicked"
+    isClickable="$wizard.allowsClickableSteps"/>\
+<a:If notEqualNull="$wizard.postTocSource">\
+    <w:WidgetInclude name="$wizard.postTocSource"/>\
+</a:If>\

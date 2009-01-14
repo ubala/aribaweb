@@ -1,0 +1,128 @@
+<!--
+Component to use OLE Automation to drive creation of an Excel spreadsheet
+    Bindings:
+        downloadURL
+        rowFields  -- List of names of fields for row edge
+        columnFields
+        dataFields
+-->
+<a:ClientSideScript LANGUAGE="VBScript">
+
+sub Excel_Create()
+          ' Launch Excel
+          dim app
+          set app = createobject("Excel.Application")
+
+          ' Make it visible
+          app.Visible = true
+
+          ' Add a new workbook
+          dim wb
+          set wb = app.workbooks.add
+          LoadAndPivot wb
+end sub
+
+sub LoadAndPivot(wb)
+     wb.ActiveSheet.Range("A1") = "Fetching Data..."
+     wb.ActiveSheet.Name = "Data"
+     with wb.ActiveSheet.QueryTables.Add("URL;<a:PrimitiveString value="$^downloadURL"/>", wb.ActiveSheet.Range("A1"))
+        .Name = "RawTable"
+        .FieldNames = True
+        .RowNumbers = False
+        .FillAdjacentFormulas = False
+        .PreserveFormatting = True
+        .RefreshOnFileOpen = False
+        .BackgroundQuery = True
+        .RefreshStyle = 1 ' xlInsertDeleteCells
+        .SavePassword = False
+        .SaveData = True
+        .AdjustColumnWidth = True
+        .RefreshPeriod = 0
+        .WebSelectionType = 2 'xlAllTables
+        .WebFormatting = 3 'xlWebFormattingNone
+        .WebPreFormattedTextToColumns = True
+        .WebConsecutiveDelimitersAsOne = True
+        .WebSingleBlockTextImport = False
+        .WebDisableDateRecognition = False
+        .Refresh(false)
+    end with
+
+    wb.PivotCaches.Add(1,"Data!RawTable").CreatePivotTable "", "PivotTable1"
+              'xlDatabase
+    wb.ActiveSheet.PivotTableWizard , , wb.ActiveSheet.Cells(3, 1)
+    wb.ActiveSheet.Cells(3, 1).Select
+    wb.ActiveSheet.PivotTables("PivotTable1").SmallGrid = False
+
+    dim pivot
+    set pivot = wb.ActiveSheet.PivotTables("PivotTable1")
+
+    wb.Sheets("Sheet4").Select
+    wb.Sheets("Sheet4").Name = "Pivot"
+    pivot.PivotSelect "", 0 'xlDataAndLabel
+    pivot.Format 0 'xlReport1
+
+<a:For list="$^rowFields" item="$fieldName" index=$index>
+    With pivot.PivotFields("<a:PrimitiveString value="$fieldName"/>")
+        .Orientation = 1 'xlRowField
+        .Position = $indexPlusOne
+    End With
+</a:For>
+
+<a:For list="$^columnFields" item="$fieldName" index=$index>
+    With pivot.PivotFields("<a:PrimitiveString value="$fieldName"/>")
+        .Orientation = 2 'xlColumnField
+        .Position = $indexPlusOne
+    End With
+</a:For>
+
+<a:For list="$^dataFields" item="$fieldName" index=$index>
+    With pivot.PivotFields("<a:PrimitiveString value="$fieldName"/>")
+        .Orientation = 4 'xlDataField
+        .Position = $indexPlusOne
+    End With
+</a:For>
+
+    'Need Page Fields!
+
+
+
+    'Create Chart
+
+    wb.Sheets("Data").Select
+    wb.ActiveSheet.PivotTableWizard -4148,"[Book1]Pivot!PivotTable1", "", "PivotTable1"
+    wb.ActiveSheet.PivotTables("PivotTable1").SmallGrid = False
+    wb.Charts.Add
+    wb.ActiveChart.SetSourceData wb.Sheets("Sheet5").Range("A3")
+    wb.ActiveChart.Location 1 'xlLocationAsNewSheet
+
+
+<a:For list="$^rowFields" item="$fieldName" count=1>
+    With wb.ActiveChart.PivotLayout.PivotFields("<a:PrimitiveString value="$fieldName"/>")
+        .Orientation = 1 'xlRowField
+        .Position = 1
+    End With
+</a:For>
+
+<a:For list="$^columnFields" item="$fieldName" count=1>
+    With wb.ActiveChart.PivotLayout.PivotFields("<a:PrimitiveString value="$fieldName"/>")
+        .Orientation = 2 'xlColumnField
+        .Position = 1
+    End With
+</a:For>
+
+<a:For list="$^dataFields" item="$fieldName" count=1>
+    With wb.ActiveChart.PivotLayout.PivotFields("<a:PrimitiveString value="$fieldName"/>")
+        .Orientation = 4 'xlDataField
+        .Position = 1
+    End With
+</a:For>
+
+    wb.ActiveChart.PlotArea.Select
+    wb.ActiveChart.ChartType = -4100 'xl3DColumn
+
+
+end sub
+
+
+</a:ClientSideScript>
+

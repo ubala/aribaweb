@@ -1,0 +1,13 @@
+<w:PopupMenuLink menuId="help" position="this">
+    <AribaString name="Help"/>
+</w:PopupMenuLink>
+<w:PopupMenu menuId="help">
+    <a:For list="$helpAreas" item="$currentArea">
+        <w:PopupMenuItem clientTrigger="$helpScript"><AribaString name="$currentArea"/></w:PopupMenuItem>\
+    </a:For>
+    <AribaCondition ifTrue="enableContactBox">\
+        <w:PopupMenuItem clientTrigger="ariba.Widgets.toggleAboutBox('AWContactDiv',event);ariba.Event.cancelBubble(event);">
+           <AribaString name="Contact"/>
+        </w:PopupMenuItem>
+    </AribaCondition>\
+</w:PopupMenu>

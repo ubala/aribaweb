@@ -1,0 +1,27 @@
+<!--
+    Copyright (c) 1996-2001 Ariba, Inc.
+    All rights reserved. Patents pending.
+
+    $Id: //ariba/platform/ui/jsptest/resource/global/wizard/Requisition.awz#17 $
+
+    Responsible: craigf
+-->
+
+<!DOCTYPE wizard SYSTEM "../../resource/global/dtd/Wizard.dtd">
+<wizard name="requisition"
+        label="Requisition"
+        delegate="ariba.ui.demoshell.WizardDelegate">
+  <doc>
+    This is a sample wizard for the platform UI wizard infrastructure.
+    It has three frames to create a very simple requisition.  It also
+    has a user chooser dialog frame.
+  </doc>
+  <steps>
+    <step name="AWXDummy" label="AWXDummy">
+      <frame name="AWXDummy" source="AWXDummy"/>
+    </step>
+  </steps>
+  <exit>
+    <frame name="confirmExit" source="AWXDummy"/>
+  </exit>
+</wizard>

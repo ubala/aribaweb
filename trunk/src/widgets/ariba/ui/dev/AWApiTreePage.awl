@@ -1,0 +1,38 @@
+<w:BasicFrameWrapper>
+    <a:If ifFalse="$didLoadAll">
+        <b style="padding:5px">\
+            <a:Hyperlink action="$loadAllTemplates">Load All Components</a:Hyperlink>\
+        </b>
+        <br/><br/>
+    </a:If>
+    <w:OutlineRepetition list="$rootPage.packageNames" item="$rootPage.currentObject" children="$rootPage.children"
+                hasChildren="$rootPage.hasChildren" selectionPath="$rootPage.selectionPath" selectedObject="$rootPage.selectedObject">
+        <a:If ifTrue="$rootPage.isCurrentObjectPackage">
+            <w:OutlineControl title="$rootPage.currentObject" allowSelection="$true"
+                style="font-style:bold"/>
+        <a:Else ifTrue="$rootPage.currentObjectHasEmpiricalApi"/>
+            <a:If ifTrue="$rootPage.currentObjectHasReferences">
+                <w:OutlineControl title="$rootPage.currentObject" allowSelection="$true"
+                    style="font-style:italic"/>
+            <a:Else/>
+                <w:OutlineControl title="$rootPage.currentObject" allowSelection="$true"
+                    style="font-style:italic;color:#AAAAAA"/>
+            </a:If>
+        <a:Else/>
+            <w:OutlineControl allowSelection="$rootPage.currentObjectSelectable">
+                <b><a:String value="$rootPage.currentObject"/></b>
+            </w:OutlineControl>
+        </a:If>
+    </w:OutlineRepetition>
+    <br/><br/>
+    <b style="padding:5px">\
+        <a:Hyperlink target="awValidationErrorPage" action="$openValidationErrorPage">Show All Validation Errors</a:Hyperlink>
+    </b>
+<a:ClientSideScript>
+    // force window to foreground
+    window.focus();
+
+    // always refresh the Body frame when we reload
+    top.bodyFrame.location.reload();
+</a:ClientSideScript>
+</w:BasicFrameWrapper>

@@ -1,0 +1,54 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TruncateString.awl#12 $
+    </Copyright>
+
+    <Overview>
+        This widget helps to set the maximum length of a displayed string.  If the
+        string passed in by the "value" binding is longer than "size", then the string
+        will be truncated and elipsis are displayed.  Placing the mouse over the string
+        will cause the full text of the string to be displayed.
+
+        Todo: Make component Firefox friendly.  Reuse cuetip to handle text display?
+    </Overview>
+
+    <Binding key="value" direction="get" type="String" required="$true">
+        String value to display.  Must be plain text.
+    </Binding>
+
+    <Binding key="size" direction="get" type="int" required="$true">
+        Length of string to display before truncating and displaying elipsis.
+    </Binding>
+
+    <Binding key="escapeUnsafeHtml" direction="get" type="String" required="$false">
+        See AWString.java
+    </Binding>
+
+    <Binding key="truncationStyle" direction="get" type="int" default="0" required="$false">
+        How should truncation be performed:
+          0:  End    ("This is a long st...")
+          1:  Middle ("This is a ... string")
+          2:  Front  ("... is a long string")
+    </Binding>
+</a:Api>\
+\
+<a:If ifTrue="$requestContext.isExportMode">\
+    <a:String value="$value" escapeUnsafeHtml="$^escapeUnsafeHtml"/>\
+<a:Else/>\
+    <span title="$value" emitTags="$elipsis">\
+        <a:String value="$front" escapeUnsafeHtml="$^escapeUnsafeHtml"/>$elipsis<a:String value="$end"/>\
+    </span>\
+</a:If>\

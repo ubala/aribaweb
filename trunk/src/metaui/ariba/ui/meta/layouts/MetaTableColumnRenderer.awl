@@ -1,0 +1,43 @@
+<a:If ifTrue="$^isHeader">\
+    <th class="tableHead" width="$columnWidth" style="$cc_style" nowrap="$cc_nowrap" align="$cc_align:left" colspan="$^colspan">\
+        <a:If ifTrue="$table.renderToExcel">\
+            <b>\
+                <a:String value="$cc_label"/>\
+            </b>\
+        <a:Else/>\
+            <t:SortHeading displayGroup="$table.displayGroup" key="$cc_sortKey"
+                     caseSensitiveSort="$cc_sortCaseSensitively" disabled="$disableSort" submitForm="$table.multiSelectOrSubmitForm">\
+                <a:String value="$cc_label"/>\
+            </t:SortHeading>\
+        </a:If>
+        <!--- &nbsp;\-->\
+    </th>\
+<a:Else/>\
+    <td class="$table.tdClass" width="$dataRowColumnWidth" style="$cc_style" align="$cc_align" valign="$columnVAlignment" nowrap="$cc_nowrap" omitTags="$^omitTD" colspan="$^colspan" >\
+        <a:OutputRangeCheck contentIterator="$table.iteratorForTDContentCheck">\
+        <!--- We should replace this with a IncludeComponent that swtiches in a Controller. -->\
+<!---
+        <a:If ifTrue="$hasAction">\
+            <a:If ifTrue="$useDirectAction">\
+                <a href="$directActionURL">\
+                    <a:IncludeBlock name="Column"/>\
+                </a>\
+            <a:Else/>\
+                <a:Hyperlink action="$actionClicked">\
+                    <a:IncludeBlock name="Column"/>\
+                </a:Hyperlink>\
+            </a:If>\
+        <a:Else/>\
+            <a:IncludeBlock name="Column"/>\
+        </a:If>\
+-->
+            <a:IncludeBlock name="Column"/>\
+        </a:OutputRangeCheck>\
+    </td>\
+</a:If>\
+\
+<a:Block name="Column">\
+    <m:Context restoreActivation="$thisColumn.fieldInfo.activation" object="$_currentItem">\
+        <m:IncludeComponent/>\
+    </m:Context>\
+</a:Block>\

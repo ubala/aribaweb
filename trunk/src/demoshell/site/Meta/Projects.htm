@@ -1,0 +1,50 @@
+<w:BasicPageWrapper hasForm="$true">
+<m:Context>
+    <m:Rules>
+        class=example.ui.busobj.Project {
+            field=(team, deals) { visible:false }
+        }
+        class=example.ui.busobj.User {
+            field=password { fieldClass:secret }
+            operation=create { visible:null; field=(firstName, lastName, phoneNumber, accountBalance) {visible:true} }
+            operation=(view, list) {
+                field=(firstName, lastName) { visible:false }
+                field=name { rank:1 }
+                field=password { visible:false;  }
+                field=rating { component:AWXRatingBar; after:name }
+            }
+        }
+    </m:Rules>
+    Operation: <a:Popup list="$operations" item="$op" selection="$selectedOperation" action="$null">$op</a:Popup>
+    <br/>
+    <m:Context object="$project" class="example.ui.busobj.Project" operation="$selectedOperation">
+        MetaContext: $metaContext<br/>
+        <m:Form/>
+
+        <br/> <hr/> <br/>
+        <a:If ifTrue="$metaContext.properties.editing">
+            <w:TextButton action="$save">Save</w:TextButton>
+        </a:If>
+    </m:Context>
+    <m:Context class="example.ui.busobj.User" operation="list">
+        <m:Rules>
+        </m:Rules>
+        MetaContext: $metaContext<br/>
+        <t:DataTable list="$project.team">
+            <m:TableColumns/>
+        </t:DataTable>
+    </m:Context>
+</m:Context>
+</w:BasicPageWrapper>\
+<groovy>
+    import example.ui.busobj.*;
+
+    def op, selectedOperation = "view", operations = ["create", "edit", "view"];
+    def project = Project.sharedInstance();
+
+    def save () {
+        if (!errorManager().checkErrorsAndEnableDisplay()) {
+        }
+        return null;
+    }
+</groovy>

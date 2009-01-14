@@ -1,0 +1,1088 @@
+/*
+    Request.js      -- functions for initiating requests to the AW application
+
+    Includes IFrame use for incremental requests, enforcing modality when request is
+    in progress, polling for status updates on long running requests, ...
+*/
+
+ariba.Request = function() {
+    // imports
+    var Util = ariba.Util;
+    var Event = ariba.Event;
+    var Debug = ariba.Debug;
+    var Input = ariba.Input;
+    var Dom = ariba.Dom;
+
+    // private vars
+    var AWRequestInProgress = false;
+    var AWSenderClickedCallbackList = null;
+    var AWPollEnabled = true;
+    var AWPollTimeoutId, AWPollSenderId, AWPollUpdateSenderId, AWPollInterval;
+    
+    // register a form value for submission -- allows submission of form values for
+    // elements that are not in the current form.
+    var AWFormValueList;
+    var AWRefreshCompleteTimeout;
+    var AWDocumentLoadTimeout;
+    var AWRefreshCount = 0;
+
+    //****************************************************
+    // ping
+    //****************************************************
+    var AWShowPingFrame = false;
+    var AWPingCompleteTimeout;
+    var AWPingCheckCount = 0;
+    var _AWProgressTimerHandle;
+    
+    var _XMLHTTP_BUSY = false;
+    var _XMLQUEUE = [];
+
+    var Request = {
+        // Public Globals
+        AWSenderIdKey : 'awsn',
+        AWResponseId : '',
+        AWRefreshUrl : '',
+        AWPingUrl : '',
+        AWProgressUrl : '',
+        AWFrameName : null,
+        AWReqUrl : null,
+        AWSessionIdKey : null,
+        AWSessionId : null,
+        AWDebugEnabled : false,
+        AWJSDebugEnabled : false,
+        AWShowRequestFrame : false,
+        AWUpdateCompleteTime : 0,
+
+        setDocumentLocation : function (hrefString, windowName, windowAttributes)
+        {
+            if (Util.isNullOrUndefined(windowName)) {
+                this.getContent(hrefString);
+            }
+            else {
+                if (Util.isNullOrUndefined(windowAttributes)) {
+                    windowAttributes = '';
+                }
+                window.open(hrefString, windowName, windowAttributes);
+            }
+            return false;
+        },
+
+        openWaitWindow : function (windowName, windowAttributes)
+        {
+            var namedWindow = Dom.openWindow('', windowName, windowAttributes);
+            namedWindow.focus();
+            Input.showWaitAlertInWindow(namedWindow);
+            return namedWindow;
+        },
+
+        submitFormAtIndexWithHiddenField : function (formIndex, hiddenFieldName, value)
+        {
+            var formObject = document.forms[formIndex];
+            var hiddenFieldObject = formObject[hiddenFieldName];
+            hiddenFieldObject.value = value;
+            this.submitForm(formObject);
+            return false;
+        },
+
+        submitFormForElementName : function (formName, elementId, mevent)
+        {
+            var formObject = Dom.formForName(formName);
+            if (elementId) {
+                Dom.addFormField(formObject, this.AWSenderIdKey, elementId);
+            }
+            this.submitForm(formObject);
+            Event.cancelBubble(mevent);
+            return false;
+        },
+        /////////////////
+        // Key handling
+        /////////////////
+        // Either element or senderId are required.  Everything else is optional
+        invoke : function (element, senderId, mevent, suppressForm, windowName, tagObjectName, submitValue, senderValue)
+        {
+            var formId = null;
+            if (!senderId) senderId = element.id;
+            if (element && !suppressForm) {
+                formId = Dom.lookupFormId(element);
+            }
+
+            return this.senderClicked(senderId, formId, windowName, tagObjectName, mevent, submitValue, senderValue)
+        },
+
+        senderClicked : function (senderId, formId, windowName, tagObjectName, mevent, submitValue, senderValue, windowAttributes)
+        {
+            var formObject = null;
+            if (formId != null) {
+                formObject = Dom.getElementById(formId);
+            }
+        //alert("awsenderClicked() - windowName:"+windowName + ", formObj:"+formObject + ", formId:" + formId);
+            if (formObject != null) {
+                Event.cancelBubble(mevent);
+                var inputObject;
+                if (submitValue) {
+                    // if we need to submit the actual value of the button
+                    inputObject = document.createElement('input');
+                    inputObject.type = 'hidden';
+                    inputObject.id = senderId;
+                    inputObject.name = senderId;
+                    formObject.appendChild(inputObject);
+                    inputObject.value = senderValue ? senderValue : senderId;
+                }
+
+            // pass the senderId
+                var actionFieldObject = formObject["wzrd_action"];
+                if ((actionFieldObject != null) && (tagObjectName != null)) {
+                    actionFieldObject.value = tagObjectName;
+                }
+                Dom.addFormField(formObject, this.AWSenderIdKey, senderId);
+
+                this.invokeSenderClickedCallbacks(senderId, formId);
+
+                if (windowName != null && windowName != "_self") {
+                    this.submitForm(formObject, windowName, windowAttributes);
+                }
+                else {
+                    this.submitForm(formObject);
+                }
+
+                if (submitValue) {
+                    // remove the value we added to the DOM
+                    formObject.removeChild(inputObject);
+                }
+            }
+            else {
+                var urlString = this.formatUrl(senderId);
+                this.invokeSenderClickedCallbacks(senderId, null);
+                this.setDocumentLocation(urlString, windowName, windowAttributes);
+            }
+            if (mevent) Event.cancelBubble(mevent);
+            return false;
+        },
+
+        registerSenderClickedCallback : function (method)
+        {
+            if (!AWSenderClickedCallbackList) {
+                AWSenderClickedCallbackList = new Array();
+            }
+
+        // Debug.log("registering: " + Debug.getMethodName(method));
+            AWSenderClickedCallbackList[AWSenderClickedCallbackList.length] = method;
+        },
+
+        invokeSenderClickedCallbacks : function (senderId, formId)
+        {
+            if (AWSenderClickedCallbackList) {
+                for (var i = 0; i < AWSenderClickedCallbackList.length; i++) {
+                    // Debug.log("evaluating: " + Debug.getMethodName(AWSenderClickedCallbackList[i]));
+                    AWSenderClickedCallbackList[i](senderId, formId);
+                }
+            }
+        },
+
+        formatUrl : function (senderId)
+        {
+            var urlString = this.formatSenderUrl(senderId);
+            return this.appendScrollValues(urlString);
+        },
+
+        formatSenderUrl : function (senderId)
+        {
+            return this.partialUrl() + this.AWSenderIdKey + '=' + senderId;
+        },
+
+        appendScrollValues : function (urlString)
+        {
+            if (urlString.indexOf("#") == -1) {
+                urlString = urlString + '&awst=' + Dom.getPageScrollTop() + '&awsl=' + Dom.getPageScrollLeft();
+            }
+            return urlString;
+        },
+
+        gotoLink : function (senderId, windowName, windowAttributes, mevent)
+        {
+            var href = this.formatUrl(senderId);
+            this.setDocumentLocation(href, windowName, windowAttributes);
+            Event.cancelBubble(mevent);
+            return false;
+        },
+
+        setResponseId : function (responseId)
+        {
+            this.AWResponseId = responseId;
+        },
+
+        appendQueryValue : function (url, key, value)
+        {
+            var urlString = url.toString();
+            var separator = null;
+            if (urlString.match(/\?/) == null) {
+                separator = '?';
+            }
+            else {
+                separator = '&';
+            }
+            urlString = urlString + separator + key + "=" + value;
+            return urlString;
+        },
+
+        setupPoll : function (enabled, intervalSecs, senderId, updateId)
+        {
+            AWPollEnabled = enabled;
+            AWPollInterval = intervalSecs * 1000;
+            AWPollSenderId = senderId;
+            AWPollUpdateSenderId = updateId;
+        // kick off initial timer
+            timer();
+
+            function timer()
+            {
+                if (AWPollEnabled && AWPollTimeoutId == null) {
+                    AWPollTimeoutId = setTimeout(poll.bind(Request), AWPollInterval);
+                }
+            }
+
+            function callback(xmlhttp)
+            {
+                // somebody else might have been using the XML http request too,
+                // so just in case we have multiple timers going, we clear the one we are
+                // aware of and then reset it to null so our timer starts the poll again
+                clearTimeout(AWPollTimeoutId);
+                AWPollTimeoutId = null;
+                if (!AWRequestInProgress) {
+                    var response = xmlhttp.responseText;
+
+                // Debug.log("poll response: " + Util.htmlEscapeValue(response));
+
+                    if (response == "<AWPoll state='update'/>") {
+                        // Debug.log("page changed -- go get content");
+                        // use the special sender id to indicate that we should re-render for update
+                        this.getContent(this.formatSenderUrl(AWPollUpdateSenderId));
+                    }
+                }
+                timer();
+            }
+
+            function poll()
+            {
+                // FIXME -- should check interval since last request against interval
+                if (!AWRequestInProgress && AWPollEnabled) {
+                    var url = this.formatSenderUrl(AWPollSenderId);
+                // wrap the awLoadLazyDivCallback in an anonymous function so we can
+                    // pass the additional divObject to it
+                    this.initiateXMLHttpRequest(url, callback.bind(this));
+                } else {
+                    // somebody else might have been using the XML http request too,
+                    // so just in case we have multiple timers going, we clear the one we are
+                    // aware of and then reset it to null so our timer starts the poll again
+                    clearTimeout(AWPollTimeoutId);
+                    AWPollTimeoutId = null;
+                    timer();
+                }
+            }
+        },
+
+        submitFormObjectNamed : function (formName)
+        {
+            var formObject = document.forms(formName);
+            this.submitForm(formObject);
+            return false;
+        },
+
+        // This function should be used for all form submissions
+        // in AW javascript.
+        //
+        // This method is overriden in Sourcing to catch multiple form
+        // submissions from the same page for the purpose of confirming
+        // or preventing multiple submissions.
+
+        submitForm : function (formObject, target, targetAttributes, async)
+        {
+            // This allows for onSubmit to be associated with a form.
+            // If the onSubmit returns:
+            //        false, the form will *not* be submitted
+            //        undefined, the form *will* be submitted.
+            // This is the behavior of a regular button click.
+            var shouldSubmit = true;
+            if (formObject.onsubmit) {
+                shouldSubmit = formObject.onsubmit();
+            // Note: typeof(var) is the safest way to check for undefined
+                if (typeof(shouldSubmit) == "undefined") {
+                    shouldSubmit = true;
+                }
+            }
+            if (shouldSubmit) {
+                Event.invokeRegisteredHandlers("onsubmit");
+                this.addAWFormFields(formObject);
+
+                if (target) {
+                    //debug("<--- start target post");
+                    Dom.removeFormField(formObject, 'awii');
+                    if (target == '_blank') {
+                        target = 'AWWindow_' + new Date().getTime();
+                    }
+                    formObject.target = target;
+
+                    // Note:  1) Doing this will bomb for target="_self"
+                    // 2) Setting a target on the hyperlink, but not passing a target here (on the JS)
+                    // (as previously done by AWHyperlink pre-behavior work will cause the
+                    // progress bar to come up on a file download.  So, I'm disabling...
+                    //
+                    // this.openWaitWindow(target, targetAttributes);
+                    formObject.submit();
+                }
+                else {
+                    this.prepareForRequest(async);
+                    var iframe = this.createRefreshIFrame();
+                    formObject.target = iframe.name;
+                    Dom.addFormField(formObject, 'awii', iframe.name);
+                    try {
+                        formObject.submit();
+                    //debug("<--- start incremental post");
+                    }
+                    catch (e) {
+                        // unblock user interaction
+                        this.requestComplete();
+                        this.handleFileUploadError(e);
+                    }
+                }
+            }
+
+            this.removeAWFormFields(formObject);
+            formObject.target = null;
+        },
+
+        addFormValueForSubmit : function (key, value)
+        {
+            if (!AWFormValueList) {
+                AWFormValueList = new Array();
+            }
+            AWFormValueList[key] = value;
+        },
+
+        addAWFormFields : function (formObject)
+        {
+            Dom.addFormField(formObject, 'awr', this.AWResponseId);
+            Dom.addFormField(formObject, 'awst', Dom.getPageScrollTop());
+            Dom.addFormField(formObject, 'awsl', Dom.getPageScrollLeft());
+            if (AWFormValueList) {
+                for (var key in AWFormValueList) {
+                    Dom.addFormField(formObject, key, AWFormValueList[key]);
+                }
+            }
+        },
+
+        removeAWFormFields : function (formObject)
+        {
+            Dom.removeFormField(formObject, this.AWSenderIdKey);
+            Dom.removeFormField(formObject, 'awr');
+            Dom.removeFormField(formObject, 'awst');
+            Dom.removeFormField(formObject, 'awsl');
+            if (AWFormValueList) {
+                for (var key in AWFormValueList) {
+                    Dom.removeFormField(formObject, AWFormValueList[key])
+                }
+            }
+            AWFormValueList = null;
+        },
+
+        handleFileUploadError : function (e)
+        {
+            var fileupload = Dom.getElementById("AWFileUploadErrorMessage");
+            if (fileupload) {
+                alert(fileupload.innerText);
+            }
+        },
+
+        partialUrl : function ()
+        {
+            var val = this.AWReqUrl + "?awr=" + this.AWResponseId;
+            if (this.AWSessionIdKey) {
+                val += "&" + this.AWSessionIdKey + "=" + this.AWSessionId;
+            }
+            if (this.AWFrameName) {
+                val += "&awf=" + this.AWFrameName;
+            }
+            return val + "&";
+        },
+
+        simpleXMLHTTP : function (url, callback)
+        {
+            // To avoid Firefox bug: Need to do in main event loop...
+            this._asyncGet(function(http) {
+                if (http) {
+                    http.onreadystatechange = function() {
+                        if (http.readyState == 4) {
+                            if (http.status == 200) {
+                                callback(http);
+                            // alert("Callback! ");
+                            }
+                            else {
+                                if (Request.AWDebugEnabled) {
+                                    alert('Got "' + http.status + ' ' + http.statusText + '" for ' + url);
+                                }
+                            }
+                            Request._asyncDone(http);
+                        }
+                    }
+                    try {
+                        http.open("GET", url, true);
+                        http.send(null);
+                    }
+                    catch (e) {
+                        alert("XMLHTTP Error in send: " + e.message);
+                        Request._asyncDone(http);
+                    }
+                }
+            });
+        },
+
+        //****************************************************
+        // Refresh.js
+        //****************************************************
+
+        appendFrameName : function (url)
+        {
+            if (!Util.isNullOrUndefined(this.AWFrameName) &&
+                url.match(/awf=/) == null) {
+                return this.appendQueryValue(url, "awf", this.AWFrameName);
+            }
+            return url;
+        },
+
+        redirectRefresh : function ()
+        {
+            this.prepareRedirectRequest();
+            var url = this.appendFrameName(this.AWRefreshUrl);
+
+            // need to do it twice on Netscape?!?  (with the backtrack hash stuff in place)
+            // if (!Dom.IsIE) window.location.href = url;
+            window.location.href = url;
+            // in somes cases, we are trying to redirect while the download “Save/Open” dialog is up.
+            // We need to retry in those cases.
+            if (Dom.IsIE6Only) {
+                function retry() {
+                    // Retry only if redirect is not in progress
+                    if (document.readyState != "loading") {
+                        window.location.href = url;
+                        setTimeout(retry, 1000);
+                    }
+                }
+                setTimeout(retry, 1000);
+            }
+        },
+
+        // Obsolete -- use awInvoke instead
+        invokeAction : function (senderId)
+        {
+            this.getContent(this.formatUrl(senderId));
+        },
+
+        // initiate content retrieval
+        getContent : function (url)
+        {
+            // Debug.log("--- awGetContent --> " + url + "  [windowName:" + window.name + ", this.AWReqUrl:" + AWReqUrl + "]");
+            this.prepareForRequest();
+            var iframe = this.createRefreshIFrame();
+            url = this.appendQueryValue(url, "awii", iframe.name);
+        // Debug.log("<--- initiate incremental get " + url);
+            iframe.src = this.appendFrameName(url);
+
+        },
+
+        prepareForRequest : function (noWaitCursor)
+        {
+            this.requestComplete();
+            AWRequestInProgress = true;
+            if (!noWaitCursor) Input.showWaitCursor();
+        // start timer to make sure something comes back in the iframe
+            setTimeout(this.startRefreshTimer.bind(this), 1);
+            Input.AWWaitMillis = 20 * 60 * 1000;  // force off auto-hinding of panel -- 20 mins, anyway...
+            this.initProgressCheck(this.AWProgressUrl, Input.AWWaitAlertMillis + 2000, Input.AWWaitAlertMillis);
+        },
+
+        requestComplete : function ()
+        {
+            AWRequestInProgress = false;
+            Input.hideWaitCursor();
+        },
+        // clear all server pings, but keep UI locked.
+        prepareRedirectRequest : function ()
+        {
+            this.refreshRequestComplete();
+            AWRequestInProgress = false;
+            AWPollEnabled = false;
+        },
+
+        createRequestIFrame : function (frameName, showFrame)
+        {
+            var divName = frameName + "Div";
+            var iframeDiv = Dom.getElementById(divName);
+            if (!iframeDiv) {
+                iframeDiv = document.createElement("div");
+                if (!showFrame) iframeDiv.style.display = "none";
+                iframeDiv.id = divName;
+                document.body.appendChild(iframeDiv);
+            }
+            var style = showFrame ? " style='border:2px solid blue;' height='300px' width='400px'"
+                    : " style='border:0px;display:none' height='0px' width='0px'";
+            iframeDiv.innerHTML =
+            "<iframe src='" + Dom.AWEmptyDocScriptlet + "' id='" + frameName + "' name='" + frameName + "'" + style + "></iframe>";
+
+            return Dom.getElementById(frameName);
+        },
+
+        destroyRequestIFrame : function (frameName)
+        {
+            var iframe = Dom.getElementById(frameName);
+            if (iframe) {
+                // To deal with IE leaks we first load an empty doc in the iframe
+                // and then innerHTML clear the wrapper div
+                function didLoad() {
+                    Event.removeEvent(iframe, "onload", didLoad);
+                // check that we are still in the DOM,
+                    // since awCreateRequestIFrame might have been called in between.
+                    if (Dom.elementInDom(iframe)) {
+                        setTimeout(function () {
+                            var iframeDiv = Dom.getElementById(frameName + "Div");
+                            if (iframeDiv) {
+                                iframeDiv.innerHTML = "";
+                                Debug.log("Destroyed Iframe: " + frameName);
+                            }
+                        }, 1);
+                    }
+                }
+            // Assign our handler and kick off the process...
+                Event.addEvent(iframe, "onload", didLoad);
+                iframe.src = Dom.AWEmptyDocScriptlet;
+            }
+        },
+        // see awStartRefreshTimer before modifying
+        createRefreshIFrame : function ()
+        {
+            if (this.AWJSDebugEnabled) {
+                var date = new Date();
+                Debug.setRequestStartTime(date.getTime());
+            }
+
+            return this.createRequestIFrame("AWRefreshFrame", this.AWShowRequestFrame);
+        },
+
+        startRefreshTimer : function ()
+        {
+            if (!Dom.IsMoz) {
+                AWRefreshCompleteTimeout = setTimeout(this.checkRequestComplete.bind(this), 500);
+            }
+        },
+
+        setWindowLocation : function (url)
+        {
+            window.location = url;
+        },
+
+        checkRequestComplete : function ()
+        {
+            Debug.log("awCheckRequestComplete");
+            var iframe = Dom.getElementById("AWRefreshFrame");
+            if (!iframe) {
+                // iframe removed already so document load must have completed
+                return;
+            }
+
+            var handled = false;
+
+            try {
+                if (iframe.contentWindow && iframe.contentWindow.document &&
+                    iframe.contentWindow.document.URL.indexOf(Dom.AWEmptyDocScriptlet) == -1) {
+
+                    var doc = iframe.contentWindow.document;
+
+                // make sure that an AW page was returned to the iframe
+                    // wait for the document to load
+                    if (doc.readyState) {
+                        // ie
+                        //debug("readyState: " + doc.readyState);
+                        if (doc.readyState != "complete") {
+                            AWDocumentLoadTimeout = setTimeout(this.checkDocumentLoad.bind(this), 500);
+                        }
+                        this.checkDocumentLoad();
+                    }
+                    /*
+                    else {
+                        // ns -- no ready state available so just give ns a bit to
+                        // finish loading
+                        //debug("starting awCheckDocumentLoad timer");
+                        AWDocumentLoadTimeout = setTimeout(this.checkDocumentLoad, 2000);
+                    }
+                    */
+                    handled = true;
+                }
+            }
+            catch (e) {
+                handled = true;
+                Input.hideWaitCursor();
+            // ping server to see if it is up ...
+                this.pingServer();
+            }
+
+            if (!handled) {
+                Debug.log("continuing " + AWRefreshCount);
+                AWRefreshCount++;
+                if (AWRefreshCount < 30) {
+                    AWRefreshCompleteTimeout = setTimeout(this.checkRequestComplete.bind(this), 10000);
+                }
+                else {
+                    Debug.log("request not initiated ...");
+                }
+            }
+        },
+
+        checkDocumentLoad : function ()
+        {
+            //debug("load check: " + AWDocumentLoadTimeout);
+            var iframe = Dom.getElementById("AWRefreshFrame");
+            if (!iframe) {
+                // iframe removed already so document load must have completed
+                return;
+            }
+
+            var refreshComplete;
+            try {
+                var doc = iframe.contentWindow.document;
+
+            // ie only
+                if (doc.readyState) {
+                    Debug.log("readyState: " + doc.readyState);
+                    if (doc.readyState != "complete") {
+                        AWDocumentLoadTimeout = setTimeout(this.checkDocumentLoad.bind(this), 200);
+                        return;
+                    }
+                }
+            //debug("document: " + doc);
+                refreshComplete = Dom.getDocumentElementById(doc, "AWRefreshComplete");
+            }
+            catch (e) {
+                //debug("exception caught: " + e);
+            }
+
+        //debug("refreshComplete object: " + refreshComplete);
+
+            if (!refreshComplete) {
+                this.handleRequestError();
+            }
+        },
+
+        refreshRequestComplete : function ()
+        {
+            //debug("--> incremental request complete :" + AWRefreshCompleteTimeout);
+            AWRefreshCount = 0;
+            clearTimeout(AWRefreshCompleteTimeout);
+            clearTimeout(AWDocumentLoadTimeout);
+        },
+
+        handleRequestError : function ()
+        {
+            Input.hideWaitCursor();
+            var iframe = Dom.getElementById("AWRefreshFrame");
+            iframe.style.left = 0;
+            iframe.style.top = 0;
+
+            var iframeDiv = Dom.getElementById("AWRefreshFrameDiv");
+            if (iframeDiv) {
+                Debug.log("setting location of iframediv");
+                iframeDiv.style.position = "absolute";
+                iframeDiv.style.left = 0;
+                iframeDiv.style.top = 0;
+            }
+            else {
+                Debug.log("just setting iframe");
+            //iframe.style.position="absolute";
+            }
+
+            var container;
+            if (window.innerHeight) {
+                // NS
+                container = document.body;
+                window.scroll(0, 0);
+            }
+            else {
+                // IE
+                container = document.documentElement;
+                container.scrollTop = 0;
+                container.scrollLeft = 0;
+            }
+
+            var height = container.scrollHeight > screen.availHeight ?
+                         container.scrollHeight : screen.availHeight;
+            var width = container.scrollWidth > (screen.availWidth) ?
+                        container.scrollWidth : (screen.availWidth);
+
+            iframeDiv.style.width = width + "px";
+            iframeDiv.style.height = height + "px";
+
+            iframe.style.width = width + "px";
+            iframe.style.height = height + "px";
+        },
+
+        pingServer : function ()
+        {
+            //debug("pinging ...");
+            var iframe = this.createRequestIFrame("AWPingFrame", AWShowPingFrame);
+            iframe.src = this.AWPingUrl;
+            AWPingCompleteTimeout = setTimeout(this.checkPingRequestComplete.bind(this), 1000);
+        },
+
+        checkPingRequestComplete : function ()
+        {
+            var iframe = Dom.getElementById("AWPingFrame");
+            if (!iframe) {
+                // iframe removed already so document load must have completed
+                return;
+            }
+
+            var handled = false;
+
+            try {
+                if (iframe.contentWindow && iframe.contentWindow.document &&
+                    iframe.contentWindow.document.URL.indexOf(Dom.AWEmptyDocScriptlet) == -1) {
+                    // something came back so we we're ok
+                    var doc = iframe.contentWindow.document;
+                    handled = true;
+                }
+            }
+            catch (e) {
+                handled = true;
+                this.handleRequestError();
+            }
+
+            if (!handled) {
+                //debug("ping continuing " + AWPingCheckCount);
+                AWPingCheckCount++;
+                if (AWPingCheckCount < 30) {
+                    AWRefreshCompleteTimeout = setTimeout(this.checkPingRequestComplete.bind(this), 10000);
+                }
+                else {
+                    this.handleRequestError();
+                }
+            }
+            else {
+                if (!AWShowPingFrame) {
+                    var iframeDiv = Dom.getElementById("AWPingFrameDiv");
+                    if (iframeDiv) {
+                        document.body.removeChild(iframeDiv);
+                    }
+                }
+            }
+        },
+
+        initProgressCheck : function (url, initialDelay, pollInterval)
+        {
+            function statusUpdate(xmlhttp) {
+                if (!AWRequestInProgress) return;
+
+                var message = xmlhttp.responseText;
+                Debug.log("Progress check.  Message:" + message);
+                if (message == "--NO_REQUEST--") {
+                    // no request in progress now.  Hide panel
+                    Event.notifyRefreshComplete();
+                    Request.requestComplete();
+                } else {
+                    Input.updateWaitMessage(xmlhttp.responseText);
+
+                    // reset to keep running pollServer
+                    timer(pollInterval);
+
+                    // Soft-link to sso package... (Ick!)
+                    // reset session timeout warning
+                    if (window.awStartInactivityTimer) awStartInactivityTimer();
+                }
+            }
+
+            function pollServer() {
+                _AWProgressTimerHandle = null;
+                if (!AWRequestInProgress) return;
+                Request.initiateXMLHttpRequest(url, statusUpdate.bind(Request));
+            }
+
+            function timer(delay) {
+                if (_AWProgressTimerHandle) clearTimeout(_AWProgressTimerHandle);
+                _AWProgressTimerHandle = setTimeout(pollServer.bind(Request), delay); // async call
+            }
+
+            timer(initialDelay);
+        },
+
+        setStatusDone : function ()
+        {
+            window.status = "Done";
+        },
+
+        //****************************************************
+        // File Upload Status
+        //****************************************************
+
+        hasPopulatedFileInputContol : function (senderId, formId) {
+            Debug.log("hasPopulatedFileInputControl() formId=" + formId);
+            var elements = document.getElementsByTagName('input');
+            for (var i = 0; i < elements.length; i++) {
+                var e = elements.item(i);
+                if (e.type == "file" && e.form.id == formId) {
+                    if (e.value.length > 0) return true;
+                }
+            }
+            return false;
+        },
+        //****************************************************
+        // XMLHttp
+        //****************************************************
+
+        getXMLHttp : function ()
+        {
+            var http = null;
+            try {
+                http = new ActiveXObject("Msxml2.XMLHTTP");
+            } catch (e1) {
+                try {
+                    http = new ActiveXObject("Microsoft.XMLHTTP");
+                } catch (e2) {
+                    try {
+                        http = new XMLHttpRequest();
+                    } catch (e3) {
+                    }
+                }
+            }
+
+            return http;
+        },
+
+        _asyncGet : function (func)
+        {
+            _XMLQUEUE.push(func);
+            this._notifyGet();
+        },
+
+        nullFunc : function () {},
+
+        _asyncDone : function (http)
+        {
+            _XMLHTTP_BUSY = false;
+            if (http) {
+                http.onreadystatechange = this.nullFunc;
+            }
+            this._notifyGet();
+        },
+
+        _notifyGet : function ()
+        {
+            if (_XMLHTTP_BUSY || (_XMLQUEUE.length == 0)) return;
+            var func = _XMLQUEUE.shift();
+            _XMLHTTP_BUSY = true;
+            var xmlhttp = this.getXMLHttp();
+        // alert ("GET: " + xmlhttp);
+            // need to do async for Firefox...
+            setTimeout(function () {
+                func(xmlhttp);
+            }, 0);
+        },
+
+        initiateXMLHttpRequest : function (url, callback)
+        {
+            function doGet(xmlhttp) {
+                // method, url, asynchronous, username, password
+                xmlhttp.open("GET", url, true);
+                xmlhttp.setRequestHeader("Content-type", "text/html");
+
+            // Define an event handler for processing
+                var _this = this;
+                xmlhttp.onreadystatechange = function() {
+                    _this.manageStateChange(xmlhttp, callback);
+                };
+
+            // Execute the request
+                try {
+                    xmlhttp.send(null);
+                }
+                catch (e) {
+                    alert("Error initiating request");
+                }
+            }
+
+            this._asyncGet(doGet.bind(this));
+        },
+        //(0) (UNINITIALIZED) The object has been created, but not initialized
+        //                   (open method has not been called).
+        //(1) LOADING The object has been created, but the send method has not been called.
+        //(2) LOADED The send method has been called and the status and headers are available,
+        //           but the response is not yet available.
+        //(3) INTERACTIVE Some data has been received. You can call responseBody and
+        //                responseText to get the current partial results.
+        //(4) COMPLETED All the data has been received, and the complete data is available in
+        //              responseBody and responseText.
+        manageStateChange : function (xmlhttp, callback)
+        {
+            switch (xmlhttp.readyState) {
+
+                case 2,3:
+                // error handling?
+                    break;
+
+                case 4:
+                // convoluted callback to make sure callback happens in main event loop
+                    var deferredCallBack = function () {
+                        callback(xmlhttp);
+                        this._asyncDone(xmlhttp);
+                    };
+                    setTimeout(deferredCallBack.bind(this), 0);
+
+                    break;
+            }
+        },
+
+        DebugXMLHttpResponse : function (xmlhttp)
+        {
+            alert("-- content: -- \n" + xmlhttp.responseText + "\n" +
+                  "-- content type: --\n" + xmlhttp.getResponseHeader("content-type") + "\n" +
+                  "-- all headers: --\n" + xmlhttp.getAllResponseHeaders());
+        },
+        //********************************************************************
+        // XMLHttp utilities
+        //********************************************************************
+
+        /**
+         Extracts the <script ...> containers and assumes they contain javascript.
+         The <script> container is unwrapped and the remainder is eval'd
+         */
+        evalScriptTags : function (responseText)
+        {
+            var matches = this.getContainersNamed(responseText, "script");
+            if (matches != null) {
+                var length = matches.length;
+                for (var index = 0; index < length; index++) {
+                    var container = matches[index];
+                    var string = this.unwrapTag(container);
+                    var indexOfVBScript = container.indexOf('VBScript');
+                    if (indexOfVBScript != -1 && indexOfVBScript < container.indexOf(">")) {
+                        Event.GlobalEvalVBScript(string);
+                    }
+                    else {
+                        eval(string);
+                    }
+                }
+            }
+        },
+        // Note: doesn't handle nested tags or multi-line open tag
+        getContainersNamed : function (responseText, tagName)
+        {
+            // eliminate newlines as the "." won't match those. -- note need \r for
+            // firefox handling of xmlhttp content
+            responseText = responseText.replace(/\n/g, "<awnewline>");
+            responseText = responseText.replace(/\r/g, "<awnewline>");
+            responseText = responseText.replace(/\f/g, "<awnewline>");
+
+        // Note: The ? in following regex causes match on first occurrence of the closing </tagName>
+            // Otherwise, it would find the last occurrence of </tagName>.
+            var RegEx = new RegExp("<" + tagName + "[ >].*?<\/" + tagName + ">", "gi");
+            var matches = responseText.match(RegEx);
+            if (matches != null) {
+                var length = matches.length;
+                for (var index = 0; index < length; index++) {
+                    var string = matches[index];
+                    string = string.replace(/<awnewline>/g, "\n");
+                    matches[index] = string;
+                }
+            }
+            return matches;
+        },
+        /**
+         Converts an array of container strings to strings without their containers.
+         In the container has ignore="true", discards the entire container if shouldIgnore is true.
+
+         unwrapContainers : function (containers, shouldIgnore)
+         {
+         var unwrappedContents = new Array();
+         var length = containers.length;
+         for (var index = 0; index < length; index++) {
+         var string = containers[index];
+         if (!shouldIgnore || !awHasIgnore(string)) {
+         string = this.unwrapTag(string);
+         string = string.replace(/<awnewline>/g, "\n");
+         unwrappedContents[index] = string;
+         }
+         }
+         return unwrappedContents;
+         },
+
+         hasIgnore : function (containerString)
+         {
+         var indexOfIgnore = containerString.indexOf('ignore=\"true\"');
+         return (indexOfIgnore != -1 && indexOfIgnore < containerString.indexOf(">"));
+         },    */
+
+        /**
+         Removes the containing tag from the string <foo ...>xxx</foo> becomes xxx.
+         */
+        unwrapTag : function (string)
+        {
+            var indexOfStart = string.indexOf(">") + 1;
+            var indexOfEnd = string.lastIndexOf("<");
+            return string.substring(indexOfStart, indexOfEnd);
+        },
+
+        downloadContent : function (srcUrl)
+        {
+            var iframe = Request.createRequestIFrame("AWDownload");
+            iframe.src = srcUrl;
+        },
+
+        fileDownloadCompleteCheck : function (statusUrl, completeUrl, delay)
+        {
+            function statusUpdate(xmlhttp)
+            {
+                var string = xmlhttp.responseText;
+                if (string == "completed") {
+                    downloadCompleted();
+                }
+                else if (string == "started") {
+                    setTimeout(pollServer.bind(this), delay);
+                }
+                else {
+                    // unable to get valid status from server, do nothing
+                    Debug.log("Error running fileDownloadCompleteCheck -- received: " + string);
+                }
+            }
+
+            function downloadCompleted()
+            {
+                Request.getContent(completeUrl);
+            }
+
+            function pollServer()
+            {
+                //debug("poll server with statusUrl" + statusUrl);
+                Request.initiateXMLHttpRequest(statusUrl, statusUpdate);
+            }
+
+            if (statusUrl != null && statusUrl.length > 0) {
+                //debug("set timeout to poll server");
+                setTimeout(pollServer.bind(this), delay); // async call
+            }
+            else {
+                //debug("set time out to display download page");
+                setTimeout(downloadCompleted.bind(this), delay);
+            }
+        },
+        // For AWBody.awl
+        progressBarSetWidth : function () {
+            if (Dom.isWindowNarrow()) {
+                var img = Dom.getElementById('awProgressBar');
+                if (img) img.width = "150px";
+            }
+        },
+
+        EOF:0};
+
+    // Initialization
+    Event.registerRefreshCallback(Request.progressBarSetWidth.bind(Request));
+
+    return Request;
+}();
+

@@ -1,0 +1,11 @@
+<w:WidgetInclude name="$loginForm"/>\
+<a:If ifFalse="$isProduction">
+    <div style="color:red;padding:10px;font-weight:bold;padding-top:30px;">\
+        <a:Local key="a002">
+            System running in non-production mode\
+        </a:Local>
+    </div>
+</a:If>
+<a:If notEqualNull="$ariba.ui.widgets.Widgets.TocBottomComponent">
+    <a:IncludeComponent name="$ariba.ui.widgets.Widgets.TocBottomComponent" isLoginPage="$true"/>
+</a:If>

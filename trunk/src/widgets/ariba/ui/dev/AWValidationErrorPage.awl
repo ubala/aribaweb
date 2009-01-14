@@ -1,0 +1,53 @@
+<w:BasicPageWrapper hasForm="$true" hasSidebarNotch="$false" isSidebarVisible="$false" isDebugVisible="$false"
+        debugTitle="AW Validation Errors" disableHomeAction="$true" disableLogoutAction="$true">\
+<table width="100%">
+    <tr>
+        <td valign="top">
+            <a:If ifTrue="$isCurrentErrorsViewEnabled">
+                <w:PulldownButton menuId="ViewMenu">$selectedViewLabel</w:PulldownButton>\
+                <w:PopupMenu menuId="ViewMenu">\
+                    <w:PopupMenuItem action="$setCurrentErrorsViewAction" showCheck="$isShowCurrentErrorsView">\
+                        Show errors for current page.
+                    </w:PopupMenuItem>\
+                    <w:PopupMenuItem action="$setAllErrorsViewAction" showCheck="$isShowAllErrorsView">\
+                        Show all errors.
+                    </w:PopupMenuItem>\
+                </w:PopupMenu>\
+            </a:If>
+
+            <div style="float:top"><a:Image filename="cleardot.gif" height="1" width="240"/></div>
+            <w:OutlineRepetition list="$packageNames" item="$currentObject" children="$children"
+                hasChildren="$false" outlineState="$outlineState" selectedObject="$selectedObject">
+                <div style="padding-top:4px">\
+                    <w:OutlineControl title="$currentObjectTitle" allowSelection="$true"/>
+                </div>
+            </w:OutlineRepetition>
+        </td>
+
+        <td class="brandMd" style="margin-right:100px;margin-left:100px">\
+            <a:Image filename="cleardot.gif" height="600" width="1"/>\
+        </td>
+
+        <td valign="top" width="100%">
+            <h3>$selectedObject</h3>
+            <t:DataTable batchSize="20" valign="middle"
+                          list="$selectedObjectPackageErrorList"
+                          groupByColumn="componentName"
+                          expandAll="$true"
+                          showOptionsMenu="$false"
+                          showBatchNavigation="$false"
+                          width="100%"
+                          displayGroup="$dict.displayGroup">
+                <t:Column key="componentName" label="Component Name" align="left"/>
+                <t:Column label="Error" align="left">
+                    <a:String value="$dict.displayGroup.currentItem.error"/>
+                </t:Column>
+            </t:DataTable>
+        </td>
+    </tr>
+</table>
+<a:ClientSideScript>
+    // force window to foreground
+    window.focus();
+</a:ClientSideScript>
+</w:BasicPageWrapper>

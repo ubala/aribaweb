@@ -1,0 +1,2 @@
+<a:GenericElement tagName="img" src="$translatedPath" border="$^border:0" otherBindings="$otherBindingsValues"/>\
+

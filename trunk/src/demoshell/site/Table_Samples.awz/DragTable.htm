@@ -1,0 +1,61 @@
+<w:BasicPageWrapper hasForm="$true">
+    <a:Content name="toc">
+        <b>The Item Bin</b><br/>
+        <a:RefreshRegion>
+            <a:DropContainer type="lineItem" dropAction="$itemDropped" tagName="div">
+                    <br/>
+                    <b>Drop Here!</b>
+                    (Count: $itemCount)
+                    <br/><br/>
+            </a:DropContainer>
+        </a:RefreshRegion>
+        <br/>
+    </a:Content>
+
+    <a:Content name="body">
+            <w:HintMessage showTopLine="$true">
+                <a:RefreshRegion>
+                    This is a sample of dragging items from a table into a container in the TOC.
+                </a:RefreshRegion>
+            </w:HintMessage>
+            <br/>
+
+            <t:DataTable csvPath="SampleSpend.csv" enableScrolling="$true" multiSelect="$true"
+                    displayGroup="$displayGroup"
+                    dragAction="$itemDragged" dragType="lineItem">
+
+                <t:HeadingArea>
+                    <h2>Draggable Items</h2>
+                </t:HeadingArea>
+
+                <t:Column key="Department" nowrap/>
+
+                <t:Column key="Category"/>
+
+                <t:Column key="Year" formatter="$formatters.shortDate" nowrap/>
+
+                <t:Column key="Amount" formatter="$formatters.money" align="right" nowrap/>
+            </t:DataTable>
+    </a:Content>
+</w:BasicPageWrapper>
+
+
+<server>
+    var displayGroup = null;
+    var draggedItem = null;
+    var itemCount = 0;
+
+    function itemDragged () {
+        draggedItem = displayGroup.currentItem();
+        return null;
+    }
+
+    function itemDropped () {
+        var v = displayGroup.allObjects();
+        ariba.util.core.ListUtil.removeElementIdentical(v, draggedItem);
+        displayGroup.setObjectArray(v);
+
+        itemCount++;
+        return null;
+    }
+</server>

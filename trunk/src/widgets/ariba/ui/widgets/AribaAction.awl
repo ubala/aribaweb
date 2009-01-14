@@ -1,0 +1,52 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaAction.awl#16 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+
+    <Binding key="name" type="String" direction="get" required="$true">
+        TBD
+    </Binding>
+
+    <Binding key="alwaysVisible" type="boolean" direction="get" default="$false">
+        TBD
+    </Binding>
+
+    <Binding key="style" type="String" direction="get" required="$false">
+
+    </Binding>
+
+</a:Api>\
+<a:RefreshRegion>\
+<a:If ifTrue="$useHyperlink">\
+    <a href="$effectiveUrl" onClick="$onClick" target="$target" omitTags="$isActionDisabled" awname="$actionName" style="$^style:text-decoration:none;">\
+        <a:IncludeContent/>\
+    </a>\
+<a:Else ifTrue="$isToggleSidebar"/>\
+    <a:PrivateHyperlink action="$actionClicked" submitForm="$submitForm" target="$target" omitTags="$isActionDisabled" style="$^style:text-decoration:none;">\
+        <a:IncludeContent/>\
+    </a:PrivateHyperlink>\
+<a:Else ifTrue="$useComponentAction"/>\
+    <a:Hyperlink action="$actionClicked" submitForm="$submitForm" target="$target" omitTags="$isActionDisabled" style="$^style:text-decoration:none;">\
+        <a:IncludeContent/>\
+    </a:Hyperlink>\
+<a:Else ifTrue="$^alwaysVisible"/>\
+    <a:IncludeContent/>\
+</a:If>\
+</a:RefreshRegion>\

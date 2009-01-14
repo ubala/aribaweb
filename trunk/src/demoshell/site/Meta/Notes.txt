@@ -1,0 +1,113 @@
+NOTES:
+    - CSS Syntax
+        - @ declarations (e.g. @import "foo.css")
+        - case insensitive
+        - selectors:
+            - "," support
+            - ns|e  -- namespace
+            - e.class
+            - e.class1.class2  -- has class1 AND class2
+            - e:first-child
+            - e::first-line   (in element)
+            - e[attr=val]
+            - E F (decendent)
+            - E > F (immediate decendant)
+            - E ~ F (preceding sibling)
+            - E + F (immediately preceding sibling)
+
+
+
+<groovy>
+package ariba.ui.demoshell;
+import ariba.ui.aribaweb.core.*;
+import ariba.ui.aribaweb.util.*;
+import ariba.ui.widgets.*;
+import ariba.util.core.*;
+import ariba.ui.meta.*;
+import example.ui.busobj.*;
+
+class Component extends AWXHTMLComponent {
+    def op, selectedOperation = "edit", operations = ["create", "edit", "view"];
+    def user = new User(firstName : "Joe", lastName : "Blow");
+
+    def save () {
+        if (!errorManager().checkErrorsAndEnableDisplay()) {
+        }
+        return null;
+    }
+
+    /*
+    static {
+        def meta = UIMeta.resetMeta();
+        new OSSParser(meta, """
+            cls=example.ui.busobj.Person {
+                field=email { label:"E-mail" }
+                operation=create {
+                    classproperty { fields : [firstName lastName phoneNumber] }
+                }
+                operation=view {
+                    field=email { after:lastName }
+                    field=birthDay { after:email }
+                }
+            }
+
+            cls=example.ui.busobj.User {
+                field=password { fieldClass:secret }
+                operation=create {
+                    classproperty { fields : [firstName lastName phoneNumber accountBalance] }
+                }
+                operation=view {
+                    field=password { hidden:true }
+                }
+            }
+        """).addRules()
+
+        meta.addRule([operation : "edit"], [editing: true])
+        meta.addRule([operation : "create"], [editing: true])
+        meta.addRule([type : "java.lang.String"], [component: "AWString"])
+        meta.addRule([type : "boolean"], [component: "AWCheckbox"])
+        meta.addRule([type : "ariba.util.core.Date"], [component: "AWString", formatter: "dateTime"])
+        meta.addRule([type : "java.math.BigDecimal"], [component: "AWString", formatter: "money"])
+        meta.addRule([editing : true], [component: "AWTextField"])
+        meta.addRule([editing : true, type : "ariba.util.core.Date"], [component: "DateField"])
+
+        meta.addRule([fieldClass : "secret", type : "java.lang.String"], [component: "AWPasswordField"])
+        meta.addRule([fieldClass : "longtext", type : "java.lang.String", editing:true], [component: "AWTextArea", bindings:[cols:60, rows:10]])
+        meta.addRule([fieldClass : "richtext", type : "java.lang.String"], [component: "AWString", bindings:[escapeUnsafeHtml:true]])
+        meta.addRule([fieldClass : "richtext", type : "java.lang.String", editing:true], [component: "RichTextArea", bindings:[cols:60, rows:10]])
+        meta.addRule([fieldClass : "truncated", type : "java.lang.String"], [component: "TruncatedString", bindings:[size:10]])
+        meta.addRule([fieldClass : "noCreate", operation:"create"], [hidden: true])
+
+        meta.addRules(
+            [cls : "example.ui.busobj.Person",
+             rules : [
+                 [field : "email", props : [ label : "E-mail"]],
+                 [operation : "create",
+                  rules : [
+                      [classproperty: true, props : [ fields : ["firstName", "lastName", "phoneNumber"]]]]
+                 ],
+                 [operation : "view",
+                  rules : [
+                      [field : "email", props : [ after : "lastName"]],
+                      [field : "birthDay", props : [ after : "email"]]
+                 ]]
+             ]]);
+
+        meta.addRules(
+            [cls : "example.ui.busobj.User",
+             rules : [
+                 // [field : "bio", props : [ fieldClass : ["richtext", "noCreate"]]],
+                 [field : "password", props : [ fieldClass : "secret"]],
+                 [operation : "create",
+                  rules : [
+                      [classproperty: true, props : [ fields : ["firstName", "lastName", "phoneNumber", "accountBalance"]]]]
+                 ],
+                 [operation : "view",
+                  rules : [
+                      [field : "password", props : [ hidden : true]],
+                 ]]
+             ]]);
+    }
+    */
+}
+</groovy>

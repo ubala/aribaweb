@@ -1,0 +1,63 @@
+<w:DocumentContainer>
+<w:DocumentHead windowTitle="AWApi" escapeTitle="$true">
+</w:DocumentHead>
+<a:Body>
+    <h2>Resource Manager Info</h2>
+    <a:Form action="$lookUpClass">
+        <table>
+            <tr>
+                <h3>Class Lookup</h3>
+                <td><a:TextField value="$className" size="40" action="$lookUpClass"/></td>
+                <td><w:TextButton action="$lookUpClass">Look up class</w:TextButton></td>
+            </tr>
+            <tr>
+                <td colspan=2>$classLookupResult</td>
+            </tr>
+        </table>
+    </a:Form>
+
+    <a:Form action="$lookUpResource">
+        <table>
+            <tr>
+                <h3>Resource Lookup</h3>
+                <td><a:TextField value="$resourceName" size="40" action="$lookUpResource"/></td>
+                <td><w:TextButton action="$lookUpResource">Look up resource</w:TextButton></td>
+            </tr>
+            <tr>
+                <td colspan=2>$resourceLookupResult</td>
+            </tr>
+        </table>
+    </a:Form>
+
+    <h3>Resource directories</h3>\
+    <ul>
+    <a:For list="$resourceDirectories" item="$current">
+        <li>$current.directoryPath</li>
+    </a:For>
+    </ul>
+
+    <a:Form action="$lookUpAWL">
+        <table>
+            <tr>
+                <h3>AWL (AWComponent) Lookup</h3>
+                <td><a:TextField value="$awlName" size="40"/></td>
+                <td><w:TextButton action="$lookUpAWL">Look up Component</w:TextButton></td>
+            </tr>
+            <tr>
+                <td colspan=2>
+                    <a:PrimitiveString value="$awlLookupResult"/>
+                </td>
+            </tr>
+        </table>
+    </a:Form>
+
+    <h3>Registered Packages</h3>\
+    <ul>
+    <a:For list="$registeredPackageNames" item="$dict.packageName">
+        <li>$dict.packageName</li>
+    </a:For>
+    </ul>
+    <h3>Classes by Name HashTable</h3>
+    $classesByNameHashtable
+</a:Body>
+</w:DocumentContainer>

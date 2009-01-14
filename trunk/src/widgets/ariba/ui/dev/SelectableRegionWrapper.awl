@@ -1,0 +1,107 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/SelectableRegionWrapper.awl#8 $
+    </Copyright>
+
+    <Overview>
+        Wrapper around a selectable area.  This wrapper will generate a dotted border
+        around its component content.  The optional TitleArea named template can be
+        used to pass in a title for the selected area.  This title is displayed in a
+        tab on the upper left corner of the wrapper.
+
+        The color of the tab and the dotted border are controlled via the selected
+        binding.  By default the color of the region is set to #99CC66 and when the
+        area is selected, the color is set to #FFE080.
+
+        <w:SelectableRegionWrapper
+            selected="$isEditSelected"
+            enabled="$true">
+            <a:Content name="TitleArea">
+                <w:ModalWindowLink action="$editAction" windowCloseAction="$editCompleteAction">Edit This Area</w:ModalWindowLink>
+            </a:Content>
+            Lots of selectable content<br/>
+            Lots of selectable content<br/>
+            Lots of selectable content<br/>
+            Lots of selectable content<br/>
+            Lots of selectable content<br/>
+        </w:SelectableRegionWrapper>
+
+        <pre>
+        |-----------------------------|
+        | AWNamedTemplate (TitleArea) |
+        |-----------------------------|......................................
+        :                                                                   :
+        : ComponentContent                                                  :
+        :                                                                   :
+        :...................................................................:
+        </pre>
+
+    </Overview>
+
+    <Binding key="enabled" direction="get" type="boolean" required="$false" default="$false">
+        Use this binding to completely disable the SelectableRegionWrapper.  When this
+        wrapper is disabled, the contained content is rendered without decoration.
+    </Binding>
+
+    <Binding key="selected" direction="get" type="boolean" required="$false" deprecated="$false">
+        Use this binding to control the color of the tab / dotted border.
+    </Binding>
+
+    <NamedContent name="TitleArea" required="$false">
+        Optional named template.  Use set the content in the tab located in the upper
+        left corner of the wrapper.
+    </NamedContent>
+
+</a:Api>\
+
+<a:If ifFalse="$^enabled">
+    <a:IncludeContent/>
+<a:Else/>
+
+    <a:If ifTrue="$^createTable">
+        <tr>
+            <td colspan="^componentColumns:1">
+                <div class="$regionClass" style="padding: 5px;" onmouseover="$onMouseOver" onmouseout="$onMouseOut">\
+                    <div class="$regionTitleClass" id="$elementId">\
+                        <b><a:IncludeContent name="TitleArea" required="$false"/></b>\
+                    </div>
+                    <iframe src="$=ariba.ui.aribaweb.core.AWXBasicScriptFunctions.EmptyDocScriptlet"
+                            id="$iframeId"
+                            style="position:absolute;top:0px;left:0px;display:none;filter:alpha(opacity=000);background-color:#FFFFFF">
+                    </iframe>
+                    <a:RefreshRegion>
+                        <table>
+                            <a:IncludeContent/>
+                        </table>
+                     </a:RefreshRegion>
+                </div>
+            </td>
+        </tr>
+    <a:Else/>
+    <a:RefreshRegion>
+        <div class="$regionClass" style="padding: 5px;" onmouseover="$onMouseOver" onmouseout="$onMouseOut">\
+            <div class="$regionTitleClass" id="$elementId">\
+                <b><a:IncludeContent name="TitleArea" required="$false"/></b>\
+            </div>
+            <iframe src="$=ariba.ui.aribaweb.core.AWXBasicScriptFunctions.EmptyDocScriptlet"
+                    id="$iframeId"
+                    style="position:absolute;top:0px;left:0px;display:none;filter:alpha(opacity=000);background-color:#FFFFFF">
+            </iframe>
+            <a:IncludeContent/>
+        </div>
+    </a:RefreshRegion>
+    </a:If>
+</a:If>

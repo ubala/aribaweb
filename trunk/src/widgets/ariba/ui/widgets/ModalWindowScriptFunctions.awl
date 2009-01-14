@@ -1,0 +1,6 @@
+<a:Singleton>
+    <a:ClientSideScript filename="widg/ModalWindow.js"/>\
+    <a:ClientSideScript elementId="$elementId" invokeAction="$windowClosedByUser">
+        ariba.ModalWindow.setWindowClosingRedirectUrl(ariba.Request.formatUrl('$elementId'));
+    </a:ClientSideScript>
+</a:Singleton>

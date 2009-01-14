@@ -1,0 +1,175 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageErrorPanel.awl#18 $
+    </Copyright>
+
+    <Overview>
+        ToDo
+    </Overview>
+</a:Api>\
+<a:RefreshRegion>
+    <a:If ifTrue="$showingPageErrorPanel">
+        <a:FormProxy name="$errorManager.getErrorNavSubmitForm">
+            <div id="$divId" class="pageErrorPanel fixedTop">
+                <div id="minimizedView" style="$minimizedViewDisplayAttr">
+                    <table border="0" cellspacing="0" cellpadding="0" class="errBg">
+                        <tr>
+                            <td colpan="1" class="minimizedText" width="99%" align="center">
+                                <a:Local key="a001">Expand to see the full message.</a:Local>
+                            </td>
+                            <td align="$languageRight" width="1%" valign="top" style="padding-top:2px;padding-right:2px">\
+                                <a:Hyperlink onclick="ariba.Widgets.toggleErrorPanel('false');">
+                                    <a:Image filename="$maxImage" alt="$maxButtonTooltip"/>
+                                </a:Hyperlink>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="maximizedView" style="$maximizedViewDisplayAttr">
+                    <a:If ifFalse="$isSingleErrorDisplay">
+                        <table border="0" cellspacing="0" cellpadding="0" class="errBg">
+                            <tr>
+                                <td colpan="1" class="msgText" width="99%">
+                                    <a:String value="$errorMsg" escapeUnsafeHtml="$true"/>
+                                </td>
+                                <td align="$languageRight" width="1%" valign="top" style="padding-top:2px;padding-right:2px">\
+                                    <a:Hyperlink onclick="ariba.Widgets.toggleErrorPanel('true');">
+                                        <a:Image filename="$minImage" alt="$minButtonTooltip"/>
+                                    </a:Hyperlink>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <table border="0" cellspacing="0" cellpadding="0">
+                                        <a:If ifTrue="$showWide">
+                                            <tr>
+                                                <a:IncludeBlock name="prevNextMsg"/>
+                                                <a:IncludeBlock name="prevNextLinks"/>
+                                            </tr>
+                                        <a:Else/>
+                                            <tr>
+                                                <a:IncludeBlock name="prevNextMsg"/>
+                                            </tr>
+                                            <tr>
+                                                <a:IncludeBlock name="prevNextLinks"/>                                                
+                                            </tr>
+                                        </a:If>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                        <a:If equalNull="$highLightedErrorMsg">
+                            <w:RoundedCorners isTop="$false" class="errBg"/>
+                        </a:If>
+                    </a:If>
+                    <a:RefreshRegion alwaysRender="$true">\
+                        <div id="slidingErrorMsg" style="border-top:1px solid #FFFFFF; visibility:hidden; height:1px; overflow:hidden; position:relative; display:none">
+                            <div id="slidingErrorMsgContent" position="relative">
+                                <a:If notEqualNull="$highLightedErrorMsg">
+                                    <a:ClientSideScript>\
+                                        ariba.Widgets.hideBubble()
+                                    </a:ClientSideScript>\
+                                    <table class="errBg" width="100%" border="0" cellspacing="0" cellpadding="2">
+                                        <tr class="$highLightedErrorStyle">
+                                            <td class="$highLightedErrorStyle" align="$highLightedErrorAlign" width="100%">
+                                                <a:If ifFalse="$highLightedErrorIsWarning">
+                                                    <a:Image class="errorAsterisk" align="absmiddle" filename="errorAsterisk.gif" alt="$[a005]Error"/>\
+                                                <a:Else/>
+                                                    <a:Image class="warningAsterisk" align="absmiddle" filename="warningAsterisk.gif" alt="$[a006]Warning"/>
+                                                </a:If>
+                                                <a:String value="$highLightedErrorMsg" escapeUnsafeHtml="$true"/>
+                                            </td>
+                                            <a:If ifTrue="$hasDeferredNavHandler">
+                                                <td valign="bottom" width="1%" nowrap>
+                                                    <a:Hyperlink action="$navToErrorAction" submitForm="$true">
+                                                        <font class="errorNav">
+                                                            <a:Local key="a004">Go To Problem Location &#62;</a:Local>
+                                                        </font>
+                                                    </a:Hyperlink>
+                                                </td>
+                                            </a:If>
+                                            <a:If ifTrue="$isSingleErrorDisplay">
+                                                <td align="$languageRight" width="1%" valign="top" style="padding-top:2px;padding-right:2px">\
+                                                    <a:Hyperlink onclick="ariba.Widgets.toggleErrorPanel('true');">
+                                                        <a:Image filename="$minImage" alt="$minButtonTooltip"/>
+                                                    </a:Hyperlink>
+                                                </td>
+                                            </a:If>
+                                        </tr>
+                                    </table>
+                                    <w:RoundedCorners isTop="$false" class="errBg"/>
+                                </a:If>
+                            </div>
+                        </div>
+                        <a:If notEqualNull="$highLightedErrorMsg">
+                            <a:ClientSideScript>\
+                                ariba.Widgets.slideErrorMessage();
+                            </a:ClientSideScript>\
+                        <a:Else/>
+                            <a:ClientSideScript>\
+                                ariba.Widgets.resetSlidingErrorMessage();\
+                            </a:ClientSideScript>\
+                        </a:If>
+                    </a:RefreshRegion>
+                </div>
+            </div>
+        </a:FormProxy>
+        <a:ClientSideScript>
+            ariba.Widgets.initErrorPanel();
+        </a:ClientSideScript>
+        <a:If ifTrue="$hasDeferredBubbleDisplay">\
+            <a:RefreshRegion alwaysRender="$true">\
+                <a:ClientSideScript>\
+                    ariba.Widgets.highLightIndicator('$deferredBubbleIndicatorId');\
+                </a:ClientSideScript>\
+            </a:RefreshRegion>\
+        </a:If>\
+    <a:Else/>
+        <a:ClientSideScript>\
+            ariba.Widgets.hideBubble()
+        </a:ClientSideScript>\
+    </a:If>
+</a:RefreshRegion>
+
+<a:Block name="prevNextMsg">
+    <td class="msgText hintText" width="99%">
+        <a:If ifTrue="$allowPreviousOrNext">
+            <a:String value="$hintMsg" escapeUnsafeHtml="$true"/>
+        </a:If>
+    </td>
+</a:Block>
+
+<a:Block name="prevNextLinks">
+    <td nowrap="1" width="15%" class="errorNav">
+        <a:If ifTrue="$allowPrevious">
+            <a:Hyperlink class="noLine" action="$previousAction" submitForm="$true">
+                <font class="errorNav">
+                    <a:Local key="a002">&#60; Previous</a:Local>
+                </font>
+            </a:Hyperlink>
+        </a:If>
+        <a:If ifTrue="$allowPreviousAndNext">
+            <a:PrimitiveString value=" | "/>
+        </a:If>
+        <a:If ifTrue="$allowNext">
+            <a:Hyperlink class="noLine" action="$nextAction" submitForm="$true">
+                <font class="errorNav">
+                    <a:Local key="a003">Next &#62;</a:Local>
+                </font>
+            </a:Hyperlink>
+        </a:If>
+    </td>
+</a:Block>

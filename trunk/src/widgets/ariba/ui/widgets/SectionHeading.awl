@@ -1,0 +1,62 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionHeading.awl#13 $
+    </Copyright>
+
+    <Overview>
+        TBD
+    </Overview>
+                  
+    <Binding key="title" direction="get" type="String" default="$null">
+        TBD
+    </Binding>
+</a:Api>\
+<a:If ifTrue="$inSectionWrapper">
+    <table class="sectionh2" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td style="padding-top:0px; text-align:left;vertical-align:top;white-space:nowrap">\
+                <h2>$^title</h2>\
+            </td>
+            <td nowrap="1" style="padding:0px 3px 0px 0px;">\
+                <div style="float:right;">
+                    <a:IncludeContent/>\
+                </div>
+            </td>
+        </tr>
+    </table>
+<a:Else/>    
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td class="sectionHLeft">
+                <w:RoundedBox hideGradient="$true" roundStyle="$=ariba.ui.widgets.RoundedBox.TopLeft">
+                    <div class="sectionHRound"></div>
+                </w:RoundedBox>
+            </td>
+            <td class="sectionHTitle">
+                <h2>$^title</h2>
+            </td>
+            <td class="sectionHRight">
+                <div></div>
+            </td>
+            <td class="sectionHLine">
+                <div></div>
+            </td>
+        </tr>
+    </table>
+    <div class="sectionHBottom">
+        <a:IncludeContent/>\
+    </div>    
+</a:If>

@@ -1,0 +1,33 @@
+<w:BasicPageWrapper hasForm="$true">
+    Operation: <a:Popup list="$operations" item="$op" selection="$selectedOperation" action="$null">$op</a:Popup>
+    <hr/>
+
+    <m:Context operation="$selectedOperation">
+        <m:Rules>
+            class=example.ui.busobj.User {
+                field=(email, phoneNumber) { after:zRight }
+                field=bio { traits:required; after:zBottom; bindings:{cols:20} }
+            }
+        </m:Rules>
+        <m:Context object="$user">
+            <m:Form/>
+        </m:Context>
+        <a:If ifTrue="$metaContext.properties.editing">
+            <br/><hr/><br/>
+            <w:TextButton action="$save">Save</w:TextButton>
+        </a:If>
+
+    </m:Context>
+</w:BasicPageWrapper>\
+<groovy>
+    import example.ui.busobj.*;
+    def op, selectedOperation = "view", operations = ["create", "edit", "view"];
+    def user = new User(firstName : "Joe", lastName : "Blow", rating:30);
+
+
+    def save () {
+        if (errorManager().checkErrorsAndEnableDisplay()) return null;
+        // Do save...
+        return null;
+    }
+</groovy>

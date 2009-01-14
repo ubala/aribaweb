@@ -1,0 +1,72 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWImage.awl#9 $
+    </Copyright>
+
+    <Overview>
+        Renders an <img ../> tag into the outgoing html along with appropriate attributes.  If the filename attribute is
+            provided, AWImage will automatically compute the width and height from the image file it locates under the
+            application resource directories.  The url generated is controlled by the AWResourceManager's url specification
+            for the directory in which the image is found, but generally, the url's generated are directed at the webserver
+            and not back into the application server.
+    </Overview>
+
+    <Binding key="filename" type="String" required="$false" direction="get" alternates="src">
+        The relative path of the image file, including the suffix (eg filename="widg/banner.gif").  This will be used to
+        lookup the actual path of the image via the resourceManager, so localized images are supported automatically.
+    </Binding>
+
+    <Binding key="width" type="int" default="computed" direction="get" seeAlso="height">
+        If the width is provided it will be used in preference to the automatically computed width (determined from the
+        image file).  It is strongly advised not to define this attribute as it is likely to get out of sync with the
+        imge's actual width.  Only in the case of cleardot.gif does it make sense to provide a width.
+    </Binding>
+
+    <Binding key="fullUrl" type="boolean" direction="get" default="false">
+        If this binding is set then we will always generate the full URL for the image, even
+        if direct connect is on for the application.
+    </Binding>
+
+    <Binding key="height" type="int" default="computed" direction="get" seeAlso="width">
+        If the height is provided it will be used in preference to the automatically computed height (determined from
+        the image file).  It is strongly advised not to define this attribute as it is likely to get out of sync with
+        the imge's actual height.  Only in the case of cleardot.gif does it make sense to provide a height.
+    </Binding>
+
+    <Binding key="border" type="int" default="0" direction="get">
+        Defines the image's border attribute.  Since borders are generally undesirable, the default is 0, which disables
+        the browser's default behavior of displaying a broder when an image is within a hyperlink.
+    </Binding>
+
+    <Binding key="title" type="String" default="$null" direction="get" seeAlso="alt">
+        Provides the images title attribute.  If the title is not defined but the alt attribute is defined, the value for
+        alt is used for the title and alt.
+    </Binding>
+
+    <Binding key="alt" type="String" default="$null" direction="get" seeAlso="title">
+        Provides the images alt attribute.
+    </Binding>
+
+    <Binding key="*" type="String" default="$null" direction="get">
+        Arbitrary key/value pairs may be passed-through to the \<img.../> tag.  Most common html components also allow for this.
+    </Binding>
+
+    <Binding key="src" type="String" default="$null" direction="get" alternates="filename">
+        The src attribute passed through to img tag.
+    </Binding>
+</a:Api>\
+
+<a:GenericElement tagName="img" src="$imageUrl" width="$width" height="$height" border="$^border:0" title="$^title:$^alt" alt="$^alt" otherBindings="$otherBindingsValues" omitTags="$requestContext.isExportMode"/>\

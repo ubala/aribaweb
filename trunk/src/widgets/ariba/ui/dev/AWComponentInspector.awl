@@ -1,0 +1,161 @@
+<w:BasicPageWrapper hasForm="$true" omitWrapperFrame="$true" hasSidebarNotch="$false" isSidebarVisible="$false"
+                  isDebugVisible="$false" disableFooter="$true" disableHomeAction="$true" disableLogoutAction="$true"
+                  debugTitle="AW Component Inspector">\
+<style>
+    .scrollClip {
+        overflow:scroll;
+        // border: 1px solid #9C9CB8;
+        margin-top: 5px;
+        height:650px;
+        width:607px;
+    }
+    .pl {
+        margin:0px;
+    }
+    .plsel {
+        margin:0px;
+        background:yellow;
+    }
+</style>
+<a:ClientSideScript>
+    ariba.Debug._AWCPISession='$request.sessionId';
+    ariba.Debug._AWCPIRefreshId='<a:ActionId action="$refreshPage"/>';
+</a:ClientSideScript>
+<table width="100%" height="100%"><tr><td valign="top">
+<div class="flexContainer">
+    <div style="width:300px"/>
+    <w:TabSet class="noPadding tabWrapper" index="$tabIndex">
+        <w:Tab label="Content Tree">
+            <a:If ifTrue="$traceDisplayGroup.filteredObjects.size">
+                <t:DataTable item="$traceNode" children="$traceNode.children" displayGroup="$traceDisplayGroup"
+                              singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                              showColumnHeader="$false" enableScrolling="$true" showOptionsMenu="$true"
+                              class="scrollTableWrapper smallFont" minHeight="400">
+                    <a:Content name="optionsMenu">
+                        <a:If ifTrue="$showingFileContents">
+                            <a:Hyperlink action="${showingFileContents=false;null}">&lt; Hide Contents</a:Hyperlink>
+                        <a:Else/>
+                            <a:Hyperlink action="${showingFileContents=true;null}">Show File Contents &gt;</a:Hyperlink>
+                        </a:If>
+                        &nbsp;
+                    </a:Content>
+
+                    <t:Column label="Component" isValueColumn="$true">\
+                        <w:OutlineControl indentationPerLevel="12" renderAsTable="$false">\
+                            <b omitTags="$traceNode.componentReference.componentDefinition.isStateless">$componentName</b>\
+                        </w:OutlineControl>\
+                    </t:Column>
+
+                    <t:RowDetail style="font:normal 9px Verdana, Arial, Helvetica, sans-serif;color:#666666;text-align:right">\
+                         <w:TruncateString value="$currentReferencePath" size="40" truncationStyle="1"/>
+                         : $traceNode.sourceReference.lineNumber
+                    </t:RowDetail>
+                </t:DataTable>
+
+                <a:IncludeBlock name="MetadataTable"/>
+            <a:Else/>
+                <br/>
+                <i>Component inspector not yet enabled.  Enabling...</i>
+                <a:PhaseInvocation append='${session.dict.put("AWConstants.ComponentPathDebugEnabled", true)}'/>
+                <a:ClientSideScript>
+                    ariba.Debug.fireMainWindowAction("foo");
+                </a:ClientSideScript>
+            </a:If>
+        </w:Tab>
+
+        <w:Tab label="Click Path">
+            <a:If ifTrue="$pathDisplayGroup.filteredObjects.size">
+                <t:DataTable item="$currentComponentReference" displayGroup="$pathDisplayGroup"
+                              singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                              title="Component Path" showColumnHeader="$false" enableScrolling="$true" showOptionsMenu="$true"
+                              class="scrollTableWrapper smallFont" minHeight="400">
+                    <a:Content name="optionsMenu">
+                        <a:If ifTrue="$showingFileContents">
+                            <a:Hyperlink action="${showingFileContents=false;null}">&lt; Hide Contents</a:Hyperlink>
+                        <a:Else/>
+                            <a:Hyperlink action="${showingFileContents=true;null}">Show File Contents &gt;</a:Hyperlink>
+                        </a:If>
+                        &nbsp;
+                    </a:Content>
+
+                    <t:Column label="Component" isValueColumn="$true">
+                        <b omitTags="$currentComponentReference.componentDefinition.isStateless">$currentComponentReference.componentDefinition.componentName</b>\
+                    </t:Column>
+
+                    <t:RowDetail style="font:normal 9px Verdana, Arial, Helvetica, sans-serif;color:#666666">\
+                        <w:TruncateString value="$currentReferencePath" size="40" truncationStyle="1"/>
+                        : $currentComponentReference.lineNumber
+                    </t:RowDetail>
+                </t:DataTable>
+
+                <a:IncludeBlock name="MetadataTable"/>
+            <a:Else/>
+                <br/>
+                <i><b>Alt-Click</b> On the area of interest in the main window to see its Component Path trace</i>
+            </a:If>
+        </w:Tab>
+    </w:TabSet>
+</div>
+</td>
+<a:MethodInvocation invoke="$makeSelectionCurrentItem"/>
+<td valign="top" _ifTrue="$showingFileContents" style="padding:1px 5px 11px 20px">\
+    <a:If ifTrue="$showDebuggerLink">
+        <a:Hyperlink action="$launchDebugger">Launch AWDebugger</a:Hyperlink>
+    </a:If>
+    <a:RefreshRegion>
+        <a:If ifTrue="$currentComponentReference">
+            <w:TabSet class="noPadding tabWrapper" index="$fileContentsTabIndex">
+                <w:Tab label="$referenceFileLabel">
+                    <div class="scrollClip" id="sourceDiv">\
+                        $referenceResourceFileContents
+                    </div>\
+                    <a:ClientSideScript>
+                        ariba.Debug.checkSelectionPos();
+                    </a:ClientSideScript>
+                </w:Tab>
+                <w:Tab label="$fileName">
+                    <div class="scrollClip" id="sourceDiv">\
+                        $resourceFileContents
+                    </div>\
+                </w:Tab>
+                <w:Tab label="java" isVisible="$javaFullPath">
+                    <div class="scrollClip" id="sourceDiv">\
+                        $javaFileContents
+                    </div>\
+                    <a:ClientSideScript>
+                        ariba.Debug.checkSelectionPos();
+                    </a:ClientSideScript>
+                </w:Tab>
+                <w:Tab label="API">\
+                    <div class="scrollClip" id="sourceDiv">\
+                        <a:ApiPage componentDefinition="$currentComponentReference.componentDefinition"/>
+                    </div>\
+                </w:Tab>
+            </w:TabSet>
+        <a:Else/>
+            <br/>
+            <i>Select file by clicking on row in right hand table to view file contents</i>
+        </a:If>
+    </a:RefreshRegion>
+</td></tr></table>
+<a:ClientSideScript>
+    ariba.Debug.cpiCheckWindowSize( <a:String value="${showingFileContents ? 960 : 320}"/>, 760);
+</a:ClientSideScript>
+</w:BasicPageWrapper>
+\
+<a:Block name="MetadataTable">\
+    <a:If ifTrue="$metadataDisplayGroup.filteredObjects.size">
+        <t:DataTable item="$metadataNode" children="$metadataNode.children" displayGroup="$metadataDisplayGroup"
+                      title="Meta Data: Groups / Fields" showColumnHeader="$false" enableScrolling="$true"
+                      class="scrollTableWrapper smallFont" minHeight="200">
+            <t:Column label="Component" isValueColumn="$true">\
+                <w:OutlineControl indentationPerLevel="12" renderAsTable="$false">\
+                    $metadataNode.title\
+                </w:OutlineControl>\
+            </t:Column>
+            <t:Column nowrap>
+                <w:CueTip value="$metadataNode.details"/>
+            </t:Column>
+        </t:DataTable>
+    </a:If>
+</a:Block>

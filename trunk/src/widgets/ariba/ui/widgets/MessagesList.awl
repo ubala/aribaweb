@@ -1,0 +1,65 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MessagesList.awl#2 $
+    </Copyright>
+
+    <Overview>
+        Widget used to display a set of messages
+    </Overview>
+
+    <Binding key="message" direction="get" type="??" required="$false">
+        The message may either be a list of errors or a single error.  Each
+        message may be a String or an Object, which will be toString'ed for
+        display.  If the message is a String it can either be an
+        already-localed String or can be an NLSString of the form
+        @resource/key, in which case we'll translate it.
+    </Binding>
+
+    <Binding key="isError" direction="get" type="boolean" default="$false">
+        Indicates whether the messages "errors". If true we use the "error" icon 
+        and prepend the messages with "Error: ". If neither isAlert nor isConfirmation
+        is true, then isError is automatically set to true.
+    </Binding>
+
+    <Binding key="isWarning" direction="get" type="boolean" default="$false">
+        Indicates whether the messages are "warnings". If true we use the "alert" icon 
+        and prepend the messages with "Alert: ". 
+        Note that isError takes precendence on isWarning, meaning if isError is true
+        then isWarning is assumed to be false.
+    </Binding>
+
+    <Binding key="isConfirmation" direction="get" type="boolean" default="$false">
+        Indicates whether the messages are "confirmations". If true we use the "confirm" icon 
+        and prepend the messages with "Confirmation: ". 
+        Note that isError takes precendence on isConfirmation, meaning if isError is true
+        then isConfirmation is assumed to be false.
+    </Binding>
+
+    <Binding key="addExtraBR" direction="get" type="boolean" default="$false">
+        Indicates whether the list of messages should be between two line breaks.
+    </Binding>
+</a:Api>\
+
+<a:If ifTrue="$hasMessage">
+    <a:If ifTrue="$^addExtraBR:$false"><br/></a:If>\
+    <a:For index="$dict.currRowIndex" item="$dict.currRow" list="$message">\
+        <div class="$style">
+            <a:String escapeUnsafeHtml="$true"
+                value="$dict.currRow"/>
+        </div>
+    </a:For>\
+    <a:If ifTrue="$^addExtraBR:$false"><br/></a:If>\
+</a:If>\

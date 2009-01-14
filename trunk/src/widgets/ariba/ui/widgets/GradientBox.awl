@@ -1,0 +1,5 @@
+<div class="$cssClass">
+    <div class="gradBody">
+        <a:IncludeContent/>
+    </div>
+</div>
