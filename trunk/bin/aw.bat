@@ -15,7 +15,7 @@ if "%DIRNAME%" == "" set DIRNAME=.\
 @rem Find Builtin Commands
 set AWCMD=
 if "x%~1" == "xcreate-project" set AWCMD="%~1"
-if "x%~1" == "x" set AWCMD="help"
+if "x%~1" == "x" set AWCMD="Welcome"
 if "x%~1" == "x-h" set AWCMD="help"
 if "x%~1" == "x-help" set AWCMD="help"
 if "x%~1" == "xhelp" set AWCMD="help"
@@ -36,11 +36,6 @@ if not "%ANT_HOME%" == "" goto check_CATALINA_HOME
 set ANT_HOME=%AW_HOME%\tools\ant
 set PATH=%ANT_HOME%\bin;%PATH%
 echo Setting ANT_HOME to: %ANT_HOME%
-
-:check_CATALINA_HOME
-if not "%CATALINA_HOME%" == "" goto init
-set CATALINA_HOME=%AW_HOME%\tools\tomcat
-echo Setting CATALINA_HOME to: %CATALINA_HOME%
 
 :init
 @rem Get command-line arguments, handling Windowz variants

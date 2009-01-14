@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#14 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#19 $
 */
 package ariba.ui.meta.core;
 
@@ -30,10 +30,7 @@ import ariba.ui.aribaweb.util.AWResourceManager;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWJarWalker;
 import ariba.ui.validation.AWVIdentifierFormatter;
-import ariba.ui.meta.annotations.Properties;
-import ariba.ui.meta.annotations.Traits;
-import ariba.ui.meta.annotations.Action;
-import ariba.ui.meta.annotations.NavModuleClass;
+import ariba.ui.meta.annotations.*;
 import ariba.util.core.Assert;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.Fmt;
@@ -155,6 +152,7 @@ public class UIMeta extends Meta
         registerPropertyMerger(KeyEditable, new PropertyMerger_And());
         registerPropertyMerger(KeyValid, new PropertyMerger_Valid());
         registerPropertyMerger(KeyTraits, PropertyMerger_List);
+        registerPropertyMerger(KeyClass, Context.PropertyMerger_DeclareList);
         registerPropertyMerger(KeyField, Context.PropertyMerger_DeclareList);
         registerPropertyMerger(KeyLayout, Context.PropertyMerger_DeclareList);
         registerPropertyMerger(KeyModule, Context.PropertyMerger_DeclareList);
@@ -207,6 +205,9 @@ public class UIMeta extends Meta
                 if (isAction) processActionAnnotation((Action)annotation, prop, predicateList);
             }
         });
+
+        Trait.registerAnnotationListeners(this);
+        Property.registerAnnotationListeners(this);
 
         AWPage.registerLifecycleListener(new AWPage.LifecycleListener() {
             // Listen for new page activations and check for rule file changes
@@ -496,27 +497,32 @@ public class UIMeta extends Meta
         String contextVal = (String)context.values().get(key);
         if (contextVal == null) contextVal = Meta.KeyAny; 
         context.set(key, contextVal);
-        context.set(KeyDeclare, true);
+        context.set(KeyDeclare, key);
         List <String> fieldNames = context.listPropertyForKey(key);
         fieldNames.remove(contextVal);
         context.pop();
         return fieldNames;
     }
 
-    public List<ItemProperties> itemProperties (Context context, String key)
+    public List<ItemProperties> itemProperties (Context context, String key, boolean filterHidden)
+    {
+        return itemProperties(context, key, itemNames(context, key), filterHidden);
+    }
+
+    public List<ItemProperties> itemProperties (Context context, String key, Collection<String>itemNames,
+                                                boolean filterHidden)
     {
         List<ItemProperties> result = new ArrayList();
-        List <String> names = itemNames(context, key);
-        for (String itemName : names) {
+        for (String itemName : itemNames) {
             context.push();
             context.set(key, itemName);
 
             // only hidden at this stage if *statically* resolvable to hidden
             Object visible = context.staticallyResolveValue(context.allProperties().get(KeyVisible));
             boolean isHidden = (visible == null) || ((visible instanceof Boolean) && !((Boolean)visible).booleanValue());
-
-            result.add(new ItemProperties(itemName, context.allProperties(), isHidden));
-                // context.resolvedProperties()
+            if (!isHidden || !filterHidden) {
+                result.add(new ItemProperties(itemName, context.allProperties(), isHidden));
+            }
             context.pop();
         }
         return result;
@@ -531,7 +537,7 @@ public class UIMeta extends Meta
     public static String[] ZonesTLRB = {ZoneLeft, ZoneRight, ZoneTop, ZoneBottom };
 
     private Map<String, List> _predecessorMap(Context context, String key, final String defaultPredecessor) {
-        List<ItemProperties> fieldInfos = itemProperties(context, key);
+        List<ItemProperties> fieldInfos = itemProperties(context, key, false);
         Map<String, List> predecessors = AWUtil.groupBy(fieldInfos,
                 new AWUtil.ValueMapper() {
                     public Object valueForObject(Object o) {
@@ -612,9 +618,14 @@ public class UIMeta extends Meta
 
     public String displayKeyForClass (String className)
     {
+        // performance: should use registerDerivedValue("fieldsByZone", new Context.StaticDynamicWrapper
+        // to get cached resolution here...
         Context context = newContext();
         context.set(KeyClass, className);
-        return (String)context.propertyForKey("displayKey");
+        context.set(KeyLayout, "LabelField");
+        List<ItemProperties> fields = itemProperties(context, KeyField, true);
+
+        return fields.isEmpty() ? null : fields.get(0).name();
     }
 
     public static String[] ActionZones = { "Main" };
@@ -625,6 +636,8 @@ public class UIMeta extends Meta
     {
         List<String> _homeForTypes;
         List<String> _usableForTypes;
+        List<String> _allTypes;
+
 
         public ModuleProperties(String name, Map properties, boolean hidden,
                                 List<String> homeForTypes, List<String> usableForTypes)
@@ -632,6 +645,8 @@ public class UIMeta extends Meta
             super(name, properties, hidden);
             _homeForTypes = homeForTypes;
             _usableForTypes = usableForTypes;
+            _allTypes = ListUtil.copyList(homeForTypes);
+            _allTypes.addAll(_usableForTypes);
         }
 
         public List<String> getHomeForTypes()
@@ -642,6 +657,11 @@ public class UIMeta extends Meta
         public List<String> getUsableForTypes()
         {
             return _usableForTypes;
+        }
+
+        public List<String> getAllTypes()
+        {
+            return _allTypes;
         }
 
         ModuleMatch matches (Map <String, String> matchContext)
@@ -723,22 +743,6 @@ public class UIMeta extends Meta
                             : (modules.isEmpty()) ? null : modules.get(0)));
     }
 
-    public Map <String, List<ItemProperties>> navActionsByCategory (Context context)
-    {
-        // assume "module" has been asserted in context, now get classes
-        List<String> homeClasses = context.listPropertyForKey("homeForClasses");
-        List<String> showClasses = context.listPropertyForKey("showsClasses");
-        List <String> allClasses = new ArrayList();
-        allClasses.addAll(homeClasses);
-        allClasses.addAll(showClasses);
-        context.push();
-        context.set(KeyClass, allClasses);
-        Map<String, List<ItemProperties>> result = new HashMap();
-        actionsByCategory(context, result);
-        context.pop();
-        return result;
-    }
-
     // caller must push/pop!
     public List<ItemProperties> actionsByCategory(Context context, Map<String, List<ItemProperties>> result)
     {
@@ -749,10 +753,7 @@ public class UIMeta extends Meta
                 return ((ItemProperties)object).name();
             }
         });
-        /*
-        context.set(KeyActionCategory, catNames);
-        collectActionsByCategory(context, result);
-        */
+
         for (String cat : catNames) {
             context.push();
             context.set(KeyActionCategory, cat);
@@ -763,29 +764,41 @@ public class UIMeta extends Meta
     }
 
     /*
-        public Map <String, List<ItemProperties>> navActionsByCategory (Context context)
-        {
-            // assume "module" has been asserted in context, now get classes
-            List<String> homeClasses = context.listPropertyForKey("homeForClasses");
-            List<String> showClasses = context.listPropertyForKey("showsClasses");
-            List <String> allClasses = new ArrayList();
-            allClasses.addAll(homeClasses);
-            allClasses.addAll(showClasses);
-            Map <String, List<ItemProperties>> result = new HashMap();
-            for (String className : allClasses) {
-                context.push();
-                context.set(KeyClass, className);
-                collectActionsByCategory(context, result);
-                context.pop();
-            }
-            return result;
+    public List<ItemProperties> actionsByCategory(Context context, Map<String, List<ItemProperties>> result)
+    {
+        // Collect list of all categories
+        HashSet<String> categoryNames = new HashSet();
+        context.push();
+        context.set(KeyActionCategory, KeyAny);
+        List <String> names = itemNames(context, KeyAction);
+        for (String name : names) {
+            context.push();
+            context.set(KeyAction, name);
+            categoryNames.add((String)context.propertyForKey(KeyActionCategory));
+            context.pop();
+        }
+        context.pop();
+
+        // Collect actionCategory info
+        List<ItemProperties> actionCategories = itemProperties(context, KeyActionCategory,
+                categoryNames, true);
+
+        // Iterate through all categories, collecting actions
+        for (String catName : categoryNames) {
+            context.push();
+            context.set(KeyActionCategory, catName);
+            collectActionsByCategory(context, result);
+            context.pop();
         }
 
-    */
+        return actionCategories;
+    }
+*/
+
     public void collectActionsByCategory (Context context, Map <String, List<ItemProperties>> result)
     {
         // assume "module" has been asserted in context, now get classes
-        List<ItemProperties> actionInfos = itemProperties(context, KeyAction);
+        List<ItemProperties> actionInfos = itemProperties(context, KeyAction, true);
         for (ItemProperties actionInfo : actionInfos) {
             context.push();
             context.set(KeyAction, actionInfo.name());
@@ -869,7 +882,7 @@ public class UIMeta extends Meta
 
     static class PropertyMerger_Valid implements PropertyMerger
     {
-        public Object merge(Object orig, Object override) {
+        public Object merge(Object orig, Object override, boolean isDeclare) {
             // if first is error (error message or false, it wins), otherwise second
             return (override instanceof String
                     || (override instanceof Boolean && !((Boolean)override).booleanValue()))
@@ -997,9 +1010,8 @@ public class UIMeta extends Meta
         Log.meta_detail.debug("---- annotation for field %s -- traits: %s", prop, traits);
     }
 
-    public void processPropertiesAnnotation (Properties propInfo, AccessibleObject prop, List predicateList)
+    public void processPropertiesAnnotation (String propString, AccessibleObject prop, List predicateList)
     {
-        String propString = propInfo.value();
         try {
             new Parser(UIMeta.this, propString).processRuleBody(predicateList, null);
         } catch (Error e) {
@@ -1010,6 +1022,11 @@ public class UIMeta extends Meta
                     propString, prop.getClass().getName(), prop), e);
         }
         Log.meta_detail.debug("---- annotation for field %s -- @Properites: %s", prop, propString);
+    }
+
+    public void processPropertiesAnnotation (Properties propInfo, AccessibleObject prop, List predicateList)
+    {
+        processPropertiesAnnotation(propInfo.value(), prop, predicateList);
     }
 
     public void processActionAnnotation (Action annotation, AccessibleObject prop, List predicateList)
@@ -1166,15 +1183,21 @@ public class UIMeta extends Meta
                         m.put(KeyField, name);
                         m.put(KeyVisible, true);
 
-                        if (p.getWriteMethod() == null) {
+                        List<Predicate> predicateList = Arrays.asList(new Predicate(KeyClass, key),
+                                                        new Predicate(KeyField, name));
+                        ListUtil.lastElement(predicateList)._isDecl = true;
+
+                        if (p.getWriteMethod() != null) {
+                            processAnnotations(p.getWriteMethod(), predicateList, m, false);
+                        } else {
                             m.put(KeyEditable, false);
                             addTraits(Arrays.asList("derived"), m);
                         }
 
-                        List<Predicate> predicateList = Arrays.asList(new Predicate(KeyClass, key),
-                                                        new Predicate(KeyField, name));
-                        ListUtil.lastElement(predicateList)._isDecl = true;
-                        
+                        if (p.getReadMethod() != null) {
+                            processAnnotations(p.getReadMethod(), predicateList, m, false);
+                        }
+
                         // Try to get natural rank
                         _IntrospectionFieldInfo finfo = rankMap.get(name);
                         int rank;

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#8 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -88,7 +88,7 @@ public class AWDebugTrace
     public ComponentTraceNode componentTraceRoot ()
     {
         // move up to root (in case we're called when were still in the middle)
-        AWDebugTrace.ComponentTraceNode node = _currentComponentTraceNode;
+        AWDebugTrace.ComponentTraceNode node = currentComponentTraceNode();
         while (node != null && node._parent != null) node = node._parent;
         return node;
     }

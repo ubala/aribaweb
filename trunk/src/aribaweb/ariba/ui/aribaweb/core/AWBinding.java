@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBinding.java#45 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBinding.java#46 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1228,6 +1228,26 @@ abstract public class AWBinding extends AWBaseObject implements Cloneable
             throw new AWGenericException(message);
         }
         return intValue;
+    }
+
+    public double doubleValue (Object object)
+    {
+        double doubleValue = 0;
+        Object value = value(object);
+        if (value instanceof String) {
+            doubleValue = Double.parseDouble((String)value);
+        }
+        else if (value instanceof Number) {
+            doubleValue = ((Number)value).doubleValue();
+        }
+        else {
+            String message = Fmt.S(
+                "%s: attempt to compute doubleValue for binding not bound to an String or Number."
+                + "Component: %s binding: (%s=\"%s\")",
+                getClass().getName(), object, bindingName(), bindingDescription());
+            throw new AWGenericException(message);
+        }
+        return doubleValue;
     }
 
     //////////////////

@@ -1,0 +1,13 @@
+Product,Year,Revenue,Profit
+Sedan,2006,532,78
+Sedan,2007,600,102
+Sedan,2008,580,30
+Truck,2006,800,200
+Truck,2007,750,50
+Truck,2008,600,-30
+Mini Van,2006,300,10
+Mini Van,2007,400,20
+Mini Van,2008,500,30
+Sub-compact,2006,150,5
+Sub-compact,2007,250,10
+Sub-compact,2008,350,20

@@ -157,6 +157,7 @@ operation=list {
         label:"";
         after:zBottom;
         component:MetaActionList;
+        columnBindings: { width:"1px" };
         bindings: {
             renderAsMenu:true;
         }
@@ -177,6 +178,7 @@ module=Search {
     @layout=SearchTOC {
        label:"Actions";
        component:MetaActionList;
+       bindings: { filterActions:static }
        after:zToc;
        area:Global;
     }

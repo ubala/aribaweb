@@ -12,13 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumnRenderer.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumnRenderer.java#2 $
 */
 package ariba.ui.meta.layouts;
 
 import ariba.ui.table.AWTDataTable;
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.MetaContext;
+
+import java.util.Map;
 
 public final class MetaTableColumnRenderer extends AWTDataTable.ColumnRenderer
 {
@@ -46,18 +48,25 @@ public final class MetaTableColumnRenderer extends AWTDataTable.ColumnRenderer
         return metaContext().properties();
     }
 
+    public Object columnBindingValue (String key, Object defaultVal)
+    {
+        Object val = defaultVal;
+        Map map = (Map)metaContext().propertyForKey("columnBindings");
+        if (map != null) {
+            Object bval = map.get(key);
+            if (bval != null) val = bval;
+        }
+
+        return val;
+    }
+
     public Object columnWidth ()
     {
         // min width for image columns
-        return column().isValueColumn() ? null : "1px";
+        return columnBindingValue("width", (column().isValueColumn() ? null : "1px"));
     }
     
-    /** Evalators for the curentColumn's bindings */
-    public Object cc_width ()
-    {
-        return null;
-    }
-
+    /** Evaluators for the curentColumn's bindings */
     public Object cc_style ()
     {
         return _table.emitColumnStyle((String)metaContext().propertyForKey("style"));

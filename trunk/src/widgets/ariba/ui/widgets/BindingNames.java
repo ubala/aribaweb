@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BindingNames.java#51 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BindingNames.java#52 $
 */
 
 package ariba.ui.widgets;
@@ -54,7 +54,6 @@ public class BindingNames extends ariba.ui.aribaweb.html.BindingNames
     public static final String commands         = "commands";
     public static final String calendarDate     = "calendarDate";
     public static final String dateFactory      = "dateFactory";
-    public static final String debugTitle       = "debugTitle";
     public static final String disableHomeAction = "disableHomeAction";
     public static final String disableHelpAction = "disableHelpAction";
     public static final String disableLogoutAction = "disableLogoutAction";

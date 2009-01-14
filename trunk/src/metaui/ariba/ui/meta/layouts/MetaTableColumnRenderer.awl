@@ -1,4 +1,5 @@
 <a:If ifTrue="$^isHeader">\
+    <m:Context field="$thisColumn.fieldInfo.name">\
     <th class="tableHead" width="$columnWidth" style="$cc_style" nowrap="$cc_nowrap" align="$cc_align:left" colspan="$^colspan">\
         <a:If ifTrue="$table.renderToExcel">\
             <b>\
@@ -12,7 +13,9 @@
         </a:If>
         <!--- &nbsp;\-->\
     </th>\
+    </m:Context>\
 <a:Else/>\
+    <m:Context field="$thisColumn.fieldInfo.name" object="$_currentItem">\
     <td class="$table.tdClass" width="$dataRowColumnWidth" style="$cc_style" align="$cc_align" valign="$columnVAlignment" nowrap="$cc_nowrap" omitTags="$^omitTD" colspan="$^colspan" >\
         <a:OutputRangeCheck contentIterator="$table.iteratorForTDContentCheck">\
         <!--- We should replace this with a IncludeComponent that swtiches in a Controller. -->\
@@ -31,13 +34,8 @@
             <a:IncludeBlock name="Column"/>\
         </a:If>\
 -->
-            <a:IncludeBlock name="Column"/>\
+            <m:IncludeComponent/>\
         </a:OutputRangeCheck>\
     </td>\
-</a:If>\
-\
-<a:Block name="Column">\
-    <m:Context field="$thisColumn.fieldInfo.name" object="$_currentItem">\
-        <m:IncludeComponent/>\
     </m:Context>\
-</a:Block>\
+</a:If>\

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#23 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#24 $
 */
 
 
@@ -23,6 +23,7 @@ import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponse;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWErrorManager;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWFormatting;
 import ariba.util.core.StringUtil;
@@ -118,6 +119,28 @@ public class Chooser extends AWComponent
         return (_formatter == null)
             ? currentItem.toString()
             : AWFormatting.get(_formatter).format(_formatter, currentItem, preferredLocale());
+    }
+
+    /**
+        Method used to set the semantic key on the drop down image of the chooser.
+        This allows the recorder identify the image that the user clicks on.
+     */
+    public String chooserDropDownSemanticKey ()
+    {
+        return AWConcreteApplication.IsAutomationTestModeEnabled == true ?
+                _debugCompositeSemanticKey("displayValue:dropDown") : "";
+    }
+
+    public String chooserAddLinkSemanticKey ()
+    {
+        return AWConcreteApplication.IsAutomationTestModeEnabled == true ?
+                _debugCompositeSemanticKey("displayValue:addLink") : "";
+    }
+
+    public String chooserRemoveLinkSemanticKey ()
+    {
+        return AWConcreteApplication.IsAutomationTestModeEnabled == true ?
+                _debugCompositeSemanticKey("displayValue:removeLink") : "";
     }
 
     public String currentItemHighlightedString ()

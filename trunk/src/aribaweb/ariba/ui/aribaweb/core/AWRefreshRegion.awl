@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.awl#28 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.awl#29 $
     </Copyright>
 
     <Overview>
@@ -107,7 +107,7 @@
     <a:If ifTrue="$dragEnabled">\
         <a:GenericContainer tagName="$^tagName:div" id="$elementId"
             class="$className"
-            style="$style"
+            style="$^style"
             otherBindings="$otherBindingsValues" invokeAction="$fireAction"
             awname="$^awname" ignore="$^ignore">\
             <a:IncludeContent/>\
@@ -116,7 +116,7 @@
         <a:GenericContainer tagName="$^tagName:div" id="$elementId"
             omitTags="$^forceRefreshOnChange"
             class="$className"
-            style="$style"
+            style="$^style"
             otherBindings="$otherBindingsValues"
             awname="$^awname" ignore="$^ignore">\
             <a:IncludeContent/>\
@@ -124,7 +124,7 @@
     </a:If>\
     <a:PhaseInvocation append="$popBuffer"/>\
 <a:Else/>\
-    <a:GenericContainer tagName="$^tagName:div" style="$style" id="$elementId"
+    <a:GenericContainer tagName="$^tagName:div" style="$^style" id="$elementId"
                         class="$className"
                         otherBindings="$otherBindingsValues"
                         awname="$^awname" ignore="$^ignore">\

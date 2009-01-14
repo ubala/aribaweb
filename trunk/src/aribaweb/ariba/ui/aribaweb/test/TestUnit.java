@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestUnit.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestUnit.java#2 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -32,8 +32,10 @@ public class TestUnit
     private List _uiNoParamLinks = ListUtil.list();
     private List _noUIWithParamLinks = ListUtil.list();
     private List _noUiNoParamLinks = ListUtil.list();
-
     private List _noLinks = ListUtil.list();
+
+    private boolean _displayTestContextValue = false;
+
     public TestUnit(String name, List<TestLinkHolder> links)
     {
         _name = name;
@@ -58,8 +60,23 @@ public class TestUnit
                 }
             }
         }
+        if (links.size() > 0) {
+            String type = links.get(0).getType();
+            if (type != null && type.equals(_name)) {
+                _displayTestContextValue = true;
+            }
+        }
     }
 
+    public boolean displayTestContextValue ()
+    {
+        return _displayTestContextValue;    
+    }
+
+    public String getFullName ()
+    {
+        return _name;
+    }
     public String getMainName ()
     {
         return _mainName;

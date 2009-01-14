@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#64 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#65 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -637,7 +637,7 @@ abstract public class AWBaseRequest extends AWBaseObject
 
         NOTE: This code is based on ariba.util.net.CGI
      */
-    private static Parameters parametersFromUrlEncodedString (String formValuesString)
+    public static Parameters parametersFromUrlEncodedString (String formValuesString)
     {
         // Catch any query strings with escaped html.
         if (formValuesString.matches(".*&(amp|lt|gt|quot);.*")) {

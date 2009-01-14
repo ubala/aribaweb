@@ -30,35 +30,31 @@
     <property name="needs.aribaweb.properties" value="true"/>
 
     <property name="aw.packagedResourceExtensions" value="awl"/>
+    <property name="aw.namespaceIdentifier" value="x"/>
     <property name="aw.useNamespaceFromPackage" value="ariba.ui.widgets"/>
     <property name="aw.dependsOn" value="ariba.widgets"/>
 
     <import file="${aw.home}/tools/build-common.xml"/>
-
-    <!-- support for tomcat base in build dir on alternate port -->
-    <condition property="servlet.port" value="9080">
-        <isset property="create.temp.webapps.base"/>
-    </condition>
-    <condition property="catalina.base.dir" value="${build.dir}/tomcat-bases/${name}">
-        <isset property="create.temp.webapps.base"/>
-    </condition>
-    <condition property="tomcat.port.prefix.override" value="9">
-        <isset property="create.temp.webapps.base"/>
-    </condition>
-    
-    <!-- include our jar in the war -->
-    <fileset id="war.jars" dir="${build.jars.dir}">
-        <include name="${jar.name}"/>
-    </fileset>
 
     <!-- default aw jar resources -->
     <resources id="war.resources">
         <resources refid="aw.resources"/>
     </resources>
 
-    <target name="build-and-run" depends="jar, war, tomcat"
+    <target name="init" depends="common.init">
+        <!-- include our jar in the war -->
+        <fileset id="app.war.jars" dir="${build.jars.dir}">
+            <include name="${jar.name}"/>
+        </fileset>
+    </target>
+
+    <target name="build-and-run" depends="init, jar, war, tomcat"
             description="Rebuild WARs and start Tomcat"/>
 
-    <target name="launch" depends="jar, war, tomcat-browse"
-            description="Rebuild WARs and start Tomcat"/>
+    <target name="launch" depends="init, jar, war, tomcat-browse"
+            description="Rebuild WARs, starts Tomcat, opens browser"/>
+
+    <target name="clean" depends="init, common.clean"
+            description="Removes build output of this target"/>
+
 </project>

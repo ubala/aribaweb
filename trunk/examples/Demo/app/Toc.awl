@@ -4,10 +4,17 @@
         <w:BucketItem label="Component Inspector"
                       action='${ariba.ui.dev.AWComponentInspector.togglePathDebugging(requestContext())}'/>
     </w:BucketHeading>
-    <w:BucketHeading label="Try">
+    <w:BucketHeading label="Gallery">
         <w:BucketItem label="Data Tables" action='${pageWithName("TableTabs")}'/>
         <w:BucketItem label="Pivot Tables" action='${pageWithName("PivotTabs")}'/>
         <w:BucketItem label="Forms" action='${pageWithName("MetaUIForms")}'/>
+        <w:BucketItem label="File Upload" action='${pageWithName("FileUploadDownload")}'/>
+    </w:BucketHeading>
+    <w:BucketHeading label="Fun">
         <w:BucketItem label="Master Detail app" action='${pageWithName("ERPage")}'/>
+        <w:BucketItem label="YouTube Browser" action='${pageWithName("YouTubeBrowser")}'/>
+        <w:BucketItem label="Charts" action='${pageWithName("ChartTabs")}'/>
+        <w:BucketItem label="Maps" action='${pageWithName("MapTabs")}'/>
+        <w:BucketItem label="Map Race" action='${pageWithName("MapRace")}'/>
     </w:BucketHeading>
 </w:BucketsTOC>\

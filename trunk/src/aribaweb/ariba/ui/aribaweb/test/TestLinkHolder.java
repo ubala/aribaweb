@@ -12,27 +12,25 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#2 $
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWComponent;
-import ariba.ui.aribaweb.core.AWDirectAction;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
-import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.ui.aribaweb.util.SemanticKeyProvider;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.StringUtil;
+import ariba.util.test.TestLink;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.Set;
 
-public class TestLinkHolder
+public class TestLinkHolder implements SemanticKeyProvider
 {
     private static String _DefaultFirstLevelCategory = "General";
 
@@ -90,14 +88,27 @@ public class TestLinkHolder
         }
     }
 
+    public String getType ()
+    {
+        return _type;
+    }
+    
+    public String getKey (Object receiver, AWComponent component)
+    {
+        return _displayName;
+    }
+    
     private String computeSecondaryName ()
     {
         String name = null;
-        if (!StringUtil.nullOrEmptyOrBlankString(_type)) {
+        if (StringUtil.nullOrEmptyOrBlankString(_type)) {
             if (_annotatedItem.getClass() == Method.class) {
                 Method m = (Method) _annotatedItem;
                     name = m.getDeclaringClass().getName();
             }
+        }
+        else {
+            name = _type;
         }
         return name;
     }
@@ -142,9 +153,10 @@ public class TestLinkHolder
     {
         String categoryName = null;
         String[] strings = className.split("\\.");
-        if (strings.length >= 2) {
-            if (strings[0].equals("ariba")) {
-                categoryName = strings[1];
+        for (String name : strings) {
+            if (!"ariba".equals(name) && !"htmlui".equals(name)) {
+                categoryName = name;
+                break;
             }
         }
         if (StringUtil.nullOrEmptyOrBlankString(categoryName)) {
@@ -160,26 +172,77 @@ public class TestLinkHolder
 
     public boolean isTestLinkParam ()
     {
-        return TestLinkParam.class.isAssignableFrom(_annotation.annotationType());
+        return TestParam.class.isAssignableFrom(_annotation.annotationType());
     }
 
     public boolean isActive (AWRequestContext requestContext)
     {
+        TestContext testContext = TestContext.getTestContext(requestContext);
         boolean active = true;
         if (requiresParam()) {
             if (_annotatedItem.getClass() == Method.class) {
                 Method method = (Method) _annotatedItem;
                 Class[] methodTypes = method.getParameterTypes();
-                TestContext testContext = TestContext.getTestContext(requestContext);
-                for (int i=0; i<methodTypes.length; i++) {
-                    if (testContext.get(methodTypes[i]) == null) {
+                if (useAnnotationType(requestContext, method)) {
+                    Class typeOnAnnotation = ClassUtil.classForName(_type);
+                    if (testContext.get(typeOnAnnotation) == null) {
                         active = false;
+                    }
+                }
+                else {
+                    active = canInvokeMethod(method, testContext);
+                }
+            }
+        }
+        if (active) {
+            active = checkTestLinkParams(testContext);
+        }
+        return active;    
+    }
+
+    private boolean canInvokeMethod(Method method, TestContext testContext)
+    {
+        boolean canInvoke = true;
+        Class[] methodTypes = method.getParameterTypes();
+        for (int i=0; i<methodTypes.length; i++) {
+            if (!AWRequestContext.class.equals(methodTypes[i]) && testContext.get(methodTypes[i]) == null) {
+                canInvoke = false;
+                break;
+            }
+        }
+        return canInvoke;
+    }
+    
+    /*
+       Check to see if all of the methods that are annotated with TestLinkParam
+       can be invoked with the current state of the TestContext.
+     */
+    private boolean checkTestLinkParams (TestContext testContext)
+    {
+        boolean canInvoke = true;
+        Class testClass;
+        if (_annotatedItem.getClass() == Method.class) {
+            Method m = (Method) _annotatedItem;
+            testClass = m.getDeclaringClass();
+        }
+        else {
+            testClass = _annotatedItem.getClass();
+        }
+        Map<Class, Object> annotations = TestLinkManager.instance().annotationsForClass(testClass.getName());
+        Set keys = annotations.keySet();
+        for (Object key : keys) {
+            Annotation annotation = (Annotation)key;
+            if (TestParam.class.isAssignableFrom(annotation.annotationType())) {
+                Object ref = annotations.get(key);
+                if (ref.getClass() == Method.class) {
+                    if (!canInvokeMethod((Method)ref, testContext)) {
+                        canInvoke = false;
                         break;
                     }
                 }
             }
         }
-        return active;    
+        return canInvoke;
     }
 
     public boolean isHidden ()
@@ -191,7 +254,7 @@ public class TestLinkHolder
         boolean isInteractive = false;
         if (_annotatedItem.getClass() == Method.class) {
             Method m = (Method) _annotatedItem;
-            if (AWComponent.class.isAssignableFrom(m.getReturnType())) {
+            if (AWResponseGenerating.class.isAssignableFrom(m.getReturnType())) {
                 isInteractive = true;
             }
         }
@@ -209,18 +272,28 @@ public class TestLinkHolder
         if (_annotatedItem.getClass() == Method.class) {
             Method method = (Method) _annotatedItem;
             Class[] methodTypes = method.getParameterTypes();
-            if (methodTypes.length > 0) {
-                if (StringUtil.nullOrEmptyOrBlankString(_type)) {
-                    requiresParam = true;
-                }
-                else if (!(methodTypes.length == 1 && methodTypes[0] == String.class)){
-                    requiresParam = true;                    
-                }
-            }
+            requiresParam = methodTypes.length > 0;
         }
         return requiresParam;
     }
-    
+
+    private boolean useAnnotationType (AWRequestContext requestContext, Method method)
+    {
+        boolean useAnnotationType = false;
+        TestContext testContext = TestContext.getTestContext(requestContext);
+        Class[] parameterTypes = method.getParameterTypes();
+        if (_type != null && parameterTypes.length == 1) {
+            Class typeOnAnnotation = ClassUtil.classForName(_type);
+            Class methodType = parameterTypes[0];
+            if (methodType.isAssignableFrom(typeOnAnnotation)) {
+                if (testContext.get(typeOnAnnotation) != null) {
+                    useAnnotationType = true;
+                }
+            }
+        }
+        return useAnnotationType;
+    }
+
     public AWResponseGenerating click (AWRequestContext requestContext)
     {
         TestContext testContext = TestContext.getTestContext(requestContext);
@@ -232,21 +305,31 @@ public class TestLinkHolder
             AWResponseGenerating page = null;
             if (_annotatedItem.getClass() == Method.class) {
                 Method m = (Method) _annotatedItem;
-                Object obj = getObjectToInvoke(requestContext, m);
-                page = (AWResponseGenerating)invokeMethod(testContext, m, obj);
+                Object obj = AnnotationUtil.getObjectToInvoke(requestContext, m);
+                if (useAnnotationType(requestContext, m)) {
+                    Class typeOnAnnotation = ClassUtil.classForName(_type);
+                    Object[] args = new Object[1];
+                    args[0] = testContext.get(typeOnAnnotation);
+                    page = (AWResponseGenerating)AnnotationUtil.invokeMethod(m, obj, args);
+                }
+                else {
+                    page = (AWResponseGenerating)AnnotationUtil.invokeMethod(requestContext, testContext, m, obj);
+                }
             }
             else {
                 String name = ClassUtil.stripPackageFromClassName(((Class) _annotatedItem).getName());
                 page = requestContext.pageWithName(name);
             }
-            initializeTestLinkParams(testContext, page);
+            if (page != null) {
+                initializeTestLinkParams(requestContext, testContext, page);
+            }
             return page;
         }
         else {
             if (_annotatedItem.getClass() == Method.class) {
                 Method m = (Method) _annotatedItem;
-                Object obj = getObjectToInvoke(requestContext, m);
-                Object res = invokeMethod(testContext, m, obj);
+                Object obj = AnnotationUtil.getObjectToInvoke(requestContext, m);
+                Object res = AnnotationUtil.invokeMethod(requestContext, testContext, m, obj);
                 if (res != null) {
                     testContext.put(res);
                 }
@@ -255,7 +338,7 @@ public class TestLinkHolder
         }
     }
     
-    private void initializeTestLinkParams (TestContext testContext, Object page)
+    private void initializeTestLinkParams (AWRequestContext requestContext, TestContext testContext, Object page)
     {
         Class testClass;
         if (_annotatedItem.getClass() == Method.class) {
@@ -265,66 +348,19 @@ public class TestLinkHolder
         else {
             testClass = _annotatedItem.getClass();
         }
+        // loop through all of the methods with TestLinkParam Annotation and invoke
+        // the with method passing the proper needed argument to the method.
         Map<Class, Object> annotations = TestLinkManager.instance().annotationsForClass(testClass.getName());
         Set keys = annotations.keySet();
         for (Object key : keys) {
             Annotation annotation = (Annotation)key;
-            if (TestLinkParam.class.isAssignableFrom(annotation.annotationType())) {
+            if (TestParam.class.isAssignableFrom(annotation.annotationType())) {
                 Object ref = annotations.get(key);
                 if (ref.getClass() == Method.class) {
-                    invokeMethod(testContext, (Method)ref, page);
+                    AnnotationUtil.invokeMethod(requestContext, testContext, (Method)ref, page);
                 }
             }
         }
     }
 
-    private Object getObjectToInvoke (AWRequestContext requestContext, Method method)
-    {
-        Object obj = null;
-        if (!Modifier.isStatic(method.getModifiers())) {
-            obj = createObject(requestContext, method.getDeclaringClass());
-        }
-        return obj;
-    }
-    private Object invokeMethod (TestContext testContext, Method method, Object onObject)
-    {
-        try {
-            Class[] methodTypes = method.getParameterTypes();
-            Object[] args = new Object[methodTypes.length];
-            for (int i=0; i<methodTypes.length; i++) {
-                args[i] = testContext.get(methodTypes[i]);
-            }
-            return method.invoke(onObject, args);
-        }
-        catch (IllegalAccessException e) {
-            throw new AWGenericException (e);
-        }
-        catch (InvocationTargetException e) {
-            throw new AWGenericException (e);
-        }
-    }
-
-    private Object createObject (AWRequestContext requestContext, Class c)
-    {
-        Object obj;
-        try {
-            if (AWComponent.class.isAssignableFrom(c)) {
-                String name = ClassUtil.stripPackageFromClassName(c.getName());
-                obj = requestContext.pageWithName(name);
-            }
-            else {
-                obj = c.newInstance();
-            }
-            if (AWDirectAction.class.isAssignableFrom(c)) {
-                ((AWDirectAction)obj).init(requestContext);
-            }
-            return obj;
-        }
-        catch (IllegalAccessException illegalAccessException) {
-            throw new AWGenericException(illegalAccessException);
-        }
-        catch (InstantiationException instantiationException) {
-            throw new AWGenericException(instantiationException);
-        }
-    }
 }

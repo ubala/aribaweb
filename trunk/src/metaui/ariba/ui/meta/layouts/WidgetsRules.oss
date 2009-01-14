@@ -100,19 +100,25 @@ field {
     }
     type=java.lang.String {
         editable                { component:AWTextField }
-        trait=richtext {
+        trait=(longtext,LongText) {
+            after:zBottom;
+            editable            { component:AWTextArea;
+                                  bindings:{cols:60; rows:10} }
+            operation=(search, list)  { visible:false }
+        }
+        trait=(richtext,RichText) {
             after:zBottom;
             bindings:{escapeUnsafeHtml:true}
-            editable            { component:${ariba.util.core.ClassUtil.classForName("ariba.ui.richtext.RichTextArea", false) ? "RichTextArea" : "AWTextArea" };
+            editable            { component:RichTextArea;
                                   bindings:{cols:60; rows:10} }
-            operation=(search)  { visible:false }
+            operation=(search, list)  { visible:false }
         }
-        trait=secret       {
+        trait=(secret, Secret)  {
             bindings:{formatter:$component.formatters.hiddenPassword};
             editable   { component:AWPasswordField; bindings:{formatter:null} }
+            operation=(search, list) { visible: false; }
         }
-        trait=longtext editable { component:AWTextArea; bindings:{cols:60; rows:10} }
-        trait=truncated    { component:TruncateString; bindings:{size:10} }
+        trait=(truncated, Truncated) { component:TruncateString; bindings:{size:10} }
     }
 
     trait=derived {
@@ -121,7 +127,7 @@ field {
         editing { visible:false; }
     }
 
-    trait=required editable {
+    trait=(required, Required) editable {
         required:true;
         valid: ${(value != null && value !="") ? true : "Answer required"}
     }
@@ -153,6 +159,7 @@ field {
 
 action {
     visible:true;
+    enabled:true;
 
     trait=pageAction {
         actionResults:${requestContext.pageWithName(properties.pageName)}
@@ -186,19 +193,25 @@ action {
     }
 
     trait=instance {
-    	visible:${object != null};
+    	enabled:${object != null};
     	isInstanceAction:true;
     }
 
     filterActions=instance {
     	visible:${properties.isInstanceAction}
     }
+    filterActions=static {
+    	visible:${!properties.isInstanceAction}
+    }
 }
 
 layout {
     zones: [zMain];
     trait=ActionMenu { visible:true; component:MetaActionList bindings:{renderAsMenu:true} elementClass:flR }
-    trait=ActionButtons { visible:true; component:MetaActionList bindings:{renderAsButtons:true} elementClass:flR }
+    trait=InstanceActionButtons { visible:true; component:MetaActionList
+                bindings:{renderAsButtons:true;filterActions:instance} elementClass:flR }
+    trait=StaticActionButtons { visible:true; component:MetaActionList
+                bindings:{renderAsButtons:true;filterActions:static} elementClass:flR }
     trait=Tabs { visible:true; component:MetaTabs }
     trait=Sections { visible:true; component:MetaSections }
     trait=Form { visible:true; component:MetaForm }
@@ -209,8 +222,19 @@ layout {
     }
 }
 layout=Inspect { traits:Form }
-layout=ButtonArea { traits:ActionButtons }
-layout=SelectionButtonArea { traits:ActionButtons }
+layout=InspectWithActions {
+    traits:Stack;
+    @layout#ActionMenu;
+    @layout#Form;
+}
+layout=ButtonArea { traits:StaticActionButtons }
+layout=SelectionButtonArea { traits:InstanceActionButtons }
+
+/* Support @Trait("LabelField") to identity label field */
+layout=LabelField field {
+    visible:false;
+    trait=LabelField { visible:true! }
+}
 
 module {
     visible:true;
@@ -230,6 +254,7 @@ module {
 actionCategory {
     visible:true;
 }
+@actionCategory=Manage {}
 
 
 /* For groovy */

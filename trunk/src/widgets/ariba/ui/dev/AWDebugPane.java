@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.java#27 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.java#28 $
 */
 package ariba.ui.dev;
 
@@ -118,7 +118,9 @@ public final class AWDebugPane extends AWComponent implements PerformanceCheck.E
 
     public String errorWarningStyle ()
     {
-        if (requestContext().validationContext().hasErrorForComponentPackage(pageComponent())) {
+        AWValidationContext context = requestContext().validationContext();
+        if (context.hasErrorForComponentPackage(pageComponent()) ||
+                context.hasGeneralErrors()) {
             return ErrorStyle;
         } else {
             return WarningStyle;

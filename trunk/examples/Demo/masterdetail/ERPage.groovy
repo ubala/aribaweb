@@ -9,7 +9,7 @@ import ariba.util.core.*;
 class ERPage extends AWComponent
 {
     def tabIndex=0;
-    def displayGroup;
+    AWTDisplayGroup displayGroup;
     def selectedItem;
     def currentItem = null;
     def expenseTypes = ["Meal", "Hotel", "Airfare", "Car", "Entertainment"];
@@ -31,18 +31,20 @@ class ERPage extends AWComponent
         return null;
     }
 
-    def addItem (String type)
-    {
+    void addItem (item, int pos) {
+        List list = displayGroup.allObjects();
+        if (pos == -1) pos = list.size()
+        list.add(pos, item);
+        displayGroup.setObjectArray(list);
+        displayGroup.setSelectedObject(item);
+    }
+
+    void addItem (String type) {
         // Clone selected item, add it to list, and select it
         def newItem = [:];  // new record
         newItem.Type = type;
         newItem.Year = new ariba.util.core.Date();
-        def list = displayGroup.allObjects();
-        list.add(newItem);
-        displayGroup.setObjectArray(list);
-        displayGroup.setSelectedObject(newItem);
-
-        return null;  // same page
+        addItem(newItem, -1)
     }
 
     def deleteSelected () {
@@ -50,6 +52,26 @@ class ERPage extends AWComponent
         return null;
     }
 
+    def draggedCharge
+    AWTDisplayGroup chargeDisplayGroup
+
+    void addCharges () {
+        chargeDisplayGroup.selectedObjects().each {
+            addItem(it, -1)
+        }
+        chargeDisplayGroup.setObjectArray(ListUtil.minus(chargeDisplayGroup.allObjects(),
+                chargeDisplayGroup.selectedObjects()));
+    }
+    
+    void chargeDragged () {
+        // remember dragged charge
+        draggedCharge = chargeDisplayGroup.currentItem()
+    }
+
+    void chargeDropped () {
+        addItem(draggedCharge, displayGroup.filteredObjects().indexOf(displayGroup.currentItem()))
+        chargeDisplayGroup.setObjectArray(ListUtil.minus(chargeDisplayGroup.allObjects(), [draggedCharge]));
+    }
 
     def rememberLastSelected () { lastSelectedObject = displayGroup.selectedObject(); }
 
@@ -68,10 +90,10 @@ class ERPage extends AWComponent
     def longRunningAction () {
         java.lang.Thread.sleep(4000); // pretend that it took us 4 sec before initing status string
         def m = ProgressMonitor.instance();
-        m.prepare("<h3>Step 1 of 2: Process items</h3>(Processed %s of %s)", displayGroup.allObjects().size());
+        m.prepare("<b>Step 1 of 2: Process items</b><br/>(Processed %s of %s)", displayGroup.allObjects().size());
         fakeDoProcessItems();
 
-        m.prepare("<h3>Step 2 of 2: Optimizing items</h3>(Processed %s of %s)", displayGroup.allObjects().size());
+        m.prepare("<b>Step 2 of 2: Optimizing items</b><br/>(Processed %s of %s)", displayGroup.allObjects().size());
         fakeDoProcessItems();
 
         return null;
@@ -90,33 +112,5 @@ class ERPage extends AWComponent
             java.lang.Thread.sleep(1000); // pretend to work for one second
             ProgressMonitor.instance().incrementCurrentCount();
         }
-    }
-
-    def chooserState;
-    def selectionSource = new MatchSource();
-    def selections;
-    def selectAction () { return null; }
-}
-
-class MatchSource implements ChooserSelectionSource
-{
-    def NamesList = [
-        "ytang_supplier1",
-        "gforget_supplier1",
-        "Sgorantla_supplier1",
-        "Mwhitmore_supplier1",
-        "Mtessel_supplier1",
-        "Chak_supplier1",
-        "Mdao_supplier1",
-    ];
-
-    public List match (String pattern, int max) {
-        List matches = match(NamesList, pattern);
-        return (matches.size() > max) ? matches.subList(0, max) : matches;
-    }
-
-    public List match(List selections, String pattern) {
-        if (pattern == null)  return selections;
-        return selections.findAll { name -> name.startsWith(pattern); }
     }
 }

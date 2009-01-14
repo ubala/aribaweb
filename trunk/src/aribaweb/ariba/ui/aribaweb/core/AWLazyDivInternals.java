@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWLazyDivInternals.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWLazyDivInternals.java#3 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -81,7 +81,7 @@ public final class AWLazyDivInternals extends AWComponent
             if (isSender) {
                 AWResponse response = application().createResponse();
                 responseGenerating = response;
-                requestContext.setResponse(response);
+                requestContext.setXHRRCompatibleResponse(response);
                 SharedComponentContentElement.renderResponse(requestContext, this);
 
                 setHasRendered(true);

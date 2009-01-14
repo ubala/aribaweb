@@ -12,17 +12,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWWhile.java#18 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWWhile.java#19 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWSemanticKeyProvider;
+import ariba.ui.aribaweb.util.SemanticKeyProvider;
 
-import java.util.Map;
 import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Because of the nature of AWWhile, it is not possible to support either skipping nor state recording.
@@ -148,7 +149,7 @@ public final class AWWhile extends AWContainerElement
                     key = (String)_semanticKey.value(component);
                 }
                 if (key == null) {
-                    AWSemanticKeyProvider provider = AWSemanticKeyProvider.get(currentItem);
+                    SemanticKeyProvider provider = AWSemanticKeyProvider.get(currentItem);
                     if (provider != null) {
                         key = provider.getKey(currentItem, component);
                     }

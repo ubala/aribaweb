@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.java#22 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.java#23 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -42,7 +42,6 @@ public final class AWRefreshRegion extends AWComponent
     public boolean _dragEnabled;
     public AWEncodedString _elementId;
 
-    public AWBinding _styleBinding;
     public AWBinding _tagNameBinding;
     public AWBinding _classBinding;
     public boolean _hasValueBinding;
@@ -67,7 +66,6 @@ public final class AWRefreshRegion extends AWComponent
             _elementId = requestContext().nextElementId();
         }
         setValueForBinding(_elementId, AWBindingNames.elementId);
-        _styleBinding = bindingForName(AWBindingNames.style);
         _classBinding = bindingForName(AWBindingNames.classBinding);
         _tagNameBinding = bindingForName(AWBindingNames.tagName);
         // use false here to avoid recursion.
@@ -88,7 +86,6 @@ public final class AWRefreshRegion extends AWComponent
         _elementId = null;
         _isDisabled = false;
         _dragEnabled = false;
-        _styleBinding = null;
         _classBinding = null;
         _tagNameBinding = null;
         _hasValueBinding = false;
@@ -137,24 +134,6 @@ public final class AWRefreshRegion extends AWComponent
             return AWDragContainer.processAction(this, _elementId);
         }
         return super.invokeAction(requestContext, component);
-    }
-
-    public Object getStyle ()
-    {
-        AWEncodedString style = null;
-        if (hasBinding(_styleBinding)) {
-            style = encodedStringValueForBinding(_styleBinding);
-        }
-
-        if (AWConcreteServerApplication.IsDebuggingEnabled) {
-            AWSession session = session(false);
-            if (session != null &&
-                Boolean.TRUE.equals(session.dict().get("RefreshRegionsVisible"))) {
-                return StringUtil.strcat("border:1px red dotted;",
-                                         style != null ? style.toString() : null);
-            }
-        }
-        return style;
     }
 
     public Object getClassName ()

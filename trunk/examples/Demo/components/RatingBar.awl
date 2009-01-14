@@ -1,0 +1,2 @@
+<!--- Simple component for rendering a bar indicator -->\
+<a:PrimitiveString value="$divHTML"/>\

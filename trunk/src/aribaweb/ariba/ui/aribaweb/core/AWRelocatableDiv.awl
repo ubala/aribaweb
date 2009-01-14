@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRelocatableDiv.awl#8 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRelocatableDiv.awl#9 $
     </Copyright>
 
     <Overview>
@@ -47,9 +47,7 @@
         <a:IncludeContent/>\
     </a:RefreshRegion>\
     <a:GenericContainer tagName="script">
-        if (window.name == "AWRefreshFrame") {
-            parent.ariba.Dom.removeRelocatedCopy('$^id');
-        }
+        if (ariba_IR) ariba.Dom.removeRelocatedCopy('$^id');
     </a:GenericContainer>
 <a:Else/>
     <div id="$^id"

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FourZoneLayout.awl#2 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FourZoneLayout.awl#4 $
     </Copyright>
 
     <Overview>
@@ -47,29 +47,33 @@
 <table border="0" cellspacing="0" cellpadding="0" width="100%">
     <tr>
         <td colspan="3" valign="top">\
-            <a:IncludeContent name="top" required="$false"/>
+            <a:RefreshRegion>
+                <a:IncludeContent name="top" required="$false"/>
+            </a:RefreshRegion>
         </td>
     </tr>
     <tr>
         <td width="$^widthLeft:50%" valign="top">\
-            <div class="flexContainer">
+            <a:RefreshRegion class="flexContainer">
                 <a:IncludeContent name="left" required="$false"/>
-            </div>
+            </a:RefreshRegion>
         </td>
 
         <td width="1%">\
-            <div style="width:20px"/>\
+            <div style="width:20px"></div>\
         </td>
 
         <td width="$^widthRight:50%" valign="top">\
-            <div class="flexContainer">
+            <a:RefreshRegion class="flexContainer">
                 <a:IncludeContent name="right" required="$false"/>
-            </div>
+            </a:RefreshRegion>
         </td>
     </tr>
     <tr>
         <td colspan="3" valign="top">\
-            <a:IncludeContent name="bottom" required="$false"/>
+            <a:RefreshRegion>
+                <a:IncludeContent name="bottom" required="$false"/>
+            </a:RefreshRegion>
         </td>
     </tr>
 </table>\

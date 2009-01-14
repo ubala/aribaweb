@@ -22,9 +22,9 @@ Operation:
             field=email { after:zRight }
             field=projects { after:Projects.zDetail }
 
-            /* Use a custom AWXRatingBar component for the "rating" field and put it at the top */
+            /* Use a custom RatingBar component for the "rating" field and put it at the top */
             field=rating {
-                editable=false {component:AWXRatingBar;}
+                editable=false {component:RatingBar;}
                 editable { bindings:{isRefresh:true} }
                 after:zTop;
             }

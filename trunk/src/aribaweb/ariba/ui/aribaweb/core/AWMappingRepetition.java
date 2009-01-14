@@ -12,21 +12,23 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWMappingRepetition.java#14 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWMappingRepetition.java#15 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWMap;
 import ariba.ui.aribaweb.util.AWSemanticKeyProvider;
-import ariba.util.core.ListUtil;
+import ariba.ui.aribaweb.util.SemanticKeyProvider;
 import ariba.util.core.Compare;
-import java.util.Map;
+import ariba.util.core.ListUtil;
 import ariba.util.core.Sort;
 import ariba.util.core.StringCompare;
-import java.util.List;
+
 import java.lang.reflect.Field;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 // Reimplement as an AWComponent?
 public final class AWMappingRepetition extends AWContainerElement
@@ -190,7 +192,7 @@ public final class AWMappingRepetition extends AWContainerElement
                     break;
                 case ActionRenderResponse:
                     if (shouldRecord) {
-                        AWSemanticKeyProvider provider = AWSemanticKeyProvider.get(currentKey);
+                        SemanticKeyProvider provider = AWSemanticKeyProvider.get(currentKey);
                         if (provider != null) {
                             String key = provider.getKey(currentKey, component);
                             requestContext._debugSetSemanticKeyPrefix(key);

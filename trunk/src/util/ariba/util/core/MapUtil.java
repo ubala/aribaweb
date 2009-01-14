@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#21 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#22 $
 */
 
 package ariba.util.core;
@@ -482,7 +482,7 @@ public final class MapUtil
                 dest.put(key,
                          mergeMapIntoMapWithObjects(
                              copyMap((Map)destValue),
-                             (Map)sourceValue));
+                             (Map)sourceValue, overwriteMismatchedClasses));
             }
             else if ((destValue instanceof Map) &&
                      (sourceValue instanceof List))
@@ -492,7 +492,7 @@ public final class MapUtil
                              mergeMapIntoMapWithObjects(
                                  copyMap((Map)destValue),
                                  convertListToMap(
-                                     (List)sourceValue)));
+                                     (List)sourceValue), overwriteMismatchedClasses));
                 }
                 else {
                     List sourceVect = ListUtil.copyList((List)sourceValue);
@@ -507,7 +507,7 @@ public final class MapUtil
                     dest.put(key,
                              mergeMapIntoMapWithObjects(
                                  convertListToMap((List)destValue),
-                                 (Map)sourceValue));
+                                 (Map)sourceValue, overwriteMismatchedClasses));
                 }
                 else {
                     ListUtil.addElementIfAbsent(((List)destValue),

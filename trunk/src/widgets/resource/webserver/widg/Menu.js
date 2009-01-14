@@ -114,8 +114,21 @@ ariba.Menu = function() {
         menuLinkOnClick : function (positioningObject, menuName, linkId, mevent)
         {
             var divObject = Dom.getElementById(menuName);
-
+            var x;
+            var y;
+            if (mevent) {
+                x = mevent.pageX;
+                y = mevent.pageY;
+            }
             Dom.relocateDiv(divObject);
+            // coordinates changes after relocating the div on Firefox 3
+            // workaround by fabricating a fake event containing the original coordinates
+
+            if (mevent && (x != mevent.pageX || y != mevent.pageY)) {
+                mevent = new Object();
+                mevent.pageX = x;
+                mevent.pageY = y;
+            }
 
             if (this.AWActiveMenu != divObject) {
                 this.hideActiveMenu();

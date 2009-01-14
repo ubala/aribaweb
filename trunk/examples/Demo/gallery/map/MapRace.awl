@@ -1,0 +1,114 @@
+<w:BasicPageWrapper hasForm="$true">
+    <h1>The Race!</h1>
+    <w:TabSet>
+        <w:Tab label="Design Course">
+            <w:HintMessage>
+                <b>Click map</b> to place markers.  <b>Drag</b> markers to relocated.
+                <b>Click markers</b> to select them in the table.  <b>Delete</b> markers at will.
+            </w:HintMessage>
+            <w:FourZoneLayout>
+                <a:Content name="left">
+                    <t:DataTable title="Segments" enableScrolling="$true" initialSortKey=""
+                                 list="$course.segments" item="$segment" displayGroup="$courseDisplayaGroup">
+                        <t:Column label="" key="number"/>
+                        <t:Column label="Length (km)" key="distance" formatter="$formatters.double"/>
+                        <t:Column align="right">
+                            <w:TextButton action="$deleteSegment">Delete</w:TextButton>
+                        </t:Column>
+                    </t:DataTable>
+                    <a:RefreshRegion>
+                        <div style="text-align:right;padding-bottom:20px">\
+                            Total course length: <b>$course.length|$formatters.double</b>\
+                        </div>
+                    </a:RefreshRegion>
+
+                    <w:OutlineBox title="Segment Length Chart" showExpandoCollapso="$true"
+                                  initiallyExpanded="$false">
+                        <a:Content name="body">
+                            <w:Chart type="Bar2D" width="440" height="320">
+                                <w:ChartData list="$course.segments" labelKey="number"
+                                             valueKey="distance"/>
+                            </w:Chart>                            
+                        </a:Content>
+                    </w:OutlineBox>
+                </a:Content>
+
+                <a:Content name="right">
+                    <h1>The Course</h1>
+                    <x:GMap width="500" height="550"
+                            clickAction="$addMarker" eventLatitude="$lat" eventLongitude="$lng">
+                        <a:For list="$course.markers" item="$marker">
+                            <x:GMapMarker latitude="$marker.latitude" longitude="$marker.longitude"
+                                          action="$markerClicked" dragAction="$markerDragged"
+                                          autoCenterMap="$false"/>
+                        </a:For>
+                        <x:GMapPolyline list="$course.markers" item="$marker"
+                                latitude="$marker.latitude" longitude="$marker.longitude"/>
+                    </x:GMap>
+                </a:Content>
+            </w:FourZoneLayout>
+        </w:Tab>
+        <w:Tab label="Monitor Race">
+            <w:HintMessage>
+                <b>Add</b> racers and set their speed.  Click <b>Start</b> to begin the race.
+                You can change racers speed during the race -- just click <b>Update</b>.
+            </w:HintMessage>
+            <w:FourZoneLayout>
+                <a:Content name="left">
+                    <t:DataTable title="Racers" enableScrolling="$true" initialSortKey=""
+                                 list="$race.racers" item="$racer" displayGroup="$racerDisplayGroup">
+                        <t:HeadingArea>
+                            <a:RefreshRegion>
+                                <div style="float:right">
+                                    <a:If ifTrue="$race.running">
+                                        <w:TextButton action="$stop">Stop</w:TextButton>
+                                    <a:Else/>
+                                        <w:TextButton action="$start">Start</w:TextButton>
+                                    </a:If>
+                                </div>
+                                <div style="float:right"><b>$race.time|$formatters.duration</b></div>
+                            </a:RefreshRegion>
+                        </t:HeadingArea>
+                        <t:Column label="Name" key="name"><a:TextField value="$racer.name"/></t:Column>
+                        <t:Column label="Speed (km/hr)" key="speed" formatter="$formatters.double">
+                            <a:TextField value="$racer.speed" formatter="$formatters.double"/>
+                        </t:Column>
+                        <t:Column label="Progress (km)" key="distance" formatter="$formatters.double">
+                            <a:RefreshRegion>$racer.distance|$formatters.double</a:RefreshRegion>
+                        </t:Column>
+                        <t:Column align="right">\
+                            <w:TextButton action="$deleteRacer">Delete</w:TextButton>\
+                        </t:Column>
+                        <t:ButtonArea>
+                            <w:TextButton action="$addRacer">Add</w:TextButton>
+                            <w:TextButton action="$null">Update</w:TextButton>
+                        </t:ButtonArea>
+                    </t:DataTable>
+                    <w:OutlineBox title="Progress Chart" showExpandoCollapso="$true"
+                                  initiallyExpanded="$false">
+                        <a:Content name="body">
+                            <w:Chart type="Bar2D" width="440" height="320">
+                                <w:ChartData list="$race.racers" labelKey="name" valueKey="distance"/>
+                                <set name='Course' value='$course.length' color='#CCCCCC'></set>\
+                            </w:Chart>
+                        </a:Content>
+                    </w:OutlineBox>
+                </a:Content>
+
+                <a:Content name="right">
+                    <h1>The Race</h1>
+                    <x:GMap width="500" height="550"
+                            eventLatitude="$lat" eventLongitude="$lng">
+                        <x:GMapPolyline list="$course.markers" item="$marker" color="#00DD00"
+                                latitude="$marker.latitude" longitude="$marker.longitude"/>
+                        <a:For list="$race.racers" item="$racer">
+                            <x:GMapMarker latitude="$racerPosition.latitude"
+                                          longitude="$racerPosition.longitude"
+                                          autoCenterMap="$false"/>
+                        </a:For>
+                    </x:GMap>
+                </a:Content>
+            </w:FourZoneLayout>
+        </w:Tab>
+    </w:TabSet>
+</w:BasicPageWrapper>

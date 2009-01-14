@@ -12,32 +12,46 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestComponentPage.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestComponentPage.java#2 $
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.util.core.FastStringBuffer;
+import ariba.util.test.TestValidationParameter;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class TestComponentPage extends AWComponent
 {
-    @TestLink
     void createBusinessObject ()
     {
         TestContext tc = TestContext.getTestContext(requestContext());
         tc.put(new String("MyBusinessObject"));
+        tc.put(new Integer(20));
+        tc.put(this);
+
+        Set keys = tc.keys();
+        for (Object key : keys) {
+            boolean has = TestLinkManager.instance().hasObjectInspectors(key);
+            if (has) {
+                List<TestInspectorLink> inspectors =
+                        TestLinkManager.instance().getObjectInspectors(key);
+                for (TestInspectorLink i :inspectors) {
+                    i.invoke(requestContext());
+                }
+            }
+        }
     }
 
-    @TestLink
     AWComponent showBusinessObjectwWindow (String businessObject)
     {
         return null;
     }
 
-    @TestLink
     AWComponent showNewBusinessObjectWindow ()
     {
         TestContext tc = TestContext.getTestContext(requestContext());
@@ -45,11 +59,23 @@ public class TestComponentPage extends AWComponent
         return null;
     }
 
-    @TestLink
     void deleteBusinessObject (String businessObject)
     {
     }
 
+    void testInspector1 ()
+    {
+    }
+
+    List<TestValidationParameter> testInspector2 ()
+    {
+        return null;
+    }
+
+    List<TestValidationParameter> testInspector3 (Integer value)
+    {
+        return null;
+    }
 
     public static String logExceptions ()
     {

@@ -13,14 +13,14 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageErrorPanel.awl#18 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageErrorPanel.awl#19 $
     </Copyright>
 
     <Overview>
         ToDo
     </Overview>
 </a:Api>\
-<a:RefreshRegion>
+<a:RefreshRegion useId="PEP">
     <a:If ifTrue="$showingPageErrorPanel">
         <a:FormProxy name="$errorManager.getErrorNavSubmitForm">
             <div id="$divId" class="pageErrorPanel fixedTop">

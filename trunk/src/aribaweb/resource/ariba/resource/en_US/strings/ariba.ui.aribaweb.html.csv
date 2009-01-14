@@ -5,3 +5,4 @@
 "AWPasswordField",a002,"Warning: Caps Lock is on.  This may cause you to enter your password incorrectly.","Warning: Caps Lock is on.  This may cause you to enter your password incorrectly.",""
 "AWSubmitButton",a001,"Submit","Submit",""
 "AWFileUploadInternals","a001","Error: Your request cannot be processed.  Please check that file paths for all file uploads are valid.","Error: Your request cannot be processed.  Please check that file paths for all file uploads are valid.",""
+"AWTextArea","a001","Characters left","Characters left",""

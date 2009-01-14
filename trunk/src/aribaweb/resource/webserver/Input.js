@@ -28,12 +28,12 @@ ariba.Input = function() {
     var AWShowWaitAlertDisabled = false;
     var AWIsWaitAlertActive = false;
 
-    // remember current focus holder
-    var _AW_CurrentFocus = null;
-    var AWCoverDiv = null, AWPrevFocus = null;
-        var AWTextFocusId = null;
+    var AWCoverDiv = null, AWPrevFocusId = null;
+    var AWActiveElementId = null;
+    var AWTextFocusId = null;
+    var AWAllowSelectFirstText = false;
     var AWModalPanelId = null;
-
+    var _disableShowUntil = 0;
 
     var Input = {
 
@@ -74,7 +74,8 @@ ariba.Input = function() {
                 AWWaitAlertDiv.style.visibility = "";
             }
 
-            this.disableInput(null, true);
+            _disableShowUntil = (new Date()).getTime() + 500;
+            this.disableInput(true);
 
             if (!AWShowWaitAlertDisabled) {
                 AWWaitAlertTimeoutId = setTimeout(this.showWaitAlert.bind(this), this.AWWaitAlertMillis);
@@ -104,6 +105,8 @@ ariba.Input = function() {
 
         showWaitAlert : function ()
         {
+            if ((new Date()).getTime() < _disableShowUntil) return;
+
             clearTimeout(AWWaitAlertTimeoutId);
             if (!AWIsWaitAlertActive && !AWShowWaitAlertDisabled) {
                 AWIsWaitAlertActive = true;
@@ -227,46 +230,24 @@ ariba.Input = function() {
             document.body.removeChild(element);
         },
 
-        focusChanged : function (e) {
-            // alert("Focus changed:" + e + " - " + window.event.srcElement);
-            // _AW_CurrentFocus = (e) ? e.target : window.event.srcElement;
-            _AW_CurrentFocus = window.event.srcElement;
-        // Debug.log("Focus changed:" + _AW_CurrentFocus + "-- " + ((_AW_CurrentFocus) ? _AW_CurrentFocus.tagName : ""));
-        },
-
-        updateFocus : function () {
-            // when new content is loaded, if no one has the focus, look for a text field
-            if (!_AW_CurrentFocus || _AW_CurrentFocus == window || _AW_CurrentFocus == Dom.documentElement() || _AW_CurrentFocus.tagName != "INPUT") {
-                // Debug.log("Selecting first text...");
-                this.selectFirstText();
-            }
-        },
-
-        releaseFocus : function () {
-            if (_AW_CurrentFocus && _AW_CurrentFocus != window && _AW_CurrentFocus.parentNode && _AW_CurrentFocus.nodeName == "INPUT") {
-                // Debug.log("Releasing focus -- " + _AW_CurrentFocus + "-- " + _AW_CurrentFocus.tagName);
-                _AW_CurrentFocus.blur();
-            }
-        },
-
         registerCoverDiv : function (div) {
             AWCoverDiv = div;
-            AWPrevFocus = _AW_CurrentFocus;
-            this.releaseFocus(); // release main window focus
+            AWPrevFocusId = Dom.getActiveElementId();
+            if (AWPrevFocusId) {
+                Debug.log("reg cover div " + AWPrevFocusId);
+                var prevFocusElement = Dom.getElementById(AWPrevFocusId);
+                if (prevFocusElement && prevFocusElement.blur) {
+                    prevFocusElement.blur(); // release main window focus                    
+                };
+            }
         },
 
         unregisterCoverDiv : function (div) {
-            if (AWPrevFocus) {
-                var pf = AWPrevFocus;
-                setTimeout(function() {
-                    try {
-                        pf.focus();
-                        pf.focus();
-                    } catch (e) { /* ignore */
-                    }
-                }, 0);
+            if (AWPrevFocusId) {
+                Debug.log("unreg cover div " + AWPrevFocusId)
+                this.registerActiveElementId(AWPrevFocusId);
             }
-            AWCoverDiv = AWPrevFocus = null;
+            AWCoverDiv = AWPrevFocusId = null;
         },
 
         registerModalDiv : function (div) {
@@ -297,29 +278,75 @@ ariba.Input = function() {
             if (!AWCoverDiv)  return false;
             var posParent = Dom.positioningParent(elm);
             if (posParent == null || posParent == Dom.documentElement()) return true;
-            var coverZ = Dom.effectiveStyle(Dom.positioningParent(AWCoverDiv), 'z-index');
             var elmZ = Dom.effectiveStyle(posParent, 'z-index');
+            if (!elmZ) return true;
+            var coverZ = Dom.effectiveStyle(Dom.positioningParent(AWCoverDiv), 'z-index');
             // Debug.log("awModallyDisabled: " + coverZ + ", " + elmZ);
             return parseInt(elmZ) < parseInt(coverZ);
         },
 
+        registerActiveElementId : function (elementId) {
+            Debug.log("registerActiveElementId: " + elementId);
+            AWActiveElementId = elementId ? elementId : Dom.getActiveElementId();
+        },
+
+        // focus on control when page load complete
+        postLoadFocusOnActiveElement : function ()
+        {
+            // Enqueue twice to ensure that it is the very last event to fire.
+            Event.eventEnqueue(function () {
+                  Event.eventEnqueue(Input.focusOnActiveElement.bind(Input));
+          }, null, true);
+        },
+
+        focusOnActiveElement : function () {
+            var elementFocused = false;
+            if (AWActiveElementId) {
+                try {
+                    var activeElement = Dom.getElementById(AWActiveElementId);
+                    if (Dom.elementInDom(activeElement) &&
+                        !this.modallyDisabled(activeElement)) {
+                        Debug.log("Focusing on element id: " + AWActiveElementId);
+                        if (activeElement.focus) {
+                            activeElement.focus();
+                            activeElement.focus();
+                        }
+                        elementFocused = true;
+                        function checkFocus () {
+                            if (!Dom.getActiveElementId()) {
+                                Debug.log("Refocusing on element id: " + AWActiveElementId);
+                                if (activeElement.focus) {
+                                    activeElement.focus();
+                                    activeElement.focus();
+                                }
+                            }
+                        }
+                        if (Dom.IsIE) {
+                            setTimeout(checkFocus, 0);
+                        }
+                    }
+                }
+                catch (e) {
+                    Debug.log("Focusing exception: " + e);                    
+                }
+                finally {
+                    AWActiveElementId = null;
+                }
+            }
+            if (!elementFocused && AWAllowSelectFirstText) {
+                AWAllowSelectFirstText = false;
+                Debug.log("Focusing on first text: ");
+                this.selectFirstText();
+            }
+        },
         ////////////////////////////
         // AWTextField
         // Select First TextField
         // or TextArea
         ///////////////////////////
 
-        ShoudCheckActiveElement : true,
-
         selectFirstText : function ()
         {
-            if (this.ShoudCheckActiveElement) {
-                var activeElement = document.activeElement;
-                if (activeElement && activeElement != document.body) {
-                    this.ShoudCheckActiveElement = false;
-                    return;
-                }
-            }
             // focus on the first text field or the one specified
             var text = null;
             if (AWTextFocusId) {
@@ -372,13 +399,10 @@ ariba.Input = function() {
             AWTextFocusId = id;
         },
 
-        // select first input field when page load complete
-        postLoadSelectFirstText : function ()
+        // allow select first input field when page load complete
+        allowSelectFirstText : function ()
         {
-            // Enqueue twice to ensure that it is the very last event to fire.
-            Event.eventEnqueue(function () {
-                  Event.eventEnqueue(Input.selectFirstText.bind(Input));
-          }, null, true);
+            AWAllowSelectFirstText = true;
         },
 
         EOF:0};
@@ -475,12 +499,10 @@ ariba.Input = function() {
          *  focusedElement is the form element which is currently focused.  If non-null, this will be
          *  restored as the focused element once Input.enableInput() is called.
          */
-        var AWFocusedElementName = null;
-        var AWFocusedElementId = null;
         var AWCaptureDiv = null;
 
         return {
-            disableInput : function (focusedElement, showWaitAlert)
+            disableInput : function (showWaitAlert)
             {
                 Event.disableEvents();
                 if (AWCaptureDiv == null) {
@@ -493,13 +515,6 @@ ariba.Input = function() {
                     AWCaptureDiv.onmousedown = this.showWaitAlert.bindEventHandler(this);
                     AWCaptureDiv.onkeydown = this.showWaitAlert.bindEventHandler(this);
                 }                
-                if (focusedElement == null) {
-                    focusedElement = document.activeElement;
-                }
-                if (focusedElement != null) {
-                    AWFocusedElementId = focusedElement.id;
-                    AWFocusedElementName = focusedElement.name;
-                }
             },
 
             enableInput : function ()
@@ -513,29 +528,6 @@ ariba.Input = function() {
                 AWCaptureDiv.releaseCapture();
 
                 AWCaptureDiv.style.cursor = "pointer";                
-                var element = null;
-                if (AWFocusedElementName) {
-                    var elements = document.getElementsByName(AWFocusedElementName);
-                    if (elements && elements.length > 0) {
-                        element = elements[0];
-                    }
-                }
-                else if (AWFocusedElementId != null) {
-                    element = Dom.getElementById(AWFocusedElementId);
-                }
-                if (element && element.style.visibility == "visible") {
-                    if (element.focus) {
-                        try {
-                            element.focus();
-                        } catch (e) {
-                        }
-                        if (element.select) {
-                            element.select();
-                        }
-                    }
-                }
-                AWFocusedElementName = null;
-                AWFocusedElementId = null;
             },
 
         EOF:0};
@@ -552,7 +544,7 @@ ariba.Input = function() {
         }
 
         return {
-            disableInput : function (focusedElement, showWaitAlert)
+            disableInput : function (showWaitAlert)
             {
                 var docBody = document.body;
                 if (showWaitAlert) {
@@ -592,16 +584,5 @@ ariba.Input = function() {
     });
 
     // Initialization
-    if (window == ariba.awCurrWindow) {
-        var d = window.document;
-        if (Dom.IsIE) {
-            d.onactivate = function (e) {
-                Input.focusChanged(e);
-                Event.gl_handler(e);
-            };
-        }
-        // document.onkeydown = Input.keyDownEvtHandler.bindDocHandler(Input);
-    }
-
     return Input;
 }();

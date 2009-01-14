@@ -12,21 +12,27 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugContent.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBookmarker.java#1 $
 */
 
-package ariba.ui.dev;
+package ariba.ui.aribaweb.util;
 
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWRequestContext;
 
-
-public class AWDebugContent extends AWComponent
+public class AWBookmarker
 {
-    
-    public boolean isDebuggingEnabled ()
+    public boolean isBookmarkable (AWRequestContext requestContext)
     {
-        return ariba.ui.aribaweb.core.AWConcreteServerApplication.IsDebuggingEnabled
-                && !requestContext().isPrintMode();
+        return requestContext.pageComponent() instanceof AWBookmarkURLProvider;
     }
 
+    public String getURLString (AWRequestContext requestContext)
+    {
+        AWComponent component = requestContext.pageComponent();
+        if (component instanceof AWBookmarkURLProvider) {
+            return ((AWBookmarkURLProvider)component).bookmarkURL();
+        }
+        return null;
+    }
 }

@@ -3,18 +3,9 @@
 */
 package @ModelPkg@
 
-import java.util.List
-import ariba.ui.meta.annotations.Action
-import ariba.ui.meta.annotations.Properties
-import ariba.ui.meta.annotations.Traits
-import ariba.ui.meta.annotations.NavModuleClass
-
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.GeneratedValue
-import javax.persistence.OneToMany
-import javax.persistence.ManyToMany
-import javax.persistence.ManyToOne
+import ariba.ui.meta.annotations.*
+import javax.persistence.*
+import java.util.*
 
 @Entity @NavModuleClass
 class @ModelClass@
@@ -24,6 +15,6 @@ class @ModelClass@
 
     String title
 
-    @Traits("richtext")
+    @Trait.RichText
     String description
 }

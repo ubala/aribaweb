@@ -9,33 +9,6 @@
         <a:IncludeComponent name="UserListEditorControl" list="$attendees"/>
     </w:FormRow>
     <w:FormRow label="Accounting">
-        <div style="float:right">
-            <w:TextButton action="$null">Edit</w:TextButton>
-        </div>
+        <w:TextButton action="$itemize">Itemize</w:TextButton><br/>
     </w:FormRow>
 </w:FormTable>
-<br/>
-
-<w:TextButton action="$itemize">Itemize</w:TextButton><br/>
-
-<a:SetValue panel1Id="$requestContext.nextElementId"/>\
-<w:Confirmation id="$panel1Id">\
-    <a:Content name="header">Example Panel</a:Content>\
-    <a:Content name="content">
-        This is just a simple panel with a long, long, long, long string that I hope will wrap in this panel...
-        I don't know -- what do you think?  Anything?  <a:Hyperlink action="$null">Hello?</a:Hyperlink>
-        <a href="TETestPanel#panel">Popup Panel ...</a>
-    </a:Content>\
-</w:Confirmation>\
-<a:Hyperlink action="$showPanel1">Show long string panel</a:Hyperlink>
-<br/>
-
-<a:SetValue panel2Id="$requestContext.nextElementId"/>\
-<w:Confirmation id="$panel2Id">\
-    <a:Content name="header">Example Panel</a:Content>\
-    <a:Content name="content">
-        <a href="TETestPanel">Visit modal page...</a>
-    </a:Content>\
-</w:Confirmation>\
-<a:Hyperlink action="$showPanel2">Show short string panel</a:Hyperlink>
-<br/>

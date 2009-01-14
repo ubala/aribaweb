@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericElement.java#43 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericElement.java#44 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -22,6 +22,7 @@ import ariba.ui.aribaweb.util.AWStringDictionary;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.Fmt;
 import ariba.util.core.GrowOnlyHashtable;
+
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -606,12 +607,18 @@ public final class AWGenericElement extends AWBindableElement
                 semanticKeyString = component._debugCompositeSemanticKey(null);
             }
         }
-        if (elementIdString != null && semanticKeyString != null) {
-            semanticKeyString = AWRecordingManager.registerSemanticKey(elementIdString, semanticKeyString, requestContext);
+        if (semanticKeyString != null) {
+            String semanticKeyWithPrefix = AWRecordingManager.applySemanticKeyPrefix(requestContext, semanticKeyString, null);
+            semanticKeyString = AWRecordingManager.registerSemanticKey(elementIdString, semanticKeyWithPrefix, requestContext);
             if (semanticKey == null) {
                 semanticKey = AWEncodedString.sharedEncodedString(semanticKeyString);
             }
+            else if (semanticKey != null && !semanticKey.string().equals(semanticKeyString)) {
+                semanticKey = AWEncodedString.sharedEncodedString(semanticKeyString);
+            }
+
         }
+
         return semanticKey;
     }
 }

@@ -1,0 +1,11 @@
+title,name,url,description
+Top rated,top_rated,http://gdata.youtube.com/feeds/api/standardfeeds/top_rated,the most highly rated YouTube videos.
+Top favorites,top_favorites,http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites,videos most frequently flagged as favorite videos.
+Most viewed,most_viewed,http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed,the most frequently watched YouTube videos.
+Most popular,most_popular,http://gdata.youtube.com/feeds/api/standardfeeds/most_popular,"the most popular YouTube videos, selected using an algorithm that combines many different signals to determine overall popularity."
+Most recent,most_recent,http://gdata.youtube.com/feeds/api/standardfeeds/most_recent,the videos most recently submitted to YouTube.
+Most discussed,most_discussed,http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed,the YouTube videos that have received the most comments.
+Most linked,most_linked,http://gdata.youtube.com/feeds/api/standardfeeds/most_linked,the YouTube videos that receive the most links from other websites.
+Most responded,most_responded,http://gdata.youtube.com/feeds/api/standardfeeds/most_responded,YouTube videos that receive the most video responses.
+Recently featured,recently_featured,http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured,videos recently featured on the YouTube home page or featured videos tab.
+Videos for mobile phones,watch_on_mobile,http://gdata.youtube.com/feeds/api/standardfeeds/watch_on_mobile,videos suitable for playback on mobile devices.

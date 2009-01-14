@@ -31,10 +31,12 @@
     <import file="build-widgets-app.xml"/>
 
     <!-- Need to include demoshell jar for AWGroovyLoader (class reloading) -->
-    <fileset id="war.jars" dir="${build.jars.dir}">
-        <include name="ariba.demoshell.jar"/>
-        <include name="${jar.name}"/>
-    </fileset>
+    <target name="init" depends="widgets-app.init">
+        <!-- include our jar in the war -->
+        <fileset id="war.jars" dir="${ariba.jars.dir}">
+            <include name="ariba.demoshell.jar"/>
+        </fileset>
+    </target>
 
     <fileset id="module.libs2" dir="${lib-internal.dir}">
         <include name="groovy-all.jar"/>

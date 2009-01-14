@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.java#6 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.java#8 $
 */
 package ariba.ui.meta.layouts;
 
@@ -34,15 +34,8 @@ public class MetaActionList extends AWComponent
     public ItemProperties _action;
     Map<String, List<ItemProperties>> _actionsByCategory;
     public Object _menuId;
-    boolean _isGlobal;
+    public boolean _isGlobal;
     
-    protected void awake()
-    {
-        super.awake();
-        Context context = MetaContext.peekContext(this);
-        _isGlobal = context == null || context.values().get(UIMeta.KeyClass) == null;
-    }
-
     protected void sleep()
     {
         super.sleep();
@@ -50,6 +43,22 @@ public class MetaActionList extends AWComponent
         _action = null;
         _actionCategory = null;
         _menuId = null;
+    }
+
+    public void prepareForGlobal ()
+    {
+        Context context = MetaContext.currentContext(this);
+        _isGlobal = context.values().get(UIMeta.KeyClass) == null;
+        if (_isGlobal) {
+            MetaContext.currentContext(this);
+            MetaNavTabBar.getState(session()).assignCurrentModuleContext(context);
+        }
+
+        // bogus -- should take from Context
+        String filterActions = stringValueForBinding("filterActions");
+        if (filterActions != null) {
+            context.set("filterActions", filterActions);
+        }
     }
 
     public List<ItemProperties> actionCategories ()

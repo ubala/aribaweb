@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWStyleSheet.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWStyleSheet.java#4 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -22,6 +22,7 @@ import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWXDebugResourceActions;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWDirectAction;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWBrand;
 import ariba.util.core.Assert;
@@ -64,8 +65,11 @@ public final class AWStyleSheet extends AWComponent
                     resource, styleSheetName());
 
         AWRequestContext requestContext = requestContext();
+        AWConcreteApplication application =
+            (AWConcreteApplication)AWConcreteApplication.sharedInstance();
+
         AWBrand brand = application().getBrand(requestContext);
-        if (brand != null) {
+        if (application.allowBrandingImages() && brand != null) {
             url = AWDirectAction.brandUrlForResourceNamed(requestContext,
                                                      resource.name(),
                                                      brand);

@@ -9,10 +9,6 @@
         <div class="$^wrapperClass:dialogWrapper" style="$^wrapperStyle">\
             <a:IncludeContent/>\
         </div>\
-        <!---b class="d1"></b>\
-        <b class="d2"></b>\
-        <b class="d3"></b>\
-        <b class="d4"></b>\
-        <b class="d5"></b-->\
     </div>\
 </a:If>\
+

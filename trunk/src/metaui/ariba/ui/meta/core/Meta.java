@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#9 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#11 $
 */
 package ariba.ui.meta.core;
 
@@ -160,7 +160,7 @@ public class Meta
 
         // The decl rule...
         prePreds.add(matchPred);
-        prePreds.add(new Predicate(KeyDeclare, true));
+        prePreds.add(new Predicate(KeyDeclare, declPred._key));
         Map m = new HashMap();
         m.put(declPred._key, declPred._value);
         addRule(new Rule(prePreds, m));
@@ -390,6 +390,7 @@ public class Meta
         });
 
         int modifiedMask = 0;
+        boolean isDeclare = (_declareKeyMask & matchResult._keysMatchedMask) != 0;
         for (Rule r : rules) {
             if (recorder != null) {
                 // for description, use predicate list, minus any propertyScope (_p) key
@@ -399,7 +400,7 @@ public class Meta
                 recorder.setCurrentSource(r._rank, desc, r.location());
             }
 
-            modifiedMask |= r.apply(this, properties, recorder);
+            modifiedMask |= r.apply(this, properties, isDeclare, recorder);
         }
 
         properties.awakeProperties();
@@ -684,6 +685,7 @@ public class Meta
                 _matches = _meta.intersect(newArr, prevMatches,
                         keyMask, _prevMatch._keysMatchedMask);
 
+                /* NOT NEEDED: now we use the property key as the *value* in the declare predicate
                 // if this is a Declare match, then force match on the last property
                 if (keyMask == _meta.declareKeyMask()) {
                     MatchResult prev = _prevMatch;
@@ -692,15 +694,14 @@ public class Meta
                     if (prev != null) {
                         int[] filtered = _meta.filterMustUse(_matches, prev._keyData.maskValue());
                         if (filtered[0] != _matches[0]) {
-                            /*
                             System.out.println("*** Filtered decl rules for must use: "
                                 + prev._keyData._key + "  " + debugString());
                             _logMatchDiff(filtered, _matches);
-                             */
                             _matches = filtered;
                         }
                     }
                 }
+                */
                 _keysMatchedMask =  keyMask | _prevMatch._keysMatchedMask;
             }
         }
@@ -929,7 +930,8 @@ public class Meta
         }
 
         // returns context keys modified
-        public int apply (Meta meta, PropertyMap properties, AWDebugTrace.AssignmentRecorder recorder)
+        public int apply (Meta meta, PropertyMap properties,
+                          boolean isDeclare, AWDebugTrace.AssignmentRecorder recorder)
         {
             int updatedMask = 0;
             if (_rank == Integer.MIN_VALUE) return 0;
@@ -941,7 +943,7 @@ public class Meta
                 Object value = entry.getValue();
                 PropertyManager propManager = meta.managerForProperty(key);
                 Object orig = properties.get(key);
-                Object newVal = propManager.mergeProperty(key, orig, value);
+                Object newVal = propManager.mergeProperty(key, orig, value, isDeclare);
                 if (newVal != orig) {
                     properties.put(key, newVal);
 
@@ -1101,7 +1103,7 @@ public class Meta
             _name = propertyName;
         }
 
-        Object mergeProperty (String propertyName, Object orig, Object newValue)
+        Object mergeProperty (String propertyName, Object orig, Object newValue, boolean isDeclare)
         {
             if (orig == null) return newValue;
             if (newValue instanceof OverrideValue) return ((OverrideValue) newValue)._value;
@@ -1122,7 +1124,7 @@ public class Meta
                 return new Context.DeferredOperationChain(_merger, orig, newValue);
             }
 
-            return _merger.merge(orig, newValue);
+            return _merger.merge(orig, newValue, isDeclare);
         }
     }
 
@@ -1151,7 +1153,7 @@ public class Meta
 
     public interface PropertyMerger
     {
-        Object merge (Object orig, Object override);
+        Object merge (Object orig, Object override, boolean isDeclare);
     }
 
     // marker interface for PropertyMerges that can handle dynamic values
@@ -1165,7 +1167,7 @@ public class Meta
 
     protected static class PropertyMerger_Overwrite implements PropertyMerger
     {
-        public Object merge(Object orig, Object override) {
+        public Object merge(Object orig, Object override, boolean isDeclare) {
             return override;
         }
 
@@ -1178,7 +1180,7 @@ public class Meta
     // (false trumps true) for visible and editable
     public static class PropertyMerger_And implements PropertyMerger
     {
-        public Object merge(Object orig, Object override) {
+        public Object merge(Object orig, Object override, boolean isDeclare) {
             // null will reset (so that it can be overridden to true subsequently
             if (override == null) return null;
             return booleanValue(orig) && booleanValue(override);
@@ -1193,7 +1195,7 @@ public class Meta
     // Merge lists
     public static PropertyMerger PropertyMerger_List =  new PropertyMerger()
     {
-        public Object merge(Object orig, Object override) {
+        public Object merge(Object orig, Object override, boolean isDeclare) {
             // if we're override a single element with itself, don't go List...
             if (!(orig instanceof List) && !(override instanceof List)
                     && objectEquals(orig, override)) {

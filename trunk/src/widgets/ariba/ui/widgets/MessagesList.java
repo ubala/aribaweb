@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MessagesList.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MessagesList.java#3 $
 */
 
 package ariba.ui.widgets;
@@ -198,20 +198,4 @@ public class MessagesList extends AWComponent
                        messageWrapperKey,
                        message);
     }
-
-    /**
-       Returns the boolean value corresponding to the given value.
-       if the binding is not specified, returns the <code>defValue</code>
-       @param bindingStr name of the binding
-       @param defValue value to return if the binding is not specified
-       @return the boolean value for the given binding.
-    */
-    private boolean booleanValueForBinding (String bindingStr, boolean defValue)
-    {
-        if (hasBinding(bindingStr)) {
-            return booleanValueForBinding(bindingStr);
-        }
-        return defValue;
-    }
-
 }

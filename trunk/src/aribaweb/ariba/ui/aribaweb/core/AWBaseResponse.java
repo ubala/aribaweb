@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#35 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#36 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -83,6 +83,7 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
     private AWResponseCompleteCallback _responseCompleteCallback;
     protected int _fullSize = 0;
     protected int _bytesWritten = 0;
+    protected boolean _writeRefreshRegionBoundaryMarkers = false;
 
     // ** Thread Safety Considerations: This is never shared -- no locking required
 
@@ -169,6 +170,11 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
     {
         return !_noChangeBuffer.isEqual(previousReponse._noChangeBuffer);
     }
+
+    void setWriteRefreshRegionBoundaryMarkers (boolean tf)
+    {
+        _writeRefreshRegionBoundaryMarkers = tf;
+    }
     
     public void init ()
     {
@@ -245,8 +251,11 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
 //        rootBuffer.printStructure(System.out, 0);
 //        System.out.println("------------------------------- END writeContent -----------------");
 
+        AWResponseBuffer.WriteContext writeContext
+                = new AWResponseBuffer.WriteContext(outputStream, _characterEncoding, 
+                                                    _writeRefreshRegionBoundaryMarkers);
         if (_previousResponse == null) {
-            rootBuffer.writeTo(outputStream, _characterEncoding, null);
+            rootBuffer.writeTo(writeContext, null);
         }
         else {
             try {
@@ -254,7 +263,7 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
                 outputStream.write(bytes, 0, bytes.length);
 
                 AWResponseBuffer previousRootBuffer = _previousResponse.rootBuffer();
-                rootBuffer.writeTo(outputStream, _characterEncoding, previousRootBuffer);
+                rootBuffer.writeTo(writeContext, previousRootBuffer);
 
                 bytes = BodyTagClose.bytes(_characterEncoding);
                 outputStream.write(bytes, 0, bytes.length);
@@ -296,7 +305,9 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
     {
         if (rootBuffer() != null) {
             rootBuffer().close();
-            rootBuffer().writeTo(outputStream, characterEncoding(), null);
+            AWResponseBuffer.WriteContext writeContext
+                    = new AWResponseBuffer.WriteContext(outputStream, _characterEncoding);
+            rootBuffer().writeTo(writeContext, null);
         }
     }
 

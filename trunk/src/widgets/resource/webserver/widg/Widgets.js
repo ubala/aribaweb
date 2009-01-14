@@ -93,17 +93,6 @@ ariba.Widgets = function() {
             }
         },
 
-        buttonClicked : function (senderId, formId)
-        {
-            var element = Dom.getElementById(senderId);
-            if (element && element.tagName == 'TD') {
-                // if it's a button, fire a blur event to cleanup the button look.
-                if (element.blur) {
-                    element.blur();
-                }
-            }
-        },
-
         downloadContent : function (srcUrl)
         {
             Request.downloadContent(srcUrl);
@@ -516,22 +505,13 @@ ariba.Widgets = function() {
         },
         // called in iframe to make the TOC hidden invisible if there's no content,
         // or put a min width if there is content
-        updateTOC : function (alley, hasVisibleContent)
+        updateTOC : function (hasVisibleContent)
         {
-            if (alley) {
-                if (hasVisibleContent) {
-                    var tocBox =
-                            Dom.findChildUsingPredicate(alley, function (e) {
-                                return e.tagName == "DIV" && Dom.hasClass(e, "tocSpacer")
-                            });
-                    tocBox.style.width = "165px";
-                }
-                else {
-                    var tocContent = Dom.findChildUsingPredicate(alley, function (e) {
-                        return e.tagName == "DIV" && Dom.hasClass(e, "tocContent")
-                    });
-                    tocContent.style.display = "none";
-                }
+            var body = document.body;
+            if (hasVisibleContent) {
+                Dom.removeClass(body, "tocEmpty")
+            } else {
+                Dom.addClass(body, "tocEmpty")
             }
         },
 
@@ -1428,8 +1408,6 @@ ariba.Widgets = function() {
             dragend   : Widgets.hideBubble
         }
     });
-
-    Request.registerSenderClickedCallback(Widgets.buttonClicked.bind(Widgets));
 
     return Widgets;
 }();

@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#109 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#111 $
 */
 
 package ariba.ui.aribaweb.core;
 
+import ariba.ui.aribaweb.util.AWBookmarker;
 import ariba.ui.aribaweb.util.AWBrand;
 import ariba.ui.aribaweb.util.AWBrandManager;
 import ariba.ui.aribaweb.util.AWCheckoutManager;
@@ -84,6 +85,7 @@ abstract public class AWConcreteApplication
     private String _refuseNewSessionsPassword = AWDirectAction.PasswordKey;
     private String _terminateApplicationPassword = AWDirectAction.PasswordKey;
     private AWMonitorStats _monitorStats;
+    private AWBookmarker _bookmarker;
     protected String _adaptorUrl;
     protected String _adaptorUrlSecure;
     private boolean _useEmbeddedKeyPathes = true;
@@ -293,6 +295,7 @@ abstract public class AWConcreteApplication
         IsCookieSessionTrackingEnabled = initCookieSessionTrackingEnabled();
         RemoteHostMask = initRemoteHostMask();
         _monitorStats = createMonitorStats();
+        _bookmarker = createBookmarker();
         _adaptorUrl = initAdaptorUrl();
         _adaptorUrlSecure = initAdaptorUrlSecure();
         _brandManager = initBrandManager();
@@ -1209,6 +1212,15 @@ abstract public class AWConcreteApplication
             : componentDefinitionForName(componentName);
     }
 
+    public AWBookmarker createBookmarker ()
+    {
+        return new AWBookmarker();
+    }
+
+    public AWBookmarker getBookmarker ()
+    {
+        return _bookmarker;
+    }
 
     //////////////////////
     // Monitoring Support

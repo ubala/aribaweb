@@ -6,7 +6,7 @@
     Includes necessary support for deferred (properly enqueued) inline JavaScript and
     incremental loading of .js files.
 */
-
+window.ariba_IR = false;
 ariba.Refresh = function() {
     // imports
     var Util = ariba.Util;
@@ -48,9 +48,18 @@ ariba.Refresh = function() {
     var AWHistoryLimit = 2;
     var _CheckLocInterval = null;
     var _LocationCheckActive = false;
-    
+    var _currentUpdateSource = null;
+    var _isXMLHttpResponse = false;
+    var _IDPat = /\s+id=["\']?(.+?)["\']?[\s>]/
+    var _ScriptAllPat = /<script[^>]*>([\s\S]*?)<\/script>/ig;
+    var _ScriptOnePat = /<script([^>]*)>([\s\S]*?)<\/script>/i;
+    var _currScript = null;
+    var _pendingCompleteRequestRun = false;
+
     // Handler called with IE History IFrame is loaded
     var _historyHandler = function () {};
+
+    var _MarkedRRs;
 
 
     // Incremental request completion is indicated by the refreshRequestComplete()
@@ -87,33 +96,26 @@ ariba.Refresh = function() {
         AWForwardTrackUrl : '',
         AWMarkRefreshRegions : false,
 
-        _refreshTable : function (poSource, poTarget)
+        _refreshTable : function (sourceHandle, poTarget)
         {
             // pick up the scratch div
             var tmpDiv = document.createElement("div");
-            if (Dom.IsIE) {
-                tmpDiv.innerHTML = poSource.outerHTML;
-            } else {
-                tmpDiv.innerHTML = "<table>" + poSource.innerHTML + "</table>";;
-                tmpDiv.firstChild.id = poSource.id;
-            }
+            tmpDiv.innerHTML = _currentUpdateSource.getOuterHtml(sourceHandle);
             var tmpTable = tmpDiv.firstChild;
             this.replaceRows(tmpTable, poTarget);
         },
 
-        _scopeUpdate : function (poSource)
+        _scopeUpdate : function (sourceHandle)
         {
-            // pick up the scratch div
-            var tmpDiv = document.createElement("div");
-            tmpDiv.innerHTML = Dom.getOuterHTML(poSource);
-
-            var target = Dom.getElementById(poSource.id);
+            var id = _currentUpdateSource.getId(sourceHandle);
+            var target = Dom.getElementById(id);
             if (target) {
-                Dom.setOuterHTML(target, tmpDiv.innerHTML);
+                Dom.setOuterHTML(target, _currentUpdateSource.getOuterHtml(sourceHandle));
             //debug("done ScopeUpdate: " + Util.htmlEscapeValue(Dom.getOuterHTML(target)));
+                this._markRR(Dom.getElementById(id));
             }
             else {
-                alert("scopeUpdate target not found: " + poSource.id);
+                alert("scopeUpdate target not found: " + id);
             }
         },
 
@@ -181,6 +183,7 @@ ariba.Refresh = function() {
                     //debug("appending: " + element.id);
                     targetTBody.appendChild(element);
                 }
+                this._markRR(element);
             }
 
         // updates
@@ -203,6 +206,7 @@ ariba.Refresh = function() {
                     else {
                         // Debug.log("replacing: " + sourceRow.id + " " + targetRow.id);
                         targetTBody.replaceChild(sourceRow, targetRow);
+                        this._markRR(sourceRow);
                     }
                 }
                 else {
@@ -220,23 +224,19 @@ ariba.Refresh = function() {
             }
 
             if (shouldDebug) {
-                var updateErrorWin = Dom.openWindow('', 'AWUpdateErrorWin');
-                var refreshFrame = Dom.getElementById("AWRefreshFrame");
-                var doc = updateErrorWin.document;
-                doc.writeln('<html><head><title>Refresh Trace</title></head><body><textarea cols="150" rows="46">');
+                var msg = ['<h1>Refresh Trace</h1><textarea cols="150" rows="46">'];
 
-                doc.writeln(message);
                 if (AWRefreshTrace != null) {
                     for (var i = 0; i < AWRefreshTrace.length; i = i + 2) {
-                        doc.writeln('\n=============== Main content (' + i / 2 + ') ====================');
-                        doc.writeln(AWRefreshTrace[i]);
-                        doc.writeln('\n=============== Incremental update (' + i / 2 + ') ====================');
-                        doc.writeln(AWRefreshTrace[i + 1]);
+                        msg.push('\n=============== Main content (' + i / 2 + ') ====================');
+                        msg.push(AWRefreshTrace[i]);
+                        msg.push('\n=============== Incremental update (' + i / 2 + ') ====================');
+                        msg.push(AWRefreshTrace[i + 1]);
                     }
                 }
+                msg.push('</textarea>');
 
-                doc.writeln('</textarea></body></html>');
-                doc.close();
+                Request.displayErrorDiv(msg.join("\n"));
             }
             else {
                 top.location.href = top.ariba.Request.appendFrameName(top.ariba.Request.AWRefreshUrl);
@@ -244,14 +244,10 @@ ariba.Refresh = function() {
             return false;
         },
 
-        domRefreshContentCallback : function ()
+        // HUH?
+        _updateRefreshTrace : function ()
         {
-            //debug("start content refresh");
-            if (Request.AWJSDebugEnabled) {
-                AWRefreshStartTime = (new Date()).getTime();
-            }
-
-        // get the BODY tag for the frame
+            // get the BODY tag for the frame
             var refreshFrame = Dom.getElementById("AWRefreshFrame");
             if (false && Request.AWDebugEnabled) {
                 // capture main content DOM and increment update
@@ -270,8 +266,180 @@ ariba.Refresh = function() {
                     AWRefreshTrace[AWRefreshTrace.length] = Dom.getOuterHTML(refreshBody);
                 }
             }
+        },
 
-        // make sure refreshContent call back is the last thing on the page otherwise
+        IFrameUpdateSource : function () {
+            var refreshFrame = Dom.getElementById("AWRefreshFrame");
+            var body = Dom.findChild(refreshFrame.contentWindow.document, "BODY");
+
+            var elements = [];
+
+            if (body != null) {
+                var refreshNodes = body.childNodes;
+                for (var i = 0; i < refreshNodes.length; i++) {
+                    var source = refreshNodes[i];
+                //debug("refresh element: " + source.id);
+                    // ### if the source does not have an id ... assume it's a script and skip it?
+                    if (source.id && source.getAttribute("ignore") != "true") {
+                        elements.push(source);
+                    }
+                }
+
+            }
+            return {
+                getHandles : function () { return elements; },
+
+                getId : function (handle) { return handle.id; },
+
+                getNodeName : function (handle) { return handle.nodeName; },
+
+                getInnerHtml : function (handle) { return handle.innerHTML; },
+
+                getOuterHtml : function (handle) {
+                    if (this.getNodeName(handle) == "TABLE" && !(Dom.IsIE)) {
+                        return '<table id="' + handle.id + '">' + handle.innerHTML + '</table>';
+                    }
+                    return handle.outerHTML;
+                }
+            }
+        },
+
+        XMLHTTPUpdateSource : function (response) {
+            // " head <!--@&@--> re 1 <!--@&@-->re2<!--@&@-->end"
+            var ids = [];
+            var info = {};
+            function init() {
+                var start = 0; // response.indexOf("<!--@&@-->");
+                while (start != -1) {
+                    start += 10;
+                    var end = response.indexOf("<!--@&@-->", start);
+                    var body = (end == -1) ? response.substring(start) : response.substring(start, end);
+                    var tagEnd = body.indexOf(">")
+                    var tag = body.substring(0, tagEnd+1)
+                    var nodeNameEnd = tag.indexOf(" ");
+                    var nodeName = tag.substring(1,nodeNameEnd).toUpperCase()
+                    var m = _IDPat.exec(tag);
+                    if (m) {
+                        var id = m[1]
+                        // Debug.log("RR: " + id + " -> " + body);
+                        ids.push(id);
+                        info[id] = { body:body, nodeName:nodeName }
+                    }
+
+                    start = end;
+                }
+                /*
+                var matches = response.match(RRPat);
+                for (var i=0; i < matches.length; i++) {
+                    var body = matches[i].substring(10);
+                    var tagEnd = body.indexOf(">")
+                    var tag = body.substring(0, tagEnd+1)
+                    var nodeNameEnd = tag.indexOf(" ");
+                    var nodeName = tag.substring(1,nodeNameEnd).toUpperCase()
+                    var m = _IDPat.exec(tag);
+                    var id = m[1]
+
+                    Debug.log("RR: " + id + " -> " + body);
+
+                    ids.push(id);
+                    info[id] = { body:body, nodeName:nodeName }
+                }
+                */
+            }
+
+            init();
+
+            return {
+                getHandles : function () { return ids; },
+
+                getId : function (handle) { return handle; },
+
+                getNodeName : function (handle) { return info[handle].nodeName; },
+
+                getInnerHtml : function (handle) {
+                    var body = info[handle].body;
+                    var start = body.indexOf(">"), end = body.lastIndexOf("<");
+                    return body.substring(start + 1, end);
+                },
+
+                getOuterHtml : function (handle) {
+                    return info[handle].body;
+                }
+            }
+        },
+
+        evalScriptTags : function (str)
+        {
+            var matches = str.match(_ScriptAllPat) || [];
+            for (var i=0; i < matches.length; i++) {
+                var outer = matches[i];
+                var m = _ScriptOnePat.exec(outer);
+                _currScript = m[2];
+                if (m[1].indexOf("VBScript") == -1) {
+                    // Debug.log("Evaluating: " + script);
+                    eval(_currScript);
+                } else {
+                    // Debug.log("Evaluating VBScript: " + script);
+                    Event.GlobalEvalVBScript(_currScript);
+                }
+                _currScript = null;
+            }
+        },
+
+        processXMLHttpResponse : function (response) {
+            window.ariba_IR = _isXMLHttpResponse = true;
+            try {
+                _pendingCompleteRequestRun = true;
+
+                _currentUpdateSource = new this.XMLHTTPUpdateSource(response);
+                this.evalScriptTags(response);
+
+            } catch (e) {
+                Request.displayErrorDiv("<h1>Error applying incremental refresh</h1>"
+                        + "<b>" + e + "</b><br/><br/>"
+                        + "<b>Script:</b> <pre><code>" + _currScript + "</code></pre><br/><br/>"
+                        + "<h2>Attaching full response content below...</h2>"
+                        + response);
+                throw(e);
+            } finally {
+                window.ariba_IR = _isXMLHttpResponse = false;
+            }
+
+            // A good response would either 1) run completeRequest (and clear our flag)
+            // or 2) trigger a redirect (and therefore stop the run of setTimeout)
+            setTimeout(function () {
+                if (_pendingCompleteRequestRun) {
+                    Request.displayErrorDiv("<h1>Bad XMLHTTP Incremental Refresh Response</h1>"
+                            + "<h2>Attaching full response content below...</h2>"
+                            + response);
+                }
+            }, 3000);
+        },
+
+        _markRR : function (target) {
+            if (this.AWMarkRefreshRegions) {
+                Dom.addClass(target, "showRR");
+                if (!_MarkedRRs) _MarkedRRs = [];
+                _MarkedRRs.push(target);
+                // target.style.backgroundColor = "#FFE080";
+            }
+        },
+
+        domRefreshContentCallback : function ()
+        {
+            if (_MarkedRRs) {
+                while (_MarkedRRs.length) {
+                    var e = _MarkedRRs.pop();
+                    try { Dom.removeClass(e, "showRR"); } catch (e) {}
+                }
+            }
+
+            //debug("start content refresh");
+            if (Request.AWJSDebugEnabled) {
+                AWRefreshStartTime = (new Date()).getTime();
+            }
+
+            // make sure refreshContent call back is the last thing on the page otherwise
             // elements lower down will not be loaded yet so they will not be picked up by
             // DOM scan
 
@@ -303,82 +471,50 @@ ariba.Refresh = function() {
                 }
             }
 
-            var body = Dom.findChild(refreshFrame.contentWindow.document, "BODY");
-        //debug("--- body: " + body);
+            var handles = _currentUpdateSource.getHandles();
 
-            if (body != null) {
+            for (i = 0; i < handles.length; i++) {
+                var handle = handles[i];
+                var id = _currentUpdateSource.getId(handle);
+                var nodeName = _currentUpdateSource.getNodeName(handle);
 
-                var refreshNodes = body.childNodes;
+                target = Dom.getElementById(id);
+                if (Util.isNullOrUndefined(target)) {
+                    this.handleUpdateError("AW: Error detected during update. Unable to find element '" + id + "'");
+                }
 
-                for (i = 0; i < refreshNodes.length; i++) {
-                    var source = refreshNodes[i];
-                //debug("refresh element: " + source.id);
-                    // ### if the source does not have an id ... assume it's a script and skip it?
-                    if (!source.id) {
-                        //debug("unknown element type found: " + source.nodeName);
-                        continue;
+                if (AWDomScopeUpdateList &&
+                    AWDomScopeUpdateList[id] == "true") {
+                    //debug("scope update for: " + source.id);
+                    this._scopeUpdate(handle);
+                }
+                    // differentiate tables and divs
+                else if (nodeName == "TABLE") {
+                    this._refreshTable(handle, target);
+                }
+                else if (nodeName == "DIV" || nodeName == "SPAN") {
+                    //debug("working on a div/span " + Util.htmlEscapeValue(source.innerHTML));
+                    var scrollTop = target.scrollTop;
+                    target.innerHTML = _currentUpdateSource.getInnerHtml(handle);
+                    if (scrollTop) {
+                        target.scrollTop = scrollTop;
                     }
-                    target = Dom.getElementById(source.id);
-
-                    if (Util.isNullOrUndefined(target)) {
-                        this.handleUpdateError("AW: Error detected during update. Unable to find element '" + source.id + "'");
-                    }
-
-                //debug("refresh element: " + source.id);
-
-                    if (target.getAttribute("ignore") == "true") {
-                        // debug
-                        //ignoreList += source.id + " ";
-                        continue;
-                    }
-
-                    if (AWDomScopeUpdateList &&
-                        AWDomScopeUpdateList[source.id] == "true") {
-                        //debug("scope update for: " + source.id);
-                        this._scopeUpdate(source);
-
+                    this._markRR(target);
+                }
+                else if (Dom.isNetscape() && target.nodeName == "PRE") {
+                    // NS parses PRE tags inside table structure differently -- places
+                    // on DOM tree
+                    target.innerHTML = _currentUpdateSource.getInnerHtml(handle);
+                    this._markRR(target);
+                }
+                else {
                     // debug
-                        //actualList += source.id;
-                    }
-                        // differentiate tables and divs
-                    else if (target.nodeName == "TABLE") {
-                        this._refreshTable(source, target);
-
-                    // debug
-                        //actualList += source.id + " ";
-                    }
-                    else if (target.nodeName == "DIV" || target.nodeName == "SPAN") {
-                        //debug("working on a div/span " + Util.htmlEscapeValue(source.innerHTML));
-                        var scrollTop = target.scrollTop;
-                        target.innerHTML = source.innerHTML;
-                        if (scrollTop) {
-                            target.scrollTop = scrollTop;
-                        }
-
-                    // debug
-                        //actualList += source.id + " ";
-                        if (this.AWMarkRefreshRegions) {
-                            target.style.backgroundColor = "#FFE080";
-                        }
-                    }
-                    else if (Dom.isNetscape() && target.nodeName == "PRE") {
-                        // NS parses PRE tags inside table structure differently -- places
-                        // on DOM tree
-                        target.innerHTML = source.innerHTML;
-                    }
-                    else {
-                        // debug
-                        //debug("unknown refresh node type: " + source.nodeName +"["+ source.id +"]");
-                        this.handleUpdateError("AW: Error detected during update. Unknown refresh node type '" + target.nodeName + ", element '" + source.id + "'");
-                    }
-
-                // debug
-                    //refreshList += source.id + " ";
+                    //debug("unknown refresh node type: " + source.nodeName +"["+ source.id +"]");
+                    this.handleUpdateError("AW: Error detected during update. Unknown refresh node type '" + target.nodeName + ", element '" + id + "'");
                 }
             }
 
-
-        // clear out the domsync metadata
+            // clear out the domsync metadata
             AWDomSyncData = null;
             AWDomScopeUpdateList = null;
 
@@ -398,6 +534,14 @@ ariba.Refresh = function() {
         refreshComplete : function ()
         {
             Debug.log("Refresh complete called...")
+
+            // Refresh region marking
+            if (this.AWMarkRefreshRegions) {
+                Dom.addClass(document.body, "rrVis");
+            } else {
+                Dom.removeClass(document.body, "rrVis");
+            }
+
             Event.eventEnqueue(Request.requestComplete.bind(Request), null, true);
             Event.notifyRefreshComplete();
         },
@@ -618,23 +762,35 @@ ariba.Refresh = function() {
         //       awCompleteRequest nor awWindowOnLoad will be called.
         completeRequest : function (current, length, isRefreshRequest)
         {
-            Input.ShoudCheckActiveElement = !isRefreshRequest;
+            _pendingCompleteRequestRun = false;
 
             // this method always gets run inline.  For a refresh request, this initiates
             // the page update, etc.  For a full page refresh, queue up on awWindowOnLoad
             Event.eventLock();
+            if (_isXMLHttpResponse) isRefreshRequest = true;
             if (isRefreshRequest) {
                 Debug.log("*** refresh");
                 Event.invokeRegisteredHandlers("onRefreshRequestComplete");
                 Request.refreshRequestComplete();
 
-            // update all content
-                this.domRefreshContentCallback();
+                if (_isXMLHttpResponse) {
+                    // already set...
+                    // _currentUpdateSource = new this.XMLHTTPUpdateSource();
 
-            // kill the iframe used to initiate thecurrent request
-                if (!Request.AWShowRequestFrame) {
-                    Request.destroyRequestIFrame("AWRefreshFrame");
+                    // update all content
+                    this.domRefreshContentCallback();
+                } else {
+                    _currentUpdateSource = new this.IFrameUpdateSource();
+
+                    // update all content
+                    this.domRefreshContentCallback();
+
+                    // kill the iframe used to initiate thecurrent request
+                    if (!Request.AWShowRequestFrame) {
+                        Request.destroyRequestIFrame("AWRefreshFrame");
+                    }
                 }
+                _currentUpdateSource = null;
 
                 Event.registerUpdateCompleteCallback(function() {
                     Refresh.updateHistory(current, length);
@@ -752,7 +908,7 @@ ariba.Refresh = function() {
             // copy content into the proper location
             Dom.setOuterHTML(divObject, xmlhttp.responseText);
             // evaluate all inline scripts
-            Request.evalScriptTags(xmlhttp.responseText);
+            this.evalScriptTags(xmlhttp.responseText);
             // indicate that update is complete
             Refresh.refreshComplete();
 
@@ -873,8 +1029,6 @@ ariba.Refresh = function() {
 
         updateHistory : function (current, length)
         {
-            if (Dom.isSafari) return;
-            
             //debug("history: " + current + " " + length);
 
             // limit multi-backrack to AWHistoryLimit
@@ -1042,7 +1196,7 @@ ariba.Refresh = function() {
             // history iframe content is vended  by special history key in AWComponentActionRequestHandler
             // This page, when loaded will call awHistoryEvent passing its url
             var iframe = this.getHistoryIFrame();
-        // we need to make sure the src that we're adding is different than the one currently
+            // we need to make sure the src that we're adding is different than the one currently
             // there or IE won't add the history.  Just add "1" the end to make it unique
             // (i.e. if we're adding 3 history entries we'll add b, b1, b).
             if (this.historyKey(iframe.src) == key) key += "1";
@@ -1184,3 +1338,12 @@ ariba.Refresh = function() {
     return Refresh;
 }();
 
+function RJS (inc, sync, isGS, f)
+{
+    // IFrame version overridden in AWXBasicScriptFunctions.awl
+    if (ariba.Refresh._isXMLHttpResponse) {
+        if (inc) ariba.Refresh.RSS(sync, isGS, f.toString());
+    } else {
+        ariba.Refresh.RSF(sync, isGS, f);
+    }
+}

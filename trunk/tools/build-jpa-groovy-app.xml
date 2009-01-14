@@ -31,12 +31,13 @@
 
     <import file="build-jpa-app.xml"/>
 
-    <!-- Must include demoshell for AWGroovyLoader rapid turnaround -->
-    <fileset id="war.jars" dir="${build.jars.dir}">
-        <include name="ariba.metaui-jpa.jar"/>
-        <include name="ariba.demoshell.jar"/>
-        <include name="${jar.name}"/>
-    </fileset>
+    <target name="init" depends="jpa-app.init">
+        <!-- Must include demoshell for AWGroovyLoader rapid turnaround -->
+        <fileset id="war.jars" dir="${ariba.jars.dir}">
+            <include name="ariba.metaui-jpa.jar"/>
+            <include name="ariba.demoshell.jar"/>
+        </fileset>
+    </target>
 
     <fileset id="module.libs2" dir="${lib-internal.dir}">
         <include name="groovy-all.jar"/>

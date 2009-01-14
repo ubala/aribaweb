@@ -1,29 +1,44 @@
 <!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
-<idea-plugin url="">
-   <name>AribaPlugin</name>
+<idea-plugin url="http://aribaweb.org/">
+    <name>AribaWeb Plugin</name>
+    <version>0.8.5</version>
+    <vendor url="http://aribaweb.org/" email="">Ariba Web Developement Framework</vendor>
 
-   <description>
+    <description>
+	AribaWeb (http://www.aribaweb.org) is the Open Source component-based web application development framework for creating rich, AJAX-enabled applications with the minimum of code (and no hand-coded JavaScript).
+  
+This IDEA plugin provides several productivity-boosting
+features to accelerate AW development within IDEA: 
+1) Component class to Template source toggle,
+2) Remote opening (clicking on component names in AW web pages will open them in IDEA),
+3) Several "Live Templates" for common AW Component tags.
+    </description>
 
-   </description>
+    <change-notes>
+	    New in version 0.8.5: bundled Live Templates (to see the templates that are provided,
+        check out the "AribaWeb" section of the Live Templates panel in the IDEA Settings).
+    </change-notes>
 
-   <version>1.2</version>
 
-   <vendor url="" email="">Ariba Web Developement Framework</vendor>
-
-   <idea-version since-build="3000"/>
-   <project-components>
-       <component>
-           <implementation-class>ariba.ideplugin.idea.RemoteOpenComponent</implementation-class>
-       </component>
-   </project-components>
+    <idea-version since-build="3000"/>
+    <application-components>
+        <component>
+            <implementation-class>ariba.ideplugin.idea.AppComponent</implementation-class>
+        </component>
+    </application-components>
+    <project-components>
+        <component>
+            <implementation-class>ariba.ideplugin.idea.RemoteOpenComponent</implementation-class>
+        </component>
+    </project-components>
 
     <actions>
         <action id="Aribaweb.Plugin.GotoComponent" class="ariba.ideplugin.idea.GotoComponent" text="goto _awl" description="Goto AWL file">
             <keyboard-shortcut first-keystroke="alt B" keymap="$default" />
-         </action>
-         <action id="Aribaweb.Plugin.ToggleAction" class="ariba.ideplugin.idea.ToggleAction" text="Toggle _awl" description="Toggle AWL et Java file">
+        </action>
+        <action id="Aribaweb.Plugin.ToggleAction" class="ariba.ideplugin.idea.ToggleAction" text="Toggle _awl" description="Toggle AWL et Java file">
             <keyboard-shortcut first-keystroke="alt A" keymap="$default" />
-         </action>
+        </action>
     </actions>
 
 </idea-plugin>

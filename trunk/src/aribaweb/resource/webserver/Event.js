@@ -292,10 +292,12 @@ ariba.Event = function() {
 
             var evt = (e) ? e : event;
             var target = (evt.srcElement) ? evt.srcElement : evt.target;
-            if (Debug.checkDebugClick(evt)) return true;
+            if (Debug.checkDebugClick(evt)) { Event.cancelBubble(evt); return true; }
             if (this.modallyDisabled(target)) {
                 // kill focus attempts outside the modal
-                if ((evt.type == "activate" || evt.type == "focus" || evt.type == "mousedown" || evt.type == "click") && target != window) {
+                if ((evt.type == "activate" || evt.type == "focus" ||
+                     evt.type == "mousedown" || evt.type == "click"||
+                     evt.type == "keydown") && target != window) {
                     this.selectFirstText();
                 }
                 return true;

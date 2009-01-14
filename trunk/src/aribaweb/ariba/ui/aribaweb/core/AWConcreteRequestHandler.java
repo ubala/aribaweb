@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteRequestHandler.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteRequestHandler.java#18 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -71,7 +71,7 @@ abstract public class AWConcreteRequestHandler extends AWBaseObject implements A
     public AWResponseGenerating handleException (AWRequestContext requestContext, Exception exception)
     {
         AWApplication application = application();
-        requestContext.setResponse(application.createResponse(requestContext.request()));
+        requestContext.setXHRRCompatibleResponse(application.createResponse(requestContext.request()));
         return application.handleException(requestContext, exception);
     }
 

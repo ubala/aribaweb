@@ -292,8 +292,19 @@ ariba.Dom = function() {
         },
 
         limitTextLength : function (textfield, maxlength) {
-            if (maxlength != 0 && textfield.value.length > maxlength) {
+            if (maxlength < 1 ) return;
+            var textFieldLength = textfield.value.length;
+            if (textFieldLength > maxlength) {
                 textfield.value = textfield.value.substring(0, maxlength);
+            }
+            else {
+                var indicator = this.getElementById(textfield.id + "MLI");
+                var width = indicator.clientWidth;
+                indicator.style.width = '';                
+                indicator.innerHTML = maxlength - textFieldLength;
+                var newWidth = indicator.clientWidth;
+                indicator.style.width =
+                    Math.max(width, newWidth) + 'px';
             }
         },
 
@@ -828,6 +839,16 @@ ariba.Dom = function() {
         unoverlay : function (divObject) {
             //no-op
         },
+
+        getActiveElementId : function ()
+        {
+            var activeElement = document.activeElement;
+            if (activeElement) {
+                return activeElement.id;
+            }
+            return null;
+        },
+        
         EOF:0};
 
     //

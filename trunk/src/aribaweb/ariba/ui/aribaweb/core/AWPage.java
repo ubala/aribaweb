@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#117 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#121 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -61,7 +61,7 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     private static final AWEncodedString RedirectStringStart =
         new AWEncodedString("<script id='AWRefreshComplete'>");
     private static final AWEncodedString RedirectStringEnd =
-        new AWEncodedString("ariba.awCurrWindow.ariba.Request.redirectRefresh();</script>");
+        new AWEncodedString("ariba.Request.redirectRefresh();</script>");
 
     private AWComponent _pageComponent;
     private List _modalPanels;
@@ -100,7 +100,7 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     private AWChangeNotifier _changeNotifier = null;
     private boolean _hasChanged = false;
     private boolean _initiatePolling = false;
-    private int _pollInterval = ((AWApplication)AWConcreteApplication.sharedInstance()).getPollInterval();
+    private int _pollInterval = defaultPollInterval();
     List _currScriptList;
 
     // Allocated by the RequestHistory (but maintained by AWPage)
@@ -565,9 +565,9 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
         BrowserState browserState = browserState();
         AWBaseResponse previousResponse = browserState._previousResponse;
 
-        // we only send delta responses for new requests.  For refreshes (or aborted
+        // we only send delta responses for new, backtrack, and forwardtrack requests.  For refreshes (or aborted
         // requests) we force a full page refresh
-        if (session.requestType(request) == AWSession.NewRequest &&
+        if (session.requestType(request) <= 2 &&
             previousResponse != null &&
             ((browserState()._lastPage == this && browserState._incrementalRefreshCount < SamePageForceFPRThreshold)
                   || (AllowCrossPageRefresh && browserState._incrementalRefreshCount < NewPageForceFPRThreshold)) &&
@@ -602,7 +602,7 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
             if (PerformanceState.threadStateEnabled()) {
                 PerformanceState.getThisThreadHashtable().setToBeContinued(true);
             }
-            _requestContext.setResponse(redirectResponse);
+            _requestContext.setXHRRCompatibleResponse(redirectResponse);
             if (!_requestContext.forceRerenderRequired()) response.setDeferred(true);
 
             browserState._incrementalRefreshCount = 0;
@@ -664,10 +664,12 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     {
         if (previousResponse != null && response.hasRootBufferChanged(previousResponse)) {
             OutputStream outputStream = System.out;
+            AWResponseBuffer.WriteContext writeContext
+                = new AWResponseBuffer.WriteContext(outputStream, previousResponse.characterEncoding());
             AWUtil.write(outputStream, Debug_RootContents_Separator, _characterEncoding);
-            previousResponse.rootBuffer().debug_writeTopLevelOnly(outputStream, previousResponse.characterEncoding());
+            previousResponse.rootBuffer().debug_writeTopLevelOnly(writeContext);
             AWUtil.write(outputStream, Debug_RootContents_Separator, _characterEncoding);
-            response.rootBuffer().debug_writeTopLevelOnly(outputStream, response.characterEncoding());
+            response.rootBuffer().debug_writeTopLevelOnly(writeContext);
 
             try {
                 String tempDir = System.getProperty("java.io.tmpdir");
@@ -676,8 +678,12 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
                 String fileName2 = tempDir + separator + "aw_fullpagerefresh2.txt";
                 FileOutputStream file1 = new FileOutputStream(fileName1, false);
                 FileOutputStream file2 = new FileOutputStream(fileName2, false);
-                previousResponse.rootBuffer().debug_writeTopLevelOnly(file1, previousResponse.characterEncoding());
-                response.rootBuffer().debug_writeTopLevelOnly(file2, response.characterEncoding());
+                previousResponse.rootBuffer().debug_writeTopLevelOnly(
+                        new AWResponseBuffer.WriteContext(file1, previousResponse.characterEncoding())
+                );
+                response.rootBuffer().debug_writeTopLevelOnly(
+                        new AWResponseBuffer.WriteContext(file2, previousResponse.characterEncoding())
+                    );
                 if (!StringUtil.nullOrEmptyOrBlankString(ARIBA_DIFF_TOOL_COMMAND)) {
                     String diffToolCommand = Fmt.S(ARIBA_DIFF_TOOL_COMMAND, fileName1, fileName2);
                     Runtime.getRuntime().exec(diffToolCommand);
@@ -1370,6 +1376,10 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
         _initiatePolling = pollEnabled;
     }
 
+    public static int defaultPollInterval ()
+    {
+        return ((AWApplication)AWConcreteApplication.sharedInstance()).getPollInterval();
+    }
 
     /**
        Returns the poll interval for this page.  If the value has not been explicitly

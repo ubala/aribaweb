@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.awl#34 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.awl#36 $
     </Copyright>
 
     <Overview>
@@ -65,9 +65,11 @@
                 <div id="FPR_Warning" style="float:left">$page.fullPageRefreshCause</div>
             </div>
         </a:If>
+    </a:RefreshRegion>
+    <a:RefreshRegion alwaysRender="$true">
         <a:ClientSideScript>
-            ariba.Debug._AWShowComponentPathAction='<a:ActionId action="$showComponentPath"/>';
-            ariba.Debug.updateComponentInspector('$request.sessionId', '<a:ActionId action="$updateComponentInspector"/>', $isComponentPathDebuggingEnabled);
+            ariba.Debug.updateComponentInspector('$request.sessionId', '<a:ActionId action="$updateComponentInspector"/>',
+                ( $isComponentPathDebuggingEnabled || $requestContext.wasPathDebugRequest ));
         </a:ClientSideScript>
     </a:RefreshRegion>
     <w:PopupMenu menuId="awDebugPane">
@@ -163,7 +165,7 @@
     <a:RefreshRegion style="display:none;">
         <a:If ifTrue="$hasValidationItems">\
             <div id="AWValidationIndicatorContent">
-                <a:If ifTrue="$hasValidationErrors">\
+                <a:If ifTrue="${hasValidationErrors or hasGeneralErrors}">\
                     <div style="$errorWarningStyle">
                         Validation errors found on page.  &nbsp;&nbsp;
                         <a:PrivateHyperlink target="awValidationErrorPage" action="$openValidationErrorPage">

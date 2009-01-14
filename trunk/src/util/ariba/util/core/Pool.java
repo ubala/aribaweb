@@ -1,5 +1,6 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2008 Ariba, Inc.
+    All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,10 +13,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Pool.java#6 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Pool.java#8 $
 */
 
 package ariba.util.core;
+
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
     Generic resource pooling mechanism
@@ -113,7 +119,10 @@ public class Pool implements LockHandlerConditions
     public void remove (Linkable linkable)
     {
         synchronized (this.lockHandler.lock) {
-            inUseCount--;
+            if (linkable.inuse()) {
+                linkable.setInuse(false);
+                inUseCount--;
+            }
         }
     }
 
@@ -161,6 +170,21 @@ public class Pool implements LockHandlerConditions
     }
 
     /**
+        Allocate a resource for our use if one is available, otherwise
+        return null.
+    */
+    public Linkable allocateIfAvailable (Linkable obj)
+    {
+        synchronized (this.lockHandler.lock) {
+            if (!this.freeList.empty()) {
+                return this.allocateAux(obj);
+            }
+            this.allocationMiss++;
+            return null;
+        }
+    }
+
+    /**
         Release an allocated resource for others to use.
     */
     public void release (Linkable linkable)
@@ -190,5 +214,52 @@ public class Pool implements LockHandlerConditions
         }
         this.allocationSum++;
         return linkable;
+    }
+    
+    private Linkable allocateAux (Linkable obj)
+    {
+        Linkable linkable = this.freeList.first();
+        while (linkable != null) {
+            if (linkable == obj) {
+                break;
+            }
+            linkable = this.freeList.next(linkable);
+        }
+        if (linkable == obj) {
+            this.freeList.remove(linkable);
+            this.inUseCount++;
+            Assert.that(!linkable.inuse(), "Object is already in use");
+            linkable.setInuse(true);
+            this.allocationSum++;
+        }
+        return linkable;
+    }
+    
+    public Linkable allocate (Comparator comparator)
+    {
+        synchronized (this.lockHandler.lock) {
+            List connections = getFreeList();
+            Set sortedSet = SetUtil.sortedSet(comparator);
+            sortedSet.addAll(connections);
+            for (Iterator it = sortedSet.iterator(); it.hasNext();) {
+                Linkable linkable = (Linkable)it.next();
+                linkable = allocateIfAvailable(linkable);
+                if (linkable != null) {
+                    return linkable;
+                }
+            }
+            return null;
+        }
+    }
+    
+    private List<Linkable> getFreeList ()
+    {
+        List free = ListUtil.list();
+        Linkable linkable = this.freeList.first();
+        while (linkable != null) {
+            free.add(linkable);
+            linkable = this.freeList.next(linkable);
+        }
+        return free;
     }
 }

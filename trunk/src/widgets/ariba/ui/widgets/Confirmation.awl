@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#28 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#30 $
     </Copyright>
 
     <Overview>
@@ -261,19 +261,19 @@
                         </td>\
                     </tr>\
                     <tr>\
-                        <td class="body" style="padding:5px 5px 5px 5px;">
+                        <td class="dialogContent">
                             <div class="flexContainer">\
                                 <a:RefreshRegion>\
                                     <a:IncludeContent name="content" required="$false"/>\
                                     <a:ClientSideScript>\
-                                        ariba.Event.eventEnqueue(ariba.Input.selectFirstText.bind(ariba.Input), null, true);
+                                        ariba.Input.allowSelectFirstText();
                                     </a:ClientSideScript>\
                                 </a:RefreshRegion>\
                             </div>\
                         </td>\
                     </tr>\
                     <tr>\
-                        <td style="padding:8px 5px 8px 5px">
+                        <td class="dialogButtons">
                             <div style="float:right">
                                 <a:If ifTrue="$hasButtonsTemplate">\
                                     <a:IncludeContent name="buttons" required="$true"/>\
@@ -290,6 +290,7 @@
                     </tr>\
                 </table>\
             </a:LazyDiv>\
+            <div class="dialogFooter"></div>\
         </div>\
         </w:DialogBox>\
         </a:RelocatableDiv>\

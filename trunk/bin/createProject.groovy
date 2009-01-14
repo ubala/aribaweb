@@ -11,8 +11,7 @@ def usage = """
 """
 
 /**
-    Design
-
+    Design:
         tools/templates
             Foo.projectTemplate/
                 templateInfo.table
@@ -41,87 +40,69 @@ def usage = """
                  }
             }
  */
-String ParamsFileName = "templateInfo.table"
-String SubstFileExtension = ".awtmpl"
-
 assert args.length == 1, usage
 File templatesDir = new File(args[0])
 assert templatesDir.exists(), "Supplied template directory not found: ${templatesDir}"
 
-templateConfigs = []
-templatesDir.eachDir { File dir ->
-    if (dir.name.endsWith(".projectTemplate")) {
-        File configFile = new File(dir, ParamsFileName);
-        if (!configFile.exists()) {
-            println "warning: Project dir missing templateInfo.table file: ${configFile}"
-        } else {
-            Map config = [:];
-            MapUtil.fromSerializedString (config, configFile.text)
-            config.dir = configFile.parentFile
-            templateConfigs += config
-        }
-    }
-}
+ParamsFileName = "templateInfo.table"
+SubstFileExtension = ".awtmpl"
+input = new Scanner(System.in)
 
-assert templateConfigs.size() > 0, "No templates found in supplied templates dir: ${templatesDir}"
+File baseDir = new File(".")
+if (new File(baseDir, "createProject.groovy").exists()) baseDir = new File(System.properties["user.home"])
+println "(Default directory: ${baseDir.getCanonicalPath()})"
 
-// sort templates by rank
-templateConfigs = templateConfigs.sort { a, b ->
-        (a.rank ? Integer.parseInt(a.rank) : 100) <=> (b.rank ? Integer.parseInt(b.rank) : 100)
-}
-
-def input = new Scanner(System.in)
-// println "${properties.greeting} -- In 10 years you will be ${ + 10}"
-
-Map chosenTemplate = templateConfigs[0]
-if (templateConfigs.size() > 0) {
-    println "Please choose a template from among the following:"
-    int i = 1;
-    templateConfigs.each { config ->
-        println "    [${i++}] ${config.title}"
-        config.description.split("\n").each { println "           ${it}" }
-        println ""
-    }
-    int choice = (int)getChoice(input, "Selection", 1) {
-                    int c = Integer.valueOf(it)
-                    return (c >0 && c <= templateConfigs.size()) ? c : null
-                 }
-    chosenTemplate = templateConfigs[choice - 1]
-}
-
-String projectName = (String)getChoice(input, "Enter name/path for your project (directory)", "MyApp", null)
-
-Map params = [ProjectName:projectName];
-chosenTemplate.parameters?.each { param ->
-    params[param.key] = getChoice(input, param["description"], param["default"], null)
-}
-
-File projectDir = new File(projectName)
+String path = (String)getChoice("Enter name/path for your project (directory)", "MyApp", null)
+File projectDir = new File(path)
+if (!projectDir.isAbsolute()) projectDir = new File(baseDir, path)
 assert !projectDir.exists(), "Directory matching project name already exists: ${projectDir}"
 
+def chosenTemplate = selectTemplate(templatesDir)
+
+String projectName = projectDir.name
+Map params = [ProjectName:projectName]
+queryParams(chosenTemplate, params)
+
 println "Applying template ${chosenTemplate.title} (${chosenTemplate.dir}) with params: ${params}"
-
 projectDir.mkdirs()
+applyTemplate(chosenTemplate.dir, projectDir, params)
 
-File templateDir = chosenTemplate.dir
-templateDir.eachFileRecurse { File f ->
-    String relativePath = f.getCanonicalPath().substring(templateDir.getCanonicalPath().length())
-    relativePath = macroPath(relativePath, params).replaceAll(SubstFileExtension + '$', "")
-    File destFile = new File(projectDir, relativePath)
-    if (f.isDirectory()) {
-        println "Creating dir: ${destFile}"
-        destFile.mkdirs()
-    } else if (f.name != ParamsFileName && f.name != ".DS_Store") {
-        if (f.name.endsWith(SubstFileExtension)) {
-            println "Eval and copying file ${f} to ${destFile}"
-            evalCopyFile(f, destFile, params)
-        } else {
-            println "Copying file ${f} to ${destFile}"
-            copyFile(f, destFile)
+File ideTemplatesDir = new File(templatesDir, "IDE")
+if (ideTemplatesDir.exists()) {
+    println "."
+    println "IDE Integration:"
+    def ideTemplate = selectTemplate(ideTemplatesDir)
+
+    queryParams(ideTemplate, params)
+
+    println "Applying IDE template ${ideTemplate.title} (${ideTemplate.dir}) with params: ${params}"
+    applyTemplate(ideTemplate.dir, projectDir, params)
+
+    String os = ((String)System.getProperties()["os.name"]).replace(" ", "").toLowerCase()
+    boolean isMac = os.startsWith("macos"), isWin = os.startsWith("windows")
+    if (isMac || isWin) {
+        String openCmd = (isMac) ? "open" : "start"
+        String choice = getChoice("What next?  o) open project, r) run app, b) both, x) exit", "o", null)
+
+        if (choice.startsWith("o") || choice.startsWith("b")) {
+            File openFile = projectDir
+            if (ideTemplate.autoOpenFile) {
+                openFile = new File(projectDir, substParams(ideTemplate.autoOpenFile, params))
+            }
+            println "Opening ${openFile}..."
+            try {
+               "${openCmd} ${openFile}".execute()
+            } catch (Exception e) {
+                println "Error running ${openCmd}: ${e.message}"
+            }
+        }
+        if (choice.startsWith("r") || choice.startsWith("b")) {
+            Process p = "ant -f ${projectDir}/build.xml launch".execute()
+            p.consumeProcessOutput(System.out, System.err)
+            p.waitFor()
         }
     }
 }
-
 
 println """
 
@@ -135,7 +116,54 @@ To run:
 
 """
 
-def getChoice (Scanner input, String prompt, Object defaultVal, conversionClosure) {
+def selectTemplate (File templatesDir) {
+    templateConfigs = []
+    templatesDir.eachDir { File dir ->
+        if (dir.name.endsWith(".projectTemplate")) {
+            File configFile = new File(dir, ParamsFileName);
+            if (!configFile.exists()) {
+                println "warning: Project dir missing templateInfo.table file: ${configFile}"
+            } else {
+                Map config = [:];
+                MapUtil.fromSerializedString (config, configFile.text)
+                config.dir = configFile.parentFile
+                templateConfigs += config
+            }
+        }
+    }
+
+    assert templateConfigs.size() > 0, "No templates found in supplied templates dir: ${templatesDir}"
+
+    // sort templates by rank
+    templateConfigs = templateConfigs.sort { a, b ->
+            (a.rank ? Integer.parseInt(a.rank) : 100) <=> (b.rank ? Integer.parseInt(b.rank) : 100)
+    }
+
+    Map template = templateConfigs[0]
+    if (templateConfigs.size() > 0) {
+        println "Please choose a template from among the following:"
+        int i = 1;
+        templateConfigs.each { config ->
+            println "    [${i++}] ${config.title}"
+            config.description.split("\n").each { println "           ${it}" }
+            println ""
+        }
+        int choice = (int)getChoice("Selection", 1) {
+                        int c = Integer.valueOf(it)
+                        return (c >0 && c <= templateConfigs.size()) ? c : null
+                     }
+        template = templateConfigs[choice - 1]
+    }
+    return template
+}
+
+def queryParams (template, params) {
+    template.parameters?.each { param ->
+        params[param.key] = getChoice(param["description"], param["default"], null)
+    }
+}
+
+def getChoice (String prompt, Object defaultVal, conversionClosure) {
     def choice = null
     while (!choice) {
         print "${prompt} [${defaultVal}]: "
@@ -150,6 +178,26 @@ def getChoice (Scanner input, String prompt, Object defaultVal, conversionClosur
     return choice
 }
 
+def applyTemplate (File templateDir, File projectDir, Map params) {
+    templateDir.eachFileRecurse { File f ->
+        String relativePath = f.getCanonicalPath().substring(templateDir.getCanonicalPath().length())
+        relativePath = macroPath(relativePath, params).replaceAll(SubstFileExtension + '$', "")
+        File destFile = new File(projectDir, relativePath)
+        if (f.isDirectory()) {
+            println "    Creating dir: ${destFile}"
+            destFile.mkdirs()
+        } else if (f.name != ParamsFileName && f.name != ".DS_Store") {
+            if (f.name.endsWith(SubstFileExtension)) {
+                println "        ... creating file ${f} to ${destFile}"
+                evalCopyFile(f, destFile, params)
+            } else {
+                println "        ... copying file ${f} to ${destFile}"
+                copyFile(f, destFile)
+            }
+        }
+    }
+}
+
 String macroPath (String path, Map params) {
     // path entries of form _Key_ should be swapped with params
     return path.replaceAll(/_(\w+)_/) { a, v ->
@@ -160,13 +208,17 @@ String macroPath (String path, Map params) {
 }
 
 def evalCopyFile (File src, File dest, Map params) {
-    String contents = src.text.replaceAll(/@(\w+)@/) { a, v ->
+    String contents = substParams(src.text, params)
+    // println ("${dest}: ${contents}")
+    dest.write(contents)
+}
+
+String substParams (String str, Map params) {
+    str.replaceAll(/@(\w+)@/) { a, v ->
         def p = params[v];
         assert p, "Reference to unbound parameter ${v}"
         p
     }
-    // println ("${dest}: ${contents}")
-    dest.write(contents)
 }
 
 def copyFile (File src, File dest) {

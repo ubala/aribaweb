@@ -1,0 +1,56 @@
+<html>
+    <head>
+        <title>$title</title>
+        <link href="../resource/widgets.css" type="text/css" rel=stylesheet>
+        \<script src="../resource/prettify.js" language=JavaScript>\</script>
+        <style type="text/css">
+            .cmd {
+                margin: 0px auto; padding: 5px; background-color:#666699; 
+                text-align: center; color:#FFFFFF; font-weight: bold;
+            }
+            .cmd a {
+                text-decoration:none;
+                color:#FFFFFF;
+            }
+            .cmd a:hover {
+                text-decoration:underline;
+            }
+            .movThumb {
+                float:left;
+                width:220px;
+            }
+            .movBlurb {
+                float:right;
+                width:450px;
+                clear:right;
+            }
+            .clearboth { clear:both; }
+            .vertspc { padding:10px 0px 10px 0px;}
+        </style>
+    </head>
+    <body class="doc" style="background-image:url(../resource/cssGrayGradient.gif)" onload="prettyPrint()">
+        <div style="background-color: white;">
+            <div style="margin: 0px auto; padding: 10px; width: 700px; height: 40px; background-color: white;">
+                <img class="flL" style="padding-top:3px" src="../resource/cmdbar_prod.gif" alt="AribaWeb"/>
+                <div class="flR" style="padding-left:20px">
+                    <i>Raising the Level of Web Application Development</i>
+                </div>
+            </div>
+        </div>
+        <div class="cmd">
+            <a href="../site/Overview.html">Overview</a> |
+            <a href="../site/Screencasts.html">Screencasts</a> |
+            <a href="../site/Getting_Started.html">Getting Started</a> |
+            <a href="../site/Creating_New_App.html">Creating a New App</a> |
+            <a href="../api/index.html">API</a> |
+            <a href="https://sourceforge.net/project/showfiles.php?group_id=227584">Download</a>
+        </div>
+        <div style="margin: 0px auto 10px; padding: 30px 20px 20px; background-color:white; width: 700px;">
+            <w:Markdown value="$contents"/>
+        </div>
+
+        <div style="margin:20px auto 10px;text-align:center">
+            <a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=227584&amp;type=3" width="125" height="37" border="0" alt="SourceForge.net Logo" /></a>
+        </div>
+    </body>
+</html>

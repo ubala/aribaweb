@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaShutdownWarning.awl#7 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaShutdownWarning.awl#9 $
     </Copyright>
 
     <Overview>
@@ -48,9 +48,9 @@
                     </w:TextButton>
                 </td>
                 <td>
-                    <w:TextButton action="$logout"
+                    <w:TextButton action="$redirect"
                                 buttonClass="btnSpecial1">
-                        <a:Local key="a003">Logout Now</a:Local>
+                        <a:Local key="a004">Redirect Now</a:Local>
                     </w:TextButton>
                 </td>
             </tr>

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWClientSideScript.awl#26 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWClientSideScript.awl#28 $
     </Copyright>
 
     <Overview>
@@ -157,7 +157,7 @@
                         <a:IncludeContent/>\
                     </pre>\
                     <a:If notEqualNull="$executeOn">\
-                        <a:ClientSideScript isSingleton="$false">
+                        <a:ClientSideScript isSingleton="$false" globalScope="$isGlobalScope">
                             ariba.Event.registerHandler("$spanId", "$executeOn");
                         </a:ClientSideScript>\
                     </a:If>\
@@ -186,12 +186,12 @@
                     </a:RefreshRegion>\
                 </pre>\
                 <a:GenericContainer tagName="script">\
-                    if (window.name != "AWRefreshFrame") {\
+                    if (!ariba_IR) {\
                         ariba.Refresh.RVBS('$spanId', <a:String value="$isGlobalScope"/>);\
                     }\
                     <a:If ifTrue="$^executeOnIncrementalUpdate:$true">\
                         else {\
-                            parent.ariba.Refresh.RVBS('$spanId', <a:String value="$isGlobalScope"/>);\
+                            ariba.Refresh.RVBS('$spanId', <a:String value="$isGlobalScope"/>);\
                         }\
                     </a:If>\
                 </a:GenericContainer>\

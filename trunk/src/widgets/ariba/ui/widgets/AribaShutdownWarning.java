@@ -12,11 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaShutdownWarning.java#8 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaShutdownWarning.java#10 $
 */
 
 package ariba.ui.widgets;
 
+import ariba.ui.aribaweb.util.AWBookmarker;
+import ariba.ui.aribaweb.core.AWRedirect;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWRequestContext;
@@ -83,11 +85,17 @@ public class AribaShutdownWarning extends AWComponent
         return Confirmation.hideConfirmation(requestContext());
     }
 
-    public AWResponseGenerating logout ()
+    public AWResponseGenerating redirect ()
     {
-        ActionHandler logoutActionHandler =
-                ActionHandler.resolveHandler(AribaAction.LogoutAction);
-        return logoutActionHandler.actionClicked(requestContext());
+        AWRedirect redirect = null;
+        AWBookmarker bookmarker = application().getBookmarker();
+        AWRequestContext requestContext = requestContext();
+        if (bookmarker.isBookmarkable(requestContext)) {
+            String url = bookmarker.getURLString(requestContext);
+            redirect = AWRedirect.getRedirect(requestContext, url);
+            redirect.setAllowInternalDispatch(false);
+        }
+        session().terminate();
+        return redirect;
     }
-
 }

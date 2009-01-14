@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#29 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#30 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -161,7 +161,7 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
         redirectResponse.appendContent(RedirectStringStart);
         redirectResponse.appendContent(escapeJavascript(url));
         redirectResponse.appendContent(RedirectStringFinish);
-        requestContext.setResponse(redirectResponse);
+        requestContext.setXHRRCompatibleResponse(redirectResponse);
     }
 
     protected static void fullPageRedirect (AWRequestContext requestContext, String url)

@@ -1,0 +1,29 @@
+<w:BasicPageWrapper hasForm="$true">
+    <w:FourZoneLayout>
+        <a:Content name="left">
+            <t:DataTable title="Locations" displayGroup="$displayGroup"
+                         multiSelect="$true" submitOnSelectionChange="$true"
+                         enableScrolling="$true" showOptionsMenu="$true">
+                <t:CSVData>
+                    Company,            Address
+                    Ariba,              "807 11th Ave, Sunnyvale CA"
+                    Apple,              "1 Infinite Loop, Cupertino CA"
+                    Oracle,             "500 Oracle Pkwy, Redwood City, CA 94065"
+                    Google,             "1600 Amphitheatre Parkway, Mountain View, CA 94043"
+                    Yahoo,             "701 First Avenue Sunnyvale, CA 94089"
+                </t:CSVData>
+            </t:DataTable>
+        </a:Content>
+        <a:Content name="right">
+            <h1>The Map</h1>
+            <x:GMap latitude="37.42307124980109" longitude="-122.13020324707031" zoomLevel="10">
+                <a:For list="$displayGroup.selectedObjects" item="$item">
+                    <x:GMapMarker address="$item.Address" action="$itemClicked"/>
+                </a:For>
+            </x:GMap>
+            <a:RefreshRegion>
+                <b>$message</b>
+            </a:RefreshRegion>
+        </a:Content>
+    </w:FourZoneLayout>
+</w:BasicPageWrapper>

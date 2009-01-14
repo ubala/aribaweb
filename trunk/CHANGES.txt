@@ -1,8 +1,34 @@
 CHANGES.txt
 
+New in Version 0.8.5 (9/29/2008)
+--------------------------------
+- Higher performance AJAX
+    - XMLHTTP for incremental requests (instead of IFrames)
+
+- IDEA project file auto-generation support
+
+- New components:
+    - FusionCharts (flash-based charting): flat and 2D pivot data
+    - Google Maps integration (via GMaps) tags
+
+- More Examples
+    - YouTubeBrowser example
+    - GMaps examples: address charting, marker drawing, AWPoll-based animated path following
+    - Charting examples
+    - File Upload / Download example
+    - MasterDetail example enhanced with Drag / Drop
+    
+- Other script / build file cleanup
+    - `aw` command now prompts to create project if launched with no args
+    - Tomcat launched with *debug* on by default
+    - app-local builds use cwd for build output (classes, jars, wars, tomcat base)
+    - cygwin/MKS compatibility for (sh-based) aw & start commands
+
+- Component Inspector (x-ray) bug fixes
+    - More reliably uses incremental refresh, fewer JS errors, works for modal panels
 
 New in Version 0.8.4 (9/1/2008)
----------------------------------
+-------------------------------
 - Documentation
     - JavaDoc, including inlined AWApi (binding doc)
     - SourceSearch documentation browse / search application

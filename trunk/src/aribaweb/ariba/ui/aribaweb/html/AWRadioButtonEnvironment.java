@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWRadioButtonEnvironment.java#16 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWRadioButtonEnvironment.java#17 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -105,6 +105,7 @@ public final class AWRadioButtonEnvironment extends AWComponent
             String semanticKey = _debugSemanticKey();
             String elementId = radioButtonName().string();
             if (semanticKey != null) {
+                semanticKey = AWRecordingManager.applySemanticKeyPrefix(requestContext, semanticKey, null);
                 AWRecordingManager.registerSemanticKey(elementId, semanticKey, requestContext);
             }
         }

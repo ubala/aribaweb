@@ -12,16 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkManager.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkManager.java#2 $
 */
 package ariba.ui.aribaweb.test;
 
-import ariba.ui.aribaweb.core.AWConcreteServerApplication;
 import ariba.ui.aribaweb.util.AWJarWalker;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
-
+import ariba.util.test.TestLink;
+import ariba.util.test.TestStager;
+import ariba.util.test.TestInspector;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,21 +33,41 @@ import java.util.Set;
 
 public class TestLinkManager
 {
-    static final Class _AnnotationClasses[] = {TestLink.class};
+    static final Class _AnnotationClasses[] = {TestLink.class, ariba.util.test.TestStager.class};
+    static final Class _AnnotationValidatorClasses[] = {TestInspector.class};
 
-    static final Class _allTestAnnotationClasses[] = {TestLink.class, TestLinkParam.class};
+    static final Class _allTestAnnotationClasses[] =
+            {TestLink.class, TestStager.class, TestParam.class,
+             TestInspector.class};
     
     static TestLinkManager _instance = new TestLinkManager();
     Set<String> _classesWithAnnotations = new HashSet();
+    Set<String> _classesWithValidatorAnnotations = new HashSet();
 
     Map <String, Map<Class, Object>> _annotationMapByClassName = new HashMap();
+    Map <Class, List<TestInspectorLink>> _testInspectorMap = new HashMap();
+    
+    private TestSessionSetup _testSessionSetup = null;
 
-    public static void initialize ()
+    public static void forceClassLoad()
     {
-        if (_instance == null) {
-            _instance = new TestLinkManager();
-            AWConcreteServerApplication.sharedInstance().resourceManager().registerPackageName("ariba.ui.aribaweb.test", true);
-        }
+        // method gets called to force the class to load and
+        // invoke its static initializers.
+    }
+
+    public static void initialize (TestSessionSetup testSessionSetup)
+    {
+        _instance._testSessionSetup = testSessionSetup;
+    }
+
+    public void registerTestSessionSetup (TestSessionSetup testSessionSetup)
+    {
+        _testSessionSetup = testSessionSetup;
+    }
+
+    public TestSessionSetup getTestSessionSetup()
+    {
+        return _testSessionSetup;
     }
 
     public TestLinkManager()
@@ -56,6 +77,14 @@ public class TestLinkManager
                 public void annotationDiscovered(String className, String annotationType)
                 {
                     _classesWithAnnotations.add(className);
+                }
+            });
+        }
+        for (Class annotationClass : _AnnotationValidatorClasses) {
+            AWJarWalker.registerAnnotationListener(annotationClass, new AWJarWalker.AnnotationListener() {
+                public void annotationDiscovered(String className, String annotationType)
+                {
+                    _classesWithValidatorAnnotations.add(className);
                 }
             });
         }
@@ -77,6 +106,17 @@ public class TestLinkManager
         return annotationMap;
     }
 
+    public boolean hasObjectInspectors (Object object)
+    {
+        List list = _testInspectorMap.get(object);
+        return list != null && list.size() > 0;
+    }
+
+    public List<TestInspectorLink> getObjectInspectors (Object object)
+    {
+        return _testInspectorMap.get(object);
+    }
+    
     private List _allTestLinks = null;
     private List<Category> _categoryList = null;
     
@@ -128,19 +168,47 @@ public class TestLinkManager
         for (String className  :_classesWithAnnotations) {
             Map<Class, Object> annotations = annotationsForClass(className);
             Set keys = annotations.keySet();
-            for (Object annotation : keys) {
-                Object annotationRef = annotations.get(annotation);
-                if (shouldExpandTestLink((Annotation)annotation)) {
-                    List<TestLinkHolder> testLinks = expandTestLink((Annotation)annotation, annotationRef);
-                    _allTestLinks.addAll(testLinks);
+            for (Object key : keys) {
+                Annotation annotation = (Annotation)key;
+                if (annotation.annotationType().isAssignableFrom(TestLink.class) ||
+                        annotation.annotationType().isAssignableFrom(ariba.util.test.TestStager.class)) {
+                    Object annotationRef = annotations.get(annotation);
+                    if (shouldExpandTestLink((Annotation)annotation)) {
+                        List<TestLinkHolder> testLinks = expandTestLink((Annotation)annotation, annotationRef);
+                        _allTestLinks.addAll(testLinks);
+                    }
+                    else {
+                        _allTestLinks.add(new TestLinkHolder((Annotation)annotation, annotationRef));
+                    }
                 }
-                else {
-                    _allTestLinks.add(new TestLinkHolder((Annotation)annotation, annotationRef));
+            }
+        }
+        for (String className  :_classesWithValidatorAnnotations) {
+            Map<Class, Object> annotations = annotationsForClass(className);
+            Set keys = annotations.keySet();
+            for (Object key : keys) {
+                Annotation annotation = (Annotation)key;
+                if (annotation.annotationType().isAssignableFrom(TestInspector.class)) {
+                    TestInspector testInspector = (TestInspector)annotation;
+                    Object annotationRef = annotations.get(annotation);
+                    TestInspectorLink inspectorLink = new TestInspectorLink(testInspector, annotationRef);
+                    if (inspectorLink.isValid()) {
+                        addTestInspectorToMap(inspectorLink);
+                    }
                 }
             }
         }
     }
 
+    private void addTestInspectorToMap (TestInspectorLink inspectorLink)
+    {
+        List list = _testInspectorMap.get(inspectorLink.getObjectClass());
+        if (list == null) {
+            list = ListUtil.list();
+            _testInspectorMap.put(inspectorLink.getObjectClass(), list);
+        }
+        list.add(inspectorLink);
+    }
 
     private boolean shouldExpandTestLink (Annotation annotation)
     {
@@ -159,6 +227,13 @@ public class TestLinkManager
             String[] types = typeList.split(";");
             for (String type : types) {
                 testLinks.add(new TestLinkHolder(annotation, ref, type));
+            }
+        }
+        String superType = AnnotationUtil.getAnnotationSuperType(annotation);
+        if (!StringUtil.nullOrEmptyOrBlankString(superType)) {
+            Set<String> subTypes = getTestSessionSetup().resolveSuperType(superType);
+            for (String subType : subTypes) {
+                testLinks.add(new TestLinkHolder(annotation, ref, subType));
             }
         }
         return testLinks;

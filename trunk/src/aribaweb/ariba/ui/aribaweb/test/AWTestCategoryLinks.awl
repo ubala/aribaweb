@@ -13,14 +13,18 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AWTestCategoryLinks.awl#1 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AWTestCategoryLinks.awl#2 $
     </Copyright>
 </a:Api>
 <a:For list="$^categoryTestUnits" item="$currentTestUnit">
     <table class="testUnit">
         <tr>
             <td class="tableHeader">$currentTestUnit.mainName ($currentTestUnit.secondaryName)</td>
-            <td class="tableHeader">Context</td>
+            <a:If ifTrue="$currentTestDisplayTestContextValue">
+                <td class="tableHeader">Context ($currentTestUnitContextValue)</td>
+            <a:Else/>
+                <td class="tableHeader">Context</td>
+            </a:If>
         </tr>
 
         <tr>
@@ -35,12 +39,11 @@
                                             $currentTestUnitLink.displayName
                                         </a:Hyperlink>
                                     </li>
-                                </a:If>
-                                <a:Else>
+                                <a:Else/>
                                     <li class="appLink">
                                         $currentTestUnitLink.displayName
                                     </li>
-                                </a:Else>
+                                </a:If>
                             </a:For>
                         </ul>
                     </a:If>
@@ -58,12 +61,11 @@
                                             $currentTestUnitLink.displayName
                                         </a:Hyperlink>
                                     </li>
-                                </a:If>
-                                <a:Else>
-                                    <li class="appLink">
+                                <a:Else/>
+                                    <li class="reloadLink">
                                         $currentTestUnitLink.displayName
                                     </li>
-                                </a:Else>
+                                </a:If>
                             </a:For>
                         </ul>
                     </a:If>
@@ -103,7 +105,7 @@
                                         </a:Hyperlink>
                                     </li>
                                 <a:Else/>
-                                    <li class="appLink">
+                                    <li class="reloadLink">
                                         $currentTestUnitLink.displayName
                                     </li>
                                 </a:If>

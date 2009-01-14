@@ -67,6 +67,6 @@
     <filelist id="merge.js.filelist" dir="${src.dir}/resource/webserver/widg/"
               files="DragDrop.js Widgets.js Menu.js Chooser.js Datatable.js Calendar.js"/>
     <filelist id="unmerged.js.filelist" dir="${src.dir}/resource/webserver/widg/"
-              files="ModalWindow.js prettify.js richtext.js"/>
+              files="ModalWindow.js prettify.js richtext.js flashcharts.js"/>
 
 </project>
