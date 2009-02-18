@@ -22,6 +22,8 @@ class SourceSearcher {
         BooleanQuery.setMaxClauseCount(Integer.MAX_VALUE)  // Avoid exception on clause expansion of queries like AW*
     }
 
+    static String extract (String s, String pat) { def m = (s =~ pat); m.find() ? m.group(1) : null; }
+  
     static List searchers
     static List allSearchers ()
     {
@@ -78,7 +80,7 @@ class SourceSearcher {
         println "Read full paths: ${pathsByDocId.size()}"
 
         searcher = new IndexSearcher(FSDirectory.getDirectory(_indexDir, false))
-        analyzer = new StandardAnalyzer()
+        analyzer = SourceCodeAnalyzer.analyzerForField("contents", null); // StandardAnalyzer()
     }
 
     def search (String q, Closure collector) { prepare(); new SearchState (source:this).search(q, collector) }
@@ -129,11 +131,15 @@ class DocRef {
     def addOther (doc) { def l = allHits(); if (!l.contains(doc)) { l.add(doc); if (doc.score > score) score = doc.score } }
     def allHits () { (_allHits) ?: (_allHits = [this]) }
     def hitExcerpt () {
-        File sourceFile = sourceFile()
-        TokenStream tokenStream = index().analyzer.tokenStream("contents", sourceFile.newReader())
-        // Get 3 best fragments and separate with a "..."
-        def ex = searchState.excerptHighlighter?.getBestFragments(tokenStream, sourceFile.text, 3, "...")?.replaceAll(/\n(\s*\n+)+/, "\n")
-        return escapeString(ex)?.replaceAll(/%#%/, '<span class="brandAccent">')?.replaceAll(/#%#/, '</span>')
+        try {
+            File sourceFile = sourceFile()
+            TokenStream tokenStream = index().analyzer.tokenStream("contents", sourceFile.newReader())
+            // Get 3 best fragments and separate with a "..."
+            def ex = searchState.excerptHighlighter?.getBestFragments(tokenStream, sourceFile.text, 3, "...")?.replaceAll(/\n(\s*\n+)+/, "\n")
+            return escapeString(ex)?.replaceAll(/%#%/, '<span class="brandAccent">')?.replaceAll(/#%#/, '</span>')
+        } catch (FileNotFoundException ex) {
+            return "File Not Found" 
+        }
     }
 
     def escapeString (s) {
@@ -142,7 +148,7 @@ class DocRef {
         return s.replaceAll(/(?m)^(\s+)/, '<span style="white-space:pre">\$1</span>').replaceAll('(?m)\$', '<br/>')
     }
 
-    def isJavadoc () { extension() == "html" &&
+    def isJavadoc () { (extension() == "html" ||  extension() == "htm") &&
                     (type() == "doc" || type() == "tutorial") } // path().contains("/docs/")
     def isSample () { extension() == ".awl" && !StringUtil.nullOrEmptyString(doc()["sampleFor"]) }
     def typeLabel () { isJavadoc() ? "doc" : extension() }

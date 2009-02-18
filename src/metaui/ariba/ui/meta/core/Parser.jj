@@ -496,7 +496,7 @@ TOKEN:
 // Key path string.
 TOKEN:
 {
-  < KEYPATH: ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","_","0"-"9", "."] )* >
+  < KEYPATH: ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","_","0"-"9", ".", "$"] )* >
 }
 
 // Dynamic field path binding.

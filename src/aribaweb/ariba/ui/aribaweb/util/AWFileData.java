@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWFileData.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWFileData.java#14 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -76,16 +76,22 @@ public final class AWFileData extends AWBaseObject implements AWDisposable
 
     public AWFileData (String filename, SharedInputStream stream, int bytesRead)
     {
+        this(filename, stream, MIME.ContentTypeApplicationOctetStream, bytesRead);
+    }
+
+    public AWFileData (String filename, SharedInputStream stream, String mimeType, int bytesRead)
+    {
         super();
         _filename = filename;
         _data = null;
-        _mimeType = MIME.ContentTypeApplicationOctetStream;
+        _mimeType = mimeType;
         _fileIncomplete = false;
         _file = null;
         _bytesRead = bytesRead;
         _sharedInputStream = stream;
 
     }
+
 
     public AWFileData (String filename, byte[] data, String mimeType)
     {

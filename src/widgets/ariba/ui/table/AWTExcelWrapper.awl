@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTExcelWrapper.awl#8 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTExcelWrapper.awl#9 $
     </Copyright>
 
     <Overview>
@@ -34,16 +34,16 @@
           xmlns="http://www.w3.org/TR/REC-html40">\
         <a:MetaContentType/>
         <meta name="ProgId" content="Excel.Sheet"/>
-        <meta name="Generator" content="Microsoft Excel 10"/>
-        <!--[if !mso]>
+        <meta name="Generator" content="Microsoft Excel 10"/> 
+        <a:Comment>[if !mso]>
             <style>
                 v\\:* {behavior:url(#default#VML);}");
                 o\\:* {behavior:url(#default#VML);}");
                 x\\:* {behavior:url(#default#VML);}");
                 .shape {behavior:url(#default#VML);}");
             </style>");
-        <![endif]-->
-        <!--[if gte mso 9]><xml>
+        <![endif]</a:Comment>
+        <a:Comment>[if gte mso 9]><xml>
          <x:ExcelWorkbook>
           <x:ExcelWorksheets>
            <x:ExcelWorksheet>
@@ -58,7 +58,7 @@
           <x:ProtectStructure>False</w:ProtectStructure>
           <x:ProtectWindows>False</w:ProtectWindows>
          </w:ExcelWorkbook>");
-        </xml><![endif]-->
+        </xml><![endif]</a:Comment>
         <head>
             <!--- This prevents body cells from being split up that has <br> in it.  -->
             <style>

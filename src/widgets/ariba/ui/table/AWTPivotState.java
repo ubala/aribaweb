@@ -176,12 +176,15 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
 
         // Check for magic column to introduce between the row fields and
         // column fields (used by S4 for RowDetailAttribute expansion toggle)
-        if (_showColumnAttributeLabelOnRowBinding != null || _useRowDetailExpansionControlBinding != null) {
-            result.add(_RowAttributeExpandoColumn);
-        }
-        else {
-            Column extra = _dataTable.findColumnForKey("PostRowFieldColumn");
-            if (extra != null) result.add(extra);
+        boolean isExportMode = _dataTable.isExportMode();
+        if (!isExportMode) {
+            if (_showColumnAttributeLabelOnRowBinding != null || _useRowDetailExpansionControlBinding != null) {
+                result.add(_RowAttributeExpandoColumn);
+            }
+            else {
+                Column extra = _dataTable.findColumnForKey("PostRowFieldColumn");
+                if (extra != null) result.add(extra);
+            }
         }
 
         _firstAttributeColumnIndex = result.size();
@@ -213,15 +216,27 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
 
         _optionalAttributeColumns = null;
 
+        if (isExportMode) {
+            result = hideColumnsForExport(result);
+        }
+        else {
+            result = restoreColumnsAfterExport(result);
+        }
+
         return result;
     }
 
     Object _prepareColumnsForExport ()
     {
+        _dataTable.invalidateColumnData();
+        return null;
+    }
+
+    List hideColumnsForExport (List displayColumns)
+    {
         // Build list of data columns, and hide non-visible edge columns in the EdgeCell set
         // to ensure that colspans are appropriately recomputed
         List dataColumns = ListUtil.list();
-        List displayColumns = _dataTable.displayedColumns();
         for (int i=0, count=displayColumns.size(); i < count; i++) {
             Column c = (Column)displayColumns.get(i);
             c.prepare(_dataTable);
@@ -232,21 +247,24 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
                 ((PivotEdgeColumn)c).edgeCell().setHidden(true);
             }
         }
-        _dataTable._displayedColumns = dataColumns;
-        return displayColumns;
+        return dataColumns;
     }
 
     void _restoreColumnsAfterExport (Object state)
     {
+        _dataTable.invalidateColumnData();
+    }
+
+    List restoreColumnsAfterExport (List displayColumns)
+    {
         // restore visibility of hidden columns
-        List displayColumns = (List)state;
         for (int i=0, count=displayColumns.size(); i < count; i++) {
             Column c = (Column)displayColumns.get(i);
             if (c instanceof PivotEdgeColumn) {
                 ((PivotEdgeColumn)c).edgeCell().setHidden(false);
             }
         }
-        _dataTable._displayedColumns = displayColumns;
+        return displayColumns;
     }
 
     boolean hasLayoutChanged ()

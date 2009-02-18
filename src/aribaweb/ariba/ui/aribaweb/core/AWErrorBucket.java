@@ -12,10 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorBucket.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorBucket.java#6 $
 */
 
 package ariba.ui.aribaweb.core;
+
+import java.util.List;
 
 /**
     This interface allows uniform access to a bucket that holds
@@ -39,6 +41,7 @@ public interface AWErrorBucket
     public AWErrorBucket add (AWErrorInfo error);
     public int size ();
     public AWErrorInfo get (int i);
+    public List<AWErrorInfo> getErrorInfos();
     public boolean hasDuplicate ();
     public AWComponent getAssociatedDataTable ();
     public Object getAssociatedTableItem ();

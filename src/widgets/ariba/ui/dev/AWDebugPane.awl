@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.awl#38 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.awl#40 $
     </Copyright>
 
     <Overview>
@@ -110,9 +110,12 @@
                                                 Disable Component Inspector\
                                             </w:PopupMenuItem>
                                             <a:Else/>
-                                            <w:PopupMenuItem action="$togglePathDebugging">\
+                                            <!--- Enable open of CI window even if popup blocker is enabled -->
+                                            <div bh="DOpCI">\
+                                            <w:PopupMenuItem action="$togglePathDebugging" >\
                                                 Show Component Inspector\
-                                            </w:PopupMenuItem>
+                                            </w:PopupMenuItem>\
+                                            </div>
                                         </a:If>
                                     </td>
                                 </tr>

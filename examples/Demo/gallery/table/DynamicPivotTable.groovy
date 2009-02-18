@@ -3,6 +3,7 @@ package gallery.table
 import ariba.ui.aribaweb.core.AWComponent
 import ariba.ui.table.AWTCSVDataSource
 import ariba.ui.table.AWTDisplayGroup
+import ariba.ui.widgets.Confirmation
 
 class DynamicPivotTable extends AWComponent
 {
@@ -68,6 +69,6 @@ class DynamicPivotTable extends AWComponent
 
     def inspect () {
         inspectedObject = displayGroup.currentItem();
-        return Confirmation.showConfirmation(component.requestContext(), panelId);
+        return Confirmation.showConfirmation(requestContext(), panelId);
     }
 }

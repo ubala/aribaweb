@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWStyleSheet.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWStyleSheet.java#5 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -57,6 +57,11 @@ public final class AWStyleSheet extends AWComponent
         return _styleSheetResource;
     }
 
+    public String styleSheetResourceUrl ()
+    {
+        return urlForResourceNamed(styleSheetResource().name(), false, true);
+    }
+    
     public String directConnectResourceUrl ()
     {
         String url = null;

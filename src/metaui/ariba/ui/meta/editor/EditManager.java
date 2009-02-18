@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/editor/EditManager.java#16 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/editor/EditManager.java#20 $
 */
 package ariba.ui.meta.editor;
 
@@ -54,7 +54,7 @@ public class EditManager
     UIMeta _meta;
     List<EditSet> _ruleSets;
     Context.AssignmentRecord _selectedRecord;
-    Context.Info _selectedInfo;
+    Context.InspectorInfo _selectedInfo;
 
     public static EditManager activeEditManager (UIMeta meta, AWSession session)
     {
@@ -140,7 +140,7 @@ public class EditManager
         return _ruleSets;
     }
 
-    EditSet editSetForContext (Context.Info contextInfo)
+    EditSet editSetForContext (Context.InspectorInfo contextInfo)
     {
         String packageName = packageNameForContext(contextInfo);
         if (packageName == null) return null;
@@ -151,7 +151,7 @@ public class EditManager
         return null;
     }
 
-    EditorProperties editorPropertiesForContext (Context.Info contextInfo)
+    EditorProperties editorPropertiesForContext (Context.InspectorInfo contextInfo)
     {
         return new EditorProperties(contextInfo);
     }
@@ -179,7 +179,7 @@ public class EditManager
         }
     }
 
-    static String packageNameForContext (Context.Info contextInfo)
+    static String packageNameForContext (Context.InspectorInfo contextInfo)
     {
         String className = (String)contextInfo.getSingleValue(UIMeta.KeyClass);
         return (className != null) ? AWUtil.pathToLastComponent(className, ".") : null;
@@ -243,8 +243,8 @@ public class EditManager
 
     public void handleDrop (Object dragRec, Object dropRec)
     {
-        Context.Info dragContext = Context.staticContext(_meta, (Context.AssignmentRecord)dragRec, true);
-        Context.Info dropContext = Context.staticContext(_meta, (Context.AssignmentRecord)dropRec, true);
+        Context.InspectorInfo dragContext = Context.staticContext(_meta, (Context.AssignmentRecord)dragRec, true);
+        Context.InspectorInfo dropContext = Context.staticContext(_meta, (Context.AssignmentRecord)dropRec, true);
         String draggedItem = (String)dragContext.contextMap.get(dragContext.scopeKey);
         String dropItem = (String)dropContext.contextMap.get(dropContext.scopeKey);
         EditSet editSet = editSetForContext(dragContext);
@@ -279,7 +279,7 @@ public class EditManager
         }
     }
 
-    private void reparentFollowers (Context.Info dragContext, String predecessor, String newPredecessor,
+    private void reparentFollowers (Context.InspectorInfo dragContext, String predecessor, String newPredecessor,
                                     EditSet editSet, Map<String, List> preds)
     {
         List followers = preds.get(predecessor);
@@ -340,7 +340,7 @@ public class EditManager
             return _editRules;
         }
 
-        protected List<Rule.Selector> selectorForContext (Context.Info contextInfo,
+        protected List<Rule.Selector> selectorForContext (Context.InspectorInfo contextInfo,
                                                             Collection<String> useKeys)
         {
             // Sort keys: propertyContext key last, EditorContextKeys first (in order)
@@ -371,7 +371,7 @@ public class EditManager
             return preds;
         }
 
-        protected List<Rule.Selector> selectorForContext (Context.Info contextInfo)
+        protected List<Rule.Selector> selectorForContext (Context.InspectorInfo contextInfo)
         {
             List<String> useKeys = UIMeta.KeyModule.equals(contextInfo.scopeKey) ? AWUtil.list(UIMeta.KeyModule) 
                         : (("field".equals(contextInfo.scopeKey))
@@ -386,23 +386,23 @@ public class EditManager
         public Rule addRule (List<Rule.Selector> selectors, Map<String, Object> properties)
         {
             _dirty = true;
-            _meta._setCurrentRuleSet(ruleSet());
+            _meta._resumeEditingRuleSet(ruleSet());
             Rule prevLast = ListUtil.lastElement(ruleSet().rules(false));
             int rank = Math.max(((prevLast != null) ? prevLast.getRank() + 1 : 0), Meta.EditorRulePriority);
             Rule rule = new Rule(selectors, properties, rank);
             List<Rule> extras = UIMeta.getInstance()._addRuleAndReturnExtras(rule);
             if (extras != null) _extrasForRule.put(rule, extras);
             getEditRules().add(rule);
-            _meta._setCurrentRuleSet(null);
+            _meta.endRuleSet();
             return rule;
         }
 
-        public Rule addRule (Context.Info contextInfo)
+        public Rule addRule (Context.InspectorInfo contextInfo)
         {
             return addRule(selectorForContext(contextInfo), new HashMap());
         }
 
-        boolean ruleMatchesContext (Rule rule, Context.Info contextInfo)
+        boolean ruleMatchesContext (Rule rule, Context.InspectorInfo contextInfo)
         {
             boolean match = false;
             Object notFoundClassVal = contextInfo.contextMap.get(ObjectMeta.KeyClass);
@@ -427,7 +427,7 @@ public class EditManager
         }
 
 
-        public Rule existingEditableRuleMatchingContext (Context.Info contextInfo)
+        public Rule existingEditableRuleMatchingContext (Context.InspectorInfo contextInfo)
         {
             List<Rule> rules = getEditRules();
             for (int i = rules.size()-1; i >=0; i--) {
@@ -437,7 +437,7 @@ public class EditManager
             return null;
         }
 
-        public Rule editableRuleForContext (Context.Info contextInfo)
+        public Rule editableRuleForContext (Context.InspectorInfo contextInfo)
         {
             Rule rule = existingEditableRuleMatchingContext(contextInfo);
             return (rule != null)
@@ -447,9 +447,9 @@ public class EditManager
 
         // Rule for context, but swapping the value of the context scope key
         // (e.g. changing field=foo to field=bar
-        public Rule ruleForContextAlternate (Context.Info contextInfo, String alternateScopeVal)
+        public Rule ruleForContextAlternate (Context.InspectorInfo contextInfo, String alternateScopeVal)
         {
-            Context.Info newContextInfo = new Context.Info(contextInfo, alternateScopeVal);
+            Context.InspectorInfo newContextInfo = new Context.InspectorInfo(contextInfo, alternateScopeVal);
             return editableRuleForContext(newContextInfo);
         }
 
@@ -469,15 +469,15 @@ public class EditManager
             }
 
             // Disable this slot (and it's extras) and add a new copy
-            _meta._setCurrentRuleSet(ruleSet());
+            _meta._resumeEditingRuleSet(ruleSet());
             List<Rule>extras =  _extrasForRule.get(rule);
             _extrasForRule.remove(rule);
             extras = _meta._updateEditedRule(rule, extras);
             if (extras != null) _extrasForRule.put(rule, extras);
-            _meta._setCurrentRuleSet(null);
+            _meta.endRuleSet();
         }
 
-        public void updateRuleSelectors (Context.Info contextInfo,
+        public void updateRuleSelectors (Context.InspectorInfo contextInfo,
                                           Rule rule, Collection<String>keys)
         {
             _dirty = true;
@@ -522,7 +522,7 @@ public class EditManager
         }
     }
 
-    void prepareContext (Context context, Context.Info contextInfo, String stopBefore, boolean omitChained)
+    void prepareContext (Context context, Context.InspectorInfo contextInfo, String stopBefore, boolean omitChained)
     {
         List<Context.AssignmentInfo> recs = contextInfo.assignmentStack;
         int last = recs.size();
@@ -544,8 +544,8 @@ public class EditManager
         }
 
         if (stopBefore == null && contextInfo.scopeKey != null) {
-            context.setContextKey(contextInfo.scopeKey);
-            context.setContextKey(contextInfo.scopeKey);
+            context.setScopeKey(contextInfo.scopeKey);
+            context.setScopeKey(contextInfo.scopeKey);
         }
     }
 
@@ -554,13 +554,13 @@ public class EditManager
 
     public class EditorProperties
     {
-        Context.Info _contextInfo;
+        Context.InspectorInfo _contextInfo;
         Context _originalContext;
         Context _propertyContext;
         Context _parentContext;
         public List <Context.AssignmentInfo> activeAssignments;
 
-        public EditorProperties (Context.Info contextInfo)
+        public EditorProperties (Context.InspectorInfo contextInfo)
         {
             _contextInfo = contextInfo;
             _originalContext = _meta.newContext();
@@ -576,10 +576,10 @@ public class EditManager
             }
         }
 
-        void preparePropertyContext (Context context, Context.Info contextInfo)
+        void preparePropertyContext (Context context, Context.InspectorInfo contextInfo)
         {
             context.set(UIMeta.KeyClass, "ariba.ui.meta.editor.Properties");
-            context.set("scopeKey", contextInfo.scopeKey);
+            context.set("scope", contextInfo.scopeKey);
 
             for (String key: PropertyContextMirrorKeys) {
                 Object value = contextInfo.contextMap.get(key);
@@ -596,15 +596,15 @@ public class EditManager
                 if (origVal instanceof List) return null;
                 if (origVal instanceof PropertyValue.Expr) return new PropertyValue.Expr("true");
             }
-            return (origVal instanceof PropertyValue.StaticallyResolvable)
+            Object val =  (origVal instanceof PropertyValue.StaticallyResolvable)
                     ? _originalContext.propertyForKey(key)
                     : origVal;
+            return (val instanceof PropertyValue.Dynamic) ? null : val;
         }
 
         List<String> compatibleTraits ()
         {
             _originalContext.push();
-            _originalContext.set(Meta.KeyTrait, UIMeta.KeyAny);
             List<String> names = _meta.itemNames(_originalContext, Meta.KeyTrait);
             _originalContext.pop();
             return names;

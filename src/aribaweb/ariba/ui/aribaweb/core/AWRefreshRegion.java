@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.java#27 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.java#28 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -105,9 +105,11 @@ public final class AWRefreshRegion extends AWComponent
     public void pushBuffer ()
     {
         if (!_isDisabled) {
-            boolean isScope = booleanValueForBinding(AWBindingNames.isScope);
+            boolean isScope = booleanValueForBinding(AWBindingNames.isScope)
+                                && !((AWBaseResponse)response()).currentRegionIsScope();
+            boolean isScopeChild = "tr".equals(_tagName);
             boolean alwaysRender = booleanValueForBinding(AWBindingNames.alwaysRender);
-            ((AWBaseResponse)response()).pushBuffer(_elementId, isScope, alwaysRender);
+            ((AWBaseResponse)response()).pushBuffer(_elementId, isScope, isScopeChild, alwaysRender);
         }
     }
 

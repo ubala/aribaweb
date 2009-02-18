@@ -13,10 +13,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#22 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#23 $
     </Copyright>
 
     <Overview>
+        An AJAX auto-completion chooser.  Supports both single and multi-select.
     </Overview>
 
     <Binding key="selections" type="AWOrderedList" direction="get">
@@ -185,7 +186,8 @@
 <span isSender="$isSender"
       invokeAction="$matchAction"
       omitTags="$true">
-    <!-- chooser match -->
+    <!-- This "comment" is a marker in the XMLHTTP response that we have results -->
+    <a:Comment>chooser match</a:Comment>
     <a:IncludeBlock templateName="ChooserList"
                     list="$chooserState.filteredSelections"
                     name="$=FilteredSelections">

@@ -1,5 +1,6 @@
 <m:Context module="$currentModule.name">\
-    <w:BasicPageWrapper hasForm="$metaContext.properties.needsForm">
+    <w:BasicPageWrapper hasForm="$metaContext.properties.needsForm"
+                        awbindingsDictionary='$metaContext.properties.bindingsDictionary'>
         <m:IncludeComponent/>\
     </w:BasicPageWrapper>\
 </m:Context>\

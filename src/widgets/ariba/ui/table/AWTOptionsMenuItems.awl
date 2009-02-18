@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.awl#21 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.awl#22 $
     </Copyright>
 
     <Overview>
@@ -97,7 +97,7 @@
             </a:Local>\
         </w:PopupMenuHeading>
         <a:For list="$table.optionalColumns" item="$table.currentColumn" count="$optionalColumnsCount">\
-            <w:PopupMenuItem action="$table.toggleCurrentColumnVisibility" showCheck="$table.isCurrentColumnDisplayed">\
+            <w:PopupMenuItem action="$table.toggleCurrentColumnVisibility" showCheck="$table.isCurrentColumnDisplayed" disabled="$disableHideColumn">\
                 <w:TruncateString value="$currentColumnLabel" size="$=ariba.ui.table.AWTDataTable.ColumnLabelMenuMaxSize"/>\
             </w:PopupMenuItem>
         </a:For>

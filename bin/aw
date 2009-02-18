@@ -133,6 +133,7 @@ if [ -z "$ANT_HOME" ] ; then
     fi
     export ANT_HOME="$antHome"
 fi
+export ANT_OPTS="-Xmx400m -XX:MaxPermSize=300m"
 
 #echo "AW_HOME = $AW_HOME"
 #echo "Arg count=$#"

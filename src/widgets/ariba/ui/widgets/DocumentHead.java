@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DocumentHead.java#4 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DocumentHead.java#6 $
 */
 
 package ariba.ui.widgets;
@@ -33,7 +33,7 @@ public final class DocumentHead extends PageWrapper
 
     public String favIconUrl ()
     {
-        return AWImage.imageUrl(requestContext(), this, "favicon.ico");
+        return AWImage.imageUrl(requestContext(), this, "favicon.ico", false);
     }
 
     public List<Widgets.StyleSheetInfo> styleSheets ()
@@ -41,4 +41,8 @@ public final class DocumentHead extends PageWrapper
         return Widgets.styleSheets();       
     }
 
+    public boolean hasApplicationCSS ()
+    {
+        return resourceManager().resourceNamed("application.css") != null;
+    }
 }

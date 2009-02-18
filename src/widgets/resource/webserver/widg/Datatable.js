@@ -1847,27 +1847,33 @@ ariba.Datatable = function() {
                     if (!Util.isNullOrUndefined(rowId) && rowId != "") {
 
                         var dragDiv = DragDrop.createDragDiv(evt, row, AWTableDragPrefix);
-
-                        dragDiv.style.border = "1px #333333 solid";
-                        dragDiv.style.width = row.scrollWidth;
-                        var tmpTable = row.parentNode.parentNode.cloneNode(false);
-                        var tmpTBody = document.createElement("tbody");
-                        tmpTBody.appendChild(row.cloneNode(true));
-                        tmpTable.appendChild(tmpTBody);
-                        dragDiv.appendChild(tmpTable);
-
-                        // change table styles based on droppable status
-                        dragDiv.droppable = function (isDroppable) {
-                            if (isDroppable) {
-                                dragDiv.style.border = "1px #333333 solid";
-                            }
-                            else {
-                                dragDiv.style.border = "1px red solid";
-                            }
+                        if (!dragDiv) {
+                            // if no dragDiv, then there must have been a drag already occurring
+                            // clean up datatable drag state
+                            this.removeRowStyle(_AWTDragHoverStyle, row);                            
                         }
+                        else {
+                            dragDiv.style.border = "1px #333333 solid";
+                            dragDiv.style.width = row.scrollWidth;
+                            var tmpTable = row.parentNode.parentNode.cloneNode(false);
+                            var tmpTBody = document.createElement("tbody");
+                            tmpTBody.appendChild(row.cloneNode(true));
+                            tmpTable.appendChild(tmpTBody);
+                            dragDiv.appendChild(tmpTable);
 
-                        dragDiv.nextSrcId =
-                        target.parentNode.nextSibling ? target.parentNode.nextSibling.id : null;
+                            // change table styles based on droppable status
+                            dragDiv.droppable = function (isDroppable) {
+                                if (isDroppable) {
+                                    dragDiv.style.border = "1px #333333 solid";
+                                }
+                                else {
+                                    dragDiv.style.border = "1px red solid";
+                                }
+                            }
+
+                            dragDiv.nextSrcId =
+                            target.parentNode.nextSibling ? target.parentNode.nextSibling.id : null;
+                        }
 
                         handled = true;
                     }

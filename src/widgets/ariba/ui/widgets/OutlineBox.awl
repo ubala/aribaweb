@@ -20,10 +20,12 @@
             <div >
                  <table border="0" cellspacing="0" cellpadding="0" width="100%">\
                     <tr>\
-                        <td _ifTrue="$showExpandoCollapsoControl" width="1px" style="padding-left:5px">\
-                            <a:Hyperlink action="$toggleExpandoCollapsoAction" submitForm="$true">\
-                                <a:Image filename="$expandoCollapsoImage" title="$expandoCollapsoToolTip" style="$expandoCollapsoStyle"/>\
-                            </a:Hyperlink>\
+                        <td width="1px" style="padding-left:5px">\
+                            <a:If ifTrue="$showExpandoCollapsoControl">\
+                                <a:Hyperlink action="$toggleExpandoCollapsoAction" submitForm="$true">\
+                                    <a:Image filename="$expandoCollapsoImage" title="$expandoCollapsoToolTip" style="$expandoCollapsoStyle"/>\
+                                </a:Hyperlink>\
+                            </a:If>
                         </td>\
                         <td align="$languageLeft"
                             class="$^titleClass:sectionHead"

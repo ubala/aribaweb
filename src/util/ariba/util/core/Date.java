@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#29 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#31 $
 */
 
 package ariba.util.core;
@@ -1011,7 +1011,7 @@ public class Date extends java.util.Date implements Externalizable
         as 1973 (rather than 73)
         @aribaapi documented
     */
-    public static int getYear (Date date)
+    public static int getYear (java.util.Date date)
     {
         return getCalendarField(date, Calendar.YEAR);
     }
@@ -1029,7 +1029,7 @@ public class Date extends java.util.Date implements Externalizable
         as 1973 (rather than 73)
         @aribaapi documented
     */
-    public static int getYear (Date date, TimeZone tz, Locale locale)
+    public static int getYear (java.util.Date date, TimeZone tz, Locale locale)
     {
         return getCalendarField(date, Calendar.YEAR, tz, locale);
     }
@@ -1109,7 +1109,7 @@ public class Date extends java.util.Date implements Externalizable
 
         @aribaapi documented
     */
-    public static int getMonth (Date date, TimeZone tz, Locale locale)
+    public static int getMonth (java.util.Date date, TimeZone tz, Locale locale)
     {
         return getCalendarField(date, Calendar.MONTH, tz, locale);
     }
@@ -1183,7 +1183,7 @@ public class Date extends java.util.Date implements Externalizable
 
         @aribaapi documented
     */
-    public static int getDayOfMonth (Date date, TimeZone tz, Locale locale)
+    public static int getDayOfMonth (java.util.Date date, TimeZone tz, Locale locale)
     {
         return getCalendarField(date, Calendar.DAY_OF_MONTH, tz, locale);
     }
@@ -1414,6 +1414,17 @@ public class Date extends java.util.Date implements Externalizable
     public static void setMinutes (Date date, int minutes)
     {
         setCalendarField(date, Calendar.MINUTE, minutes);
+    }
+
+    /**
+        Sets the minutes portion of the time for the given <code>Date</code>.
+        @param date The object to modify the number of minutes in.
+        @param minutes The number of minutes past the hour to set.
+        @aribaapi documented
+    */
+    public static void setMinutes (Date date, int minutes, TimeZone tz, Locale locale)
+    {
+        setCalendarField(date, Calendar.MINUTE, minutes, tz, locale);
     }
 
     /**
@@ -1915,10 +1926,15 @@ public class Date extends java.util.Date implements Externalizable
         }
     }
 
-    private static int getCalendarField (Date date, int field)
+    static boolean calendarDate (java.util.Date date)
+    {
+        return (date instanceof ariba.util.core.Date) && ((ariba.util.core.Date)date).calendarDate();
+    }
+
+    private static int getCalendarField (java.util.Date date, int field)
     {
             // get a Calendar instance
-        Calendar calendar = getCalendarInstance(date.calendarDate());
+        Calendar calendar = getCalendarInstance(calendarDate(date));
         synchronized (calendar) {
             clearCalendarFields(calendar);
             updateCalendarFromDate(calendar, date);
@@ -1928,12 +1944,12 @@ public class Date extends java.util.Date implements Externalizable
         }
     }
 
-    private static int getCalendarField (Date date, int field,
+    private static int getCalendarField (java.util.Date date, int field,
                             TimeZone tz, Locale locale)
     {
             // get a Calendar instance
         Calendar calendar =
-            getCalendarInstance(date.calendarDate(), tz, locale);
+            getCalendarInstance(calendarDate(date), tz, locale);
         synchronized (calendar) {
             clearCalendarFields(calendar);
             updateCalendarFromDate(calendar, date);

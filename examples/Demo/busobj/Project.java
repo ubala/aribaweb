@@ -12,14 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/opensourceui/examples/Demo/busobj/Project.java#1 $
+    $Id: //ariba/platform/ui/opensourceui/examples/Demo/busobj/Project.java#2 $
 */
 package busobj;
 
 import java.util.List;
+import java.util.Date;
 import java.math.BigDecimal;
 
-import ariba.util.core.Date;
 import ariba.util.core.ListUtil;
 import ariba.ui.meta.annotations.Action;
 import ariba.ui.meta.annotations.Properties;

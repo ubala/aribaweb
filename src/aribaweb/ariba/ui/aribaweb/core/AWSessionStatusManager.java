@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSessionStatusManager.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSessionStatusManager.java#6 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -20,6 +20,8 @@ package ariba.ui.aribaweb.core;
 import java.util.List;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import ariba.util.core.MapUtil;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.StringUtil;
@@ -85,12 +87,12 @@ public class AWSessionStatusManager
         getSessionMap().put(session, "connected");
     }
 
-    public void updateSessionStatusTable (List connectList, List existingSessions)
+    public void updateSessionStatusTable (ConcurrentLinkedQueue<AWConcreteApplication.SessionWrapper> connectList, List existingSessions)
     {
         long currTime = System.currentTimeMillis();
 
         Iterator iterator = existingSessions.iterator();
-
+        
         FastStringBuffer debugBuffer = null;
         boolean isDisconnectDebugEnabled =
             Log.aribaweb_userstatus_disconnectTime.isDebugEnabled();
@@ -136,14 +138,19 @@ public class AWSessionStatusManager
             }
         }
 
-        // insert connected
-        if (connectList != null && !connectList.isEmpty()) {
-            iterator = connectList.iterator();
-            while (iterator.hasNext()) {
-                AWSession session = (AWSession)iterator.next();
-                trackSessionConnect(session);
+        if (connectList != null) {
+            AWConcreteApplication.SessionWrapper sessOp = null;
+            while ((sessOp = connectList.poll()) != null) {
+                if (sessOp.op == AWConcreteApplication.SessionOp.Add) {
+                    trackSessionConnect(sessOp.session);
+                    existingSessions.add(sessOp.session);
+                }
+                else {
+                    trackSessionTerminate(sessOp.session);
+                    existingSessions.remove(sessOp.session);
+                }
                 if (isDisconnectDebugEnabled) {
-                    debugBuffer.append(session.debugDisconnectString());
+                    debugBuffer.append(sessOp.session.debugDisconnectString());
                     debugBuffer.append("\n");
                 }
             }

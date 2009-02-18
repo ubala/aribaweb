@@ -190,15 +190,8 @@ field { label: ${ariba.ui.meta.core.UIMeta.getInstance().throwSampleException()}
 operation=list {
     @actionCategory=Manage { visible:true }
     
-    @field=ActionCol {
-        visible:true;
-        label:"";
+    field=ActionCol {
         after:zBottom;
-        component:MetaActionList;
-        columnBindings: { width:"1px" };
-        bindings: {
-            renderAsMenu:true;
-        }
     }
 }
 
@@ -209,7 +202,7 @@ module {
         pageBindings: {
             class:${properties.moduleClassName};
             module:$module;
-            contextKey:layout;
+            scopeKey:layout;
         }
     }
 
@@ -219,7 +212,7 @@ module {
         pageBindings: {
             class:${properties.moduleClassName};
             module:$module;
-            contextKey:layout;
+            scopeKey:layout;
         }
     }
 }
@@ -244,8 +237,7 @@ module_trait=SearchDetail {
     layout=SearchDetailPage {
         component:MetaDashboardLayout;
         visible:true;
-        widthLeft:"450px";
-        widthRight:auto;
+        bindings: {widthLeft:"450px"; widthRight:auto; }
         label:${pushAndResolve([module:"*"], "label")};
 
         @layout=Search {
@@ -258,7 +250,7 @@ module_trait=SearchDetail {
         @layout=Detail {
             after:zRight;
             component:MetaContext;
-            wrapperComponent:AWTNullWrapper;
+            portletWrapper:AWTNullWrapper;
             bindings: {
                 object:$requestContext.pageComponent.dict.selectedObject;
                 layout:InspectStack;

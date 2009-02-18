@@ -1,0 +1,61 @@
+<w:BasicPageWrapper hasForm="$true">
+    <a:RefreshRegion>
+        <a:Checkbox action="$null" value="$tableRR"/> Use RR on Table<br/>
+        <a:Checkbox action="$null" value="$trRR"/> Use RR on TR<br/>
+        <a:Checkbox action="$null" value="$innerRR"/> Use RR on TD content<br/>
+        <a:Checkbox action="$null" value="$innerTableRR"/> Use RR on Inner Table<br/>
+    </a:RefreshRegion>
+
+    <h1>Sample Table</h1>
+    <a:RefreshRegion tagName="table" disabled="$!tableRR" isScope="$true" border=1>
+        <a:If ifTrue="$showR1">
+            <a:RefreshRegion tagName="tr" disabled="$!trRR">
+                <td>Row 1</td>
+                <td><a:RefreshRegion disabled="$!innerRR">$c1</a:RefreshRegion></td>
+                <td>
+                    <a:Hyperlink action="${c1=c1+1;null}">inc</a:Hyperlink>
+                </td>
+            </a:RefreshRegion>
+        </a:If>
+        <a:If ifTrue="$showR2">
+            <a:RefreshRegion tagName="tr" disabled="$!trRR">
+                <td>Row 2</td>
+                <td><a:RefreshRegion disabled="$!innerRR">$c2</a:RefreshRegion></td>
+                <td>
+                    <a:Hyperlink action="${c2=c2+1;null}">inc</a:Hyperlink>
+                </td>
+            </a:RefreshRegion>
+        </a:If>
+        <a:If ifTrue="$showR3">
+            <a:RefreshRegion tagName="tr" disabled="$!trRR">
+                <td>Row 3</td>
+                <td>
+                    <a:RefreshRegion tagName="table" disabled="$!tableRR" isScope="$true" border=1>
+                        <a:RefreshRegion tagName="tr" disabled="$!trRR">
+                            <td>Inner Table Row</td>
+                            <td><a:RefreshRegion disabled="$!innerRR">$c3</a:RefreshRegion></td>
+                            <td>
+                                <a:Hyperlink action="${c3=c3+1;null}">inc</a:Hyperlink>
+                            </td>
+                        </a:RefreshRegion>
+                    </a:RefreshRegion>
+                </td>
+                <td>
+                    <a:Hyperlink action="${c2=c2+1;null}">inc</a:Hyperlink>
+                </td>
+            </a:RefreshRegion>
+        </a:If>
+    </a:RefreshRegion>
+
+    <h2>show/hide rows</h2>
+    <a:RefreshRegion>
+        <a:Checkbox action="$null" value="$showR1"/> Show row 1<br/>
+        <a:Checkbox action="$null" value="$showR2"/> Show row 2<br/>
+    </a:RefreshRegion>
+
+</w:BasicPageWrapper>
+<groovy>
+    boolean tableRR=true, trRR=true, innerTableRR=true, innerRR=false;
+    boolean showR1=true,showR2=true,showR3=true;
+    int c1, c2, c3;
+</groovy>

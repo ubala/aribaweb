@@ -1,0 +1,49 @@
+**AribaWeb makes creating compelling, professional-grade web applications fast and fun.**
+
+AribaWeb enables the creation of rich, highly interactive business applications with far less coding effort than
+alternative web application development frameworks.  Among the key attributes that set AribaWeb apart:
+
+![AribaWeb AutoAJAX](/hero/AutoAJAX.gif)
+Auto AJAX!
+==========
+Today's users demand a highly interactive, rich user experience from their web applications. To date, this challenge
+has been met primarily through AJAX, but implementing AJAX typically involves the extensive (and expensive) hand-coding
+of brittle client-side JavaScript code.  With [Auto AJAX]#, AribaWeb completely changes the game and dramatically alters
+the cost equation:  AJAX user interfaces -- complete with drag and drop, incremental page refresh, type ahead choosers,
+etc -- are produced automatically, without requiring the application developer to
+perform any client-side scripting.
+
+![AribaWeb Instant App](/hero/InstantApp.gif)
+Instant App
+===========
+Business applications typically consist of hundreds of user interface screens built to support the creation, editing,
+search and inspection of the "business objects" that encode the business functionality.  In most frameworks, the user
+interface developer must create and maintain user interface code for each of these screens.  AribaWeb's "Instant App"
+technology eliminates the need for this code.  In fact, given only a set of UI-agnostic Java or Groovy domain classes,
+AribaWeb can apply rules to the available meta-data and instantly derive a fully functional application, all without a
+single line of application UI code.  This all part of the AribaWeb declarative programming model that delivers
+More app with [Way Less Code]#.
+
+![AribaWeb Live Edit & X-Ray](/hero/LiveEdit.gif)
+Live Edit & X-Ray
+=================
+AribaWeb's focus on developer productivity is further evidenced through its Live Edit and X-Ray capabilities.
+Developers use [X-Ray]# to "see through" running application UIs, getting visibility to the active hierarchy of components
+behind the scenes.  Further, with Live Edit, developers can use drag and drop to alter the UI layout and property sheets
+to tweak rules right in the browser. All changes take immediate effect in the live application.
+
+The same holds true for edits to source code.  With [Rapid Turnaround]#, edits to UI templates (.awl), metaui
+rules (.oss), as well as Java or Groovy source files are reloaded automatically, without a disruptive server
+restart.
+
+![AribaWeb Proven Full Stack](/hero/FullStack.gif)
+Proven Full Stack
+=================
+The AribaWeb distribution provides a full stack for the development of database-based business applications, including
+a deep library of [Rich Widgets]# (forms, pivot tables, charts, rich text editors, etc.) as well as bindings to a bundled
+Object-Relational Mapping (ORM) database framework, and supports deployment in a variety of J2EE environments.  And
+AribaWeb is [Enterprise Proven]# technology. Now in its fifth major release, AribaWeb has been included by Ariba as a
+critical component of its market-leading Spend Management solutions and Network Services for nearly a decade.
+AribaWeb is used daily by millions of users at more than a thousand of the world's largest enterprises, and has been
+part of over one trillion dollars of business-to-business electronic commerce.
+

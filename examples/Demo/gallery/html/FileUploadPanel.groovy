@@ -10,7 +10,7 @@ class FileUploadPanel extends AWComponent
     public long maxsize
     public String fileName
     public def mimeType
-    public InputStream inputStream
+    public byte[] bytes
     boolean fileSizeExceeded
 
     public void setup (AWActionCallback callback, long uploadMaxsize)

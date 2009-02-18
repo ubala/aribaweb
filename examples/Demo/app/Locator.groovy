@@ -17,6 +17,7 @@ public class Locator
 
     static Locator locate (String str)
     {
-        Locs.find { it.description.contains(str) }
+        Locs.find { Locator l -> l.description.toLowerCase().contains(str.toLowerCase()) } ?:
+          new Locator(latitude:0.0, longitude:0.0, description:"\"${str}\" -- not found")
     }
 }

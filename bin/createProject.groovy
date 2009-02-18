@@ -43,7 +43,7 @@ def usage = """
 ParamsFileName = "templateInfo.table"
 SubstFileExtension = ".awtmpl"
 
-// We may be invoked by the IDE plugins with Param* variables bound 
+// We may be invoked by the IDE plugins with Param* variables bound
 try {
     //If params are bound this call will proceed, otherwise we'll get an exception
     applyTemplate(ParamTemplateDir,ParamProjectDir,ParamConfigMap);
@@ -87,9 +87,9 @@ if (ideTemplatesDir.exists()) {
 
     println "Applying IDE template ${ideTemplate.title} (${ideTemplate.dir}) with params: ${params}"
     applyTemplate(ideTemplate.dir, projectDir, params)
-
     String os = ((String)System.getProperties()["os.name"]).replace(" ", "").toLowerCase()
     boolean isMac = os.startsWith("macos"), isWin = os.startsWith("windows")
+
     if (isMac || isWin) {
         String openCmd = (isMac) ? "open" : "start"
         String choice = getChoice("What next?  o) open project, r) run app, b) both, x) exit", "o", null)
@@ -107,7 +107,8 @@ if (ideTemplatesDir.exists()) {
             }
         }
         if (choice.startsWith("r") || choice.startsWith("b")) {
-            Process p = "ant -f ${projectDir}/build.xml launch".execute()
+            String antExe = new File(new File(System.getenv()["ANT_HOME"], "bin"), (isWin ? "ant.bat" : "ant")).getAbsolutePath()
+            Process p = "${antExe} -f ${projectDir}/build.xml launch".execute()
             p.consumeProcessOutput(System.out, System.err)
             p.waitFor()
         }

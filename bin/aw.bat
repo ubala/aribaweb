@@ -36,6 +36,7 @@ if not "%ANT_HOME%" == "" goto init
 set ANT_HOME=%AW_HOME%\tools\ant
 set PATH=%ANT_HOME%\bin;%PATH%
 echo Setting ANT_HOME to: %ANT_HOME%
+set ANT_OPTS=-Xmx400m -XX:MaxPermSize=300m
 
 :init
 @rem Get command-line arguments, handling Windowz variants

@@ -55,6 +55,7 @@ ariba.Refresh = function() {
     var _ScriptOnePat = /<script([^>]*)>([\s\S]*?)<\/script>/i;
     var _currScript = null;
     var _pendingCompleteRequestRun = false;
+    var AWRefreshScriptEnabled = true;
 
     // Handler called with IE History IFrame is loaded
     var _historyHandler = function () {};
@@ -432,6 +433,10 @@ ariba.Refresh = function() {
             _pendingCompleteRequestRun = false;
         },
 
+        enableRefreshScript : function () {
+            AWRefreshScriptEnabled = true;
+        },
+
         domRefreshContentCallback : function ()
         {
             if (_MarkedRRs) {
@@ -598,16 +603,18 @@ ariba.Refresh = function() {
             }
         },
 
+        // Run script string used by incremental updates
         RSS : function (sync, isGlobalScope, funcString)
         {
             _RunningIncrementalAction = true;
-
+            //ariba.Debug.log("RSS (register): " + funcString);
             var func = function() {      // execute all embedded scripts (ie AWClientSideScript's)
                 // try {
                     if (isGlobalScope) {
                         var bodyString = Refresh.extractFuncBody(funcString);
                         Refresh.registerGlobalJS(bodyString);
                     } else {
+                        //ariba.Debug.log("RSS (run): " + funcString);
                         eval("var f=" + funcString + "; f.call();");
                     }
                 }
@@ -621,8 +628,10 @@ ariba.Refresh = function() {
             Refresh.RSF(sync, false, func);
         },
 
+        // Run script function
         RSF : function (sync, isGlobalScope, func)
         {
+            if (!AWRefreshScriptEnabled) return;
             if (sync) {
                 func.call(null);
             } else {
@@ -633,6 +642,7 @@ ariba.Refresh = function() {
                         Refresh.registerGlobalJS(funcStr);
                     };
                 }
+                //ariba.Debug.log("RSF (register): " + func.toString());
                 Event.registerUpdateCompleteCallback(func);
             }
         },
@@ -789,6 +799,7 @@ ariba.Refresh = function() {
         _completeRequest : function (current, length, isRefreshRequest)
         {
             _pendingCompleteRequestRun = false;
+            AWRefreshScriptEnabled = false;
 
             // this method always gets run inline.  For a refresh request, this initiates
             // the page update, etc.  For a full page refresh, queue up on awWindowOnLoad
@@ -938,10 +949,12 @@ ariba.Refresh = function() {
         loadLazyDivCallback : function (divObject, xmlhttp)
         {
             var parent = divObject.parentNode;
-            // copy content into the proper location
-            Dom.setOuterHTML(divObject, xmlhttp.responseText);
             // evaluate all inline scripts
             this.evalScriptTags(xmlhttp.responseText);
+            AWRefreshScriptEnabled = false;
+            // copy content into the proper location
+            Dom.setOuterHTML(divObject, xmlhttp.responseText);
+
             // indicate that update is complete
             Refresh.refreshComplete();
 

@@ -14,7 +14,7 @@
             <a:IncludeContent/>
         </w:ModalPageWrapper>\
     <a:Else/>\
-        <w:BasicPageWrapper hasForm="$true">\
+        <w:BasicPageWrapper hasForm="$true" awbindingsDictionary='${metaContext.pushAndResolve([module:"*"], "bindingsDictionary")}'>\
             <!--- $ariba.ui.meta.persistence.ObjectContext.get ($ariba.ui.meta.persistence.ObjectContext.get.groupName_debug) -->
             <a:If ifTrue="$metaContext.properties.title">\
                 <h1>$metaContext.properties.title</h1>

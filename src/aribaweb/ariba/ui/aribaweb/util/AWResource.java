@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWResource.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWResource.java#8 $
 */
 
 package ariba.ui.aribaweb.util;
 
 import ariba.ui.aribaweb.util.AWBaseObject;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.util.core.StringUtil;
 import java.io.InputStream;
 
@@ -120,5 +121,10 @@ public abstract class AWResource extends AWBaseObject
     public AWResource relativeResource (String relativePath, AWResourceManager resourceManager)
     {
         return null;
+    }
+
+    public boolean canCacheUrl ()
+    {
+        return ((AWConcreteApplication)AWConcreteApplication.sharedInstance()).canCacheResourceUrls();
     }
 }

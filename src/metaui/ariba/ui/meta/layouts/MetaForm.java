@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.java#11 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.java#12 $
 */
 package ariba.ui.meta.layouts;
 
@@ -54,23 +54,6 @@ public class MetaForm extends AWComponent implements AWFullValidationHandler
         return false;
     }
 
-    public void renderResponse (AWRequestContext requestContext, AWComponent component)
-    {
-        Context context = MetaContext.currentContext(this);
-        _editManager = EditManager.activeEditManager(UIMeta.getInstance(), session());
-
-        _object = context.values().get("object");
-
-        // register validation callback if necessary
-        Boolean editing = (Boolean)context.propertyForKey(UIMeta.KeyEditing);
-        if (editing != null && editing.booleanValue()) {
-            _contextSnapshot = context.snapshot();
-            // ToDo: Need to change error manager not to add dups
-            errorManager().registerFullValidationHandler(this);
-        }
-        super.renderResponse(requestContext, component);
-    }
-
     public Object currentProperties ()
     {
         return MetaContext.currentContext(this).properties();
@@ -97,6 +80,17 @@ public class MetaForm extends AWComponent implements AWFullValidationHandler
         _className = (String)context.values().get(ObjectMeta.KeyClass);
         String zonePath = UIMeta.getInstance().zonePath(context);
         _zonePath = (zonePath == null) ? null : zonePath.concat(".");
+
+        _editManager = EditManager.activeEditManager(UIMeta.getInstance(), session());
+
+        // register validation callback if necessary
+        Boolean editing = (Boolean)context.propertyForKey(UIMeta.KeyEditing);
+        if (editing != null && editing.booleanValue()) {
+            _object = context.values().get("object");
+            _contextSnapshot = context.snapshot();
+            // ToDo: Need to change error manager not to add dups
+            errorManager().registerFullValidationHandler(this);
+        }
     }
 
     public String zonePath ()

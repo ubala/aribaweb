@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.awl#32 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.awl#33 $
     </Copyright>
 
     <Overview>
@@ -93,9 +93,15 @@
 
 </a:Api>\
 \
-<a:If ifTrue="$omitLink">\
-    <!--- we're in export mode and should render our content as plain text -->\
-    <a:IncludeContent/>\
+<a:If ifTrue="$staticOrOmit">\
+    <a:If ifTrue="$omitLink">\
+        <!--- we're in export mode and should render our content as plain text -->\
+        <a:IncludeContent/>\
+    <a:Else/>
+        <a href="$staticUrlForActionResults" otherBindings="$otherBindingsValues">\
+            <a:IncludeContent/>\
+        </a>\
+    </a:If>
 <a:Else ifFalse="$isSubmitForm"/>\
     <!--- regular hyperlink -->\
     <a:If ifFalse="$^omitTags">\

@@ -16,10 +16,6 @@
         $$
     </Copyright>
 
-    <Responsible>
-        craigf
-    </Responsible>
-
     <Overview>
         Displays a FusionCharts flash chart control.
 
@@ -69,7 +65,7 @@
 
 <!--- $type is in comment below to force refresh region update if chart type chages -->        
 <a:RefreshRegion>
-    <!-- $type -->
+    <a:Comment>$type</a:Comment>
     <div id="$objId">\
         <a:Local>\
             Loading Graph...

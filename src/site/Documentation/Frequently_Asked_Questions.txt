@@ -1,0 +1,103 @@
+I first heard of AribaWeb only recently.  Is it new?
+----------------------------------------------------
+Yes and no.  AribaWeb has been used by Ariba, Inc. in its commercial enterprise applications and On Demand
+WebServices since 1999.  The framework was first released as Open Source (quietly) in May, 2008.
+Active promotion of the open source project began in February 2009.
+
+For more background, check out the AW [Product History](Release_History.txt).
+
+How does AribaWeb compare to other Open Source UI Frameworks?
+-------------------------------------------------------------
+Although AW predates nearly all currently popular open source web frameworks,
+it shares an interesting combination of virtues with many of them:
+
+  - Like Java Server Faces (JSF), Tapestry and Wicket, AribaWeb is a deeply
+    *component-oriented framework*, and, like Wicket, AW transparently manages component server state.
+    AW's model of template/class binding is most similar to that of Tapestry.
+
+  - Like Google Web Toolkit (GWT), ZK, and Echo2, AribaWeb enables creating
+    *AJAX applications without writing JavaScript*, and like ZK and Echo2, AW's "Auto AJAX"
+    approach is server-based.
+
+  - Like ZK, AribaWeb enables *less source code* to implement many UIs (and offers the ability to inline
+    component logic in the UI template, if desired).
+
+  - Like Ruby on Rails, Django, and Grails, AribaWeb provides a *full stack* for implementing database
+    applications, and supports a *dynamic scripting language* (Groovy, in the case of AW) for conveniently
+    expressing application logic.
+
+In addition to combining all these attributes in a single framework, several aspects of AribaWeb set
+it apart:
+
+  - AribaWeb's component model is both more dynamic that Tapestry's and more efficient than Wicket's.
+
+  - AribaWeb's approach to server-side-AJAX is totally transparent and does not require applications
+    to adopt a tedious event handling paradigm (instead favoring consistent declarative binding).
+
+  - AribaWeb's ability to concisely express an application UI is unmatched (typically 50% the code of
+    even ZK, and even less than in other frameworks).  With MetaUI, the AW advantage is even greater.
+
+  - Only AribaWeb has *Instant App* with *Live Edit* support: while some frameworks provide a limited
+    ability to generate UIs based on the application data model (using "scaffolding" or "generic views"),
+    AribaWeb is unique in enabling radical customization of these UIs (contextually, to the operation,
+    layout, etc.) as well as the live editing of the UI layout and rules, directly on the running application
+    interface.
+
+  - While AribaWeb supports authoring applications in a dynamic scripting language (Groovy),
+    *AribaWeb itself is 100% pure Java* and fully supports applications written in pure-Java
+    (or a mix of Java and Groovy).  This means that the AW engine is extremely *fast*
+    (and multi-threaded) and that your application can use whatever mix of dynamic and static code
+    best meets your requirements.
+
+100x Less Code than Rails?  Really??
+------------------------------------
+It hard to believe, but it's [true](http://aribaweb.blogspot.com/2009/02/way-way-less-code.html):
+An out of the box AribaWeb project for an app managing a handful of domain classes
+has 100x fewer lines of code than its equivalent (but *far* less function) Rails project.
+And, for each added domain class, AW add 15x less code.
+
+10x Less than GWT?  For Google Maps?!?
+--------------------------------------
+Ah, the irony....  But, [yes](http://aribaweb.blogspot.com/2009/02/way-way-less-code.html#autoajax_50_the_code_of_zk_),
+in comparing implementations of a simple AJAX app that searches for a location and marks it on a Google Map,
+the AW implementation is 2x smaller than ZK, and 10x smaller than with Google Web Toolkit, or JSF/ICEfaces. 
+
+Is AribaWeb Production Quality?
+-------------------------------
+Absolutely.  AW has been deployed commercially for nearly a decade to millions of users in some
+of the most demanding enterprises in the world, and has been part of over a Trillion Dollars (USD)
+of Business-to-Business electronic commerce.
+
+Does Ariba Use All of the AribaWeb Libraries?
+---------------------------------------------
+Almost.  The Util, Expr, AribaWeb (core), and Widgets library are used in customer
+facing applications.  MetaUI is new (although it is similar to an older internal
+Ariba framework) and is currently used only in administrative and testing applications
+(although its use is likely to expand over time).  Only the JPA (Hibernate) integration
+is not currently used by Ariba.
+
+Does AW Require Groovy?
+-----------------------
+No.  The AW libraries are implemented entirely in Java and support pure-Java applications.
+However, AW also supports an add on library, ariba.groovyloader.jar, which enables
+embedding groovy in component templates as well as dynamic source reloading ("rapid turnaround")
+for .groovy files paired with .awls.  Finally, the AW Ant build system is Groovy-aware, so its
+easy to use compiled groovy in your projects for your JPA domain classes.
+
+What's the AribaWeb License?
+----------------------------
+AribaWeb is released as Open Source under the (commercially friendly) Apache License, v2.
+
+Why Did Ariba Release AribaWeb as Open Source?  Why Now?
+--------------------------------------------------------
+We should have done it sooner!  :-)
+
+As one of the first companies to push Java to enterprise/web scale (releasing the pure-Java
+ORMS in 1997) Ariba has long been a heavy adopter of Open Source technology.  The AribaWeb
+framework has long been a "hidden gem" inside the company and we decided that we wanted to
+"give back" to the community that has helped make our products possible.  Also, we saw how
+other frameworks were evolving (with a heavy emphasis on handed coded javascript clients)
+and we felt that AribaWeb's unique server-centric Auto-AJAX programming model, and meta-data
+driven (rules-based) UI derivation were important ideas to expose to the web development
+community.  We hope that now, with access to this technology, many others can now build better
+apps faster.

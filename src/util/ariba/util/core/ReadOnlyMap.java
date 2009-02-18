@@ -2,7 +2,7 @@
     Copyright (c) 1996-2008 Ariba, Inc.
     All rights reserved. Patents pending.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ReadOnlyMap.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ReadOnlyMap.java#6 $
 
     Responsible: jshultis
 */
@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import ariba.util.io.FormattingSerializer;
 
 
 /**
@@ -45,6 +47,7 @@ public class ReadOnlyMap <K,V>
         return new ReadOnlyMap(MapUtil.map());
     }
 
+    // XXX JCS: Create ReadOnlyList to protect those values, too.
     public V get (K key)
     {
         V value = null;
@@ -131,6 +134,14 @@ public class ReadOnlyMap <K,V>
 
     public static final char Dot = '.';
 
+    /**
+     * Fetch a value from a nested map using a path of keys using
+     * dot notation.
+     * @param path The dotted path of key values
+     * @return The value at that path. If the value is a Map, return a
+     * ReadOnlyMap, so the result is equivalent to doing a sequence of
+     * get operations on the path elements.
+     */
     public Object getPath (String path)
     {
         Object value = map;
@@ -143,12 +154,12 @@ public class ReadOnlyMap <K,V>
                 return null;
             }
         }
-        return value;
+        return (value instanceof Map) ? new ReadOnlyMap((Map)value) : value;
     }
 
     public String toString ()
     {
-        return map == null ? null : map.toString();
+        return map == null ? null : FormattingSerializer.serializeObject(map);
     }
 
     /**

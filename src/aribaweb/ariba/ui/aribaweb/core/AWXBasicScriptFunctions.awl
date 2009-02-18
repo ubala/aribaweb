@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#40 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#41 $
     </Copyright>
 
     <Overview>
@@ -60,15 +60,17 @@
             <a:ClientSideScript filename="aribaweb_all.js"/>\
         </a:If>
 
-        <a:If ifTrue="$^sessionless:$false">
-            <a:JSDebug enabled="$false"
-                       showRequestFrame="$false"
-                       showHistoryFrame="$false"/>
-        <a:Else/>
-            <a:JSDebug enabled="$session.dict.IsJavascriptDebuggingEnabled"
-                       showRequestFrame="$session.dict.IsRefreshFrameVisible"
-                       showHistoryFrame="$session.dict.IsHistoryVisible"
-                       markRefreshUpdates="$session.dict.RefreshRegionsVisible"/>
+        <a:If ifTrue="$ariba.ui.aribaweb.core.AWConcreteServerApplication.IsDebuggingEnabled">
+            <a:If ifTrue="$^sessionless:$false">
+                <a:JSDebug enabled="$false"
+                           showRequestFrame="$false"
+                           showHistoryFrame="$false"/>
+            <a:Else/>
+                <a:JSDebug enabled="$session.dict.IsJavascriptDebuggingEnabled"
+                           showRequestFrame="$session.dict.IsRefreshFrameVisible"
+                           showHistoryFrame="$session.dict.IsHistoryVisible"
+                           markRefreshUpdates="$session.dict.RefreshRegionsVisible"/>
+            </a:If>
         </a:If>
     </a:Environment>
 

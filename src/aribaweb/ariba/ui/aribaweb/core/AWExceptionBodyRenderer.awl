@@ -54,10 +54,10 @@
 </style>
 <a:If ifTrue="^showRawStackTrace:$true">
     <div style="text-align:right">
-        <a href="#" oncLick='document.getElementById("rawStackTrace").style.display="block"'>Show Raw Stack Trace</a>
+        <a href="#" oncLick='document.getElementById("rawStackTrace").style.display="block"' awname="SHOW_STACK_TRACE">Show Raw Stack Trace</a>
     </div>
     <form id="rawStackTrace" style="display:none; margin:20px">
-        <textarea rows="30" cols="100">
+        <textarea rows="60" cols="200" awname="STACK_TRACE">
             <a:String value="$stackTrace" escapeHtml="$true"/>\
         </textarea>
     </form>

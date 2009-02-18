@@ -1,6 +1,7 @@
-/*
-    Application.oss -- application global rules
-*/
-module=model.Master {
-    trait:SearchDetail;
+/* Application.oss -- application global rules */
+module=model.Issue {
+    @layout#Hint {
+        bindings:{value:"Demo Note: <i>currently logged in as Anonymous</i> -- To see full functionality click <b>Sign In</b> (User: admin, Password: ariba)"};
+        visible:${!ariba.appcore.User.isLoggedIn()}
+    }
 }

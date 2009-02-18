@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FileUploadStatusBar.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FileUploadStatusBar.java#4 $
 */
 
 package ariba.ui.widgets;
@@ -22,7 +22,7 @@ import ariba.ui.aribaweb.core.AWComponent;
 /** @deprecated
  *
  */
-// ### craigf: delete this class
+// Todo: delete this class
 
 public class FileUploadStatusBar extends AWComponent
 {

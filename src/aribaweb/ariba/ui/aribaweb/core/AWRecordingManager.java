@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRecordingManager.java#40 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRecordingManager.java#41 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -80,6 +80,7 @@ public class AWRecordingManager extends AWBaseObject
 
     protected final static Map _recordingInstances = MapUtil.map();
     private static boolean _inPlaybackModeGlobal = false;
+    protected static PlaybackMonitor _playbackMonitor;
 
     protected File _recordingDirectory;
     protected int  _requestCount;
@@ -348,7 +349,7 @@ public class AWRecordingManager extends AWBaseObject
                                       String recordingPath)
     {
         AWRequest request = requestContext.request();
-        if (isInPlaybackMode(request)) {
+        if (isInPlaybackMode(requestContext)) {
             return;
         }
 
@@ -374,7 +375,7 @@ public class AWRecordingManager extends AWBaseObject
                                      AWResponse response)
     {
         AWRequest request = requestContext.request();
-        if (!isInPlaybackMode(request)) {
+        if (!isInPlaybackMode(requestContext)) {
             return;
         }
         // XXX the recording path is not sufficient to identify
@@ -392,8 +393,18 @@ public class AWRecordingManager extends AWBaseObject
         response.addCookie(cookie);
     }
 
-    public static boolean isInPlaybackMode (AWRequest request)
+    public static void registerPlaybackMonitor (PlaybackMonitor playbackMonitor)
     {
+        _playbackMonitor = playbackMonitor;
+    }
+
+    public static boolean isInPlaybackMode (AWRequestContext requestContext)
+    {
+        if (requestContext == null) {
+            return false;
+        }
+
+        AWRequest request = requestContext.request();
         if (request == null) {
             return false;
         }
@@ -401,6 +412,12 @@ public class AWRecordingManager extends AWBaseObject
         if (_inPlaybackModeGlobal) {
             return true;
         }
+
+        // if there is a registered playback monitor, check its playback mode
+        if (_playbackMonitor != null) {
+            return _playbackMonitor.isInPlaybackMode(requestContext);
+        }
+
         if (request.headerForKey(HeaderPlayBackMode) != null) {
             return true;
         }
@@ -639,6 +656,10 @@ public class AWRecordingManager extends AWBaseObject
         return semanticKey;
     }
 
+    public interface PlaybackMonitor
+    {
+        public boolean isInPlaybackMode(AWRequestContext requestContext);
+    }
 }
 
 class SemanticKey

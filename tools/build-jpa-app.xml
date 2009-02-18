@@ -55,8 +55,17 @@
     <!-- file
     <property name="database.dir" value="${java.io.tmpdir}/${ant.project.name}-db"/>
     -->
-    <condition property="hibernate.connection.url" value="jdbc:hsqldb:file://${database.dir}/db">
-        <isset property="database.dir"/>
+    <groovy>
+        if (properties["database.dir"]) properties["database.url"] = new File(properties["database.dir"]).toURL()
+
+        // compass dir won't work if it contains special windows chars (":" or "~")
+        if (properties["compass.dir"] &amp;&amp; !(properties["compass.dir"] =~ /.*[~:].*/)) {
+            properties["compass.url"] = new File(properties["compass.dir"]).toURL().toString().replaceAll(/^file:\/([^\/].*)/, "file:///\$1")
+        }
+    </groovy>
+    
+    <condition property="hibernate.connection.url" value="jdbc:hsqldb:${database.url}/db">
+        <isset property="database.url"/>
     </condition>
     <!-- server ...
     <property name="hibernate.connection.url" value="jdbc:hsqldb:hsql://localhost"/>
@@ -84,8 +93,8 @@
 
     <!--- Compass support -->
     <target name="compass-init" if="use.compass">
-        <condition property="compass.engine.connection" value="file://${compass.dir}">
-            <isset property="compass.dir"/>
+        <condition property="compass.engine.connection" value="${compass.url}">
+            <isset property="compass.url"/>
         </condition>
         <property name="compass.engine.connection" value="ram://metaui-compass-index"/>
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/IntegerFormatter.java#9 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/IntegerFormatter.java#10 $
 */
 
 package ariba.util.formatter;
@@ -21,13 +21,13 @@ import ariba.util.core.Assert;
 import ariba.util.core.Constants;
 import ariba.util.core.StringUtil;
 import ariba.util.core.Fmt;
-
 import java.util.Locale;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.ParsePosition;
 
 /**
     <code>IntegerFormatter</code> is a subclass of <code>Formatter</code>
@@ -42,6 +42,8 @@ public class IntegerFormatter extends Formatter
     private static final String MaxValueExceededKey = "MaxValueExceeded";
     private static final String MinValueExceededKey = "MinValueExceeded";
     private static final String WholeNumberRequiredKey = "WholeNumberRequiredKey";
+    private static final String NumberFormatErrorKey = "NumberFormatError";
+
 
     /*-----------------------------------------------------------------------
         Constants
@@ -276,7 +278,8 @@ public class IntegerFormatter extends Formatter
         @aribaapi documented
     */
     public static int parseInt (String string)
-      throws ParseException {
+      throws ParseException
+    {
         return parseInt(string, getDefaultLocale());
     }
 
@@ -348,7 +351,8 @@ public class IntegerFormatter extends Formatter
         @aribaapi documented
         @see java.text.DecimalFormat
     */
-    public static int parseInt (String string, Locale locale, String pattern, boolean useGrouping)
+    public static int parseInt (String string, Locale locale, String pattern,
+                                boolean useGrouping)
       throws ParseException
     {
         return parseInt(string, locale, pattern, useGrouping, true);
@@ -362,7 +366,7 @@ public class IntegerFormatter extends Formatter
         @param  locale  the <code>Locale</code> to use for parsing
         @param  pattern the DecimalFormat pattern to use for parsing
         @param  useGrouping whether grouping characters should be used
-        @param  allowOverflow if true, then thows ParseException if value is &lt; Integer.MIN_VALUE or
+        @param  allowOverflow if false, then thows ParseException if value is &lt; Integer.MIN_VALUE or
                               Integer.MAX_VALUE &gt; val
         @return         an <code>int</code> value derived from the string
         @exception      ParseException if the string cannot be parsed as an
@@ -372,6 +376,39 @@ public class IntegerFormatter extends Formatter
     */
     public static int parseInt (String string, Locale locale, String pattern,
                                 boolean useGrouping, boolean allowOverflow)
+      throws ParseException
+    {
+        return parseInt(string, locale, pattern,
+                        useGrouping, allowOverflow, false,
+                        Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+
+    /**
+        Tries to parse the given string as an integer in the given
+        <code>locale</code>.
+
+        @param  string  the string to parse as an <code>int</code>
+        @param  locale  the <code>Locale</code> to use for parsing
+        @param  pattern the DecimalFormat pattern to use for parsing
+        @param  useGrouping whether grouping characters should be used
+        @param  allowOverflow if false, then thows ParseException if value is &lt; Integer.MIN_VALUE or
+                              Integer.MAX_VALUE &gt; val
+        @param  strictParsing if true, then throws ParseException if only a portion of the string was
+                              evaluated to an integer. Example: "12 T" would evaluate to 12 if
+                              strictParsing is false, but with the flag on, an exception would be thrown
+        @param  minValue  the minimum valid integer value allowed
+        @param  maxValue  the maximum valid integer value allowed
+        @return         an <code>int</code> value derived from the string
+        @exception      ParseException if the string cannot be parsed as an
+                        <code>int</code>
+        @aribaapi documented
+        @see java.text.DecimalFormat
+    */
+    public static int parseInt (String string, Locale locale, String pattern,
+                                boolean useGrouping, boolean allowOverflow,
+                                boolean strictParsing,
+                                int minValue,
+                                int maxValue)
       throws ParseException
     {
         Assert.that(locale != null, "invalid null Locale");
@@ -384,20 +421,27 @@ public class IntegerFormatter extends Formatter
             Number num = fmt.parse(string);
             if (!allowOverflow) {
                 double val = num.doubleValue();
-                if (val < Integer.MIN_VALUE) {
+                if (val < minValue) {
                     throw new ParseException(
                                 Fmt.Sil(StringTable, MinValueExceededKey,
-                                        string, Integer.MIN_VALUE),
+                                        string, minValue),
                                 0);
                 }
-                else if (Integer.MAX_VALUE < val) {
+                else if (maxValue < val) {
                     throw new ParseException(
                                 Fmt.Sil(StringTable, MaxValueExceededKey,
-                                        string, Integer.MAX_VALUE),
+                                        string, maxValue),
                                 0);
                 }
             }
 
+            if (strictParsing) {
+                ParsePosition pp = new ParsePosition(0);
+                Number n = fmt.parse(string, pp);
+                if (string != null && string.length() != pp.getIndex()) {
+                    throw makeParseException(NumberFormatErrorKey, 0);
+                }
+            }
             //if (num.doubleValue() % 1 > 0) {
             //    throw new ParseException(
             //                Fmt.Sil(StringTable, WholeNumberRequiredKey, string), 0);
@@ -683,7 +727,7 @@ public class IntegerFormatter extends Formatter
     protected Format instantiateFormat (int type, Locale locale, String pattern)
     {
         pattern = (pattern == null) ? "" : pattern;
-        DecimalFormat fmt = (DecimalFormat) NumberFormat.getNumberInstance(locale);
+        DecimalFormat fmt = (DecimalFormat)NumberFormat.getNumberInstance(locale);
         if (!StringUtil.nullOrEmptyString(pattern)) {
             fmt.applyLocalizedPattern(pattern);
         }

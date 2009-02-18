@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Initialization.java#5 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Initialization.java#6 $
 */
 package ariba.appcore;
 
@@ -242,12 +242,6 @@ public class Initialization
         };
     }
 
-    static boolean isLoggedIn ()
-    {
-        User user =  User.currentUser();
-        return user != null && user != User.getAnonymous();
-    }
-
     public static void setupSessionValidator (final boolean allowAccessWithoutLogin)
     {
         AWConcreteApplication application = (AWConcreteApplication)AWConcreteApplication.sharedInstance();
@@ -267,7 +261,7 @@ public class Initialization
 
             protected boolean validateSession (AWRequestContext requestContext)
             {
-                return isLoggedIn();
+                return User.isLoggedIn();
             }
         });
 
@@ -285,7 +279,7 @@ public class Initialization
         ConditionHandler.setHandler("disableLogoutAction", new ConditionHandler() {
             public boolean evaluateCondition (AWRequestContext requestContext)
             {
-                return !isLoggedIn();
+                return !User.isLoggedIn();
             }
         });
         
@@ -293,7 +287,7 @@ public class Initialization
             ConditionHandler.setHandler("showLoginAction", new ConditionHandler() {
                 public boolean evaluateCondition (AWRequestContext requestContext)
                 {
-                    return !isLoggedIn();
+                    return !User.isLoggedIn();
                 }
             });
 
@@ -301,7 +295,7 @@ public class Initialization
                 public AWResponseGenerating actionClicked (AWRequestContext requestContext)
                 {
                     // force a login
-                    if (!isLoggedIn()) throw new AWSessionValidationException();
+                    if (!User.isLoggedIn()) throw new AWSessionValidationException();
                     return null;
                 }
 
@@ -339,7 +333,7 @@ public class Initialization
         StringHandler.setHandler(StringHandler.UserGreeting, new StringHandler() {
             public String getString (AWRequestContext requestContext)
             {
-                return isLoggedIn() ? Fmt.S("Welcome %s", User.currentUser().getName())
+                return User.isLoggedIn() ? Fmt.S("Welcome %s", User.currentUser().getName())
                                     : "(Not logged in)";
             }
         });

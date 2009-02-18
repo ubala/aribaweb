@@ -12,17 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SiteActionHandler.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SiteActionHandler.java#3 $
 */
 
 package ariba.ui.widgets;
 
 import ariba.ui.aribaweb.core.AWRequestContext;
-import ariba.util.core.StringUtil;
-import ariba.util.core.Fmt;
-import ariba.util.core.ListUtil;
 import java.util.List;
-import java.util.Collections;
 
 /**
     @aribaapi
@@ -30,6 +26,8 @@ import java.util.Collections;
 public class SiteActionHandler extends ActionHandler
 {
     protected static final String KeySites = "SiteActions.Sites";
+    
+    private String _selectedSite;
     
     public List<String> getSites (AWRequestContext requestContext)
     {
@@ -51,5 +49,15 @@ public class SiteActionHandler extends ActionHandler
     public String siteLabel (String site)
     {
         return null;
+    }
+    
+    public String selectedSite ()
+    {
+        return _selectedSite;
+    }
+    
+    public void setSelectedSite (String site)
+    {
+        _selectedSite = site;
     }
 }

@@ -12,14 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/DateFormatter.java#27 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/DateFormatter.java#28 $
 */
 
 package ariba.util.formatter;
 
 import ariba.util.core.Assert;
 import ariba.util.core.Constants;
-import ariba.util.core.Date;
 import ariba.util.core.FastStringBuffer;
 import ariba.util.core.Fmt;
 import ariba.util.core.ResourceService;
@@ -36,6 +35,7 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.List;
+import java.util.Date;
 
 /**
     <code>DateFormatter</code> is a subclass of <code>Formatter</code> which
@@ -410,6 +410,11 @@ public class DateFormatter extends Formatter
         return getStringValue(date, pattern, getDefaultLocale(), timeZone);
     }
 
+    static boolean calendarDate (Date date)
+    {
+        return (date instanceof ariba.util.core.Date) && ((ariba.util.core.Date)date).calendarDate();
+    }
+
     /**
         Returns a formatted string for the given <code>Date</code> in the
         given locale.  Uses the date format pattern <code>pattern</code> as
@@ -440,9 +445,9 @@ public class DateFormatter extends Formatter
         SimpleDateFormat fmt = null;
         try
         {
-            fmt = acquireSimpleDateFormat(locale,pattern,date.calendarDate());
+            fmt = acquireSimpleDateFormat(locale,pattern, calendarDate(date));
             // honor time zone for non-calendar dates
-            if (!date.calendarDate()) {
+            if (!calendarDate(date)) {
                 Assert.that(timeZone != null, "invalid null TimeZone");
                 fmt.setTimeZone(timeZone);
             }
@@ -450,7 +455,7 @@ public class DateFormatter extends Formatter
         }
         finally
         {
-            releaseSimpleDateFormat(fmt,locale,pattern,date.calendarDate());
+            releaseSimpleDateFormat(fmt,locale,pattern, calendarDate(date));
         }
     }
 
@@ -504,8 +509,8 @@ public class DateFormatter extends Formatter
     public static String formatMillisAsDuration (long millis)
     {
         String result;
-        if (millis < Date.MillisPerMinute) {
-            int seconds = (int)(millis/Date.MillisPerSecond);
+        if (millis < ariba.util.core.Date.MillisPerMinute) {
+            int seconds = (int)(millis/ariba.util.core.Date.MillisPerSecond);
             if (seconds == 0) {
                 result = toUnits(millis,
                                  ((millis == 1) ?
@@ -519,11 +524,11 @@ public class DateFormatter extends Formatter
         }
         else {
             FastStringBuffer fsb = new FastStringBuffer();
-            int days = (int)(millis / Date.MillisPerDay);
-            millis -= days * Date.MillisPerDay;
-            int hours = (int)(millis / Date.MillisPerHour);
-            millis -= hours * Date.MillisPerHour;
-            int minutes = (int)(millis / Date.MillisPerMinute);
+            int days = (int)(millis / ariba.util.core.Date.MillisPerDay);
+            millis -= days * ariba.util.core.Date.MillisPerDay;
+            int hours = (int)(millis / ariba.util.core.Date.MillisPerHour);
+            millis -= hours * ariba.util.core.Date.MillisPerHour;
+            int minutes = (int)(millis / ariba.util.core.Date.MillisPerMinute);
             if (days > 0) {
                 fsb.append(toUnits(days,
                                    (days == 1) ? DayKey : DaysKey));
@@ -1239,7 +1244,7 @@ public class DateFormatter extends Formatter
 
         // append the GMT difference
         boolean isNegative = false;
-        int     gmtDiff    = Date.timezoneOffset(date, tz);
+        int     gmtDiff    = ariba.util.core.Date.timezoneOffset(date, tz);
         if (gmtDiff < 0) {
             gmtDiff = -gmtDiff;
             isNegative = true;
@@ -1373,7 +1378,7 @@ public class DateFormatter extends Formatter
         @see #parseDate(java.lang.String, java.lang.String)
         @see #parseDateUsingFormats(java.lang.String, java.util.Locale, java.lang.String)
     */
-    public static Date parseDate (String string)
+    public static ariba.util.core.Date parseDate (String string)
       throws ParseException
     {
         return parseDate(string, getDefaultLocale(), getDefaultTimeZone(), false);
@@ -1399,7 +1404,7 @@ public class DateFormatter extends Formatter
         @see #parseDateUsingFormats(java.lang.String, java.util.Locale, java.lang.String, boolean)
         @aribaapi documented
     */
-    public static Date parseDate (String string, boolean calendarDate)
+    public static ariba.util.core.Date parseDate (String string, boolean calendarDate)
       throws ParseException
     {
         return parseDate(string, getDefaultLocale(), getDefaultTimeZone(), calendarDate);
@@ -1427,7 +1432,7 @@ public class DateFormatter extends Formatter
         @see #parseDate(String,String,java.util.Locale)
         @see #parseDateUsingFormats(String,java.util.Locale,String)
     */
-    public static Date parseDate (String string, Locale locale)
+    public static ariba.util.core.Date parseDate (String string, Locale locale)
       throws ParseException
     {
         return parseDate(string, locale, false);
@@ -1456,7 +1461,7 @@ public class DateFormatter extends Formatter
         @see #parseDateUsingFormats(String,java.util.Locale,String,boolean)
         @aribaapi documented
     */
-    public static Date parseDate (String string, Locale locale, boolean calendarDate)
+    public static ariba.util.core.Date parseDate (String string, Locale locale, boolean calendarDate)
       throws ParseException
     {
         return parseDate(string, locale, getDefaultTimeZone(), calendarDate);
@@ -1487,7 +1492,7 @@ public class DateFormatter extends Formatter
         boolean calendarDate)
         @aribaapi documented
     */
-    public static Date parseDate (
+    public static ariba.util.core.Date parseDate (
         String   string,
         Locale   locale,
         TimeZone timeZone,
@@ -1497,7 +1502,7 @@ public class DateFormatter extends Formatter
         Assert.that(locale != null, "invalid null Locale");
 
             // try the localized list of system date formats
-        Date result =
+        ariba.util.core.Date result =
             parseDateUsingDefaultFormats(string, locale, timeZone, calendarDate);
         if (result != null) {
             return result;
@@ -1518,7 +1523,7 @@ public class DateFormatter extends Formatter
         @return             a <code>Date</code> derived from the string, <b>null</b> if the sting cannot be parsed.
         @aribaapi documented
     */
-    public static Date parseDateUsingFormats (
+    public static ariba.util.core.Date parseDateUsingFormats (
         String string,
         Locale locale,
         String formatsKey)
@@ -1540,7 +1545,7 @@ public class DateFormatter extends Formatter
 
         @aribaapi documented
     */
-    public static Date parseDateUsingFormats (
+    public static ariba.util.core.Date parseDateUsingFormats (
         String   string,
         Locale   locale,
         String   formatsKey,
@@ -1565,7 +1570,7 @@ public class DateFormatter extends Formatter
 
         @aribaapi documented
     */
-    public static Date parseDateUsingFormats (
+    public static ariba.util.core.Date parseDateUsingFormats (
         String   string,
         Locale   locale,
         String   formatsKey,
@@ -1615,13 +1620,13 @@ public class DateFormatter extends Formatter
 
         @aribaapi private
     */
-    protected static Date parseDateUsingDefaultFormats (
+    protected static ariba.util.core.Date parseDateUsingDefaultFormats (
         String   string,
         Locale   locale,
         TimeZone timeZone,
         boolean  calendarDate)
     {
-        Date date = parseDateUsingFormats(string, locale, SystemFormatsKey,
+        ariba.util.core.Date date = parseDateUsingFormats(string, locale, SystemFormatsKey,
             timeZone, calendarDate);
         if (date == null) {
             date = parseDateUsingFormats(string, locale, DefaultFormatKey,
@@ -1648,7 +1653,7 @@ public class DateFormatter extends Formatter
                            <code>Date</code> using the given format pattern
         @aribaapi documented
     */
-    public static Date parseDate (String string, String pattern)
+    public static ariba.util.core.Date parseDate (String string, String pattern)
       throws ParseException
     {
         return parseDate(string, pattern, false);
@@ -1669,7 +1674,7 @@ public class DateFormatter extends Formatter
                             <code>Date</code> using the given format pattern
         @aribaapi documented
     */
-    public static Date parseDate (String string, String pattern, boolean calendarDate)
+    public static ariba.util.core.Date parseDate (String string, String pattern, boolean calendarDate)
       throws ParseException
     {
         Locale locale = getDefaultLocale();
@@ -1691,7 +1696,7 @@ public class DateFormatter extends Formatter
                            <code>Date</code> using the given format pattern
         @aribaapi documented
     */
-    public static Date parseDate (String string, String pattern, Locale locale)
+    public static ariba.util.core.Date parseDate (String string, String pattern, Locale locale)
       throws ParseException
     {
         return parseDate(string, pattern, locale, false);
@@ -1712,7 +1717,7 @@ public class DateFormatter extends Formatter
                            <code>Date</code> using the given format pattern
         @aribaapi documented
     */
-    public static Date parseDate (
+    public static ariba.util.core.Date parseDate (
         String   string,
         String   pattern,
         Locale   locale,
@@ -1739,7 +1744,7 @@ public class DateFormatter extends Formatter
                             <code>Date</code> using the given format pattern
         @aribaapi documented
     */
-    public static Date parseDate (
+    public static ariba.util.core.Date parseDate (
         String   string,
         String   pattern,
         Locale   locale,
@@ -1762,7 +1767,7 @@ public class DateFormatter extends Formatter
             try {
                 string = LocaleSupport.normalizeDate(string, locale);
 
-                Date date = new Date(fmt.parse(string).getTime(), calendarDate);
+                ariba.util.core.Date date = new ariba.util.core.Date(fmt.parse(string).getTime(), calendarDate);
                     // Note:
                     // java.text.SimpleDateFormat will give bogus results if
                     // there is mismatching between year pattern and year input:
@@ -1773,7 +1778,7 @@ public class DateFormatter extends Formatter
                     // 1. always try 4 digit format first.
                     // 2. if the result come back with year < 100, ignore it,
                     //    try the 2 digit format.
-                if (Date.getYear(date) >= InvalidYearThreshold) {
+                if (ariba.util.core.Date.getYear(date) >= InvalidYearThreshold) {
                     return date;
                 }
                 else {
@@ -1801,7 +1806,7 @@ public class DateFormatter extends Formatter
                            <code>Date</code> using a GMT format pattern
         @aribaapi documented
     */
-    public static Date parseDateGMT (String string)
+    public static ariba.util.core.Date parseDateGMT (String string)
       throws ParseException
     {
         return parseDate(string,
@@ -1866,7 +1871,7 @@ public class DateFormatter extends Formatter
         <code>Date</code> using the UTC format pattern
         @aribaapi documented
     */
-    public static Date parseDateUTC (String dateStr)
+    public static ariba.util.core.Date parseDateUTC (String dateStr)
       throws ParseException
     {
         return parseDate(dateStr, UTCFormat, getDefaultLocale(),
@@ -1883,7 +1888,7 @@ public class DateFormatter extends Formatter
                            <code>Date</code> using the cXML GMT format pattern
         @aribaapi documented
     */
-    public static Date parseDateCXML (String string)
+    public static ariba.util.core.Date parseDateCXML (String string)
       throws ParseException
     {
             // Initialize our cached formatter if it hasn't been
@@ -1914,8 +1919,8 @@ public class DateFormatter extends Formatter
                                     string.substring(offsetPos + 1,colonIdx));
                 int minPart  = IntegerFormatter.parseInt(
                                     string.substring(colonIdx + 1));
-                gmtDiff = (hourPart * Date.MillisPerHour) +
-                          (minPart * Date.MillisPerMinute);
+                gmtDiff = (hourPart * ariba.util.core.Date.MillisPerHour) +
+                          (minPart * ariba.util.core.Date.MillisPerMinute);
             }
             catch (ParseException e) {
                 throw new ParseException(
@@ -1942,7 +1947,7 @@ public class DateFormatter extends Formatter
                         Fmt.S("Unable to parse date from %s", string), offsetPos);
             }
 
-            return new Date(millis);
+            return new ariba.util.core.Date(millis);
         }
 
             // No colon found in gmt offset
@@ -1963,7 +1968,7 @@ public class DateFormatter extends Formatter
         @return        a <code>Date</code> derived from the given object
         @aribaapi documented
     */
-    public static Date getDateValue (Object object, boolean calendarDate)
+    public static ariba.util.core.Date getDateValue (Object object, boolean calendarDate)
     {
         return getDateValue(object, getDefaultLocale(), calendarDate);
     }
@@ -1978,7 +1983,7 @@ public class DateFormatter extends Formatter
         @return        a <code>Date</code> derived from the given object
         @aribaapi documented
     */
-    public static Date getDateValue (Object object)
+    public static ariba.util.core.Date getDateValue (Object object)
     {
         return getDateValue(object, getDefaultLocale(), false);
     }
@@ -1994,7 +1999,7 @@ public class DateFormatter extends Formatter
         @return        a <code>Date</code> derived from the given object
         @aribaapi documented
     */
-    public static Date getDateValue (Object object, Locale locale)
+    public static ariba.util.core.Date getDateValue (Object object, Locale locale)
     {
         return getDateValue(object, locale, false);
     }
@@ -2012,14 +2017,14 @@ public class DateFormatter extends Formatter
         @return        a <code>Date</code> derived from the given object
         @aribaapi documented
     */
-    public static Date getDateValue (Object object, Locale locale,
+    public static ariba.util.core.Date getDateValue (Object object, Locale locale,
                                   boolean calendarDate)
     {
         if (object == null) {
             return null;
         }
-        else if (object instanceof Date) {
-            return ((Date)object);
+        else if (object instanceof ariba.util.core.Date) {
+            return ((ariba.util.core.Date)object);
         }
         else {
             try {

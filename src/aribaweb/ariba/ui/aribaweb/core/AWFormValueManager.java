@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormValueManager.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormValueManager.java#10 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -43,17 +43,10 @@ public class AWFormValueManager extends AWBaseObject
     public static final int DeferredValues = 0;
     /** queue for running triggers */
     public static final int Triggers = DeferredValues + 1;
+    /** queue for computed value */
+    public static final int ComputedValue = Triggers + 1;
     /** queus for running behaviors */
-    public static final int Validations = Triggers + 1;
-
-    // The following are a set of extended queues which allow the AWFormManager
-    // to provide the service to queue up any deferred work that is to be
-    // processed during action invoke (after other queues are being processed).
-    public static final int ExtendedQueueStartIndex = Validations + 1;
-    // This queue simply provide a storage area to register any operation
-    // that is to be performed when the document is being submitted.
-    public static final int Submit = ExtendedQueueStartIndex;
-    public static final int ExtendedQueueEndIndex = Submit + 1;
+    public static final int Validations = ComputedValue + 1;
 
     // the queues
     private final List _queues;
@@ -74,11 +67,6 @@ public class AWFormValueManager extends AWBaseObject
     {
         _queues = ListUtil.list();
         for (int index = 0; index <= Validations; index++) {
-            List list = ListUtil.list();
-            _queues.add(list);
-        }
-
-        for (int index = ExtendedQueueStartIndex; index < ExtendedQueueEndIndex; index++) {
             List list = ListUtil.list();
             _queues.add(list);
         }
@@ -197,7 +185,7 @@ public class AWFormValueManager extends AWBaseObject
     */
     protected void processAllQueues ()
     {
-        for (int queueId = 0, length = ExtendedQueueStartIndex; queueId < length; queueId++) {
+        for (int queueId = 0; queueId <= Validations; queueId++) {
             if (_suppressQueueExecution != null &&
                 _suppressQueueExecution[queueId]) {
                 // we've suppressed the execution of this queue, skip it

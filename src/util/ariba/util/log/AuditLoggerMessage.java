@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/AuditLoggerMessage.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/log/AuditLoggerMessage.java#6 $
 */
 
 package ariba.util.log;

@@ -308,7 +308,7 @@ ariba.Event = function() {
 
             var evt = (e) ? e : event;
             var target = (evt.srcElement) ? evt.srcElement : evt.target;
-            if (Debug.checkDebugClick(evt)) { Event.cancelBubble(evt); return true; }
+            if (ariba.Request.AWDebugEnabled && Debug.checkDebugClick(evt)) { Event.cancelBubble(evt); return true; }
             if (this.modallyDisabled(target)) {
                 // kill focus attempts outside the modal
                 if ((evt.type == "activate" || evt.type == "focus" ||
@@ -418,6 +418,11 @@ ariba.Event = function() {
                                 if (target.type == 'radio') {
                                     target.checked = true;
                                     ret = false;
+                                }
+                                else if (target.type == 'checkbox') {
+                                    target.checked = !target.checked;
+                                    ret = false;
+                                    this.preventDefault(evt);
                                 }
                                 else if (target.tagName == 'SELECT') {
                                     target.focus();

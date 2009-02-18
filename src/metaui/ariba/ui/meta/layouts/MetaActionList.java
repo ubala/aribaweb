@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.java#9 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.java#10 $
 */
 package ariba.ui.meta.layouts;
 
@@ -68,7 +68,7 @@ public class MetaActionList extends AWComponent
             UIMeta meta = (UIMeta)context.meta();
             context.push();
             _actionsByCategory = new HashMap();
-            List<ItemProperties> categories = meta.actionsByCategory(context, _actionsByCategory);
+            List<ItemProperties> categories = meta.actionsByCategory(context, _actionsByCategory, UIMeta.ActionZones);
             context.pop();
             return categories;
         }

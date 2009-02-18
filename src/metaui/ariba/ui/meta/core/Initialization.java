@@ -12,18 +12,26 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Initialization.java#9 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Initialization.java#11 $
 */
 package ariba.ui.meta.core;
 
 import ariba.ui.aribaweb.core.AWConcreteServerApplication;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWNamespaceManager;
 import ariba.ui.validation.AWVFormatterFactory;
 import ariba.ui.widgets.AribaNavigationBar;
 import ariba.ui.widgets.AribaCommandBar;
+import ariba.ui.widgets.ActionHandler;
+import ariba.ui.widgets.AribaAction;
+import ariba.ui.widgets.StringHandler;
+import ariba.ui.widgets.PageWrapper;
+import ariba.ui.widgets.HeaderIncludes;
 import ariba.ui.meta.layouts.MetaHomePage;
+import ariba.ui.meta.layouts.MetaNavTabBar;
 import ariba.util.fieldvalue.FieldValue;
 
 import java.util.Arrays;
@@ -87,6 +95,36 @@ public class Initialization
                     if (application.resourceManager().packageResourceNamed(application.mainPageName()+".awl") == null) {
                         application.setMainPageName(MetaHomePage.class.getName());
                     }
+
+                    if (ActionHandler.resolveHandler(AribaAction.HomeAction) == null) {
+                        ActionHandler.setHandler(AribaAction.HomeAction, new ActionHandler() {
+                            public AWResponseGenerating actionClicked(AWRequestContext requestContext) {
+                                MetaNavTabBar.getState(requestContext.session()).gotoHomeModule(requestContext);
+                                return requestContext.application().mainPage(requestContext);
+                            }
+                        });
+                    }
+
+                    if (StringHandler.resolveHandler(PageWrapper.ApplicationStringName, StringHandler.class) == null) {
+                        StringHandler.setHandler(PageWrapper.ApplicationStringName, new StringHandler() {
+                            public String getString (AWRequestContext requestContext)
+                            {
+                                String result = null;
+                                Context ctx = MetaContext.peekContext(requestContext.getCurrentComponent());
+                                if (ctx != null && ctx.values().get(UIMeta.KeyModule) != null) {
+                                    ctx.push();
+                                    ctx.setScopeKey(UIMeta.KeyModule);
+                                    result = (String)ctx.propertyForKey("pageTitle");
+                                    ctx.pop();
+                                }
+                                return result;
+                            }
+                        });
+                    }
+
+                    if (application.componentDefinitionForName("DocumentHeadContent") != null) {
+                        HeaderIncludes.registerInclude("DocumentHeadContent");
+                    }                    
 
                     UIMeta.getInstance().loadRuleFile("WidgetsRules.oss", true, Meta.SystemRulePriority);
                     if (!UIMeta.getInstance().loadRuleFile("Application.oss", false, Meta.LowRulePriority)) {

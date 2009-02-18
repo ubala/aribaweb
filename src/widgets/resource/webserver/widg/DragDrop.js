@@ -83,6 +83,18 @@ ariba.DragDrop = function() {
 
         createDragDiv : function (evt, dragObject, dragPrefix, dragId)
         {
+
+            if (AWDragDiv) {
+                // if there is an existing drag, then clear it out and do not
+                // create the drag div.  this should only occur if the user is
+                // currently dragging and uses the scroll wheel or other mouse
+                // control to 'click'.  Rather than causing any confusion by actually
+                // handling the click, we clear the drag and suppress all further
+                // handling.
+                DragDrop.clearDragDrop(evt);
+                return null;
+            }
+
             AWDragDiv = document.createElement("div");
             AWDragDiv.id = "AWDragDiv";
             document.body.appendChild(AWDragDiv);
@@ -111,6 +123,22 @@ ariba.DragDrop = function() {
             AWDragDiv.style.height = size[1];
             return AWDragDiv;
         },
+
+        clearDragDrop : function (evt)
+        {
+            AWDCanceledDrag = false;
+            if (AWDragDiv) {
+                // reset -- invalid state
+                // mouse -- down on drag item, out of window, up, over window, down
+                this.releaseDragDiv();
+            }
+
+            this.clearPreviousDrop();
+        },
+
+        //---------------------------------------------------------
+        // Drag drop event handlers
+        //---------------------------------------------------------
 
         mouseDownEvtWrapper : function (target, evt)
         {
@@ -141,14 +169,7 @@ ariba.DragDrop = function() {
             evt = (evt) ? evt : event;
             // var target = (evt.target) ? evt.target : evt.srcElement;
 
-            AWDCanceledDrag = false;
-            if (AWDragDiv) {
-                // reset -- invalid state
-                // mouse -- down on drag item, out of window, up, over window, down
-                this.releaseDragDiv();
-            }
-
-            this.clearPreviousDrop();
+            this.clearDragDrop(evt);
 
             return !handled;
         },
@@ -211,10 +232,6 @@ ariba.DragDrop = function() {
             return !handled;
         },
 
-        //---------------------------------------------------------
-        // Drag drop event handlers
-        //---------------------------------------------------------
-
         shouldHandleMouseDown : function (evt)
         {
             var target = (evt.target) ? evt.target : evt.srcElement;
@@ -254,41 +271,43 @@ ariba.DragDrop = function() {
                     }
                 }
 
-                this.createDragDiv(evt, div, dragPrefix, dragId);
-            // set the contents of the drag div -- seperate from awdCreateDragDiv since
-                // other draggable types may render their AWDragDiv differently (AWTDataTable)
-                // Debug.log("Drag innerHtml=" + div.tagName);
-                if (div.tagName == "TR") {
-                    AWDragDiv.innerHTML = "<table>" + div.innerHTML + "</table>";
-                } else {
-                    AWDragDiv.innerHTML = div.innerHTML;
-                }
-                AWDragDiv.style.border = "1px solid black";
-                AWDragDiv.style.backgroundColor = "#FFFFFF";
-
-            // default handler for change in drop status -- noop
-                AWDragDiv.droppable = function (isDroppable) {
-                    if (isDroppable) {
+                var dragDiv = this.createDragDiv(evt, div, dragPrefix, dragId);
+                if (dragDiv) {
+                    // set the contents of the drag div -- seperate from awdCreateDragDiv since
+                    // other draggable types may render their AWDragDiv differently (AWTDataTable)
+                    // Debug.log("Drag innerHtml=" + div.tagName);
+                    if (div.tagName == "TR") {
+                        dragDiv.innerHTML = "<table>" + div.innerHTML + "</table>";
+                    } else {
+                        dragDiv.innerHTML = div.innerHTML;
                     }
-                    else {
+                    dragDiv.style.border = "1px solid black";
+                    dragDiv.style.backgroundColor = "#FFFFFF";
+
+                    // default handler for change in drop status -- noop
+                    dragDiv.droppable = function (isDroppable) {
+                        if (isDroppable) {
+                        }
+                        else {
+                        }
                     }
+
+                    // capture the page height for drag scroll
+                    dragDiv.pageHeight = Dom.documentElement().scrollHeight;
+                    // Non-safari browsers takes the newly created div client height
+                    // into account, so making Safari consistent.
+                    // This browser side effect makes us able to drag scroll
+                    // below the original page scroll height.
+                    if (Dom.isSafari) {
+                        dragDiv.pageHeight += dragDiv.clientHeight;
+                    }
+                    dragDiv.pageWidth = Dom.documentElement().scrollWidth;
+
+                    this.clearPreviousDrop();
+
+                    Event.elementInvoke(div, "dragstart");
+                    handled = true;
                 }
-
-                // capture the page height for drag scroll
-                AWDragDiv.pageHeight = Dom.documentElement().scrollHeight;
-                // Non-safari browsers takes the newly created div client height
-                // into account, so making Safari consistent.
-                // This browser side effect makes us able to drag scroll
-                // below the original page scroll height.
-                if (Dom.isSafari) {
-                    AWDragDiv.pageHeight += AWDragDiv.clientHeight;                        
-                }
-                AWDragDiv.pageWidth = Dom.documentElement().scrollWidth;
-
-                this.clearPreviousDrop();
-
-                Event.elementInvoke(div, "dragstart");
-                handled = true;
             }
 
             if (handled) {

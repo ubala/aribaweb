@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWImageInfo.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWImageInfo.java#6 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -350,12 +350,12 @@ public final class AWImageInfo extends AWBaseObject
                 widthString = null;
                 heightString = null;
             }
-            _url = AWEncodedString.sharedEncodedString(_resource.url());
+            _url = (_resource.canCacheUrl()) ? AWEncodedString.sharedEncodedString(_resource.url()) : null;
         }
     }
 
     public AWEncodedString url ()
     {
-        return _url;
+        return _url != null ? _url : AWEncodedString.sharedEncodedString(_resource.url());
     }
 }

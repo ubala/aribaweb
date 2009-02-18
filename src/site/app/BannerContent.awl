@@ -1,0 +1,10 @@
+<div class="bnr">
+    <div class="bnrMessage">
+        <table>
+            <tr>
+                <td><b>$^title</b></td>
+                <td>&#8226;&nbsp;$^value</td>
+            </tr>
+        </table>
+    </div>
+</div>

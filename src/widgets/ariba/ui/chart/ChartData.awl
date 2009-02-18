@@ -16,10 +16,6 @@
         $$
     </Copyright>
 
-    <Responsible>
-        craigf
-    </Responsible>
-
     <Overview>
         Generates data for the Chart component content.
     </Overview>

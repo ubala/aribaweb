@@ -12,12 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWResourceDirectory.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWResourceDirectory.java#9 $
 */
 
 package ariba.ui.aribaweb.util;
 
-import ariba.ui.aribaweb.util.AWBaseObject;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.util.core.ListUtil;
 import ariba.util.core.Assert;
 import ariba.util.core.Fmt;
@@ -102,7 +102,17 @@ public abstract class AWResourceDirectory extends AWBaseObject
         return the url prefix for all the resources in this directory
     */
     public abstract String urlPrefix ();
-    
+
+    public String formatCacheableUrlForResource (AWResource resource)
+    {
+        return ((AWConcreteApplication)AWConcreteApplication.sharedInstance()).formatUrlForResource(urlPrefix(), resource, true);
+    }
+
+    public String formatUrlForResource (AWResource resource)
+    {
+        return ((AWConcreteApplication)AWConcreteApplication.sharedInstance()).formatUrlForResource(urlPrefix(), resource, false);
+    }
+
     /**
         return list of files with certain file name extension
     */

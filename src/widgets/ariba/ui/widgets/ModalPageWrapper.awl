@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#53 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#54 $
     </Copyright>
 
     <Overview>
@@ -60,7 +60,7 @@
         See BasicPageWrapper
     </Binding>
 
-    <Binding key="submitFormDefault" direction="get" type="boolean" default="$false">
+    <Binding key="submitFormDefault" direction="get" type="boolean">
         See BasicPageWrapper
     </Binding>
 
@@ -182,7 +182,7 @@
                   toc="$^toc"
                   formEncodingType="$^formEncodingType"
                   hasForm="$^hasForm:$true"
-                  submitFormDefault="$^submitFormDefault:$false"
+                  submitFormDefault="$^submitFormDefault"
                   helpKey="$^helpKey">\
 
     <a:If ifFalse="$hasBottomLeftAreaSubTemplate">

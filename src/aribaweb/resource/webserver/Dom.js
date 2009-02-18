@@ -431,10 +431,13 @@ ariba.Dom = function() {
             return absoluteTop;
         },
 
-        clientHeight : function (docElement)
+        clientHeight : function (docElement, docScrollElement)
         {
             var clientHeight = docElement.clientHeight;
-            clientHeight += docElement.scrollTop;
+            if (!docScrollElement) {
+                docScrollElement = docElement;
+            }
+            clientHeight += docScrollElement.scrollTop;
             return clientHeight;
         },
 
@@ -445,8 +448,9 @@ ariba.Dom = function() {
         visibleInScrollArea : function (element)
         {
             var docElement = this.documentElement();
-            var scrollTop = docElement.scrollTop;
-            var scrollBottom = this.clientHeight(docElement);
+            var docScrollElement = this.getPageScrollElement();
+            var scrollTop = docScrollElement.scrollTop;
+            var scrollBottom = this.clientHeight(docElement, docScrollElement);
             var elementTop = this.absoluteTop(element);
             var elementBottom = elementTop + element.clientHeight;
             var elementTopVisible = (elementTop > scrollTop) && (scrollBottom > elementTop);
@@ -457,16 +461,21 @@ ariba.Dom = function() {
         //
         // Div Positioning
         //
-        clientWidth : function (docElement)
+        clientWidth : function (docElement, docScrollElement)
         {
             var clientWidth = docElement.clientWidth;
-            clientWidth += docElement.scrollLeft;
+            if (!docScrollElement) {
+                docScrollElement = docElement;
+            }
+            clientWidth += docScrollElement.scrollLeft;
             return clientWidth;
         },
 
         correctForRightEdge : function (divLeft, div)
         {
-            var clientWidth = this.clientWidth(document.documentElement);
+            var clientWidth =
+                this.clientWidth(document.documentElement,
+                                 this.getPageScrollElement());
             var adjustedDivLeft = clientWidth - div.offsetWidth;
             if (divLeft > adjustedDivLeft) {
                 divLeft = adjustedDivLeft;
@@ -476,7 +485,9 @@ ariba.Dom = function() {
 
         correctForBottomEdge : function (divTop, div)
         {
-            var clientHeight = this.clientHeight(document.documentElement);
+            var clientHeight =
+                this.clientHeight(document.documentElement,
+                                  this.getPageScrollElement());
             var adjustedMenuTop = clientHeight - div.offsetHeight;
             if (divTop > adjustedMenuTop) {
                 divTop = adjustedMenuTop;
@@ -942,6 +953,12 @@ ariba.Dom = function() {
         };
 
         return {
+            setPageScroll : function (scrollLeft, scrollTop)
+            {
+                this.setPageScrollLeft(scrollLeft);
+                this.setPageScrollTop(scrollTop);
+            },
+            
             setPageScrollTop : function (scrollValue)
             {
                 this.documentElement().scrollTop = scrollValue;
@@ -1137,7 +1154,7 @@ ariba.Dom = function() {
 
         return {
 
-            setPageScrollNS : function (scrollLeft, scrollTop)
+            setPageScroll : function (scrollLeft, scrollTop)
             {
                 window.scroll(scrollLeft, scrollTop);
             },

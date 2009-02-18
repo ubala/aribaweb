@@ -1,0 +1,132 @@
+Rich Widgets
+------------
+
+In addition to core control constructs and dynamic wrappers for core HTML tags,
+AribaWeb includes a full complement of higher-level widgets, from **tab sets**,
+client-side **panels**, **wizards**, and **page wrappers**, to **buttons**,
+**choosers**, and **menus**, all the way to scrolling, sorting
+**data tables**, **tree tables**, **pivot tables**, **flash charts** and
+a **rich text editor**.
+
+In addition, AW provides a rich validation framework that makes specifying
+validation easy (and often automatic) and provides users easy navigation of any
+errors on the page.
+
+And all of this automatically get the benefits of "Auto AJAX"...
+
+
+Auto AJAX
+---------
+
+Traditionally, even with the best client-side JavaScript libraries, writing AJAX
+applications can be complex and error prone; developers are usually forced to deal
+with two languages (Java and JavaScript) and two programming models (one server-side
+one client-side).
+
+AribaWeb changes this equation.  In AribaWeb,
+*you program with a singe simple, declarative, server-side programming model*, and
+**AribaWeb automatically provides AJAX behavior**.  AribaWeb provides AJAX-style
+incremental page refresh through a unique mechanism called *Refresh Regions*.  Essentially,
+your app processes a user action as if it were rendering a full new page in response,
+and then AW figures out which parts of the response differ from the current browser
+document and sends only those changes.
+
+In addition to refresh regions, many AribaWeb widgets (Choosers, scrolling tables,
+rich text editors) are JavaScript enhanced, so you get the benefits of rich AJAX
+controls without ever writing (or maintaining) a line of JavaScript.
+
+Bonus: AribaWeb also comprehensively solves the **browser back button** problem!
+
+
+Enterprise Proven
+-----------------
+
+AribaWeb has been **deployed to literally millions of users for nearly 10 years**.
+AribaWeb is at the heart of every application in [Ariba](http://www.ariba.com)'s
+Spend Management solutions and [Network services](http://discovery.ariba.com) --
+market leading web application used by hundreds of the largest corporations around
+the world, both deployed behind their firewalls and hosted at scale as a multi-tenant
+"On Demand" service.  (See the [AribaWeb release history](/Documentation/Release_History.txt)).
+
+AribaWeb has been designed from the group up for enterprise-grade security.  AW's
+*server encapsulated state model* ensures that links cannot be tampered to gain access
+content not already intentionally exposed to the current user.
+
+Full Stack
+----------
+AribaWeb pre-integrates a complete, best of breed, stack for building database applications:
+
+  - The **AribaWeb Core** provides the core engine for request handling, component handling, and AJAX UI.
+    It builds on The efficient Ariba Util "FieldValue" property binding facility, and includes the
+    OGNL-derived AribaExpr expression parser.
+
+  - The **Widgets** framework includes hundreds of pre-built components, as well as wrappers around some
+    excellent third part controls, including the [Xinha](http://www.xinha.org) rich text editor, and the
+    [Fusion Charts Free](http://www.fusioncharts.com/) charting package.
+
+  - The **MetaUI** framework provides the technical underpinning for "Instant App": MetaUI includes
+    a CSS-like rule engine that take rules inferred from Java class introspection, annotations,
+    and explicit ".oss" rule files, and *on the fly* selects the best configuration of AW Components
+    to produce a UI for any context.
+
+  - The MetaUI **JPA Adapter** bridges MetaUI with [Hibernate](http://www.hibernate.org) and the
+    Apache [Lucene](http://lucene.apache.org/)-based [Compass](http://www.compass-project.org/)
+    search framework.  (Other ORM frameworks can be used as well).
+
+  - AW further includes a complete [Ant](http://ant.apache.org)-based **build framework** (which reduces app
+    build files to just a few lines) and bundles the Apache [Tomcat](http://tomcat.apache.org) Java Servlet
+    container.  (AW is, of course, compatible with other servlet containers as well).
+
+This stack is carefully modularized -- your apps can consume as much or as little of the complete
+as you need -- but having it bundled and pre-integrated in a single download ensures that you
+can get up and running without the endless configuration and component version dependency hassles
+all to common with other solutions.
+
+
+Way Less Code
+-------------
+
+AribaWeb is designed with the principal that less is more: less boilerplate,
+less configuration, less wrote coding, more functionality, more maintainability,
+more fun.  AW minimizes the code required to express your applications through:
+
+  - A *rich component model* for nested, repeated, stateful or stateless components
+    that supports extensive factoring of reusable code
+  - An extensive library of versatile pre-built components that means that most of what
+    you need has already been written (and tested) for you
+  - *Declarative binding* for input, output, and actions that means you'll never
+    write code to process form values or generate a URL
+  - *Inferred configuration* that means you just author your components; the configuration
+    is implied
+  - AW's *Meta Data Driven UI* that can derive forms, data tables, action menus, or even
+    a complete application purely from your domain object model.
+
+
+X-Ray
+-----
+
+With traditional tools, getting your arms around a large web application can be
+chore.  AribaWeb substantially eases this burden with *Component Inspector*,
+an integrated, in-process development tool that provides an x-ray view through
+your running application.  You'll never again need hunt for the source of some
+element you see in the UI.
+
+And, whether it's a component identified in Component Inspector, or (heaven forbid)
+a line number listed in an exception stack trace, with AribaWeb's *IDE Integration*
+you're always just one mouse-click away from editing the file.
+
+
+Rapid Turnaround
+----------------
+
+UI development is most fun when you can rapidly try out alternative ideas.
+With AribaWeb, whether you're editing your component template (.awl file),
+or your *Java or Groovy* source file, AW will automatically spot the change,
+compile (if necessary) and reload your changes, all without restarting your
+server or even losing your session (and no IDE is required).
+
+AW further increase productivity through its [IDE Integration](/Documentation/IDE_Plugins.txt) --
+whereever a component appears in an exception stack trace or in Component Inspector
+it's a clickable link that will automatically direct your Eclipse or IntelliJ IDEA IDE
+directly to your target.
+

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.awl#16 $
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaForm.awl#17 $
     </Copyright>
 
     <Overview>
@@ -25,7 +25,7 @@
     </Binding>
 </a:Api>\
 \
-<m:Context contextKey="class">
+<m:Context scopeKey="class">
     <a:PhaseInvocation append="$initClass"/>
     <!--- <b>MetaForm: </b><pre>$metaContext.debugString</pre>-->
     <a:SetValue fieldsByZone="$metaContext.properties.fieldsByZone"/>

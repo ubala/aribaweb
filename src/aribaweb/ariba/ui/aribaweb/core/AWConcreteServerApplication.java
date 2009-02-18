@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#56 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#60 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -84,7 +84,7 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
     abstract public AWRequest createRequest (Object nativeRequestObject);
     abstract public AWResponse createResponse ();
     abstract public void initRequestHandlers ();
-    abstract public boolean initIsRapidTurnaroundEnabled ();
+
     abstract public boolean initIsStatisticsGatheringEnabled ();
 
     public AWResponse createResponse (AWRequest request)
@@ -108,6 +108,7 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         // that uses this lock.
         _cooperativeMultithreadingLock = initCooperativeMultithreadingLock();
 
+        IsDebuggingEnabled = isDebuggingEnabled();
         IsRapidTurnaroundEnabled = initIsRapidTurnaroundEnabled();
         if (IsRapidTurnaroundEnabled) {
             String AWReloadingClass = "ariba.awreload.ReloadingClassLoaderInit";
@@ -123,7 +124,6 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         AWUtil.AllowsConcurrentRequestHandling = AllowsConcurrentRequestHandling;
 
         IsStatisticsGatheringEnabled = initIsStatisticsGatheringEnabled();
-        IsDebuggingEnabled = isDebuggingEnabled();
         _resourceUrl = initResourceUrl();
         AWMultiLocaleResourceManager.setResourceManagerFactory(this);
         _multiLocaleResourceManager = createResourceManager();
@@ -244,11 +244,20 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         return null;
     }
 
+    static List<String>_ExtraSearchPaths = ListUtil.list();
+
+    public static void registerDebugSearchPath (String pathString)
+    {
+        _ExtraSearchPaths.add(pathString);
+    }
+
     protected void registerResourceDirectories (AWMultiLocaleResourceManager resourceManager)
     {
         if (AWConcreteApplication.IsRapidTurnaroundEnabled) {
-            registerAWSourcePath(resourceManager);
+            String awSearchPath = AWUtil.getenv("ARIBA_AW_SEARCH_PATH");
+            if (awSearchPath != null) registerDebugSearchPath(awSearchPath);
         }
+        for (String p : _ExtraSearchPaths) registerAWSourcePaths(p, resourceManager);
         
         String aribaDeployRoot = deploymentRootDirectory();
         if (aribaDeployRoot != null) {
@@ -341,9 +350,8 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         SystemUtil.setLocalTempDirectory(new File(tempName, _AppName).getAbsolutePath());
     }
 
-    private static void registerAWSourcePath (AWMultiLocaleResourceManager resourceManager)
+    private static void registerAWSourcePaths (String awSearchPath, AWMultiLocaleResourceManager resourceManager)
     {
-        String awSearchPath = AWUtil.getenv("ARIBA_AW_SEARCH_PATH");
         if (awSearchPath != null) {
             String[] paths = AWUtil.componentsSeparatedByString(awSearchPath, ";").array();
             Set jarNameSuffixes = _awJarNameSuffixes();
@@ -357,6 +365,14 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
                     String jarSuffix = _jarNameSuffixForSourceDirectory(path);
                     if (jarSuffix == null || jarNameSuffixes.contains(jarSuffix)) {
                         resourceManager.registerResourceDirectory(path, resourceUrl);
+                        File resourceDir = new File(path, "resource/webserver/branding/ariba");
+                        if (resourceDir.exists() && resourceDir.isDirectory()) {
+                            resourceManager.registerResourceDirectory(resourceDir.getPath(), resourceUrl, false);
+                        }
+                        resourceDir = new File(path, "resource/webserver");
+                        if (resourceDir.exists() && resourceDir.isDirectory()) {
+                            resourceManager.registerResourceDirectory(resourceDir.getPath(), resourceUrl, false);
+                        }
                     }
                 }
             }
@@ -430,7 +446,12 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
     //////////////////
     public boolean isDebuggingEnabled ()
     {
-        return true;
+        return "true".equals(System.getProperty("ariba.aribaweb.Debug"));
+    }
+
+    public boolean initIsRapidTurnaroundEnabled ()
+    {
+        return AWUtil.getenv("ARIBA_AW_SEARCH_PATH") != null;
     }
 
     public boolean isStateValidationEnabled ()

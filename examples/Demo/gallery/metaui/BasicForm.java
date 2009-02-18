@@ -17,8 +17,6 @@
 package gallery.metaui;
 
 import ariba.ui.aribaweb.core.AWComponent;
-import ariba.ui.meta.annotations.Trait;
-import ariba.ui.meta.annotations.Properties;
 import busobj.Project;
 
 import java.util.List;
@@ -43,45 +41,4 @@ public final class BasicForm extends AWComponent
         errorManager().checkErrorsAndEnableDisplay();
         return null;
     }
-
-    public AWComponent p1 ()
-    {
-        TestFormPage page = (TestFormPage)pageWithName(TestFormPage.class.getName());
-        page.params = new ParamClass1();
-        return page;
-    }
-
-    public AWComponent p2 ()
-    {
-        TestFormPage page = (TestFormPage)pageWithName(TestFormPage.class.getName());
-        page.params = new ParamClass2();
-        return page;
-    }
-
-    public static class ParamClass1
-    {
-        public ParamClass1 ()
-        {
-
-        }
-
-        public String paramStringOption;
-
-        public boolean paramBoolean;
-
-        public int paramInt;
-
-    }
-
-
-    public static class ParamClass2
-    {
-        public String pString;
-
-        public String anotherOne;
-
-        public int andAnInt;
-    }
-
-
 }

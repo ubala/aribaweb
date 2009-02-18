@@ -1,8 +1,8 @@
 package busobj;
 
-import ariba.util.core.Date;
 import ariba.util.core.Fmt;
-import ariba.ui.meta.annotations.NavModuleClass;
+
+import java.util.Date;
 
 public class Person
 {

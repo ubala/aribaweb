@@ -122,13 +122,14 @@
     <path id="ui.resource.dirs">
         <!-- Search for all directories with build.xml files - we'll strip the file in the regexmapper below -->
       <fileset dir="${src.ui.dir}" erroronmissingdir="false"
-               includes="**/build.xml, aribaweb/resource/webserver, widgets/resource/webserver, widgets/resource/webserver/branding/ariba"
+               includes="**/build.xml"
                excludes="release/**,opensourceui/build.xml,opensourceui/src/build.xml"/>
       <fileset dir="${src.samples.dir}" includes="**/build.xml"/>
 
+
       <!-- JS resources -->
       <dirset dir="${src.ui.dir}" erroronmissingdir="false"
-              includes="aribaweb/resource/webserver, widgets/resource/webserver, widgets/resource/webserver/branding/ariba"/>
+              includes="widgets/resource/webserver/branding/ariba"/>
     </path>
 
     <property name="env.ARIBA_AW_SEARCH_PATH" value="NOT_SET"/>
@@ -174,7 +175,7 @@
     <property name="build.docroot.dir" value="${build.classes.dir}/docroot"/>
     <property name="ariba.jars.dir" value="${dist.root.dir}/lib"/>
     <property name="doc.dir" location="${dist.root.dir}/docs"/>
-    <property name="site.dir" location="${dist.root.dir}/docs/site"/>
+    <property name="site.dir" location="${dist.root.dir}/site"/>
     <property name="tools.dir" location="${dist.root.dir}/tools"/>
     <property name="awreload.jar" location="${ariba.jars.dir}/ariba.awreload-jmti.jar"/>
 
@@ -272,10 +273,21 @@
 
     <!-- AW Tools classpath -->
     <path id="aw.tools.classpath">
-        <resources refid="build-only.deps"/>
-        <resources refid="build.deps"/>
-        <resources refid="build.deps2"/>
-        <resources refid="build.jars"/>
+        <!-- minimal set of AW / Widgets jars -->
+        <fileset dir="${lib-build.dir}">
+            <include name="javax.servlet.zip"/>
+        </fileset>
+        <fileset dir="${lib.dir}">
+            <include name="log4j*.jar"/>
+            <include name="jakarta-oro.jar"/>
+            <include name="asm.jar"/>
+            <include name="bcel.jar"/>
+        </fileset>
+        <fileset dir="${ariba.jars.dir}">
+            <include name="ariba.util.jar"/>
+            <include name="ariba.expr.jar"/>
+            <include name="ariba.aribaweb.jar"/>
+        </fileset>
     </path>
 
     <!-- Build classpath -->
@@ -327,6 +339,22 @@
         <fileset dir="${lib-demo.dir}">
             <include name="lucene-core.jar"/>
             <include name="lucene-highlighter.jar"/>
+        </fileset>
+    </path>
+
+    <path id="groovy.app.classpath">
+        <path refid="groovy.script.classpath"/>
+
+        <fileset dir="${ariba.jars.dir}">
+            <include name="ariba.metaui.jar"/>
+        </fileset>
+
+        <fileset id="groovy.support.jars" dir="${ariba.jars.dir}">
+            <include name="ariba.groovyloader.jar"/>
+        </fileset>
+
+        <fileset id="module.libs2" dir="${lib-internal.dir}">
+            <include name="groovy-all.jar"/>
         </fileset>
     </path>
 
@@ -423,7 +451,7 @@
     </target>
 
     <target name="compile-groovy" if="compile.groovy">
-        <echo message="Compiling ${basedir}"/>
+        <echo message="Compiling (with groovy) ${basedir}"/>
         <groovy-compile destdir="${build.classes.dir}" srcdir="${src.dir}:${src.derived.dir}">
             <classpath refid="classpath"/>
         </groovy-compile>
@@ -813,6 +841,8 @@
         <launch-tomcat>
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=${env.JPDA_TRANSPORT},address=${env.JPDA_ADDRESS},server=y,suspend=n"/>
+            <!-- Enable AW runtime dev support (AW Debug Options panel, Component Inspector, ...) -->
+            <jvmarg value="-Dariba.aribaweb.Debug=true"/>
         </launch-tomcat>
     </target>
 
@@ -887,7 +917,6 @@
         <attribute name="srcdir"/>
         <attribute name="destdir"/>
         <element name="nested" implicit="yes" optional="yes"/>
-
         <sequential>
             <mkdir dir="@{destdir}"/>
             <groovyc
@@ -895,13 +924,13 @@
                     destdir="@{destdir}"
                     excludes="${javac.excludes}">
                 <nested/>
+                <!-- FIXME: Groovy 1.6 (RC3) breaks expression is embedded javac tag, so need to hard code! -->
+                <!-- see http://jira.codehaus.org/browse/GROOVY-3223 -->
                 <javac
-                        encoding="${build.encoding}"
-                        deprecation="${javac.deprecation}"
-                        debug="${javac.debug}"
-                        source="${javac.source}"
-                        target="${javac.target}"
-                        excludes="${javac.excludes}"/>
+                        encoding="utf-8"
+                        debug="on"
+                        source="1.5"
+                        target="1.5"/>
             </groovyc>
         </sequential>
     </macrodef>

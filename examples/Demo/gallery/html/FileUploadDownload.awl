@@ -1,17 +1,18 @@
-<w:BasicPageWrapper hasForm="$true">
-    <t:DataTable title="Uploads" list="$uploads" item="$currentUpload"
-                 multiSelect="$true" displayGroup="$displayGroup">
-        <t:Column key="fileName"/>
-        <t:Column key="mimeType" label="Type"/>
-        <t:Column key="bytes.length" label="Size"/>
-        <t:Column width="1px">\
-            <w:TextButton action="$update">Update</w:TextButton>
-            <w:TextButton action="$doDownload">Download</w:TextButton>
-        </t:Column>
-        <t:RowDetail style="padding-left:30px">\
-            <w:RichTextArea value="$currentUpload.description"/>\
-        </t:RowDetail>
-        <t:SelectionButtonArea><w:TextButton action="$remove">Remove</w:TextButton></t:SelectionButtonArea>
-        <t:ButtonArea><w:TextButton action="$add">Add</w:TextButton></t:ButtonArea>
-    </t:DataTable>
-</w:BasicPageWrapper>
+<w:HintMessage>
+    This demonstrates upload via a separate panel
+</w:HintMessage>
+<t:DataTable title="Uploads" list="$uploads" item="$currentUpload"
+             multiSelect="$true" displayGroup="$displayGroup">
+    <t:Column key="fileName"/>
+    <t:Column key="mimeType" label="Type"/>
+    <t:Column key="bytes.length" label="Size"/>
+    <t:Column width="1px">\
+        <w:TextButton action="$update">Update</w:TextButton>
+        <w:TextButton action="$doDownload">Download</w:TextButton>
+    </t:Column>
+    <t:RowDetail style="padding-left:30px">\
+        <w:RichTextArea value="$currentUpload.description"/>\
+    </t:RowDetail>
+    <t:SelectionButtonArea><w:TextButton action="$remove">Remove</w:TextButton></t:SelectionButtonArea>
+    <t:ButtonArea><w:TextButton action="$add">Add</w:TextButton></t:ButtonArea>
+</t:DataTable>

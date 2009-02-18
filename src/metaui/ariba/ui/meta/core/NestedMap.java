@@ -16,8 +16,10 @@ import java.util.HashMap;
 public class NestedMap<K, V> extends AbstractMap<K, V>
 {
     Map<K, V>_parent;
-    Map<K, V> _map;
+    Map<K, Object> _map;
     int _overrideCount;
+
+    static final Object _NullMarker = new Object();
 
     public NestedMap (Map<K,V> parentMap)
     {
@@ -25,11 +27,19 @@ public class NestedMap<K, V> extends AbstractMap<K, V>
         _map = new HashMap();
     }
 
+    private NestedMap (Map<K,V> parentMap, Map<K,Object> map)
+    {
+        _parent = parentMap;
+        _map = map;
+    }
+
     // You seriously need to know what you're doing before calling this...
     // In particular, the new parent should have the exact same keys present as the previous one
-    public void reparent (Map newParent)
+    public NestedMap reparentedMap (Map newParent)
     {
-        _parent = newParent;
+        NestedMap newMap = new NestedMap(newParent, _map);
+        newMap._overrideCount = _overrideCount;
+        return newMap;
     }
 
     // Essential override from AbstractMap
@@ -45,26 +55,27 @@ public class NestedMap<K, V> extends AbstractMap<K, V>
 
     public V get(Object key)
     {
-        return _map.containsKey(key) ? _map.get(key) : _parent.get(key);
+        Object val = _map.containsKey(key) ? _map.get(key) : _parent.get(key);
+        return (val == _NullMarker) ? null : (V)val;
     }
 
     public V put(K key, V value)
     {
-        V orig = _map.get(key);
-        if (orig == null && _parent.containsKey(key)) {
-            _overrideCount += (_map.containsKey(key) ? -1: 1);
+        Object orig = _map.get(key);
+        if ((orig == _NullMarker || orig == null) && _parent.containsKey(key)) {
+            _overrideCount += (orig == _NullMarker ? -1: 1);
         }
         _map.put(key, value);
-        return orig;
+        return (V)orig;
     }
 
     public V remove(Object key)
     {
-        V orig = null;
+        Object orig = null;
         if (_map.containsKey(key)) {
             orig = _map.remove(key);
             if (_parent.containsKey(key)) {
-                _map.put((K)key, null);
+                _map.put((K)key, _NullMarker);
                 // _overrideCount--;
                 _overrideCount++;
             }
@@ -73,10 +84,15 @@ public class NestedMap<K, V> extends AbstractMap<K, V>
             // we're "removing" a value we don't have (but that our parent does)
             // we need to store a null override
             orig = _parent.get(key);
-            _map.put((K)key, null);
+            _map.put((K)key, _NullMarker);
             _overrideCount += 2;
         }
-        return orig;
+        return (V)orig;
+    }
+
+    public boolean containsKey (Object value)
+    {
+        return _map.containsKey(value) ? (_map.get(value) != _NullMarker) : _parent.containsKey(value);
     }
 
     public Map dup ()
@@ -131,7 +147,7 @@ public class NestedMap<K, V> extends AbstractMap<K, V>
             // Note: we need to skip nulls (masked values)
             while (!_fromNested && _nestedIterator.hasNext()) {
                 _nextEntry = _nestedIterator.next();
-                if (_nextEntry.getValue() != null) _fromNested = true;
+                if (_nextEntry.getValue() != _NullMarker) _fromNested = true;
             }
 
             if (!_fromNested) {

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDateFactory.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDateFactory.java#4 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -38,12 +38,12 @@ public interface AWDateFactory
 
     // Get absolute year with the calendar in the specified timezone and locale.
     // Example, 1973, not 73.
-    public int getYear (Date date, TimeZone timezone, Locale locale);
+    public int getYear (java.util.Date date, TimeZone timezone, Locale locale);
 
     // Get month with the calendar in the specified timezone and locale.
-    public int getMonth (Date date, TimeZone timezone, Locale locale);
+    public int getMonth (java.util.Date date, TimeZone timezone, Locale locale);
 
     // Get day of month with the calendar in the specified timezone and locale.
-    public int getDayOfMonth (Date date, TimeZone timezone, Locale locale);
+    public int getDayOfMonth (java.util.Date date, TimeZone timezone, Locale locale);
 
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#10 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -354,7 +354,9 @@ public class TestLinkHolder implements SemanticKeyProvider
         if (_type != null && parameterTypes.length == 1) {
             Class typeOnAnnotation = ClassUtil.classForName(_type);
             Class methodType = parameterTypes[0];
-            if (methodType.isAssignableFrom(typeOnAnnotation)) {
+            if (methodType != null && typeOnAnnotation != null &&
+                    methodType.isAssignableFrom(typeOnAnnotation))
+            {
                 if (testContext.get(typeOnAnnotation) != null) {
                     useAnnotationType = true;
                 }

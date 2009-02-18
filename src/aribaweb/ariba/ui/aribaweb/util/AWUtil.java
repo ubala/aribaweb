@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#50 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#51 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -2277,6 +2277,33 @@ public final class AWUtil extends AWBaseObject
         buf.append(key);
         buf.append('=');
         buf.append(AWUtil.encodeString(val));
+        return buf.toString();
+    }
+
+    static String relativeUrlString (URL startUrl, URL destUrl)
+    {
+        if (!startUrl.getProtocol().equals(destUrl.getProtocol())
+                || !startUrl.getHost().equals(destUrl.getHost())) return destUrl.toExternalForm();
+
+        String[] start = startUrl.getPath().split("/");
+        String[] end = destUrl.getPath().split("/");
+        int lastCommonIdx = 0;
+        int max = Math.min(start.length, end.length);
+        for ( ; lastCommonIdx < max; lastCommonIdx++) {
+            if (!start[lastCommonIdx].equals(end[lastCommonIdx])) {
+                break;
+            }
+        }
+        lastCommonIdx--;
+        StringBuilder buf = new StringBuilder();
+        int popCount = start.length - lastCommonIdx - 2;
+        while (popCount-- > 0) {
+            buf.append("../");
+        }
+        for (int i=lastCommonIdx+1; i < end.length; i++) {
+            buf.append(end[i]);
+            if (i != end.length-1) buf.append("/");
+        }
         return buf.toString();
     }
 

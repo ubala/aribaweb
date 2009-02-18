@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#10 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#11 $
 */
 package ariba.ui.meta.persistence;
 
@@ -90,11 +90,13 @@ public class PersistenceMeta
             boolean isEntity = _EntityClasses.contains(value);
             Log.meta.debug("PersistenceMeta field Type listener notified of first use of field type: %s - isEntity: %s", value, isEntity);
             if (isEntity) {
+                meta.beginRuleSet(TypeToOneMetaProvider.class.getName());
                 Map selector = new HashMap();
                 selector.put(ObjectMeta.KeyType, value);
                 Map properties = new HashMap();
                 properties.put(Meta.KeyTrait, Arrays.asList(KeyToOneRelationship));
                 meta.addRule(selector, properties, Meta.ClassRulePriority);
+                meta.endRuleSet();
             }
         }
     }
@@ -110,11 +112,13 @@ public class PersistenceMeta
             boolean isEntity = _EntityClasses.contains(value);
             Log.meta.debug("PersistenceMeta field Type listener notified of first use of field type: %s - isEntity: %s", value, isEntity);
             if (isEntity) {
+                meta.beginRuleSet(TypeToManyMetaProvider.class.getName());
                 Map selector = new HashMap();
                 selector.put(ObjectMeta.KeyElementType, value);
                 Map properties = new HashMap();
                 properties.put(Meta.KeyTrait, Arrays.asList(KeyToManyRelationship));
                 meta.addRule(selector, properties, Meta.ClassRulePriority);
+                meta.endRuleSet();
             }
         }
     }

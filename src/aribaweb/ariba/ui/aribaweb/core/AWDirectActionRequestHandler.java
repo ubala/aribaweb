@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#60 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#61 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -314,9 +314,7 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
                             "Direct action result cannot be null.");
 
                 // Allow response to replace itself (see AWRedirect for example)
-                if (actionResults instanceof AWResponseGenerating.ResponseSubstitution
-                    && !requestContext._debugIsInPlaybackMode()
-                    && !requestContext._debugIsInRecordingMode()) {
+                if (actionResults instanceof AWResponseGenerating.ResponseSubstitution) {
                     actionResults = ((AWResponseGenerating.ResponseSubstitution)actionResults).replacementResponse();
                 }
                 

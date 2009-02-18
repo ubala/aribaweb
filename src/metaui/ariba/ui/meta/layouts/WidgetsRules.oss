@@ -34,6 +34,7 @@ operation=(view, list) {
 }
 
 field {
+    visible:true;
     editing=true  { editable:true; }
     editing=false { editable:false; }
 }
@@ -64,25 +65,34 @@ class {
 
 
 field {
-    type                    { component:AWString; bindings:{value:$value} }
+    type         { component:AWString; bindings:{value:$value} }
     type=boolean { 
         bindings:{formatter:$formatters.boolean};
         editable { component:AWCheckbox }
     }
-    type=ariba.util.core.Date   {
-        bindings:{formatter:$formatters.shortDate};
-        editable                { component:DateField }
+    type=(java.lang.Integer, int) {
+        bindings:{formatter:$formatters.integer};
+        editable { component:AWTextField; bindings:{style:"text-align:right"; size:13} }
+        operation=search { bindings:{formatter:$formatters.blankNull.integer} }
+    }
+    type=(java.lang.Long, long) {
+        bindings:{formatter:$formatters.long};
+        editable { component:AWTextField; bindings:{style:"text-align:right"; size:13} }
+        operation=search { bindings:{formatter:$formatters.blankNull.long} }
+    }
+    type=(java.lang.Double, double) {
+        bindings:{formatter:$formatters.double};
+        editable { component:AWTextField; bindings:{style:"text-align:right"; size:13} }
     }
     type=java.math.BigDecimal   {
         bindings:{formatter:$formatters.money};
-        editable                {
-            component:AWTextField;
-            bindings:{
-                style:"text-align:right";
-                size:13;
-            };
-        }
+        editable { component:AWTextField; bindings:{ style:"text-align:right"; size:13; }; }
     }
+    type=java.util.Date   {
+        bindings:{formatter:$formatters.shortDate};
+        editable                { component:DateField }
+    }
+
     type=java.lang.Enum   {
         editable                {
             component:GenericChooser;
@@ -121,16 +131,32 @@ field {
         }
     }
 
-    type=(java.lang.Integer, int) {
-        bindings:{formatter:$formatters.integer};
-        operation=search { bindings:{formatter:$formatters.blankNull.integer} }
-        editable                { component:AWTextField; bindings:{style:"text-align:right"; size:13} }
+    type="[B" {
+        editable {
+            component:FileUploadChooser; bindings:{ bytes:$value; };
+        }
+        editable=false {
+            bindings: {value:${value ? "" + (value.length + " bytes") : "(none)"}}
+        }
     }
 
-    type=(java.lang.Long, long) {
-        bindings:{formatter:$formatters.long};
-        operation=search { bindings:{formatter:$formatters.blankNull.long} }
-        editable                { component:AWTextField; bindings:{style:"text-align:right"; size:13} }
+    type="java.io.File" {
+        editable {
+            component:FileUploadChooser; bindings:{ file:$value };
+        }
+        editable=false {
+            bindings: {value:${value ? value.name : "(none)"}}
+        }
+    }
+
+    type=javax.mail.internet.MimeMessage {
+        component:MimeMessageView;
+        bindings:{ mimeMessage:$value }
+    }
+
+    type=ariba.ui.aribaweb.util.AWMimeParsedMessage {
+        component:MimeMessageView;
+        bindings:{ parsedMessage:$value }
     }
 
     type=java.lang.String {
@@ -158,35 +184,29 @@ field {
     }
 
     type="[B" {
-        after:zNone;
         @trait=imageData {
-            component:AWImageData;
-            after:null;
             contentType:"image/jpeg";
-            bindings:{
-                bytes:$value;
-                contentType:${ariba.ui.aribaweb.util.AWContentType.contentTypeNamed(properties.contentType)}
+            editable=false {
+                component:AWImageData;
+                bindings:{
+                    bytes:$value;
+                    contentType:${ariba.ui.aribaweb.util.AWContentType.contentTypeNamed(properties.contentType)}
+                }
+            }
+            editable {
+                bindings: { awcontentLayouts:{_main:_imgUploadPreview;} };
             }
         }
     }
 
-    type="java.io.File" {
-        editable {
-            component:FileUploadChooser; bindings:{ file:$value };
+    layout=_imgUploadPreview {
+        wrapperComponent:MetaContext; wrapperBindings:{scopeKey:field;};
+        component:AWImageData;
+        bindings:{
+            bytes:$value;
+            contentType:${ariba.ui.aribaweb.util.AWContentType.contentTypeNamed(properties.contentType)};
+            style:"width:100px";
         }
-        editable=false {
-            bindings: {value:${value ? value.name : "(none)"}}
-        }
-    }
-
-    type=javax.mail.internet.MimeMessage {
-        component:MimeMessageView;
-        bindings:{ mimeMessage:$value }
-    }
-
-    type=ariba.ui.aribaweb.util.AWMimeParsedMessage {
-        component:MimeMessageView;
-        bindings:{ parsedMessage:$value }
     }
 
     @trait=derived {
@@ -204,7 +224,7 @@ field {
         operation=(edit, create) {
             required:true;
             object {
-                valid: ${(value != null && value !="") ? true : "Answer required"}
+                valid: ${(value != null && !"".equals(value)) ? true : "Answer required"}
             }
         }
     }
@@ -359,6 +379,26 @@ layout {
             awcontentLayouts:{body:Content; buttonArea:Actions};
         };
     }
+
+    @trait=Markdown {
+       component:Markdown;
+       bindings: {
+           value:${ariba.ui.aribaweb.util.AWUtil.stringWithContentsOfInputStream(requestContext.currentComponent.resourceManager.resourceNamed(properties.resourceName).inputStream)};
+       }
+    }
+    @trait=pad8 {
+        wrapperComponent:AWGenericContainer;
+        wrapperBindings:{ tagName:div; style:"padding:8px" }
+    }
+
+    @trait=Hint {
+        portletWrapper:AWTNullWrapper;
+        wrapperComponent:HintMessage;
+        after:zTop;
+        component:AWString;
+        bindings:{escapeUnsafeHtml:true; value:"Message..."};
+
+    }
 }
 
 @traitGroup=ActionGrouping {
@@ -375,7 +415,7 @@ layout {
     @trait=Stack;
 }
 
-layout=(Inspect, SearchForm) { trait:Form; label:${ariba.ui.meta.core.UIMeta.beautifyClassName(values.class)}; }
+class layout=(Inspect, SearchForm) { trait:Form; label:${ariba.ui.meta.core.UIMeta.beautifyClassName(values.class)}; }
 layout=InspectWithActions {
     trait:Stack;
     @layout=Actions#ActionMenu;
@@ -383,7 +423,7 @@ layout=InspectWithActions {
 }
 layout=InspectStack {
     trait:Stack;
-    @layout=ISMain {
+    @layout=Main {
         visible:true;
         component:OutlineBox;
         bindings: {
@@ -416,10 +456,21 @@ object class  { objectTitle:${ariba.util.fieldvalue.FieldValue.getFieldValue(obj
                     ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(values.class))}; }
 object layout { objectTitle:${ariba.util.fieldvalue.FieldValue.getFieldValue(object,
                     ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(values.class))}; }
+operation=list {
+    @field=ActionCol {
+        label:"";
+        visible:true;
+        after:zNone;
+        component:MetaActionList;
+        columnBindings: { width:"1px" };
+        bindings: { renderAsMenu:true; }
+    }
+}
 
 module {
     visible:true;
     homePage:MetaHomePage;
+    pageBindings:${properties.homePage == "MetaHomePage" ? java.util.Collections.singletonMap("module", values.module) : null};
     component:MetaDashboardLayout;
     layout { visible:true }
 
@@ -435,6 +486,7 @@ module {
 actionCategory {
     visible:true;
 }
+@actionCategory=General {  after:zMain;  }
 @actionCategory=Manage { after:Search; }
 
 

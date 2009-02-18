@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#110 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#114 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -342,7 +342,8 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         // we don't require AWBindings to be cleared for locally pooled components (because they're pooled on the
         // AWComponentReference where the bindings stay constant across uses
         return super.isFieldRequiredClear(field) &&
-                 (!useLocalPool() || !AWBinding.class.isAssignableFrom(field.getType()));
+                 (!useLocalPool() || !AWBinding.class.isAssignableFrom(field.getType()))
+                && !field.getName().equals("_uniqueTemplate");
     }
 
     public void ensureFieldValuesClear ()
@@ -707,6 +708,8 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     public boolean hasContentNamed (String name)
     {
         AWElement contentElement = componentReference().contentElement();
+        if (name == null) return (contentElement != null);
+        
         if (contentElement instanceof AWTemplate) {
             AWTemplate template = (AWTemplate)contentElement;
             int index = template.indexOfNamedSubtemplate(name, this);
@@ -1102,6 +1105,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
             _currentTemplateElement = null;
             if (isStateless() && !useLocalPool()) {
                 _otherBindingsBinding = null;
+                _extendedFields = null;
             }
             // note: _parent, _componentReference, and _page are set to null in AWComponentRef (but only for stateless);
         }
@@ -1223,7 +1227,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     public double doubleValueForBinding (String bindingName, double defaultValue)
     {
         AWBinding binding = bindingForName(bindingName, false);
-        return (binding != null) ? doubleValueForBinding(binding) : defaultValue;
+        return hasBinding(binding) ? doubleValueForBinding(binding) : defaultValue;
     }
 
     // Int
@@ -1245,7 +1249,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     public int intValueForBinding (String bindingName, int defaultValue)
     {
         AWBinding binding = bindingForName(bindingName, false);
-        return (binding != null) ? intValueForBinding(binding) : defaultValue;
+        return hasBinding(binding) ? intValueForBinding(binding) : defaultValue;
     }
 
     // Boolean
@@ -1260,10 +1264,15 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         return booleanValueForBinding(binding);
     }
 
+    public boolean booleanValueForBinding (AWBinding binding, boolean defaultValue)
+    {
+        return hasBinding(binding) ? booleanValueForBinding(binding) : defaultValue;
+    }
+
     public boolean booleanValueForBinding (String bindingName, boolean defaultValue)
     {
         AWBinding binding = bindingForName(bindingName, false);
-        return (binding != null) ? booleanValueForBinding(binding) : defaultValue;
+        return booleanValueForBinding(binding, defaultValue);
     }
 
     // Object
@@ -1285,7 +1294,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     public Object valueForBinding (String bindingName, Object defaultValue)
     {
         AWBinding binding = bindingForName(bindingName, false);
-        return (binding != null) ? valueForBinding(binding) : defaultValue;
+        return hasBinding(binding) ? valueForBinding(binding) : defaultValue;
     }
 
     // String
@@ -1307,7 +1316,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     public String stringValueForBinding (String bindingName, String defaultValue)
     {
         AWBinding binding = bindingForName(bindingName, false);
-        return (binding != null) ? stringValueForBinding(binding) : defaultValue;
+        return hasBinding(binding) ? stringValueForBinding(binding) : defaultValue;
     }
 
     // AWEncodedString
@@ -1688,9 +1697,14 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         
     public String urlForResourceNamed (String resourceName, boolean useFullUrl)
     {
+        return urlForResourceNamed (resourceName, useFullUrl, false);
+    }
+
+    public String urlForResourceNamed (String resourceName, boolean useFullUrl, boolean isVersion)
+    {
         AWRequestContext requestContext = requestContext();
-        boolean isSecure = useFullUrl ? requestContext.request().isSecureScheme() : false;
-        String url = resourceManager().urlForResourceNamed(resourceName, useFullUrl, isSecure);
+        boolean isSecure = useFullUrl ? requestContext.request() != null && requestContext.request().isSecureScheme() : false;
+        String url = resourceManager().urlForResourceNamed(resourceName, useFullUrl, isSecure, isVersion);
         return url;
     }
 

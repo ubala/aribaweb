@@ -1,0 +1,161 @@
+module {
+    bindings: {widthAlley:"3px"; addContentMargin:false;}
+
+    pageTitle:${"AribaWeb - " + properties.label};
+    mainResource {
+        pageTitle:${"AribaWeb - " + ariba.ui.meta.core.UIMeta.beautifyFileName(mainResource)};
+    }
+
+    layout { portletWrapper:AWTNullWrapper; }
+    @layout=Download {
+        wrapperComponent:SitePortletWrapper;
+        wrapperBindings:{title:"Get it now!";portletClass:sitePortletNarrow;}
+        component:DownloadContent;
+        after:zNone; rank:9999999;
+    }
+    @layout=Banner {
+       after:zTop;
+       component:BannerContent;
+       bindings: { title:${pushAndResolve([module:"*"], "label")}; value:${pushAndResolve([module:"*"], "description")} }
+    }
+
+    @layout=Footer {
+       after:zBottom;
+       component:FooterContent;
+    }
+}
+
+module=(Home, Product, Demo, Download) layout=Download { after:zRight }
+
+layout {
+    trait=WidePortlet {
+       after:zLeft;
+       wrapperComponent:SitePortletWrapper;
+       wrapperBindings:{title:$properties.label;portletClass:sitePortletWide;}
+    }
+    trait=NarrowPortlet {
+       after:zRight;
+       wrapperComponent:SitePortletWrapper;
+       wrapperBindings:{title:$properties.label;portletClass:sitePortletNarrow;}
+    }
+}
+
+layout trait=Markdown {
+    component:MetaMarkdown;
+    bindings:{resourcePath:$properties.resourceName};
+}
+
+layout layout_trait=Markdown {
+    page {
+        action=goto#pageAction {
+            pageName:MetaContentPage;
+            pageBindings: {
+                mainResource:$values.page;
+                module:${ariba.ui.meta.layouts.MetaMarkdown.moduleForResource(values.page, this)};
+            }
+        }
+
+        /* if they're linking off our site, target a different window */
+        linkTarget:${page.startsWith("http") ? "_blank" : null};
+    }
+
+    resourceName:$properties.homeResourceName;
+    label:${ariba.ui.meta.core.UIMeta.beautifyFileName(properties.resourceName)};
+    mainResource {
+        resourceName:$values.mainResource;
+    }
+}
+
+@module=Home  {
+    pageTitle:"AribaWeb - More App, Way Less Code!";
+
+    layout=Banner {
+       component:HomeContent;
+    }
+    @layout=Screencasts#WidePortlet {
+       label:"AribaWeb Screencasts";
+       component:ScreencastContent;
+       bindings:{smallPlayer:true; twoColThumbnails:true; }
+    }
+    @layout=News#NarrowPortlet {
+       after:Download;
+       label:"News from the AW Blog";
+       component:NewsContent;
+    }
+    @layout=CommunityResources#NarrowPortlet,Markdown {
+       after:News;
+       resourceName:"Community/CommunityLinks.txt";
+    }
+}
+
+@module=Product {
+    description:"Discover what makes AribaWeb different!";
+
+    @layout=ProductOverview#WidePortlet,Markdown {
+       resourceName:"Product/Overview.txt";
+    }
+    @layout=ProductFeatures#WidePortlet,Markdown {
+       resourceName:"Product/Features.txt";
+    }
+    @layout=Features#NarrowPortlet,Markdown {
+       resourceName:"Product/OverviewIndex.txt";
+       label:"Topics";
+    }
+}
+
+@module=Demo  {
+    description:"Seeing is believing!";
+    @layout=Screencasts#WidePortlet {
+       component:ScreencastContent;
+       bindings:{largePlayer:true; }
+    }
+    @layout=Gallery#NarrowPortlet {
+       component:ScreencastContent;
+       bindings:{oneColThumbnails:true; }
+    }
+}
+
+@module=Download {
+    description:"Try it for yourself!";
+
+    @layout=ReleaseHistory#WidePortlet,Markdown {
+       resourceName:"Download/CHANGES.txt";
+       label:"Release Notes";
+    }
+    @layout=SourceCode#NarrowPortlet,Markdown {
+       resourceName:"Download/DownloadLinks.txt";
+       after:Download;
+    }
+    @layout=Resources#NarrowPortlet,Markdown {
+       resourceName:"Documentation/DocumentationLinks.txt";
+       after:SourceCode;
+    }
+}
+
+@module=Documentation  {
+    description:"Dig into the details!";
+
+    @layout=Documentation#WidePortlet,Markdown {
+       homeResourceName:"Documentation/Documentation.txt";
+    }
+    @layout=Resources#NarrowPortlet,Markdown {
+       resourceName:"Documentation/DocumentationLinks.txt";
+    }
+}
+
+@module=Community {
+    description:"Get involved!";
+
+    @layout=Overview#WidePortlet,Markdown {
+       label:"Stay Plugged In!"
+       resourceName:"Community/Community.txt";
+    }
+    @layout=KeyLinks#NarrowPortlet,Markdown {
+       resourceName:"Community/CommunityLinks.txt";
+    }
+    @layout=News#NarrowPortlet {
+       after:KeyLinks;
+       label:"News from the AW Blog";
+       component:NewsContent;
+    }
+}

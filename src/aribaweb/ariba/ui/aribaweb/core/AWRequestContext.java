@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#129 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#133 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -106,9 +106,8 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     private int     _historyAction = -1;
 
     // record and playback
-    private boolean _debugShouldRecord = false;
-    private boolean _debugIsInPlaybackMode = false;
-    private boolean _debugIsInRecordingMode = false;
+    private Boolean _debugIsInPlaybackMode;
+    private Boolean _debugIsInRecordingMode;
     // debugging / validation
     private boolean _componentPathDebuggingEnabled = false;
     private boolean _pageRequiresPreGlidCompatibility = false;
@@ -147,9 +146,6 @@ public class AWRequestContext extends AWBaseObject implements DebugState
             _isBrowserMicrosoft = _request.isBrowserMicrosoft();
             _isBrowserSafari = _request.isBrowserSafari();
             _frameName = request.frameName();
-            _debugIsInPlaybackMode = AWRecordingManager.isInPlaybackMode(_request);
-            _debugIsInRecordingMode = AWRecordingManager.isInRecordingMode(_request);
-            _debugShouldRecord = _debugIsInPlaybackMode || _debugIsInRecordingMode;
             String[] requestSenderIds = ((AWBaseRequest)request).senderIds();
             if (requestSenderIds != null) {
                 String currentRequestSenderId = requestSenderIds[0];
@@ -171,6 +167,16 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         ThreadDebugState.set(RequestContextID, this);
         _dataValuePushedInInvokeAction = false;
         _disableElementIdGeneration = false;
+    }
+
+    /**
+     * Return the request context if there is one is associated with the
+     * current thread and null otherwise
+     *
+     * @return the request context or null
+     */
+    public static AWRequestContext _requestContext() {
+        return (AWRequestContext)ThreadDebugState.get(RequestContextID);
     }
 
     public AWValidationContext validationContext ()
@@ -416,7 +422,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
             _awsession = createSessionForHttpSession(httpSession);
         }
         _awsession.ensureAwake(this);
-        if (!AWRecordingManager.isInPlaybackMode(request())) {
+        if (!AWRecordingManager.isInPlaybackMode(this)) {
             checkRemoteHostAddress(_awsession, sessionId, checkRemoteHostAddress);
         }
         return httpSession;
@@ -434,8 +440,8 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     remoteHostsMatch = checkHostsAgainstMask(sessionRemoteIPAddress, remoteHostAddress, remoteHostMask);
                 }
                 if (!remoteHostsMatch) {
-                	   // the session will be accessed when rendering the error page.
-                	   // set the remotehostaddress so the same error does not get triggered.
+                       // the session will be accessed when rendering the error page.
+                       // set the remotehostaddress so the same error does not get triggered.
                     session.setRemoteHostAddress(remoteHostAddress);
                     checkInExistingHttpSession();
                     String message = Fmt.S("Unable to restore session with sessionId: '%s'.  The remote address of the current request '%s' does not match the remote address of the initial request '%s' with mask '%s'.",
@@ -443,9 +449,12 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     Log.aribaweb_session.debug(message);
                        // the two generic exceptions below are intentional. This will be
                        // removed and the SessionValidationException will be processed.
-                    AWSessionValidationException sve = new AWSessionValidationException(message);
-                    AWGenericException ae = new AWGenericException(sve);
-                    throw new AWGenericException(ae);
+                    AWSessionRestorationException sre =
+                        new AWSessionRestorationException(message);
+                    sre.setState(sre.IPChanged);
+                    sre.setOldIP(sessionRemoteIPAddress.getHostAddress());
+                    sre.setNewIP(remoteHostAddress);
+                    throw new AWGenericException(sre);
                 }
             }
         }
@@ -557,7 +566,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     }
 
     // AW internal method for temporarilty overriding the request -- used for internal dispatch of direct actions
-    protected void _overrideRequest (AWRequest newRequest)
+    public void _overrideRequest (AWRequest newRequest)
     {
         _request = newRequest;
     }
@@ -1528,11 +1537,23 @@ public class AWRequestContext extends AWBaseObject implements DebugState
 
     public boolean _debugIsInPlaybackMode ()
     {
+        // do lazy initialization here
+        if (_debugIsInPlaybackMode == null) {
+            _debugIsInPlaybackMode = (_request != null) ?
+                AWRecordingManager.isInPlaybackMode(this) : Boolean.FALSE;
+        }
+
         return _debugIsInPlaybackMode;
     }
 
     public boolean _debugIsInRecordingMode ()
     {
+        // do lazy initialization here
+        if (_debugIsInRecordingMode == null) {
+            _debugIsInRecordingMode = (_request != null) ?
+                AWRecordingManager.isInRecordingMode(_request) : Boolean.FALSE;
+        }
+
         return _debugIsInRecordingMode;
     }
 
@@ -1544,14 +1565,13 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     // this is need to turn
     public void _debugSkipRecordPlayback ()
     {
-        _debugShouldRecord = false;
         _debugIsInRecordingMode = false;
         _debugIsInPlaybackMode = false;
     }
 
     public boolean _debugShouldRecord ()
     {
-        return _debugShouldRecord;
+        return _debugIsInPlaybackMode() || _debugIsInRecordingMode();
     }
 
     public static void cleanupThreadLocalState ()
@@ -1775,7 +1795,35 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         return (session != null) ? session.isAccessibilityEnabled() : false;
     }
 
+    /*
+        return omitLink() || requestContext().isStaticGeneration();
+    }
 
+    public String staticUrlForActionResults ()
+    {
+        return requestContext().staticUrlForActionResults(AWGenericActionTag.evaluateActionBindings(this, _pageNameBinding, _actionBinding));
+
+     */
+
+    public boolean isStaticGeneration ()
+    {
+        return ((AWConcreteApplication)_application).getStaticizer() != null;
+    }
+
+    public String staticUrlForActionResults (AWResponseGenerating responseGenerating)
+    {
+        if (responseGenerating == null) {
+            // Assert.assertNonFatal(false, "Null actionResults");
+            return "#";
+        }
+        if (responseGenerating instanceof AWResponseGenerating.ResponseSubstitution) {
+            responseGenerating = ((AWResponseGenerating.ResponseSubstitution)responseGenerating).replacementResponse();
+        }
+
+        Assert.that(responseGenerating instanceof AWComponent, "Static link returned non-AW Component results");
+        return ((AWConcreteApplication)_application).getStaticizer().note((AWComponent)responseGenerating);
+    }
+    
     /*
         Support for item-scoped subcomponent state.
         See AWFor scopeSubcomponentsByItem for more details.

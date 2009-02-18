@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templateSet group="AribaWeb">
-  <template name="bpw" value="&lt;w:BasicPageWrapper hasForm=&quot;$true&quot;&gt;&#10;    $END$&#10;&lt;/w:BasicPageWrapper&gt;" description="AW BasicPageWrapper tag" toReformat="true" toShortenFQNames="true">
+  <template name="wbpw" value="&lt;w:BasicPageWrapper hasForm=&quot;$true&quot;&gt;&#10;    $END$&#10;&lt;/w:BasicPageWrapper&gt;" description="AW BasicPageWrapper tag" toReformat="true" toShortenFQNames="true">
     <context>
       <option name="JAVA_CODE" value="false" />
       <option name="JAVA_COMMENT" value="false" />
@@ -12,7 +12,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="cc" value="&lt;a:Content name=&quot;$name$&quot;&gt;&#10;    $END$&#10;&lt;/a:Content&gt;&#10;" description="AW Content tag" toReformat="true" toShortenFQNames="true">
+  <template name="acc" value="&lt;a:Content name=&quot;$name$&quot;&gt;&#10;    $END$&#10;&lt;/a:Content&gt;&#10;" description="AW Content tag" toReformat="true" toShortenFQNames="true">
     <variable name="name" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
       <option name="JAVA_CODE" value="false" />
@@ -25,7 +25,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="dt" value="&lt;t:DataTable list=&quot;$list$&quot; item=&quot;$item$&quot; enableScrolling=&quot;$true&quot;&gt;&#10;    &lt;t:Column key=&quot;$key$&quot; label=&quot;$label$&quot;/&gt;&#10;    $END$&#10;&lt;/t:DataTable&gt;&#10;" description="AW DataTable" toReformat="true" toShortenFQNames="true">
+  <template name="tcol" value="&lt;t:DataTable list=&quot;$list$&quot; item=&quot;$item$&quot; enableScrolling=&quot;$true&quot;&gt;&#10;    &lt;t:Column key=&quot;$key$&quot; label=&quot;$label$&quot;/&gt;&#10;    $END$&#10;&lt;/t:DataTable&gt;&#10;" description="AW DataTable" toReformat="true" toShortenFQNames="true">
     <variable name="list" expression="" defaultValue="" alwaysStopAt="true" />
     <variable name="item" expression="" defaultValue="" alwaysStopAt="true" />
     <variable name="key" expression="" defaultValue="" alwaysStopAt="true" />
@@ -41,7 +41,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="for" value="&lt;a:For list=&quot;$list$&quot; item=&quot;$item$&quot;&gt;&#10;    $END$&#10;&lt;/a:For&gt;" description="AW For" toReformat="true" toShortenFQNames="true">
+  <template name="afor" value="&lt;a:For list=&quot;$list$&quot; item=&quot;$item$&quot;&gt;&#10;    $END$&#10;&lt;/a:For&gt;" description="AW For" toReformat="true" toShortenFQNames="true">
     <variable name="list" expression="" defaultValue="" alwaysStopAt="true" />
     <variable name="item" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
@@ -55,7 +55,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="fr" value="&lt;w:FormRow label=&quot;$label$&quot;&gt;$END$&lt;/w:FormRow&gt;&#10;" description="AW FormRow tag" toReformat="true" toShortenFQNames="true">
+  <template name="wfr" value="&lt;w:FormRow label=&quot;$label$&quot;&gt;$END$&lt;/w:FormRow&gt;&#10;" description="AW FormRow tag" toReformat="true" toShortenFQNames="true">
     <variable name="label" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
       <option name="JAVA_CODE" value="false" />
@@ -68,7 +68,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="ft" value="&lt;w:FormTable showErrorFlags=&quot;$true&quot;&gt;&#10;    &lt;w:FormRow label=&quot;$label$&quot;&gt;$END$&lt;/w:FormRow&gt;&#10;&lt;/w:FormTable&gt;&#10;" description="AW FormTable tag" toReformat="true" toShortenFQNames="true">
+  <template name="wft" value="&lt;w:FormTable showErrorFlags=&quot;$true&quot;&gt;&#10;    &lt;w:FormRow label=&quot;$label$&quot;&gt;$END$&lt;/w:FormRow&gt;&#10;&lt;/w:FormTable&gt;&#10;" description="AW FormTable tag" toReformat="true" toShortenFQNames="true">
     <variable name="label" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
       <option name="JAVA_CODE" value="false" />
@@ -81,7 +81,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="fzl" value="&lt;w:FourZoneLayout&gt;&#10;    &lt;a:Content name=&quot;top&quot;&gt;&#10;        $END$&#10;    &lt;/a:Content&gt;&#10;    &lt;a:Content name=&quot;left&quot;&gt;&#10;&#10;    &lt;/a:Content&gt;&#10;    &lt;a:Content name=&quot;right&quot;&gt;&#10;&#10;    &lt;/a:Content&gt;&#10;    &lt;a:Content name=&quot;bottom&quot;&gt;&#10;&#10;    &lt;/a:Content&gt;&#10;&lt;/w:FourZoneLayout&gt;&#10;" description="AW FourZoneLayout tag" toReformat="true" toShortenFQNames="true">
+  <template name="wfzl" value="&lt;w:FourZoneLayout&gt;&#10;    &lt;a:Content name=&quot;top&quot;&gt;&#10;        $END$&#10;    &lt;/a:Content&gt;&#10;    &lt;a:Content name=&quot;left&quot;&gt;&#10;&#10;    &lt;/a:Content&gt;&#10;    &lt;a:Content name=&quot;right&quot;&gt;&#10;&#10;    &lt;/a:Content&gt;&#10;    &lt;a:Content name=&quot;bottom&quot;&gt;&#10;&#10;    &lt;/a:Content&gt;&#10;&lt;/w:FourZoneLayout&gt;&#10;" description="AW FourZoneLayout tag" toReformat="true" toShortenFQNames="true">
     <context>
       <option name="JAVA_CODE" value="false" />
       <option name="JAVA_COMMENT" value="false" />
@@ -93,7 +93,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="hl" value="&lt;a:Hyperlink action=&quot;$action$&quot;&gt;$END$&lt;/a:Hyperlink&gt;&#10;" description="AW Hyperlink tag" toReformat="true" toShortenFQNames="true">
+  <template name="ahl" value="&lt;a:Hyperlink action=&quot;$action$&quot;&gt;$END$&lt;/a:Hyperlink&gt;&#10;" description="AW Hyperlink tag" toReformat="true" toShortenFQNames="true">
     <variable name="action" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
       <option name="JAVA_CODE" value="false" />
@@ -106,7 +106,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="if" value="&lt;a:If ifTrue=&quot;$cond$&quot;&gt;&#10;    $END$&#10;&lt;/a:If&gt;" description="AW If tag" toReformat="true" toShortenFQNames="true">
+  <template name="aif" value="&lt;a:If ifTrue=&quot;$cond$&quot;&gt;&#10;    $END$&#10;&lt;/a:If&gt;" description="AW If tag" toReformat="true" toShortenFQNames="true">
     <variable name="cond" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
       <option name="JAVA_CODE" value="false" />
@@ -119,7 +119,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="ife" value="&lt;a:If ifTrue=&quot;$cond$&quot;&gt;&#10;    $END$&#10;&lt;/a:Else&gt;&#10;&#10;&lt;/a:If&gt;" description="AW If tag" toReformat="true" toShortenFQNames="true">
+  <template name="aife" value="&lt;a:If ifTrue=&quot;$cond$&quot;&gt;&#10;    $END$&#10;&lt;/a:Else&gt;&#10;&#10;&lt;/a:If&gt;" description="AW If tag" toReformat="true" toShortenFQNames="true">
     <variable name="cond" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
       <option name="JAVA_CODE" value="false" />
@@ -132,7 +132,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="mpw" value="&lt;w:ModalPageWrapper title=&quot;$title$&quot; okAction=&quot;$okaction$&quot;&gt;&#10;    $END$&#10;&lt;/w:ModalPageWrapper&gt;" description="AW ModalPageWrapper tag" toReformat="true" toShortenFQNames="true">
+  <template name="wmpw" value="&lt;w:ModalPageWrapper title=&quot;$title$&quot; okAction=&quot;$okaction$&quot;&gt;&#10;    $END$&#10;&lt;/w:ModalPageWrapper&gt;" description="AW ModalPageWrapper tag" toReformat="true" toShortenFQNames="true">
     <variable name="title" expression="" defaultValue="Page Title" alwaysStopAt="true" />
     <variable name="okaction" expression="" defaultValue="$okAction" alwaysStopAt="true" />
     <context>
@@ -146,7 +146,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="rr" value="&lt;a:RefreshRegion&gt;$END$&lt;/a:RefreshRegion&gt;&#10;" description="AW Hyperlink tag" toReformat="true" toShortenFQNames="true">
+  <template name="arr" value="&lt;a:RefreshRegion&gt;$END$&lt;/a:RefreshRegion&gt;&#10;" description="AW Hyperlink tag" toReformat="true" toShortenFQNames="true">
     <context>
       <option name="JAVA_CODE" value="false" />
       <option name="JAVA_COMMENT" value="false" />
@@ -158,7 +158,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="str" value="&lt;a:String value=&quot;$value$&quot;/&gt;" description="AWString tag" toReformat="true" toShortenFQNames="true">
+  <template name="astr" value="&lt;a:String value=&quot;$value$&quot;/&gt;" description="AWString tag" toReformat="true" toShortenFQNames="true">
     <variable name="value" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
       <option name="JAVA_CODE" value="false" />
@@ -171,7 +171,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="tab" value="&lt;w:Tab label=&quot;$t1Label$&quot;&gt;&#10;    $END$&#10;&lt;/w:Tab&gt;&#10;" description="AW TabSet Tab tag" toReformat="true" toShortenFQNames="true">
+  <template name="wtab" value="&lt;w:Tab label=&quot;$t1Label$&quot;&gt;&#10;    $END$&#10;&lt;/w:Tab&gt;&#10;" description="AW TabSet Tab tag" toReformat="true" toShortenFQNames="true">
     <variable name="t1Label" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
       <option name="JAVA_CODE" value="false" />
@@ -184,7 +184,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="tb" value="&lt;w:TextButton action=&quot;$action$&quot;&gt;$Label$&lt;/w:TextButton&gt;&#10;" description="AW TextButton tag" toReformat="true" toShortenFQNames="true">
+  <template name="wtb" value="&lt;w:TextButton action=&quot;$action$&quot;&gt;$Label$&lt;/w:TextButton&gt;&#10;" description="AW TextButton tag" toReformat="true" toShortenFQNames="true">
     <variable name="action" expression="" defaultValue="" alwaysStopAt="true" />
     <variable name="Label" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
@@ -198,7 +198,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="tc" value="&lt;t:Column key=&quot;$key$&quot; label=&quot;$label$&quot;/&gt;&#10;" description="AW DataTable Table Column" toReformat="true" toShortenFQNames="true">
+  <template name="wtc" value="&lt;t:Column key=&quot;$key$&quot; label=&quot;$label$&quot;/&gt;&#10;" description="AW DataTable Table Column" toReformat="true" toShortenFQNames="true">
     <variable name="key" expression="" defaultValue="" alwaysStopAt="true" />
     <variable name="label" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
@@ -212,7 +212,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="tf" value="&lt;a:TextField value=&quot;$value$&quot;/&gt;" description="AWTextField tag" toReformat="true" toShortenFQNames="true">
+  <template name="atf" value="&lt;a:TextField value=&quot;$value$&quot;/&gt;" description="AWTextField tag" toReformat="true" toShortenFQNames="true">
     <variable name="value" expression="" defaultValue="" alwaysStopAt="true" />
     <context>
       <option name="JAVA_CODE" value="false" />
@@ -225,7 +225,7 @@
       <option name="OTHER" value="false" />
     </context>
   </template>
-  <template name="ts" value="&lt;w:TabSet&gt;&#10;    &lt;w:Tab label=&quot;$t1Label$&quot;&gt;&#10;        $END$&#10;    &lt;/w:Tab&gt;&#10;&#10;    &lt;w:Tab label=&quot;$t2Label$&quot;&gt;&#10;        &#10;    &lt;/w:Tab&gt;&#10;&lt;/w:TabSet&gt;&#10;" description="AW TabSet tag" toReformat="true" toShortenFQNames="true">
+  <template name="wts" value="&lt;w:TabSet&gt;&#10;    &lt;w:Tab label=&quot;$t1Label$&quot;&gt;&#10;        $END$&#10;    &lt;/w:Tab&gt;&#10;&#10;    &lt;w:Tab label=&quot;$t2Label$&quot;&gt;&#10;        &#10;    &lt;/w:Tab&gt;&#10;&lt;/w:TabSet&gt;&#10;" description="AW TabSet tag" toReformat="true" toShortenFQNames="true">
     <variable name="t1Label" expression="" defaultValue="" alwaysStopAt="true" />
     <variable name="t2Label" expression="" defaultValue="" alwaysStopAt="true" />
     <context>

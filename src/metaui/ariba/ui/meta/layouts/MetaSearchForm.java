@@ -12,25 +12,20 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaSearchForm.java#5 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaSearchForm.java#6 $
 */
 
 package ariba.ui.meta.layouts;
 
 import ariba.ui.meta.persistence.Predicate;
-import ariba.ui.meta.persistence.ObjectContext;
 import ariba.ui.meta.persistence.QuerySpecification;
 import ariba.ui.meta.persistence.PersistenceMeta;
 import ariba.ui.meta.core.MetaContext;
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.Context;
 import ariba.ui.aribaweb.core.AWComponent;
-import ariba.ui.aribaweb.core.AWBindingNames;
-import ariba.ui.aribaweb.core.AWRequestContext;
 
 import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
 
 public class MetaSearchForm extends AWComponent
 {
@@ -65,7 +60,7 @@ public class MetaSearchForm extends AWComponent
         QuerySpecification spec = new QuerySpecification(className, pred);
 
         context.push();
-        context.setContextKey(UIMeta.KeyClass);
+        context.setScopeKey(UIMeta.KeyClass);
         spec.setUseTextIndex(pred != null
                 && context.booleanPropertyForKey(PersistenceMeta.PropUseTextSearch, false));
         context.pop();

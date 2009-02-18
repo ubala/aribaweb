@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/PropertyValue.java#5 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/PropertyValue.java#6 $
 */
 package ariba.ui.meta.core;
 
@@ -48,15 +48,18 @@ public class PropertyValue
         public Object awakeForPropertyMap(Meta.PropertyMap map)
         {
             // copy ourselves so there's a fresh copy for each context in which is appears
-            return new StaticDynamicWrapper(_orig);
+            StaticallyResolvable orig = (_orig instanceof Meta.PropertyMapAwaking)
+                        ? (StaticallyResolvable)((Meta.PropertyMapAwaking)_orig).awakeForPropertyMap(map)
+                        : _orig;
+            return new StaticDynamicWrapper(orig);
         }
 
-        public Object evaluate(Context context)
+        public Object evaluate (Context context)
         {
             // we lazily static evaluate our value and cache the result
             if (_cached == null) _cached = context.staticallyResolveValue(_orig);
 
-            return context.resolveValue(_cached);
+            return _cached;
         }
 
         public String toString()

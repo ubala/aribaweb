@@ -15,24 +15,24 @@
 class=ariba.ui.meta.editor.Properties {
     @field=trait {}
 
-    scopeKey=(field, layout, action) {
+    scope=(field, layout, action) {
         @field=label {}
         @field=after {}
     }
     
-    scopeKey=(field, layout) {
+    scope=(field, layout) {
         @field=visible {}
         @field=component {}
         @field=bindings {}
         @field=cueTip {}
     }
 
-    scopeKey=field {
+    scope=field {
         @field=editable {}
         @field=valid {}
     }
 
-    scopeKey=action {
+    scope=action {
         @field=pageName {}
         @field=actionResults {}
         @field=pageBindings {}

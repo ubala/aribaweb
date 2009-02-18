@@ -1,27 +1,12 @@
 /*
-    model rules.oss -- Meta-data rules
-
-    These are auto-loaded (lazily) when any component in this java package is
-    referenced in the rules
+   rules.oss:  auto-loaded (lazily) when any component in this 
+               java package is referenced in the rules
 */
-
-module=model.Master {
-}
-
-class=model.Master {
-
-} 
-
-class=model.Detail {
-
-}
-
-
-
-
-/*!--- Editor Generated Rules -- Content below this line will be overwritten ---*/
-
-class=model.Master {
-    zLeft => title;
-    zRight => owner#required => metaClass;
+module=model.Issue#SearchDetail; 
+class=model.Issue {
+    zTop => title;
+    zLeft => status#Popup => metaClass => priority#Popup;
+    zRight => owner => category;
+    ObjectDetail.zDetail => notes;
+    field=title  { bindings:{size:50};  }
 }

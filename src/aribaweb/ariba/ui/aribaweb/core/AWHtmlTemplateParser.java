@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHtmlTemplateParser.java#47 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHtmlTemplateParser.java#48 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -921,9 +921,14 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
                 else if (openTagName.startsWith("!--")) {
                     // reconstitute comment and add to current bare string
                     String commentBody = parseCommentBody();
-                    commentBody = AWUtil.replaceAllOccurrences(commentBody, "$", "\\$");
-                    String commentString = StringUtil.strcat("<", openTagName, commentBody, "-->");
-                    characters(commentString);
+                    // For XML we leave comments in place, for HTML, we strip them out.
+                    // If you're rendering HTML and you really want a comment in the
+                    // output, use <a:Comment>.
+                    if (_useXmlEscaping) {
+                        commentBody = AWUtil.replaceAllOccurrences(commentBody, "$", "\\$");
+                        String commentString = StringUtil.strcat("<", openTagName, commentBody, "-->");
+                        characters(commentString);
+                    }
                 }
                 else {
                     String openTagBody = parseOpenTagBody();

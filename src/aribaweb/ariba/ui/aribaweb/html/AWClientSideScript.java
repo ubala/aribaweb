@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWClientSideScript.java#24 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWClientSideScript.java#25 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -161,7 +161,7 @@ public final class AWClientSideScript extends AWComponent
     public String scriptFileUrl ()
     {
         String scriptFileUrl = (((AWConcreteApplication)application()).allowsJavascriptUrls())
-            ? urlForResourceNamed(_filename)
+            ? urlForResourceNamed(_filename, false, true)
             : AWXDebugResourceActions.urlForResourceNamed(requestContext(), _filename);
         Assert.that(scriptFileUrl != null, "%s: unable to locate file named \"%s\"", getClass().getName(), _filename);
         return scriptFileUrl;

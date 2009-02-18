@@ -1,0 +1,94 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2008 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id:  $
+    </Copyright>
+
+    <Overview>
+        AWIncludeBlock allows for reference to the content of an AWBlock.
+        The idea is to allow for a light-weight component which enables (template)
+        code factoring without the overhead of a full-blown template.  Often,
+        factoring a duplicated region of a component's template leads to an
+        explosion of files, and an unnecessary clouding of what are the real
+        high-level pieces of the application.  While AWIncludeBlock has is
+        limitations (no code may be associated specifically with the subcomponent),
+        it makes lightweight factoring easy and powerful.
+
+        To use AWIncludeBlock, you must define an AWBlock within the same
+        template where the AWIncludeBlock will reference the AWBlock.  Within
+        an AWBlock, $ bindings are evaluated in the scope of the defining
+        component.  However, $^ bindings apply to the values passed from the
+        AWIncludeBlock reference and not to the defining component (perhaps I could
+        do a cascased lookup?).  This is necessary as this is the only way to
+        parameterize the sbcomponent.
+
+        As an example, consider the following template fragment:
+
+                <td>
+                    <a:IncludeBlock name="ModuleBrowser" list="$moduleList1"/>
+                </td>
+                <td>
+                    <a:IncludeBlock name="ModuleBrowser" list="$moduleList2"/>
+                </td>
+                ...
+                <a:Block name="ModuleBrowser">
+                    <a:Browser list="$^list" item="$currentModule" style="width:100%" size="10">
+                        $currentModule.name
+                    </a:Browser>
+                </a:Block>
+
+        Here, we define the AWBlock named ModuleBrowser and refer to it via an AWIncludeBlock tag which has two
+        bindings:  the templateName of the AWBlock to use, and an arbitrary binding 'list'.  In essence, AWIncludeBlock
+        operates like AWIncludeComponent in that it switches in the appropriate component/template and makes the
+        remaining bindings available to the subcomponent.  In this case, the 'list' binding can be accessed within the
+        AWBlock by simply using the standard carat ($^) binding.  In the example above, you can see that the
+        ModuleBrowser subtemplate accesses the $^list from the AWIncludeBlock reference, but all the other bindings
+        (ie $currentString) are evaluated int the scope of the enclosing component.  By allowing for parameters to be
+        passed like this, the AWBlock can be parameterized and used with different sets of data, while still using the
+        rest of the values in the enclosing components scope/context.
+
+        It should also be noted that AWIncludeContent works as usual.  For example, we could rewrite the above awl as
+        follows, thus giving us even more control over how the subcomponent renders:
+
+                <td>
+                    <a:IncludeBlock name="ModuleBrowser" list="$moduleList1">
+                        (1) $currentModule.name
+                    </a:IncludeBlock>
+                </td>
+                <td>
+                    <a:IncludeBlock name="ModuleBrowser" list="$moduleList2">
+                        (2) $currentModule.name
+                    </a:IncludeBlock>
+                </td>
+
+                ...
+
+                <a:Block name="ModuleBrowser">
+                    <a:Browser list="$^list" item="$currentModule" style="width:100%" size="10">\
+                        <AWIncludeContent/>
+                    </a:Browser>
+                    \
+                </a:Block>
+
+    </Overview>
+
+    <Binding key="name" direction="get" type="String">
+        Name of AWBlock to include.
+    </Binding>
+
+    <Binding key="templateName" direction="get" type="String">
+        Alternative binding name for `name`.
+    </Binding>
+</a:Api>\

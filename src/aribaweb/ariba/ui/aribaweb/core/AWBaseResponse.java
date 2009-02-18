@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#37 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#38 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -98,7 +98,7 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
     {
         if (_bufferStack == null) {
             _bufferStack = ListUtil.list(8);
-            pushBuffer(RootBufferName, false, false);
+            pushBuffer(RootBufferName, false, false, false);
             _rootBuffer = (AWResponseBuffer)_bufferStack.get(0);
 
             // Ignore whitespace changes in root buffer for purposes of checksum.
@@ -107,7 +107,7 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
 
             // Fake buffer to accumulate CRC for noChange (force-FPR on change) buffers
             _noChangeBuffer = new AWResponseBuffer(AWEncodedString.sharedEncodedString("noChange"),
-                    false, false, this);
+                    AWResponseBuffer.Type.Normal, false, this);
         }
         return _bufferStack;
     }
@@ -142,9 +142,11 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
         return _globalContents;
     }
 
-    protected void pushBuffer (AWEncodedString name, boolean isScope, boolean alwaysRender)
+    protected void pushBuffer (AWEncodedString name, boolean isScope, boolean isScopedChild, boolean alwaysRender)
     {
-        AWResponseBuffer responseBuffer = new AWResponseBuffer(name, isScope, alwaysRender, this);
+        AWResponseBuffer.Type type = (isScope ? AWResponseBuffer.Type.Scope
+                : (isScopedChild ? AWResponseBuffer.Type.ScopeChild : AWResponseBuffer.Type.Normal));
+        AWResponseBuffer responseBuffer = new AWResponseBuffer(name, type, alwaysRender, this);
         if (_currentBuffer != null) {
             _currentBuffer.append(responseBuffer);
         }

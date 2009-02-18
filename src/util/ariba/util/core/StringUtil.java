@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#28 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#29 $
 */
 
 package ariba.util.core;
@@ -1541,4 +1541,36 @@ public final class StringUtil
         return found != null ? new SearchResult(found, result) : null;
     }
 
+    /*
+        Parse the input <code>String</code> into two components separated by
+        matching left and right parentheses. Only one pair is supported.
+
+        @return an array containing two elements, the first one is the
+        first component before the left parenthesis and the second one is
+        the component wrapped between the left and right perentheses
+    */
+    public static String[] parseMatchingParentheses (String str)
+    {
+        String[] components = new String[2];
+        components[0] = null;
+        components[1] = str;
+
+        if (str != null) {
+            int leftParenthesisPos = str.indexOf("(");
+            int rightParenthesisPos = str.indexOf(")");
+            boolean hasMatchingParenthesis =
+                leftParenthesisPos >= 0 && rightParenthesisPos > leftParenthesisPos;
+
+            if (hasMatchingParenthesis) {
+
+                // we do have a function matched by "(" and ")"
+                // Now get the true path inside the function
+                components[0] = str.substring(0, leftParenthesisPos);
+                components[1] =
+                    str.substring(leftParenthesisPos + 1, rightParenthesisPos);
+            }
+        }
+
+        return components;
+    }
 }

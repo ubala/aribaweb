@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BucketItem.awl#25 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BucketItem.awl#26 $
     </Copyright>
 
     <Overview>
@@ -77,7 +77,7 @@
         &nbsp;\
     </td>
 
-    <td style="padding-left:4px;">\
+    <td style="padding-left:4px;" bh="$^tdBh">\
         <a:Hyperlink omitTags="$disabled" submitForm="$^submitForm:$hasForm" action="$linkClicked" awname="$^awname">\
             <a:String value="$^label"/>\
         </a:Hyperlink>\

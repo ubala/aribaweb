@@ -1,13 +1,8 @@
-<w:ModalPageWrapper title="$[]Choose File to Upload" hasForm="$false"
+<w:ModalPageWrapper title="$[]Choose File to Upload"
         okAction="$done" okTitle="$[]Cancel">
-    <a:Form enctype="multipart/form-data">
-        <nobr>
-            <a:FileUpload filename="$fileName"
-                inputStream="$inputStream"
-                mimeType="$mimeType"
-                maxLength="$maxsize"
-                fileSizeExceeded="$fileSizeExceeded"/>\
-            <div class="flR"><w:TextButton action="$done" isBrandStyle="$true">Upload</w:TextButton></div>
-        </nobr>
-    </a:Form>
+    <w:FileUploadChooser filename="$fileName"
+        bytes="$bytes"
+        mimeType="$mimeType"
+        maxLength="$maxsize"
+        fileSizeExceeded="$fileSizeExceeded"/>\
 </w:ModalPageWrapper>

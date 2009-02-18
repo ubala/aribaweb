@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericActionTag.awl#11 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericActionTag.awl#12 $
     </Copyright>
 
     <Overview>
@@ -97,6 +97,7 @@
         _w="$^windowAttributes"
         _a="$^name"
         _av="$^isTrigger:$null"
+        _sL="$staticUrl"
         isSender="$isSender" invokeAction="$^action"
         disabled="$disabledString"
         tabIndex="$^tabIndex:0"
@@ -115,6 +116,7 @@
         _w="$^windowAttributes"
         _a="$^name"
         _av="$^isTrigger"
+        _sL="$staticUrl"        
         isSender="$isSender" invokeAction="$^action"
         disabled="$disabledString"
         tabIndex="$^tabIndex:0"

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/User.java#5 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/User.java#7 $
 */
 package ariba.appcore;
 
@@ -20,7 +20,6 @@ import ariba.ui.meta.annotations.*;
 
 import javax.persistence.Entity;
 import java.util.List;
-
 import ariba.util.core.*;
 import ariba.ui.meta.persistence.ObjectContext;
 import ariba.ui.aribaweb.util.AWUtil;
@@ -52,6 +51,7 @@ public class User extends Principal
 
     public void setPassword (String password)
     {
+        // todo: needs to be replaced with code that applies one-way hash to stored passwords
         this.password = password;
     }
 
@@ -93,6 +93,7 @@ public class User extends Principal
         return  (user != null) ? user : create(email, fullName);
     }
 
+
     static ThreadLocal _ThreadLocalUserId = new ThreadLocal();
     static Long _AnonymousUID;
     public static final String AnonymousName = "anonymous";
@@ -125,6 +126,12 @@ public class User extends Principal
         return (id != null) ? ObjectContext.get().find(User.class, id) : getAnonymous();
     }
 
+    public static boolean isLoggedIn ()
+    {
+        User user =  currentUser();
+        return user != null && user != getAnonymous();
+    }
+    
     public static void initializeSessionBinder ()
     {
         if (!_DidReg) {

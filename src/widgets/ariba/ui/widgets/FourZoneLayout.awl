@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FourZoneLayout.awl#7 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FourZoneLayout.awl#10 $
     </Copyright>
 
     <Overview>
@@ -53,19 +53,20 @@
         </td>
     </tr>
     <tr>
-        <a:SetValue dict.wL="$^widthLeft:50%"/>
+        <a:SetValue dict.wL="$^widthLeft:auto"/>
         <td width='${dict.wL.endsWith("px") ? "1%" : dict.wL }' valign="top">\
             <a:RefreshRegion class="flexContainer">\
                 <a:IncludeContent name="left" required="$false"/>\
-                <div _ifTrue="$dict.wL" style='${"zoom:1;height:1px;line-height:1px;padding-right:" + dict.wL}'></div>
+                <div _ifTrue='${dict.wL.endsWith("px")}' style='${"zoom:1;height:1px;line-height:1px;padding-right:" + dict.wL}'></div>
             </a:RefreshRegion>
         </td>
 
+        <a:SetValue dict.wA="$^widthAlley:30px"/>
         <td width="1px">\
-            <div style="width:30px"></div>\
+            <div style='${"width:"+dict.wA}'></div>\
         </td>
 
-        <td width="$^widthRight:50%" valign="top">\
+        <td width="$^widthRight:auto" valign="top">\
             <a:RefreshRegion class="flexContainer">
                 <a:IncludeContent name="right" required="$false"/>
             </a:RefreshRegion>

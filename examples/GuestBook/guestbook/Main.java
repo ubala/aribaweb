@@ -10,8 +10,8 @@ import java.util.Vector;
 public class Main extends AWComponent
 {
     public static class Entry {
-        public Date date;
-        public String name;
+        public Date date = new Date();
+        public String name = "Anonymous";
         public String comment;
     }
 
@@ -29,5 +29,10 @@ public class Main extends AWComponent
         
         _entries.add(_current);
         _current = new Entry();
+    }
+
+    public void delete ()
+    {
+        _entries.remove(_item);
     }
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBindingDictionary.java#15 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBindingDictionary.java#16 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -109,5 +109,15 @@ public final class AWBindingDictionary extends AWBaseObject
     public List elementsVector ()
     {
         return ListUtil.arrayToList(_values, false);
+    }
+
+    public int hashCode ()
+    {
+        return _hashtable.hashCode();
+    }
+
+    public boolean equals (Object obj)
+    {
+        return (obj instanceof AWBindingDictionary) && _hashtable.equals(((AWBindingDictionary)obj)._hashtable);
     }
 }

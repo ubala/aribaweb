@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#43 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#50 $
 */
 package ariba.ui.meta.core;
 
@@ -23,6 +23,7 @@ import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWPage;
 import ariba.ui.aribaweb.core.AWBindingDictionary;
 import ariba.ui.aribaweb.core.AWBinding;
+import ariba.ui.aribaweb.core.AWValidationContext;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWResourceManager;
@@ -62,6 +63,7 @@ public class UIMeta extends ObjectMeta
     public final static String PropFieldsByZone = "fieldsByZone";
     public final static String PropFieldPropertyList = "fieldPropertyList";
     public final static String PropLayoutsByZone = "layoutsByZone";
+    static final String DefaultActionCategory = "General";
 
     static UIMeta _Instance;
 
@@ -85,89 +87,101 @@ public class UIMeta extends ObjectMeta
                         _navModuleClasses.add(className);
                     }
                 });
-        registerKeyInitObserver(KeyClass, new FileMetaProvider());
 
-        registerKeyInitObserver(KeyModule, new ModuleMetaProvider());
+        beginRuleSet(UIMeta.class.getName());
+        try {
+            registerKeyInitObserver(KeyClass, new FileMetaProvider());
 
-        // These keys define scopes for their properties
-        // defineKeyAsPropertyScope(KeyArea);
-        defineKeyAsPropertyScope(KeyLayout);
-        defineKeyAsPropertyScope(KeyModule);
+            // These keys define scopes for their properties
+            // defineKeyAsPropertyScope(KeyArea);
+            defineKeyAsPropertyScope(KeyLayout);
+            defineKeyAsPropertyScope(KeyModule);
 
-        // Default rule for converting field name to label
-        registerDefaultLabelGeneratorForKey(KeyField);
-        registerDefaultLabelGeneratorForKey(KeyLayout);
-        registerDefaultLabelGeneratorForKey(KeyClass);
-        registerDefaultLabelGeneratorForKey(KeyModule);
-        registerDefaultLabelGeneratorForKey(KeyAction);
-        registerDefaultLabelGeneratorForKey(KeyActionCategory);
+            // Default rule for converting field name to label
+            registerDefaultLabelGeneratorForKey(KeyField);
+            registerDefaultLabelGeneratorForKey(KeyLayout);
+            registerDefaultLabelGeneratorForKey(KeyClass);
+            registerDefaultLabelGeneratorForKey(KeyModule);
+            registerDefaultLabelGeneratorForKey(KeyAction);
+            registerDefaultLabelGeneratorForKey(KeyActionCategory);
 
-        // policies for chaining certain well known properties
-        registerPropertyMerger(KeyArea, Context.PropertyMerger_DeclareList);
-        registerPropertyMerger(KeyLayout, Context.PropertyMerger_DeclareList);
-        registerPropertyMerger(KeyModule, Context.PropertyMerger_DeclareList);
+            // policies for chaining certain well known properties
+            registerPropertyMerger(KeyArea, PropertyMerger_DeclareList);
+            registerPropertyMerger(KeyLayout, PropertyMerger_DeclareList);
+            registerPropertyMerger(KeyModule, PropertyMerger_DeclareList);
 
-        mirrorPropertyToContext(KeyEditing, KeyEditing);
-        mirrorPropertyToContext(KeyLayout, KeyLayout);
-        mirrorPropertyToContext(KeyComponentName, KeyComponentName);
+            mirrorPropertyToContext(KeyEditing, KeyEditing);
+            mirrorPropertyToContext(KeyLayout, KeyLayout);
+            mirrorPropertyToContext(KeyComponentName, KeyComponentName);
 
-        registerPropertyMerger(KeyEditing, new PropertyMerger_And());
+            registerPropertyMerger(KeyEditing, new PropertyMerger_And());
 
-        registerValueTransformerForKey("requestContext", Transformer_KeyPresent);
-        registerValueTransformerForKey("displayGroup", Transformer_KeyPresent);
+            registerValueTransformerForKey("requestContext", Transformer_KeyPresent);
+            registerValueTransformerForKey("displayGroup", Transformer_KeyPresent);
 
-        // define operation hierarchy
-        keyData(KeyOperation).setParent("view", "inspect");
-        keyData(KeyOperation).setParent("edit", "inspect");
-        keyData(KeyOperation).setParent("edit", "inspect");
-        keyData(KeyOperation).setParent("search", "inspect");
-        keyData(KeyOperation).setParent("keywordSearch", "search");
-        keyData(KeyOperation).setParent("textSearch", "keywordSearch");
+            // define operation hierarchy
+            keyData(KeyOperation).setParent("view", "inspect");
+            keyData(KeyOperation).setParent("print", "view");
+            keyData(KeyOperation).setParent("edit", "inspect");
+            keyData(KeyOperation).setParent("search", "inspect");
+            keyData(KeyOperation).setParent("keywordSearch", "search");
+            keyData(KeyOperation).setParent("textSearch", "keywordSearch");
 
-        registerStaticallyResolvable(PropFieldsByZone, new PropertyValue.StaticallyResolvable() {
-                public Object evaluate(Context context) {
-                    Map m = ((UIMeta)context.meta()).itemNamesByZones(context, KeyField, zones(context));
-                    String zonePath = zonePath(context);
-                    if (zonePath != null) {
-                        m = (Map)FieldValue.getFieldValue(m, zonePath);
-                        if (m == null) m = Collections.EMPTY_MAP;
+            registerStaticallyResolvable(PropFieldsByZone, new PropertyValue.StaticallyResolvable() {
+                    public Object evaluate(Context context) {
+                        Map m = ((UIMeta)context.meta()).itemNamesByZones(context, KeyField, zones(context));
+                        String zonePath = zonePath(context);
+                        if (zonePath != null) {
+                            m = (Map)FieldValue.getFieldValue(m, zonePath);
+                            if (m == null) m = Collections.EMPTY_MAP;
+                        }
+                        return m;
                     }
-                    return m;
-                }
-            }, KeyClass);
-        
-        registerStaticallyResolvable(PropFieldPropertyList, new PropertyValue.StaticallyResolvable() {
-                public Object evaluate(Context context) {
-                    return ((UIMeta)context.meta()).fieldList(context);
-                }
-            }, KeyClass);
+                }, KeyClass);
 
-        registerStaticallyResolvable(PropLayoutsByZone, new PropertyValue.StaticallyResolvable() {
-                public Object evaluate(Context context) {
-                    return ((UIMeta)context.meta()).itemNamesByZones(context, KeyLayout, zones(context));
-                }
-            }, KeyLayout);
+            registerStaticallyResolvable(PropFieldPropertyList, new PropertyValue.StaticallyResolvable() {
+                    public Object evaluate(Context context) {
+                        return ((UIMeta)context.meta()).fieldList(context);
+                    }
+                }, KeyClass);
 
-        PropertyValue.StaticallyResolvable dyn = new PropertyValue.StaticallyResolvable() {
-                public Object evaluate(Context context) {
-                    return bindingDictionaryForValueMap((Map)context.propertyForKey("bindings"));
-                }
-            };
-        registerStaticallyResolvable("bindingsDictionary", dyn, KeyField);
-        registerStaticallyResolvable("bindingsDictionary", dyn, KeyLayout);
-        registerStaticallyResolvable("bindingsDictionary", dyn, KeyClass);
-        registerStaticallyResolvable("bindingsDictionary", dyn, KeyModule);
+            registerStaticallyResolvable(PropLayoutsByZone, new PropertyValue.StaticallyResolvable() {
+                    public Object evaluate(Context context) {
+                        return ((UIMeta)context.meta()).itemNamesByZones(context, KeyLayout, zones(context));
+                    }
+                }, KeyLayout);
 
-        AWPage.registerLifecycleListener(new AWPage.LifecycleListener() {
-            // Listen for new page activations and check for rule file changes
-            public void pageWillRender(AWPage page)
-            {
-               checkRuleFileChanges(false);
-            }
-            
-            public void pageWillAwake (AWPage page) { }
-            public void pageWillSleep (AWPage page) { }
-        });
+            PropertyValue.StaticallyResolvable dyn = new PropertyValue.StaticallyResolvable() {
+                    public Object evaluate(Context context) {
+                        return bindingDictionaryForValueMap((Map)context.propertyForKey("bindings"));
+                    }
+                };
+            registerStaticallyResolvable("bindingsDictionary", dyn, KeyField);
+            registerStaticallyResolvable("bindingsDictionary", dyn, KeyLayout);
+            registerStaticallyResolvable("bindingsDictionary", dyn, KeyClass);
+            registerStaticallyResolvable("bindingsDictionary", dyn, KeyModule);
+        } finally {
+            endRuleSet();
+        }
+
+        if (AWConcreteServerApplication.IsRapidTurnaroundEnabled) {
+            AWPage.registerLifecycleListener(new AWPage.LifecycleListener() {
+                // Listen for new page activations and check for rule file changes
+                public void pageWillRender(AWPage page)
+                {
+                    AWValidationContext validationContext = page.validationContext();
+                    validationContext.clearGeneralErrors("MetaUI");
+                    try {
+                        checkRuleFileChanges(false);
+                    } catch (RuleLoadingException exception) {
+                        validationContext.addGeneralError("MetaUI", exception.getMessage(), exception);
+                    }
+                }
+
+                public void pageWillAwake (AWPage page) { }
+                public void pageWillSleep (AWPage page) { }
+            });
+        }
     }
 
     public List<String> zones (Context context)
@@ -181,7 +195,7 @@ public class UIMeta extends ObjectMeta
         String zonePath = null;
         if (context.values().get(KeyLayout) != null) {
             context.push();
-            context.setContextKey(KeyLayout);
+            context.setScopeKey(KeyLayout);
             zonePath = (String)context.propertyForKey(KeyZonePath);
             context.pop();
         }
@@ -243,17 +257,19 @@ public class UIMeta extends ObjectMeta
 
     protected void _loadRuleFile (AWResource resource)
     {
-        _loadRules(resource.name(), resource.inputStream(), (resource instanceof AWFileResource));
+        try {
+            _loadRules(resource.name(), resource.inputStream(), (resource instanceof AWFileResource));
+        } finally {
+            // Need to set *any* object on resource to get it's hasChanged() timestamp set
+            resource.setObject(Boolean.TRUE);
+        }
 
-        // Need to set *any* object on resource to get it's hasChanged() timestamp set
-        resource.setObject(Boolean.TRUE);
         _loadedResources.put(resource, endRuleSet());
     }
 
     private long _lastCheckMillis = 0;
     public void checkRuleFileChanges (boolean force)
     {
-        if (!AWConcreteServerApplication.IsRapidTurnaroundEnabled) return;
         // Only stat every 2 seconds
         long currentTimeMillis = System.currentTimeMillis();
         if (force || currentTimeMillis - _lastCheckMillis > 2000) {
@@ -271,9 +287,10 @@ public class UIMeta extends ObjectMeta
         Meta.RuleSet ruleSet = _loadedResources.get(resource);
         Assert.that(ruleSet != null, "Attempt to reload not previously loaded resource");
         Log.meta.debug("Reloading modified rule file: %s", resource.name());
-        invalidateRules();
         beginReplacementRuleSet(ruleSet);
         _loadRuleFile(resource);
+        ruleSet.disableRules();
+        invalidateRules();
     }
 
     static class _DefaultLabelGenerator implements PropertyValue.StaticallyResolvable
@@ -477,14 +494,16 @@ public class UIMeta extends ObjectMeta
                                        String key, Context context)
     {
         List<String>result = ListUtil.list();
-        for (String zone : zoneList) {
-            List<String>fields = fieldsByZones.get(zone);
-            if (fields == null) continue;
-            for (String field : fields) {
-                context.push();
-                context.set(key, field);
-                if (context.booleanPropertyForKey(KeyVisible, false)) result.add(field);
-                context.pop();
+        if (fieldsByZones != null) {
+            for (String zone : zoneList) {
+                List<String>fields = fieldsByZones.get(zone);
+                if (fields == null) continue;
+                for (String field : fields) {
+                    context.push();
+                    context.set(key, field);
+                    if (context.booleanPropertyForKey(KeyVisible, false)) result.add(field);
+                    context.pop();
+                }
             }
         }
         return result;
@@ -496,15 +515,16 @@ public class UIMeta extends ObjectMeta
         // performance: should use registerDerivedValue("...", new Context.StaticDynamicWrapper
         // to get cached resolution here...
         Context context = newContext();
-        context.set(KeyClass, className);
         context.set(KeyLayout, "LabelField");
+        context.set(KeyClass, className);
         List<ItemProperties> fields = itemProperties(context, KeyField, true);
 
         return fields.isEmpty() ? "toString" : fields.get(0).name();
     }
 
 
-    public static String[] ActionZones = { "Main" };
+    public static String[] ModuleActionZones = { "zGlobal" };
+    public static String[] ActionZones = { "zGlobal", "zMain" };
 
     public enum ModuleMatch { AsHome, AsShow, NoMatch };
 
@@ -542,10 +562,16 @@ public class UIMeta extends ObjectMeta
 
         ModuleMatch matches (Map <String, String> matchContext)
         {
+            String moduleName = matchContext.get(KeyModule);
+            if (moduleName != null && moduleName.equals(name())) {
+                return ModuleMatch.AsHome;
+            }
+
             String homePage = matchContext.get(KeyHomePage);
             if (homePage != null && homePage.equals(properties().get(KeyHomePage))) {
                 return ModuleMatch.AsHome;
             }
+
             String className = matchContext.get(KeyClass);
             return (className == null) ? ModuleMatch.NoMatch
                     : (_homeForTypes.contains(className)
@@ -566,6 +592,7 @@ public class UIMeta extends ObjectMeta
 
     public ModuleInfo computeModuleInfo (Context context, boolean checkVisibility)
     {
+        ensureDidDeclareModules();
         ModuleInfo moduleInfo = new ModuleInfo();
         // List<ItemProperties> items = itemList(context, KeyModule, ActionZones);
         moduleInfo.modules = ListUtil.list();
@@ -605,7 +632,7 @@ public class UIMeta extends ObjectMeta
         context.set(KeyModule, moduleInfo.moduleNames);
         context.set(KeyClass, moduleInfo.classNames);
         moduleInfo.actionsByCategory = MapUtil.map();
-        moduleInfo.actionCategories = actionsByCategory(context, moduleInfo.actionsByCategory);
+        moduleInfo.actionCategories = actionsByCategory(context, moduleInfo.actionsByCategory, ModuleActionZones);
         context.pop();
 
         return moduleInfo;
@@ -622,7 +649,8 @@ public class UIMeta extends ObjectMeta
     public Map<String, String> contextForPage (AWComponent pageComponent)
     {
         if (pageComponent instanceof NavContextProvider) {
-            return ((NavContextProvider)pageComponent).currentNavContext();
+            Map<String, String> navContext = ((NavContextProvider)pageComponent).currentNavContext();
+            if (navContext != null) return navContext;
         }
         return Collections.singletonMap(UIMeta.KeyHomePage, pageComponent.componentDefinition().componentName());
     }
@@ -654,7 +682,7 @@ public class UIMeta extends ObjectMeta
     public List<String> actionCategories (Context context)
     {
         context.push();
-        context.set(KeyAction, KeyAny);
+        // context.set(KeyAction, KeyAny);
         context.set(KeyDeclare, KeyAction);
         List <String> categoryNames = context.listPropertyForKey(KeyActionCategory);
         context.pop();
@@ -662,9 +690,9 @@ public class UIMeta extends ObjectMeta
     }
 
     // caller must push/pop!
-    public List<ItemProperties> actionsByCategory(Context context, Map<String, List<ItemProperties>> result)
+    public List<ItemProperties> actionsByCategory(Context context, Map<String, List<ItemProperties>> result, String[] zones)
     {
-        List actionCategories = itemList(context, KeyActionCategory, ActionZones);
+        List actionCategories = itemList(context, KeyActionCategory, zones);
         List<String> catNames = AWUtil.collect(actionCategories, new AWUtil.ValueMapper () {
             public Object valueForObject(Object object)
             {
@@ -680,13 +708,13 @@ public class UIMeta extends ObjectMeta
     {
         for (String cat : catNames) {
             context.push();
-            context.set(KeyActionCategory, cat);
-            collectActionsByCategory(context, result);
+            if (!cat.equals(DefaultActionCategory)) context.set(KeyActionCategory, cat);
+            collectActionsByCategory(context, result, cat);
             context.pop();
         }
     }
 
-    public void collectActionsByCategory (Context context, Map <String, List<ItemProperties>> result)
+    public void collectActionsByCategory (Context context, Map <String, List<ItemProperties>> result, String targetCat)
     {
         // assume "module" has been asserted in context, now get classes
         List<ItemProperties> actionInfos = itemProperties(context, KeyAction, true);
@@ -697,6 +725,8 @@ public class UIMeta extends ObjectMeta
             context.pop();
             if (visible != null && visible.booleanValue()) {
                 String category = (String)actionInfo.properties().get(KeyActionCategory);
+                if (category == null) category = DefaultActionCategory;
+                if (!targetCat.equals(category)) continue;
                 List<ItemProperties> forCategory = result.get(category);
                 if (forCategory == null) {
                     forCategory = new ArrayList();
@@ -709,10 +739,13 @@ public class UIMeta extends ObjectMeta
 
     private AWResponseGenerating _fireAction(Context context, AWRequestContext requestContext)
     {
-        Object resultWrapper = context.propertyForKey("actionResults");
-        AWResponseGenerating result = (AWResponseGenerating)context.resolveValue(resultWrapper);
-        preparePage(context, result);
-        return result;
+        Object result = context.propertyForKey("actionResults");
+
+        // deal permissively with action scripts that return non-AWResponseGenerating results
+        if (!(result instanceof AWResponseGenerating)) return null;
+
+        preparePage(context, (AWResponseGenerating)result);
+        return (AWResponseGenerating)result;
     }
 
     public AWResponseGenerating fireAction (ItemProperties action, Context context,
@@ -757,6 +790,11 @@ public class UIMeta extends ObjectMeta
         return AWVIdentifierFormatter.decamelize(className);
     }
 
+    public static String beautifyFileName (String path)
+    {
+        return AWVIdentifierFormatter.decamelize(AWUtil.pathToLastComponent(AWUtil.lastComponent(path, "/"), "."));
+    }
+
     AWBindingDictionary bindingDictionaryForValueMap (Map<String, Object> map)
     {
         if (MapUtil.nullOrEmptyMap(map)) return null;
@@ -797,41 +835,40 @@ public class UIMeta extends ObjectMeta
      */
     boolean _didDeclareModules = false;
 
+    void ensureDidDeclareModules()
+    {
+        if (_didDeclareModules) return;
+        _didDeclareModules = true;
+        declareModulesForClasses(_navModuleClasses);
+    }
+
     void declareModulesForClasses (List<String> moduleClasses)
     {
         if (moduleClasses.size() == 0) return;
         Log.meta.debug("Auto declaring modules for classes: %s ", moduleClasses);
         for (String className : moduleClasses) {
             beginRuleSet(className);
-            List <Rule.Selector> selectors = Arrays.asList(new Rule.Selector(KeyModule, className));
-            ListUtil.lastElement(selectors)._isDecl = true;
+            try {
+                List <Rule.Selector> selectors = Arrays.asList(new Rule.Selector(KeyModule, className));
+                ListUtil.lastElement(selectors)._isDecl = true;
 
-            Map properties = new HashMap();
-            addTrait("ModuleClassPage", properties);
-            properties.put("moduleClassName", className);
-            Rule r = new Rule(selectors, properties, ClassRulePriority);
+                Map properties = new HashMap();
+                addTrait("ModuleClassPage", properties);
+                properties.put("moduleClassName", className);
+                Rule r = new Rule(selectors, properties, ClassRulePriority);
 
-            addRule(r);
+                addRule(r);
 
-            // Add decl rule for this module being home for this class
-            addRule(new Rule(
-                    Arrays.asList(new Rule.Selector(KeyModule, className),
-                          new Rule.Selector("homeForClasses", true),
-                          new Rule.Selector(KeyClass, className, true)),
-                    new HashMap(),
-                    ClassRulePriority));
-            endRuleSet();
-        }
-    }
-
-    class ModuleMetaProvider implements Meta.ValueQueriedObserver
-    {
-        public void notify(Meta meta, String key, Object value)
-        {
-            String moduleName = ((String)value);
-            Log.meta.debug("ModuleMetaProvider notified of first use of module: %s ", moduleName);
-            if (!_didDeclareModules) declareModulesForClasses(_navModuleClasses);
-            _didDeclareModules = true;
+                // Add decl rule for this module being home for this class
+                addRule(new Rule(
+                        Arrays.asList(new Rule.Selector(KeyModule, className),
+                              new Rule.Selector("homeForClasses", true),
+                              new Rule.Selector(KeyClass, className, true)),
+                        new HashMap(),
+                        ClassRulePriority));
+            } finally {
+                endRuleSet();
+            }
         }
     }
 
@@ -840,7 +877,7 @@ public class UIMeta extends ObjectMeta
 
         public void notify(Meta meta, String key, Object value)
         {
-            Log.meta.debug("FileMetaProvider notified of first use of class: %s ", value);
+            Log.meta_detail.debug("FileMetaProvider notified of first use of class: %s ", value);
             String className = ((String)value);
             int dot = className.lastIndexOf(".");
             if (dot != -1) {

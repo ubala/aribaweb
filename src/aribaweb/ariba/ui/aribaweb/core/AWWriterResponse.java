@@ -16,7 +16,7 @@ import java.util.Map;
     An <code>AWResponse</code> capable of populating an <code>OutputStream</code>.
 */
 
-public class AWWriterResponse implements AWResponse
+public class AWWriterResponse extends AWBaseResponse
 {
     static {
         ClassUtil.classTouch("AWUtil");

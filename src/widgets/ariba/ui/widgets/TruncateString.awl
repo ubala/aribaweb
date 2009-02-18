@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TruncateString.awl#13 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TruncateString.awl#14 $
     </Copyright>
 
     <Overview>
@@ -34,7 +34,7 @@
     </Binding>
 
     <Binding key="escapeUnsafeHtml" direction="get" type="String" required="$false">
-        Depreciated.  Value must be plain text.
+        Deprecated.  Value must be plain text.
     </Binding>
 
     <Binding key="truncationStyle" direction="get" type="int" default="0" required="$false">

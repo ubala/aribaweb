@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#25 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#34 $
 */
 package ariba.ui.meta.core;
 
@@ -23,16 +23,37 @@ import ariba.util.core.Assert;
 import ariba.util.core.Fmt;
 import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
+import ariba.util.core.GrowOnlyHashtable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.concurrent.locks.ReentrantLock;
 import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.io.PrintWriter;
 
+/**
+    Meta is the core class in MetaUI.  An instance of meta represents a "Rule Base"
+    (a repository rules), and this rule base is used to compute property maps
+    based on a series of key/value constraints (typically based on the current values
+    in a Context instance).
+
+    Typically a single Meta instance is shared process wide, usually by way of multiple
+    Context instances on various threads.
+
+    Meta works in concert with Match.MatchResult to cache partial matches (match trees)
+    with cached computed property maps.
+
+    Meta is generally used by way of its subclasses ObjectMeta and UIMeta (which extend
+    Meta with behaviors around auto-creating rules for references Java classes, auto-reading
+    rule files associated with referenced java packages, and dynamic properties for
+    field and layout zoning)
+ */
 public class Meta
 {
     public static final String KeyAny = "*";
@@ -47,24 +68,62 @@ public class Meta
     static final Object NullMarker = new Object();
     protected static final String ScopeKey = "scopeKey";
 
-    Map <String, KeyData> _keyData = new HashMap();
-    KeyData[] _keyDatasById = new KeyData[MaxKeyDatas];
+    // PartialIndexing indexes each rule by a single (well chosen) key and evaluates
+    // other parts of the selector on the index-filtered matches (generally this is a
+    // win since may selectors are not selective, resulting in huge rule vectors)
+    static boolean _UsePartialIndexing = true;
+    static boolean _DebugDoubleCheckMatches = false;
+
+    /**
+        THREAD SAFETY Design
+        A single instance of Meta is typically shared process-global, and is accessed
+        concurrently by multiple threads (each with their own Context instances).
+        Meta is thread-safe for reading (performing rule matches) as well as for
+        incrementally adding RuleSet (as occurs, lazily, when classes / packages
+        are first referenced).  Meta is *not* thread-safe for Rule Editing or Rule
+        reload (rapid turnaround on .oss files) -- these activities are development-time
+        only and should not involve concurrency.
+
+        Thread safety for reads (rule matching) in the face of incremental rule additions
+        is supported as follows:
+          - The rule list and all rule indexes (i.e. KeyDatas, _ValueMatches) are *grow only*
+                and support reading concurrent with appending
+          - Updates to rules are serialized (single writer) via a lock on beginRuleSet --
+            only a single RuleSet may be active at a time (and rules cannot be added without
+            an active rule set)
+
+        There are additional thread-safety considerations for Context.  See comments there
+        for details.
+     */
+
+    // THREAD SAFETY: rules array is "grow only" and is replaced atomically
+    // _ruleCount (size within the array) is updated upon endRuleSet();
+    ReentrantLock _updateLock = new ReentrantLock();
+    volatile Rule[] _rules = new Rule[128];
+    volatile int _ruleCount = 0;
+    RuleSet _currentRuleSet;
     int _nextKeyId = 0;
-    List <Rule> _rules = new ArrayList();
     int _ruleSetGeneration = 0;
 
-    // Todo: NOT THREAD SAFE!
-    Map <Match, PropertyMap> _MatchToPropsCache = new HashMap();
-    Map<PropertyMap, PropertyMap> _PropertyMapUniquer = new HashMap();
-    IdentityHashMap _identityCache = new IdentityHashMap();
-    RuleSet _currentRuleSet;
-    Map <String, PropertyManager> _managerForProperty = new HashMap();
+    Map <String, KeyData> _keyData = new GrowOnlyHashtable();
+    KeyData[] _keyDatasById = new KeyData[MaxKeyDatas];
+    GrowOnlyHashtable<Match, PropertyMap> _MatchToPropsCache = new GrowOnlyHashtable();
+    GrowOnlyHashtable<PropertyMap, PropertyMap> _PropertyMapUniquer = new GrowOnlyHashtable();
+    GrowOnlyHashtable _identityCache = new GrowOnlyHashtable.IdentityMap();
+    GrowOnlyHashtable <String, PropertyManager> _managerForProperty = new GrowOnlyHashtable();
     long _declareKeyMask;
 
     public Meta ()
     {
         _declareKeyMask = keyData(KeyDeclare).maskValue();
-        registerPropertyMerger(KeyTrait, PropertyMerger_Traits);        
+        registerPropertyMerger(KeyTrait, PropertyMerger_Traits);
+
+        // Thread safety: add noop rule as rule 0 so a read into an unflushed _ValueMatches._arr entry
+        // will get the noop rule
+        Rule nooprule = new Rule(null, null, 0, 0);
+        nooprule.disable();
+        _rules[0] = nooprule;
+        _ruleCount = 1;
     }
 
     public void addRule (Rule rule)
@@ -78,90 +137,163 @@ public class Meta
         // we allow null to enable creation of a decl, but otherwise this rule has no effect
         if (rule._properties != null) {
             // After we've captured the decl, do the collapse
-            rule._selectors = rule.collapseKeyOverrides(rule._selectors);
+            rule._selectors = rule.convertKeyOverrides(rule._selectors);
 
             _addRule(rule, true);
         }
     }
 
+    synchronized void _addToRules(Rule rule, int pos)
+    {
+        if (pos == _rules.length) {
+            Rule[] newArr = new Rule[pos * 2];
+            System.arraycopy(_rules,  0, newArr, 0, pos);
+            _rules = newArr;
+        }
+        _rules[pos] = rule;
+    }
+
     public void _addRule (Rule rule, boolean checkPropScope)
     {
+        Assert.that(_currentRuleSet != null, "Attempt to add rule without current RuleSet");
         List <Rule.Selector> selectors =  rule._selectors;
 
-        int entryId = _rules.size();
+        int entryId = _currentRuleSet.allocateNextRuleEntry();
         rule._id = entryId;
-        if (rule._rank == 0) rule._rank = allocateNextRuleRank();
+        if (rule._rank == 0) rule._rank = _currentRuleSet._rank++;
         rule._ruleSet = _currentRuleSet;
-        _rules.add(rule);
+
+        _addToRules(rule, entryId);
 
         Log.meta_detail.debug("Add Rule, rank=%s: %s", Integer.toString(rule._rank), rule);
 
         // index it
         KeyData lastScopeKeyData = null;
-        long mask = 0, antiMask = 0;
+        String declKey = null;
+        long declMask = declareKeyMask();
+        long matchMask = 0, indexedMask = 0, antiMask = 0;
         int count = selectors.size();
-        for (int i=0; i < count; i++) {
+        Rule.Selector indexOnlySelector = _UsePartialIndexing ? bestSelectorToIndex(selectors) : null;
+        for (int i=count-1; i >= 0; i--) {
             Rule.Selector p = selectors.get(i);
 
-            // See if overridded by same key later in selector
-            boolean overridden = false;
-            for (int j=count-1; j>i; j--) {
-                if (selectors.get(j)._key.equals(p._key)) { overridden=true; break; }
-            }
-            if (overridden) continue;
-
+            boolean shouldIndex = (indexOnlySelector == null || p == indexOnlySelector);
             KeyData data = keyData(p._key);
+            long dataMask = data.maskValue();
             if (p._value != NullMarker) {
-                if (p._value instanceof List) {
-                    for (Object v : (List)p._value) {
-                        data.addEntry(v, entryId);
+                if (shouldIndex || _DebugDoubleCheckMatches) {
+                    if (p._value instanceof List) {
+                        for (Object v : (List)p._value) {
+                            data.addEntry(v, entryId);
+                        }
                     }
+                    else {
+                        data.addEntry(p._value, entryId);
+                    }
+                    if (shouldIndex) indexedMask |= (1L << data._id);
                 }
-                else {
-                    data.addEntry(p._value, entryId);
+                if (!shouldIndex) {
+                    // prepare selector for direct evaluation
+                    p.bindToKeyData(data);
                 }
-                mask |= (1 << data._id);
+                matchMask |= dataMask;
 
-                if (data.isPropertyScope()) lastScopeKeyData = data;
+                if (data.isPropertyScope() && lastScopeKeyData == null) lastScopeKeyData = data;
+                if ((dataMask & declMask) != 0) declKey = (String)p._value;
+
             } else {
-                antiMask |= (1 << data._id);
+                // Anti mask applies only to decls
+                if (declKey != null) antiMask |= dataMask;
             }
         }
 
-        // all non-decl rules don't apply outside decl context
-        long declMask = declareKeyMask();
-        if ((mask & declMask) == 0) antiMask |= declMask;
+        // Decls that match on a non scope key need to scope
+        boolean isDecl = (declKey != null);
+        boolean nonScopeKeyDecl = declKey != null && !keyData(declKey).isPropertyScope();
+        if (!isDecl || nonScopeKeyDecl) {
+            // all non-decl rules don't apply outside decl context
+            if (!isDecl) antiMask |= declMask;
 
-        if (lastScopeKeyData != null  && checkPropScope) {
-            Object traitVal = rule._properties.get(KeyTrait);
-            if (traitVal != null) {
-                String traitKey = lastScopeKeyData._key + "_trait";
-                Rule traitRule = new Rule(rule._selectors, AWUtil.map(traitKey, traitVal), rule._rank, rule._lineNumber);
-                _addRule(traitRule, false);
+            if (lastScopeKeyData != null  && checkPropScope) {
+                Object traitVal = rule._properties.get(KeyTrait);
+                if (traitVal != null) {
+                    String traitKey = lastScopeKeyData._key + "_trait";
+                    Rule traitRule = new Rule(rule._selectors, AWUtil.map(traitKey, traitVal), rule._rank, rule._lineNumber);
+                    _addRule(traitRule, false);
+                }
+                rule._selectors = ListUtil.copyList(selectors);
+                Rule.Selector scopeSel = new Rule.Selector(ScopeKey, lastScopeKeyData._key);
+                rule._selectors.add(scopeSel);
+                KeyData data = keyData(ScopeKey);
+                if (!_UsePartialIndexing || _DebugDoubleCheckMatches) {
+                    data.addEntry(lastScopeKeyData._key, entryId);
+                    indexedMask |= (1L << data._id);
+                }
+                scopeSel.bindToKeyData(data);
+                matchMask |= (1L << data._id);
             }
-            rule._selectors = ListUtil.copyList(selectors);
-            rule._selectors.add(new Rule.Selector(ScopeKey, lastScopeKeyData._key));
-            KeyData data = keyData(ScopeKey);
-            data.addEntry(lastScopeKeyData._key, entryId);
-            mask |= (1L << data._id);
         }
 
-        rule._keyMatchesMask = mask;
+        rule._keyMatchesMask = matchMask;
+        rule._keyIndexedMask = indexedMask;
         rule._keyAntiMask = antiMask;
     }
 
+    Rule.Selector bestSelectorToIndex (List<Rule.Selector> selectors)
+    {
+        Rule.Selector best = null;
+        int bestRank = Integer.MIN_VALUE;
+        int pos = 0;
+        for (Rule.Selector sel : selectors) {
+            int rank = selectivityRank(sel) + pos++;
+            if (rank > bestRank) {
+                best = sel;
+                bestRank = rank;
+            }
+        }
+        return best;
+    }
+
+
+    int selectivityRank (Rule.Selector selector)
+    {
+        // Score selectors: good if property scope, key != "*" or bool
+        // "*" is particularly bad, since these are inherited by all others
+        int score = 1;
+        Object value = selector.getValue();
+        if (value != null && !KeyAny.equals(value)) score += ((value instanceof Boolean) ? 1 : 9);
+        KeyData keyData = keyData(selector.getKey());
+        if (keyData.isPropertyScope()) score *= 5;
+        // Todo: we could score based on # of entries in KeyData
+        return score;
+    }
+/*
+    int selectivityRank_dynamic (Rule.Selector selector)
+    {
+        KeyData keyData = keyData(selector.getKey());
+        _ValueMatches m = keyData.get(selector.getValue());
+        int count = m._arr != null ? m._arr[0] : 0;
+        return Integer.MAX_VALUE / (count + 1);
+    }
+*/
     // if addition of this rule results in addition of extra rules, those are returned
     // (null otherwise)
+
+    int _editingRuleEnd ()
+    {
+        return Math.max(_currentRuleSet._end, _ruleCount);
+    }
+
     public List<Rule> _addRuleAndReturnExtras (Rule rule)
     {
-        int start = _rules.size();
+        int start = _editingRuleEnd();
         List<Rule> extras = null;
 
         addRule(rule);
 
         // Return any extra rules created by addition of this one
-        for (int i=start, c=_rules.size(); i < c; i++) {
-            Rule r = _rules.get(i);
+        for (int i=start, c=_editingRuleEnd(); i < c; i++) {
+            Rule r = _rules[i];
             if (r != rule) {
                 if (extras == null) extras = ListUtil.list();
                 extras.add(r);
@@ -177,7 +309,7 @@ public class Meta
         // in place replace existing rule with NoOp
         Rule nooprule = new Rule(null, null, 0, 0);
         nooprule.disable();
-        _rules.set(rule._id, nooprule);
+        _rules[rule._id] = nooprule;
 
         if (extras != null) {
             for (Rule r : extras) r.disable();
@@ -204,14 +336,6 @@ public class Meta
             if (data.isPropertyScope()) return pred._key;
         }
         return null;
-    }
-
-    protected int allocateNextRuleRank ()
-    {
-        if (_currentRuleSet != null) {
-            return _currentRuleSet._rank++;
-        }
-        return _rules.size();
     }
 
     public void addRule (Map selectorMap, Map propertyMap)
@@ -265,13 +389,27 @@ public class Meta
         _loadRules(filename, inputStream, editable);
     }
 
+    public void loadRules (String ruleText)
+    {
+        loadRules("StringLiteral", new ByteArrayInputStream(ruleText.getBytes()), 0, true);
+        endRuleSet();
+    }
+
     public static final String RuleFileDelimeter = "/*!--- Editor Generated Rules -- Content below this line will be overwritten ---*/\n\n";
     public static final String RuleFileDelimeterStart = "/*!--- ";
     boolean _RuleEditingEnabled = true;
 
+    static class RuleLoadingException extends AWGenericException
+    {
+        RuleLoadingException (String message, Throwable exception)
+        {
+            super(message, exception);
+        }
+    }
+
     protected void _loadRules (String filename, InputStream inputStream, boolean editable)
     {
-        Log.meta.debug("Loading rule file: %s", filename);
+        Log.meta_detail.debug("Loading rule file: %s", filename);
         try {
             String editRules = null, userRules = AWUtil.stringWithContentsOfInputStream(inputStream);
             // Read ruls
@@ -288,7 +426,7 @@ public class Meta
             new Parser(this, userRules).addRules();
 
             if (editable &&_RuleEditingEnabled) {
-                _currentRuleSet._editableStart = _rules.size();
+                _currentRuleSet._editableStart = _currentRuleSet._end;
                 // boost rank for editor rules
                 _currentRuleSet._rank = EditorRulePriority;
 
@@ -298,10 +436,10 @@ public class Meta
             }
         } catch (Error er) {
             endRuleSet().disableRules();
-            throw new AWGenericException(Fmt.S("Error loading rule file: %s -- %s", filename, er));
+            throw new RuleLoadingException(Fmt.S("Error loading rule file: %s -- %s", filename, er), null);
         } catch (Exception e) {
             endRuleSet().disableRules();
-            throw new AWGenericException(Fmt.S("Exception loading rule file: %s", filename), e);
+            throw new RuleLoadingException(Fmt.S("Exception loading rule file: %s -- %s", filename, e.getMessage()), e);
         }
     }
 
@@ -320,9 +458,9 @@ public class Meta
 
     protected void clearCaches ()
     {
-        _MatchToPropsCache = new HashMap();
-        _PropertyMapUniquer = new HashMap();
-        _identityCache = new IdentityHashMap();
+        _MatchToPropsCache = new GrowOnlyHashtable();
+        _PropertyMapUniquer = new GrowOnlyHashtable();
+        _identityCache = new GrowOnlyHashtable.IdentityMap();
     }
 
     boolean isTraitExportRule (Rule rule)
@@ -333,6 +471,10 @@ public class Meta
         return false;
     }
 
+    /**
+        A group of rules originating from a common source.
+        All rules must be added to the rule base as part of a RuleSet.
+     */
     public class RuleSet
     {
         String _filePath;
@@ -342,7 +484,7 @@ public class Meta
         public void disableRules()
         {
             for (int i=_start; i < _end; i++) {
-                _rules.get(i).disable();
+                _rules[i].disable();
             }
             clearCaches();
         }
@@ -358,7 +500,7 @@ public class Meta
             int i = (editableOnly) ? (_editableStart == -1 ? _end : _editableStart) 
                     : _start;
             for ( ; i<_end; i++) {
-                Rule r = _rules.get(i);
+                Rule r = _rules[i];
                 if (!r.disabled() && !isTraitExportRule(r)) {
                     result.add(r);
                 }
@@ -368,30 +510,41 @@ public class Meta
 
         public int startRank ()
         {
-            return (_start < _rules.size())
-                    ? _rules.get(_start)._rank
+            return (_start < _ruleCount)
+                    ? _rules[_start]._rank
                     : _rank - (_end - _start); 
+        }
+
+        protected int allocateNextRuleEntry ()
+        {
+            return (_ruleCount > _end) ? _ruleCount++ : _end++;
         }
     }
 
     public void beginRuleSet (String filePath)
     {
-        beginRuleSet(_rules.size(), filePath);
+        beginRuleSet(_ruleCount, filePath);
     }
 
     public void beginRuleSet (int rank, String filePath)
     {
-        Assert.that(_currentRuleSet == null, "Can't start new rule set while one in progress");
-        _currentRuleSet = new RuleSet();
-        _currentRuleSet._start = _rules.size();
-        _currentRuleSet._rank = rank;
-        _currentRuleSet._filePath = filePath;
+        _updateLock.lock();
+        try {
+            Assert.that(_currentRuleSet == null, "Can't start new rule set while one in progress");
+            _currentRuleSet = new RuleSet();
+            _currentRuleSet._start = _ruleCount;
+            _currentRuleSet._end = _ruleCount;
+            _currentRuleSet._rank = rank;
+            _currentRuleSet._filePath = filePath;
+        } catch (RuntimeException e) {
+            _updateLock.unlock();
+            throw e;
+        }
     }
 
     public void beginReplacementRuleSet (RuleSet orig)
     {
         int origRank = orig.startRank();
-        orig.disableRules();
         beginRuleSet(orig.filePath());
         _currentRuleSet._rank = origRank;
     }
@@ -400,14 +553,18 @@ public class Meta
     {
         Assert.that(_currentRuleSet != null, "No rule set progress");
         RuleSet result = _currentRuleSet;
-        result._end = _rules.size();
+        if (_ruleCount < result._end) _ruleCount = result._end;
         _currentRuleSet = null;
         _ruleSetGeneration++;
+
+        _updateLock.unlock();
         return result;
     }
 
-    public void _setCurrentRuleSet (RuleSet ruleSet)
+    // not thread safe, but only used in editor
+    public void _resumeEditingRuleSet(RuleSet ruleSet)
     {
+        _updateLock.lock();
         _currentRuleSet = ruleSet;
     }
 
@@ -457,9 +614,17 @@ public class Meta
         long keyMask = 1L << keyData._id;
 
         // Does our result already include this key?  Then no need to join again
-        if (intermediateResult != null && (intermediateResult._keysMatchedMask & keyMask) != 0) return intermediateResult;
+        // if (intermediateResult != null && (intermediateResult._keysMatchedMask & keyMask) != 0) return intermediateResult;
 
         return new Match.MatchResult(this, keyData, value, intermediateResult);
+    }
+
+    Match.UnionMatchResult unionOverrideMatch (String key, Object value,
+                             Match.UnionMatchResult intermediateResult)
+    {
+        KeyData keyData = _keyData.get(overrideKeyForKey(key));
+        if (keyData == null) return intermediateResult;
+        return new Match.UnionMatchResult(this, keyData, value, intermediateResult);
     }
 
     // subclasses can override to provide specialized properties Map subclasses
@@ -468,11 +633,20 @@ public class Meta
         return new PropertyMap();
     }
 
+    /**
+        Called on implementing values to allow statically resolvable (but dynamic) values
+        to evaluate/copy themselves for inclusion in a new map (to ensure that a value that
+        derived its value based on a different context doesn't get reused in another)
+     */
     public interface PropertyMapAwaking
     {
         Object awakeForPropertyMap (PropertyMap map);
     }
 
+    /**
+        The Map type used to accumulate the effective properties through the successive application
+        of rules.
+     */
     public static class PropertyMap extends HashMap <String, Object>
     {
         List<PropertyManager> _contextPropertiesUpdated;
@@ -509,13 +683,13 @@ public class Meta
 
         properties = newPropertiesMap();
 
-        int[] arr = matchResult.filter();
+        int[] arr = matchResult.filteredMatches();
         if (arr == null) return properties;
         // first entry is count
         int count = arr[0];
         Rule[] rules = new Rule[count];
         for (int i=0; i < count; i++) {
-            rules[i] = _rules.get(arr[i+1]);
+            rules[i] = _rules[arr[i+1]];
         }
 
         // sort by rank
@@ -527,13 +701,14 @@ public class Meta
         });
 
         long modifiedMask = 0;
-        boolean isDeclare = (_declareKeyMask & matchResult._keysMatchedMask) != 0;
+        String declareKey = ((_declareKeyMask & matchResult._keysMatchedMask) != 0)
+                ? (String)matchResult.valueForKey(KeyDeclare) : null;
         for (Rule r : rules) {
             if (recorder != null && r._rank != Integer.MIN_VALUE) {
                 recorder.setCurrentSource(new Rule.AssignmentSource(r));
             }
 
-            modifiedMask |= r.apply(this, properties, isDeclare, recorder);
+            modifiedMask |= r.apply(this, properties, declareKey, recorder);
         }
 
         properties.awakeProperties();
@@ -565,6 +740,20 @@ public class Meta
         return data;
     }
 
+    List<String> _keysInMask (long mask)
+    {
+        List<String>matches = ListUtil.list();
+        int pos = 0;
+        while (mask != 0) {
+            if ((mask & 1) != 0) {
+                matches.add(_keyDatasById[pos]._key);
+            }
+            pos++;
+            mask >>= 1;
+        }
+        return matches;
+    }
+
     public void registerKeyInitObserver (String key, ValueQueriedObserver o)
     {
         keyData(key).addObserver(o);
@@ -575,27 +764,43 @@ public class Meta
         keyData(key)._transformer = transformer;
     }
 
-    protected IdentityHashMap identityCache ()
+    protected GrowOnlyHashtable identityCache ()
     {
         return _identityCache;
     }
 
+    /**
+        Implemented by observers for notification of when a paricular key/value has been referenced in
+        the rule base for the first time.
+        Most commonly used to lazilly register additional rules upon first reference to a class.
+     */
     public static interface ValueQueriedObserver
     {
         void notify (Meta meta, String key, Object value);
     }
 
-    // Used to transform values into the version they should be indexed / searched under
-    // For instance, "object" may be indexed as true/false (present or not)
+    /**
+        Used to transform values into the (static) version they should be indexed / searched under
+        For instance, "object" may be indexed as true/false (present or not)
+      */
     interface KeyValueTransformer {
         public Object tranformForMatch (Object o);
     }
 
+    /**
+        KeyData is the primary structure for representing information about context keys
+        (e.g. "class", "layout", "operation", "field", ...), including an index of rules
+        that match on particular values of that key (_ValueMatches).
+
+        Note that every context key has a small integer ID (0-63) and these are uses in
+        (long) masks for certain rule matching operations.
+     */
     static class KeyData
     {
         String _key;
         int _id;
-        Map <Object, _ValueMatches> _ruleVecs;
+        // Thread safety: beginRuleSet lock guarentees single writer (and multiple readers)
+        GrowOnlyHashtable <Object, _ValueMatches> _ruleVecs;
         List <ValueQueriedObserver> _observers;
         _ValueMatches _any;
         KeyValueTransformer _transformer;
@@ -605,7 +810,7 @@ public class Meta
         {
             _key = key;
             _id = id;
-            _ruleVecs = new HashMap();
+            _ruleVecs = new GrowOnlyHashtable();
             _any = get(KeyAny);
 
         }
@@ -617,7 +822,8 @@ public class Meta
 
         private _ValueMatches get (Object value)
         {
-            if (_transformer != null) value = _transformer.tranformForMatch(value);
+            if (value == null) value = NullMarker;
+            else if (_transformer != null) value = _transformer.tranformForMatch(value);
             _ValueMatches matches = _ruleVecs.get(value);
             if (matches == null) {
                 matches = new _ValueMatches(value);
@@ -627,8 +833,25 @@ public class Meta
             return matches;
         }
 
+        MatchValue matchValue (Object value)
+        {
+            if (value instanceof List) {
+                List list = (List)value;
+                if (list.size() == 1) return get(list.get(0));
+                Meta.MultiMatchValue multi = new Meta.MultiMatchValue();
+                for (Object v : list) {
+                    multi.add(get(v));
+                }
+                return multi;
+            } else {
+                return get(value);
+            }
+        }
+
         void addEntry (Object value, int id)
         {
+            // Thread safety: beginRuleSet lock guarentees single writer (and multiple readers)
+            // -- ops in our add are carefully sequenced work during a read
             _ValueMatches matches = get(value);
             int[] before = matches._arr;
             int[] after = Match.addInt(before, id);
@@ -641,13 +864,21 @@ public class Meta
         {
             _ValueMatches matches = get(value);
             if (!matches._read && _observers != null) {
-                // notify
-                matches._read = true;
-                if (value != null) {
-                    for (ValueQueriedObserver o : _observers) {
-                        o.notify(owner, _key, value);
+                // double-check logging is for turkeys, but I just can't help myself
+                owner._updateLock.lock();
+                try {
+                    if (!matches._read) {
+                        // notify
+                        if (value != null) {
+                            for (ValueQueriedObserver o : _observers) {
+                                o.notify(owner, _key, value);
+                            }
+                        }
                     }
-                }
+                    matches._read = true;
+                } finally {
+                    owner._updateLock.unlock();
+                }                    
             }
             // check if parent has changed and need to union in parent data
             matches.checkParent();
@@ -689,7 +920,38 @@ public class Meta
         }
     }
 
-    static private class _ValueMatches {
+    // Key used to record overriden (i.e. context parent) rules
+    static String overrideKeyForKey (String key)
+    {
+        return key + "_o";
+    }
+
+    /**
+        Abstraction for values (or sets of values) that can be matched against others
+        (in the context of Selector key/value) matching.  Subtypes take advantage of
+        the fact that _ValueMatches instances globally uniquely represent key/value pairs
+        to enable efficient matching entirely through identity comparison.
+     */
+    interface MatchValue {
+        boolean matches (MatchValue other);
+        MatchValue updateByAdding (MatchValue other);
+    }
+
+    /**
+        Uniquely represents a particular key/value in the Meta scope, and indexes all rules
+        with (indexed) Selectors matching that key/value.
+
+        _ValueMatches also models *inheritance* by allowing one key/value to have another
+        as its "parent" and thereby match on any Selector (and rule) that its parent would.
+        For instance, this enables a rule on class=Number to apply to class=Integer and
+        class=BigDecimal, and one on class=* to apply to any.
+        The utility of 'parent' is not limited, of course, to the key "class": all keys
+        take advantage of the parent "*" to support unqualified matches on that key, and
+        keys like 'operation' define a value hierarchy ( "inspect" -> {"view", "search"},
+        "search" -> {"keywordSearch", "textSearch"})
+     */
+    static private class _ValueMatches implements MatchValue
+    {
         Object _value;
         boolean _read;
         int[] _arr;
@@ -707,12 +969,77 @@ public class Meta
             // the rule set has reloaded
             if (_parent != null) {
                 _parent.checkParent();
-                if (_parent._arr != null && _parent._arr[0] != _parentSize) {
-                    _arr = Match.union(_arr, _parent._arr);
-                    _parentSize = _parent._arr[0];
+                int[] parentArr = _parent._arr;
+                if (parentArr != null && parentArr[0] != _parentSize) {
+                    _arr = Match.union(_arr, parentArr);
+                    _parentSize = parentArr[0];
                 }
             }
         }
+
+        public boolean matches (MatchValue other)
+        {
+            if (!(other instanceof _ValueMatches)) return other.matches(this);
+            // we recurse up parent chain to do superclass matches
+            return (other == this)
+                || (_parent != null && _parent.matches(other));
+        }
+
+        public MatchValue updateByAdding (MatchValue other)
+        {
+            MultiMatchValue multi = new MultiMatchValue();
+            multi.add(this);
+            return multi.updateByAdding(other);
+        }
+    }
+
+    static class MultiMatchValue extends ArrayList<MatchValue> implements MatchValue
+    {
+        public boolean matches (MatchValue other)
+        {
+            if (other instanceof MultiMatchValue) {
+                // list / list comparison: any combo can match
+                for (MatchValue v : this) {
+                    if (other.matches(v)) return true;
+                }
+            }
+            else {
+                // single value against array: one must match
+                for (MatchValue v: this) {
+                    if (v.matches(other)) return true;
+                }
+            }
+            return false;
+        }
+
+        public MatchValue updateByAdding (MatchValue other)
+        {
+            if (other instanceof MultiMatchValue) {
+                addAll((MultiMatchValue)other);
+            } else {
+                add(other);
+            }
+            return this;
+        }
+    }
+
+    /**
+     * Allocate new matchArray to be used in matching against rule Selectors
+     * @return uninitialized array
+     */
+    MatchValue[] newMatchArray ()
+    {
+        return new MatchValue[_nextKeyId];
+    }
+
+    void matchArrayAssign(MatchValue[] array, KeyData keyData, MatchValue matchValue)
+    {
+        int idx = keyData._id;
+        MatchValue curr = array[idx];
+        if (curr != null) {
+            matchValue = curr.updateByAdding(matchValue);
+        }
+        array[idx] = matchValue;
     }
 
     public static final KeyValueTransformer Transformer_KeyPresent = new KeyValueTransformer()
@@ -722,6 +1049,11 @@ public class Meta
         }
     };
 
+    /**
+        Wrapper for a value that should, in rule application, override any previous value for its
+        property.  This can be used to override default property value merge policy, for instance
+        allowing the "visible" property to be forced from false to true.
+     */
     public static class OverrideValue
     {
         Object _value;
@@ -730,6 +1062,12 @@ public class Meta
         public String toString () { return (_value != null ? _value.toString() : "null") + "!"; }
     }
 
+    /**
+        Store of policy information for particular properties -- most significantly, how
+        successive values of this property are to be *merged* during rule application.
+        (See Meta.registerPropertyMerger).  E.g. 'visible', 'trait', and 'valid' all have unique
+        merge policies.
+     */
     public class PropertyManager
     {
         String _name;
@@ -805,8 +1143,19 @@ public class Meta
         return ScopeKey.equals(key);
     }
 
+    /**
+        Define policy for merging a property value assigned by one rule
+        to a subsequent value from a higher ranked rule.
+     */
     public interface PropertyMerger
     {
+        /**
+         * Called during rule application to merge an earlier (lower ranked) value with a newer one.
+         * @param orig the previous value accumulated in the property map
+         * @param override the new value from the higher ranked rule
+         * @param isDeclare whether we are currently accumulating matched for declarations of the property/value
+         * @return the new property value to be put in the property map
+         */
         Object merge (Object orig, Object override, boolean isDeclare);
     }
 
@@ -840,7 +1189,10 @@ public class Meta
         }
     }
 
-    // (false trumps true) for visible and editable
+    /**
+        PropertyMerger implementing AND semantics -- i.e. false trumps true.
+        (Used, for instance, for the properties 'visible' and 'editable')
+     */
     public static class PropertyMerger_And implements PropertyMerger, PropertyMergerDynamic, PropertyMergerIsChaining
     {
         public Object merge(Object orig, Object override, boolean isDeclare) {
@@ -852,6 +1204,10 @@ public class Meta
                 || ((override instanceof Boolean) && !((Boolean)override).booleanValue()))
                     return false;
 
+            // ANDing with true is a noop -- return new value
+            if ((orig instanceof Boolean) && ((Boolean)orig)) {
+                return (override instanceof PropertyValue.Dynamic) ? override : booleanValue(override);
+            }
             // if one of our values is dynamic, defer
             if ((orig instanceof PropertyValue.Dynamic || override instanceof PropertyValue.Dynamic)) {
                 return new PropertyValue.DeferredOperationChain(this, orig, override);
@@ -866,7 +1222,9 @@ public class Meta
         }
     }
 
-    // Merge lists
+    /**
+        PropertyMerger for properties the should be unioned as lists
+     */
     public static PropertyMerger PropertyMerger_List =  new PropertyMerger()
     {
         public Object merge(Object orig, Object override, boolean isDeclare) {
@@ -884,7 +1242,36 @@ public class Meta
         }
     };
 
-    public PropertyMerger PropertyMerger_Traits =  new Context.PropertyMergerDeclareList()
+    public static Meta.PropertyMerger PropertyMerger_DeclareList =  new PropertyMergerDeclareList();
+
+    /**
+        PropertyMerger for properties the should override normally, but return lists when
+        in declare mode (e.g. "class", "field", "layout", ...)
+     */
+    public static class PropertyMergerDeclareList implements PropertyMergerDynamic
+    {
+        public Object merge (Object orig, Object override, boolean isDeclare) {
+            if (!isDeclare) return override;
+
+            // if we're override a single element with itself, don't go List...
+            if (!(orig instanceof List) && !(override instanceof List)
+                    && Meta.objectEquals(orig, override)) {
+                return orig;
+            }
+
+            List result = new ArrayList();
+            ListUtil.addElementsIfAbsent(result, Meta.toList(orig));
+            ListUtil.addElementsIfAbsent(result, Meta.toList(override));
+            return result;
+        }
+    };
+    
+    /**
+        PropertyMerger for the 'trait' property.  Generally, traits are unioned, except for traits
+        from the same "traitGroup", which override (i.e. only one trait from each traitGroup should
+        survive).
+     */
+    public PropertyMerger PropertyMerger_Traits =  new PropertyMergerDeclareList()
     {
         public Object merge(Object orig, Object override, boolean isDeclare) {
             if (isDeclare) return super.merge(orig, override, isDeclare);
@@ -944,6 +1331,43 @@ public class Meta
         }
     }
 
+    static class _KeyValueCount { String key; Object value; int count; }
+
+    public void _logRuleStats ()
+    {
+        _logRuleStats(new PrintWriter(System.out, true));
+    }
+
+    public void _logRuleStats (PrintWriter out)
+    {
+        List<_KeyValueCount> counts = ListUtil.list();
+        int total = 0;
+        for (KeyData keyData : _keyData.values()) {
+            for (_ValueMatches vm : keyData._ruleVecs.values()) {
+                _KeyValueCount kvc = new _KeyValueCount();
+                kvc.key = keyData._key;
+                kvc.value = vm._value;
+                kvc.count = (vm._arr != null) ? vm._arr[0] : 0;
+                total += kvc.count;
+                counts.add(kvc);
+            }
+        }
+
+        Collections.sort(counts, new Comparator<_KeyValueCount>() {
+            public int compare(_KeyValueCount o1, _KeyValueCount o2) {
+                return o2.count - o1.count;
+            }
+        });
+
+        int c = Math.min(10, counts.size());
+        out.printf("Total index entries comparisons performed: %d\n", Match._Debug_ElementProcessCount);
+        out.printf("Total index entries: %d\n\n", total);
+        out.printf("Top %d keys/values\n", c);
+        for (int i=0; i<c; i++) {
+            _KeyValueCount kvc = counts.get(i);
+            out.printf("     %s = %s : %d entries\n", kvc.key,  kvc.value, kvc.count);
+        }
+    }
     
     /*
         A few handy utilities (for which we probably already have superior versions elsewhere)

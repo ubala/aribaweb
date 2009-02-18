@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.java#33 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.java#34 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -25,6 +25,7 @@ import ariba.ui.aribaweb.core.AWHtmlForm;
 import ariba.ui.aribaweb.core.AWPage;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.aribaweb.core.AWBindingNames;
 import ariba.ui.aribaweb.util.AWArrayManager;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWUtil;
@@ -111,7 +112,9 @@ public class AWForm extends AWComponent implements AWHtmlForm
 
     public AWEncodedString formActionUrl ()
     {
-        AWEncodedString formActionUrl = AWComponentActionRequestHandler.SharedInstance.requestHandlerUrlEncoded(request());
+        AWEncodedString formActionUrl =  (requestContext().isStaticGeneration())
+                ? new AWEncodedString(requestContext().staticUrlForActionResults((AWResponseGenerating)valueForBinding(AWBindingNames.action)))
+                : AWComponentActionRequestHandler.SharedInstance.requestHandlerUrlEncoded(request());
         String fragmentIdentifier = stringValueForBinding(BindingNames.fragmentIdentifier);
         if (fragmentIdentifier != null) {
             String url = StringUtil.strcat(formActionUrl.string(), "#", fragmentIdentifier);

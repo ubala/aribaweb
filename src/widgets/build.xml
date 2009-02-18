@@ -62,7 +62,7 @@
     </target>
 
     <!-- Generate merged JS file -->
-    <property name="js.merge.destpath" value="ariba/ui/widgets"/>
+    <property name="js.merge.destpath" value="ariba/ui/widg"/>
     <property name="js.merge.destfile" value="widgets_all.js"/>
     <filelist id="merge.js.filelist" dir="${src.dir}/resource/webserver/widg/"
               files="DragDrop.js Widgets.js Menu.js Chooser.js Datatable.js Calendar.js"/>

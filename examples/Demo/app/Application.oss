@@ -14,39 +14,37 @@ action=search {
 }
 
 /* Used for Dashboard modules rules */
-@module="Home"  {
-    label:"Home";
-    showsClasses: "*";
-
+@module=Home  {
     @layout=Main {
-       label:"Welcome to AribaWeb!";
-       component:"HomeContent";
        after:zTop;
+       label:"Welcome to AribaWeb!";
+       component:HomeContent;
     }
 
     @layout=Actions {
-       label:"Actions";
-       component:"Toc";
        after:zToc;
+       component:Toc;
     }
 }
 
-@module="Documentation"  {
-    homePage:"SearchSource";
+@module=Documentation {
+    homePage:SearchSource;
 }
 
 @module="DataTables"  {
-    component:MetaTabs;
-    layout { bindings: { vertical:true; } }
     needsForm:true;
-    @layout=SimpleTable     { component:SimpleTable }
-    @layout=AdvancedTable   { component:AdvancedTable }
-    @layout=GroupingTable   { component:GroupingTable }
-    @layout=OutlineTable    { component:OutlineTable }
-    @layout=XMLTable        { component:XMLDataTable }
-    @layout=RemoteTable     { component:MetaContentTable }
-    @layout=ExplorerPage    { component:ExplorerPage }
-    @layout=PersonMasterDetail { component:PersonMasterDetail }
+    component:MetaTabs;
+    layout {
+        bindings: { vertical:true; }
+        @layout=SimpleTable     { component:SimpleTable }
+        @layout=AdvancedTable   { component:AdvancedTable }
+        @layout=GroupingTable   { component:GroupingTable }
+        @layout=OutlineTable    { component:OutlineTable }
+        @layout=XMLTable        { component:XMLDataTable }
+        @layout=RemoteTable     { component:MetaContentTable }
+        @layout=ExplorerPage    { component:ExplorerPage }
+        @layout=PersonMasterDetail { component:PersonMasterDetail }
+    }
 }
 
 @module="PivotTables"  {

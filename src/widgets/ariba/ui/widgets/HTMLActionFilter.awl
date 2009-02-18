@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.awl#7 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.awl#10 $
     </Copyright>
 
     <Overview>
@@ -40,6 +40,10 @@
         Push of the url that was just clicked.
     </Binding>
 
+    <Binding key="actionTarget" type="String" direction="get">
+        href window target (if specified will override any originally on link)
+    </Binding>
+
     <Binding key="resourceUrl" type="String" direction="set">
         Push of the url that was/will be just fetched.
     </Binding>
@@ -55,7 +59,17 @@
 <a:While notEqualNull="$nextAction">\
     <a:PrimitiveString value="$currentPrefix"/>\
     <a:If ifTrue="$matchIsHref">\
-        href="#" id="<a:ActionId action='$currentClicked'/>" bh="GAT"\
+        <a:If ifTrue="$requestContext.isStaticGeneration">\
+            href="$staticUrlForActionResults"
+            <a:If notEqualNull="$currentTarget">\
+                target="$currentTarget"\
+            </a:If>\
+        <a:Else/>\
+            href="#" id="<a:ActionId action='$currentClicked'/>" bh="GAT" \
+            <a:If notEqualNull="$currentTarget">\
+                _t="$currentTarget"\
+            </a:If>\
+        </a:If>
     <a:Else ifTrue="$useStaticUrl"/>\
         src="$staticUrl"\
     <a:Else/>

@@ -12,17 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVLocalizedDateFormatter.java#4 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVLocalizedDateFormatter.java#5 $
 */
 package ariba.ui.validation;
 
 import ariba.ui.aribaweb.util.AWFormatter;
-import ariba.util.core.Date;
 import ariba.util.core.Fmt;
 import ariba.util.core.Assert;
 import ariba.util.core.StringUtil;
 import ariba.util.formatter.DateFormatter;
 
+import java.util.Date;
 import java.util.TimeZone;
 import java.util.Locale;
 import java.text.ParseException;
