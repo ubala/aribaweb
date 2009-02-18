@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.java#21 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.java#22 $
 */
 
 package ariba.ui.widgets;
@@ -40,6 +40,17 @@ public class DateField extends AWComponent
     public boolean _showCalendar;
     private String _exampleDate;
 
+
+    /**
+        Convenience setter method to assist DateField debugging. (Otherwise it
+        seems to be impossible to trap the sets of this field.)
+        @aribaapi ariba
+    */
+    public void setDate (Object object)
+    {
+        _date = object;
+    }
+    
     public boolean isStateless()
     {
         // We must make this stateful so that the textDate can be available during the

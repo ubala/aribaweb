@@ -268,6 +268,13 @@ ariba.ModalWindow = function() {
         // HyperLink
         MWL : {
             mousedown :  function (elm, evt) {
+                // disable other mousedown events (ie, from PopupMenuItem)
+                // can't call open window because
+                // it throws an access denied exception
+                // see http://support.microsoft.com/kb/904947
+                Event.cancelBubble(evt);
+            },
+            click :  function (elm, evt) {
                 var windowName = elm.getAttribute('_wn');
                 var tile = Dom.boolAttr(elm, '_tw');
                 var width = elm.getAttribute('_w');

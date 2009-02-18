@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.awl#5 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.awl#6 $
     </Copyright>
 
     <Overview>
@@ -108,6 +108,9 @@
       corresponding java file. -->\
 <input type="file" elementId="$elementId" name="$fileUploadName" otherBindings="$otherBindingsValues"
        formValue="voodoo" id="$env.awinputId"/>\
+<a:If ifTrue="$inPlaybackMode">\
+    <nobr>URL:<input type="text" name="$urlInputName" id="$urlInputName"/></nobr>
+</a:If>
 <a:Singleton>
     <div id="AWFileUploadErrorMessage" style="display:none">
         <a:Local key="a001">

@@ -1,0 +1,10 @@
+<w:BasicPageWrapper hasForm="$false">
+<w:TabSet>
+    <w:Tab label="Upload Panel">
+        <x:FileUploadDownload/>
+    </w:Tab>
+    <w:Tab label="Multi-Upload">
+        <x:MultiFileUpload/>
+    </w:Tab>
+</w:TabSet>    
+</w:BasicPageWrapper>

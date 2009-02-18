@@ -12,22 +12,27 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#10 $
 */
 
 package ariba.ui.aribaweb.test;
 
+import ariba.ui.aribaweb.core.AWConcreteServerApplication;
+import ariba.ui.aribaweb.core.AWRecordingManager;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWSession;
-import ariba.ui.aribaweb.core.AWConcreteServerApplication;
+import ariba.util.core.Assert;
 import ariba.util.core.Base64;
-import ariba.util.core.ClassUtil;
 import ariba.util.core.MapUtil;
 import ariba.util.core.StringUtil;
-import ariba.util.test.SuiteShare;
+import ariba.util.i18n.I18NUtil;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Set;
+
 
 public class TestContext
 {
@@ -46,10 +51,25 @@ public class TestContext
     private String[] _returnUrl;
     
     private static Map<String, TestContext> _savedTestContext = MapUtil.map();
+    private static Map<String, TestContextObjectFactory> _factoriesById = MapUtil.map();
+    private static Map<Class, String> _factoryIdsByClass = MapUtil.map();
+
+    static
+    {
+        // register the playback monitor with AWRecordingManager
+        // here we assume if we have TestContext it means we're in the playback mode
+        AWRecordingManager.registerPlaybackMonitor(new AWRecordingManager.PlaybackMonitor() {
+            public boolean isInPlaybackMode(AWRequestContext requestContext)
+            {
+                return (getTestContext(requestContext) != null);
+            }
+        } );
+    }
+
 
     public TestContext ()
     {
-        _id = String.valueOf(System.currentTimeMillis()) ;
+        _id = String.valueOf(System.currentTimeMillis());
     }
 
     public String getId ()
@@ -85,7 +105,7 @@ public class TestContext
         }
     }
 
-    public Object getInternalParam(String key)
+    public Object getInternalParam (String key)
     {
         return _internalContext.get(key);
     }
@@ -153,23 +173,61 @@ public class TestContext
         _context = MapUtil.map();
     }
 
-    private static final String OpenParen = "(";
-    private static final String CloseParen = ")";
+    public static void registerTestContextObjectFactory (
+        TestContextObjectFactory factory,
+        Class c,
+        String factoryId
+        )
+    {
+        Assert.that(factory != null, "factory cannot be null");
+        Assert.that(c != null, "class cannot be null");
+        Assert.that(!StringUtil.nullOrEmptyOrBlankString(factoryId),
+                    "factoryId cannot be null or blank or empty");
+
+        Assert.that(_factoriesById.get(factoryId) == null, 
+                    "Cannot reregister factory ID %s", factoryId);
+        _factoriesById.put(factoryId, factory);
+
+        Assert.that(_factoryIdsByClass.get(c) == null,
+                    "Cannot reregister class %s", c.getName());
+        _factoryIdsByClass.put(c, factoryId);
+    }
+
+    TestContextObjectFactory factoryForId (String id)
+    {
+        return _factoriesById.get(id);
+    }
+
+    String factoryIdForClass (Class c)
+    {
+        // TODO: should return factory of superclass?
+        return _factoryIdsByClass.get(c);
+    }
+
+    private static final String Pipe = "|";
     public static final String SemiColon = ";";
 
     public String getSuiteData ()
     {
         StringBuffer buf = new StringBuffer();
-        Set keys = keys();
-        for (Object key : keys) {
-            Object obj = get((Class)key);
-            if (obj instanceof SuiteShare) {
-                SuiteShare share = (SuiteShare)obj;
-                buf.append(obj.getClass().getName());
-                buf.append(OpenParen);
-                buf.append(share.getObjectIdentifier());
-                buf.append(CloseParen);
-                buf.append(SemiColon);
+        for (Object key : keys()) {
+            Class c = (Class)key;
+            String factoryId = factoryIdForClass(c);
+            if (factoryId != null) {
+                TestContextObjectFactory f = factoryForId(factoryId);
+                Object obj = get(c);
+                String objId = f.getSharedID(obj);
+                if (buf.length() > 0) {
+                    buf.append(SemiColon);
+                }
+                try {
+                    buf.append(URLEncoder.encode(factoryId, I18NUtil.EncodingUTF_8));
+                    buf.append(Pipe);
+                    buf.append(URLEncoder.encode(objId, I18NUtil.EncodingUTF_8));
+                }
+                catch (UnsupportedEncodingException e) {
+                    Assert.that(false, "UTF-8 must be supported");
+                }
             }
         }
         return Base64.encode(buf.toString());
@@ -186,26 +244,61 @@ public class TestContext
         String suiteData = requestContext.formValueForKey(SuiteDataParam);
         if (!StringUtil.nullOrEmptyOrBlankString(suiteData)) {
             suiteData = Base64.decode(suiteData);
-            String[] objects = suiteData.split(SemiColon);
-            for (String object : objects) {
-                int index1 = object.indexOf(OpenParen);
-                int index2 = object.indexOf(CloseParen);
-                String identifier = object.substring(index1, index2);
-                String className = object.substring(0, index1);
-                SuiteShare  sharedObject = (SuiteShare)ClassUtil.newInstance(className);
-                sharedObject.initialize(identifier);
-                put(sharedObject);
+            String[] pairs = suiteData.split(SemiColon);
+            for (String pair : pairs) {
+                String[] kv = pair.split("\\|");
+                Assert.that(kv.length == 2,
+                            "Suite data key-value pair had %s " +
+                            "members instead of 2", kv.length);
+                try {
+                    String factoryId = URLDecoder.decode(
+                        kv[0],
+                        I18NUtil.EncodingUTF_8
+                        );
+                    String objId = URLDecoder.decode(
+                        kv[1],
+                        I18NUtil.EncodingUTF_8
+                        );
+                    TestContextObjectFactory f = factoryForId(factoryId);
+                    Assert.that(f != null,
+                                "No factory found for ID %s", factoryId);
+                    Object obj = f.reconstituteObject(requestContext, objId);
+                    if (obj != null) {
+                        put(obj);
+                    }
+                }
+                catch (UnsupportedEncodingException e) {
+                    Assert.that(false, "UTF-8 must be supported");
+                }
             }
         }
     }
 
+    public static String getEncodedReturnUrl (String displayName, String url)
+    {
+        StringBuilder buf = new StringBuilder();
+        buf.append(displayName);
+        buf.append(SemiColon);
+        buf.append(url);
+        return Base64.encode(buf.toString());
+
+    }
+
+    public String getEncodedReturnUrl ()
+    {
+        return getEncodedReturnUrl(
+                getReturnUrlName(),
+                getReturnUrl()
+                );
+    }
+
     public String getReturnUrlName ()
     {
-       return _returnUrl != null ? _returnUrl[1] : null;
+        return _returnUrl != null ? _returnUrl[0] : null;
     }
 
     public String getReturnUrl ()
     {
-        return _returnUrl != null ? _returnUrl[0] : null;
+        return _returnUrl != null ? _returnUrl[1] : null;
     }
 }

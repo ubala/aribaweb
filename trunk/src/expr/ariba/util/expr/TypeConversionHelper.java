@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeConversionHelper.java#6 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeConversionHelper.java#7 $
 */
 
 package ariba.util.expr;
@@ -236,7 +236,7 @@ public class TypeConversionHelper
         return false;
     }
 
-    private static Class getClassForType (String name)
+    public static Class getClassForType (String name)
     {
         Class primitiveClass = PrimitiveTypeProvider.getClassForType(name);
         return (primitiveClass != null ? primitiveClass : ClassUtil.classForName(name));

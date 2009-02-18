@@ -1,7 +1,8 @@
 <w:BasicPageWrapper hasForm="$true">
+    <w:HintMessage>AribaWeb: only 17 lines, ZK: 35, GWT: 190 (see http://www.zkoss.org/smalltalks/gwtZk)</w:HintMessage>
     <h1>Google Map Locator</h1>
-    <a:TextField value="$locString"/>
-    <a:SubmitButton action="$locate" value="Search"/>
+    <a:TextField value="$locString"/><w:CueTip>Try "Eiffel"</w:CueTip>
+    <w:TextButton action="$locate" isDefault="$true" class="inline btnWrap">Search</w:TextButton>
     <x:GMap zoomLevel="16">
         <a:If notEqualNull="$loc">
             <x:GMapMarker latitude="$loc.latitude" longitude="$loc.longitude" infoHtml="$loc.description"/>
@@ -11,8 +12,7 @@
 <groovy>
     import app.Locator;
     def locString, loc
-    void locate () {
-       loc = Locator.locate(locString);
-       println "Loc: ${loc.description}"
+    def locate () {
+        loc = Locator.locate(locString); null
     }
 </groovy>

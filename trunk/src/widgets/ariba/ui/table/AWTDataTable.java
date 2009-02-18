@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#180 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#186 $
 */
 
 package ariba.ui.table;
@@ -874,11 +874,6 @@ public final class AWTDataTable extends AWComponent
 
         checkDetailExpandoEnabled();
         
-        if (createdDisplayGroup) {
-            initializeDisplayGroupObjects();
-            setValueForBinding(_displayGroup, BindingNames.displayGroup);
-        }
-
         // Apply any saved table configuration
         boolean didHaveConfig = processTableConfig();
 
@@ -912,6 +907,15 @@ public final class AWTDataTable extends AWComponent
                 checkGroupByColumn();
             }
         }
+
+        if (createdDisplayGroup) {
+            initializeDisplayGroupObjects();
+        }
+
+        if (createdDisplayGroup) {
+            setValueForBinding(_displayGroup, BindingNames.displayGroup);
+        }
+
         clearColumnPurgatory();
     }
 
@@ -1573,6 +1577,11 @@ public final class AWTDataTable extends AWComponent
     {
         AWBinding binding = bindingForName(BindingNames.showColumnLabelWhenGrouping);
         return (binding == null) ? true : booleanValueForBinding(binding);
+    }
+
+    public boolean showBatchNavRow ()
+    {
+        return showNavigationBar() || showOptionsMenu();    
     }
 
     public List displayedColumns ()

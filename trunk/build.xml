@@ -127,46 +127,63 @@
         <mkdir dir="${doc.resource.dir}"/>
         <delete dir="${site.dir}"/>
         <mkdir dir="${site.dir}"/>
+        <copy file="${src.dir}/docs/index.html" todir="${doc.dir}"/>
         <copy file="${widgets.resource.dir}/widg/prettify.js" todir="${doc.resource.dir}"/>
         <copy file="${widgets.resource.dir}/branding/ariba/widgets.css" todir="${doc.resource.dir}"/>
-        <copy file="${widgets.resource.dir}/branding/ariba/cssOrangeGradient.gif" todir="${doc.resource.dir}"/>
-        <copy file="${widgets.resource.dir}/branding/ariba/cssGrayGradient.gif" todir="${doc.resource.dir}"/>
-        <copy file="${widgets.resource.dir}/cmdbar_prod.gif" todir="${doc.resource.dir}"/>
-        <copy file="${src.dir}/docs/index.html" todir="${doc.dir}"/>
-        <copy file="${src.dir}/docs/site-index.html" todir="${site.dir}"/>
-        <copy todir="${site.dir}">
-            <fileset dir="${src.dir}/docs/" includes="screencasts/*"/>
-        </copy>
     </target>
 
     <target name="process-doc" depends="doc-resources" unless="nodoc">
+        <property name="site.src" location="${src.dir}/site"/>
+        <property name="doc.src" location="${site.src}/Documentation"/>
         <property name="doc.template" location="${tools.dir}/templates/doctemplate.awl"/>
-        <property name="tutorial.src.dir" location="${src.dir}/docs/tutorial/"/>
         <property name="tutorial.doc.dir" location="${doc.dir}/tutorial"/>
         <delete dir="${tutorial.doc.dir}"/>
         <mkdir dir="${tutorial.doc.dir}"/>
+
         <groovy src="bin/processdoc.groovy" classpathref="groovy.script.classpath">
             <arg value="${doc.template}"/>
-
-            <arg value="${tutorial.src.dir}"/>
-            <arg value="${src.ui.dir}/ideplugin/docs"/>
-
+            <arg value="${doc.src}"/>
             <arg value="${tutorial.doc.dir}"/>
         </groovy>
-        <delete file="${tutorial.doc.dir}/screencasts.html"/>
 
-        <property name="site.template" location="${tools.dir}/templates/sitetemplate.awl"/>
-        <groovy src="bin/processdoc.groovy" classpathref="groovy.script.classpath">
-            <arg value="${site.template}"/>
+    </target>
 
-            <arg value="${basedir}/CHANGES.txt"/>
-            <arg value="${tutorial.src.dir}"/>
-            <arg value="${src.ui.dir}/ideplugin/docs"/>
+    <target name="site">
+        <delete dir="${site.dir}"/>
+        <mkdir dir="${site.dir}"/>
+        <property name="site.src" location="${src.dir}/site"/>
+        <copy todir="${site.dir}">
+            <fileset dir="${site.src}/docroot"/>
+        </copy>
 
-            <arg value="${site.dir}"/>
+        <groovy classpathref="groovy.app.classpath">
+            import ariba.ui.aribaweb.core.AWConcreteApplication
+            import ariba.ui.aribaweb.util.AWNamespaceManager
+            import ariba.ui.aribaweb.util.AWStaticSiteGenerator
+
+            // println "Sleeping for debugger attach..."; Thread.currentThread().sleep(5000)
+
+            // Need to override groovy class loader with one for AW so jar resources are found...
+            Thread.currentThread().setContextClassLoader(AWConcreteApplication.class.getClassLoader())
+
+            println "Generating to ${properties["site.dir"]}"
+
+            AWStaticSiteGenerator.main([properties["site.dir"], properties["site.src"]].toArray(new String[2]));
+            // AWStaticSiteGenerator.main([properties["site.dir"], properties["site.src"], ".", "/"].toArray(new String[4]));
         </groovy>
     </target>
 
+    <target name="run-site">
+        <subant target="build-and-run" failonerror="true">
+            <property name="aw.home" location="${aw.home}"/>
+            <property name="make.common.dir" location="${make.common.dir}"/>
+            <property name="build.dir" value="${build.dir}"/>
+            <property name="build.jars.dir" value="${build.jars.dir}"/>
+
+            <fileset dir="src/site" includes="build.xml" erroronmissingdir="false"/>
+        </subant>
+    </target>
+    
     <target name="javadocs" description="Generate javadoc" depends="doc-resources"  unless="nodoc">
         <module-crawl target="javadocs"/>
     </target>
@@ -177,11 +194,21 @@
 
     <target name="docs" description="Generate docs" depends="javadocs, process-doc"/>
 
+    <!-- Need app.Demo.jar for lucence SourceCodeAnalyzer -->
+    <path id="groovy.lucene.classpath">
+        <path refid="groovy.script.classpath"/>
+
+        <fileset dir="${ariba.jars.dir}">
+            <include name="app.Demo.jar"/>
+        </fileset>
+    </path>
+
     <target name="index-doc" depends="" unless="nodoc">
         <property name="doc.index" location="${doc.dir}/index.lucene"/>
         <delete dir="${doc.index}"/>
         <mkdir dir="${doc.index}"/>
-        <groovy src="bin/indexsource.groovy" classpathref="groovy.script.classpath">
+
+        <groovy src="bin/indexsource.groovy" classpathref="groovy.lucene.classpath">
             <arg value="${doc.index}"/>
 
             <arg value="${doc.dir}/api/"/>
@@ -200,6 +227,10 @@
             <arg value="$ARIBAWEB_HOME/src/widgets"/>
             <arg value="source"/>
 
+            <arg value="${src.ui.dir}/metaui/"/>
+            <arg value="$ARIBAWEB_HOME/src/metaui"/>
+            <arg value="source"/>
+
             <arg value="${dist.root.dir}/examples/"/>
             <arg value="$ARIBAWEB_HOME/examples"/>
             <arg value="examples"/>
@@ -213,6 +244,12 @@
         </groovy>
     </target>
 
+    <target name="groovy-lucene" depends="">
+        <groovy src="${script}" classpathref="groovy.lucene.classpath">
+            <arg line="${args}"/>
+        </groovy>
+    </target>
+
     <!-- ================================================================== -->
     <!-- D I S T R I B U T I O N                                            -->
     <!-- ================================================================== -->
@@ -220,11 +257,11 @@
                 includes="**/*.java, **/*.awl, **/*.groovy, **/*.js, **/*.css, **/*.htm"/>
     <patternset id="src.dist.patterns"
                 includes="tools/,src/,examples/,*,lib/ext*/,bin/"
-                excludes="dist/, webapps/, work/, classes/, derived-src/, docs/site/"
+                excludes="dist/, webapps/, work/, classes/, derived-src/, site/"
             />
     <patternset id="binary.root.dist.patterns"
                 includes="**"
-                excludes="dist/, conf/, work/, classes/, build/, derived-src/, webapps/, bin/, docs/site/"
+                excludes="dist/, conf/, work/, classes/, build/, derived-src/, webapps/, lib/app.*, bin/, site/"
             />
 
     <patternset id="binary.root.dist.patterns.exe"
@@ -236,7 +273,7 @@
     </target>
 
     <target name="package-binary"
-            depends="wars, src-jar, docs, index-doc, check-ant, package-binary-min, package-binary-full">
+            depends="wars, src-jar, docs, site, index-doc, check-ant, package-binary-min, package-binary-full">
     </target>
 
     <target name="inc-package-binary"
@@ -363,8 +400,8 @@
                 <fileset dir="${src.dir}" includes="build.xml" erroronmissingdir="false"/>
                 <fileset dir="${src.ui.dir}" includes="metaui-jpa/examples/appcore/build.xml" erroronmissingdir="true"/>
                 <fileset dir="${src.samples.dir}" includes="**/appcore/build.xml"/>
-                <fileset dir="${src.samples.dir}" includes="**/build.xml"/>
-                <fileset dir="${src.ui.dir}" includes="*/examples/*/build.xml" erroronmissingdir="false"/>
+                <fileset dir="${src.samples.dir}" includes="**/build.xml" excludes="**/AtIssue/build.xml,**/GuestBook/build.xml"/>
+                <fileset dir="${src.ui.dir}" includes="*/examples/*/build.xml" excludes="**/AtIssue/build.xml,**/GuestBook/build.xml" erroronmissingdir="false"/>
             </subant>
         </sequential>
     </macrodef>

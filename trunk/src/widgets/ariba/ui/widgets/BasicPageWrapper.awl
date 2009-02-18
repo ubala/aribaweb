@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#98 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#100 $
     </Copyright>
 
     <Overview>
@@ -62,7 +62,7 @@
         see onLoad in ariba.ui.aribaweb.html.AWBody.awl
     </Binding>
 
-    <Binding key="submitFormDefault" direction="get" type="boolean" default="$false">
+    <Binding key="submitFormDefault" direction="get" type="boolean">
         see submitFormDefault in ariba.ui.widgets.PageWrapperForm.awl
     </Binding>
 
@@ -73,7 +73,7 @@
     <Binding key="disableHomeAction" direction="get" type="boolean" default="$false">
         Removes the Home button from the page wrapper.  (see AribaBasicPageWrapper.htm)
     </Binding>
-    
+
     <Binding key="disableHelpAction" direction="get" type="boolean" default="$false">
         Removes the Help button from the page wrapper.  (see AribaBasicPageWrapper.htm)
     </Binding>
@@ -231,7 +231,7 @@
                                        hasSidebarNotch="$^hasSidebarNotch"
                                        isSidebarVisible="$^isSidebarVisible"
                                        disableAboutBox="$^disableAboutBox"
-                                       isNavigatorVisible="$^isNavigatorVisible"                
+                                       isNavigatorVisible="$^isNavigatorVisible"
                                        overrideGlobalCommandBar="$^overrideGlobalCommandBar">\
                     <!---   Note: Nothing should be put inside the AribaBasicPageWrapper
                             other than a ref to AWComponentContent.  If you put something else
@@ -277,11 +277,11 @@
                 <AribaNotificationDialog/>
                 <AribaShutdownWarning/>
                 <w:ErrorBubble/>
+                <a:If ifTrue="$hasTestPane">
+                	<a:IncludeComponent awcomponentName="$testPane"/>\
+				</a:If>
                 <a:If ifFalse="$^sessionless">
                     <a:If ifFalse="$omitWrapperBoilerplate">
-                        <a:If ifTrue="$hasTestPane">
-                            <a:IncludeComponent awcomponentName="$testPane"/>\
-                        </a:If>
                         <a:If ifTrue="$^isDebugVisible:$true">\
                             <a:DebugPane/>\
                         </a:If>\

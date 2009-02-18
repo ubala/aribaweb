@@ -9,6 +9,7 @@ Usage:
 import ariba.ui.aribaweb.util.AWEvaluateTemplateFile
 import ariba.ui.aribaweb.core.AWConcreteApplication
 import ariba.ui.aribaweb.util.AWNamespaceManager
+import ariba.ui.aribaweb.util.AWStaticSiteGenerator
 
 assert args.length >= 3, usage
 
@@ -24,8 +25,11 @@ List inputDirs = args[1..-2].collect() { new File(it) }
 
 // Need to override groovy class loader with one for AW so jar resources are found...
 Thread.currentThread().setContextClassLoader(AWConcreteApplication.class.getClassLoader())
+AWConcreteApplication application = (AWConcreteApplication)AWConcreteApplication.createApplication(
+                AWStaticSiteGenerator.ExtendedDefaultApplication.class.getName(), AWStaticSiteGenerator.ExtendedDefaultApplication.class);
 
-AWConcreteApplication application = (AWConcreteApplication)AWConcreteApplication.defaultApplication()
+// Activate static site generation mode (so that HTMLActionFilter will convert redirects into static URLs)
+new AWStaticSiteGenerator(outputDir)
 
 // Need to set resolver for AWEvaluateTemplate to include widgets
 AWNamespaceManager ns = AWNamespaceManager.instance();
@@ -34,12 +38,12 @@ ns.registerResolverForPackage("ariba.ui.aribaweb.util", ns.resolverForPackage("a
 def processFile (File file) {
     int prefixLen = file.getParentFile().getCanonicalPath().length()
     String relativePath = file.getCanonicalPath().substring(prefixLen)
-    File outputFile = new File(outputDir, relativePath.replaceAll(/\.txt$/, ".html"))
+    File outputFile = new File(outputDir, relativePath.replaceAll(/\.txt$/, ".htm"))
     println "    ... processing $relativePath ..."
     String markdown = file.text
     String title = "AribaWeb -- " + file.name.replace('_', ' ').replace('.txt', '')
     AWEvaluateTemplateFile page = AWEvaluateTemplateFile.create(templateFile,
-            [contents:markdown, title:title])
+            [contents:markdown, title:title], file)
     page.process(outputFile)
 }
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWPagedVector.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWPagedVector.java#11 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -118,12 +118,7 @@ public final class AWPagedVector extends AWBaseObject
             _pages = pages;
             _pageLength = ((Object[])_pages.get(0)).length;
             _endIndex = endIndex;
-
-            _nextIndex = startIndex;
-            _currentPageIndex = _nextIndex / _pageLength;
-            _nextOffset = _nextIndex % _pageLength;
-
-            _currentPage = (Object[])_pages.get(_currentPageIndex);
+            skipTo(startIndex);
         }
 
         public boolean hasNext ()
@@ -149,7 +144,7 @@ public final class AWPagedVector extends AWBaseObject
             _nextIndex = index;
             _nextOffset = _nextIndex % _pageLength;
             _currentPageIndex = _nextIndex / _pageLength;
-            _currentPage = (Object[])_pages.get(_currentPageIndex);
+            _currentPage = (_nextIndex < _endIndex) ? (Object[])_pages.get(_currentPageIndex) : null;
         }
 
         public void remove ()

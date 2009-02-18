@@ -52,9 +52,9 @@ import java.util.Set;
 
     @aribaapi ariba
 */
-public class GrowOnlyHashtable extends AbstractMap
+public class GrowOnlyHashtable<K,V> extends AbstractMap<K,V>
 {
-    private class Storage
+    static private class Storage<K,V>
     {
         int count;
         int totalCount;
@@ -62,8 +62,8 @@ public class GrowOnlyHashtable extends AbstractMap
         int capacity;
         int indexMask;
 
-        Object keys[];
-        Object elements[];
+        K keys[];
+        V elements[];
         public Storage ()
         {
         }
@@ -76,7 +76,7 @@ public class GrowOnlyHashtable extends AbstractMap
             indexMask = o.indexMask;
         }
     }
-    private Storage storage = new Storage();
+    private Storage<K,V> storage = new Storage<K,V>();
 
     public static final String ClassName = "ariba.util.core.GrowOnlyHashtable";
 
@@ -162,21 +162,21 @@ public class GrowOnlyHashtable extends AbstractMap
         Hashtable contains no keys, an empty array is returned.
         @return the Object array above mentioned.
     */
-    public Object[] keysArray ()
+    public K[] keysArray ()
     {
-        Storage tmpStorage = storage;
+        Storage<K,V> tmpStorage = storage;
         int count = tmpStorage.count;
-        Object[] keys = tmpStorage.keys;
+        K[] keys = tmpStorage.keys;
 
         if (count == 0) {
-            return emptyArray;
+            return (K[])emptyArray;
         }
 
-        Object[] array = new Object[count];
+        K[] array = (K[])new Object[count];
         int arrayCount = 0;
 
         for (int i = 0; i < keys.length && arrayCount < count; i++) {
-            Object key = keys[i];
+            K key = keys[i];
             if (key != null && key != DeletedMarker) {
                 array[arrayCount++] = key;
             }
@@ -191,22 +191,22 @@ public class GrowOnlyHashtable extends AbstractMap
         empty array is returned.
         @return the Object array mentioned above.
     */
-    public Object[] elementsArray ()
+    public V[] elementsArray ()
     {
-        Storage tmpStorage = storage;
+        Storage<K,V> tmpStorage = storage;
         int count = tmpStorage.count;
-        Object[] elements = tmpStorage.elements;
+        V[] elements = tmpStorage.elements;
 
 
         if (count == 0) {
-            return emptyArray;
+            return (V[])emptyArray;
         }
 
-        Object[] array = new Object[count];
+        V[] array = (V[])new Object[count];
         int arrayCount = 0;
 
         for (int i = 0; i < elements.length && arrayCount < count; i++) {
-            Object element = elements[i];
+            V element = elements[i];
             if (element != null && element != DeletedMarker) {
                 array[arrayCount++] = element;
             }
@@ -221,7 +221,7 @@ public class GrowOnlyHashtable extends AbstractMap
         element. This method is slow -- O(n) -- because it must scan
         the table searching for the element.
     */
-    public boolean contains (Object element)
+    public boolean contains (V element)
     {
         int i;
         Object tmp;
@@ -266,19 +266,19 @@ public class GrowOnlyHashtable extends AbstractMap
         contain <b>key</b>.  GrowOnlyHashtable hashes and compares
         <b>key</b> using <b>hashCode()</b> and <b>equals()</b>.
     */
-    public Object get (Object key)
+    public V get (Object key)
     {
         // We need to short-circuit here since the data arrays may not have
         // been allocated yet.
-        Storage tmpStorage = storage;
+        Storage<K,V> tmpStorage = storage;
         if (tmpStorage.count == 0) {
             return null;
         }
-        int index = tableIndexFor(tmpStorage, key, true);
+        int index = tableIndexFor(tmpStorage, (K)key, true);
         if (index == -1) {
             return null;
         }
-        Object element = tmpStorage.elements[index];
+        V element = tmpStorage.elements[index];
         return (element == DeletedMarker)  ? null : element;
     }
 
@@ -289,7 +289,7 @@ public class GrowOnlyHashtable extends AbstractMap
         be <b>null</b>. Returns the old element associated with
         <b>key</b>, or <b>null</b> if the <b>key</b> was not present.
     */
-    public Object put (Object key, Object element)
+    public V put (K key, V element)
     {
         if (element == null) {
             throw new NullPointerException();
@@ -305,7 +305,7 @@ public class GrowOnlyHashtable extends AbstractMap
             }
 
             int index = tableIndexFor(storage, key, false);
-            Object oldValue = storage.elements[index];
+            V oldValue = storage.elements[index];
 
                 // If the total number of occupied slots (either with
                 // a real element or a removed marker) gets too big,
@@ -332,12 +332,12 @@ public class GrowOnlyHashtable extends AbstractMap
         }
     }
 
-    protected int getHashValueForObject (Object o)
+    protected int getHashValueForObject (K o)
     {
         return o.hashCode();
     }
 
-    protected boolean objectsAreEqualEnough (Object obj1, Object obj2)
+    protected boolean objectsAreEqualEnough (K obj1, K obj2)
     {
             // Looking at the implementation of visualcafe 1.1 and sun
             // String.equals() isn't smart enough to avoid full
@@ -356,8 +356,8 @@ public class GrowOnlyHashtable extends AbstractMap
         put. The caller must look at the hashCode at that index to
         differentiate between the two possibilities.
     */
-    private int tableIndexFor (Storage tmpStorage,
-                               Object key,
+    private int tableIndexFor (Storage<K,V> tmpStorage,
+                               K key,
                                boolean failIfNoObject)
     {
         int hash = getHashValueForObject(key);
@@ -368,7 +368,7 @@ public class GrowOnlyHashtable extends AbstractMap
         // index where we found a REMOVED marker so we can return that index
         // as the first available slot if the key is not already in the table.
 
-        Object oldKey = tmpStorage.keys[index];
+        K oldKey = tmpStorage.keys[index];
         if (oldKey == null || objectsAreEqualEnough(key, oldKey)) {
             return index;
         }
@@ -385,7 +385,7 @@ public class GrowOnlyHashtable extends AbstractMap
             probeCount++;
             index = (index + step) & tmpStorage.indexMask;
 
-            Object testKey = tmpStorage.keys[index];
+            K testKey = tmpStorage.keys[index];
             if (testKey == null) {
                 if (failIfNoObject) {
                     return -1;
@@ -444,8 +444,8 @@ public class GrowOnlyHashtable extends AbstractMap
     */
     private void grow ()
     {
-        Storage tmpStorage = storage;
-        Storage newStorage = new Storage(tmpStorage);
+        Storage<K,V> tmpStorage = storage;
+        Storage<K,V> newStorage = new Storage(tmpStorage);
 
         int count = tmpStorage.count;
         // The table size needs to be a power of two, and it should double
@@ -456,11 +456,11 @@ public class GrowOnlyHashtable extends AbstractMap
         newStorage.indexMask = (1 << power) - 1;
         newStorage.capacity = (3 * (1 << power)) / 4;
 
-        Object[] oldKeys = tmpStorage.keys;
-        Object[] oldValues = tmpStorage.elements;
+        K[] oldKeys = tmpStorage.keys;
+        V[] oldValues = tmpStorage.elements;
 
-        newStorage.keys = new Object[1 << power];
-        newStorage.elements = new Object[1 << power];
+        newStorage.keys = (K[])new Object[1 << power];
+        newStorage.elements = (V[])new Object[1 << power];
 
         // Reinsert the old elements into the new table if there are any.  Be
         // sure to reset the counts and increment them as the old entries are
@@ -472,7 +472,7 @@ public class GrowOnlyHashtable extends AbstractMap
             count = 0;
 
             for (int i = 0; i < oldKeys.length; i++) {
-                Object key = oldKeys[i];
+                K key = oldKeys[i];
 
                 if (key != null && key != DeletedMarker) {
                     int index = tableIndexFor(newStorage, key, false);
@@ -492,13 +492,13 @@ public class GrowOnlyHashtable extends AbstractMap
     /**
         Returns a List containing the Hashtable's keys.
     */
-    public List keysList ()
+    public List<K> keysList ()
     {
         int i, vectCount;
-        Object key;
-        List vect;
+        K key;
+        List<K> vect;
 
-        Storage tmpStorage = storage;
+        Storage<K,V> tmpStorage = storage;
         int count = tmpStorage.count;
 
         if (count == 0) {
@@ -508,7 +508,7 @@ public class GrowOnlyHashtable extends AbstractMap
         vect = ListUtil.list(count);
         vectCount = 0;
 
-        Object keys[] = tmpStorage.keys;
+        K keys[] = tmpStorage.keys;
 
         for (i = 0; i < keys.length && vectCount < count; i++) {
             key = keys[i];
@@ -545,16 +545,16 @@ public class GrowOnlyHashtable extends AbstractMap
     /**
         @see java.util.Map#entrySet
     */
-    public Set entrySet ()
+    public Set<Entry<K,V>> entrySet ()
     {
-        return new GrowOnlyHashtableEntrySet(storage);
+        return new GrowOnlyHashtableEntrySet<K,V>(storage);
     }
 
-    private static class GrowOnlyHashtableEntrySet extends AbstractSet
+    private static class GrowOnlyHashtableEntrySet<K,V> extends AbstractSet<Entry<K,V>>
     {
-        private final Storage _storage;
+        private final Storage<K,V> _storage;
 
-        GrowOnlyHashtableEntrySet (Storage storage)
+        GrowOnlyHashtableEntrySet (Storage<K,V> storage)
         {
             _storage = storage;
         }
@@ -570,14 +570,14 @@ public class GrowOnlyHashtable extends AbstractMap
         }
     }
 
-    private static class GrowOnlyHashtableEntry implements Map.Entry
+    private static class GrowOnlyHashtableEntry<K,V> implements Map.Entry<K,V>
     {
-        private final Storage _storage;
+        private final Storage<K,V> _storage;
         private int _index = -1;
-        private Object _key;
-        private Object _value;
+        private K _key;
+        private V _value;
 
-        GrowOnlyHashtableEntry (Storage storage)
+        GrowOnlyHashtableEntry (Storage<K,V> storage)
         {
             _storage = storage;
         }
@@ -589,12 +589,12 @@ public class GrowOnlyHashtable extends AbstractMap
             _value = _storage.elements[_index];
         }
 
-        public Object getKey ()
+        public K getKey ()
         {
             return _key;
         }
 
-        public Object getValue ()
+        public V getValue ()
         {
             return _value;
         }
@@ -683,5 +683,17 @@ public class GrowOnlyHashtable extends AbstractMap
         }
     }
 
+    public static class IdentityMap extends GrowOnlyHashtable
+    {
+        protected boolean objectsAreEqualEnough (Object obj1, Object obj2)
+        {
+            return  obj1 == obj2;
+        }
+
+        protected int getHashValueForObject (Object o)
+        {
+            return System.identityHashCode(o);
+        }
+    }
 }
 

@@ -1,24 +1,47 @@
 <w:BasicPageWrapper hasForm="$true">
-    <h1>Hello World!</h1>
-
-    <w:FormTable showErrorFlags="$true">
-        <w:FormRow label="Name">
-            <a:TextField value="$current.name"/>
-        </w:FormRow>
-        <w:FormRow label="Comment">
-            <a:TextArea value="$current.comment" formatter="$formatters.requiredString"/>
-        </w:FormRow>
-        <w:FormRow>
-            <w:TextButton action="$add">Add</w:TextButton>
-        </w:FormRow>
-    </w:FormTable>
-
-    <br/><h2>Past Comments</h2>
-
-    <a:For item="$item" list="$entries">
-        <hr/>
-        On <a:String value="$item.date" formatter="$formatters.dateTime"/>
-        <b>$item.name</b> wrote:<br/>
-        <i>$item.comment</i><br/>
-    </a:For>
+    <h1>Guest Book!</h1>
+    <w:HintMessage>
+        This app is the end result from this <a href="http://www.vimeo.com/1773123">screencast</a>.
+    </w:HintMessage>
+    <w:FourZoneLayout>
+        <a:Content name="left">
+            <w:FormTable showErrorFlags="$true">
+                <w:FormRow label="Name">
+                    <a:TextField value="$current.name"/>
+                </w:FormRow>
+                <w:FormRow label="Post Date">
+                    <a:String value="$current.date" formatter="$formatters.dateTime"/>
+                </w:FormRow>
+                <w:FormRow label="Comment">
+                    <a:TextArea cols="40" rows="20" value="$current.comment" formatter="$formatters.requiredString"/>
+                </w:FormRow>
+                <w:FormRow>
+                    <w:TextButton action="$add" isDefault="$true">Add</w:TextButton>
+                </w:FormRow>
+            </w:FormTable>
+        </a:Content>
+        <a:Content name="right">
+            <w:TabSet>
+                <w:Tab label="List Layout">
+                    <h2>Past Comments</h2>
+                    <a:For item="$item" list="$entries">
+                        <hr/>
+                        On <a:String value="$item.date" formatter="$formatters.dateTime"/>
+                        <b>$item.name</b> wrote:<br/>
+                        <i>$item.comment</i><br/>
+                    </a:For>
+                </w:Tab>
+                <w:Tab label="Table Layout">
+                    <t:DataTable list="$entries" item="$item" enableScrolling="$true" initialSortKey="date">
+                        <t:Column key="name" label="Name"/>
+                        <t:Column key="comment" label="Comment"/>
+                        <t:Column key="date" label="Date" formatter="$formatters.dateTime"/>
+                        <t:Column>
+                            <w:TextButton action="$delete">Delete</w:TextButton>
+                        </t:Column>
+                    </t:DataTable>
+                </w:Tab>
+            </w:TabSet>
+        </a:Content>
+    </w:FourZoneLayout>
 </w:BasicPageWrapper>

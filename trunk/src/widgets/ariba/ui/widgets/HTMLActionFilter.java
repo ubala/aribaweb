@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.java#7 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.java#11 $
 */
 
 package ariba.ui.widgets;
@@ -21,6 +21,9 @@ import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWRedirect;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWBindingNames;
+import ariba.ui.aribaweb.core.AWGenericActionTag;
+import ariba.ui.aribaweb.util.AWResource;
+import ariba.util.core.Assert;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,6 +60,14 @@ public final class HTMLActionFilter extends AWComponent
         return _matcher.group(1) != null;
     }
 
+    public String currentTarget ()
+    {
+        String url = _matcher.group(1);
+        setValueForBinding(url, "actionUrl");
+        String target = stringValueForBinding("actionTarget");
+        return target != null ? target : _matcher.group(2);
+    }
+
     public String remainderString ()
     {
         return _input.substring(_readPos);
@@ -68,7 +79,15 @@ public final class HTMLActionFilter extends AWComponent
         setValueForBinding(orig, "resourceUrl");
 
         _staticUrl = stringValueForBinding("replacementUrl");
-        if (_staticUrl == null && !hasBinding("resourceResponse")) _staticUrl = orig;
+        if (_staticUrl == null && !hasBinding("resourceResponse")) {
+            if (orig.startsWith("/")) {
+                AWResource resource = resourceManager().resourceNamed(orig);
+                Assert.that(resource != null, "Can't find resource referenced in markdown: %s", orig);
+                _staticUrl = resource.url();
+            } else {
+                _staticUrl = orig;
+            }
+        }
 
         return _staticUrl != null;
     }
@@ -76,13 +95,18 @@ public final class HTMLActionFilter extends AWComponent
     public AWResponseGenerating currentClicked ()
     {
         String url = _matcher.group(1);
-        String target = _matcher.group(2);
         setValueForBinding(url, "actionUrl");
+        String target = currentTarget();
         AWResponseGenerating response = (AWResponseGenerating)valueForBinding(AWBindingNames.action);
         if (response == null) {
             response = HTMLActions.handleAction(url, target, this);
         }
         return response;
+    }
+
+    public String staticUrlForActionResults ()
+    {
+        return requestContext().staticUrlForActionResults(currentClicked());
     }
 
     public AWResponseGenerating resourceRequest ()

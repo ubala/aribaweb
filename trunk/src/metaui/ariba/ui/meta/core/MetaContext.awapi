@@ -1,0 +1,65 @@
+<a:Api>
+    <Copyright>
+        Copyright 2009 Craig Federighi
+
+        Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License.
+        You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id:  $
+    </Copyright>
+
+    <Overview>
+        MetaContext (m:Context) enables manipulation of a MetaUI Context as part of the AribaWeb
+        component processing.  The MetaContext tag will find the current Context in the AWEnvironment
+        for the request or will create one, will push() a level on the Context, set() all of its
+        bindings as key/values, render its content, and then pop().  Since its content may contain
+        component that further use MetaContext, additional nested context manipulations may occur.
+
+        Simple use:
+
+                <m:Context object="$user" layout="Inspect" operation="edit">
+                    <m:IncludeComponent/>
+                </m:Context>
+
+        More advanced use:
+
+                <m:Context object="$user" operation="edit">
+                    <a:For item="$fieldName"
+                           list="$metaContext.properties.fieldsByZone.zLeft">
+                        <m:Context field="$fieldName">
+                            <a:If ifTrue="$metaContext.properties.visible">
+                               <a:String value="$metaContext.properties.label"/> :
+                               <m:IncludeComponent/>
+                            </a:If>
+                        </m:Context>
+                     </a:For>
+                </m:Context>
+
+        Generally, MetaContext treats its bindings as a verbatim list of keys/values to be set()
+        on the context (i.e. the bindings above on "object", "layout", "operation", and "field"
+        are not predefined by MetaContext).  See below for a small number of special pre-defined
+        bindings.
+    </Overview>
+
+    <Binding key="valueMap" direction="get" type="Map">
+        If specified indicates a Map of keys/values to be set on the context (in addition to any
+        others specified as bindings).
+    </Binding>
+
+    <Binding key="scopeKey" direction="get" type="String">
+        The key to force as the "context scope key" (see Context.setScopeKey()).
+    </Binding>
+
+    <Binding key="pushNewContext" direction="get" type="boolean" default="false">
+        If true, a *new* context is pushed on the environment (rather than applying
+        the assignments to any current one).
+    </Binding>
+</a:Api>\

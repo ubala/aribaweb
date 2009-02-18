@@ -1,10 +1,10 @@
-<table cellspacing="0" width="100%"><tr>
+<table cellspacing="0" width="100%" class="dbTitleWrapper"><tr>
     <td class="dbTitle">$metaContext.properties.label <b><a:Local>Dashboard</a:Local></b></td>
     <td align="right" nowrap>\
         <!--- Imagine Something useful here -->
     </td>
 </tr></table>
-<table cellspacing="0" width="100%"><tr>
+<table cellspacing="0" width="100%" cellpadding="0"><tr>
     <td _ifTrue="$layoutsByZones.zToc" class="dbTOC">\
         <div class="flexContainer">\
             <div class="dbTOC">\
@@ -14,7 +14,8 @@
     </td>
     <td width="99%" valign="top">\
         <div class="flexContainer">\
-            <w:FourZoneLayout widthLeft="$metaContext.properties.widthLeft" widthRight="$metaContext.properties.widthRight">
+            <a:MethodInvocation invoke="$requestContext.markNextComponentAsMainInTrace"/>\            
+            <w:FourZoneLayout awbindingsDictionary="$metaContext.properties.bindingsDictionary">
                 <a:Content name="top">
                     <a:IncludeBlock name="portlets" list="$layoutsByZones.zTop" portletWidth="wide"/>
                 </a:Content>
@@ -36,13 +37,15 @@
     <a:Environment portletWidth="$^portletWidth">\
         <a:For list="$^list" item="$layout">
             <m:Context layout="$layout.name">
-                <a:Form omitTags="$!layout.properties.needsForm">
-                    <a:IncludeComponent name="$layout.properties.wrapperComponent:PortletWrapper"
-                           title="$label"
-                           dragAction='${ariba.ui.widgets.AribaPageContent.setMessage("Dragging portlets not fully implemented yet -- check back later!", session()); null}'>
-                        <m:IncludeComponent/>\
-                    </a:IncludeComponent>
-                </a:Form>
+                <a:If ifTrue="$metaContext.properties.visible">
+                    <a:Form omitTags="$!metaContext.properties.needsForm">
+                        <a:IncludeComponent name="$metaContext.properties.portletWrapper:PortletWrapper"
+                               title="$label"
+                               dragAction='${ariba.ui.widgets.AribaPageContent.setMessage("Dragging portlets not fully implemented yet -- check back later!", session()); null}'>
+                            <m:IncludeComponent/>\
+                        </a:IncludeComponent>
+                    </a:Form>
+                </a:If>
             </m:Context>
         </a:For>
     </a:Environment>

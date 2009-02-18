@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#12 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#13 $
 */
 
 package ariba.ui.servletadaptor;
@@ -180,11 +180,6 @@ public class AWServletApplication extends AWConcreteApplication
         else {
             return StringUtil.strcat(path1, separator, path2);
         }
-    }
-
-    public boolean initIsRapidTurnaroundEnabled ()
-    {
-        return true;
     }
 
     public boolean initIsStatisticsGatheringEnabled ()

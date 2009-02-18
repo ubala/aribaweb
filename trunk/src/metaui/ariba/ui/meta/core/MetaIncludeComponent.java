@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaIncludeComponent.java#10 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaIncludeComponent.java#13 $
 */
 package ariba.ui.meta.core;
 
@@ -30,7 +30,7 @@ import ariba.ui.aribaweb.core.AWBindingNames;
 import ariba.ui.aribaweb.core.AWConcreteTemplate;
 import ariba.ui.aribaweb.core.AWContent;
 import ariba.ui.aribaweb.core.AWElementContaining;
-import ariba.ui.aribaweb.core.AWBaseElement;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.Assert;
@@ -41,6 +41,20 @@ import ariba.util.fieldvalue.FieldPath;
 import java.util.Map;
 import java.util.List;
 
+/**
+    MetaIncludeComponent is (along with MetaContext) the key element for binding MetaUI into
+    AribaWeb user interfaces.
+
+    MetaIncludeComponent dynamically switches in an AWComponent (or other AWElement) based on
+    the current MetaContext's 'component' property and sets its bindings from the 'bindings' property.
+    This alone enables almost any existing AW widget to be specified for use for a particular field
+    or layout using rules -- without any additional glue code or "adaptor components".
+
+    MetaIncludeComponent support additional, more sophisticated, component bindings:  wrapping the main
+    component using 'wrapperComponent' and 'wrapperBindings', binding component content using the bindings
+    'awcontent' and 'awcontentElement', and event binding named Content templates using an 'awcontentLayouts'
+    map binding.
+ */
 public class MetaIncludeComponent extends AWIncludeComponent
 {
     private AWBinding _awpropertyMap;
@@ -100,12 +114,16 @@ public class MetaIncludeComponent extends AWIncludeComponent
 
     protected String componentName (AWComponent component)
     {
-        return componentName(component, UIMeta.KeyComponentName);
+        String name = componentName(component, UIMeta.KeyComponentName);
+        if (name == null && AWConcreteApplication.IsDebuggingEnabled) {
+            return "MetaNoComponent";
+        }
+        return name;
     }
 
-    protected String componentName (AWComponent component, String poropertyKey)
+    protected String componentName (AWComponent component, String propertyKey)
     {
-        Object name = properties(component).get(poropertyKey);
+        Object name = properties(component).get(propertyKey);
         return (name == null) ? null
             : (name instanceof String)
                 ? (String)name
@@ -212,30 +230,38 @@ public class MetaIncludeComponent extends AWIncludeComponent
         if (contentLayoutsBinding != null) {
             Map<String, String> contentToLayout = (Map)contentLayoutsBinding.value(component);
             if (!MapUtil.nullOrEmptyMap(contentToLayout)) {
-                // Template -*> AWContent (name:key) --> MetaContext (layout:value) --> MetaInclude
-                AWConcreteTemplate concreteTemplate = new AWConcreteTemplate();
-                concreteTemplate.init();
-                for (Map.Entry e : contentToLayout.entrySet()) {
-                    AWContent content = new AWContent();
-                    content.init("AWContent", AWUtil.map(AWBindingNames.name,
-                            AWBinding.bindingWithNameAndConstant(AWBindingNames.name, e.getKey())));
-                    content.setTemplateName(templateName());
-
-                    MetaContext metaContext = new MetaContext();
-                    metaContext.init("MetaContext", AWUtil.map(UIMeta.KeyLayout,
-                            AWBinding.bindingWithNameAndConstant(UIMeta.KeyLayout, e.getValue())));
-                    metaContext.setTemplateName(templateName());
-                    content.add(metaContext);
-                    MetaIncludeComponent metaInclude = new MetaIncludeComponent();
-                    metaInclude.setTemplateName(templateName());
-                    metaInclude.init("MetaIncludeComponent", MapUtil.map());
-                    metaContext.add(metaInclude);
-                    concreteTemplate.add(content);
+                String name;
+                if (contentToLayout.size() == 1 && ((name = contentToLayout.get("_main")) != null)) {
+                    return createLayoutInclude(name);
+                } else {
+                    // Template -*> AWContent (name:key) --> MetaContext (layout:value) --> MetaInclude
+                    AWConcreteTemplate concreteTemplate = new AWConcreteTemplate();
+                    concreteTemplate.init();
+                    for (Map.Entry e : contentToLayout.entrySet()) {
+                        AWContent content = new AWContent();
+                        content.init("AWContent", AWUtil.map(AWBindingNames.name,
+                                AWBinding.bindingWithNameAndConstant(AWBindingNames.name, e.getKey())));
+                        content.setTemplateName(templateName());
+                        content.add(createLayoutInclude((String)e.getValue()));
+                        concreteTemplate.add(content);
+                    }
+                    return concreteTemplate;
                 }
-                return concreteTemplate;
             }
         }
         return super.createContentElement(component, newBindingsHashtable, application);
+    }
+
+    private AWElement createLayoutInclude(String layoutName) {
+        MetaContext metaContext = new MetaContext();
+        metaContext.init("MetaContext", AWUtil.map(UIMeta.KeyLayout,
+                AWBinding.bindingWithNameAndConstant(UIMeta.KeyLayout, layoutName)));
+        metaContext.setTemplateName(templateName());
+        MetaIncludeComponent metaInclude = new MetaIncludeComponent();
+        metaInclude.setTemplateName(templateName());
+        metaInclude.init("MetaIncludeComponent", MapUtil.map());
+        metaContext.add(metaInclude);
+        return metaContext;
     }
 
 

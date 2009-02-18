@@ -5,6 +5,6 @@
         \<script src="../resource/prettify.js" language=JavaScript>\</script>
     </head>
     <body class="doc" style="padding:8px" onload="prettyPrint()">
-        <w:Markdown value="$contents"/>
+        <w:HTMLActionFilter value="${ariba.ui.widgets.Markdown.translateMarkdown(contents)}" actionUrl="$hrefUrl" action="$resolvedHrefUrlRedirect"/>
     </body>
 </html>

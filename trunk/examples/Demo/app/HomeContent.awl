@@ -2,15 +2,16 @@
           Try selecting <b>Component Inspector</b> from the <b>AW Options</b> link above...
 </w:HintMessage>
 
-<div style="padding:0px 8px 8px 8px">
-    <h1>Welcome!</h1>
-    AribaWeb is a component-oriented framework for building web application
-    user interfaces.  The AW distribution includes both the (relatively) low-level
+<div style="padding:0px 8px 8px 8px" class="doc">
+    <b><a href="http://aribaweb.org" target="_blank">AribaWeb</a> is the Open Source component-based web application
+    development framework for creating rich, AJAX-enabled applications with the absolute minimum of code
+    (and no hand-coded Javascript).</b>
+    The AW distribution includes both the (relatively) low-level
     core rendering and request handling framework (ariba.aribaweb) as well
     as a higher level library of ui components (ariba.widgets, ariba.metaui, ...)
     <br/><br/>
 
-    <h1>The Demo Application</h1>
+    <h2>The Demo Application</h2>
     This application shows off some of AW's bundled widgets.  Click across the tabs
     at the top and explore
     <b><a:Hyperlink action='${pageWithName("TableTabs")}'>Data Tables</a:Hyperlink></b>,
@@ -21,15 +22,17 @@
     (simulated Expense Report editor) that pulls some of this together.
     <br/><br/>
 
-    <h1>Source Search</h1>
+    <h2>Source Search</h2>
     Check out the  <b><a:Hyperlink action='${pageWithName("SearchSource")}'>Documentation</a:Hyperlink></b>
     table for to search or browse the AribaWeb documentation and source code.
     <br/><br/>
 
-    <h1>Component Inspector</h1>
+    <h2>X-Ray</h2>
     You'll hopefully soon grow curious as to what's happening "under the hood" with
     these examples.  That's where
-    <b><a:Hyperlink action='${ariba.ui.dev.AWComponentInspector.togglePathDebugging(requestContext())}'>Component Inspector</a:Hyperlink></b>
+    <b bh="${ariba.ui.dev.AWComponentInspector.ciLinkBH(requestContext)}">\
+        <a:Hyperlink action='${ariba.ui.dev.AWComponentInspector.togglePathDebugging(requestContext())}'>Component Inspector</a:Hyperlink>\
+    </b>
     comes in.  Just activate it (from the "AW Options" menu at the top of every page) and
     it will show you all of the components involved in rendering each page, automatically
     updating as you browse.  You can see the .awl template contents, the .java or .groovy
@@ -38,16 +41,18 @@
     and Component Inspector will automatically focus on that path in the component tree.
     <br/><br/>
 
-    <h1>Other Example Apps</h1>
+    <h2>Other Example Apps</h2>
     In addition to the Demo app, a few other small sample apps are bundled with this
-    distribution.  Check out <b><a href="/GuestBook/AribaWeb">Guest Book</a></b>,
-    a trivial widgets-only app, and <b><a href="/MetaDB/AribaWeb">MetaDB</a></b>,
-    which demonstrates how the MetaUI framework can create a complete database application
-    from just a set of domain POJOs.
+    distribution.  Check out <b><a href="/MasterDetail/AribaWeb">MasterDetail</a></b>, an "Instant App"
+    (MetaUI database app) which includes AppCore (User, Group, Permission) and Compass text search.
+    (Note: for full functionality in MasterDetail, click the <i>login</i> link and login as Admin/ariba).
+    Also included in the examples directory are  <b>Guest Book</b>, a trivial widgets-only app, and
+    <b>AtIssue</b>, a cool, email-integrated Issue Tracker building on MasterDetail.
     <br/><br/>
 
-    <h1>Creating your own Application</h1>
-    Ready to get started building an application of your own?  Check out "Creating_New_App"
+    <h2>Creating your own Application</h2>
+    Ready to get started building an application of your own?  Check out
+    "<b><a:Hyperlink action='${def p = pageWithName("SearchSource"); p.show("Creating_New_App.htm"); p}'>Creating_New_App</a:Hyperlink></b>"
     in the doc/Tutorials folder in your AribaWeb installation.
     <br/><br/>
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#77 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#79 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -403,7 +403,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
 
         response = historyRequestFilter(request, requestContext);
         if (response != null) return response;
-        
+
         session.initRequestType();
         AWPage currentPage = session.restoreCurrentPage();
 
@@ -426,6 +426,9 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
             }
             if (currentPage.pageComponent().shouldValidateRequest()) {
                 currentPage.pageComponent().validateRequest(requestContext);
+            }
+            if (! isValidNode(requestContext)) {
+                throw new AWGenericException("Security Exception.  Invalid node.");
             }
             int requestType = session.requestType(request);
 
@@ -499,7 +502,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                     if (response == null) {
                         // AWReload support
                         if (AWConcreteApplication.IsRapidTurnaroundEnabled) AWUtil.getClassLoader().checkForUpdates();
-                        
+
                         currentPage.ensureAwake(requestContext);
                         session.savePage(currentPage);
                         requestContext.setPage(currentPage);
@@ -529,9 +532,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                     }
 
                     // Allow response to replace itself (see AWRedirect for example)
-                    if (actionResults instanceof AWResponseGenerating.ResponseSubstitution
-                        && !requestContext._debugIsInPlaybackMode()
-                        && !requestContext._debugIsInRecordingMode()) {
+                    if (actionResults instanceof AWResponseGenerating.ResponseSubstitution) {
                         actionResults = ((AWResponseGenerating.ResponseSubstitution)actionResults).replacementResponse();
                     }
 
@@ -608,6 +609,20 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         }
     }
 
+    /**
+        This verifies that the sesson, node role and realm all match properly.
+        This is a helper method to handleRequest.
+        @aribaapi private
+     */
+    private boolean isValidNode (AWRequestContext requestContext)
+    {
+        AWNodeValidator val = AWNodeManager.getDefaultNodeValidator();
+        if (val == null) {
+            return true;
+        }
+        return val.isValid(requestContext);
+    }
+
     static class NullResponse extends AWBaseResponse
     {
         public void setStatus (int status)
@@ -674,7 +689,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     }
 
     protected void _runNullRender(AWRequestContext requestContext,
-                                AWComponent actionResultsComponent, 
+                                AWComponent actionResultsComponent,
                                 AWRequest request,
                                 boolean runAsRefresh)
     {

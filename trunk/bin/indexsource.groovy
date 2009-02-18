@@ -87,8 +87,9 @@ def indexbuilds (File indexHome) {
             String buildDirPath = buildDir.path.replace("\\", "/")
             if (!buildDirPath.endsWith("/")) buildDirPath += "/"
             config.roots.each { sourceConfig ->
-               argList += buildDirPath + sourceConfig.sourcePattern
-               argList += buildDirPath + sourceConfig.sourcePattern
+               String dirPrefix = sourceConfig.sourcePattern.startsWith("/") ? "" : buildDirPath;
+               argList += dirPrefix + sourceConfig.sourcePattern
+               argList += dirPrefix + sourceConfig.sourcePattern
                argList += sourceConfig.type
             }
             createIndex(argList.toArray())
@@ -114,7 +115,8 @@ def createIndex (args) {
              "dtd", "groovy", "table", "pl", "module", "bdf", "rul", "pml", "acf"]);
              // not:  "xml", "csv"
     File indexDir = new File(args[0])
-    def _writer = new IndexWriter(indexDir, new StandardAnalyzer(), true)
+    // def _writer = new IndexWriter(indexDir, new StandardAnalyzer(), true)
+    def _writer = new IndexWriter(indexDir, search.SourceCodeAnalyzer.analyzerForField("contents", null), true)
     _writer.useCompoundFile = false
     println "Created index in ${args[0]}"
 
@@ -129,10 +131,18 @@ def createIndex (args) {
             String dirName = (symbolicName == dataDirPat) ? dataDir.getAbsolutePath().substring(0,prefixLen) : symbolicName
             println "Indexing dir ${dataDir} as ${type}, root=${dirName}"
             dataDir.eachFileRecurse { File f ->
-                def m = f.name =~ /.+\.(\w+)$/
                 String path = f.getAbsolutePath().substring(prefixLen+1).replace('\\','/')
+                boolean skip = false
+                // Hack for AN (which includes old release builds in path)
+                if (dataDir.getName() == "release") {
+                    String projName = path.split("/")[0]
+                    if (new File(dataDir.getParentFile(), projName).exists()) skip = true;
+                }
+                def m = f.name =~ /.+\.(\w+)$/
                 // println "${f.name} : ${m.matches() ? m.group(1) : 'no match'}"
-                if (f.directory) {
+                if (skip) {
+                  // skip
+                } else if (f.directory) {
                     println "   ... indexing $path"
                 } else if (m.matches() && _IndexedExtensions.contains(m.group(1)) && (f.parentFile.name != "class-use") && !f.hidden && f.exists() && f.canRead() && f.length() < 1000000) {
                     String className = f.getName().replaceAll(/\.(\w+)$/, "")

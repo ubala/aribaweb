@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWResourceManager.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWResourceManager.java#11 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -37,6 +37,7 @@ public abstract class AWResourceManager extends AWBaseObject
     abstract public String pathForResourceNamed (String resourceName);
     abstract public String urlForResourceNamed (String resourceFileName);
     abstract public String urlForResourceNamed (String resourceFileName, boolean isFullUrl, boolean isSecure);
+    abstract public String urlForResourceNamed (String resourceFileName, boolean isFullUrl, boolean isSecure, boolean isVersioned);
     abstract public AWImageInfo imageInfoForName (String imageFilename);
     abstract public AWResource packageResourceNamed (String resourceName);
     abstract public Locale locale ();

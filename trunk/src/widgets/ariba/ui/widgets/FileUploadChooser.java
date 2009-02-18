@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FileUploadChooser.java#1 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FileUploadChooser.java#3 $
 */
 package ariba.ui.widgets;
 
@@ -20,6 +20,7 @@ import ariba.ui.aribaweb.util.AWMimeReader;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.util.core.SystemUtil;
+import ariba.util.core.Fmt;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class FileUploadChooser extends AWComponent
         }
     }
 
-    public String _filename;
+    String _filename;
     public String _displayName;
 
     protected void awake ()
@@ -44,6 +45,10 @@ public class FileUploadChooser extends AWComponent
         if (_displayName == null) {
             File file = (File)valueForBinding(BindingNames.file);
             if (file != null) _displayName = file.getName();
+        }
+        if (_displayName == null) {
+            byte[] bytes = (byte[])valueForBinding(BindingNames.bytes);
+            if (bytes != null) _displayName = String.format("%,d bytes" /* */, bytes.length);
         }
     }
 
@@ -57,6 +62,13 @@ public class FileUploadChooser extends AWComponent
     {
         setValueForBinding(null, BindingNames.filename);
         setValueForBinding(null, BindingNames.file);
+        setValueForBinding(null, BindingNames.bytes);
+    }
+
+    public void setFilename (String filename)
+    {
+        _filename = filename;
+        setValueForBinding(_filename, BindingNames.filename);        
     }
         
     public void setFile (File file)
@@ -67,7 +79,6 @@ public class FileUploadChooser extends AWComponent
 
         file.renameTo(newFile);
         newFile.deleteOnExit();
-        setValueForBinding(_filename, BindingNames.filename);
         setValueForBinding(newFile, BindingNames.file);
     }
     
@@ -83,5 +94,10 @@ public class FileUploadChooser extends AWComponent
         } catch (IOException e) {
             throw new AWGenericException(e);
         }
+    }
+
+    public boolean hasContent ()
+    {
+        return hasContentNamed(null);
     }
 }

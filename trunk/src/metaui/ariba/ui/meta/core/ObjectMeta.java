@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ObjectMeta.java#15 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ObjectMeta.java#18 $
 */
 package ariba.ui.meta.core;
 
@@ -86,11 +86,11 @@ public class ObjectMeta extends Meta
         registerPropertyMerger(KeyEditable, new PropertyMerger_And());
         registerPropertyMerger(KeyValid, new PropertyMerger_Valid());
 
-        registerPropertyMerger(KeyClass, Context.PropertyMerger_DeclareList);
-        registerPropertyMerger(KeyField, Context.PropertyMerger_DeclareList);
-        registerPropertyMerger(KeyAction, Context.PropertyMerger_DeclareList);
-        registerPropertyMerger(KeyActionCategory, Context.PropertyMerger_DeclareList);
-        registerPropertyMerger(KeyTraitGroup, Context.PropertyMerger_DeclareList);
+        registerPropertyMerger(KeyClass, PropertyMerger_DeclareList);
+        registerPropertyMerger(KeyField, PropertyMerger_DeclareList);
+        registerPropertyMerger(KeyAction, PropertyMerger_DeclareList);
+        registerPropertyMerger(KeyActionCategory, PropertyMerger_DeclareList);
+        registerPropertyMerger(KeyTraitGroup, PropertyMerger_DeclareList);
 
         mirrorPropertyToContext(KeyClass, KeyClass);
         mirrorPropertyToContext(KeyType, KeyType);
@@ -235,22 +235,13 @@ public class ObjectMeta extends Meta
         }
     }
 
-    public List<String> fieldNames (Context context)
-    {
-        return itemNames(context, KeyField);
-    }
-
     public List<String> itemNames (Context context, String key)
     {
         context.push();
-        Object contextVal = context.values().get(key);
-        if (contextVal == null) contextVal = Meta.KeyAny;
-        context.set(key, contextVal);
         context.set(KeyDeclare, key);
-        List <String> fieldNames = context.listPropertyForKey(key);
-        fieldNames.remove(contextVal);
+        List <String> itemNames = context.listPropertyForKey(key);
         context.pop();
-        return fieldNames;
+        return itemNames;
     }
 
     public List<ItemProperties> itemProperties (Context context, String key, boolean filterHidden)
@@ -357,7 +348,7 @@ public class ObjectMeta extends Meta
         processPropertiesAnnotation(propInfo.value(), prop, selectorList);
     }
 
-    public void processActionAnnotation (Action annotation, AnnotatedElement prop, List selectorList)
+    public void processActionAnnotation (Action annotation, AnnotatedElement prop, List<Rule.Selector> selectorList)
     {
         Method method = (Method)prop;
         boolean isStatic = (method.getModifiers() & Modifier.STATIC) != 0;
@@ -369,14 +360,16 @@ public class ObjectMeta extends Meta
         }
         Map properties = new HashMap();
 
-        List selectors = new ArrayList(selectorList);
-        selectors.add(selectorList.size()-1, new Rule.Selector(KeyActionCategory, annotation.category()));
+        List<Rule.Selector> selectors = new ArrayList(selectorList.subList(0,selectorList.size()-1));
+        selectors.add(new Rule.Selector(KeyActionCategory, annotation.category()));
         if (!isStatic) selectors.add(new Rule.Selector(KeyObject, KeyAny));
-        properties.put(KeyActionCategory, annotation.category());
+        // properties.put(KeyActionCategory, annotation.category());
+        Rule.Selector origSel = ListUtil.lastElement(selectorList);
+        Rule.Selector actionSel = new Rule.Selector(origSel.getKey(), origSel.getValue(), true);
+        selectors.add(actionSel);
 
         if (!isStatic) addTraits(Arrays.asList("instance"), properties);
 
-        // Todo:  Category part of selector!
         addTraits(Arrays.asList(annotation.ResponseType().name()), properties);
 
         String message = annotation.message();
@@ -469,7 +462,7 @@ public class ObjectMeta extends Meta
 
         public void notify(Meta meta, String key, Object value)
         {
-            Log.meta.debug("IntrospectionMetaProvider notified of first use of class: %s ", value);
+            Log.meta_detail.debug("IntrospectionMetaProvider notified of first use of class: %s ", value);
             Class cls = AWUtil.classForName((String)value);
             if (cls != null) {
                 registerRulesForClass(cls);
@@ -484,20 +477,24 @@ public class ObjectMeta extends Meta
                 keyData(KeyClass).setParent(className, sc.getName());
             }
 
-            beginRuleSet(cls.getName().replace(".", "/") + ".java");
+            RuleSet ruleSet = null;
 
-            List selectorList = Arrays.asList(new Rule.Selector(KeyClass, className));
-            Map properties = newPropertiesMap();
-            processAnnotations(cls, selectorList, properties, false);
-            if (!properties.isEmpty()) {
-                Rule r = new Rule(selectorList, properties, ClassRulePriority);
-                addRule(r);
+            beginRuleSet(cls.getName().replace(".", "/") + ".java");
+            try {
+                List selectorList = Arrays.asList(new Rule.Selector(KeyClass, className));
+                Map properties = newPropertiesMap();
+                processAnnotations(cls, selectorList, properties, false);
+                if (!properties.isEmpty()) {
+                    Rule r = new Rule(selectorList, properties, ClassRulePriority);
+                    addRule(r);
+                }
+
+                _registerActionsForClass(className, cls);
+                _registerFieldsForClass(className, cls);
+            } finally {
+                ruleSet = endRuleSet();
             }
 
-            _registerActionsForClass(className, cls);
-            _registerFieldsForClass(className, cls);
-
-            RuleSet ruleSet = endRuleSet();
             _ruleSetsByClassName.put(className, ruleSet);
         }
 
@@ -510,7 +507,7 @@ public class ObjectMeta extends Meta
                     Map properties = new HashMap();
                     List <Rule.Selector> selectors = Arrays.asList(new Rule.Selector(KeyClass, key),
                                                 new Rule.Selector(KeyAction, name));
-                    ListUtil.lastElement(selectors)._isDecl = true;
+                    // ListUtil.lastElement(selectors)._isDecl = true;
                     processAnnotations(method, selectors, properties, true);
                     if (!properties.isEmpty()) {
                         Rule r = new Rule(selectors, properties, ClassRulePriority);
@@ -613,6 +610,5 @@ public class ObjectMeta extends Meta
                 Log.meta.debug("Registering non-primitive field type: %s ", cls);
             }
         }
-
     }
 }

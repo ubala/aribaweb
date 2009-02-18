@@ -65,6 +65,7 @@
             <arg value="${doc.dir}/xsd"/>
             <arg value="${src.ui.dir}/aribaweb"/>
             <arg value="${src.ui.dir}/widgets"/>
+            <arg value="${src.ui.dir}/metaui"/>
             <classpath>
                 <path refid="classpath"/>
             </classpath>
@@ -109,7 +110,7 @@
                     link="${javadoc.link}"
                     windowtitle="${Name} ${version} API"
                     doctitle="${Name} ${version} API"
-                    bottom="Copyright &amp;copy; ${year} Ariba, Inc.  All Rights Reserved.">
+                    bottom="&lt;a href='http://aribaweb.org' target='_top'&gt;AribaWeb User Interface Development Framework&lt;/a&gt;&lt;br/&gt;Copyright &amp;copy; ${year} Ariba, Inc.  All Rights Reserved.">
                 <tag name="note" description="Note:"/>
                 <tag name="aribaapi" enabled="false"/>
 
@@ -123,6 +124,7 @@
                 </packageset>
 
                 <packageset dir="${src.ui.dir}/metaui"/>
+                <packageset dir="${src.ui.dir}/metaui-jpa"/>
                 <!--
                 <packageset dir="${src.ui.dir}/demoshell">
                     <exclude name="ariba/ui/scratch/**"/>

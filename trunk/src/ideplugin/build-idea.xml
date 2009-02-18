@@ -33,6 +33,8 @@
     <import file="${aw.home}/tools/build-module.xml"/>
 
     <property name="build.plugin.dir" value="${dist.root.dir}/ide"/>
+    <property name="dest.jar" location="${build.plugin.dir}/aribawebIdeaPlugin.jar"/>
+
     <available file="lib/idea" property="idea.lib.dir" value="lib/idea"/>
 
     <fileset id="module.libs" dir="${idea.lib.dir}">
@@ -48,22 +50,23 @@
     </target>
 
     <target name="jar-check">
+        <pathconvert property="source.files.path" refid="source.files"/>
         <dependset>
             <sources>
                 <resources refid="source.files"/>
             </sources>
             <targets>
-                <path location="${build.plugin.dir}/aribawebIdeaPlugin.jar"/>
+                <path location="${dest.jar}"/>
             </targets>
         </dependset>
-        <available file="${build.plugin.dir}/aribawebIdeaPlugin.jar" property="jar.uptodate"/>
+        <available file="${dest.jar}" property="jar.uptodate"/>
     </target>
 
     <target name="jar" depends="check-missing-idea-lib, jar-check" unless="jar.uptodate" if="has.idea.lib"
             description="Packages the JAR file">
         <mkdir dir="${build.plugin.dir}"/>
         <antcall target="build-jar">
-            <param name="build.jar.file" value="${build.plugin.dir}/aribawebIdeaPlugin.jar"/>
+            <param name="build.jar.file" value="${dest.jar}"/>
             <param name="javac.excludes" value="**/eclipse/**/*"/>
         </antcall>
     </target>

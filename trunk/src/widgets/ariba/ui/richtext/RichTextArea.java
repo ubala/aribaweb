@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.java#21 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.java#22 $
 */
 
 package ariba.ui.richtext;
@@ -25,7 +25,6 @@ import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.html.BindingNames;
 import ariba.util.core.HTML;
 import ariba.util.core.Fmt;
-
 import java.util.regex.Pattern;
 
 public class RichTextArea extends AWComponent
@@ -52,7 +51,7 @@ public class RichTextArea extends AWComponent
         return SupportedBindingNames;
     }
 
-    public boolean isStateless()
+    public boolean isStateless ()
     {
         return false;
     }
@@ -97,7 +96,14 @@ public class RichTextArea extends AWComponent
         String safeHTML = HTML.filterUnsafeHTML(value);
 
         if (!safeHTML.equals(value)) {
-            recordError(); 
+            // this results in an error message that (should)
+            // be displayed to the user and the submission
+            // will fail
+            recordError();
+        }
+        else {
+            // final pass only, after the submission is successful
+            safeHTML = HTML.filterMargins(safeHTML);
         }
 
         setValueForBinding(safeHTML, BindingNames.value);
@@ -108,7 +114,7 @@ public class RichTextArea extends AWComponent
     // when area is sized in a panel, in which case Xinha will use rows/cols as width/height
     // in ems -- so, we need to adjust for the size different between ems and the
     // "average character size" traditionally used by rows/cols.
-    
+
     public int rows ()
     {
         int rows = intValueForBinding("rows");
@@ -148,7 +154,7 @@ public class RichTextArea extends AWComponent
         string = RemoveNewlinePattern.matcher(string).replaceAll("");
         // 1-79ISX1 - remove leading unbalanced closing tags
         string = RemoveUnbalancedPattern.matcher(string).replaceAll("");
-        // remove script added attributes by Firefox 
+        // remove script added attributes by Firefox
         string = RemoveMouseAttrPattern.matcher(string).replaceAll("");
         string = RemoveLeadingLISpacePattern.matcher(string).replaceAll("<li>");
         string = RemovePTagPattern.matcher(string).replaceAll("$1\n");

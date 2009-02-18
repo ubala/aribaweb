@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PaddedImage.awl#7 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PaddedImage.awl#8 $
     </Copyright>
 
     <Overview>
@@ -21,6 +21,10 @@
     </Overview>
 
     <Binding key="alt" direction="get" type="String" required="$false">
+        TBD
+    </Binding>
+    
+    <Binding key="title" direction="get" type="String" required="$false">
         TBD
     </Binding>
 
@@ -47,7 +51,7 @@
         <a:If notEqualNull="$componentReference.contentElement">\
             <a:IncludeContent required="$false"/>\
         <a:Else/>\
-            <a:Image filename="$^filename" align="$^align" alt="$^alt" fullUrl="$^fullUrl"/>\
+            <a:Image filename="$^filename" align="$^align" title="$^title" alt="$^alt" fullUrl="$^fullUrl"/>\
         </a:If>\
     </span>\
 </t:ExportConditional>

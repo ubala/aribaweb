@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWEvaluateTemplateFile.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWEvaluateTemplateFile.java#5 $
 */
 package ariba.ui.aribaweb.util;
 
 import ariba.util.core.Assert;
 import ariba.util.core.ListUtil;
+import ariba.util.core.URLUtil;
 import ariba.util.fieldvalue.FieldValue_Object;
 import ariba.util.fieldvalue.FieldPath;
 import ariba.util.fieldvalue.FieldValueException;
@@ -25,6 +26,8 @@ import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWTemplate;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWValidationContext;
+import ariba.ui.aribaweb.core.AWRedirect;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +36,10 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.Map;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
     Command line task for evaluating an template file (.awl) in terms of a
@@ -45,6 +51,7 @@ import java.net.MalformedURLException;
 public class AWEvaluateTemplateFile extends AWComponent
 {
     static File _templateFile;
+    static File _baseFile;
     public Map <String, Object>_properties;
     public String propName;
 
@@ -81,6 +88,13 @@ public class AWEvaluateTemplateFile extends AWComponent
         return page;
     }
     
+    public static AWEvaluateTemplateFile create (File templateFile, Map properties, File baseFile)
+    {
+        AWEvaluateTemplateFile page = create(templateFile,  properties);
+        _baseFile = baseFile;
+        return page;
+    }
+
     public void process (File outputFile)
     {
         String output = generateStringContents();
@@ -132,6 +146,29 @@ public class AWEvaluateTemplateFile extends AWComponent
     public String decamelize (String string)
     {
         return AWUtil.decamelize(string, '-', false);
+    }
+
+    /*
+    hrefUrl" action="$resolvedHrefUrl
+     */
+    public String _hrefUrl;
+
+    static final Pattern LocalResourcePattern = Pattern.compile("^/?([\\w\\-\\./_]+)");
+
+    public AWResponseGenerating resolvedHrefUrlRedirect ()
+    {
+        if (_baseFile == null || _hrefUrl == null) return null;
+
+        String destUrl = _hrefUrl;
+        Matcher m = LocalResourcePattern.matcher(_hrefUrl);
+        if (m.matches()) {
+            File resourceFile = new File (_baseFile.getParentFile(), m.group(1));
+            Assert.that(resourceFile.exists(), "Can't find referenced file: %s", _hrefUrl);
+
+            destUrl = AWUtil.relativeUrlString(URLUtil.url(_baseFile), URLUtil.url(resourceFile));
+            if (destUrl.endsWith(".txt")) destUrl = destUrl.replaceAll("\\.txt$", ".htm");
+        }
+        return AWRedirect.getRedirect(requestContext(), destUrl);
     }
 
     /*

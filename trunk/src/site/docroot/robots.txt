@@ -1,0 +1,3 @@
+User-Agent: *
+Allow: /
+Sitemap: http://aribaweb.org/sitemap.xml.gz

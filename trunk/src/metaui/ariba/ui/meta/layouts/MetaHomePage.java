@@ -12,15 +12,23 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaHomePage.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaHomePage.java#5 $
 */
 package ariba.ui.meta.layouts;
 
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.aribaweb.util.AWStaticSiteGenerator;
+import ariba.ui.meta.core.UIMeta;
 
-public class MetaHomePage extends AWComponent implements AWResponseGenerating.ResponseSubstitution
+import java.util.Map;
+import java.util.Collections;
+
+public class MetaHomePage extends AWComponent implements AWResponseGenerating.ResponseSubstitution,
+        UIMeta.NavContextProvider, AWStaticSiteGenerator.Naming
 {
+    String _module;
+
     public ariba.ui.meta.core.ItemProperties currentModule ()
     {
         MetaNavTabBar.State state = MetaNavTabBar.getState(session());
@@ -31,5 +39,25 @@ public class MetaHomePage extends AWComponent implements AWResponseGenerating.Re
     public AWResponseGenerating replacementResponse ()
     {
         return MetaNavTabBar.getState(session()).redirectForPage(this);
+    }
+
+    public String getModule()
+    {
+        return _module;
+    }
+
+    public void setModule (String module)
+    {
+        _module = module;
+    }
+
+    public Map<String, String> currentNavContext()
+    {
+        return (_module != null) ? Collections.singletonMap(UIMeta.KeyModule, _module) : null;
+    }
+
+    public String staticPath()
+    {
+        return currentModule().name();
     }
 }

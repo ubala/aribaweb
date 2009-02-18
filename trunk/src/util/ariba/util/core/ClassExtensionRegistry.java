@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ClassExtensionRegistry.java#10 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ClassExtensionRegistry.java#11 $
 */
 
 package ariba.util.core;
@@ -109,7 +109,7 @@ public class ClassExtensionRegistry extends Object
         for (int index = 0; index < MaxMruEntries; index++) {
             _mruClassExtensions[index] = Dummy;
         }
-        _categoriesByClass = new EqGrowOnlyHashtable();
+        _categoriesByClass = new GrowOnlyHashtable.IdentityMap();
         if (addToGlobalRegistries) {
             ClassExtensionRegistry.addRegistry(this);
         }
@@ -290,10 +290,3 @@ class DummyClassExtension extends ClassExtension
 {
 }
 
-class EqGrowOnlyHashtable extends GrowOnlyHashtable
-{
-    protected boolean objectsAreEqualEnough (Object obj1, Object obj2)
-    {
-        return  obj1 == obj2;
-    }
-}

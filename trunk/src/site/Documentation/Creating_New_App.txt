@@ -1,0 +1,78 @@
+Creating a New Application
+==========================
+
+AribaWeb includes new project templates that make getting started
+with your first application quite easy.
+
+Online Video Tutorials
+----------------------
+
+  - [Getting Started](http://www.vimeo.com/1790856)
+  - [Building a GuestBook](http://www.vimeo.com/1773123)
+  - [Setting up IntelliJ IDEA](http://www.vimeo.com/1776187)
+
+Before Getting Started
+----------------------
+
+1. Open a shell window (e.g. Windows cygwin/MKS window, or MacOS X / Linux Terminal)
+
+2. Make sure that you have the bin directory of you aribaweb installation in your PATH.
+e.g. if you unpacked AW in your home directory:
+
+        export PATH="~/aribaweb-5.0/bin:$PATH"
+
+
+Creating a Widgets App
+----------------------
+
+Let's say we want to create a simple, one page, "guest book" sample.
+
+1. First, change your current working directory to where you'd like to put your new project.
+
+        cd ~/projects
+
+
+2. Now we'll run the AW create-project command to create our project from a template
+
+        % aw create-project
+
+3. At the prompts, choose the "Basic Widgets Application" and enter
+reasonable values for the application name ("GuestBook") and source code
+package ("app")
+
+	
+        Please choose a template from among the following:
+            [1] Basic AribaWeb/Widgets Application
+                   A starter template for a basic (non-database)
+                   AribaWeb application that uses the Widgets library.
+            ...
+        Selection [1]:
+        1
+
+        Enter name/path for your project (directory) [MyApp]:
+        GuestBook
+
+        Java package to use for your AW components/pages [app]:
+        app
+
+4. cd into your new project and run it
+
+        cd GuestBook
+        aw ant launch
+
+The browser will automatically open and connect to your app.
+
+5. Take a look at the source code in your IDE / Text editor of choice.
+
+  - `app/Main.awl` is the AW template for the main page
+
+  - `app/Main.java` is the corresponding component definition
+
+  - `build.xml` is your build files.  Note that it includes a parent build file from
+      your AW installation (the AW_HOME environment varaible is being set for you by
+      the "aw" command that you used to run Ant
+
+6. Try out modifications to the files
+
+  - add some basic HTML to the .awl file and refresh the page in your browser
+    

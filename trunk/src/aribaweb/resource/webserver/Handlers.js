@@ -404,6 +404,7 @@ ariba.Handlers = function() {
     // GenericActionTag
     var GAT = {
         click : function (elm, evt) {
+            if (elm.getAttribute("_sL")) {Request.redirect(elm.getAttribute("_sL")); return true; }
             if (Dom.boolAttr(elm, "_dC", false)) return true;
             var formId = Dom.boolAttr(elm, "_sf", true) ? Dom.lookupFormId(elm) : null;
             return ariba.Handlers.tagOnClick(elm, formId, elm.getAttribute("_t"), elm.getAttribute("_a"),

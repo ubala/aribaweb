@@ -47,8 +47,8 @@ class FileUploadDownload extends AWComponent
 
     void remove () { displayGroup.selectedObjects().each { uploads.remove(it) } }
 
-    Upload updateFile (Upload upload, fileName, mimeType, inputStream) {
-        upload.bytes = AWUtil.getBytes(inputStream)
+    Upload updateFile (Upload upload, fileName, mimeType, bytes) {
+        upload.bytes = bytes
         upload.mimeType = mimeType
         upload.fileName = fileName
         return upload
@@ -70,11 +70,11 @@ class UploadCallback extends AWActionCallback {
     Upload _orig
     UploadCallback (FileUploadDownload caller, Upload orig) { super(caller); _caller = caller; _orig = orig }
     public AWResponseGenerating doneAction (AWComponent sender) {
-        if (sender.inputStream) {
+        if (sender.bytes) {
             if (_orig) {
-                _caller.updateFile(_orig, sender.fileName, sender.mimeType, sender.inputStream)
+                _caller.updateFile(_orig, sender.fileName, sender.mimeType, sender.bytes)
             } else {
-                _caller.uploads += _caller.updateFile(new Upload(), sender.fileName, sender.mimeType, sender.inputStream)
+                _caller.uploads += _caller.updateFile(new Upload(), sender.fileName, sender.mimeType, sender.bytes)
             }
         }
         return _caller.pageComponent();

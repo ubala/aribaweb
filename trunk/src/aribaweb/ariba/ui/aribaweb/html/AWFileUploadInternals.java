@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#6 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -23,10 +23,17 @@ import ariba.ui.aribaweb.core.AWSession;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWFileData;
 import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.ui.aribaweb.util.AWUtil;
+import ariba.ui.aribaweb.util.AWMimeReader;
+import ariba.util.core.Fmt;
+import ariba.util.core.MIME;
+import ariba.util.core.StringUtil;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.IOException;
 import java.util.Locale;
+import java.net.URL;
 
 /**
  * Because applyValues is overridden and super.applyValues is NOT
@@ -106,6 +113,10 @@ public final class AWFileUploadInternals extends AWComponent
         }
 
         AWFileData fileData = requestContext.request().fileDataForKey(fileUploadName);
+        if (fileData == null && inPlaybackMode()) {
+            fileData = fileDataFromInputUrl();
+        }
+
         if (fileData != null && (fileData.bytesRead() > 0 || booleanValueForBinding("newMode"))) {
             String filename = fileData.filename();
             setValueForBinding(filename, BindingNames.filename);
@@ -133,5 +144,37 @@ public final class AWFileUploadInternals extends AWComponent
         }
         // This is here to balance the glid stack since we do not call super.
         requestContext.popFormInputElementId();
+    }
+
+    public boolean inPlaybackMode ()
+    {
+        return requestContext()._debugIsInPlaybackMode();
+        // return false;
+    }
+
+    public String urlInputName ()
+    {
+        return fileUploadName() + "_URL_FIELD";
+    }
+
+    AWFileData fileDataFromInputUrl ()
+    {
+        String urlString = requestContext().request().formValueForKey(urlInputName());
+        if (StringUtil.nullOrEmptyOrBlankString(urlString)) return null;
+        String fileName = AWUtil.lastComponent(urlString, '/');
+        try {
+            URL url = new URL(urlString);
+            byte[] bytes = AWUtil.getBytes(url.openStream());
+            String uploadDirPath = AWMimeReader.fileUploadDirectory();
+            if (uploadDirPath != null) {
+                File uploadDirectory = new File(uploadDirPath);
+                File uploadFile = File.createTempFile("awupload", ".tmp", uploadDirectory);
+                AWUtil.writeToFile(bytes, uploadFile);
+                return new AWFileData(fileName, uploadFile, MIME.ContentTypeApplicationOctetStream, false, bytes.length);
+            }
+            return new AWFileData(fileName, bytes);
+        } catch (IOException e) {
+            throw new AWGenericException(Fmt.S("Exception in processing playback simulated file upload on URL: %s", urlString), e);
+        }
     }
 }

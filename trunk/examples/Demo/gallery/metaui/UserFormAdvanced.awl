@@ -75,6 +75,17 @@ Operation:
             }
         }
         field=projects { class { bindings: {class:"noBox scrollTableWrapper"} } }
+
+        class=busobj.Project operation=list {
+            zDetail => description;
+            zBottom => ActionCol;
+            layout=TableRow {
+                @actionCategory=Manage { @action=actionMenuAction#instance {  } }
+            }
+            layout=SelectionButtonArea {
+                @actionCategory=Manage { @action=someInstanceAction#instance {  } }
+            }
+        }
     </m:Rules>
     
     <m:Context object="$user" layout="Inspect" filterActions="instance">

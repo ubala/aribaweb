@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#117 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#120 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -31,6 +31,7 @@ import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWResourceManager;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.Log;
+import ariba.ui.aribaweb.util.AWStaticSiteGenerator;
 import ariba.util.core.Assert;
 import ariba.util.core.Constants;
 import ariba.util.core.Fmt;
@@ -52,6 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.net.URL;
 import java.net.MalformedURLException;
 import javax.servlet.http.HttpSession;
@@ -93,7 +95,7 @@ abstract public class AWConcreteApplication
     private GrowOnlyHashtable _componentConfigurationSources;
     private AWParameters _configParameters;
     private int _pollInterval;
-
+    private static AWStaticSiteGenerator _Staticizer;
 
     public static final String DefaultAWLStringsSuffix = ".strings";
     public static final String DefaultJavaStringsSuffix = ".jstrings";
@@ -129,11 +131,9 @@ abstract public class AWConcreteApplication
 
     public static AWApplication defaultApplication ()
     {
-        AWApplication defaultApplication =
-            (AWApplication)AWConcreteServerApplication.sharedInstance();
+        AWApplication defaultApplication = (AWApplication)AWConcreteServerApplication.sharedInstance();
         if (defaultApplication == null) {
-            defaultApplication = new AWDefaultApplication();
-            ((AWDefaultApplication)defaultApplication).init();
+            defaultApplication = createApplication(AWDefaultApplication.class.getName(), AWDefaultApplication.class);
         }
         return defaultApplication;
     }
@@ -159,6 +159,7 @@ abstract public class AWConcreteApplication
             }
             application.init();
         }
+
         if (!application._didCompleteInit) {
             for (DidInitCallback cb : application._PostInitCallbacks) {
                 cb.applicationDidInit(application);
@@ -168,7 +169,7 @@ abstract public class AWConcreteApplication
         }
 
         application.awake();
-
+        
         return application;
     }
 
@@ -476,11 +477,19 @@ abstract public class AWConcreteApplication
         return _useEmbeddedKeyPathes;
     }
 
+    ////////////////////////////
+    // Timezone support
+    ////////////////////////////
+
     public List getPreferredTimezones ()
     {
         return null;
     }
 
+    public Map<String,TimeZone> getTimeZoneByOffsetKeys()
+    {
+        return null;
+    }
 
     //////////////////////
     // Page Creation
@@ -659,12 +668,7 @@ abstract public class AWConcreteApplication
         return _terminateApplicationPassword;
     }
 
-    protected void addSessionToStatusTable (AWSession session)
-    {
-        synchronized(this) {
-            _sessionAddList.add(session);
-        }
-    }
+
 
     public void registerSession (AWSession session)
     {
@@ -682,6 +686,7 @@ abstract public class AWConcreteApplication
             monitorStats().decrementMarkedForTerminationSessionCount();
         }
         session.unregisterActiveSession();
+        removeSessionFromStatusTable(session);
     }
 
     public void incrementMarkedForTerminationSessionCount ()
@@ -689,7 +694,7 @@ abstract public class AWConcreteApplication
         monitorStats().incrementMarkedForTerminationSessionCount();
     }
 
-    protected void updateSessionStatusTable (List connectList, List existingSessions)
+    protected void updateSessionStatusTable (ConcurrentLinkedQueue<AWConcreteApplication.SessionWrapper> connectList, List existingSessions)
     {
         if (_sessionStatusManager != null) {
             _sessionStatusManager.updateSessionStatusTable(connectList, existingSessions);
@@ -730,6 +735,7 @@ abstract public class AWConcreteApplication
             throw new AWGenericException("Error: cannot create instance of AWRequestContext class: " + RequestContextClass + " exception: ", exception);
         }
         requestContext.init(this, request);
+        if (_Staticizer != null) _Staticizer.didCreateRequestContext(requestContext);
         return requestContext;
     }
 
@@ -740,7 +746,7 @@ abstract public class AWConcreteApplication
 
     public AWResponseGenerating handleException (AWRequestContext requestContext, Exception exception)
     {
-        debugString(SystemUtil.stackTrace(exception));
+        logString(SystemUtil.stackTrace(exception));
         // Log to server log
         // Log.aribaweb_html.error(3615, SystemUtil.stackTrace(exception));
 
@@ -1482,25 +1488,32 @@ abstract public class AWConcreteApplication
 
     }
 
-    private List _sessionAddList = ListUtil.list();
+    private ConcurrentLinkedQueue<SessionWrapper> _sessionProcessList = new ConcurrentLinkedQueue<SessionWrapper>();
 
-    /**
-     * Hands back the current sessionAddList.  Once the list is returned from this
-     * method, all future operations will work on a new list so the caller can operate
-     * on the list unsynchronized.
-     * @return
-     */
-    private List getSessionAddList ()
+    enum SessionOp {
+        Add, Remove
+    };
+
+    public static class SessionWrapper
     {
-        List addList = null;
-        if (!_sessionAddList.isEmpty()) {
-            // synchronize on the application class and swap
-            synchronized(this) {
-                addList = _sessionAddList;
-                _sessionAddList = ListUtil.list();
-            }
+        SessionOp op;
+        AWSession session;
+
+        public SessionWrapper (SessionOp o, AWSession sess)
+        {
+            op = o;
+            session = sess;
         }
-        return addList;
+    }
+
+    protected void addSessionToStatusTable (AWSession session)
+    {
+        _sessionProcessList.add(new SessionWrapper(SessionOp.Add, session));
+    }
+    
+    protected void removeSessionFromStatusTable (AWSession session)
+    {
+        _sessionProcessList.add(new SessionWrapper(SessionOp.Remove, session));
     }
 
     private class AWSessionMonitor implements Runnable
@@ -1524,23 +1537,16 @@ abstract public class AWConcreteApplication
                         continue;
                     }
 
-                    // get the current add list from app
-                    List connectList = _application.getSessionAddList();
-
                     if (Log.aribaweb_userstatus.isDebugEnabled()) {
-                        if (connectList != null && !connectList.isEmpty()) {
+                        if (_sessionProcessList != null && !_sessionProcessList.isEmpty()) {
                             Log.aribaweb_userstatus.debug(
-                                "AWSessionMonitor -- existing sessions: %s adding %s",
-                                _sessionList.size(), connectList.size());
+                                "AWSessionMonitor -- existing sessions: %s processing %s",
+                                _sessionList.size(), _sessionProcessList.size());
                         }
                     }
 
-                    _application.updateSessionStatusTable(connectList, _sessionList);
+                    _application.updateSessionStatusTable(_sessionProcessList, _sessionList);
 
-                    // merge for next pass
-                    if (connectList != null) {
-                        _sessionList.addAll(connectList);
-                    }
                 }
                 catch (InterruptedException e) {
                     Log.aribaweb.error(9023,
@@ -1554,6 +1560,28 @@ abstract public class AWConcreteApplication
                 }
             }
         }
+    }
+
+    public static AWStaticSiteGenerator getStaticizer ()
+    {
+        return _Staticizer;
+    }
+
+    public static void setStaticizer (AWStaticSiteGenerator staticizer)
+    {
+        _Staticizer = staticizer;
+    }
+
+    public String formatUrlForResource (String urlPrefix, AWResource resource, boolean forCache)
+    {
+        return (_Staticizer != null)
+                ? _Staticizer.formatUrlForResource(urlPrefix, resource, forCache)
+                : StringUtil.strcat(urlPrefix, "/", resource.relativePath().replace('\\', '/'));
+    }
+
+    public boolean canCacheResourceUrls ()
+    {
+        return _Staticizer == null;
     }
 
     protected void startSessionMonitor ()

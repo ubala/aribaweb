@@ -1,0 +1,17 @@
+<h3>Key Capabilities</h3>
+
+  - [Auto AJAX!]#
+  - [Instant App]#
+  - [Live Edit & X-Ray]#
+  - [Proven Full Stack]#
+
+
+<h3>Features</h3>
+
+  - [Rich Widgets]#
+  - [Auto Ajax]#
+  - [Enterprise Proven]#
+  - [Full Stack]#
+  - [Way Less Code]#
+  - [X-Ray]#
+  - [Rapid Turnaround]#

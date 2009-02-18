@@ -14,9 +14,15 @@
                     </w:RoundedBox>\
                 </div>
             </a:OutputRangeCheck>
-        <a:GenericContainer tagName="script">
-            ariba.Widgets.updateTOC($hasVisibleContent);
-        </a:GenericContainer>        
+            <a:If ifTrue="$requestContext.isIncrementalUpdateRequest">
+                <a:ClientSideScript>
+                    ariba.Widgets.updateTOC($hasVisibleContent);
+                </a:ClientSideScript>
+            <a:Else/>
+                <a:GenericContainer tagName="script">
+                    ariba.Widgets.updateTOC($hasVisibleContent);
+                </a:GenericContainer>                
+            </a:If>
     <a:Else/>
         <a name="navigation"></a>\
         <w:WidgetInclude name="$toc"/>\

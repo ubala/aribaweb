@@ -13,4 +13,8 @@
     <a:Else/>
         <w:PopupMenuItem action="$enableEditing">Enable Editing</w:PopupMenuItem>
     </a:If>
+<!---
+    <w:PopupMenuHeading showSeparator="$true">Debug</w:PopupMenuHeading>
+    <w:PopupMenuItem action="$metaContext.meta._logRuleStats">Log Rule Stats</w:PopupMenuItem>
+-->
 </w:PopupMenu>

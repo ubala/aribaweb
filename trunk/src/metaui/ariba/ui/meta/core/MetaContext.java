@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#9 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#10 $
 */
 package ariba.ui.meta.core;
 
@@ -34,21 +34,24 @@ import ariba.util.core.Assert;
 import ariba.util.core.ClassExtension;
 import ariba.util.core.ClassExtensionRegistry;
 import ariba.util.core.Fmt;
-import ariba.util.core.Sort;
 
 import java.util.Map;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+    AW Element for manipulating a MetaUI Context as part of AribaWeb component processing.
+    See AWApi for more info... 
+ */
 public class MetaContext extends AWContainerElement
 {
     protected static final String EnvKey = "MetaContext";
     protected static final String ValueMapBindingKey = "valueMap";
-    protected static final String ContextKeyBindingKey = "contextKey";
+    protected static final String scopeKeyBindingKey = "scopeKey";
     protected static final String PushNewContextBindingKey = "pushNewContext";
     AWBindingDictionary _bindings;
-    AWBinding _contextKeyBinding;
+    AWBinding _scopeKeyBinding;
     AWBinding _valueMapBinding;
     AWBinding _pushNewContextBinding;
     int _hasMetaRuleChildren;
@@ -73,7 +76,7 @@ public class MetaContext extends AWContainerElement
     public void init (String tagName, Map bindingsHashtable)
     {
         _valueMapBinding = (AWBinding)bindingsHashtable.remove(ValueMapBindingKey);
-        _contextKeyBinding = (AWBinding)bindingsHashtable.remove(ContextKeyBindingKey);
+        _scopeKeyBinding = (AWBinding)bindingsHashtable.remove(scopeKeyBindingKey);
         _pushNewContextBinding = (AWBinding)bindingsHashtable.remove(PushNewContextBindingKey);
         _bindings = AWBinding.bindingsDictionary(bindingsHashtable);
         super.init(tagName, null);
@@ -120,8 +123,8 @@ public class MetaContext extends AWContainerElement
         AWBindingDictionary bindings = _bindings;
         if (isPush) {
             context.push();
-            String contextKey = (_contextKeyBinding != null)
-                                    ? (String)_contextKeyBinding.value(component) : null;
+            String scopeKey = (_scopeKeyBinding != null)
+                                    ? (String)_scopeKeyBinding.value(component) : null;
             Map <String, Object> values;
             if (_valueMapBinding != null && ((values = (Map)_valueMapBinding.value(component)) != null)) {
                 // ToDo: sort based on Meta (KeyData) defined rank (e.g. module -> class -> operation ...)
@@ -129,8 +132,8 @@ public class MetaContext extends AWContainerElement
                 List<String> sortedKeys = new ArrayList(values.keySet());
                 Collections.sort(sortedKeys);
                 for (String key : sortedKeys) {
-                    if (key.equals(ContextKeyBindingKey)) {
-                        contextKey = (String)values.get(key);
+                    if (key.equals(scopeKeyBindingKey)) {
+                        scopeKey = (String)values.get(key);
                     } else {
                         context.set(key, values.get(key));
                     }
@@ -144,7 +147,7 @@ public class MetaContext extends AWContainerElement
                 context.set(key, value);
             }
 
-            if (contextKey != null) context.setContextKey(contextKey);
+            if (scopeKey != null) context.setScopeKey(scopeKey);
         } else {
             context.pop();
         }

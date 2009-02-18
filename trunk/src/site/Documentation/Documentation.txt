@@ -1,0 +1,38 @@
+You can always read the source code, but documentation has its place!
+
+Tutorials
+======================
+There are a few short guides to help you get started:
+
+  - **[Getting Started](Getting_Started.txt)** explains installation
+    and the structure of the distribution.
+
+  - **[Creating a New App](Creating_New_App.txt)** details the small number of steps
+    required to create a new app and get it running.
+
+  - **[Setting up IDE Integration](IDE_Plugins.txt)** describes how to configure your Eclipse or
+    IntelliJ IDEA IDEA for optimal AW development productivity.
+
+
+API Documentation
+=================
+Check out the **[API Documentation](http://aribaweb.org/api/index.html)**.
+AW Supports "enriched JavaDoc" for all UI components: in addition the the Java-level API
+documentation, most UI components detail their bindings, named content areas, etc.
+
+Examples and Screencasts
+========================
+The best way to learn AW is to:
+
+  1. Watch the screencasts  (there are loads of them, and many go into great detail)
+  2. Check out the included examples
+
+The "Demo" app (which you can start simply by clicking on bin/start in the AW distribution)
+contains many examples.  Make sure to turn on *Component Inspector* as you click through --
+then you can "X-ray" in on the code behind what you're seeing.
+
+Other Sources
+=============
+
+  - [FAQ](Frequently_Asked_Questions.txt)
+  - [Product History](Release_History.txt)

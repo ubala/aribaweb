@@ -12,18 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestInspectorLink.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestInspectorLink.java#6 $
 */
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWRequestContext;
-import ariba.util.core.Assert;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.FastStringBuffer;
 import ariba.util.core.StringUtil;
+import ariba.util.core.Fmt;
 import ariba.util.test.TestValidationParameter;
 import ariba.util.test.TestValidator;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -33,6 +32,11 @@ public class TestInspectorLink
     private Object _annotatedItem;
     private Class _objectClass;
     private String _type;
+
+    public static final String VALIDATION_LOAD_ERROR_HEADER =
+            "Validation Failed: could not load the validator specified in the " +
+            "test script (this is often caused by renaming/moving classes or " +
+            "methods consult an application developer for help";
     
     // this is used to store the descriptionof the AML Group or for Network the
     // EOF Equivalent.
@@ -50,7 +54,8 @@ public class TestInspectorLink
         _objectClass = classToValidate;
     }
 
-    public TestInspectorLink (TestValidator testInspector, Object annotatedItem, String type)
+    public TestInspectorLink (TestValidator testInspector,
+                              Object annotatedItem, String type)
     {
         _testInspector = testInspector;
         _annotatedItem = annotatedItem;
@@ -93,11 +98,18 @@ public class TestInspectorLink
         }
     }
 
-    private void decodeFromString (String encoded)
+    private void decodeFromString (String encoded) throws ValidatorLoadException
     {
         String[] parts = encoded.split(",");
         if (parts[0].equals(APP_ENCODING_FLAG)) {
             _objectClass = ClassUtil.classForName(parts[1]);
+            if (_objectClass == null) {
+                throw new ValidatorLoadException (
+                    Fmt.S(VALIDATION_LOAD_ERROR_HEADER +
+                          " Test Expected Application Specific (e.g. AML group) " +
+                          "validator on the class %s and could not load the " +
+                          "specified class.", parts[1]));
+            }
             _appSpecificValidatorName = parts[2];
         }
         else {
@@ -106,21 +118,70 @@ public class TestInspectorLink
             String objectClassName = parts.length > 2 ? parts[2] : null;
 
             Class annotatedClass = ClassUtil.classForName(annotatedClassName);
-            try {
+            if (annotatedClass == null) {
+                String errorMessage;
                 if (objectClassName == null) {
-                    _objectClass = annotatedClass;
-                    _annotatedItem = annotatedClass.getMethod(annotatedMethodName);
+                    throw new ValidatorLoadException(
+                        constructNonAppSpecificError(annotatedClassName,
+                                annotatedMethodName, annotatedClassName,
+                                Fmt.S("Could not load specified class: %s",
+                                        annotatedClassName)));
                 }
                 else {
-                    _objectClass = ClassUtil.classForName(objectClassName);
+                    throw new ValidatorLoadException(
+                        constructNonAppSpecificError(annotatedClassName,
+                                annotatedMethodName, objectClassName,
+                                Fmt.S("Could not load specified class: %s",
+                                        annotatedClassName)));
+                }
+            }
+            if (objectClassName == null) {
+                _objectClass = annotatedClass;
+                try {
+                    _annotatedItem = annotatedClass.getMethod(annotatedMethodName);
+                }
+                catch (NoSuchMethodException noMethod) {
+                    throw new ValidatorLoadException (
+                        constructNonAppSpecificError(annotatedClassName,
+                                annotatedMethodName, annotatedClassName,
+                                Fmt.S("Could not find the specified method:%s",
+                                        annotatedMethodName)));
+                }
+            }
+            else {
+                _objectClass = ClassUtil.classForName(objectClassName);
+                if (_objectClass == null) {
+                    throw new ValidatorLoadException (
+                        constructNonAppSpecificError(annotatedClassName,
+                                annotatedMethodName, objectClassName,
+                                Fmt.S("Could not load specified class: %s",
+                                        objectClassName)));
+                }
+                try {
                     _annotatedItem = annotatedClass.getMethod(annotatedMethodName,
                                                               _objectClass);
                 }
-            }
-            catch (NoSuchMethodException ex) {
-                Assert.assertNonFatal(false, ex.toString());
+                catch (NoSuchMethodException noMethod) {
+                    throw new ValidatorLoadException (
+                        constructNonAppSpecificError(annotatedClassName,
+                                annotatedMethodName, objectClassName,
+                                Fmt.S("Could not find the method: %s",
+                                        annotatedMethodName)));
+                }
             }
         }
+    }
+
+    private String constructNonAppSpecificError (String classWithMethod,
+                                               String methodName,
+                                               String classToBeValidated,
+                                               String error)
+    {
+        String errorMessage = Fmt.S(VALIDATION_LOAD_ERROR_HEADER + "<br/>" +
+            "Method Name          : %s<br/>Class with Method    : %s" +
+            "<br/>Class to be Validated: %s<br/>Problem              : %s<br/><br/>",
+            methodName, classWithMethod, classToBeValidated, error);
+        return errorMessage;
     }
 
     public boolean isValid ()
@@ -154,7 +215,7 @@ public class TestInspectorLink
     public String getInspectorClassName ()
     {
         String name = null;
-        if (_annotatedItem.getClass() == Method.class) {
+        if (_annotatedItem != null && _annotatedItem.getClass() == Method.class) {
             Method method = (Method)_annotatedItem;
             name = method.getDeclaringClass().getName();
         }
@@ -171,6 +232,19 @@ public class TestInspectorLink
             Method method = (Method)_annotatedItem;
             name = method.getName();
         }
+        return name;
+    }
+
+    public String getInspectorSecondaryName ()
+    {
+        String name = getInspectorName();
+        if (_testInspector != null) {
+            String description = _testInspector.description();
+            if (!StringUtil.nullOrEmptyOrBlankString(description)) {
+                name = name + ": " + description;
+            }
+        }
+
         return name;
     }
 
@@ -236,6 +310,7 @@ public class TestInspectorLink
     }
 
     public static TestInspectorLink decodeTestInspectorLink (String encoding)
+            throws ValidatorLoadException
     {
         TestInspectorLink newLink = new TestInspectorLink();
         newLink.decodeFromString(encoding);

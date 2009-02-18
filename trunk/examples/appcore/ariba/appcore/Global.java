@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Global.java#1 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Global.java#2 $
 */
 package ariba.appcore;
 
@@ -20,7 +20,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 
-import ariba.util.core.Date;
+import java.util.Date;
 import ariba.ui.meta.persistence.ObjectContext;
 
 import java.util.Collections;

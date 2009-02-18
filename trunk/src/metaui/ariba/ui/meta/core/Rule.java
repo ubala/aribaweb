@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Rule.java#9 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Rule.java#14 $
 */
 package ariba.ui.meta.core;
 
@@ -25,10 +25,18 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+    A Rule defines a map of properties that should apply in the event that a set of Selectors
+    are matched.  Given a rule base (Meta) and a set of asserted values (Context) a list of matching
+    rules can be computed (by matching their selectors against the values) and by successively (in
+    rank / priority order) applying (merging) their property maps a set of effective properties can
+    be computed.
+ */
 public class Rule
 {
     int _id;
     long _keyMatchesMask;
+    long _keyIndexedMask;
     long _keyAntiMask;
     List<Selector> _selectors;
     Map<String, Object> _properties;
@@ -66,18 +74,26 @@ public class Rule
         this(Selector.fromMap(selectorValues), properties, 0, -1);
     }
 
+    public boolean matches (Meta.MatchValue[] matchArray)
+    {
+        for (Selector sel : _selectors) {
+            if (!sel.matches(matchArray)) return false;
+        }
+        return true;
+    }
+
     // returns context keys modified
     public long apply (Meta meta, Meta.PropertyMap properties,
-                      boolean isDeclare, AWDebugTrace.AssignmentRecorder recorder)
+                      String declareKey, AWDebugTrace.AssignmentRecorder recorder)
     {
         if (_rank == Integer.MIN_VALUE) return 0;
 
         Log.meta_detail.debug("Evaluating Rule: %s", this);
-        return merge(meta, _properties, properties, isDeclare, recorder);
+        return merge(meta, _properties, properties, declareKey, recorder);
     }
 
     public static long  merge (Meta meta, Map<String, Object> src, Map<String, Object> dest,
-                      boolean isDeclare, AWDebugTrace.AssignmentRecorder recorder)
+                      String declareKey, AWDebugTrace.AssignmentRecorder recorder)
     {
         long updatedMask = 0;
 
@@ -87,6 +103,7 @@ public class Rule
             Object value = entry.getValue();
             Meta.PropertyManager propManager = meta.managerForProperty(key);
             Object orig = dest.get(key);
+            boolean isDeclare = (declareKey != null && key.equals(declareKey));
             Object newVal = propManager.mergeProperty(key, orig, value, isDeclare);
 
             if (recorder != null) recorder.registerAssignment(key, newVal);
@@ -174,47 +191,41 @@ public class Rule
         // add rule for declaration
         List <Selector> selectors = _selectors;
         Selector declPred = selectors.get(selectors.size()-1);
+        List <Selector> prePreds = convertKeyOverrides(new ArrayList(selectors.subList(0, selectors.size()-1)));
 
-        // see if we have a colliding preceding contraint assignment
-        Selector matchPred = null;
-        for (int i= selectors.size()-2; i >=0; i--) {
-            Selector p = selectors.get(i);
-            if (p._key.equals(declPred._key)) {
-                matchPred = p;
-                break;
-            }
-        }
-        if (matchPred == null) matchPred = new Selector(declPred._key, Meta.KeyAny);
-
-        // Mutate the selectors list to scope overrides
-        selectors = collapseKeyOverrides(selectors);
-        List <Selector> prePreds = new ArrayList(selectors.subList(0, selectors.size()-1));
-        declPred = selectors.get(selectors.size()-1);
-
-        // Add property decl to main rule
+        // We give main rule each of its selectors as properties.  (This is probably a bad idea...)
         if (_properties == null) _properties = new HashMap();
         for (Selector p : selectors) {
             if (!(p._value instanceof  List)) _properties.put(p._key, p._value);
         }
 
+        // check for override scope
+        boolean hasOverrideScope = false;
+        for (Selector p : prePreds) {
+            if (p._key.equals(declPred._key)) hasOverrideScope = true;
+        }
+
+        // if decl key isn't scoped, then select on no scope
+        if (!hasOverrideScope) {
+            String overrideKey = Meta.overrideKeyForKey(declPred._key);
+            prePreds.add(0, new Selector(overrideKey, Meta.NullMarker));
+        }
+
         // The decl rule...
-        prePreds.add(matchPred);
         prePreds.add(new Selector(Meta.KeyDeclare, declPred._key));
         Map m = new HashMap();
         m.put(declPred._key, declPred._value);
         return new Rule(prePreds, m);
     }
     
-    // rewrite any selector of the form "layout=l1, class=c, layout=l2" to
-    // "class=c, layout=l1_l2"
-    List <Selector> collapseKeyOverrides (List<Selector> orig)
+    // rewrite any selector of the form "layout=L1, class=c, layout=L2" to
+    // "layout_o=L1 class=c, layout=L2"
+    List <Selector> convertKeyOverrides (List<Selector> orig)
     {
         List result = orig;
         int count = orig.size();
-        int collapsed = 0;
         for (int i=0; i < count; i++) {
             Selector p = orig.get(i);
-            boolean hide = false;
             // See if overridded by same key later in selector
             for (int j = i + 1; j < count; j++) {
                 Selector pNext = orig.get(j);
@@ -224,43 +235,11 @@ public class Rule
 
                     // make a copy if we haven't already
                     if (result == orig) result = new ArrayList(orig.subList(0,i));
-                    hide = true;
+                    p = new Selector(Meta.overrideKeyForKey(p._key), p._value);
                     break;
                 }
             }
-            if (result != orig && !hide) result.add(p);
-        }
-
-        return result;
-    }
-
-    // Alias values scoped by a parent assignment on the same key
-    //  E.g. "layout=l1, class=c, layout=l2" to
-    // "layout=l1, class=c, layout=l1_l2"
-    List <Selector> scopeNestedContraints (List<Selector> orig)
-    {
-        List result = orig;
-        int count = orig.size();
-        for (int i=count-1; i > 0; i--) {
-            Selector p = orig.get(i);
-            if (p._value instanceof String) {
-                String newVal = (String)p._value;
-                // See if overridded by same key later in selector
-                for (int j = i - 1; j >= 0; j--) {
-                    Selector pPrev = orig.get(j);
-                    if (pPrev._key.equals(p._key) && pPrev._value instanceof String) {
-                        newVal = newVal.equals(Meta.KeyAny)
-                            ? (String)pPrev._value
-                            : pPrev._value + "_" + newVal;
-                    }
-                }
-                if (newVal != p._value) {
-                    // make a copy if we haven't already
-                    if (result == orig) result = new ArrayList(orig);
-                    Selector pReplacement = new Selector(p._key, newVal, p._isDecl);
-                    result.set(i, pReplacement);
-                }
-            }
+            if (result != orig) result.add(p);
         }
 
         return result;
@@ -293,6 +272,10 @@ public class Rule
         }
     }
 
+    /**
+        A Selector defines a sort of key/value predicate that must be satisfied for a
+        rule to apply.
+     */
     public static class Selector
     {
         String _key;
@@ -328,6 +311,23 @@ public class Rule
         public Object getValue ()
         {
             return _value;
+        }
+
+        int _matchArrayIdx;
+        Meta.MatchValue _matchValue;
+
+        void bindToKeyData (Meta.KeyData keyData)
+        {
+            _matchArrayIdx = keyData._id;
+            _matchValue = keyData.matchValue(_value);
+        }
+
+        public boolean matches (Meta.MatchValue[] matchArray)
+        {
+            // If we haven't been initialized with a matchValue, then we were indexed and don't need to match
+            if (_matchValue == null) return true;
+            Meta.MatchValue other = matchArray[_matchArrayIdx];
+            return (other != null) ? other.matches(_matchValue) : false;
         }
 
         public String toString ()

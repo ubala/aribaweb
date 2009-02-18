@@ -13,12 +13,8 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.awl#19 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.awl#21 $
     </Copyright>
-
-    <Responsible>
-        kngan
-    </Responsible>
 
     <Overview>
         The rich text area both rich text and plain text creation.
@@ -90,7 +86,7 @@
                     rows="$rows"
                     cols="$cols"
                     style="$style"
-                    erroKey="$^errorKey"
+                    errorKey="$^errorKey"
                     emptyStringValue="$^emptyStringValue"
                     otherBindings="$otherBindingsValues"/>\        
     <a:Else/>
@@ -110,7 +106,7 @@
                             cols="$cols"
                             style="$style"
                             class="rtt"
-                            erroKey="$^errorKey"
+                            errorKey="$^errorKey"
                             emptyStringValue="$^emptyStringValue"
                             otherBindings="$otherBindingsValues"/>\
                 <a:ClientSideScript isSingleton="$false">

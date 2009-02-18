@@ -12,16 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaSite.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaSite.java#3 $
 */
 
 package ariba.ui.widgets;
 
-import java.util.List;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
-import ariba.ui.aribaweb.core.AWFormRedirect;
-import ariba.util.core.Fmt;
+import java.util.List;
 
 public class AribaSite extends AWComponent
 {
@@ -38,28 +36,39 @@ public class AribaSite extends AWComponent
     public void init ()
     {
         super.init();
-        SiteActionHandler handler = handler();
+        SiteActionHandler handler = listHandler();
         _sites = (handler != null) ? handler.getSites(requestContext()) : null;
     }
 
-    public String siteScript ()
+    public AWResponseGenerating actionClicked ()
     {
-        requestContext().put(RealmSite, _currentSite);
+        requestContext().put(RealmSite, _currentSite);        
         ActionHandler handler = handler();
-        String url = handler.url(requestContext());
-        return Fmt.S("javascript:window.location='%s';ariba.Event.cancelBubble(event);",
-                url);
+        return handler == null ? null : handler.actionClicked(requestContext());
     }
-
+    
     public String siteLabel ()
     {
-        return handler().siteLabel(_currentSite);
+        return listHandler().siteLabel(_currentSite);
     }
-
-    private SiteActionHandler handler ()
+    
+    private ActionHandler handler ()
+    {
+        return ActionHandler.resolveHandlerInComponent(AribaAction.SiteAction, this);
+    }
+    
+    
+    protected SiteActionHandler listHandler ()
     {
         ActionHandler handler = ActionHandler.resolveHandlerInComponent(AribaAction.SiteAction, this);
-        return (handler instanceof SiteActionHandler) ? (SiteActionHandler)handler : null;
+        if (handler instanceof SiteActionHandler) {
+            return (SiteActionHandler)handler;
+        }
+        else if (handler != null) {
+            handler = handler.realHandler();
+            return (handler instanceof SiteActionHandler) ? (SiteActionHandler)handler : null;
+        }
+        return null;
     }
 
 }

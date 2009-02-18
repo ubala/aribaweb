@@ -1,4 +1,6 @@
-<w:BasicPageWrapper hasForm="$false">
+    <w:HintMessage>
+        This demonstrates support for adding multiple files to upload and then triggering the upload in batch
+    </w:HintMessage>
     <a:Form enctype="multipart/form-data">
         <t:DataTable title="Uploads" list="$uploads" item="$currentUpload" displayGroup="$displayGroup" 
                      enableScrolling="$true" multiSelect="$true">
@@ -40,4 +42,3 @@
             </t:ButtonArea>
         </t:DataTable>
     </a:Form>
-</w:BasicPageWrapper>

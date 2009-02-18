@@ -12,31 +12,42 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationError.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationError.java#3 $
     Responsible: jimh
 */
 package ariba.util.test;
 
+import ariba.util.core.Fmt;
+
 public class TestValidationError {
     private TestValidationParameter _oldValue;
     private TestValidationParameter _newValue;
+    private String _nestedParameterPrefix = "";
 
     public TestValidationError (TestValidationParameter oldValue,
-                                TestValidationParameter newValue)
+                                TestValidationParameter newValue,
+                                String nestedParameterPrefix)
     {
         _oldValue = oldValue;
         _newValue = newValue;
+        if (nestedParameterPrefix != null) {
+            _nestedParameterPrefix = nestedParameterPrefix;
+        }
     }
 
     public String getParameterName ()
     {
+        String name = "";
         if (_newValue != null) {
-            return _newValue.getName();
+            name = _newValue.getName();
         }
         else if (_oldValue != null) {
-            return _oldValue.getName();
+            name = _oldValue.getName();
         }
-        return "";
+        if (_nestedParameterPrefix.length() != 0) {
+            name = Fmt.S("%s::%s", _nestedParameterPrefix, name);
+        }
+        return name; 
     }
 
     public String getOldValue ()
@@ -44,7 +55,7 @@ public class TestValidationError {
         if (_oldValue != null) {
             return _oldValue.getValue().toString();
         }
-        return "";
+        return "MISSING PARAMETER*";
     }
 
     public String getNewValue ()

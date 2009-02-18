@@ -5,10 +5,11 @@ import ariba.ui.table.*;
 
 class SearchSource extends AWComponent {
     List searchers
-    def _searcher, iSearcher
+    def _searcher
+    public def _iSearcher
     def queryString, doc, matchDoc, message, showingDetails=false
     Node root, node
-    def outlineDisplayGroup = new AWTDisplayGroup(), resultDisplayGroup = new AWTDisplayGroup()
+    AWTDisplayGroup outlineDisplayGroup = new AWTDisplayGroup(), resultDisplayGroup = new AWTDisplayGroup()
     def _filteredMatches, _lastSelection;
     def fileTypes = [:], fileType, fileTypeList, _enabledTypes = new HashSet()
     def _selectedDoc, selectedPackage, selectedSubDoc
@@ -16,16 +17,26 @@ class SearchSource extends AWComponent {
     def _displayedDoc, displayedContent, newContentUrl
     int selectedContentTab = 1
 
-    String extract (String s, String pat) { def m = (s =~ pat); m.find() ? m.group(1) : null; }
-
     void init () {
         searchers = SourceSearcher.allSearchers()
-        setSearcher(searchers[0])
-
-        // auto-search if we're accessed via http://machine:port/Demo/Ariba/SearchSource.htm?q=someQueryString
-        queryString = requestContext().request().formValueForKey("q")
-        if (queryString) searchAction()
+        if (hasSearchers()) {
+          // auto-search if we're accessed via http://machine:port/Demo/Ariba/SearchSource.htm?q=someQueryString
+          setSearcher(searchers[0])
+          queryString = requestContext().request().formValueForKey("q")
+          if (queryString) searchAction()
+        }
     }
+
+    def show (String path) {
+        queryString = "path:\"${path}\"".toString();
+        searchAction()
+        checkSelection()
+        if (resultDisplayGroup.filteredObjects().size() == 1) {
+            setSelectedDoc(resultDisplayGroup.filteredObjects()[0]);
+        }
+    }
+
+    boolean hasSearchers () { searchers && searchers.size() }
 
     def getSearcher () { _searcher }
 

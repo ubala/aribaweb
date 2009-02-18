@@ -12,20 +12,66 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSessionRestorationException.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSessionRestorationException.java#6 $
 */
 
 package ariba.ui.aribaweb.core;
 
 public final class AWSessionRestorationException extends RuntimeException
 {
+
+    public enum State {Normal, IPChanged};
+    public static final State IPChanged = State.IPChanged;
+    public static final State Normal = State.Normal;
+
+    private State _state;
+    private String _oldIP;
+    private String _newIP;
+
     public AWSessionRestorationException ()
     {
         super();
+        _state = State.Normal;
     }
 
     public AWSessionRestorationException (String exceptionMessage)
     {
+        this(exceptionMessage, State.Normal);
+    }
+
+    public AWSessionRestorationException (String exceptionMessage, State state)
+    {
         super(exceptionMessage);
+        _state = state;
+    }
+
+    public State getState ()
+    {
+        return _state;
+    }
+
+    public void setState (State state)
+    {
+        _state = state;
+    }
+
+    public String getOldIP ()
+    {
+        return _oldIP;
+    }
+
+    public void setOldIP (String oldIP)
+    {
+        _oldIP = oldIP;
+    }
+
+    public String getNewIP ()
+    {
+        return _newIP;
+    }
+
+    public void setNewIP (String newIP)
+    {
+        _newIP = newIP;
     }
 }

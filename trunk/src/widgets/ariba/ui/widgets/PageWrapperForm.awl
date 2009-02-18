@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageWrapperForm.awl#12 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageWrapperForm.awl#13 $
     </Copyright>
 
     <Overview>
@@ -48,7 +48,7 @@
         values such as formActionUrl.
     </Binding>
 
-    <Binding key="submitFormDefault" direction="get" type="boolean" default="$false">
+    <Binding key="submitFormDefault" direction="get" type="boolean">
         see ariba.ui.aribaweb.html.AWForm
     </Binding>
 </a:Api>\
@@ -58,7 +58,7 @@
        <a:IncludeContent/>
    </form>
 <a:Else/>\
-   <a:Form action="$^action" omitTags="$^omitTags" enctype="$^formEncodingType" submitFormDefault="$^submitFormDefault:$false" style="margin:0px;padding:0px;">\
+   <a:Form action="$^action" omitTags="$^omitTags" enctype="$^formEncodingType" submitFormDefault="$^submitFormDefault" style="margin:0px;padding:0px;">\
        <a:IncludeContent/>
    </a:Form>
 </a:If>\

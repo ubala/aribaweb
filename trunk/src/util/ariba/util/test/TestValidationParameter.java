@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationParameter.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationParameter.java#6 $
 */
 package ariba.util.test;
 
@@ -97,13 +97,14 @@ public class TestValidationParameter {
         this(name, name, value);
     }
 
-    public TestValidationParameter (String name, String key, List<TestValidationParameter> value)
+    public TestValidationParameter (String name, String key,
+                                    List<TestValidationParameter> value)
     {
         TestValidationParameterList list =
                 TestValidationParameterList.createFromListOfParameters(value);
         _name = name;
         _key = key;
-        _value = value;
+        _value = list;
     }
 
     public String getName ()

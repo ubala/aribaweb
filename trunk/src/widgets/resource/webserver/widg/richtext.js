@@ -63,7 +63,16 @@ function xinhaRemoveFormatting (editor) {
         // retain only new lines
         D=D.replace(/<p[^>]*>(.*?)<\/p>/gi,"!!p!!$1!!p!!");
         D=D.replace(/<br *\/?>/gi,"!!br!!");
-        D=D.replace(/<[^>]*>/gi,"");
+        // We want to remove comments, iframes, scripts, styles
+        // and all of their contents entirely
+        var regex = "(<!--[\\s\\S]*?-->)";
+        regex += "|(<iframe>[\\s\\S]*?<\\/iframe>)";
+        regex += "|(<script>[\\s\\S]*?<\\/script>)";
+        regex += "|(<style>[\\s\\S]*?<\\/style>)";
+        // We also want to remove all remaining HTML tags
+        regex += "|(<[^>]*?>)";
+        var regexObject = new RegExp(regex, "gi");
+        D=D.replace(regexObject,"");
         D=D.replace(/!!p!!(.*?)!!p!!/gi,"<p>$1</p>");
         D=D.replace(/!!br!!/gi,"<br/>");
         editor.setHTML(D);
@@ -136,6 +145,16 @@ function createRTA (id)
                     return ariba.Dom.hasClass(e, "rtaWrapper");
             });
         wrapper.style.visibility = "visible";
+
+        // For Ariba Selenium test automation
+        var awname = editor._textArea.getAttribute("awname");
+        if (awname) {
+            // A unique identifier on the body element within the iframe so
+            // Selenium can find it on playback
+            editor._doc.body.setAttribute("awname", "XinhaBody:" + awname);
+            editor._doc.awXinhaId = editor._textArea.id;
+            Xinha._addEvent(editor._doc, "blur", blurRTAHandler);
+        }
     }
 
     var width = editor._textArea.offsetHeight;
@@ -149,9 +168,29 @@ function createRTA (id)
         ariba.Event.eventEnqueue(deferredGenerate, null, true);
     }
     else {
+        // Delay the refresh complete until Xinha is done loading
+        ariba.Event.refreshIncrementNesting();
         editor.generate();
         editor.whenDocReady(postRTALoad);
+        // When it's done the refresh can complete
+        editor.whenDocReady(ariba.Event.notifyRefreshComplete.bind(ariba.Event));
     }
+}
+
+function blurRTAHandler (event)
+{
+    // target should be the HtmlDocument object where we stashed the ID earlier
+    var doc = ariba.Event.eventSourceElement(event);
+    var editor = Xinha.getEditor(doc.awXinhaId);
+
+    // Now dispatch a change event on the textarea.  A change event on 
+    // the document would make more sense, but Selenium isn't listening 
+    // for that and it won't bubble up out of its own document to the
+    // main document.
+    var ev = doc.createEvent("HTMLEvents");
+    ev.initEvent("change", true, true);
+    editor._textArea.dispatchEvent(ev);
+    return true;
 }
 
 // get this into into Xinha Core code

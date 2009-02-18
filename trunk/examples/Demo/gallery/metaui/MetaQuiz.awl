@@ -1,0 +1,92 @@
+<w:BasicPageWrapper hasForm="$true">
+    Operation:<w:GenericChooser list='${["create", "edit", "view"]}' key="op" type="Popup" action="$null"/>
+    <hr/>
+    <m:Context>
+        <m:Rules>
+          class=busobj.User {
+            /* #1 (should be in Application.oss) */
+            field type=ariba.util.Date operation=edit {
+                bindings: { formatter: $formatters.longDate; }
+            }
+
+            /* #2 */
+            field=password#required {
+                after:zNone;
+                operation=create { after:email; }
+            }
+
+            /* #3 */
+            @field=passwordStrength#derived  {
+                value:${object.password.length};
+                type:java.lang.Integer;  /* Null component name not allowed without this... */
+                visible:true;
+                after:password;
+            }
+          }
+
+            /* #4 */
+            object @action=appendExclaimation  {
+                 actionResults:${object.lastName = object.lastName + "!"};
+                 visible: ${properties.editing};
+            }
+            layout=Inspect#Stack {
+                @layout#ActionButtons;
+                @layout#Form;
+            }
+
+
+            /* #5 */
+            field type=java.lang.String {
+                @trait=boxedAndTruncated {
+                    component:TruncateString;
+                    bindings:{ size:20 };
+                    wrapperComponent:AWGenericContainer;
+                    wrapperBindings: { tagName:div; style:"background-color:red;border:1px solid black"; }
+                }
+            }
+
+            /* Sample field to use it on ... */
+            @field=fullName#boxedAndTruncated {
+                value:${object.firstName + " " + object.lastName};
+                type:java.lang.String;
+                after:lastName;
+            }
+
+            /* #7 */
+            object @action=EditInPanel#pageAction {
+                visible: ${!properties.editing};
+                pageName:MetaContentPage;
+                pageBindings: {
+                    object:${object};
+                    operation:edit;
+                    layout:Inspect;
+                    clientPanel:true;
+                }
+            }
+
+            layout=Inspect2#Sections {
+                @layout=First#Form;
+                @layout=Second#Form { zonePath:Second; }
+
+            }
+            class=busobj.User {
+                Second.zLeft => email => password => birthDay => accountBalance;
+            }
+        </m:Rules>
+
+        <m:Context object="$user" operation="$op" layout="Inspect">
+            <m:IncludeComponent/>
+        </m:Context>
+
+        <hr/>
+        <h1>Another Form</h1>
+        <m:Context object="$user" operation="$op" layout="Inspect2">
+            <m:IncludeComponent/>
+        </m:Context>
+    </m:Context>
+
+</w:BasicPageWrapper>
+<groovy>
+    def user = new busobj.User()
+    public String op = "edit";
+</groovy>

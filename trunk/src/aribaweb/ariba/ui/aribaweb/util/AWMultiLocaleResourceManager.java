@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMultiLocaleResourceManager.java#50 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMultiLocaleResourceManager.java#51 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -46,6 +46,7 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
     public static boolean AllowScanningAllPackages = false;
     protected static String WebserverUrlPrefix = "http://localhost";
     protected static String WebserverUrlPrefixSecure = "https://localhost";
+    protected static String ResourceVersion;
     private static int LogFailedResourceLookups = 0;
     private static final Class AWDummyClass = AWDummy.class;
     private static final Class DeletedMarker = DeletedDummy.class;
@@ -87,6 +88,16 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
     public static String webserverUrlPrefix (boolean isSecure)
     {
         return isSecure ? WebserverUrlPrefixSecure : WebserverUrlPrefix;
+    }
+
+    public static void setResourceVersion (String version)
+    {
+        ResourceVersion = version;        
+    }
+
+    public static String resourceVersion ()
+    {
+        return ResourceVersion;
     }
 
     public static void setResourceManagerFactory (AWResourceManagerFactory resourceManagerFactory)
@@ -482,7 +493,12 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
 
     public String urlForResourceNamed (String resourceName, boolean isFullUrl, boolean isSecure)
     {
-        throw new AWGenericException("urlForResourceNamed(String resourceName, boolean isFullUrl, boolean isSecure) is not yet supported.");
+        throw new AWGenericException("urlForResourceNamed(String resourceName, boolean isFullUrl, boolean isSecure, is not yet supported.");
+    }
+
+    public String urlForResourceNamed (String resourceName, boolean isFullUrl, boolean isSecure, boolean isVersioned)
+    {
+        throw new AWGenericException("urlForResourceNamed(String resourceName, boolean isFullUrl, boolean isSecure, boolean isVersioned) is not yet supported.");
     }
 
     public AWImageInfo imageInfoForName (String imageFilename, Locale locale)

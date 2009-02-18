@@ -12,16 +12,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorFlag.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorFlag.java#4 $
 */
 
 package ariba.ui.widgets;
 
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWBinding;
+import ariba.ui.aribaweb.core.AWErrorBucket;
 import ariba.ui.aribaweb.core.AWErrorManager;
 import ariba.ui.aribaweb.core.AWErrorInfo;
 import ariba.ui.aribaweb.core.AWRequestContext;
+import ariba.ui.aribaweb.core.AWErrorManager.MultiErrorBucket;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.util.core.Constants;
 import ariba.util.core.ListUtil;
@@ -123,7 +125,16 @@ public class ErrorFlag extends AWComponent
         if (_errorInfoList == null) {
             Object[] errorKeys = AWErrorManager.getErrorKeyFromBindings(this);
             //Log.aribaweb_errorManager.debug("ErrorFlag: errorKeys=[%s, %s, %s]", errorKeys[0], errorKeys[1], errorKeys[2]);
-            _errorInfoList = errorManager().errorsForKeys(errorKeys);
+            List<AWErrorBucket> errors = errorManager().errorsForKeys(errorKeys);
+            if (errors != null) {
+                _errorInfoList = ListUtil.list();
+                for (int i = 0; i < errors.size(); i++) {
+                    _errorInfoList.addAll(errors.get(i).getErrorInfos());
+                }
+            }
+            else {
+                _errorInfoList = null;
+            }
         }
     }
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResource.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWClasspathResource.java#4 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -38,19 +38,21 @@ public class AWClasspathResource extends AWResource
 {
     URL _url;
     String _externalURL;
+    AWClasspathResourceDirectory _directory;
 
     public AWClasspathResource(String resourceName, String relativePath,
                                URL url, AWClasspathResourceDirectory directory)
     {
         super(resourceName, relativePath);
         _url = url;
-        _externalURL = StringUtil.strcat(directory.urlPrefix(), "/", relativePath);
+        _externalURL = directory.formatCacheableUrlForResource(this);
+        _directory = directory;
         // Log.aribawebResource_register.debug("Registering ClassPathResource: %s", _url.toExternalForm());
     }
 
     public String url()
     {
-        return _externalURL;
+        return _externalURL != null ? _externalURL : _directory.formatUrlForResource(this);
     }
 
     public String fullUrl()

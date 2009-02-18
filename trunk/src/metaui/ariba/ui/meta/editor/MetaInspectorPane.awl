@@ -152,18 +152,20 @@
                              item="$assignment"
                              list="$activeAssignments">
 
-                    <t:Column label="" width="20px" isVisible="$editing">\
-                        <a:IncludeBlock name="RuleMenuLink">\
-                            <a:Content name="Link">\
-                                <a:Image style="$ruleIndicatorStyle" filename="cleardot.gif"
-                                         width="6" height="6"
-                                         title="$assignment.source.description"/>\
-                            </a:Content>
-                            <a:Content name="MenuItems">\
-                                <w:PopupMenuHeading>Rule</w:PopupMenuHeading>
-                                <w:PopupMenuItem action="$deleteCurrentProperty">Delete Override</w:PopupMenuItem>
-                            </a:Content>
-                        </a:IncludeBlock>
+                    <t:Column label="" isVisible="$editing">\
+                        <div style="width:16px">\
+                            <a:IncludeBlock name="RuleMenuLink">\
+                                <a:Content name="Link">\
+                                    <a:Image style="$ruleIndicatorStyle" filename="cleardot.gif"
+                                             width="6" height="6"
+                                             title="$assignment.source.description"/>\
+                                </a:Content>
+                                <a:Content name="MenuItems">\
+                                    <w:PopupMenuHeading>Rule</w:PopupMenuHeading>
+                                    <w:PopupMenuItem action="$deleteCurrentProperty">Delete Override</w:PopupMenuItem>
+                                </a:Content>
+                            </a:IncludeBlock>\
+                        </div>
                     </t:Column>
 
                     <t:Column class="label" align="right" label="Property" key="key" width="1px" nowrap>\

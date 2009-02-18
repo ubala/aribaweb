@@ -1,0 +1,115 @@
+<table cellpadding="0" cellspacing="0" id="bnrMain" class="bnrMain1">
+    <tr>
+        <td class="bnrMainLeft">
+            <div class="bnrMainLeftHovers">
+                <div class="bnrHover"
+                     onmouseover="hoverDisplay(1)"></div>
+                <div class="bnrHover"
+                     onmouseover="hoverDisplay(2)"></div>
+                <div class="bnrHover"
+                     onmouseover="hoverDisplay(3)"></div>
+                <div class="bnrHover"
+                     onmouseover="hoverDisplay(4)"></div>
+            </div>
+        </td>
+        <td class="bnrMainRight">
+            <a:SetValue dict.hci="1"/>
+            <a:IncludeBlock name="HoverContent" title="Auto AJAX">
+                In AribaWeb, you program with a
+                simple, declarative, server-side
+                programming model, and AribaWeb
+                automatically provides AJAX behavior.
+            </a:IncludeBlock>
+            <a:SetValue dict.hci="2"/>
+            <a:IncludeBlock name="HoverContent" title="Instant App">
+                Just give AribaWeb your Java or
+                Groovy domain classes and it will
+                apply rules to the available metadata
+                to derive a complete application.
+            </a:IncludeBlock>
+            <a:SetValue dict.hci="3"/>
+            <a:IncludeBlock name="HoverContent" title="Live Edit & X-Ray">
+                X-Ray your running application to
+                see exactly the components in play.
+                Use Live Edit to drag and drop your
+                layout and edit rules.  All from
+                within your browser.
+            </a:IncludeBlock>
+            <a:SetValue dict.hci="4"/>
+            <a:IncludeBlock name="HoverContent" title="Proven Full Stack">
+                Rich Widget set, ORM integration, ...
+                Everything ready for your next business app.
+                AribaWeb has been deployed to
+                literally millions of users for nearly
+                10 years.
+            </a:IncludeBlock>
+        </td>
+    </tr>
+</table>
+<a:GenericContainer tagName="script">
+    var _hovered = false;
+    var _rotateIndex = 2;
+    
+    function hoverDisplay (index)
+    {
+        display(index);
+        _hovered = true; 
+    }
+
+    function display (index)
+    {
+        var bnrMain = ariba.Dom.getElementById('bnrMain')
+        if (bnrMain) {
+            bnrMain.className='bnrMain' + index;
+        }
+    }
+    
+    function rotateSiteBanner ()
+    {
+        if (!_hovered && 6 != _rotateIndex) {
+            if (_rotateIndex > 4) {
+                display(_rotateIndex % 4);
+            } else {
+                display(_rotateIndex);
+            }
+            _rotateIndex++;
+            setTimeout(rotateSiteBanner, 2000);
+        }
+    }
+
+    setTimeout(rotateSiteBanner, 2500);
+</a:GenericContainer>
+<div class="bnrBottom">
+    <div>
+        <b>AribaWeb</b> is the Open Source component-based web application development framework for creating
+        rich, AJAX-enabled applications with the<br/>absolute minimum of code (and no hand-coded Javascript).
+    </div>
+</div>
+<a:Block name="HoverContent">
+    <table class="${'bnrHoverRight' + dict.hci}">
+        <tr>
+            <td class="bnrHoverImage"></td>
+            <td class="bnrHoverMsg">
+                <h2>$^title</h2>
+                <div class="bnrHoverText">
+                    <a:IncludeContent/>
+                </div>
+                <w:TextButton buttonWrapperStyle="LeftRight"
+                              buttonClass="bnrBtn"
+                              action='${ariba.ui.meta.layouts.MetaNavTabBar.getState(requestContext.session).gotoModule("Product", requestContext)}'>
+                    Learn More
+                </w:TextButton>
+            </td>
+        </tr>
+    </table>
+</a:Block>
+<!--- prefetch -->
+<span class="hide">
+    <a:Image filename="bnr_main_lft-2.jpg"/>
+    <a:Image filename="bnr_main_lft-3.jpg"/>
+    <a:Image filename="bnr_main_lft-4.jpg"/>
+    <a:Image filename="hero/InstantApp.gif"/>
+    <a:Image filename="hero/LiveEdit.gif"/>
+    <a:Image filename="hero/FullStack.gif"/>
+    <a:Image filename="smallplayerPrevHov.jpg"/>
+</span>

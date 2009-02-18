@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#19 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#20 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -148,7 +148,7 @@ public final class AWResponseBuffer extends AWBaseObject
 {
     private final AWEncodedString _name;
     private final boolean _alwaysRender;
-    private final boolean _isScope;
+    private final Type _type;
     private final AWBaseResponse _baseResponse;
     private final HashMap _globalScopeChildren;
     private int _contentsStartIndex;
@@ -156,6 +156,8 @@ public final class AWResponseBuffer extends AWBaseObject
     private boolean _ignoreWhitespaceDiffs;
 
     private AWPagedVector _globalContents;
+
+    public enum Type { Normal, Scope, ScopeChild };
 
     // AWChecksum is a java implementation of the CRC32 checksum, which does not use
     // the java.util.zip.Checksum interface and thus does not require creating instances
@@ -223,15 +225,15 @@ public final class AWResponseBuffer extends AWBaseObject
 
     }
 
-    protected AWResponseBuffer (AWEncodedString name, boolean isScope, boolean alwaysRender, AWBaseResponse baseResponse)
+    protected AWResponseBuffer (AWEncodedString name, Type type, boolean alwaysRender, AWBaseResponse baseResponse)
     {
         _baseResponse = baseResponse;
         _globalContents = baseResponse.globalContents();
         _name = name;
         Assert.that(_name != null, "name may not be null.");
-        _isScope = isScope;
-        _ignoreWhitespaceDiffs = isScope;
-        _globalScopeChildren = _isScope ? _baseResponse.scopeChildren() : null;
+        _type = type;
+        _ignoreWhitespaceDiffs = type == Type.Scope;
+        _globalScopeChildren = type == Type.Scope ? _baseResponse.scopeChildren() : null;
         _alwaysRender = alwaysRender;
         _contentsStartIndex = _globalContents.size();
         _contentsEndIndex = _contentsStartIndex;
@@ -240,7 +242,8 @@ public final class AWResponseBuffer extends AWBaseObject
     private AWResponseBuffer (AWEncodedString name)
     {
         _name = name;
-        _alwaysRender = _isScope = false;
+        _alwaysRender = false;
+        _type = Type.Normal;
         _baseResponse = null;
         _globalScopeChildren = null;
     }
@@ -323,15 +326,16 @@ public final class AWResponseBuffer extends AWBaseObject
     protected void append (AWResponseBuffer responseBuffer)
     {
         if (responseBuffer != null) {
-            Assert.that(!responseBuffer._isScope || !_isScope, "Attempt to nest scoped RefreshRegion directly inside another");
+            Assert.that(responseBuffer._type != Type.Scope || _type != Type.Scope, "Attempt to nest scoped RefreshRegion directly inside another");
             addChild(responseBuffer);
             // add the response buffer to the global contents and increment the
             // response buffer's _contentsStartIndex so it doesn't point to itself
             _globalContents.add(responseBuffer);
             responseBuffer._contentsStartIndex++;
-            if (_isScope) {
+            if (_type == Type.Scope) {
                 // For scoped buffers, we do not include the children buffers in its checksum
                 _globalScopeChildren.put(responseBuffer._name, responseBuffer);
+                if (responseBuffer._type != Type.ScopeChild) updateChecksum(responseBuffer._name);
             }
             else {
                 updateChecksum(responseBuffer._name);
@@ -341,7 +345,7 @@ public final class AWResponseBuffer extends AWBaseObject
 
     protected boolean isScope ()
     {
-        return _isScope;
+        return _type == Type.Scope;
     }
 
     static class ScopeChanges {
@@ -361,11 +365,11 @@ public final class AWResponseBuffer extends AWBaseObject
     {
         if (_alwaysRender || otherBuffer == null || !isEqual(otherBuffer)) {
             renderAll(context);
-            if (_isScope) {
+            if (_type == Type.Scope) {
                 writeScopeUpdate(context);
             }
         }
-        else if (_isScope) {
+        else if (_type == Type.Scope) {
             // We either need the wrapper or we do not.  We do not need the wrapper if all children checksums match,
             // which means there were no insertions, deletions, or modifications to the top-level content of any row.
             // Note: it may be more efficient to simply extract the inserted/deleted/modified/unmodified lists rather
@@ -432,7 +436,7 @@ public final class AWResponseBuffer extends AWBaseObject
      */
     private void writeNextLevel (WriteContext context, AWResponseBuffer otherBuffer)
     {
-        Assert.that(_isScope == false, "writeNextLevel(...) cannot be used by scoped buffers");
+        Assert.that(_type != Type.Scope, "writeNextLevel(...) cannot be used by scoped buffers");
         AWResponseBuffer childBuffer = _children;
         AWResponseBuffer otherChildBuffer = otherBuffer._children;
         while (childBuffer != null) {
@@ -449,13 +453,17 @@ public final class AWResponseBuffer extends AWBaseObject
      */
     private void writeNextSublevel (WriteContext context, AWResponseBuffer otherBuffer)
     {
-        Assert.that(_isScope, "writeNextSublevel(...) can only be used by scoped buffers");
+        Assert.that(_type == Type.Scope, "writeNextSublevel(...) can only be used by scoped buffers");
         AWResponseBuffer childBuffer = _children;
         HashMap otherScopeChildren = otherBuffer._globalScopeChildren;
         while (childBuffer != null) {
             AWEncodedString childBufferName = childBuffer._name;
             AWResponseBuffer otherChildBuffer = (AWResponseBuffer)otherScopeChildren.get(childBufferName);
-            childBuffer.writeNextLevel(context, otherChildBuffer);
+            if (childBuffer._type == Type.ScopeChild) {
+                childBuffer.writeNextLevel(context, otherChildBuffer);
+            } else {
+                childBuffer.writeTo(context, otherChildBuffer);
+            }
             childBuffer = childBuffer._next;
         }
     }
@@ -477,20 +485,22 @@ public final class AWResponseBuffer extends AWBaseObject
             Object element = elements.next();
             if (!(element instanceof AWEncodedString)) {
                 AWResponseBuffer childBuffer = (AWResponseBuffer)element;
-                AWEncodedString childBufferName = childBuffer._name;
-                AWResponseBuffer otherChildBuffer = (AWResponseBuffer)otherScopeChildren.get(childBufferName);
-                if (otherChildBuffer == null) {
-                    if (inserts == null) inserts = ListUtil.list();
-                    inserts.add(previousChild);
-                    inserts.add(childBuffer);
-                    total++;
-                } else if (!childBuffer.isEqual(otherChildBuffer) || childBuffer._alwaysRender) {
-                    if (updates == null) updates = ListUtil.list();
-                    updates.add(childBuffer);
-                    total++;
+                if (childBuffer._type == Type.ScopeChild) {
+                    AWEncodedString childBufferName = childBuffer._name;
+                    AWResponseBuffer otherChildBuffer = (AWResponseBuffer)otherScopeChildren.get(childBufferName);
+                    if (otherChildBuffer == null) {
+                        if (inserts == null) inserts = ListUtil.list();
+                        inserts.add(previousChild);
+                        inserts.add(childBuffer);
+                        total++;
+                    } else if (!childBuffer.isEqual(otherChildBuffer) || childBuffer._alwaysRender) {
+                        if (updates == null) updates = ListUtil.list();
+                        updates.add(childBuffer);
+                        total++;
+                    }
+                    elements.skipTo(childBuffer._contentsEndIndex);
+                    previousChild = childBuffer;
                 }
-                elements.skipTo(childBuffer._contentsEndIndex);
-                previousChild = childBuffer;                
             }
         }
         elements.release();
@@ -498,11 +508,13 @@ public final class AWResponseBuffer extends AWBaseObject
         // deletions
         AWResponseBuffer otherChildBuffer = otherBuffer._children;
         while (otherChildBuffer != null) {
-            AWEncodedString otherChildBufferName = otherChildBuffer._name;
-            if (_globalScopeChildren.get(otherChildBufferName) == null) {
-                if (deletes == null) deletes = ListUtil.list();
-                deletes.add(otherChildBuffer);
-                total++;
+            if (otherChildBuffer._type == Type.ScopeChild) {
+                AWEncodedString otherChildBufferName = otherChildBuffer._name;
+                if (_globalScopeChildren.get(otherChildBufferName) == null) {
+                    if (deletes == null) deletes = ListUtil.list();
+                    deletes.add(otherChildBuffer);
+                    total++;
+                }
             }
             otherChildBuffer = otherChildBuffer._next;
         }
@@ -617,36 +629,15 @@ public final class AWResponseBuffer extends AWBaseObject
         AWResponseBuffer childBuffer = _children;
         while (childBuffer != null) {
             AWResponseBuffer otherChildBuffer = (AWResponseBuffer)otherScopeChildren.get(childBuffer._name);
-            if (otherChildBuffer != null && childBuffer.isEqual(otherChildBuffer)) {
-                childBuffer.writeNextLevel(context, otherChildBuffer);
+            if (childBuffer._type == Type.ScopeChild) {
+                if (otherChildBuffer != null && childBuffer.isEqual(otherChildBuffer)) {
+                    childBuffer.writeNextLevel(context, otherChildBuffer);
+                }
+            } else {
+                childBuffer.writeTo(context, otherChildBuffer);
             }
             childBuffer = childBuffer._next;
         }
-    }
-
-    // Only to be used by _isScoped
-    // Checks if any of the children buffers are different, ignoring deleted buffers.
-    private boolean needsWrapper (AWResponseBuffer otherBuffer)
-    {
-        Assert.that(_isScope == true, "needsWrapper(...) can only be used by scoped buffers");
-        HashMap otherScopeChildren = otherBuffer._globalScopeChildren;
-        AWResponseBuffer childBuffer = _children;
-        while (childBuffer != null) {
-            AWEncodedString childName = childBuffer._name;
-            AWResponseBuffer otherChildBuffer = (AWResponseBuffer)otherScopeChildren.get(childName);
-            if (otherChildBuffer == null || !childBuffer.isEqual(otherChildBuffer) || childBuffer._alwaysRender) {
-                return true;
-            }
-            childBuffer = childBuffer._next;
-        }
-        return false;
-    }
-
-    private void write (OutputStream os, byte bytes[]) throws IOException
-    {
-        int len = bytes.length;
-        os.write(bytes, 0, len);
-        _baseResponse._bytesWritten += len;
     }
 
     protected void debug_writeTopLevelOnly (WriteContext context)

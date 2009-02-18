@@ -12,19 +12,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#23 $
+    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#25 $
 */
 
 package ariba.util.core;
 
+import ariba.util.log.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import ariba.util.log.Log;
 
 /**
     Some HTML helpers
@@ -451,10 +451,16 @@ public class HTML
        Escaping unsafe tags and attributes
 
        safeTags and safeAttrs stores the definitions of safe tags and attributes
+       unsafeAttrValues defines unsafe substrings in attribute values
        safeConfigDefined will be true if any of the two arrays is not empty
     */
     private static String[] safeTags = new String[0];
     private static String[] safeAttrs = new String[0];
+    private static final String[] unsafeAttrValues = {
+        "javascript",
+        "vbscript",
+        "url"
+    };
     private static boolean safeConfigDefined = false;
 
     /**
@@ -527,11 +533,6 @@ public class HTML
         return -1;
     }
 
-    private static final String[] unsafeAttrValues = {
-        "javascript",
-        "vbscript",
-        "url"
-    };
     /**
        Process the attributes portion of a safe element, which is in the range
        of [from, to] of the buffer.
@@ -811,51 +812,245 @@ public class HTML
                     buf.append(tag);
                     buf.append(">");
                 }
-	        }
+            }
         }
         Log.util.debug("HTML.escapeUnsafe: Returns:%s", buf);
         return bufferLength > 0 ? buf.toString() : "";
     }
 
+    /*
+    Filtering Unsafe HTML
+
+    unsafeHTMLPattern holds the regular expression pattern of HTML to remove
+    escapedEquals is the custom escape sequence used by (un)encodeEqualsInStringLiteral
+    safeTagBegin and safeTagEnd are the custom escape sequences used for tags
+    stb and ste are shorthands for safeTagBegin and safeTagEnd
+    _slashEndOfTagMatchers and _slashEndOfTagPattern are part
+        of optimizations for encodeEqualsInStringLiteral
+     */
+    private static final Pattern unsafeHTMLPattern = createUnsafeHTMLPattern();
+    private static final String escapedEquals = "&AEQ;";
+    private static final String safeTagBegin = "&STB;", stb = safeTagBegin;
+    private static final String safeTagEnd = "&STE;", ste = safeTagEnd;
+    private static final Pattern _slashEndOfTagPattern = Pattern.compile("^/\\s*>");
+    private static final ThreadLocal<Matcher> _slashEndOfTagMatchers = new ThreadLocal<Matcher>() {
+        protected Matcher initialValue ()
+        {
+            return _slashEndOfTagPattern.matcher("");
+        }
+    };
+
     /**
-        Filters out any unsafe HTML and returns a safe HTML string 
+        This segment of regex will cause the entire match to fail
+        if we aren't actually in a tag (if we're in content).
+        It means: match until we reach the beginning or end of a tag,
+        then, if the next substring isn't the end of a tag, fail.
+        The following forms won't match and cause entire regex to fail:
+        href=content<nextTag>
+        href= "more content" !!sf!
+        These will match and allow the entire match to succeed:
+        attribute="value">
+        attribute = "value" attribute2=value!sf!!
+        attribute=HeavyEmphasis!!!!!!!!!!!!!!!!!!!sf!!
+
+        Before reading the pattern below, remember that:
+        ?= is lookahead and match (note that lookaheads don't capture)
+        ?! is lookahead and don't match
+        ?: is the "non-capturing" directive.
+
+        The idiom (?:(?!regex).)* means match until regex.
+        It is similar to [^chars] but much less intuitive.
+    */
+    private static final String regexIsInTag =
+        "(?=(?:(?![<>]|"+stb+"|"+ste+").)*(?:>|"+ste+"))";
+
+    /**
+        This string holds a regex that will match a HTML string literal.
+        It takes into account quoted and unquoted values.
+        See {@link #regexIsInTag} for regex documentation.
+     */
+    private static final String stringLiteral =
+        // This part matches a quoted string literal
+        "(?:(?:\\s*\"[^\"]*\")|" +
+        // This next bit allows unquoted attributes to match.
+        // The following forms won't match:
+        // href = stuff
+        // href =/>
+        // href =!!sf!
+        // href =!sf!!
+        // It will allow matches to:
+        // href =stuff
+        "(?:(?![\\s<>]|/\\s*>|"+stb+"|"+ste+").)*)";
+
+    /**
+        Filters out any unsafe HTML and returns a safe HTML string
         @aribaapi private
     */
     public static String filterUnsafeHTML (String str)
     {
+        // specially escape some equal signs(=)
+        str = encodeEqualsInStringLiteral(str);
+
+        // create shorthand aliases
+        final String stb = safeTagBegin, ste = safeTagEnd;
+
         // prevent safe tags from being stripped
         for (String safeTag : safeTags) {
             String safeTagPattern =
-                Fmt.S("<(/%s)>", safeTag);
-            str = str.replaceAll(safeTagPattern, "!sf!$1!sf!");
-            safeTagPattern =
-                Fmt.S("<(%s[^>]*/?)>", safeTag);
-            str = str.replaceAll(safeTagPattern, "!sf!$1!sf!");
+                Fmt.S("<\\s*(/?\\s*(?i:%s)(?=[\\s/>])[^>]*)>", safeTag);
+            str = str.replaceAll(safeTagPattern, stb + "$1" + ste);
         }
 
         // prevent safe attributes from being stripped
         for (String safeAttributes : safeAttrs) {
-            String safeAttributePattern =
-                Fmt.S(" (%s)=(\"[^\"]*\")", safeAttributes);
-            str = str.replaceAll(safeAttributePattern, " @sf@$1@sf@$2@sf@");
+            Pattern safeAttributePattern = getSafeAttributePattern(safeAttributes);
+            str = safeAttributePattern.matcher(str).replaceAll(" @sf@$1@sf@$2@sf@");
         }
 
-        // stripped all remaining unsafe HTML
-        String safeHTML = str.replaceAll("<script>.*</script>", "");
-        safeHTML = safeHTML.replaceAll("<iframe>.*</iframe>", "");
-        safeHTML = safeHTML.replaceAll("<[^/]*/>", "");
-        safeHTML = safeHTML.replaceAll("<[^<]*>", "");
-        safeHTML = safeHTML.replaceAll(" [^ ]*=\"[^\"]*\"", "");
+        // remove all remaining unsafe HTML tags and attributes
+        String safeHTML = unsafeHTMLPattern.matcher(str).replaceAll(" ");
+
+        // invalidate unsafe substrings in HTML attribute values
         for (String unsafeAttrVal : unsafeAttrValues) {
             String unsafeAttrValPattern =
-                Fmt.S("(%s:)", unsafeAttrVal);
+                Fmt.S("(?i)(%s:)" + regexIsInTag, unsafeAttrVal);
             safeHTML = safeHTML.replaceAll(unsafeAttrValPattern, "x$1");
         }
 
         // bring back the safe HTML
-        safeHTML = safeHTML.replaceAll("!sf!(.*?)!sf!", "<$1>");
+        safeHTML = safeHTML.replaceAll(stb+"((?:(?!"+ste+").)*)"+ste, "<$1>");
         safeHTML = safeHTML.replaceAll("@sf@(.*?)@sf@(.*?)@sf@", "$1=$2");
+        safeHTML = unencodeEqualsInStringLiteral(safeHTML);
         return safeHTML;
+    }
+
+    /**
+       Creates and returns a compiled efficient regular expression.
+       Removes the tags and content of HTML/XML comments, iframes,
+       scripts and styles.  This is designed to be used internally by
+       filterUnsafeHTML.
+       @pre Any HTML is well formed and valid content is HTML escaped correctly.
+       @return Returns a compiled pattern.
+       @aribaapi private
+     */
+    private static Pattern createUnsafeHTMLPattern ()
+    {
+        // Flag anything commented out for removal, iframes, scripts and styles
+        // Also flag the content
+        String regex = "(?:<!--.*?-->)";
+        regex += "|(?:<\\s*iframe[^>]*>[^<]*<\\s*/\\s*iframe\\s*>)";
+        regex += "|(?:<\\s*script[^>]*>[^<]*<\\s*/\\s*script\\s*>)";
+        regex += "|(?:<\\s*style[^>]*>[^<]*<\\s*/\\s*style\\s*>)";
+
+        // Include all remaining tags, but keep their content
+        // match all opening tags, closing tags and tags w/o content
+        //            <    /      aTag     /   >
+        regex += "|(?:<\\s*/?\\s*[^\\s>]++[^>]*>)";
+        // remove all remaining attributes
+        //                 theAttr=
+        regex += "|(?:\\s+[^\\s=]+\\s*=" + stringLiteral + regexIsInTag + ")";
+        return Pattern.compile(regex, Pattern.DOTALL);
+    }
+
+    /**
+        Returns a pattern for finding a <code>safeAttr</code> in a string.
+    */
+    private static final Pattern getSafeAttributePattern (String safeAttr)
+    {
+        return Pattern.compile(
+            // This first bit matches the initial tag and quoted attributes.
+            //        href    =     "stuff"
+            Fmt.S("\\s(%s)\\s*=(" + stringLiteral + ")" + regexIsInTag, safeAttr));
+    }
+
+    /**
+        This function encodes equals signs found in HTML attribute values.
+        Technically it will mistakenly encode equals signs outside of html tags
+        but after unencoding it becomes irrelevant.
+        This is a helper function for filterUnsafeHTML().
+        @aribaapi private
+    */
+    private static String encodeEqualsInStringLiteral (String str)
+    {
+        FastStringBuffer buf = null;
+        boolean inQuotedStringLiteral = false;
+        boolean inRawStringLiteral = false;
+        for (int i = 0; i < str.length(); i++)
+        {
+            char c = str.charAt(i);
+            if ( c == '=') {
+                if (inRawStringLiteral || inQuotedStringLiteral) {
+                    if (buf == null) {
+                        buf = new FastStringBuffer(str.substring(0, i));
+                    }
+                    buf.append(escapedEquals);
+                    // do not append =
+                    continue;
+                }
+                else {
+                    inRawStringLiteral = true;
+                }
+            }
+            else if ( c == '\"') {
+                inQuotedStringLiteral = ! inQuotedStringLiteral;
+                inRawStringLiteral = false;
+            }
+            else if (Character.isWhitespace(c) || c == '>' ) {
+                // white space, > or /> end the raw string literal
+                inRawStringLiteral = false;
+            }
+            else if (c == '/'){
+                Matcher matcher = _slashEndOfTagMatchers.get();
+                matcher.reset(str);
+                if (matcher.find(i)) {
+                    inRawStringLiteral = false;
+                }
+            }
+            if (buf != null) {
+                buf.append(c);
+            }
+        }
+        return buf != null ? buf.toString() : str;
+    }
+
+    /**
+       Undoes the work of {@link #encodeEqualsInStringLiteral(String)}.
+       @aribaapi private
+    */
+    private static String unencodeEqualsInStringLiteral (String str)
+    {
+        return str.replaceAll(escapedEquals, "=");
+    }
+
+    /**
+     * This holds the pattern to filter css margins in html attribute values.
+     */
+    private static final Pattern filterMarginsPattern = createFilterMarginsPattern();
+
+    /**
+     * This filters out css margins in html attribute values.
+     * @aribaapi private
+     */
+    public static String filterMargins (String str)
+    {
+        return filterMarginsPattern.matcher(str).replaceAll(" ");
+    }
+
+    /**
+        This creates the pattern used by filterMargins().
+        This function assumes that the attribute is quoted.
+    */
+    private static Pattern createFilterMarginsPattern ()
+    {
+        // Remember:
+        // (?>regex) is an independent group, it "locks in" the match
+        //     and disables backtracking here for efficiency.
+        // ?+ *+ and ++ are the possessive quantifiers and also disable backtracking
+
+        // This part matches the margin property.
+        //                 margin-left  :0 3px 10 em ;
+        String regex = "(?>margin[^<:]*+:[^\\\";<>]++);?+" + regexIsInTag;
+        return Pattern.compile(regex, Pattern.DOTALL);
     }
 
     /*
@@ -909,5 +1104,5 @@ public class HTML
             result.put((K)keysAndValues[i], (V)keysAndValues[i+1]);
         }
         return result;
-    }       
+    }
 }

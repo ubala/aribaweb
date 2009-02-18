@@ -1,0 +1,96 @@
+Contents
+------------
+
+This guide describes how to install the AribaWeb distribution, get up and running with
+the examples, and start building your own application.
+
+
+Installation
+------------
+
+The AribaWeb distribution .zip archive contains everything you need to get running
+(including Ant, Tomcat, and the HSQLDB Java database libraries) -- all you need is
+a valid installation of the Java5 or Java6 *JDK* (not just the JRE).
+
+  1. Install the Java5 or Java6 JDK (http://java.sun.com/javase/downloads/index_jdk5.jsp)
+        > set your JAVA_HOME (e.g. on Unix: `export JAVA_HOME="d:/jdk1.5"`,
+         on Windows set JAVA_HOME in your System Control Panel Advanced -> Environment Variables panel)
+
+  2. Unzip the aribweb.zip to an appropriate directory.
+        > **Note:** Unzip to a path without any spaces in any parent directory names. --- i.e. on Windows unzip to d:/
+          rather than to your Desktop or Documents folders (both of which are in a folder called "Documents and Settings")
+
+Running The Examples
+--------------------
+
+  1. **Double-click in `aribaweb/bin` directory on `start`** (or, on Windows, `start.bat`)
+
+  2. There is no step 2.  :-)
+
+
+If all goes according to plan, the examples webapps will be packed, tomcat will launch, and your browser
+will open to the Demo App [http://localhost:9080/Demo/AribaWeb](http://localhost:9080/Demo/AribaWeb).
+From there you can click around the app, browse and search the online documentation, and see the
+source code behind the examples with Component Inspector (just Alt-click on any UI element).
+
+One other example app will launch as well:
+
+  - **[MasterDetail](http://localhost:9080/MasterDetail/AribaWeb)** --  a MetaUI database app
+    which includes AppCore (User, Group, Permission) and Compass text search.  (Note: for full functionality
+    in MasterDetail, click the login link and login as Admin/ariba)
+
+
+Also included in the examples directory are:
+
+  - **GuestBook** -- a trivial guest book app.
+
+  - **AtIssue**, an email-integrated bug tracker.  To run AtIssue you'll need to set up a GMail account to use as
+    your bug IMAP inbox, and configure AtIssue to point at it.  See the instructions in examples/AtIssue/README.txt
+    for more info.
+
+You can cd into to these source directories and run `aw ant launch` to build and run each of these
+
+### Troubleshooting ###
+
+Several configuration issues could prevent the examples from launching correctly:
+
+  - Your JAVA_HOME is not set correctly, or points to a JRE (rather than JDK), or your JDK is 1.3 or 1.4
+    (rather than the required 1.5 or 1.6)
+
+  - You installed AW to a path where a parent directory has spaces
+
+  - You have an ANT_HOME defined and it points to an old version of Ant (e.g. 1.6 or 1.7.0, rather than 1.7.1)
+          > **Note:** AribaWeb includes Ant 1.7.1 as part of its distribution.  You are best off clearing your ANT_HOME
+            environment variable and letting AW use its bundled Ant
+
+  - You have TOMCAT_HOME, CATALINA_HOME or CATALINA_BASE environment variables defined, and they point
+    to an old or customized installation.
+          > **Note:** AribaWeb includes Tomcat 6 as part of its distribution.  On initialization, the AW build files
+            copy the CATALINA_HOME/conf directory and try to update the webserver port in the copied server.xml (to 9080).
+            If you have tweaked your server.xml, for instance, AW's attempts to change the port may fail and the app
+            may start on a different port (in which case you'll need to access the apps with a different port in you
+            URL)
+
+  - You get a debugger port conflict on start up
+          > By default AW launches the examples with the debugger enabled and set to listen on port 9000.  If you have
+          another process using that port the server will fail to start.
+
+  - Everything launched and AW says that it's opening the browser to http://localhost:9080/Demo/AribaWeb,
+    but the browser doesn't open
+          > The auto browser launch feature works only on Mac and Windows and has been known to fail on certain
+            Windows machines.  If your browser does not launch, simply manually point your browser at http://localhost:9080/Demo/AribaWeb.
+
+Building your Own App
+---------------------
+
+You can create a new AW app by Double-clicking in `aribaweb/bin` directory on **`aw`** (or, on Windows, `aw.bat`)
+and then respond to the shell prompt with 'c' to create a new application.  From there simply answer the on screen
+instructions to provide an app name, choose a template, and provide class and package names.  When you're done you
+can choose to have the new project opened in your IDE, or launched build and launched immediately.
+
+For more information see:
+
+  - [Creating a New App](Creating_New_App.txt).
+
+  - [Setting up IDE Integration](IDE_Plugins.txt).
+

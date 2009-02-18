@@ -1,0 +1,11 @@
+<a:SetValue dict.mid="$requestContext.nextElementId"/>
+<div style="border:1px solid red; background-color:#FFAAAA;padding:3px;width:300px">
+    <h2>MetaIncludeComponent Error:</h2>
+    No componentName property resolved in Context<br/>
+    [<w:PopupMenuLink menuId="$dict.mid">Context Info</w:PopupMenuLink>]
+</div>
+<w:PopupMenu menuId="$dict.mid">
+    <div onmouseDOwn='event.cancelBubble()'>
+        <textarea rows="20" cols="80">$metaContext.debugString</textarea>
+    </div>
+</w:PopupMenu>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSingleLocaleResourceManager.java#15 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSingleLocaleResourceManager.java#16 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -39,7 +39,7 @@ public class AWSingleLocaleResourceManager extends AWResourceManager
     private final AWCharacterEncoding _characterEncoding;
     private final AWStringsThunk _stringsClassExtension = new AWStringsThunk(this);
     private GrowOnlyHashtable _resources;
-    private GrowOnlyHashtable _fullUrls;
+    private GrowOnlyHashtable _urlsForResource;
     private final int _index;
 
     public static AWSingleLocaleResourceManager ensureSingleLocale (AWResourceManager resourceManager)
@@ -83,7 +83,7 @@ public class AWSingleLocaleResourceManager extends AWResourceManager
         _locale = locale;
         _characterEncoding = lookupCharacterEncoding(_locale);
         _resources = new GrowOnlyHashtable();
-        _fullUrls = new GrowOnlyHashtable();
+        _urlsForResource = new GrowOnlyHashtable();
         synchronized (this.getClass()) {
             _index = NextIndex;
             NextIndex++;
@@ -186,49 +186,63 @@ public class AWSingleLocaleResourceManager extends AWResourceManager
         return (resource == null) ? null : ((AWFileResource)resource)._fullPath();
     }
 
-    private String fullUrl (AWResource resource, boolean isSecure)
+    private String urlForResource (AWResource resource, boolean isFullUrl, boolean isSecure, boolean isVersioned)
     {
-        String fullUrl = (String)_fullUrls.get(resource);
-        if (fullUrl == null) {
-            synchronized (_fullUrls) {
-                fullUrl = (String)_fullUrls.get(resource);
-                if (fullUrl == null) {
-                    String partialUrl = resource.url();
-                    if (partialUrl.startsWith("http:") || partialUrl.startsWith("https:")) {
-                            // We are already full! (this directory was registered with a full
-                            // url prefix to begin with.
-                        fullUrl = partialUrl;
-                    }
-                    else {
-                        if (!partialUrl.startsWith("/")) {
-                            partialUrl = StringUtil.strcat("/", partialUrl);
+        String resourceUrl = resource.url();
+        if (!isFullUrl && !isVersioned) {
+            return resourceUrl;
+        }
+        String urlForResource = (String)_urlsForResource.get(resource);
+        if (urlForResource == null) {
+            synchronized (_urlsForResource) {
+                urlForResource = (String) _urlsForResource.get(resource);
+                if (urlForResource == null) {
+                    urlForResource = resourceUrl;
+                    if (isFullUrl && !resourceUrl.startsWith("http:") &&
+                        !resourceUrl.startsWith("https:")) {
+                        if (!resourceUrl.startsWith("/")) {
+                            resourceUrl = StringUtil.strcat("/", resourceUrl);
                         }
                         String webserverUrlPrefix = AWMultiLocaleResourceManager.webserverUrlPrefix(isSecure);
                         if (webserverUrlPrefix.endsWith("/")) {
                             webserverUrlPrefix = webserverUrlPrefix.substring(0, webserverUrlPrefix.length() - 1);
                         }
-                        fullUrl = StringUtil.strcat(webserverUrlPrefix, partialUrl);
-                        _fullUrls.put(resource, fullUrl);
+                        urlForResource = StringUtil.strcat(webserverUrlPrefix, resourceUrl);
+                    }
+                    if (isVersioned) {
+                        String version = AWMultiLocaleResourceManager.resourceVersion();
+                        if (!StringUtil.nullOrEmptyOrBlankString(version)) {
+                            urlForResource = StringUtil.strcat(urlForResource, "?v=", version);
+                        }
+                    }
+                    if (urlForResource != resourceUrl) {
+                        _urlsForResource.put(resource, urlForResource);
                     }
                 }
             }
         }
-        return fullUrl;
+        return urlForResource;
     }
 
     public String urlForResourceNamed (String resourceName, boolean isFullUrl, boolean isSecure)
     {
+        return urlForResourceNamed(resourceName, isFullUrl, isSecure, false);
+    }
+
+    public String urlForResourceNamed (String resourceName, boolean isFullUrl,
+                                       boolean isSecure, boolean isVersioned)
+    {
         String url = null;
         AWResource resource = resourceNamed(resourceName);
         if (resource != null) {
-            url = isFullUrl ? fullUrl(resource, isSecure) : resource.url();
+            url = urlForResource(resource, isFullUrl, isSecure, isVersioned);
         }
         return url;
     }
 
     public String urlForResourceNamed (String resourceName)
     {
-        return urlForResourceNamed(resourceName, false, false);
+        return urlForResourceNamed(resourceName, false, false, false);
     }
 
     public AWImageInfo imageInfoForName (String imageFilename)

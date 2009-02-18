@@ -70,7 +70,7 @@ ariba.Util.extend(ariba.Debug, function() {
         }
     });
 
-    return {
+    var Debug = {
 
         // Parameters put in the panel by AWComponentInspector.awl
         _AWCPISession : "",
@@ -350,6 +350,11 @@ ariba.Util.extend(ariba.Debug, function() {
             awDeepestChild = null;
         },
 
+        prepOpenCI : function ()
+        {
+            _ComponentInspectorWin = window.open("", "AWComponentPath", _AWCPIWindOpts);
+        },
+
         // Called by AWXRichClientScriptFunctions.js:gl_handler to see if an event is
         // an invocation of component inspector        
         checkDebugClick : function (evt)
@@ -448,8 +453,10 @@ ariba.Util.extend(ariba.Debug, function() {
                     var mainWindow = window;
                     setTimeout(function() {
                         // alert ("trying to set " + _ComponentInspectorWin + " to " + window);
-                        _ComponentInspectorWin._AWXMainWindow = mainWindow;
-                        _ComponentInspectorWin._AWXRefreshMainActionId = refreshMainActionId;
+                        if (_ComponentInspectorWin) {
+                            _ComponentInspectorWin._AWXMainWindow = mainWindow;
+                            _ComponentInspectorWin._AWXRefreshMainActionId = refreshMainActionId;
+                        }
                     },3000);
                 } catch (e) {
                 }
@@ -510,24 +517,6 @@ ariba.Util.extend(ariba.Debug, function() {
             }
         },
 
-        // XXX remove this after transition to onRefreshRequestBegin
-        isRequestComplete : function () {
-            return ariba.Debug._requestComplete;
-        },
-        
-        // XXX remove this after transition to onRefreshRequestBegin
-        resetRequestComplete : function () {
-            ariba.Debug._requestComplete = false;
-        },
-
-        // XXX remove this after transition to onRefreshRequestBegin
-        requestCompleteNotification : function () {
-            ariba.Debug._requestComplete = true;
-            if (typeof aribaDebugRequestCompleteCallback != "undefined") {
-                aribaDebugRequestCompleteCallback();
-            }
-        },
-
         /*
         _createFloater : function ()  {
             if (!document || !document.body) return null;
@@ -557,6 +546,21 @@ ariba.Util.extend(ariba.Debug, function() {
         */
 
         EOF:0};
+
+    Event.registerBehaviors({
+        DOpCI : {
+            click : function (elm, evt) {
+                if (!Dom.isSafari) Debug.prepOpenCI();
+                return false;
+            },
+            mousedown : function (elm, evt) {
+                if (Dom.isSafari) Debug.prepOpenCI();
+                return false;
+            }
+        }
+    });
+
+    return Debug;
 
 }());
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Calendar.java#12 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Calendar.java#13 $
 */
 
 package ariba.ui.widgets;
@@ -56,22 +56,19 @@ public class Calendar extends AWComponent
             return new ariba.util.core.Date(year, month, day, _calendarDate, timezone, locale);
         }
 
-        public int getYear (Date date, TimeZone timezone, Locale locale)
+        public int getYear (java.util.Date date, TimeZone timezone, Locale locale)
         {
-            ariba.util.core.Date utilDate = (ariba.util.core.Date)date;
-            return ariba.util.core.Date.getYear(utilDate, timezone, locale);
+            return ariba.util.core.Date.getYear(date, timezone, locale);
         }
 
-        public int getMonth (Date date, TimeZone timezone, Locale locale)
+        public int getMonth (java.util.Date date, TimeZone timezone, Locale locale)
         {
-            ariba.util.core.Date utilDate = (ariba.util.core.Date)date;
-            return ariba.util.core.Date.getMonth(utilDate, timezone, locale);
+            return ariba.util.core.Date.getMonth(date, timezone, locale);
         }
 
-        public int getDayOfMonth (Date date, TimeZone timezone, Locale locale)
+        public int getDayOfMonth (java.util.Date date, TimeZone timezone, Locale locale)
         {
-            ariba.util.core.Date utilDate = (ariba.util.core.Date)date;
-            return ariba.util.core.Date.getDayOfMonth(utilDate, timezone, locale);
+            return ariba.util.core.Date.getDayOfMonth(date, timezone, locale);
         }
 
     };
@@ -84,7 +81,7 @@ public class Calendar extends AWComponent
     private static final String AWCalendarDateKey = "awcald";
 
     public AWEncodedString _elementId;
-    public Date _selectedDate;
+    public java.util.Date _selectedDate;
     // This is only here to trick takeValuesPahse into visiting this component
     // if we're in a form (also see subcomponent in Calendar.awl)
     public Object _formValueDummy;

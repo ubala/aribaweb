@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#123 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#127 $
     </Copyright>
 
     <Overview>
@@ -608,10 +608,11 @@
 \
     <!--- Pre-Table heading area -->\
     <t:ScrollTableWrapper enableScrolling="$enableScrolling" class="$tableClass" style="$style"
-            width="$^width"
+            width="$^width"                      
             showColumnHeader="$showColumnHeader" showHeader="$showNavigationRowTop" showFooter="$showNavigationRowBottom"
             useRefresh="$useRefresh" isDragDropEnabled="$isDragDropEnabled" minHeight="$^minHeight" maxHeight="$^maxHeight"
-            topCount="$displayGroup.scrollTopCount" bottomCount="$displayGroup.scrollBottomCount" scrollFaultAction="$scrollFaultAction"
+            topCount="$displayGroup.scrollTopCount" bottomCount="$displayGroup.scrollBottomCount" rowCount="$displayGroup.filteredObjects.size" 
+            scrollFaultAction="$scrollFaultAction"
             topOffset="$displayGroup.scrollTopOffset" topIndex="$scrollTopIndex"
             isMaximized="$isMaximized" elementIdForVisibleRow="$elementIdForVisibleRow"
             disableRowSelection="$disableRowSelection" checkNbsps="$false" checkSelectionStyle="$false"
@@ -633,9 +634,11 @@
                     </a:If>
                     <a:IncludeBlock name="Buttons" isTop="$true" showTotalItems="$^showTotalItems"/>
                 </td>
-                <td width="1%" align="right">\
-                    <a:IncludeBlock name="BatchNavRow" isTop="$true" showTotalItems="$^showTotalItems"/>\
-                </td>
+                <a:If ifTrue="$showBatchNavRow">
+                    <td width="1%" align="right">\
+                        <a:IncludeBlock name="BatchNavRow" isTop="$true" showTotalItems="$^showTotalItems"/>\
+                    </td>
+                </a:If>
             </tr></table>
         </a:Content>
 
@@ -681,7 +684,7 @@
                         dropAction="$dropAction" dragAction="$dragAction" dr="$primaryDataRowIndicator">\
                         <td class="empty tableBody" colspan="$tableColumnCount">
                             <a:If notEqualNull="$^emptyTableMessage">\
-                                <a:String value="$^emptyTableMessage"/>
+                                <a:String value="$^emptyTableMessage" escapeUnsafeHtml="$true"/>
                             <a:Else/>\
                                 <a:Local key="a002">No items</a:Local>\
                             </a:If>\
@@ -691,7 +694,7 @@
                     <a:RefreshRegion tagName="tr" class="$rowClass" disabled="$disableRefresh">
                         <td class="empty tableBody" colspan="$tableColumnCount">\
                             <a:If notEqualNull="$^emptyTableMessage">\
-                                <a:String value="$^emptyTableMessage"/>
+                                <a:String value="$^emptyTableMessage" escapeUnsafeHtml="$true"/>
                             <a:Else/>\
                                 <a:Local key="a002">No items</a:Local>\
                             </a:If>\
@@ -739,9 +742,11 @@
                 <a:IncludeComponent awcomponentName="$rightButtonArea.rendererComponentName" table="$this"/>\
             </a:If>\
             <a:IncludeContent name="footerAreaRight" required="$false"/>
-            <div style="float:right;padding:0px 5px 0px;">\
-                <a:IncludeBlock name="BatchNavRow" isTop="$false" showTotalItems="$^showTotalItems"/>
-            </div>
+            <a:If ifTrue="$showBatchNavRow">
+                <div style="float:right;padding:0px 5px 0px;">\
+                    <a:IncludeBlock name="BatchNavRow" isTop="$false" showTotalItems="$^showTotalItems"/>
+                </div>
+            </a:If>
         </a:Content>
     </t:ScrollTableWrapper>\
 <a:Else/>

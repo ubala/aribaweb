@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FileUploadChooser.awl#1 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FileUploadChooser.awl#2 $
     </Copyright>
 
     <Overview>
@@ -36,6 +36,12 @@
 
         This file is set with File.deleteOnExit(), so the app must move it if the file contents are
         to be retained.
+    </Binding>
+
+    <Binding key="bytes" type="byte[]" direction="set" alternates="inputStream,file">
+        If this binding is provided, the contents of the uploaded data will be made available
+        to the application in the form of a byte[].  If the application is in the mode which requires
+        it to write all incoming file uploads to disk, this will simply read the contents from disk int a byte[].
     </Binding>
 
     <Binding key="filename" type="String" direction="both" required="$false">
@@ -72,9 +78,18 @@
 
 </a:Api>\
 <a:If ifTrue="$displayName">
-    $displayName
+    <a:If ifTrue="$hasContent">
+        <a:IncludeContent/>
+    <a:Else/>
+        $displayName
+    </a:If>
     [<a:Hyperlink action="$clear" submitForm="$false">Clear</a:Hyperlink>]
 <a:Else/>
-    <a:FileUpload file="$file" filename="$filename" mimeType="$^mimeType" fileSizeExceeded="$^fileSizeExceeded"
-        maxLength="$^maxLength"/>
+    <a:If ifTrue='${hasBinding("file")}'>
+        <a:FileUpload file="$file" filename="$filename" mimeType="$^mimeType" fileSizeExceeded="$^fileSizeExceeded"
+            maxLength="$^maxLength"/>
+    <a:Else/>
+        <a:FileUpload bytes="$^bytes" filename="$filename" mimeType="$^mimeType" fileSizeExceeded="$^fileSizeExceeded"
+            maxLength="$^maxLength"/>
+    </a:If>
 </a:If>

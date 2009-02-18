@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#125 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#126 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -55,9 +55,7 @@ import javax.servlet.http.HttpSession;
 
 public final class AWPage extends AWBaseObject implements AWDisposable, AWRequestContext._SubcomponentLookup
 {
-    private static final AWEncodedString SetPageScrollTop = AWEncodedString.sharedEncodedString("ariba.Dom.setPageScrollTop");
-    private static final AWEncodedString SetPageScrollLeft = AWEncodedString.sharedEncodedString("ariba.Dom.setPageScrollLeft");
-    private static final AWEncodedString SetPageScrollNS = AWEncodedString.sharedEncodedString("ariba.Dom.setPageScrollNS");
+    private static final AWEncodedString SetPageScroll = AWEncodedString.sharedEncodedString("ariba.Dom.setPageScroll");
     private static final AWEncodedString RedirectStringStart =
         new AWEncodedString("<script id='AWRefreshComplete'>");
     private static final AWEncodedString RedirectStringEnd =
@@ -791,31 +789,13 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     {
         if ((_pageScrollTop != null) || (_pageScrollLeft != null)) {
             AWResponse response = _requestContext.response();
-            if (_requestContext.isBrowserMicrosoft()) {
-                if (_pageScrollTop != null) {
-                    response.appendContent(SetPageScrollTop);
-                    response.appendContent(AWConstants.OpenParen);
-                    response.appendContent(_pageScrollTop);
-                    response.appendContent(AWConstants.CloseParen);
-                    response.appendContent(AWConstants.Semicolon);
-                }
-                if (_pageScrollLeft != null) {
-                    response.appendContent(SetPageScrollLeft);
-                    response.appendContent(AWConstants.OpenParen);
-                    response.appendContent(_pageScrollLeft);
-                    response.appendContent(AWConstants.CloseParen);
-                    response.appendContent(AWConstants.Semicolon);
-                }
-            }
-            else {
-                response.appendContent(SetPageScrollNS);
-                response.appendContent(AWConstants.OpenParen);
-                response.appendContent(_pageScrollLeft == null ? AWConstants.Zero : _pageScrollLeft);
-                response.appendContent(AWConstants.Comma);
-                response.appendContent(_pageScrollTop == null ? AWConstants.Zero : _pageScrollTop);
-                response.appendContent(AWConstants.CloseParen);
-                response.appendContent(AWConstants.Semicolon);
-            }
+            response.appendContent(SetPageScroll);
+            response.appendContent(AWConstants.OpenParen);
+            response.appendContent(_pageScrollLeft == null ? AWConstants.Zero : _pageScrollLeft);
+            response.appendContent(AWConstants.Comma);
+            response.appendContent(_pageScrollTop == null ? AWConstants.Zero : _pageScrollTop);
+            response.appendContent(AWConstants.CloseParen);
+            response.appendContent(AWConstants.Semicolon);
         }
     }
 

@@ -1,7 +1,7 @@
 <a:SetValue title="$metaContext.properties.label"/>
 <m:Context class="$metaContext.properties.elementType" object="$false">
     <m:Context displayGroup="$displayGroup" dataSourceType="${displayGroup.dataSource.class.getName()}" layout="DetailTable"
-               operation="list" contextKey="class">\
+               operation="list" scopeKey="class">\
         <t:DataTable enableScrolling="$true" displayGroup="$displayGroup" title="$title"
                      singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
                      awbindingsDictionary="$metaContext.properties.bindingsDictionary">

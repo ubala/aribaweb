@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#47 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#49 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -382,21 +382,18 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         return _currentRepository.size();
     }
 
-    public List getAllErrors ()
+    public List<AWErrorInfo> getAllErrors ()
     {
         return getAllErrorsWithSeverity(null);
     }
 
-    private List getAllErrorsWithSeverity (Boolean isWarning)
+    private List<AWErrorInfo> getAllErrorsWithSeverity (Boolean isWarning)
     {
-        List orderedElements = _currentRepository.elements();
-        List list = ListUtil.list();
-        for (int i = 0; i < orderedElements.size(); i++) {
-            AWErrorBucket bucket = (AWErrorBucket)orderedElements.get(i);
-            for (int j = 0; j < bucket.size(); j++) {
-                AWErrorInfo error = bucket.get(j);
-                if (isWarning == null ||
-                    error.isWarning() == isWarning.booleanValue()) {
+        List<AWErrorBucket> orderedElements = _currentRepository.elements();
+        List<AWErrorInfo> list = ListUtil.list();
+        for (AWErrorBucket bucket : orderedElements) {
+            for (AWErrorInfo error : bucket.getErrorInfos()) {
+                if (isWarning == null || error.isWarning() == isWarning) {
                     list.add(error);
                 }
             }
@@ -409,7 +406,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         return _currentRepository.hasErrorsWithSeverity(Boolean.FALSE);
     }
 
-    public List getAllWarnings ()
+    public List<AWErrorInfo> getAllWarnings ()
     {
         return getAllErrorsWithSeverity(Boolean.TRUE);
     }
@@ -589,7 +586,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     }
 
     // with wildcard lookup
-    public List errorsForKeys (Object[] keys)
+    public List<AWErrorBucket> errorsForKeys (Object[] keys)
     {
         return errorsForValueSource(
             keys[AWErrorInfo.ValueSourceKeyIndex],
@@ -628,12 +625,13 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         if (keys == null) {
             return null;
         }
-        List errors = errorsForKeys(keys);
+        List<AWErrorBucket> errors = errorsForKeys(keys);
         if (!ListUtil.nullOrEmptyList(errors)) {
-            for (int i = 0; i < errors.size(); i++) {
-                AWErrorInfo error = (AWErrorInfo)errors.get(i);
-                if (error.isWarning() == isWarning) {
-                    return error;
+            for (AWErrorBucket error : errors) {
+                for (AWErrorInfo errorInfo : error.getErrorInfos()) {
+                    if (errorInfo.isWarning() == isWarning) {
+                        return errorInfo;
+                    }
                 }
             }
         }
@@ -656,9 +654,9 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     }
 
     // with wildcard lookup
-    public List errorsForValueSource (Object valueSource, String fieldPath, String group)
+    public List<AWErrorBucket> errorsForValueSource (Object valueSource, String fieldPath, String group)
     {
-        List errors = null;
+        List<AWErrorBucket> errors = null;
         if (AWErrorInfo.NullKey.equals(fieldPath) && AWErrorInfo.NullKey.equals(group)) {
             errors = _currentRepository.getErrorForKeyIndex(
                 AWErrorInfo.ValueSourceKeyIndex, valueSource);
@@ -1807,6 +1805,11 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return _errorsForSameKey.size();
         }
 
+        public List<AWErrorInfo> getErrorInfos ()
+        {
+            return _errorsForSameKey;
+        }
+
         public boolean hasDuplicate ()
         {
             for (int i = 0; i < _errorsForSameKey.size(); i++) {
@@ -1839,7 +1842,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
 
     private static class ErrorRepository
     {
-        private EMMultiKeyHashtable _errors;
+        private EMMultiKeyHashtable/*<Object[],AWErrorBucket>*/ _errors;
         private int _displayOrderCounter = 0;
         private int _unnavigableDisplayOrderCounter = 0;
         private boolean _hasUnnavigableErrors = false;
@@ -1875,7 +1878,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return _errors.size();
         }
 
-        public List elements ()
+        public List<AWErrorBucket> elements ()
         {
             return _errors.elementsVector();
         }
@@ -1909,9 +1912,9 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return (AWErrorBucket)_errors.getValueForKeys(keys);
         }
 
-        public List /*AWErrorBucket*/ getErrorForKeyIndex (int keyIndex, Object key)
+        public List<AWErrorBucket> getErrorForKeyIndex (int keyIndex, Object key)
         {
-            List matches = ListUtil.list();
+            List<AWErrorBucket> matches = ListUtil.list();
             List errors = _errors.elementsVector();
             for (int i = 0; i < errors.size(); i++) {
                 AWErrorBucket bucket = (AWErrorBucket)errors.get(i);
@@ -1922,10 +1925,10 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return matches;
         }
 
-        public List /*AWErrorBucket*/ getErrorForKeyIndex (int keyIndex1, Object key1,
+        public List<AWErrorBucket> getErrorForKeyIndex (int keyIndex1, Object key1,
                                                            int keyIndex2, Object key2)
         {
-            List matches = ListUtil.list();
+            List<AWErrorBucket> matches = ListUtil.list();
             List errors = _errors.elementsVector();
             for (int i = 0; i < errors.size(); i++) {
                 AWErrorBucket bucket = (AWErrorBucket)errors.get(i);
@@ -1937,11 +1940,11 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return matches;
         }
 
-        public List /*AWErrorBucket*/ getErrorForKeyIndex (int keyIndex1, Object key1,
+        public List<AWErrorBucket> getErrorForKeyIndex (int keyIndex1, Object key1,
                                                            int keyIndex2, Object key2,
                                                            int keyIndex3, Object key3)
         {
-            List matches = ListUtil.list();
+            List<AWErrorBucket> matches = ListUtil.list();
             List errors = _errors.elementsVector();
             for (int i = 0; i < errors.size(); i++) {
                 AWErrorBucket bucket = (AWErrorBucket)errors.get(i);
@@ -2563,6 +2566,10 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         {
             Object ret = super.put(targetKeyList, value, false);
             if (ret == null) {
+                _allValues.add(value);
+            }
+            else {
+                _allValues.remove(ret);
                 _allValues.add(value);
             }
             return ret;

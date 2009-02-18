@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWFileResource.java#11 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWFileResource.java#13 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -51,12 +51,11 @@ public final class AWFileResource extends AWResource
                               AWFileResourceDirectory directory)
     {
         super(resourceName, relativePath);
-        _url = StringUtil.strcat(directory.urlPrefix(), "/", relativePath);
-        _url = _url.replace('\\', '/');
         _directory = directory;
         String fullPath = _fullPath();
         _file = new File(fullPath);
         Assert.that(_file.exists(), "Specified file does not exist: \"" + fullPath + "\" resource: " + toString());
+        _url = directory.formatCacheableUrlForResource(this);
         try {
             String canonicalPath = _file.getCanonicalPath();
             Assert.that(canonicalPath.endsWith(_file.getName()), "Case mismatch in file name: \"" + relativePath + "\" Note: was able to locate file with similar name: " + canonicalPath);
@@ -74,7 +73,7 @@ public final class AWFileResource extends AWResource
 
     public String url ()
     {
-        return _url;
+        return _url != null ? _url : _directory.formatUrlForResource(this);
     }
 
     public String fullUrl ()
@@ -158,7 +157,7 @@ public final class AWFileResource extends AWResource
     {
         GrowOnlyHashtable table = _FileStatCache;
         if (table == null) {
-            table = new EqGrowOnlyHashtable();
+            table = new GrowOnlyHashtable.IdentityMap();
             _FileStatCache = table;
         }
 
@@ -171,15 +170,3 @@ public final class AWFileResource extends AWResource
     }
 }
 
-class EqGrowOnlyHashtable extends GrowOnlyHashtable
-{
-    protected boolean objectsAreEqualEnough (Object obj1, Object obj2)
-    {
-        return  obj1 == obj2;
-    }
-
-    protected int getHashValueForObject (Object o)
-    {
-        return System.identityHashCode(o);
-    }
-}

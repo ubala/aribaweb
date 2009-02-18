@@ -10,7 +10,10 @@
         <w:Tab label="MetaUI Advanced">
             <a:IncludeComponent name="UserFormAdvanced"/>
         </w:Tab>
-        <w:Tab label="Basic Form">
+        <w:Tab label="Meta Minimal">
+            <a:IncludeComponent name="MetaSimple"/>
+        </w:Tab>
+        <w:Tab label="Non-Meta Form">
             <a:IncludeComponent name="BasicForm"/>
         </w:Tab>
     </w:TabSet>

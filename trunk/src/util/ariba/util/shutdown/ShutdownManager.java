@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#16 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#17 $
 */
 
 package ariba.util.shutdown;
@@ -785,7 +785,7 @@ public class ShutdownManager
                             // there used to be a break here, but we don't want
                             // to starve shutdown delayers (like AWConcreteApplication)
                             // that use canShutdown calls for side effects
-                            Log.shutdown.debug("Shutdown pending: waiting for delayer- "
+                            Log.shutdown.info("Shutdown pending: waiting for delayer- "
                                    + delayer.toString());
                         }
                     }

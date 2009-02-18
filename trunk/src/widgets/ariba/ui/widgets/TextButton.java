@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.java#45 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.java#47 $
 */
 
 package ariba.ui.widgets;
@@ -26,6 +26,7 @@ import ariba.ui.aribaweb.core.AWEditableRegion;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponse;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.aribaweb.core.AWBindingNames;
 
 public final class TextButton extends AWComponent
 {
@@ -95,6 +96,7 @@ public final class TextButton extends AWComponent
         _buttonClass = null;
         _onClick = null;
         _confirmationId = null;
+        _buttonWrapperStyle = null;
     }
 
     public void renderResponse (AWRequestContext requestContext, AWComponent component)
@@ -147,7 +149,8 @@ public final class TextButton extends AWComponent
 
     public AWEncodedString wrapClassString ()
     {
-        return _isBrandStyle ? BtnBrandWrap : BtnWrap;
+        AWEncodedString cls = encodedStringValueForBinding(AWBindingNames.classBinding);
+        return (cls != null) ? cls : (_isBrandStyle ? BtnBrandWrap : BtnWrap);
     }
 
     public boolean useLeftRightWrapper ()

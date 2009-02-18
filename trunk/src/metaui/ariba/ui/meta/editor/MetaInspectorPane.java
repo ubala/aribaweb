@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/editor/MetaInspectorPane.java#13 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/editor/MetaInspectorPane.java#15 $
 */
 package ariba.ui.meta.editor;
 
@@ -50,7 +50,7 @@ public class MetaInspectorPane extends AWComponent
     AWDebugTrace _debugTrace;
     boolean _didInvalidate;
     Context.AssignmentRecord _srec;
-    public Context.Info _contextInfo;
+    public Context.InspectorInfo _contextInfo;
     public Map<Rule.AssignmentSource, List<Assignment>> _assignmentMap;
     public List<Rule.AssignmentSource> _assignmentLocations;
     public List<Assignment> _activeAssignments;
@@ -126,7 +126,12 @@ public class MetaInspectorPane extends AWComponent
             _activeAssignments = ListUtil.list();
             for (List<Assignment>assignments : _assignmentMap.values()) {
                 for (Assignment assignment : assignments) {
-                    if (!assignment.isOverridden() && !assignment.getKey().endsWith("_trait")) _activeAssignments.add(assignment);
+                    String key = assignment.getKey();
+                    if (!assignment.isOverridden() && !key.endsWith("_trait")
+                            && !key.equals("bindingsDictionary")
+                            && !key.equals(_contextInfo.scopeKey)) {
+                        _activeAssignments.add(assignment);
+                    }
                 }
             }
             
@@ -358,19 +363,21 @@ public class MetaInspectorPane extends AWComponent
 
     public void doneEditing ()
     {
+        if (_editingRule == null) return;
         UIMeta meta = UIMeta.getInstance();
         Map newProp = MapUtil.map();
         String newAssignmentString = (isPropertiesPanel())
-                ? _assignment.getKey() + ": " + OSSWriter.escapeString(_editableAssignmentString)
+                ? _editingKey + ": " + OSSWriter.escapeString(_editableAssignmentString)
                 : _editableAssignmentString;
         String errorMessage = meta.parsePropertyAssignment(newAssignmentString, newProp);
         if (errorMessage != null) {
             recordValidationError("property", errorMessage, _editableAssignmentString);
-        } if (newProp.isEmpty()) {
+        }
+        if (newProp.isEmpty()) {
             recordValidationError("property", "Unable to parse property assignment", _editableAssignmentString);
         } else {
             // clear old key
-            Rule rule = currentAssignmentRule();
+            Rule rule = _editingRule;
             if (!newProp.containsKey(_editingKey)) newProp.put(_editingKey, null);
             EditManager.EditSet editSet = _editManager.editSetForRule(rule);
             editSet.updateRule(rule, newProp);
@@ -382,6 +389,9 @@ public class MetaInspectorPane extends AWComponent
 
     public void saveChanges ()
     {
+        doneEditing();
+        if (errorManager().hasErrors()) return;
+        
         _editManager.saveChanges();
         AribaPageContent.setMessage(Fmt.S("Changes saved to %s", _editSet._resource.relativePath()),
                 session());

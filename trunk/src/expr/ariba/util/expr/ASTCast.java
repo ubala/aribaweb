@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/ASTCast.java#2 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/ASTCast.java#3 $
 */
 package ariba.util.expr;
 
@@ -45,10 +45,17 @@ class ASTCast extends SimpleNode
             throws ExprException
     {
         Object value = children[0].getValue( context, source );
-        // If both _classname and chidl value are primtiives, then this
+        // If both _classname and child value are primitives, then this
         // method will convert the child value to an instance of the casted type.
-        // Otherwise, the method will just return child value as it is.
-        return TypeConversionHelper.convertPrimitive(_classname, value);
+        // Otherwise, the method will just return child value as it is if it is
+        // convertable or return null.
+        Class targetClass = TypeConversionHelper.getClassForType(_classname);
+        if (TypeConversionHelper.canConvert(targetClass, value)) {
+            return TypeConversionHelper.convertPrimitive(_classname, value);
+        }
+        else {
+            return null;
+        }
     }
 
     protected void setValueBody( ExprContext context, Object target, Object value )

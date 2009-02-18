@@ -7,7 +7,6 @@ import ariba.appcore.*
 import ariba.appcore.util.*
 import ariba.appcore.annotations.*
 import javax.persistence.*
-import ariba.util.core.*
 import javax.mail.internet.*
 import ariba.ui.meta.annotations.Property.Visible
 import org.compass.annotations.*

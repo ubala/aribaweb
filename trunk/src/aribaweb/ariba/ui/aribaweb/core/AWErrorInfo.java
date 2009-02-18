@@ -12,18 +12,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorInfo.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorInfo.java#19 $
 */
 
 package ariba.ui.aribaweb.core;
 
+import java.util.List;
+import java.util.Collections;
 import ariba.util.core.Assert;
-import ariba.util.core.StringUtil;
+import ariba.util.core.ListUtil;
 import ariba.util.core.Fmt;
 import ariba.util.core.FastStringBuffer;
-import ariba.util.core.Constants;
 import ariba.util.log.Logger;
-import ariba.ui.aribaweb.util.Log;
 import ariba.ui.aribaweb.util.AWEncodedString;
 
 /**
@@ -448,6 +448,11 @@ public class AWErrorInfo implements AWErrorBucket
     public int size ()
     {
         return 1;
+    }
+
+    public List<AWErrorInfo> getErrorInfos ()
+    {
+        return Collections.singletonList(this);
     }
 
     public boolean hasDuplicate ()

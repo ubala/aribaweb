@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DocumentHead.awl#18 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DocumentHead.awl#20 $
     </Copyright>
 
     <Overview>
@@ -56,8 +56,11 @@
     <a:If notEqualNull="$^applicationCSS">\
         <a:StyleSheet filename="$^applicationCSS"/>
     </a:If>\
+    <a:If ifTrue="$hasApplicationCSS">\
+        <a:StyleSheet filename="application.css"/>
+    </a:If>
     <title>\
-        <a:String value="$^windowTitle" escapeHtml="$^escapeTitle:$true"/>
+        <a:String value="$^windowTitle" escapeHtml="$^escapeTitle:$true"/>\
     </title>
     <a:IncludeContent/>
     <link rel="shortcut icon" href="$favIconUrl" type="image/x-icon"/>

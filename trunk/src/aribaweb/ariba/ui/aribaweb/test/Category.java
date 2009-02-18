@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/Category.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/Category.java#3 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -56,7 +56,8 @@ public class Category
                     {
                         TestUnit c1 = (TestUnit)object1;
                         TestUnit c2 = (TestUnit)object2;
-                        return c1.getMainName().compareTo(c2.getMainName());
+                        return c1.getMainName().toLowerCase().compareTo(
+                                c2.getMainName().toLowerCase());
                     }
                     public boolean equals (Object o1, Object o2)
                     {

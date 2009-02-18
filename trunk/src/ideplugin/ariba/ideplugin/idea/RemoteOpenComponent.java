@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/idea/RemoteOpenComponent.java#6 $
+    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/idea/RemoteOpenComponent.java#7 $
 */
 package ariba.ideplugin.idea;
 
@@ -22,14 +22,19 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.search.GlobalSearchScope;
 
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import ariba.ideplugin.core.RemoteOpen;
 
@@ -87,8 +92,10 @@ public class RemoteOpenComponent implements ProjectComponent, RemoteOpen.Opener
 
         public void run () {
             String shortName = _name.substring(_name.lastIndexOf("/") + 1);
-            PsiFile[] files =
-                PsiManager.getInstance(_project).getShortNamesCache().getFilesByName(shortName);
+            PsiFile[] files = filesByShortName(_project, shortName);
+            // PsiManager.getInstance(_project).getShortNamesCache().getFilesByName(shortName);
+            // FilenameIndex.getFilesByName(_project, shortName, ProjectScope.getProjectScope(_project))
+            
             if (files.length > 0) {
                 for (int i = 0; i < files.length; i++) {
                     VirtualFile file = files[i].getVirtualFile();
@@ -106,6 +113,45 @@ public class RemoteOpenComponent implements ProjectComponent, RemoteOpen.Opener
                 }
             }
         }
+    }
+
+    // Due to API changes between IDEA 7 and 8, need to use reflection to do lookup
+    private static final int IDEA_8_0 = 8000;
+    static PsiFile[] filesByShortName (Project project, String filePath) {
+        PsiFile[] psiFiles = null;
+        String ver = ApplicationInfo.getInstance().getBuildNumber();
+        int v = Integer.parseInt(ver);
+        boolean isIdea8 = v > IDEA_8_0;
+        PsiClass cls = null;
+        try {
+            if (isIdea8) {
+				Class filenameIndexClass = Class.forName("com.intellij.psi.search.FilenameIndex");
+                Method getFilesByName = filenameIndexClass.getMethod("getFilesByName", Project.class,
+                        String.class, GlobalSearchScope.class);
+				Class projectScopeClass = Class.forName("com.intellij.psi.search.ProjectScope");
+                Method getProjectScope = projectScopeClass.getMethod("getProjectScope", Project.class);
+                GlobalSearchScope scope = (GlobalSearchScope) getProjectScope.invoke(null, project);
+                psiFiles = (PsiFile[]) getFilesByName.invoke(null, project, filePath, scope);
+            } else {
+				Class psiManagerClass = Class.forName("com.intellij.psi.PsiManager");
+                Method getInstance = psiManagerClass.getMethod("getInstance", Project.class);
+                Object inst = getInstance.invoke(null, project);
+                Method getShortNamesCache = psiManagerClass.getMethod("getShortNamesCache");
+				Class psiShortNamesCacheClass = Class.forName("com.intellij.psi.search.PsiShortNamesCache");
+                Object cacheInstance = getShortNamesCache.invoke(inst);
+                Method getFilesByName = psiShortNamesCacheClass.getMethod("getFilesByName", String.class);
+                psiFiles = (PsiFile[]) getFilesByName.invoke(cacheInstance, filePath);
+            }
+        } catch (ClassNotFoundException e) {
+   		    e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+   		    e.printStackTrace();
+        } catch (IllegalAccessException e) {
+   		    e.printStackTrace();
+        } catch (InvocationTargetException e) {
+   		    e.printStackTrace();
+        }
+        return psiFiles;
     }
 
 }

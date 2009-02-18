@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/BigDecimalFormatter.java#13 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/BigDecimalFormatter.java#14 $
 */
 
 package ariba.util.formatter;
@@ -617,7 +617,12 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
             return Constants.ZeroBigDecimal;
         }
         else if (object instanceof Double) {
-            return new BigDecimal(object.toString());
+            try {
+                return new BigDecimal(object.toString());
+            }
+            catch (NumberFormatException e) {
+                return Constants.ZeroBigDecimal;
+            }
         }
         else if (object instanceof BigDecimal) {
             return (BigDecimal)object;

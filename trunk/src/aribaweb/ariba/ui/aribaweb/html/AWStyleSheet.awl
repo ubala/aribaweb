@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWStyleSheet.awl#2 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWStyleSheet.awl#3 $
     </Copyright>
 
     <Overview>
@@ -32,7 +32,7 @@
 
 <a:If ifTrue="$=application.allowsStyleSheetUrls">\
     <a:If notEqualNull="$styleSheetResource">\
-        <link rel="stylesheet" type="text/css" href="$styleSheetResource.url" media="$^media"/>\
+        <link rel="stylesheet" type="text/css" href="$styleSheetResourceUrl" media="$^media"/>\
     </a:If>\
 <a:Else/>\
     <!--- The following is a rapid-turnaround (DirectConnect) url for: <a:PrimitiveString value="$styleSheetResource._fullPath"/> -->

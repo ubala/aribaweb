@@ -1,0 +1,131 @@
+
+\<script type="text/javascript">
+    ariba.Event.registerBehaviors({
+      VidUpdate: {
+        click : function (elm, evt) {
+            var player = document.getElementById("SCPlayer");
+            player.innerHTML = player.innerHTML.replace(/clip_id=\d+/g, "clip_id="+elm.getAttribute("vid")).replace(/com\/\d+/g, "com/="+elm.getAttribute("vid"));
+            ariba.Event.cancelBubble(evt);
+        }},
+      ExpandPlayer: {
+        click : function (elm, evt) {
+            var player = document.getElementById("SmallSCPlayer");
+            player.className = "expandPlayer";
+            ariba.Event.cancelBubble(evt);
+            return false;
+        }},
+      Redirect: {
+        click : function (elm, evt) {
+            window.open(elm.href, "vimeo");
+            ariba.Event.cancelBubble(evt);
+            return false;
+        }
+    }});
+\</script>
+<a:If ifTrue="$^smallPlayer">
+    <div id="SmallSCPlayer">
+        <table cellpadding="0" cellspacing="0" class="playerImage">
+            <tr>
+                <td bh="ExpandPlayer">\
+                    <div class="screencast" bh="ROV" roClass="screencastHov"></div>
+                </td>
+                <td valign="top" style="padding:5px 10px 10px">
+                    <h2 style="font-size:13px">Experience the AW Difference!</h2>
+                    Spend just three minutes to learn how with Auto AJAX,
+                    InstantApp, Live Edit & X-Ray, and a Proven Full Stack distribution,
+                    AribaWeb delivers <b>More App with <i>Way</i> Less Code</b>.
+                </td>
+            </tr>
+        </table>
+        <div class="playerExpanded">
+            <object width="540" height="407">
+                <param name="allowfullscreen" value="true"/>
+                <param name="allowscriptaccess" value="always"/>
+                <param name="movie"
+                       value="http://vimeo.com/moogaloop.swf?clip_id=3134140&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=00ADEF&amp;fullscreen=1&amp;autoplay=1"/>
+                <embed src="http://vimeo.com/moogaloop.swf?clip_id=3134140&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=00ADEF&amp;fullscreen=1&amp;autoplay=1"
+                       type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="540"
+                       height="407"></embed>
+            </object>
+        </div>
+    </div>
+<a:Else ifTrue="$^largePlayer"/>
+    <div id="SCPlayer">
+        <object width="540" height="407">
+            <param name="allowfullscreen" value="true"/>
+            <param name="allowscriptaccess" value="always"/>
+            <param name="movie"
+                   value="http://vimeo.com/moogaloop.swf?clip_id=1790856&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=00ADEF&amp;fullscreen=1"/>
+            <embed src="http://vimeo.com/moogaloop.swf?clip_id=1790856&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=0&amp;color=00ADEF&amp;fullscreen=1"
+                   type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="540"
+                   height="407"></embed>
+        </object>
+    </div>
+</a:If>
+<table _ifTrue="$^twoColThumbnails" cellpadding="0" cellspacing="0" style="margin-top:15px" width="100%">
+    <a:For count="$rowCount" index="$idx">
+        <tr>
+            <td>
+                <a:IncludeBlock name="screencastThb" id="$video1.id"
+                                title="$video1.title"
+                                description="$video1.description"/>
+            </td>
+            <td _ifTrue="$video2">
+                <a:IncludeBlock name="screencastThb" id="$video2.id"
+                                title="$video2.title"
+                                description="$video2.description"/>
+            </td>
+        </tr>
+        <tr><td>&nbsp;</td></tr>
+    </a:For>
+</table>
+<div _ifTrue="$^oneColThumbnails">
+    <a:For list="$videos" item="$video">
+        <a:IncludeBlock name="screencastThb" id="$video.id"
+                        title="$video.title"
+                        description="$video.description"
+                        bh="VidUpdate"/>
+    </a:For>
+</div>
+        
+<a:Block name="screencastThb">
+    <table><tr>
+        <td class="screencastThb">\
+            <a href='${"http://www.vimeo.com/" + stringValueForBinding("id")}' target="_blank" rel="nofollow" vid="$^id" bh="$^bh:Redirect">\
+                <a:Image filename='${"thumbnails/"+ stringValueForBinding("id") + ".gif"}'/>\
+            </a>
+        </td>
+        <td class="screencastThbDesc">
+            <a href='${"http://www.vimeo.com/" + stringValueForBinding("id")}' target="_blank" rel="nofollow" vid="$^id" bh="$^bh:Redirect">\
+                <b>$^title</b>\
+            </a><br/>
+            $^description
+        </td>
+    </tr></table>
+</a:Block>
+<groovy>
+    int idx;
+    def video;
+    def videos = [
+        [id:"1790856", title:"Getting Started",
+         description:"See how quickly you can get going with AribaWeb!"],
+        [id:"1773123", title:"Building a Guestbook",
+         description:"Use various AW widgets to build a snappy GuestBook application"],
+        [id:"1827249", title:"Rich Widgets and AJAX",
+         description:"Pivot Tables, Charts, Rich Text, YouTube & Google Maps integration"],
+        [id:"2239096", title:"MetaUI Live Editing",
+         description:"Drag and drop editing live Database app UI!"],
+        [id:"2685671", title:"20 mins to Lift Off!",
+         description:"Build a complete email-integrated bug tracking app in 100x less code!"],
+        [id:"1826564", title:"Auto-AJAX Explained",
+         description:"AJAX without hand-coded JavaScript! Build a reusable component."],
+        [id:"1844030", title:"MetaUI Database App",
+         description:"MetaUI-JPA & Hibernate 3:  full DB App with just domain objects + annotations."],
+        [id:"1840925", title:"MetaUI In Detail",
+         description:"Derive full-UI from domain POJOs + rules or annotations."]
+    ];
+
+    def rowCount() { (videos.size()+1) / 2 }
+    def video1() { videos[idx*2] }
+    def video2() { idx*2+1 < videos.size() ? videos[idx*2+1] : null }
+</groovy>

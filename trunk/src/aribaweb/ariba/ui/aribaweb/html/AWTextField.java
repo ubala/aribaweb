@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#50 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#51 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -296,8 +296,9 @@ public class AWTextField extends AWComponent
     public String cssClass ()
     {
         String cls = stringValueForBinding(BindingNames.classBinding);
-        if (cls == null) cls = (valueForBinding(BindingNames.size) == null) ? "tf tfW" : "tf";
-        if (_disabled) cls += " tfDis";
+        cls = cls == null ? "" : " " + cls;
+        cls = (valueForBinding(BindingNames.size) == null ?  "tf tfW" : "tf") + cls;
+        if (_disabled) cls = "tfDis " + cls;
         return cls;
     }
 

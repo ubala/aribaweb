@@ -12,14 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestUnit.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestUnit.java#4 $
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.util.core.ClassUtil;
 import ariba.util.core.ListUtil;
-
 import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
@@ -145,7 +144,8 @@ public class TestUnit
                      {
                          TestLinkHolder c1 = (TestLinkHolder)object1;
                          TestLinkHolder c2 = (TestLinkHolder)object2;
-                         return c1.getDisplayName().compareTo(c2.getDisplayName());
+                         return c1.getDisplayName().toLowerCase().compareTo(
+                                 c2.getDisplayName().toLowerCase());
                      }
                      public boolean equals (Object o1, Object o2)
                      {

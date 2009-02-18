@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.java#29 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.java#31 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -77,11 +77,9 @@ public class AWHyperlink extends AWComponent
         _frameName = AWUtil.UndefinedEncodedString;
         _fragmentIdentifier = AWUtil.UndefinedEncodedString;
         AWHtmlForm currentForm = requestContext().currentForm();
-        if (currentForm != null) {
-            _isSubmitForm = hasBinding(_submitFormBinding) ?
-                booleanValueForBinding(_submitFormBinding) :
-                ((AWForm)currentForm).submitFormDefault();
-        }
+        _isSubmitForm = hasBinding(_submitFormBinding) ?
+            booleanValueForBinding(_submitFormBinding) :
+            currentForm != null && ((AWForm)currentForm).submitFormDefault();
         Assert.that(_hrefBinding == null, "href no longer supported");
         Assert.that(_fragmentIdentifierBinding == null, "fragmentIdentifier no longer supported");
     }
@@ -194,6 +192,16 @@ public class AWHyperlink extends AWComponent
             }
         }
         return primaryBinding;
+    }
+
+    public boolean staticOrOmit ()
+    {
+        return omitLink() || requestContext().isStaticGeneration();
+    }
+
+    public String staticUrlForActionResults ()
+    {
+        return requestContext().staticUrlForActionResults(AWGenericActionTag.evaluateActionBindings(this, _pageNameBinding, _actionBinding));
     }
 
     public boolean omitLink ()

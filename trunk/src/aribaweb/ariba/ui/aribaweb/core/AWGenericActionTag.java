@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericActionTag.java#21 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericActionTag.java#22 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -207,6 +207,13 @@ public final class AWGenericActionTag extends AWComponent
                 !"a".equals(stringValueForBinding(_tagNameBinding)));
     }
 
+    public String staticUrl ()
+    {
+        return (requestContext().isStaticGeneration())
+                ? requestContext().staticUrlForActionResults(evaluateActionBindings(this))
+                : null;
+    }
+
     ///////////////////
     // Utility Methods
     ///////////////////
@@ -241,5 +248,4 @@ public final class AWGenericActionTag extends AWComponent
         }
         return actionResults;
     }
-
 }

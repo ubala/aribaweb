@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDefaultApplication.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDefaultApplication.java#18 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -21,6 +21,8 @@ import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWBrand;
 import ariba.ui.aribaweb.util.AWBrandManager;
+import ariba.util.core.ResourceService;
+import ariba.util.i18n.LocalizedJavaString;
 
 import java.io.StringWriter;
 
@@ -33,10 +35,24 @@ import java.io.StringWriter;
 public class AWDefaultApplication extends AWConcreteApplication
 {
     private String _loginUrl;
+    private AWMergedStringLocalizer _localizer = new AWMergedStringLocalizer();
 
     public AWDefaultApplication ()
     {
         _loginUrl = "./";
+    }
+
+    public void init ()
+    {
+        // Note: must init *after* line above, because super will call our resourceUrl()
+        super.init();
+
+        // Todo!  Why were we calling "couldBeNull" -- we'll blow up downstream it this isn't initialized...
+        ResourceService resourceService = ResourceService.getService(); // ResourceService.serviceCouldBeNull();
+        if (resourceService != null) {
+            resourceService.registerStringProcessor(_localizer);
+        }
+        LocalizedJavaString.registerLocalizer(_localizer);
     }
 
     public AWDefaultApplication (String loginUrl, String applicationName)
@@ -53,8 +69,8 @@ public class AWDefaultApplication extends AWConcreteApplication
 
     public String resourceFilePath ()
     {
-            // not implemented
-        return null;
+        // this is our default path inside of the wars and jars (and web server as well)
+        return "docroot/";
     }
 
     protected String initAdaptorUrl ()
@@ -106,8 +122,7 @@ public class AWDefaultApplication extends AWConcreteApplication
     ///////////////////////////
     public AWStringLocalizer getStringLocalizer ()
     {
-        throw new AWGenericException(
-            "AWDefaultApplication getStringLocalizer not supported");
+        return _localizer;
     }
 
     public boolean initIsRapidTurnaroundEnabled ()
@@ -138,10 +153,5 @@ public class AWDefaultApplication extends AWConcreteApplication
     {
         throw new AWGenericException(
             "AWDefaultApplication getBrandManager not supported");
-    }
-
-    public AWBrand getBrand (AWRequestContext requestContext)
-    {
-        throw new AWGenericException("AWDefaultApplication getBrand not supported");
     }
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaRules.java#8 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaRules.java#9 $
 */
 package ariba.ui.meta.core;
 
@@ -31,8 +31,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
 
-/*
-    Register rules in context of the template in which this tag appears
+/**
+    Registers inline rules scoped to the template in which this tag appears.
  */
 public class MetaRules extends AWContainerElement implements AWHtmlTemplateParser.LiteralBody
 {

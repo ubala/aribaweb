@@ -1,0 +1,116 @@
+Distribution Contents
+=====================
+
+Shipped Directories
+-------------------
+
+ - **lib/**
+        The aribaweb jars, plus, in ext-*, third-party libraries for runtime, build time, and demo
+
+ - **src/**
+        Source code for the AribaWeb jars
+
+ - **examples/**
+        A few examples of using AribaWeb
+
+ - **tools/**
+        Files used by the AW (Ant-based) build system, plus bundled copies of Ant (1.7.1) and Tomcat (6.0.x)
+
+ - **bin/**
+        Shell scripts and groovy scripts, including the `start` and `aw` scripts,
+        there to get you going quickly.
+
+ - **ide/**
+        Contains the aribawebIdeaPlugin.jar, ariba.ideplugin.eclipse.5.0RC1.jar -- plug-ins
+        for two popular Java IDEs 
+
+Generated Directories
+---------------------
+
+ - **build/**
+        derived source, compilied .class files, and computed app-local catalina-base directories
+ - **webapps/**
+        WAR files for AW sample/demo applications (fully self-contained, with jars and resources)
+ - **conf/**
+       A copy of the CATALINA_HOME (Tomcat) conf directory.  Putting a copy
+       here allows tomcat to run directly on this install (without moving files
+       into your default CATALINA_HOME/BASE)
+                
+Lib Details:
+------------
+
+ - ariba.util.jar
+    > Low-level utility classes used by the other AW components.  Includes logging,
+    collection wrappers, performance metric and debugging tracing utilities, as well
+    as "ClassExtension" and "FieldValue" support for AOP-like external class
+    extension, and JavaBeans-like high-performance property access.
+
+ - ariba.aribaweb.jar
+    > The core AribaWeb framework.  Includes servlet adaptors to bind AW into a
+    container, the AWComponent and AWElement hierarchy, template parser, and
+    built-in tags for control flow (AWIf, AWFor, etc) as well as HTML constructs
+    (AWTextField, AWPopup, ...) as well at the client-side javascript libraries
+    to deliver an AJAX user experience (incremental refresh, drag/drop, ...)
+
+    > Note: this jar contains webserver resources in docroot/** that need to be
+    copied to any application deployment WAR file.
+
+ - ariba.widgets.jar
+    > Higher level UI components for building AribaWeb applications.  Includes:
+    - Layout components (*PageWrapper, TabSet, SectionHead/Body, PortletWrapper)
+    - Controls (PopupMenu, Chooser, Calendar)
+    - Rich DataTable, PivotTable and Tree/Outline support
+    - Validation display / navigation UI (ErrorFlag, ...)
+    - Wizard framework (multi-step UIs)
+    > Several of these controls provide a rich user interface via associated client-side
+    JavaScript libraries (e.g. type-ahead choosers, scrolling and dynamic data retrieval
+    in tables).
+
+    > Note: this jar contains webserver resources in docroot/** that need to be
+    copied to any application deployment WAR file.
+
+ - ariba.expr.jar
+    > A simple expression parser/interpreter that can be used in AW tag bindings
+    and metaui property definitions.  Based originally on OGNL code, but with a
+    more Java/Groovy-inspired syntax and using ariba.util.fieldvalue for high-performance
+    property access.  (Also supports interfaces for type-safe validation of
+    restricted subsets of APIs exposed for business application end-user scripting)
+
+ - ariba.metaui.jar
+    > Meta-data driven UI framework, built on the full AribaWeb stack for generating
+    complete user interfaces "on the fly" based on various sources of meta data
+    (java class introspection, annotations, and ".oss" files).  Uses CSS-like
+    "multi-dimensional selectors" to contextually specify properties.
+    Currently supports generating forms (with validation), tables, as well as
+    global application navigation (e.g. nav tabs) and Action (global and instance-level)
+
+ - ariba.groovyloader
+    > Integration between AribaWeb and the Groovy scripting language.  Supports
+      rapid-turnaround on edits to .groovy source files, and the embedding of
+      groovy source code in .awl files via the `groovy` tag.
+
+Src/ Details
+------------
+
+ - BUILD.txt
+      > Read this for instructions on how to build the AribaWeb distribution from source
+
+ - util, aribaweb, widgets, expr, metaui, groovyloader/
+      > Correspond to the above-described jars
+
+ - build.xml
+      > Ant build files.  Each source sub-directory has a build.xml file that references
+        shared build rules in the build-support directory
+
+
+ - examples/
+     > Contains a few simple AW sample applications:
+      - GuestBook/ A single-component "Guest Book" mini app (see Main.{awl, java})
+      - Demo/ A demo application that includes:
+       - the "SearchSource" documentation / source code search a browse mini-app
+       - selected "widget gallery" examples (DataTables, PivotTables, ...)
+       - MetaUI forms example
+       - Master detail mini app (with panels, etc)
+
+---
+This software is covered under the Apache License Version 2.0 (see LICENSE.txt)

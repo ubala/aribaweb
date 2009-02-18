@@ -6,11 +6,12 @@
 <a:ClientSideScript filename="widg/prettify.js"/>
 <w:HintMessage>
     You may search and filter by path hierarchy on the left, and see excerpts from matches on the right.
-    <a href="http://lucene.apache.org/java/docs/queryparsersyntax.html#Terms" target="new">Query Syntax</a>
+    <a href="http://lucene.apache.org/java/2_3_2/queryparsersyntax.html#Terms" target="new">Query Syntax</a>
 </w:HintMessage>
 <table width="100%"><tr>
     <td valign="top" width="30%">
         <div class="flexContainer">
+            <a:If ifTrue="$hasSearchers">
             <t:DataTable item="$node" children="$node.nonLeafChildren" displayGroup="$outlineDisplayGroup"
                     multiSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
                     class="scrollTableWrapper smallFont" enableScrolling="$true" showColumnHeader="$false">
@@ -47,6 +48,9 @@
                     </w:OutlineControl>\
                 </t:Column>
             </t:DataTable>
+            <a:Else/>
+                <i>No Lucene indexes found -- searching disabled.</i>
+            </a:If>
         </div>
     </td>
     <td valign="top" width="100%" style="padding-left:12px">
@@ -76,6 +80,7 @@
                                 <a:Hyperlink action="$matchDocClicked">$matchDoc.typeLabel</a:Hyperlink>
                             </a:For>
                         </t:Column>
+                        <t:Column key="path"/>
                         <t:RowDetail style="padding:0px 4px 0px 4px" isVisible="$showingDetails">\
                             <div style='font:normal 12px/15px "Courier New", Courier, mono'>\
                                 <a:PrimitiveString value='$doc.hitExcerpt'/>

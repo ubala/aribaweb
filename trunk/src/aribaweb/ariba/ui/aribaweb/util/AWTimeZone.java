@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWTimeZone.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWTimeZone.java#11 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -29,11 +29,12 @@ import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.text.ParseException;
 
 public final class AWTimeZone extends Object
 {
-    private static GrowOnlyHashtable TimeZonesByOffsetKeys = new GrowOnlyHashtable();
+    private static Map<String,TimeZone> DefaultTimeZonesByOffsetKeys;
 
     static public int STD_YEAR;
     static public int STD_MONTH = 1;
@@ -51,56 +52,13 @@ public final class AWTimeZone extends Object
     */
 
     static {
-        /*
-            Changed the STD_YEAR to use the current year instead of hardcoding
-            2002.  If you pass a  previous year to get the offset, java
-            will return timezone as of that year, any changes to timezones the
-            occured since then are not included.
-            This change will work correctly for most cases execpt for changes
-            to day light time saving changes that occur in countries in the
-            southern hemisphere where the day light time saving period
-            spans 2 calendar years.  The logic that assume the day light time zone
-            between Feb 1 and Aug 1, might not be correct for those countries.
-         */
-        STD_YEAR = Calendar.getInstance().get(Calendar.YEAR);
-        DST_YEAR = STD_YEAR;
+
         AWConcreteApplication app =
                 (AWConcreteApplication)AWConcreteApplication.sharedInstance();
-        String[] timezones = TimeZone.getAvailableIDs();
-
         // get preferred timezones from the application
         List preferredTZs = app.getPreferredTimezones();
-        for (int i = 0; i < timezones.length; ++i) {
-            // iterate through the list of timezones returned by the JVM and
-            // construct "key" for the given timezone
-            TimeZone timezone = TimeZone.getTimeZone(timezones[i]);
-            int febOffset = timezone.getOffset(1, STD_YEAR, STD_MONTH, STD_DATE, 7, 0);
-            int augOffset = timezone.getOffset(1, DST_YEAR, DST_MONTH, DST_DATE, 6, 0);
-            String newKey = Fmt.S("%s:%s", Constants.getInteger(febOffset), Constants.getInteger(augOffset));
-            // now insert key/timezone into the timezone map. If the key has already
-            // been inserted (ie, a different timezone name has already been inserted
-            // for the same timezone, GMT-8 is US/SanFrancisco or US/LosAngeles), then
-            // check if the current value (ie timezone id) is a preferred value.  If not
-            // then overwrite, if so, then keep the preferred value.
-            // The "last entry" wins mechanism needs to be maintained for backward
-            // compatibility, but we've added the extra "preferred timezone" concept.
-            // Note that this caches the value at the system level and we'll need to
-            // add a per-realm override and possibly a per-user override in the future.
-            if (TimeZonesByOffsetKeys.containsKey(newKey)) {
-                String currId = ((TimeZone)TimeZonesByOffsetKeys.get(newKey)).getID();
-                if (preferredTZs == null || !preferredTZs.contains(currId)) {
-                    Log.aribaweb.debug("Overwriting existing timezone key: %s value: %s with new value: %s",
-                            newKey, currId, timezones[i]);
-                    TimeZonesByOffsetKeys.put(newKey, timezone);
-                }
-                else {
-                    Log.aribaweb.debug("Preferred timezone not overwritten: %s", currId);
-                }
-            }
-            else {
-                TimeZonesByOffsetKeys.put(newKey, timezone);
-            }
-        }
+
+        DefaultTimeZonesByOffsetKeys = createTimeZoneByOffSetMap(preferredTZs,false);
     }
 
     private static String makeTimeZoneKey(TimeZone timezone)
@@ -115,6 +73,80 @@ public final class AWTimeZone extends Object
         String offsetKey = Fmt.S("%s:%s", Constants.getInteger(offsetFeb),
                                  Constants.getInteger(offsetAug));
         return timeZoneFromOffsetKey(offsetKey);
+    }
+
+    /**
+     * Create a map of offset keys to timezones.  Since multiple timezones can map to a particular offset key, the
+     * preferredTimezones can be used to specify a preferred timezone for a given offset.  If no preferred timezone
+     * is given, then the default is use the last timezone for a given offset based on the order from
+     * java.util.TimeZone.getAvailableIDs().
+     *
+     * @param preferredTimezones null or list of preferred timezones (see java.util.Timezone.getID()
+     * @param sparse if true, then only insert entries for preferred timezones.  If false, then create a full map
+     * including all non-preferred timezones.
+     * @return map of offset key to timezone
+     */
+    public static Map<String,TimeZone> createTimeZoneByOffSetMap (List preferredTimezones, boolean sparse)
+    {
+        Map<String,TimeZone> timezoneByOffsetKeys = new GrowOnlyHashtable();
+
+        /*
+            Changed the STD_YEAR to use the current year instead of hardcoding
+            2002.  If you pass a  previous year to get the offset, java
+            will return timezone as of that year, any changes to timezones the
+            occured since then are not included.
+            This change will work correctly for most cases execpt for changes
+            to day light time saving changes that occur in countries in the
+            southern hemisphere where the day light time saving period
+            spans 2 calendar years.  The logic that assume the day light time zone
+            between Feb 1 and Aug 1, might not be correct for those countries.
+         */
+        STD_YEAR = Calendar.getInstance().get(Calendar.YEAR);
+        DST_YEAR = STD_YEAR;
+        String[] timezones = TimeZone.getAvailableIDs();
+
+        for (int i = 0; i < timezones.length; ++i) {
+            // iterate through the list of timezones returned by the JVM and
+            // construct "key" for the given timezone
+            TimeZone timezone = TimeZone.getTimeZone(timezones[i]);
+            int febOffset = timezone.getOffset(1, STD_YEAR, STD_MONTH, STD_DATE, 7, 0);
+            int augOffset = timezone.getOffset(1, DST_YEAR, DST_MONTH, DST_DATE, 6, 0);
+            String newKey = Fmt.S("%s:%s", Constants.getInteger(febOffset), Constants.getInteger(augOffset));
+            // now insert key/timezone into the timezone map. If the key has already
+            // been inserted (ie, a different timezone name has already been inserted
+            // for the same timezone, GMT-8 is US/SanFrancisco or US/LosAngeles), then
+            // check if the current value (ie timezone id) is a preferred value.  If not
+            // then overwrite, if so, then keep the preferred value.
+            // The "last entry" wins mechanism needs to be maintained for backward
+            // compatibility, but we've added the extra "preferred timezone" concept.
+
+            // Note that this caches the value at the system level and we'll need to
+            // add a per-realm override and possibly a per-user override in the future.
+
+            if (timezoneByOffsetKeys.containsKey(newKey)) {
+                String currId = timezoneByOffsetKeys.get(newKey).getID();
+                if (preferredTimezones == null || !preferredTimezones.contains(currId)) {
+                    Log.aribaweb.debug("Overwriting existing timezone key: %s value: %s with new value: %s",
+                            newKey, currId, timezones[i]);
+                    timezoneByOffsetKeys.put(newKey, timezone);
+                }
+                else {
+                    Log.aribaweb.debug("Preferred timezone not overwritten: %s", currId);
+                }
+            }
+            else if (sparse) {
+                if (preferredTimezones != null && preferredTimezones.contains(timezone.getID())) {
+                    // for sparse maps, only insert preferred timezones
+                    timezoneByOffsetKeys.put(newKey, timezone);
+                }
+            }
+            else {
+                // not sparse so create full map by inserting non-preferred timezones
+                // last timezone from TimeZone.getAvailableIDs() will win for any given offset key
+                timezoneByOffsetKeys.put(newKey, timezone);
+            }
+        }
+        return timezoneByOffsetKeys;
     }
 
     public static TimeZone getPreferredTimeZone (TimeZone tz)
@@ -134,34 +166,47 @@ public final class AWTimeZone extends Object
         if (offsetKey == null) {
             return TimeZone.getDefault();
         }
-        TimeZone timezone = (TimeZone)TimeZonesByOffsetKeys.get(offsetKey);
+
+        Map<String,TimeZone> timezoneMap =
+            ((AWConcreteApplication)AWConcreteApplication.sharedInstance()).getTimeZoneByOffsetKeys();
+
+        if (timezoneMap == null) {
+            timezoneMap = DefaultTimeZonesByOffsetKeys;
+        }
+
+        TimeZone timezone = timezoneMap.get(offsetKey);
+
         if (timezone == null) {
-            synchronized (TimeZonesByOffsetKeys) {
-                timezone = (TimeZone)TimeZonesByOffsetKeys.get(offsetKey);
-                if (timezone == null) {
-                    // parse out the Feb. 1 offset value in the offset key (it's the value
-                    // to the left of the colon)
-                    int indexOfColon = offsetKey.indexOf(':');
-                    if (indexOfColon != -1) {
-                        String feb1OffsetString = offsetKey.substring(0, indexOfColon);
-                        try {
-                            int feb1Offset = Integer.parseInt(feb1OffsetString);
-                            timezone = new SimpleTimeZone(feb1Offset, feb1OffsetString);
-                        }
-                        catch (NumberFormatException e) {
-                            // ill-formed offset key => should we let this throw
-                            // propagate up?
-                            e.printStackTrace();
-                        }
-                    }
-
-                        // if timezone still equals null, then use default
+            // if it's not in the override, then check the default
+            timezone = DefaultTimeZonesByOffsetKeys.get(offsetKey);
+            if (timezone == null) {
+                synchronized (DefaultTimeZonesByOffsetKeys) {
+                    timezone = DefaultTimeZonesByOffsetKeys.get(offsetKey);
                     if (timezone == null) {
-                        timezone = TimeZone.getDefault();
-                    }
+                        // parse out the Feb. 1 offset value in the offset key (it's the value
+                        // to the left of the colon)
+                        int indexOfColon = offsetKey.indexOf(':');
+                        if (indexOfColon != -1) {
+                            String feb1OffsetString = offsetKey.substring(0, indexOfColon);
+                            try {
+                                int feb1Offset = Integer.parseInt(feb1OffsetString);
+                                timezone = new SimpleTimeZone(feb1Offset, feb1OffsetString);
+                            }
+                            catch (NumberFormatException e) {
+                                // ill-formed offset key => should we let this throw
+                                // propagate up?
+                                e.printStackTrace();
+                            }
+                        }
 
-                        // put the new timezone in the hashtable
-                    TimeZonesByOffsetKeys.put(offsetKey, timezone);
+                            // if timezone still equals null, then use default
+                        if (timezone == null) {
+                            timezone = TimeZone.getDefault();
+                        }
+
+                            // put the new timezone in the hashtable
+                        DefaultTimeZonesByOffsetKeys.put(offsetKey, timezone);
+                    }
                 }
             }
         }

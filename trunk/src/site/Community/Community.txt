@@ -1,0 +1,25 @@
+AribaWeb is constantly evolving.  Get involved in the growing AW community
+to get help, help others, and influence future direction for the framework.
+
+
+The Official AW Blog
+======================
+The **[The Official AW Blog](http://aribaweb.blogspot.com)** is ground zero for
+the latest announcements from the AribaWeb core team.  In addition to highlighting
+new releases, the AW Blog occasionally digs in to interesting feature areas to
+help you get the most out of AW.
+
+The AW Forum
+==============
+The **[AribaWeb Group](http://groups.google.com/group/aribaweb)** on Google Groups
+is a great place to ask for help or make suggestions for future framework features.
+Add yourself to the mailing list to stay plugged in.
+
+
+The AW Issue Tracker
+====================
+The **[AribaWeb Issues Tracker](http://code.google.com/p/aribaweb/issues/list)** on Google Code
+is the official repository for known issues and enhancement requests.  If you're
+having a problem, find out if it's already known (and if a workaround is available)
+or file a new issue report.
+

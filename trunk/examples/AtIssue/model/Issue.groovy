@@ -6,7 +6,6 @@ package model
 import ariba.appcore.*
 import ariba.ui.meta.annotations.*
 import javax.persistence.*
-import ariba.util.core.*
 import java.util.*
 import ariba.ui.meta.annotations.Property.Visible
 import ariba.ui.meta.persistence.ObjectContext

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ActionHandler.java#18 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ActionHandler.java#19 $
 */
 
 package ariba.ui.widgets;
@@ -123,6 +123,14 @@ public class ActionHandler extends BaseHandler
         }
         return null;
     }
+    
+    // Wrapper handler (ARBWizardActionHandler) uses this function to return
+    // the underline ActionHanlder
+    protected ActionHandler realHandler ()
+    {
+        return this;
+    }
+    
     //////////////////////////////
     // The following two methods are only invoked for non-component action
     // based Action

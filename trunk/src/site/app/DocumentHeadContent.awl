@@ -1,0 +1,5 @@
+<!--- Extras to be included in our head tag -->
+<meta name="description"
+	content="AribaWeb is the Open Source component-based web application development framework for creating rich, AJAX-enabled applications with the absolute minimum of code (and no hand-coded Javascript)."/>
+<meta name="keywords" content="AribaWeb, Ajax, Open Source, Framework, Ajax framework, RIA, Java, Groovy, Web Development, JSF" />
+        

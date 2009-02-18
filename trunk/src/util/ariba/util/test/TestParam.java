@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/test/TestParam.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/test/TestParam.java#3 $
 */
 
 package ariba.util.test;
@@ -72,7 +72,7 @@ public @interface TestParam
      * <pre>
      *      class MyTestParams implements StagerArgs {
      *          //Indicates the enumeration type and the list of values available for the field
-     *          <b>&#64;Properties("traits:enumeration; choices: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];")</b>
+     *          <b>&#64;Properties("trait:enumeration; choices: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];")</b>
      *          int resultsPerPage;
      *      }
      * </pre>

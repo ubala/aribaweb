@@ -26,6 +26,7 @@ import ariba.util.fieldvalue.FieldPath;
 import ariba.ui.meta.core.Meta;
 import ariba.ui.meta.core.Rule;
 import ariba.ui.meta.core.UIMeta;
+import ariba.ui.meta.core.PropertyValue;
 import ariba.ui.aribaweb.util.AWUtil;
 
 import java.util.Map;
@@ -50,6 +51,10 @@ public class OSSWriter
                                           new OSSSerialize());
         _ClassExtensionRegistry.registerClassExtension(String.class,
                                           new FromString());
+        _ClassExtensionRegistry.registerClassExtension(Number.class,
+                                          new AsToString());
+        _ClassExtensionRegistry.registerClassExtension(PropertyValue.Expr.class,
+                                          new AsToString());
         _ClassExtensionRegistry.registerClassExtension(Map.class,
                                           new FromMap());
         _ClassExtensionRegistry.registerClassExtension(List.class,
@@ -149,7 +154,7 @@ public class OSSWriter
          */
         public void writeOSS (Object value, PrintWriter writer)
         {
-            writer.print(value);
+            writer.print("null");
         }
     }
 
@@ -164,6 +169,14 @@ public class OSSWriter
             } else {
                 writer.print(value);
             }
+        }
+    }
+
+    static class AsToString extends OSSSerialize
+    {
+        public void writeOSS (Object value, PrintWriter writer)
+        {
+            writer.print(value);
         }
     }
 
@@ -223,6 +236,32 @@ public class OSSWriter
         }
     }
 
+    static void indent (PrintWriter writer, int level)
+    {
+        while (level-- > 0) {
+            writer.print("    ");
+        }
+    }
+
+    public static void writeProperties (PrintWriter writer, Map<String, Object> properties, int level, boolean singleLine)
+    {
+        for (Map.Entry<String,Object> e : properties.entrySet()) {
+            if (!singleLine) indent(writer, level);
+            Object val = e.getValue();
+            if (val == null) {
+                writer.printf("%s:null%s", e.getKey(), singleLine ? "; " : ";\n");
+
+            } else {
+                OSSSerialize serializer = OSSSerialize.get(val);
+                if (serializer.getClass() != OSSSerialize.class) {
+                    writer.printf("%s:", e.getKey());
+                    serializer.writeOSS(val, writer);
+                    writer.print( singleLine ? "; " : ";\n");
+                }
+            }
+        }
+    }
+
     static class RuleNode
     {
         Rule.Selector _selector;
@@ -255,7 +294,7 @@ public class OSSWriter
                 nodeForSelector(preds.next()).addRule(preds, rule);
             } else {
                 if (_properties == null) _properties = new HashMap();
-                Rule.merge(UIMeta.getInstance(), rule.getProperties(), _properties, false, null);
+                Rule.merge(UIMeta.getInstance(), rule.getProperties(), _properties, null, null);
             }
         }
 
@@ -266,11 +305,12 @@ public class OSSWriter
                     || (_properties != null && (!shouldInlineProperties(_properties) || childCount > 0)));
 
             if (_selector != null) {
-                if (_selector.getValue().equals(Meta.KeyAny) || _selector.getValue().equals(true)) {
-                    writer.printf("%s ", _selector.getKey());
-                } else {
-                    writer.printf("%s=%s ", _selector.getKey(), _selector.getValue());
+                writer.printf("%s", _selector.getKey());
+                if (!_selector.getValue().equals(Meta.KeyAny) && !_selector.getValue().equals(true)) {
+                    writer.print("=");
+                    OSSWriter.write(_selector.getValue(), writer);
                 }
+                writer.print(" ");
             }
 
             if (hasBlock) {
@@ -314,13 +354,6 @@ public class OSSWriter
             }
         }
 
-        void indent (PrintWriter writer, int level)
-        {
-            while (level-- > 0) {
-                writer.print("    ");
-            }
-        }
-
         boolean shouldInlineProperties (Map<String, Object> properties) {
             int count = properties.size();
             if (count <= 1) return true;
@@ -331,16 +364,6 @@ public class OSSWriter
                 return true;
             }
             return false;
-        }
-
-        void writeProperties (PrintWriter writer, Map<String, Object> properties, int level, boolean singleLine)
-        {
-            for (Map.Entry<String,Object> e : properties.entrySet()) {
-                if (!singleLine) indent(writer, level);
-                writer.printf("%s:", e.getKey());
-                OSSWriter.write(e.getValue(), writer);
-                writer.print( singleLine ? "; " : ";\n");
-            }
         }
 
         void writePredecessorChain (PrintWriter writer, List<RuleNode>predNodes, int level)

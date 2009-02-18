@@ -267,24 +267,26 @@ ariba.Request = function() {
                 clearTimeout(AWPollTimeoutId);
                 AWPollTimeoutId = null;
                 var response = xmlhttp.responseText;
-                if (!AWRequestInProgress) {
-                // Debug.log("poll response: " + Util.htmlEscapeValue(response));
+                Debug.log("poll response: " + Util.htmlEscapeValue(response));
 
-                    if (response == "<AWPoll state='update'/>") {
-                        // Debug.log("page changed -- go get content");
-                        // use the special sender id to indicate that we should re-render for update
+                if (response == "<AWPoll state='update'/>") {
+                    Debug.log("page changed -- go get content");
+                    // use the special sender id to indicate that we should re-render for update
+                    if (!AWRequestInProgress) {
                         this.getContent(this.formatSenderUrl(AWPollUpdateSenderId));
                     }
-                }
-                // check for nochange explicity, since the sesssion might have expired
-                if (response == "<AWPoll state='nochange'/>") {
+                    timer();
+                } else if (response == "<AWPoll state='nochange'/>") {
                     timer();
                 }
+
+                // check for nochange explicity, since the sesssion might have expired
             }
 
             function poll()
             {
                 // FIXME -- should check interval since last request against interval
+                Debug.log("AWRequestInProgress: " + AWRequestInProgress + ", AWPollEnabled=" + AWPollEnabled);
                 if (!AWRequestInProgress && AWPollEnabled) {
                     var url = this.formatSenderUrl(AWPollSenderId);
                 // wrap the awLoadLazyDivCallback in an anonymous function so we can
@@ -331,8 +333,6 @@ ariba.Request = function() {
                 }
             }
             if (shouldSubmit) {
-                // XXX remove this after transition to onRefreshRequestBegin
-                ariba.Debug.resetRequestComplete();
                 Event.invokeRegisteredHandlers("onsubmit");
                 this.addAWFormFields(formObject);
 
@@ -361,6 +361,7 @@ ariba.Request = function() {
                             origEncType = formObject.enctype;
                             if (!origEncType || (origEncType.indexOf("multipart") != 0)) {
                                 formObject.enctype = "multipart/form-data";
+                                formObject.encoding = "multipart/form-data";
                             } else {
                                 origEncType = null;
                             }
@@ -594,7 +595,7 @@ ariba.Request = function() {
             window.location.href = url;
             // in somes cases, we are trying to redirect while the download �Save/Open� dialog is up.
             // We need to retry in those cases.
-            if (Dom.IsIE6Only || Dom.isSafari) {
+            if (Dom.IsIE6Only) {
                 function retry() {
                     // Retry only if redirect is not in progress
                     if (document.readyState != "loading") {
@@ -615,8 +616,6 @@ ariba.Request = function() {
         // initiate content retrieval
         getContent : function (url, forceIFrame)
         {
-            // XXX remove this after transition to onRefreshRequestBegin
-            ariba.Debug.resetRequestComplete();
             // Debug.log("--- awGetContent --> " + url + "  [windowName:" + window.name + ", this.AWReqUrl:" + AWReqUrl + "]");
             this.prepareForRequest();
             if (this.UseXmlHttpRequests && !forceIFrame) {
@@ -646,6 +645,7 @@ ariba.Request = function() {
         {
             this.requestComplete();
             AWRequestInProgress = true;
+            ariba.Refresh.enableRefreshScript();
             Event.invokeRegisteredHandlers("onRefreshRequestBegin");
             if (!noWaitCursor) Input.showWaitCursor();
         // start timer to make sure something comes back in the iframe
@@ -663,11 +663,6 @@ ariba.Request = function() {
         {
             AWRequestInProgress = false;
             Input.hideWaitCursor();
-        },
-
-        isRequestInProgress : function ()
-        {
-            return AWRequestInProgress;
         },
 
         // clear all server pings, but keep UI locked.
@@ -711,17 +706,20 @@ ariba.Request = function() {
                 // and then innerHTML clear the wrapper div
                 function didLoad() {
                     Event.removeEvent(iframe, "onload", didLoad);
-                // check that we are still in the DOM,
-                    // since awCreateRequestIFrame might have been called in between.
-                    if (Dom.elementInDom(iframe)) {
-                        setTimeout(function () {
-                            var iframeDiv = Dom.getElementById(frameName + "Div");
-                            if (iframeDiv) {
-                                iframeDiv.innerHTML = "";
-                                Debug.log("Destroyed Iframe: " + frameName);
-                            }
-                        }, 1);
-                    }
+                    setTimeout(function () {
+                        // check that we are still in the DOM,
+                        // since createRequestIFrame might have been 
+                        // called in between.
+                        if (!Dom.elementInDom(iframe)) {
+                            Debug.log("Skipped destroying Iframe: " + frameName + ": no longer in DOM");
+                            return;
+                        }
+                        var iframeDiv = Dom.getElementById(frameName + "Div");
+                        if (iframeDiv) {
+                            iframeDiv.innerHTML = "";
+                            Debug.log("Destroyed Iframe: " + frameName);
+                        }
+                    }, 1);
                 }
             // Assign our handler and kick off the process...
                 Event.addEvent(iframe, "onload", didLoad);

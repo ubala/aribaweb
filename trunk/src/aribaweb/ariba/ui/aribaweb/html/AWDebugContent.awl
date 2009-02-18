@@ -1,9 +1,3 @@
 <a:If ifTrue="$isDebuggingEnabled">
-    <a:ClientSideScript executeOnIncrementalUpdate="$false">
-        <!---
-            XXX remove this after Selenium transition to
-            onRefreshRequestBegin and isRequestInProgress
-        -->
-        ariba.Event.registerRefreshCallback(ariba.Debug.requestCompleteNotification);
-    </a:ClientSideScript>\
+  <!--- No Content! -->
 </a:If>

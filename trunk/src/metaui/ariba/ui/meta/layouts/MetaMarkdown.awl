@@ -1,0 +1,49 @@
+<a:Api>
+    <Copyright>
+        Copyright 2009 Craig Federighi
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaMarkdown.awl#3 $
+    </Copyright>
+
+    <Overview>
+        A version of the Markdown tag that will translate embedded URLs to context actions.
+
+        This component is useful when hyperlinks in markdown text should trigger actions in the
+        meta context.  Two URL patterns in markdown links will trigger this behavior:
+
+                /action/someAction
+                /goto/somePage
+
+        The first will translate into the context assignment action=someAction.  The second
+        to `action=goto, page=somePage`.  Rules may then match on these to derive the appropriate
+        "actionResults" property.
+
+        Both variants also support a list of query params.  E.g.:
+
+                /action/doIt?class=myClass&layout=myLayout
+
+        Will result in the context assignments:
+
+                class = myClass
+                layout = myLayout
+                action = doIt
+
+        (and then the `actionResults` property will be evaluated to get the page to return).
+    </Overview>
+
+    <Binding key="value" direction="get" type="String">
+        The markdown text
+    </Binding>
+</a:Api>\
+<div class="markdown"><w:HTMLActionFilter value="$markdownValue" actionUrl="$actionUrl" action="$action" actionTarget="$actionTarget"/></div>

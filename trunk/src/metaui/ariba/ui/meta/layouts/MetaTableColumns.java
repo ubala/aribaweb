@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumns.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaTableColumns.java#5 $
 */
 package ariba.ui.meta.layouts;
 
@@ -20,10 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import ariba.ui.table.AWTDataTable;
-import ariba.ui.meta.core.ItemProperties;
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.MetaContext;
-import ariba.ui.meta.core.Context;
 import ariba.util.core.ListUtil;
 
 /**
@@ -55,7 +53,7 @@ public final class MetaTableColumns extends AWTDataTable.Column
         UIMeta.UIContext context = MetaContext.currentContext(table);
         // get cached field list
         context.push();
-        context.setContextKey(UIMeta.KeyClass);
+        context.setScopeKey(UIMeta.KeyClass);
         Map<String, List> fieldsByZone = (Map)context.propertyForKey(UIMeta.PropFieldsByZone);
 
         for (String fieldName : context.uiMeta().flattenVisible(fieldsByZone, UIMeta.ZonesMTLRB,

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWIncludeBlock.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWIncludeBlock.java#4 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -20,74 +20,12 @@ package ariba.ui.aribaweb.core;
 import ariba.util.core.Assert;
 import ariba.util.fieldvalue.FieldValue;
 
-/**
+/*
     AWIncludeBlock allows for reference to the content of an AWBlock.
-    The idea is to allow for a light-weight component which enables (template)
-    code factoring without the overhead of a full-blown template.  Often,
-    factoring a duplicated region of a component's template leads to an
-    explosion of files, and an unnecessary clouding of what are the real
-    high-level pieces of the application.  While AWIncludeBlock has is
-    limitations (no code may be associated specifically with the subcomponent),
-    it makes lightweight factoring easy and powerful.
-
-    To use AWIncludeBlock, you must define an AWBlock within the same
-    template where the AWIncludeBlock will reference the AWBlock.  Within
-    an AWBlock, $ bindings are evaluated in the scope of the defining
-    component.  However, $^ bindings apply to the values passed from the
-    AWIncludeBlock reference and not to the defining component (perhaps I could
-    do a cascased lookup?).  This is necessary as this is the only way to
-    parameterize the sbcomponent.
-
- As an example, consider the following template fragment:
-
- ====
- :
- <td>
-     <AWIncludeBlock templateName="ModuleBrowser" list="$moduleList1"/>
- </td>
- <td>
-     <AWIncludeBlock templateName="ModuleBrowser" list="$moduleList2"/>
- </td>
-  :
-  :
- <AWBlock name="ModuleBrowser">
-     <AWBrowser list="$^list" item="$currentModule" style="width:100%" size="10">\
-         $currentModule.name\
-     </AWBrowser>\
- </AWBlock>
-
-====
-
- Here, we define the AWBlock named ModuleBrowser and refer to it via an AWIncludeBlock tag which has two bindings:  the templateName of the AWBlock to use, and an arbitrary binding 'list'.  In essence, AWIncludeBlock operates like AWIncludeComponent in that it switches in the appropriate component/template and makes the remaining bindings available to the subcomponent.  In this case, the 'list' binding can be accessed within the AWBlock by simply using the standard carat ($^) binding.  In the example above, you can see that the ModuleBrowser subtemplate accesses the $^list from the AWIncludeBlock reference, but all the other bindings (ie $currentString) are evaluated int the scope of the enclosing component.  By allowing for parameters to be passed like this, the AWBlock can be parameterized and used with different sets of data, while still using the rest of the values in the enclosing components scope/context.
-
- It should also be noted that AWIncludeContent works as usual.  For example, we could rewrite the above awl as folows, thus giving us even more control over how the subcomponent renders:
-
- ====
- :
- <td>
-     <AWIncludeBlock templateName="ModuleBrowser" list="$moduleList1"/>
-        (1) $currentModule.name\
-     </AWIncludeBlock>
- </td>
- <td>
-     <AWIncludeBlock templateName="ModuleBrowser" list="$moduleList2">
-        (2) $currentModule.name\
-     </AWIncludeBlock>
- </td>
-  :
-  :
- <AWBlock name="ModuleBrowser">
-     <AWBrowser list="$^list" item="$currentModule" style="width:100%" size="10">\
-         <AWIncludeContent/>
-     </AWBrowser>\
- </AWBlock>
-
-====
-
+    See AWApi file for complete user doc. 
 */
 
 /*
-
  Warning:  There is a latent bug here.  I believe that if the user provides a
  dynamic binding for the templateName, we need to adjust the elementId just as
  switch component does.  This is not happening now.

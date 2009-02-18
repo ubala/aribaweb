@@ -12,13 +12,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationParameterList.java#1 $
+    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationParameterList.java#2 $
 */
 package ariba.util.test;
 
 import ariba.util.core.ListUtil;
+import ariba.util.core.MapUtil;
+import ariba.util.core.Fmt;
+import ariba.util.core.SetUtil;
+
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class TestValidationParameterList implements Iterable {
     private List<TestValidationParameter> _list;
@@ -111,6 +117,17 @@ public class TestValidationParameterList implements Iterable {
         return _list.iterator();
     }
 
+    /**
+         * Validates that all of the keys are unique including keys within nested lists.
+         * Note that the nested lists keys can collide with keys in the parent or other lists,
+         * however the keys must all be unique for each entry in that list.
+         * @return a list of Strings which are the names of the non-unique keys (including parent path delimited by ::.  The list will be empty if no problems were found.
+         */
+    public List<String> verifyUniqueKeys ()
+    {
+        return verifyUniqueKeys(_list);
+    }
+
     public static TestValidationParameterList createFromListOfParameters (
             List<TestValidationParameter> list)
     {
@@ -119,5 +136,47 @@ public class TestValidationParameterList implements Iterable {
             newList.add(list.get(i));
         }
         return newList;
-    }    
+    }
+
+    private static List<String> verifyUniqueKeys (List<TestValidationParameter> list)
+    {
+        return verifyUniqueKeys(list, null);
+    }
+
+    private static List<String> verifyUniqueKeys (List<TestValidationParameter> list,
+                                                  String parentPath) {
+        List<String> problemKeys = ListUtil.list();
+        Iterator<TestValidationParameter> iter = list.iterator();
+        Set<String> keySet = SetUtil.set();
+        while (iter.hasNext()) {
+            TestValidationParameter param = iter.next();
+            if (keySet.contains(param.getKey())) {
+                if (parentPath == null) {
+                    problemKeys.add(param.getKey());
+                }
+                else {
+                    problemKeys.add(Fmt.S("%s::%s", parentPath, param.getKey()));
+                }
+            }
+            else {
+                keySet.add(param.getKey());
+            }
+
+            // if value is list then also check inside it.
+            if (param.getValue() instanceof TestValidationParameterList) {
+                String newParentPath;
+                if (parentPath != null) {
+                    newParentPath = Fmt.S("%s::%s", parentPath, param.getKey());
+                }
+                else {
+                    newParentPath = param.getKey();
+                }
+                problemKeys.addAll(
+                    verifyUniqueKeys(
+                            ((TestValidationParameterList)param.getValue())._list,
+                            newParentPath));
+            }
+        }
+        return problemKeys;
+    }
 }

@@ -48,6 +48,9 @@ Operation:
                 editable { bindings:{ type:PopupControl } }
             }
         }
+        class=busobj.User class=busobj.Project {
+            field=description#bold;
+        }
     </m:Rules>
 
     <a:If ifTrue="$metaContext.properties.editing">
