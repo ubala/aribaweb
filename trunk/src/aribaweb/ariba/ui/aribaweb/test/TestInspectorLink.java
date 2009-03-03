@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestInspectorLink.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestInspectorLink.java#7 $
 */
 package ariba.ui.aribaweb.test;
 
@@ -32,6 +32,9 @@ public class TestInspectorLink
     private Object _annotatedItem;
     private Class _objectClass;
     private String _type;
+    private String _validatorName;
+    private String _humanFriendlyValidatorName;
+    private Class _actualValidatedObjectClass;
 
     public static final String VALIDATION_LOAD_ERROR_HEADER =
             "Validation Failed: could not load the validator specified in the " +
@@ -98,6 +101,20 @@ public class TestInspectorLink
         }
     }
 
+    /**
+     * @return the class that was actually validated. This may have been a subclass of the object
+     * defined for the validator.
+     */
+    public Class getActualClassValidated ()
+    {
+        if (_actualValidatedObjectClass != null) {
+            return _actualValidatedObjectClass;
+        }
+        else {
+            return _objectClass;
+        }
+    }
+
     private void decodeFromString (String encoded) throws ValidatorLoadException
     {
         String[] parts = encoded.split(",");
@@ -113,17 +130,33 @@ public class TestInspectorLink
             _appSpecificValidatorName = parts[2];
         }
         else {
-            String annotatedClassName = parts[0];
-            String annotatedMethodName = parts[1];
-            String objectClassName = parts.length > 2 ? parts[2] : null;
+            String annotatedClassName = null;
+            String annotatedMethodName = null;
+            String objectClassName = null;
+            String actualValidatedObjectClassName = null;
+            if (parts.length < 4) {
+                // use old encoding.
+                annotatedClassName = parts[0];
+                annotatedMethodName = parts[1];
+                objectClassName = parts.length > 2 ? parts[2] : null;
+            }
+            else {
+                // using new encoding.  In new encoding we always have 4 fields:
+                // annoteadedclass, method, objectclass, validatedobjectclass.
+                // these will be "null" if appropriate.
+                annotatedClassName = parts[0];
+                annotatedMethodName = parts[1];
+                objectClassName = parts[2].equals("null") ? null : parts[2];
+                actualValidatedObjectClassName = parts[3].equals("null") ? null : parts[3];
+            }
 
             Class annotatedClass = ClassUtil.classForName(annotatedClassName);
             if (annotatedClass == null) {
-                String errorMessage;
                 if (objectClassName == null) {
                     throw new ValidatorLoadException(
                         constructNonAppSpecificError(annotatedClassName,
                                 annotatedMethodName, annotatedClassName,
+                                actualValidatedObjectClassName,
                                 Fmt.S("Could not load specified class: %s",
                                         annotatedClassName)));
                 }
@@ -131,6 +164,7 @@ public class TestInspectorLink
                     throw new ValidatorLoadException(
                         constructNonAppSpecificError(annotatedClassName,
                                 annotatedMethodName, objectClassName,
+                                actualValidatedObjectClassName,
                                 Fmt.S("Could not load specified class: %s",
                                         annotatedClassName)));
                 }
@@ -144,6 +178,7 @@ public class TestInspectorLink
                     throw new ValidatorLoadException (
                         constructNonAppSpecificError(annotatedClassName,
                                 annotatedMethodName, annotatedClassName,
+                                actualValidatedObjectClassName,
                                 Fmt.S("Could not find the specified method:%s",
                                         annotatedMethodName)));
                 }
@@ -154,33 +189,94 @@ public class TestInspectorLink
                     throw new ValidatorLoadException (
                         constructNonAppSpecificError(annotatedClassName,
                                 annotatedMethodName, objectClassName,
+                                actualValidatedObjectClassName,
                                 Fmt.S("Could not load specified class: %s",
                                         objectClassName)));
                 }
-                try {
-                    _annotatedItem = annotatedClass.getMethod(annotatedMethodName,
-                                                              _objectClass);
-                }
-                catch (NoSuchMethodException noMethod) {
+                _annotatedItem = getBestMethod(annotatedClass, annotatedMethodName,
+                            _objectClass);
+                if (_annotatedItem == null) {
                     throw new ValidatorLoadException (
                         constructNonAppSpecificError(annotatedClassName,
                                 annotatedMethodName, objectClassName,
+                                actualValidatedObjectClassName,
                                 Fmt.S("Could not find the method: %s",
                                         annotatedMethodName)));
+                }
+            }
+            if (actualValidatedObjectClassName != null) {
+                _actualValidatedObjectClass = ClassUtil.classForName(actualValidatedObjectClassName);
+                if (_actualValidatedObjectClass == null) {
+                    throw new ValidatorLoadException(
+                        constructNonAppSpecificError(annotatedClassName,
+                                annotatedMethodName, objectClassName, actualValidatedObjectClassName,
+                                Fmt.S("Could not load specified class: %s",
+                                        actualValidatedObjectClassName)));
                 }
             }
         }
     }
 
+    private Method getBestMethod (Class annotatedClass, String methodName, Class argumentClass)
+    {
+        Method method = null;
+        boolean methodFound = false;
+        Class currentArgumentClass = argumentClass;
+        while (!methodFound) {
+            try {
+                if (currentArgumentClass != null) {
+                    method = annotatedClass.getMethod(methodName, currentArgumentClass);
+                }
+                methodFound = true;
+            }
+            catch (NoSuchMethodException noMethod) {
+                currentArgumentClass = currentArgumentClass.getSuperclass();
+            }
+        }
+
+        if (method == null) {
+            // lets search the interfaces then.
+            methodFound = false;
+            currentArgumentClass = argumentClass;
+            while (!methodFound) {
+                if (currentArgumentClass != null) {
+                    Class[] interfaces = currentArgumentClass.getInterfaces();
+                    for (int i = 0; i < interfaces.length; i++) {
+                        try {
+                            method = annotatedClass.getMethod(methodName, interfaces[i]);
+                            methodFound = true;
+                            break;
+                        }
+                        catch (NoSuchMethodException noMethod) {
+                            // do nothing.
+                        }
+                    }
+                    if (!methodFound) {
+                        currentArgumentClass = currentArgumentClass.getSuperclass();
+                    }
+                }
+                else {
+                    // we failed, but will just return null.
+                    methodFound = true;
+                }
+            }
+        }
+        return method;
+    }
+
     private String constructNonAppSpecificError (String classWithMethod,
                                                String methodName,
                                                String classToBeValidated,
+                                               String actualClassValidated,
                                                String error)
     {
         String errorMessage = Fmt.S(VALIDATION_LOAD_ERROR_HEADER + "<br/>" +
-            "Method Name          : %s<br/>Class with Method    : %s" +
-            "<br/>Class to be Validated: %s<br/>Problem              : %s<br/><br/>",
-            methodName, classWithMethod, classToBeValidated, error);
+            "Method Name                   : %s<br/>" +
+            "Class with Method             : %s<br/>" +
+            "Class Defined to be Validated : %s<br/>" +
+            "Class Actually Validated      : %s<br/>" +
+            "Problem                       : %s<br/><br/>",
+            methodName, classWithMethod, classToBeValidated, actualClassValidated, error);
         return errorMessage;
     }
 
@@ -224,15 +320,25 @@ public class TestInspectorLink
 
     public String getInspectorName ()
     {
-        String name = null;
-        if (_appSpecificValidatorName != null) {
-            name = _appSpecificValidatorName;
+        if (_validatorName == null) {
+            if (_appSpecificValidatorName != null) {
+                _validatorName = _appSpecificValidatorName;
+            }
+            else if (_annotatedItem.getClass() == Method.class) {
+                Method method = (Method)_annotatedItem;
+                _validatorName = method.getName();
+            }
         }
-        else if (_annotatedItem.getClass() == Method.class) {
-            Method method = (Method)_annotatedItem;
-            name = method.getName();
+        return _validatorName;
+    }
+
+    public String getUserFriendlyValidatorName ()
+    {
+        if (_humanFriendlyValidatorName == null) {
+            String refinedString = removeUselessLeadingStrings(getInspectorName());
+            _humanFriendlyValidatorName = decamelize(refinedString);
         }
-        return name;
+        return _humanFriendlyValidatorName;
     }
 
     public String getInspectorSecondaryName ()
@@ -253,7 +359,7 @@ public class TestInspectorLink
         return _appSpecificValidatorName;
     }
 
-    public List<TestValidationParameter> invoke (AWRequestContext requestContext)
+    public List<TestValidationParameter> invoke (AWRequestContext requestContext, Object objToValidate)
     {
         List<TestValidationParameter> result = null;
         if (_appSpecificValidatorName != null) {
@@ -268,14 +374,19 @@ public class TestInspectorLink
                 Object obj = getObjectToInvoke(requestContext, method, testContext);
                 result =
                     (List<TestValidationParameter>)AnnotationUtil.invokeMethod(
-                            requestContext, testContext, method, obj);
+                            requestContext, testContext, method, obj, objToValidate);
             }
         }
             
         return result;
     }
 
-    public String getEncodedString ()
+    public List<TestValidationParameter> invoke (AWRequestContext requestContext)
+    {
+        return invoke(requestContext, null);
+    }
+
+    public String getEncodedString (String validatedObjectType)
     {
         FastStringBuffer encoded = new FastStringBuffer();
         if (_appSpecificValidatorName != null) {
@@ -293,6 +404,19 @@ public class TestInspectorLink
                 encoded.append(",");
                 encoded.append(getObjectClassName());
             }
+            else {
+                encoded.append(",");
+                encoded.append("null");
+            }
+            if (validatedObjectType != null) {
+                encoded.append(",");
+                encoded.append(validatedObjectType);
+            }
+            else {
+                encoded.append(",");
+                encoded.append("null");                
+            }
+
         }
         return encoded.toString();
     }
@@ -316,5 +440,46 @@ public class TestInspectorLink
         newLink.decodeFromString(encoding);
         return newLink;
     }
-    
+
+    private static String decamelize (String string)
+    {
+        FastStringBuffer buf = new FastStringBuffer();
+        int lastUCIndex = -1;
+        for (int i=0, len = string.length(); i < len; i++) {
+            char c = string.charAt(i);
+            if (Character.isUpperCase(c)) {
+                if (i-1 != lastUCIndex) buf.append(" ");
+                lastUCIndex = i;
+            }
+            else if (Character.isLowerCase(c)) {
+                if (i==0) {
+                    c = Character.toUpperCase(c);
+                }
+            }
+            else if (c == '_') {
+                c = ' ';
+            }
+            buf.append(c);
+        }
+        return buf.toString();
+    }
+
+    private static final String[] USELESS_STRINGS = {
+            "validate",
+            "validation",
+            "inspect"      
+    };
+
+    private static String removeUselessLeadingStrings (String string)
+    {
+        for (int i = 0; i < USELESS_STRINGS.length; i++) {
+            if (string.length() > USELESS_STRINGS[i].length()) {
+                String leadingPart = string.substring(0,USELESS_STRINGS[i].length());
+                if (leadingPart.equalsIgnoreCase(USELESS_STRINGS[i])) {
+                    return string.substring(USELESS_STRINGS[i].length(), string.length());
+                }
+            }
+        }
+        return string;
+    }
 }

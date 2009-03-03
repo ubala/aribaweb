@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTSortHeading.awl#13 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTSortHeading.awl#14 $
     </Copyright>
 
     <Overview>
@@ -63,12 +63,6 @@
     <Binding key="submitForm" type="boolean" required="$false" direction="get">
         Should submit form when sort control clicked?
     </Binding>
-
-    <Binding key="sortDataSource" type="boolean" required="$false" direction="get">
-        Causes the data in the associated AWTDisplayGroup to be refreshed (refetched)
-        when the column is reordered.  This allows for external ordering of the data.
-    </Binding>
-
 </a:Api>\
 <a:If ifFalse="$^disabled">\
     <a:Hyperlink action="$toggleClicked" submitForm="$^submitForm" awname="$^awname">\

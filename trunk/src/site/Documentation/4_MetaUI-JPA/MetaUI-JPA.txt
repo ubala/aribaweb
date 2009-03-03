@@ -1,0 +1,33 @@
+Part IV. MetaUI-JPA Database Apps
+=================================
+
+**NOTE: This document is a placeholder: more will be coming soon**
+
+![AribaWeb Stack: MetaUI-JPA App](stack_metaui-jpa.jpg)
+Is the section we'll introduce the MetaUI-JPA framework.
+MetaUI-JPA completes AribaWeb's "InstantApp" capability by marrying the ability of MetaUI to generate
+rich user interfaces based on class metadata with the Java Persistence API (JPA)'s ability to 
+persist annotated java classes.  MetaUI-JPA itself is a quite thin "adaptor layer" between the two frameworks.
+
+Where do we go from here?
+-------------------------
+**NOTE: This document is incomplete: more will be coming soon**
+
+The "by example" section of this document is forthcoming.  In the meanwhile, your best way to explore
+MetaUI is:
+
+  1. Watch the screencasts:
+
+    - [Creating a Database application with MetaUI](http://www.vimeo.com/1844030)
+    - [MetaUI Live Editing](http://www.vimeo.com/2239096)
+    - [Building a Real App in 20 minutes](http://www.vimeo.com/2685671)
+
+  2. Check out the source code for the examples, taking special note of each annotation, and the .oss files:
+
+    - `examples/MasterDetail`
+    - `examples/AtIssue`
+
+  3. Use Component Inspector on the examples
+ 
+    - Make sure to select the "meta" link and walk up and down the stack of components, taking a look at the components involved (e.g. MetaSearch, MetaDetailTable)
+

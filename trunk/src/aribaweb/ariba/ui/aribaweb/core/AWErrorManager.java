@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#49 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#50 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -20,6 +20,8 @@ package ariba.ui.aribaweb.core;
 import java.util.Map;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Collections;
+import java.util.Comparator;
 import ariba.util.core.MapUtil;
 import ariba.util.core.Assert;
 import ariba.util.core.ListUtil;
@@ -28,6 +30,7 @@ import ariba.util.core.MultiKeyHashtable;
 import ariba.util.core.StringUtil;
 import ariba.util.core.SparseVector;
 import ariba.util.core.ClassUtil;
+import ariba.util.core.MathUtil;
 import ariba.ui.aribaweb.util.AWBaseObject;
 import ariba.ui.aribaweb.util.Log;
 import ariba.ui.aribaweb.util.AWEncodedString;
@@ -59,6 +62,10 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     private List _prioritizedNavHandlers;
     private List _fullValidationHandlers;
     private Map _invokedValidationHandlers;
+    /**
+        Whether or not we are current invoking the validation handlers.
+    */
+    private boolean _invokingValidationHandlers;
     private AWErrorInfo _curHighLightedError = null;
     private AWErrorInfo _prevHighLightedError = null;
     private EMMultiKeyHashtable _visitedErrors =
@@ -75,9 +82,6 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     private boolean _ignoreUnknownWarningsMode = false;
     private boolean _selectedErrorNeedAdjustment = false;
     private boolean _autoScrollInProgress;
-
-    private EMMultiKeyHashtable _tableAssociation =
-        new EMMultiKeyHashtable(AWErrorInfo.NumKeys);
 
     // constants indicate the phase we're in
     public static int OutOfPhase = 0;
@@ -114,6 +118,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         _page = page;
 
         _enablePageErrorDisplay = false;
+
+        _invokingValidationHandlers = false;
 
         // the very first phase we'll walk through is Append, so get the objects
         // initialized as they will be in all subsequent Appends:
@@ -177,10 +183,16 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         if (isErrorDisplayEnabled() &&
             _invokedValidationHandlers.get(handler) == null) {
             // This handler hasn't been invoke before - do it now
-            Log.aribaweb_errorManager.debug(
-                "%s: Calling full-validation handler: %s", getLogPrefix(), handler);
-            handler.evaluateValidity(this._page.pageComponent());
-            _invokedValidationHandlers.put(handler, handler);
+            try {
+                Log.aribaweb_errorManager.debug(
+                        "%s: Calling full-validation handler: %s", getLogPrefix(), handler);
+                _invokingValidationHandlers = true;
+                handler.evaluateValidity(this._page.pageComponent());
+                _invokedValidationHandlers.put(handler, handler);
+            }
+            finally {
+                _invokingValidationHandlers = false;
+            }
         }
     }
 
@@ -570,14 +582,14 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     }
 
     // exact match lookup
-    private AWErrorInfo firstErrorForKeyExactMatch (ErrorRepository repository,
-                                                    Object key, Boolean isWarning)
+    private static AWErrorInfo firstErrorForKeyExactMatch (ErrorRepository repository,
+                                                           Object key, Boolean isWarning)
     {
         if (key == null) {
             return null;
         }
         // this method does an exact match on the single key - no wildcarding
-        AWErrorBucket bucket = _currentRepository.get(key);
+        AWErrorBucket bucket = repository.get(key);
         if (bucket != null) {
             // first error by default
             return bucket.getFirstError(isWarning);
@@ -763,9 +775,10 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
      */
     protected void _privateSetErrorMessageAndValue (AWErrorInfo error)
     {
+        error.setValidationError(_invokingValidationHandlers);
         // Allow more than one error per key, but de-dup on duplicates
         AWErrorBucket bucket = _newRepository.get(error.getKeys());
-        if (bucket == null) {
+        if (bucket == null) {    
             // use a single-key bucket
             _newRepository.assignRegistryOrder(error);
             _newRepository.put(error.getKeys(), error);
@@ -953,7 +966,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
 
     public void rerunValidation ()
     {
-        _currentRepository.clearAllErrors();
+        _currentRepository.clearValidationErrors();
         _invokedValidationHandlers.clear();
         Log.aribaweb_errorManager.debug("%s: all errors are cleared", getLogPrefix());
         if (_phase == RenderPhase) {
@@ -1695,7 +1708,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
 
     public static class MultiErrorBucket implements AWErrorBucket
     {
-        private List _errorsForSameKey;
+        private List<AWErrorInfo> _errorsForSameKey;
         private boolean _hasDuplicate = false;
 
         public MultiErrorBucket (AWErrorInfo error)
@@ -1706,7 +1719,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
 
         private AWErrorInfo getFirstError ()
         {
-            return (AWErrorInfo)ListUtil.firstElement(_errorsForSameKey);
+            return ListUtil.firstElement(_errorsForSameKey);
         }
 
         public AWErrorInfo getFirstError (Boolean isWarning)
@@ -1714,7 +1727,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             AWErrorInfo firstError = getFirstError();
             for (int i = 0; isWarning != null && i < _errorsForSameKey.size(); i++) {
                 // match on severity too if specified
-                AWErrorInfo error = (AWErrorInfo)_errorsForSameKey.get(i);
+                AWErrorInfo error = _errorsForSameKey.get(i);
                 if (error.isWarning() == isWarning.booleanValue()) {
                     firstError = error;
                     break;
@@ -1751,6 +1764,13 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         public int getRegistrationOrder ()
         {
             return getFirstError().getRegistrationOrder();
+        }
+
+        public void setRegistrationOrder (int order)
+        {
+            for (AWErrorInfo info : _errorsForSameKey) {
+                info.setRegistrationOrder(order);
+            }
         }
 
         public boolean isSingleErrorBucket ()
@@ -1834,9 +1854,26 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         public void setAssociatedTableItem (AWComponent table, Object item)
         {
             for (int i = 0; i < _errorsForSameKey.size(); i++) {
-                AWErrorInfo error = (AWErrorInfo)_errorsForSameKey.get(i);
+                AWErrorInfo error = _errorsForSameKey.get(i);
                 error.setAssociatedTableItem(table, item);
             }
+        }
+
+        public List<AWErrorInfo> getErrorInfos (Boolean validationErrors)
+        {
+            if (validationErrors == null) {
+                return getErrorInfos();
+            }
+            List<AWErrorInfo> result = null;
+            for (AWErrorInfo error : _errorsForSameKey) {
+                if (validationErrors == error.isValidationError()) {
+                    if (result == null) {
+                        result = ListUtil.list();
+                    }
+                    result.add(error);
+                }
+            }
+            return result != null ? result : Collections.<AWErrorInfo>emptyList();
         }
     }
 
@@ -2458,7 +2495,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                 Integer.toString(bucket.size()));
         }
 
-        public void assignRegistryOrder (AWErrorInfo error)
+        public void assignRegistryOrder (AWErrorBucket error)
         {
             int order = _registrationOrderCounter;
             error.setRegistrationOrder(order);
@@ -2475,6 +2512,42 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             _registrationOrderCounter = 0;
             _displayOrderCounter = 0;
             _errorSetId++;
+        }
+
+        public void clearValidationErrors ()
+        {
+            List<AWErrorBucket> errors = elements();
+            List<AWErrorBucket> newErrors = ListUtil.list();
+            for (int i=errors.size() - 1; i >= 0; --i) {
+                AWErrorBucket error = errors.get(i);
+                remove(error.getKeys());
+                List<AWErrorInfo> nonValidationErrors = error.getErrorInfos(false);
+                AWErrorBucket nonValidationError = null;
+                if (nonValidationErrors.size() == 1) {
+                    nonValidationError = nonValidationErrors.get(0);
+                }
+                else if (!nonValidationErrors.isEmpty()) {
+                    nonValidationError = new MultiErrorBucket(nonValidationErrors.get(0));
+                    for (int j=1, size=nonValidationErrors.size(); j<size; ++j) {
+                        nonValidationError.add(nonValidationErrors.get(j));
+                    }
+                }
+                if (nonValidationError != null) {
+                    newErrors.add(nonValidationError);
+                }
+            }
+            _registrationOrderCounter = 0;
+            _displayOrderCounter = 0;
+            _errorSetId++;
+            Collections.sort(newErrors, new Comparator<AWErrorBucket>() {
+                public int compare (AWErrorBucket first, AWErrorBucket second) {
+                    return MathUtil.sgn(first.getRegistrationOrder(), second.getRegistrationOrder());
+                }
+            });
+            for (AWErrorBucket newError : newErrors) {
+                assignRegistryOrder(newError);
+                put(newError.getKeys(), newError);
+            }
         }
 
         public int getErrorSetId ()

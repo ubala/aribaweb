@@ -1,14 +1,13 @@
-<h3>Latest Release: v5.0RC1 (2/2009)</h3>
+<h3>Latest Release: v5.0RC2 (3/2009)</h3>
 <ul>
-<li>The first Release Candidate for v5.0:  GA is just around the corner!</li>
-<li>Many fixes to examples, preformance, development enhancements, code stability.</li>
+<li>The second Release Candidate for v5.0:  GA is just around the corner!</li>
+<li>Fixes for a number of issues uncovered by the community</li>
+<li>New <i>AribaWeb by Example</i> documentation!</li>
 </ul>
 <div style="height:30px;margin-left:80px">
     <w:TextButton buttonWrapperStyle="LeftRight"
                   buttonClass="siteBtn"
                   action='${ariba.ui.aribaweb.core.AWRedirect.getRedirect(requestContext,"http://sourceforge.net/project/showfiles.php?group_id=227584&package_id=275548")}'>
-        Download v5.0RC1
+        Download v5.0RC2
     </w:TextButton>
 </div>
-
-        

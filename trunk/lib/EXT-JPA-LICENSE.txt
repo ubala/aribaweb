@@ -22,16 +22,16 @@ LICENSES FOR THIRD-PARTY COMPONENTS in lib/ext-jpa
 - EJB 3.0 Final Release
 
 * hibernate-annotations.jar
-- Hibernate Annotations 3.3.0 GA (http://annotations.hibernate.org) LGPL License
+- Hibernate Annotations 3.4.0 GA (http://annotations.hibernate.org) LGPL License
 
 * hibernate-entitymanager.jar
-- Hibernate Entity Manager 3.3.0 GA (http://entitymanager.hibernate.org) LGPL License
+- Hibernate Entity Manager 3.4.0 GA (http://entitymanager.hibernate.org) LGPL License
 
 * hibernate-tools.jar
 - Hibernate Tools 3.3.0 GA (http://tools.hibernate.org) LGPL License
 
 * hibernate3.jar
-- Hibernate 3.2.6.GA (http://www.hibernate.org) LGPL License
+- Hibernate 3.3.1 GA (http://www.hibernate.org) LGPL License
 
 * hsqldb.jar
 - HSQLDB (http://hsqldb.org/) HSQLDB License (see http://hsqldb.org/web/hsqlLicense.html)

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientFooter.awl#24 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientFooter.awl#25 $
     </Copyright>
 
     <Overview>
@@ -35,7 +35,7 @@
 <a:RefreshCompleteScript>
     <!--- if we're in the refresh iframe, then update the response id and
     initiate the refresh -->
-  <a:If ifTrue="$^sessionless">
+  <a:If ifTrue="$omitHistory">
     ariba.Refresh.completeRequest(null,null,ariba_IR);
   <a:Else/>
     ariba.Refresh.completeRequest($historyPosition,$historyLength,ariba_IR);

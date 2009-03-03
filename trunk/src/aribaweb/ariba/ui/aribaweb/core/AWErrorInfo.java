@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorInfo.java#19 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorInfo.java#20 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -20,7 +20,6 @@ package ariba.ui.aribaweb.core;
 import java.util.List;
 import java.util.Collections;
 import ariba.util.core.Assert;
-import ariba.util.core.ListUtil;
 import ariba.util.core.Fmt;
 import ariba.util.core.FastStringBuffer;
 import ariba.util.log.Logger;
@@ -48,6 +47,7 @@ public class AWErrorInfo implements AWErrorBucket
     protected String _message;
     protected Object _errantValue;
     protected boolean _isWarning;
+    protected boolean _isValidationError;
 
     // This tracks validity condition where the error came from
     protected Object _errorSource;
@@ -102,6 +102,9 @@ public class AWErrorInfo implements AWErrorBucket
             _keys[SingleKeyIndex] = key;
         }
         initialize(message, errantValue, isWarning);
+        /* whether or not this is a true validation error (i.e. set as part of the
+           running of the validation handlers. See isValidationError() */
+        _isValidationError = false;
     }
 
     /**
@@ -234,6 +237,34 @@ public class AWErrorInfo implements AWErrorBucket
     public void setRegistrationOrder (int order)
     {
         _registrationOrder = order;
+    }
+
+    /**
+        Returns <code>true</code> if this error is a validation error in the sense
+        that it was added to the error manager during the invocation of the
+        validation handlers. Returns <code>false</code> otherwise.
+     
+        @aribaapi ariba
+    */
+    public boolean isValidationError ()
+    {
+        return _isValidationError;   
+    }
+
+    public List<AWErrorInfo> getErrorInfos (Boolean validationErrors)
+    {
+        return (validationErrors == null || validationErrors == _isValidationError)
+                    ? getErrorInfos()
+                    : Collections.<AWErrorInfo>emptyList();
+    }
+
+    /**
+        Sets whether or not this is a validation error. See {@link #isValidationError()}.
+        @aribaapi ariba
+    */
+    public void setValidationError (boolean value)
+    {
+        _isValidationError = value;
     }
 
     public Object getKey ()

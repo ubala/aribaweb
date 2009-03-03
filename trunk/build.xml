@@ -148,6 +148,9 @@
 
     </target>
 
+    <property name="AWAPI.URL" value="http://aribaweb.org/api"/>
+    <property name="AWAPI.RootDirectory" value="${doc.dir}/api"/>
+
     <target name="site">
         <delete dir="${site.dir}"/>
         <mkdir dir="${site.dir}"/>
@@ -166,10 +169,14 @@
             // Need to override groovy class loader with one for AW so jar resources are found...
             Thread.currentThread().setContextClassLoader(AWConcreteApplication.class.getClassLoader())
 
+            System.getProperties()["AWAPI.URL"] = properties["AWAPI.URL"]
+            System.getProperties()["AWAPI.RootDirectory"] = properties["AWAPI.RootDirectory"]
+            println "AWAPI.URL = ${System.getProperties()["AWAPI.URL"]}"
+
             println "Generating to ${properties["site.dir"]}"
 
-            AWStaticSiteGenerator.main([properties["site.dir"], properties["site.src"]].toArray(new String[2]));
-            // AWStaticSiteGenerator.main([properties["site.dir"], properties["site.src"], ".", "/"].toArray(new String[4]));
+            // AWStaticSiteGenerator.main([properties["site.dir"], properties["site.src"]].toArray(new String[2]));
+            AWStaticSiteGenerator.main([properties["site.dir"], properties["site.src"], ".", "http://aribaweb.org"].toArray(new String[4]));
         </groovy>
     </target>
 
@@ -179,6 +186,8 @@
             <property name="make.common.dir" location="${make.common.dir}"/>
             <property name="build.dir" value="${build.dir}"/>
             <property name="build.jars.dir" value="${build.jars.dir}"/>
+            <property name="tomcat.jvmarg.extra1" value="-DAWAPI.URL=${AWAPI.URL}"/>
+            <property name="tomcat.jvmarg.extra2" value="-DAWAPI.RootDirectory=${AWAPI.RootDirectory}"/>
 
             <fileset dir="src/site" includes="build.xml" erroronmissingdir="false"/>
         </subant>

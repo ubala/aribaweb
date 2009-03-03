@@ -1,11 +1,11 @@
 You can always read the source code, but documentation has its place!
 
-Tutorials
+Quick Start
 ======================
 There are a few short guides to help you get started:
 
   - **[Getting Started](Getting_Started.txt)** explains installation
-    and the structure of the distribution.
+    and getting the examples running.
 
   - **[Creating a New App](Creating_New_App.txt)** details the small number of steps
     required to create a new app and get it running.
@@ -13,6 +13,13 @@ There are a few short guides to help you get started:
   - **[Setting up IDE Integration](IDE_Plugins.txt)** describes how to configure your Eclipse or
     IntelliJ IDEA IDEA for optimal AW development productivity.
 
+AribaWeb by Example
+===================
+The AribaWeb by example guide introduces the key concepts of each layer of the AribaWeb
+stack while building a simple example application.
+Start with the **[Introduction to the AribaWeb Stack](0_Introduction/Introduction.txt)** to learn the role of the
+major components of the AW stack.  The move on to the chapters on the **[AribaWeb Core](1_AribaWeb/AribaWeb.txt)**
+and **[Widgets](2_Widgets/Widgets.txt)** frameworks.
 
 API Documentation
 =================

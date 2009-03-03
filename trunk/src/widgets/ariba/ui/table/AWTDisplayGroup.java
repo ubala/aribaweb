@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#70 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#71 $
 */
 package ariba.ui.table;
 
@@ -325,14 +325,23 @@ public final class AWTDisplayGroup
     public List filteredObjects ()
     {
         if (_filteredObjects == null) {
-            _filteredObjects = sortedChildList(_allObjects);
+            _filteredObjects = sortedMainList(_allObjects);
             if (_grouper != null) _grouper.validateFilteredList(_filteredObjects);
             detailExpansionPrepareForObjects(_filteredObjects);
         }
         return _filteredObjects;
     }
 
-    // also called from OutlineState to sort / group child lists
+    // called from OutlineState to sort / group child lists
+    public List sortedMainList (List objects)
+    {
+        List sorted = (_dataSource != null && _dataSource.dataSourceDoesSort())
+                ? ListUtil.collectionToList(objects)
+                : computeSortedObjects(objects);
+        return groupObjects(sorted);
+    }
+
+    // called from OutlineState to sort / group child lists
     public List sortedChildList (List objects)
     {
         return groupObjects(computeSortedObjects(objects));
@@ -1309,7 +1318,13 @@ public final class AWTDisplayGroup
         if (_outlineState != null) {
             _outlineState.invalidateSortState();
         }
-        updateDisplayedObjects();        
+
+        if (_dataSource != null && _dataSource.dataSourceDoesSort()) {
+            _dataSource.setSortOrderings(effectiveSortOrderings());
+            fetch();
+        } else {
+            updateDisplayedObjects();
+        }
     }
 
     /** FIXME: stub implementations... */
@@ -1324,10 +1339,9 @@ public final class AWTDisplayGroup
         _didInitialFetch = false;
     }
 
-    // currently same as updateDisplayedObjects (and unused) -- see
-    // "sortDataSource" comments in AWTDataTable
     public void fetch ()
     {
+        // We're lazy about performing the actual fetch -- wait until checkDataSource()...
         _didInitialFetch = false;
         updateDisplayedObjects();
     }

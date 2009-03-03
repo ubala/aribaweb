@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#114 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#117 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -39,6 +39,8 @@ import ariba.util.core.Constants;
 import ariba.util.core.Fmt;
 import java.util.Map;
 import ariba.util.i18n.I18NUtil;
+import ariba.util.fieldvalue.FieldValue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -72,6 +74,11 @@ import javax.servlet.http.HttpSession;
     for use in bindings) as well as action methods (which return {@link AWResponseGenerating reponses}
     which are usually just other page-level AWComponent instances for the next page (or null
     to rerender the current page while reflecting any updated state).
+    <p/>
+    Components participate in the {@link AWCycleable} request handling lifecycle.  In addition to
+    {@link #renderResponse(AWRequestContext, AWComponent)}, {@link #applyValues(AWRequestContext, AWComponent)},
+    and {@link #invokeAction(AWRequestContext, AWComponent)}, an AWComponent also experiences
+    {@link #init()}, {@link #awake()}, {@link #sleep()}, and even possibly {@link #hibernate()}.  
   @aribaapi private
  */
 public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleableReference, AWResponseGenerating,
@@ -160,7 +167,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         // component) make sure the component doesn't override init.  It doesn't make
         // sense for stateless components to override init because init will only be
         // called once (technically, once per shared instance).
-        if (isStateless() && parent() != null) {
+        if (isStatelessSubComponent()) {
             try {
                 Class cls = getClass();
                 while (cls != null && cls != AWComponent.ClassObject) {
@@ -189,6 +196,11 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     protected void setPage (AWPage page)
     {
         _page = page;
+    }
+
+    private boolean isStatelessSubComponent ()
+    {
+        return isStateless() && parent() != null;
     }
 
     protected void setCurrentTemplateElement (AWElement element)
@@ -343,7 +355,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         // AWComponentReference where the bindings stay constant across uses
         return super.isFieldRequiredClear(field) &&
                  (!useLocalPool() || !AWBinding.class.isAssignableFrom(field.getType()))
-                && !field.getName().equals("_uniqueTemplate");
+                && !(field.getName().equals("_uniqueTemplate") || field.getName().equals("_extendedFields"));
     }
 
     public void ensureFieldValuesClear ()
@@ -1103,9 +1115,8 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
             _isAwake = false;
             sleep();
             _currentTemplateElement = null;
-            if (isStateless() && !useLocalPool()) {
+            if (isStatelessSubComponent() && !useLocalPool()) {
                 _otherBindingsBinding = null;
-                _extendedFields = null;
             }
             // note: _parent, _componentReference, and _page are set to null in AWComponentRef (but only for stateless);
         }
@@ -1398,6 +1409,27 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     public AWComponent pageWithName (String pageName)
     {
         return _page.requestContext().pageWithName(pageName);
+    }
+
+    public AWComponent pageWithName (String pageName, Map<String, Object>assignments)
+    {
+        AWComponent page = pageWithName(pageName);
+        if (!MapUtil.nullOrEmptyMap(assignments)) {
+            for (Map.Entry<String, Object>e : assignments.entrySet()) {
+                FieldValue.setFieldValue(page, e.getKey(), e.getValue());
+            }
+        }
+        return page;
+    }
+
+    public <T> T pageWithClass (Class<T> tClass)
+    {
+        return (T)pageWithName(tClass.getName());
+    }
+
+    public <T> T pageWithClass (Class<T> tClass, Map<String, Object>assignments)
+    {
+        return (T)pageWithName(tClass.getName(), assignments);
     }
 
     public Object componentConfiguration(String configName)

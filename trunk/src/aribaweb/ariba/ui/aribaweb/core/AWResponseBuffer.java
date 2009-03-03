@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#20 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#21 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -627,7 +627,7 @@ public final class AWResponseBuffer extends AWBaseObject
     {
         HashMap otherScopeChildren = otherBuffer._globalScopeChildren;
         AWResponseBuffer childBuffer = _children;
-        while (childBuffer != null) {
+        while (childBuffer != null && !childBuffer._alwaysRender) {
             AWResponseBuffer otherChildBuffer = (AWResponseBuffer)otherScopeChildren.get(childBuffer._name);
             if (childBuffer._type == Type.ScopeChild) {
                 if (otherChildBuffer != null && childBuffer.isEqual(otherChildBuffer)) {

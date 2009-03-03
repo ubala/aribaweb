@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#14 $
 */
 
 package ariba.ui.servletadaptor;
@@ -28,15 +28,9 @@ import ariba.ui.aribaweb.core.AWServerApplication;
 import ariba.ui.aribaweb.core.AWMergedStringLocalizer;
 import ariba.ui.aribaweb.core.AWStringLocalizer;
 import ariba.ui.aribaweb.core.AWBaseMonitorStatsPage;
-import ariba.ui.aribaweb.core.AWDirectActionUrl;
 import ariba.ui.aribaweb.core.AWSessionValidator;
-import ariba.ui.aribaweb.core.AWSession;
-import ariba.ui.aribaweb.core.AWComponent;
-import ariba.ui.aribaweb.core.AWPage;
 import ariba.ui.aribaweb.core.AWDirectActionRequestHandler;
 import ariba.ui.aribaweb.core.AWDirectAction;
-import ariba.ui.aribaweb.core.AWRedirect;
-import ariba.ui.aribaweb.core.AWApplication;
 import ariba.ui.aribaweb.core.AWComponentActionRequestHandler;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
@@ -51,14 +45,18 @@ import ariba.util.core.Assert;
 import ariba.util.i18n.LocalizedJavaString;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletConfig;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Enumeration;
 import java.net.URL;
 import java.net.MalformedURLException;
 
+/**
+    An {@link ariba.ui.aribaweb.core.AWApplication} for javax.servlet-based applications.
+    By default will serve resources from WAR files.
+    AWServletApplications use {@link AWServletRequest} for requests and {@link AWServletResponse}
+    for responses.
+ */
 public class AWServletApplication extends AWConcreteApplication
 {
     public String cleardotUrl = "/cleardot.gif";

@@ -1,0 +1,64 @@
+Part III. MetaUI Applications
+=============================
+
+**NOTE: This document is incomplete: more will be coming soon**
+
+![AribaWeb Stack: MetaUI App](stack_metaui.jpg)
+Is the section we'll introduce the MetaUI framework.
+MetaUI builds upon AribaWeb Core (and, tangentially, on Widgets) to assemble interfaces
+on the fly (without templates).  MetaUI can assemble various types of interfaces:
+
+ - Date entry forms (and read-only inspectors)
+ - DataTables
+ - Action Menus
+ - Application global navigation (e.g. top level "tabs" and menus)
+
+Overview
+--------
+MetaUI assembles interfaces by applying *rules* to dynamically (and recursively) select 
+and configure AWComponents -- the exact same components in AribaWeb Core and Widgets that
+we learned about in Part I and Part II.
+
+These rules can come from a variety of sources:
+
+ - Runtime introspection of Java classes
+    > These rules declare the available properties (fields) and actions, along with their data types
+
+ - Annotations on Java classes
+   > Annotations can provide additional information not inferable from the class alone (e.g. Is this field required? Is this String meant to contain rich text?)
+
+ - Built-in rules
+   > MetaUI includes a base set of rules to describe, for instance, a mapping from field data type to UI component (e.g. "if it's a Date and we're editing, use the date field")
+
+ - Application provided rules
+   > Applications may provide explicit rules via "oss files".  These are a convenient place to express presentation-oriented rules that really don't belong in (UI agnostic) domain classes (e.g. "these fields should appear on the right in the search form")
+
+ - Other Sources of Meta Data
+   > Many applications have other external sources of information about the application's domain classes.  For instance, an application may have ORM meta data (perhaps expressed in annotations or in XML files) that provide additional information about classes and fields that should be taken into account when creating user interfaces (e.g. "is this field an owned to-many relationship?").  MetaUI provides generic hooks for integrating such sources of metadata (in fact, the metadata sources above integrate via these same hooks).
+
+MetaUI and Databases
+--------------------
+*MetaUI itself knows nothing about databases*.  MetaUI can be used to build UIs on plain old POJOs
+(or even atop plain Maps or any other structure for which metadata can be provided).  This means that 
+MetaUI is suitable for non-database applications, applications that use non-relational sources of data,
+or applications for which you have your own database persistence solution.
+
+The bundled support in the AribaWeb stack for building database applications is **MetaUI-JPA**.
+This is a small layer -- quite distinct from MetaUI itself -- that binds MetaUI to the Java-standard
+JPA persistence APIs (and, by default, the Hibernate ORM layer).  We cover MetaUI-JPA in Part IV.
+
+Where do we go from here?
+-------------------------
+**NOTE: This document is incomplete: more will be coming soon**
+
+The "by example" section of this document is forthcoming.  In the meanwhile, your best way to explore
+MetaUI is:
+
+  1. Watch the screencast [AribaWeb: Understanding MetaUI](http://www.vimeo.com/1840925)
+  2. Check out this (intimidatingly technical) [slide presentation](http://aribaweb.org/papers/MetaUI-InDepth.pdf)
+  3. Dig in to the MetaUI examples in the Demo application (`examples/Demo`):
+    - `gallery/metaui` contains several AW components that embed metaui interfaces
+    - `busobj/rules.oss` shows the rule file
+  4. Check out the doc for [MetaContext]#api and [MetaIncludeComponent]#api
+
+Next up: **[Part IV: MetaUI-JPA](../4_MetaUI-JPA/MetaUI-JPA.txt)**

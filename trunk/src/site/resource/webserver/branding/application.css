@@ -70,12 +70,26 @@ strong {
     clear:right;
     border: 1px solid #DDDDDD;
     padding:10px;
+    margin:10px 10px 10px 10px;
+    background-color:#FFFFFF;
+}
+
+.bigImgMarg .markdown img {
+    float:right;
+    clear:right;
+    border: 1px solid #DDDDDD;
+    padding:10px;
     margin:44px 10px 10px 10px;
     background-color:#FFFFFF;
 }
 
+
 .markdown h1 {
     font-size:24px;    
+}
+
+.markdown h2 {
+    white-space:normal;    
 }
 
 td#prodimg {
@@ -402,6 +416,10 @@ td#prodimg {
     padding:10px;
 }
 
+.sitePortletNarrowBody h3 {
+    white-space:normal;
+}
+
 .screencast {
     background-image:url(smallplayerPrev.jpg);
     width:370px;
@@ -499,4 +517,11 @@ td#prodimg {
 
 #SCPlayer {
     text-align:center;
+}
+
+.markdown pre.prettyprint {
+    background-color:#FFFFFF;
+    border:1px solid #888888;
+    margin:-8px 0px 8px 0px;
+    clear:both;
 }

@@ -24,7 +24,7 @@
 
     <h2>Source Search</h2>
     Check out the  <b><a:Hyperlink action='${pageWithName("SearchSource")}'>Documentation</a:Hyperlink></b>
-    table for to search or browse the AribaWeb documentation and source code.
+    tab for to search or browse the AribaWeb documentation and source code.
     <br/><br/>
 
     <h2>X-Ray</h2>

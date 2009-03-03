@@ -1,0 +1,52 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2009 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id:  $
+    </Copyright>
+
+    <Overview>
+        AWLocal is used to mark content that should be localized.
+
+        Content is usually initially authored without a key.  E.g.
+
+                <a:Local>No items match your query</a:Local>
+
+        Then a script is run that assigns a key to the item, and externalizes tag content
+        as the default translation is a message string file.  The tag would then read:
+
+                <a:Local key="a001">No items match your query</a:Local>
+
+        AWLocal supports more advanced substitutions where the message contains embedded dynamic
+        content.  E.g.:
+
+                <a:Local key="a001">
+                    Click <a:Hyperlink action="$reviewItem">here</a:Hyperlink> to review
+                    or <a:Hyperlink action="$cancelItem">cancel</a:Hyperlink>.
+                </a:Local>
+
+        In this case the string written to the localization file would have the dynamic content
+        replaced with positional placeholders.  E.g.
+
+                "Click {0}here{/0} to review or {1}cancel{/1}."
+
+        Wrapping longer bits of content containing dynamic elements gives the localizer the
+        flexibility to reorder elements as necessary to meet this needs of the translation.
+    </Overview>
+
+    <Binding key="key" direction="get" type="String" required="$true">
+        This list (java.util.List, native Array, etc) containing the items
+        being unrolled.
+    </Binding>
+</a:Api>\

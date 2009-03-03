@@ -12,14 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QuerySpecification.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QuerySpecification.java#3 $
 */
 package ariba.ui.meta.persistence;
+
+import java.util.List;
 
 public class QuerySpecification
 {
     String _entityName;
     Predicate _predicate;
+    List<SortOrdering> _sortOrderings;
     boolean _useTextIndex;
 
     public QuerySpecification (String rootEntity)
@@ -46,6 +49,16 @@ public class QuerySpecification
     public void setPredicate(Predicate predicate)
     {
         _predicate = predicate;
+    }
+
+    public List<SortOrdering> getSortOrderings ()
+    {
+        return _sortOrderings;
+    }
+
+    public void setSortOrderings (List<SortOrdering> sortOrderings)
+    {
+        _sortOrderings = sortOrderings;
     }
 
     public boolean useTextIndex ()

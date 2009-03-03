@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletRequest.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletRequest.java#3 $
 */
 
 package ariba.ui.servletadaptor;
@@ -22,10 +22,8 @@ import ariba.util.core.MapUtil;
 import ariba.ui.aribaweb.util.AWFileData;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.Log;
-import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.core.AWBaseRequest;
 import ariba.ui.aribaweb.core.AWSession;
-import ariba.ui.aribaweb.core.AWConcreteServerApplication;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.util.core.Assert;
 import ariba.util.core.Constants;
@@ -33,7 +31,6 @@ import ariba.util.core.Fmt;
 import ariba.util.core.HTTP;
 import java.util.Map;
 import ariba.util.core.MIME;
-import ariba.util.core.StringArray;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +39,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.ServletContext;
 
-// subclassed by orms/ServletRequest
+/**
+    An @{Link ariba.ui.aribaweb.core.AWRequest} wrapping around HttpServletRequest. 
+ */
 public class AWServletRequest extends AWBaseRequest
 {
     protected HttpServletRequest _servletRequest;

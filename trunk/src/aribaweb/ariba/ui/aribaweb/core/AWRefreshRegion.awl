@@ -13,13 +13,17 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.awl#32 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRefreshRegion.awl#33 $
     </Copyright>
 
     <Overview>
-        Note the "ignore" binding is not listed in the AWApi but is a valid binding.  This
-        binding is passed through to the HTML and is used to indicate to the update code
-        that this AWRefreshRegion should be ignored during incremental updates.
+        Indicates a region that should be considered for incremental DOM update (AJAX)
+        without requiring update of its surrounding content.
+
+        RefreshRegions, by default, wrap their content in a div (with an id).  If, on
+        subsequent renderings, the contents of a refresh regions has changed (and any parent
+        regions enclosing it have not) then only the changes for this regions need be sent to
+        the client.
     </Overview>
 
     <Binding key="tagName" direction="get" type="String" default="div">
@@ -97,6 +101,8 @@
 
     <Binding key="ignore" direction="get" type="boolean" default="$false">
         Indicates that this AWRefreshRegion should be ignored during incremental updates.
+        (This binding is passed through to the HTML and is used to indicate to the client
+        update code that this AWRefreshRegion should be ignored during incremental updates.)
     </Binding>
 
     <Binding key="forceRefreshOnChange" direction="get" type="boolean" default="$false">

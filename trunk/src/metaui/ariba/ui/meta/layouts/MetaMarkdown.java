@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaMarkdown.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaMarkdown.java#6 $
 */
 package ariba.ui.meta.layouts;
 
@@ -26,6 +26,7 @@ import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWResourceManager;
 import ariba.ui.widgets.Markdown;
+import ariba.ui.widgets.HTMLActionFilter;
 import ariba.ui.meta.core.Context;
 import ariba.ui.meta.core.MetaContext;
 import ariba.ui.meta.core.UIMeta;
@@ -39,14 +40,19 @@ import java.util.regex.Matcher;
 public class MetaMarkdown extends AWComponent
 {
     public String _actionUrl;
+    public String _resourceUrl;
     AWResponseGenerating _actionResults;
     String _actionTarget;
+    public boolean _needsPrettyPrint;
+    HTMLActionFilter.UrlFilter _urlFilter;
 
     protected void sleep ()
     {
         _actionUrl = null;
         _actionResults = null;
         _actionTarget = null;
+        _urlFilter = null;
+        _needsPrettyPrint = false;
     }
 
     public String markdownValue ()
@@ -64,6 +70,9 @@ public class MetaMarkdown extends AWComponent
         if (value == null) return value;
 
         String markdown = Markdown.translateMarkdown(value);
+
+        _needsPrettyPrint = markdown.contains("<pre class='prettyprint'>");
+        _urlFilter = (HTMLActionFilter.UrlFilter)valueForBinding("urlFilter");
         return markdown;
     }
 
@@ -87,6 +96,11 @@ public class MetaMarkdown extends AWComponent
     {
         String action = null;
         String page = null;
+        if (_urlFilter != null) {
+            String replacementUrl = _urlFilter.replacementForUrl(_actionUrl);
+            if (replacementUrl != null) _actionUrl = replacementUrl;
+        }
+        
         Matcher m = ActionPattern.matcher(_actionUrl);
         if (m.matches()) {
             action = m.group(1);
@@ -130,10 +144,17 @@ public class MetaMarkdown extends AWComponent
         }
     }
 
+    public String replacementResourceUrl ()
+    {
+        String basePath = stringValueForBinding("resourcePath");
+        AWResource resource = lookupRelativeResource(basePath, _resourceUrl, requestContext());
+        return resource != null ? resource.url() : null;        
+    }
+
     /*
         Silly general purpose utilities that might better be placed in UIMeta...
      */
-    public static String resourceRelative (String baseResourcePath, String relativePath, AWRequestContext requestContext)
+    public static AWResource lookupRelativeResource (String baseResourcePath, String relativePath, AWRequestContext requestContext)
     {
         AWResourceManager resourceManager = requestContext.getCurrentComponent().resourceManager();
         AWResource resource = null;
@@ -146,6 +167,12 @@ public class MetaMarkdown extends AWComponent
 
         if (resource == null) resource = resourceManager.resourceNamed(relativePath);
 
+        return resource;
+    }
+
+    public static String resourceRelative (String baseResourcePath, String relativePath, AWRequestContext requestContext)
+    {
+        AWResource resource = lookupRelativeResource(baseResourcePath, relativePath, requestContext);
         return resource != null ? resource.relativePath() : null;
     }
 

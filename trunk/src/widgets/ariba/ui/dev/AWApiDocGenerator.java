@@ -12,19 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWApiDocGenerator.java#1 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWApiDocGenerator.java#2 $
 */
 package ariba.ui.dev;
 
 import ariba.util.core.Assert;
-import ariba.util.core.Fmt;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWApi;
 import ariba.ui.aribaweb.core.AWConcreteTemplate;
 import ariba.ui.aribaweb.core.AWApplication;
 import ariba.ui.aribaweb.core.AWBindingApi;
-import ariba.ui.aribaweb.core.AWBaseElement;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWNamespaceManager;
 
@@ -217,7 +215,7 @@ public class AWApiDocGenerator extends AWComponent
         String pkg = packagePath.replace('/', '.').replace('\\', '.');
         AWNamespaceManager ns = AWNamespaceManager.instance();
         AWNamespaceManager.Resolver resolver = ns.resolverForPackage(pkg);
-        String refName = resolver.referenceNameForClassName(pkg, componentName);
+        String refName = (resolver != null) ? resolver.referenceNameForClassName(pkg, componentName) : null;
         if (refName == null) refName = componentName;
         return refName;
     }

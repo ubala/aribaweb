@@ -3,7 +3,7 @@
 AribaWeb enables the creation of rich, highly interactive business applications with far less coding effort than
 alternative web application development frameworks.  Among the key attributes that set AribaWeb apart:
 
-![AribaWeb AutoAJAX](/hero/AutoAJAX.gif)
+![AribaWeb AutoAJAX](hero/AutoAJAX.gif)
 Auto AJAX!
 ==========
 Today's users demand a highly interactive, rich user experience from their web applications. To date, this challenge
@@ -13,7 +13,7 @@ the cost equation:  AJAX user interfaces -- complete with drag and drop, increme
 etc -- are produced automatically, without requiring the application developer to
 perform any client-side scripting.
 
-![AribaWeb Instant App](/hero/InstantApp.gif)
+![AribaWeb Instant App](hero/InstantApp.gif)
 Instant App
 ===========
 Business applications typically consist of hundreds of user interface screens built to support the creation, editing,
@@ -24,7 +24,7 @@ AribaWeb can apply rules to the available meta-data and instantly derive a fully
 single line of application UI code.  This all part of the AribaWeb declarative programming model that delivers
 More app with [Way Less Code]#.
 
-![AribaWeb Live Edit & X-Ray](/hero/LiveEdit.gif)
+![AribaWeb Live Edit & X-Ray](hero/LiveEdit.gif)
 Live Edit & X-Ray
 =================
 AribaWeb's focus on developer productivity is further evidenced through its Live Edit and X-Ray capabilities.
@@ -36,7 +36,7 @@ The same holds true for edits to source code.  With [Rapid Turnaround]#, edits t
 rules (.oss), as well as Java or Groovy source files are reloaded automatically, without a disruptive server
 restart.
 
-![AribaWeb Proven Full Stack](/hero/FullStack.gif)
+![AribaWeb Proven Full Stack](hero/FullStack.gif)
 Proven Full Stack
 =================
 The AribaWeb distribution provides a full stack for the development of database-based business applications, including

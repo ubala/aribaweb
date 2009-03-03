@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#25 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#26 $
 */
 package ariba.ui.validation;
 
@@ -37,6 +37,27 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+/**
+    Provides a default (localized) set of formatters accessible via "$formatters.{name}" bindings
+    off of AWComponents.
+    <p>
+    Bundled formatters include:
+    <ol>
+        <li>boolean</li>
+        <li>integer</li>
+        <li>long</li>
+        <li>double</li>
+        <li>bigDecimal</li>
+        <li>money</li>
+        <li>shortDate</li>
+        <li>longDate</li>
+        <li>dateTime</li>
+        <li>longDateTime</li>
+        <li>duration</li>
+        <li>timeMillis</li>
+        <li>hiddenPassword</li>
+    </ol>
+ */
 public final class AWVFormatterFactory
 {
     public static final String RequiredStringFormatterKey = "requiredString";

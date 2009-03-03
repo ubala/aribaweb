@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTCSVDataSource.java#19 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTCSVDataSource.java#20 $
 */
 package ariba.ui.table;
 
@@ -31,6 +31,7 @@ import ariba.util.core.Date;
 import java.util.Map;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Locale;
 
 import ariba.util.io.CSVConsumer;
 import ariba.util.io.CSVReader;
@@ -53,7 +54,7 @@ public final class AWTCSVDataSource extends AWTDataSource implements CSVConsumer
     protected List _objects = null;
     protected Entity _entity = new Entity();
     ParsePosition _parsePosition = new ParsePosition(0);
-    static NumberFormat _NumberFormatter = NumberFormat.getNumberInstance();
+    static NumberFormat _NumberFormatter = NumberFormat.getNumberInstance(Locale.US);
     static DateFormatter _DateFormatter = new DateFormatter();
     protected static final Class _NullMarker = AWTCSVDataSource.class;
 

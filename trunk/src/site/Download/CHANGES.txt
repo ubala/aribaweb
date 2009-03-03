@@ -1,3 +1,25 @@
+New in Version 5.0RC2 (3/2009)
+------------------------------
+
+- New "AribaWeb by Example" Guide
+    - Three chapters: Introduction, AribaWeb Core, and Widgets
+      (two more coming: MetaUI and MetaUI-JPA)
+
+- Update to GA build of Groovy 1.6
+
+- Numerous bug fixes reported by forum members
+    - DataTable samples throwing exception when run under non-US locale
+    - Compass jars included in Eclipse project build path
+    - MySQL compatible connection params (and appcore column name fix)
+    - Windows Vista compatible Ant target for browser launch
+    - No Exception if launch metaui-jpa app with no @NavModule entities
+
+- Other minor fixes / enhancements
+    - metaui-jpa / AWTDataTable: support for performing sort in fetch rather than in memory
+    - fixes for installing/finding branding resources when deploying in production mode
+    - FourZone layout 50/50 column width fix
+    - Component Inspector: fix JavaScript exception when re-opening Inspector on Internet Explorer
+
 New in Version 5.0RC1 (2/2009)
 ------------------------------
 

@@ -48,7 +48,7 @@ market leading web application used by hundreds of the largest corporations arou
 the world, both deployed behind their firewalls and hosted at scale as a multi-tenant
 "On Demand" service.  (See the [AribaWeb release history](/Documentation/Release_History.txt)).
 
-AribaWeb has been designed from the group up for enterprise-grade security.  AW's
+AribaWeb has been designed from the ground up for enterprise-grade security.  AW's
 *server encapsulated state model* ensures that links cannot be tampered to gain access
 content not already intentionally exposed to the current user.
 
@@ -80,14 +80,14 @@ AribaWeb pre-integrates a complete, best of breed, stack for building database a
 This stack is carefully modularized -- your apps can consume as much or as little of the complete
 as you need -- but having it bundled and pre-integrated in a single download ensures that you
 can get up and running without the endless configuration and component version dependency hassles
-all to common with other solutions.
+all too common with other solutions.
 
 
 Way Less Code
 -------------
 
 AribaWeb is designed with the principal that less is more: less boilerplate,
-less configuration, less wrote coding, more functionality, more maintainability,
+less configuration, less rote coding, more functionality, more maintainability,
 more fun.  AW minimizes the code required to express your applications through:
 
   - A *rich component model* for nested, repeated, stateful or stateless components

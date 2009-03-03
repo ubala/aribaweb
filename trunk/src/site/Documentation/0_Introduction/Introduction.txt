@@ -1,0 +1,103 @@
+AribaWeb by Example
+===================
+
+About this Document
+-------------------
+This guide is intended to introduce the aspiring AribaWeb application developer
+to the key aspects of the framework.  Before getting started it is recommended
+that you watch in the online screencasts, download the distribution, and explore
+the examples.  In particular, please view:
+
+ - [Welcome to AribaWeb](http://www.vimeo.com/3134140)
+ - [AribaWeb: Getting Started](http://www.vimeo.com/1790856)
+
+This document is organized by "topic" but uses the construction of an ever richer
+application as the context for introducing each topic.  As such, it is both a reference
+guide and a (long winded) step-by-step tutorial.
+
+![AribaWeb Stack](stack.jpg)
+The AribaWeb Stack
+------------------
+The AribaWeb distribution provides the "full stack" necessary to build database-oriented
+business applications with rich AJAX web user interfaces.  However, internally the framework
+is modular, and applications need not consume all components of the stack.  For instance,
+many applications build on top of the Widgets + AribaWeb (Core) components, but
+provide their own mechanisms for database persistence.
+
+The stack consists of the following major components:
+
+ - **AribaWeb (Core)**
+    > The core component-oriented request handling engine.  Includes servlet adaptors to bind AW into a
+    container, the AWComponent and AWElement hierarchy, template parser, and
+    built-in tags for control flow (AWIf, AWFor, etc), HTML constructs
+    (AWTextField, AWPopup, ...) as well at the client-side javascript libraries
+    to deliver an AJAX user experience (incremental refresh, drag/drop, ...)
+
+ - **Util** and **Expr**
+    - Util contains low-level utility classes used by the other AW components.  Includes logging,
+    collection wrappers, performance metric and debugging tracing utilities, as well
+    as "ClassExtension" and "FieldValue" support for AOP-like external class
+    extension, and JavaBeans-like high-performance property access.
+  
+    - Expr is a simple expression parser/interpreter that can be used in AW tag bindings
+    and metaui property definitions.  Based originally on OGNL code, but with a
+    more Java/Groovy-inspired syntax and using ariba.util.fieldvalue for high-performance
+    property access.
+
+Part I of the Guide focusses on building applications at this level using just these components.
+
+Building atop the AribaWeb core is...
+
+ - **Widgets**
+    > Higher level UI components for building AribaWeb applications.  Includes:
+    - Layout components (PageWrappers, TabSet, SectionHead/Body, PortletWrapper)
+    - Controls (PopupMenu, Chooser, Calendar)
+    - Validation display / navigation UI (ErrorFlag, ...)
+    - DataTable, PivotTable and Tree/Outline support
+    - RichText editor, Flash Charting
+    - Wizard framework (multi-step UIs)
+    > Several of these controls provide a rich user interface via associated client-side
+    JavaScript libraries (e.g. type-ahead choosers, scrolling and dynamic data retrieval
+    in tables).
+
+Part II of the Guide introduces the Widgets framework.
+
+To automate building part or all of the user interfaces based on model object metadata, applications may adopt...
+
+ - **MetaUI**
+    > Meta-data driven UI framework, built on the full AribaWeb stack for generating
+    complete user interfaces "on the fly" based on various sources of meta data
+    (java class introspection, annotations, and ".oss" files).  Uses CSS-like
+    "multi-dimensional selectors" to contextually specify properties.
+    Supports generating forms (with validation), tables, as well as
+    global application navigation (e.g. nav tabs) and actions (global and instance-level)
+
+Note that MetaUI may be used with POJOs as well as (when a persistence framework is involved) persistent objects.
+Also, while MetaUI automates  dynamic *assembly* of AribaWeb/Widgets interfaces, it does not "mask" the underlying
+framework - applications can build reusable components at the AribaWeb/Widgets level and bind them in to MetaUI 
+generated interfaces,  and can use MetaUI to produce Forms, Tables, or Navigation in the context of an otherwise template-specified UI (in fact, the `Demo` application included in the distribution builds at this level).
+
+Part III of the Guide addresses programming at this level of the stack.
+
+MetaUI can further automate the creation of complete database applications via...
+
+ - **MetaUI-JPA**
+    > Binds MetaUI to a Java JPA-provided persistence engine (powered, by default, by Hibernate).
+    Business objects can be annotated with JPA annotations (e.g. @Entity, @OneToMany, etc) and JPA
+    with generate a database schema and support persisting and retrieving object instances.  MetaUI-JPA
+    further processes these annotations (and those for the Compass search framework) to create MetaUI rules
+    that influence the generated UI.
+
+Part IV will cover these kinds of apps.
+
+
+Where to Go from Here
+---------------------
+The presentation of AribaWeb topics is divided into three majors chapters:
+
+  - **[Part I: AribaWeb Core](../1_AribaWeb/AribaWeb.txt)**
+  - **[Part II: Widgets](../2_Widgets/Widgets.txt)**
+  - **[Part III: MetaUI](../3_MetaUI/MetaUI.txt)**
+  - **[Part IV: MetaUI-JPA](../4_MetaUI-JPA/MetaUI-JPA.txt)**
+
+Next: **[Part I: AribaWeb Core](../1_AribaWeb/AribaWeb.txt)**

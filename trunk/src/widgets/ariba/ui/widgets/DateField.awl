@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#31 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#32 $
     </Copyright>
 
     <Overview>
@@ -100,7 +100,7 @@
 <w:PopupMenu menuId="$menuId">
     <a:RefreshRegion>
         <w:Calendar selection="$date" action="$calendarAction" showYearNavigation="$^showYearNavigation"
-                  dateFactory="$dateFactory" bodyBehavior="DFB"/>
+                  dateFactory="$dateFactory" bodyBehavior="DFB" enabledCalendarDays="$^enabledCalendarDays"/>
         <a:If ifTrue="$showCalendar">
             <a:ClientSideScript>
                 ariba.Calendar.showCalendar('$linkId');

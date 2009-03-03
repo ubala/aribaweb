@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaMarkdown.awl#3 $
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaMarkdown.awl#5 $
     </Copyright>
 
     <Overview>
@@ -45,5 +45,23 @@
     <Binding key="value" direction="get" type="String">
         The markdown text
     </Binding>
+
+    <Binding key="resourcePath" direction="get" type="String">
+        The resource manager relative path for the current value
+        (used to resolve relative path references to other resources)
+    </Binding>
+
+    <Binding key="urlFilter" type="HTMLActionFilter.UrlFilter" direction="get">
+        Instance of HTMLActionFilter.UrlFilter that should be applied to action urls
+    </Binding>
 </a:Api>\
-<div class="markdown"><w:HTMLActionFilter value="$markdownValue" actionUrl="$actionUrl" action="$action" actionTarget="$actionTarget"/></div>
+<div class="markdown">\
+    <w:HTMLActionFilter value="$markdownValue" resourceUrl="$resourceUrl" replacementUrl="$replacementResourceUrl"
+                        actionUrl="$actionUrl" action="$action" actionTarget="$actionTarget"/>\
+</div>
+<a:If ifTrue="$needsPrettyPrint">\
+    <a:ClientSideScript filename="widg/prettify.js"/>
+    <a:ClientSideScript isSingleton="$true">
+        prettyPrint();
+    </a:ClientSideScript>
+</a:If>

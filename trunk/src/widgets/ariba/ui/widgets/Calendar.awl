@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Calendar.awl#33 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Calendar.awl#34 $
     </Copyright>
 
     <Overview>
@@ -46,6 +46,18 @@
     <Binding key="bodyBehavior" direction="get" type="String" required="$false">
         For internal use: Allow for override of calendar body behavior.
         Used by DateField.
+    </Binding>
+
+    <Binding key="enabledCalendarDays" direction="get" type="String" required="$false">
+        Comma seperated string of days of the week which need to be enabled/disabled.
+        
+        Enablement is determined by the sign on the number, positive numbers indicate 
+        active days and negative numbers indicate inactive days. For example "-1,-7" 
+        would disable selection for Saturdays and Sundays. 
+        
+        The "*" is used to indicate all days of the week, so "-*" means disable all days
+        of the week. This can be used in combination with days of the week, "-*, 2,3" would 
+        enable Mondays and Tuesdays.
     </Binding>
 
 </a:Api>\
@@ -196,7 +208,7 @@
 
 <a:RefreshRegion>
     <a:ClientSideScript isSingleton="$false">
-        new ariba.Calendar.Control('$elementId', new Date($selectedYear, $selectedMonth, $selectedDayOfMonth));
+        new ariba.Calendar.Control('$elementId', new Date($selectedYear, $selectedMonth, $selectedDayOfMonth), '$^enabledCalendarDays');
     </a:ClientSideScript>
 </a:RefreshRegion>
 

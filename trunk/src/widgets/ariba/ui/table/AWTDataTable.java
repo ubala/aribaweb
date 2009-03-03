@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#186 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#187 $
 */
 
 package ariba.ui.table;
@@ -356,7 +356,6 @@ public final class AWTDataTable extends AWComponent
     private boolean _didHibernate = false;
 
     private String _globalValign;
-    private boolean _sourceSort;  // not used
     private AWBinding _isItemSelectableBinding;
     private AWBinding _groupByColumnBinding;
     private AWBinding _forceColumnUpdateBinding;
@@ -627,13 +626,6 @@ public final class AWTDataTable extends AWComponent
         // force refresh latch
         _forceColumnUpdateBinding = bindingForName("forceColumnUpdate");
         _forceRenderRowsBinding = bindingForName(BindingNames.forceRenderRows);
-
-        // Currently not used
-        _sourceSort = false;
-        AWBinding binding = bindingForName(BindingNames.sortDataSource, true);
-        if (binding != null) {
-            _sourceSort = booleanValueForBinding(binding);
-        }
 
         if (hasBinding(BindingNames.showSelectAll)) {
             _showSelectAll = booleanValueForBinding(BindingNames.showSelectAll);
@@ -1456,11 +1448,6 @@ public final class AWTDataTable extends AWComponent
         setValueForBinding((numPerBatch * (batchIndex-1)) + currentRowIndex, CurrentAbsoluteRowIndexBinding);
     }
 */
-    public boolean sortDataSource ()
-    {
-        return ((displayGroup().dataSource() instanceof AWTDataSource) && _sourceSort);
-    }
-
     OutlineState outlineState ()
     {
         return displayGroup().outlineState();

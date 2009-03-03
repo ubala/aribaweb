@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Widgets.java#70 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Widgets.java#72 $
 */
 
 package ariba.ui.widgets;
@@ -278,17 +278,16 @@ public final class Widgets
 		// resourceURL is the URL for the docroot resources
 	private static void registerWidgetsResources (String packageRootPath, String resourceFilePath, String resourceURL)
 	{
+        // register root package.  (Should be in aribaweb?)
+        registerResourceDirectory(packageRootPath, resourceURL);
+        registerResourceDirectory("./ariba/resource",
+                        StringUtil.strcat(resourceURL, "ariba/resource"));
+
         registerResourceDirectory(StringUtil.strcat(resourceFilePath, AWWebResourcePath),
                                   StringUtil.strcat(resourceURL, AWWebResourcePath));
 
         registerResourceDirectory(StringUtil.strcat(resourceFilePath, WidgResourcePath),
                                   StringUtil.strcat(resourceURL, WidgResourcePath));
-
-        registerResourceDirectory(packageRootPath,
-                                  null);
-
-        registerResourceDirectory(StringUtil.strcat(packageRootPath, "ariba/resource"),
-                                  StringUtil.strcat(resourceURL, "ariba/resource"));
 	}
 
     // Used for AribaUI to register RecordPlayback control to appear

@@ -32,4 +32,20 @@
 
     <import file="build-widgets-app.xml"/>
 
+    <!-- set with metaui jars included -->
+    <fileset id="build.jars" dir="${ariba.jars.dir}">
+        <include name="ariba.util.jar"/>
+        <include name="ariba.expr.jar"/>
+        <include name="ariba.aribaweb.jar"/>
+        <include name="ariba.widgets.jar"/>
+        <include name="ariba.metaui.jar"/>
+        <include name="ariba.awreload.jar"/>
+    </fileset>
+
+    <fileset id="ariba.war.resource.jars" dir="${ariba.jars.dir}">
+        <include name="ariba.aribaweb.jar"/>
+        <include name="ariba.widgets.jar"/>
+        <include name="ariba.metaui.jar"/>
+    </fileset>
+
 </project>

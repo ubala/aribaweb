@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTSortHeading.java#15 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTSortHeading.java#16 $
 */
 package ariba.ui.table;
 
@@ -199,14 +199,6 @@ public final class AWTSortHeading extends AWComponent
             setValueForBinding(orderingArray, BindingNames.sortOrderings);
         }
 
-        // Note: "sortDataSource" is currently unused, see comment in AWTDataTable
-        boolean sortDataSource = booleanValueForBinding(BindingNames.sortDataSource);
-        if (sortDataSource) {
-            _displayGroup.fetch();
-        }
-        else {
-            _displayGroup.updateDisplayedObjects();
-        }
         AWTDataTable table = AWTDataTable.currentInstance(this);
         table.pushTableConfig();
         return null;

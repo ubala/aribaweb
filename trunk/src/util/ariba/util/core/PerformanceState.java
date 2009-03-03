@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#25 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#26 $
 */
 
 package ariba.util.core;
@@ -803,7 +803,7 @@ public class PerformanceState
                     }
 
                     PerformanceState.Stats stats = stateMap._performanceState;
-                    Log.perf_log_exception.debug("Thread Exceeded Expected Runtime (%s sec so far...): %s\nThread Debug State = %s",
+                    Log.perf_log_exception.info(10132,
                             Integer.toString((int)((currentTime - stats._startTime) / 1000)),
                             stackString,
                             ThreadDebugState.protectedToString(stateMap));

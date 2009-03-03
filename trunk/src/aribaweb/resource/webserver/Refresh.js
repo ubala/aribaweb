@@ -538,7 +538,22 @@ ariba.Refresh = function() {
             AWWindowOnLoad = true;
 
             if (!this.AWAllowParentFrame && top != self) {
-                top.location=self.location;
+                var pop = true;
+                try{
+                    //If we are not the top frame, check if the top frame is
+                    //from the same host. This could be a punch out session.
+                    if(top.location.hostname == document.location.hostname ){
+                       pop = false;
+                    }
+                } 
+                catch(e) {
+                   //If the top frame is from a differant host, we are
+                   //likely to get an exception, in which case promote the
+                   //current frame to the top.
+                }
+                if(pop){
+                    top.location=self.location;
+                }
             }
 
             AWWindowLoadStartTime = (new Date()).getTime();

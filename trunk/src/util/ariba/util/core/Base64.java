@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Base64.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Base64.java#5 $
 */
 
 package ariba.util.core;
@@ -229,6 +229,32 @@ public class Base64
 
         return dest;
     }
+
+    /**
+        The methods you actually wanted ...
+
+         @param contents
+         @return base-64 encoded message.
+     */
+    public static String encodeToString (byte[] contents)
+    {
+        return StringUtil.getStringUTF8(Base64.encode(contents,0,contents.length));
+    }
+
+
+    /**
+        The method you wanted to have all along!
+
+        @param string base-64 encoded string
+        @return base-64 decoded bytes from the string
+     */
+    public static byte[] decodeFromString (String string)
+    {
+        byte[] bytes = StringUtil.getBytesUTF8(string);
+
+        return Base64.decode(bytes, 0, bytes.length);
+    }
+
 
     /**
         This method will Base64 encode the contents of a file and output it to

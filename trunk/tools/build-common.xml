@@ -118,33 +118,6 @@
               value="${common.dir}/examples"
            property="src.samples.dir"/>
 
-    <!--- AW Source Search path (for rapid turnaround) -->
-    <path id="ui.resource.dirs">
-        <!-- Search for all directories with build.xml files - we'll strip the file in the regexmapper below -->
-      <fileset dir="${src.ui.dir}" erroronmissingdir="false"
-               includes="**/build.xml"
-               excludes="release/**,opensourceui/build.xml,opensourceui/src/build.xml"/>
-      <fileset dir="${src.samples.dir}" includes="**/build.xml"/>
-
-
-      <!-- JS resources -->
-      <dirset dir="${src.ui.dir}" erroronmissingdir="false"
-              includes="widgets/resource/webserver/branding/ariba"/>
-    </path>
-
-    <property name="env.ARIBA_AW_SEARCH_PATH" value="NOT_SET"/>
-    <condition property="aw.search.path" value="${env.ARIBA_AW_SEARCH_PATH}">
-        <and>
-            <not><equals arg1="${env.ARIBA_AW_SEARCH_PATH}" arg2="NOT_SET"/></not>
-            <not><equals arg1="${env.ARIBA_AW_SEARCH_PATH}" arg2=""/></not>
-        </and>
-    </condition>
-    <pathconvert refid="ui.resource.dirs" property="aw.search.path" pathsep=";">
-        <mapper>
-          <regexpmapper from="^(.*?)(/build\.xml)?$$" to="\1" handledirsep="true"/>
-        </mapper>
-    </pathconvert>
-
     <property name="javadoc.link" value="http://java.sun.com/j2se/1.5/docs/api/"/>
 
     <!-- Type of checksum to compute for distribution files -->
@@ -179,6 +152,39 @@
     <property name="tools.dir" location="${dist.root.dir}/tools"/>
     <property name="awreload.jar" location="${ariba.jars.dir}/ariba.awreload-jmti.jar"/>
 
+    <!--- AW Source Search path (for rapid turnaround) -->
+    <path id="ui.resource.dirs">
+        <!-- Search for all directories with build.xml files - we'll strip the file in the regexmapper below -->
+      <fileset dir="${src.dir}" includes="build.xml" erroronmissingdir="false"/>
+      <fileset dir="${src.ui.dir}" erroronmissingdir="false"
+               includes="**/build.xml"
+               excludes="release/**,opensourceui/build.xml,opensourceui/src/build.xml"/>
+      <fileset dir="${src.samples.dir}" includes="**/build.xml"/>
+
+
+      <!-- JS resources -->
+      <dirset dir="${src.ui.dir}" erroronmissingdir="false"
+              includes="widgets/resource/webserver/branding/ariba"/>
+    </path>
+
+    <property name="env.ARIBA_AW_SEARCH_PATH" value="NOT_SET"/>
+    <condition property="aw.search.path" value="${env.ARIBA_AW_SEARCH_PATH}">
+        <and>
+            <not><equals arg1="${env.ARIBA_AW_SEARCH_PATH}" arg2="NOT_SET"/></not>
+            <not><equals arg1="${env.ARIBA_AW_SEARCH_PATH}" arg2=""/></not>
+        </and>
+    </condition>
+    <!-- if debug is off, turn off rapid turnaround -->
+    <condition property="aw.search.path" value="">
+        <isset property="debug.off"/>
+    </condition>
+
+    <pathconvert refid="ui.resource.dirs" property="aw.search.path" pathsep=";">
+        <mapper>
+          <regexpmapper from="^(.*?)(/build\.xml)?$$" to="\1" handledirsep="true"/>
+        </mapper>
+    </pathconvert>
+    
     <target name="init">
         <!-- support for tomcat base in build dir / on alternate port -->
         <property name="derived.catalina.base.dir" location="${build.dir}/tomcat-bases/${name}"/>
@@ -236,21 +242,24 @@
         <include name="javax.servlet.zip"/>
     </fileset>
 
-    <!-- ToDo: derive a module specific list from a list declared within each module -->
+    <!-- Base set for widgets app -->
     <fileset id="build.jars" dir="${ariba.jars.dir}">
         <include name="ariba.util.jar"/>
         <include name="ariba.expr.jar"/>
         <include name="ariba.aribaweb.jar"/>
         <include name="ariba.widgets.jar"/>
-        <include name="ariba.metaui.jar"/>
         <include name="ariba.awreload.jar"/>
     </fileset>
 
-    <fileset id="war.resource.jars" dir="${ariba.jars.dir}">
+    <fileset id="ariba.war.resource.jars" dir="${ariba.jars.dir}">
         <include name="ariba.aribaweb.jar"/>
         <include name="ariba.widgets.jar"/>
-        <include name="ariba.metaui.jar"/>
     </fileset>
+
+    <resources id="war.resource.jars">
+        <fileset refid="ariba.war.resource.jars"/>
+        <fileset refid="app.war.jars"/>
+    </resources>
 
     <fileset id="java.src.files" dir="${src.dir}" includes="**/*.java,**/*.groovy"/>
     <resources id="source.files">
@@ -664,7 +673,6 @@
             properties["war.all.libs.path"].split(";").each {
                 def src = new File(it), dest = new File(libDir, src.name)
                 if (!dest.exists() || (dest.lastModified() &lt; src.lastModified())) {
-                    println "Copying: ${src} to ${dest}"
                     ant.copy(file:src, todir:libDir)
                 }
             }
@@ -865,7 +873,7 @@
 
     <target name="open-url">
         <echo message="Opening ${url} in browser"/>
-        <exec executable="cmd.exe" os="Windows 2000,Windows NT,Windows XP" >
+        <exec executable="cmd.exe" os="Windows 2000,Windows NT,Windows XP,Windows Vista" >
                 <arg line="/C start ${url}"/>
         </exec>
         <!--
@@ -882,7 +890,7 @@
         </exec>
     </target>
 
-    <target name="echo-build-classpath">
+    <target name="echo-build-classpath" depends="init">
         <pathconvert property="classpath.string" refid="classpath" pathsep=";"/>
         <echo message="CLASSPATH: ${classpath.string}"/>
     </target>
@@ -977,6 +985,8 @@
             <echo message="ARIBA_AWRELOAD=${aw.reload}, jvmarg: ${tomcat.jvmarg}, ANT_HOME=${ant.home}"/>
             <echo message="Setting ARIBA_AW_SEARCH_PATH=${aw.search.path}"/>
             <echo message="Connect via ${app.url}"/>
+            <property name="tomcat.jvmarg.extra1" value="-Dbogus1=n"/>
+            <property name="tomcat.jvmarg.extra2" value="-Dbogus2=n"/>
             <java jar="${catalina.home.dir}/bin/bootstrap.jar" fork="true">
                 <env key="CATALINA_HOME" value="${catalina.home.dir}"/>
                 <env key="ARIBAWEB_HOME" value="${dist.root.dir}"/>
@@ -989,6 +999,8 @@
                 <env key="ANT_HOME" value="${ant.home}"/>
                 <jvmarg value="-Xmx256m"/>
                 <jvmarg value="${tomcat.jvmarg}"/>
+                <jvmarg value="${tomcat.jvmarg.extra1}"/>
+                <jvmarg value="${tomcat.jvmarg.extra2}"/>
 
                 <jvmarg value="-Dcatalina.home=${catalina.home.dir}"/>
                 <jvmarg value="-Dcatalina.base=${catalina.base.dir}"/>

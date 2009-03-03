@@ -590,9 +590,22 @@ ariba.Request = function() {
         {
             this.prepareRedirectRequest();
 
-            // need to do it twice on Netscape?!?  (with the backtrack hash stuff in place)
-            // if (!Dom.IsIE) window.location.href = url;
-            window.location.href = url;
+            var location = window.location;
+            // Todo conditionalize for Safari < 4
+            // setting the href = url if there a hash on the URL.
+            // append/remove a dummy param to make the URL different
+            // than the current one and make the set take effect.
+            if (Dom.isSafari) {
+                if (url.indexOf("/") == 0) {
+                    if (location.href.indexOf("awrdt=1") < 0) {
+                        url = url + "&awrdt=1";
+                    }
+                    else {
+                        url = url.replace(/\&awrdt=1/, "");
+                    }
+                }
+            }
+            location.href = url;
             // in somes cases, we are trying to redirect while the download �Save/Open� dialog is up.
             // We need to retry in those cases.
             if (Dom.IsIE6Only) {

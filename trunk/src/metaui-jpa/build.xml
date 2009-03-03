@@ -35,6 +35,14 @@
     <available file="${basedir}/lib/ext-compass" property="lib.compass.dir" value="${basedir}/lib/ext-compass"/>
     <property name="lib.compass.dir" location="${aw.home}/lib/ext-compass"/>
 
+    <fileset id="build.jars" dir="${ariba.jars.dir}">
+        <include name="ariba.util.jar"/>
+        <include name="ariba.expr.jar"/>
+        <include name="ariba.aribaweb.jar"/>
+        <include name="ariba.widgets.jar"/>
+        <include name="ariba.metaui.jar"/>
+    </fileset>
+
     <fileset id="jar.resources" dir="${basedir}" excludes="examples/**">
         <patternset refid="jar.resource.patterns"/>
     </fileset>

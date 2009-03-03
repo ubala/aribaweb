@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#60 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#62 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -369,6 +369,10 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
                         if (resourceDir.exists() && resourceDir.isDirectory()) {
                             resourceManager.registerResourceDirectory(resourceDir.getPath(), resourceUrl, false);
                         }
+                        resourceDir = new File(path, "resource/webserver/branding");
+                        if (resourceDir.exists() && resourceDir.isDirectory()) {
+                            resourceManager.registerResourceDirectory(resourceDir.getPath(), resourceUrl, false);
+                        }
                         resourceDir = new File(path, "resource/webserver");
                         if (resourceDir.exists() && resourceDir.isDirectory()) {
                             resourceManager.registerResourceDirectory(resourceDir.getPath(), resourceUrl, false);
@@ -451,7 +455,7 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
 
     public boolean initIsRapidTurnaroundEnabled ()
     {
-        return AWUtil.getenv("ARIBA_AW_SEARCH_PATH") != null;
+        return !StringUtil.nullOrEmptyOrBlankString(AWUtil.getenv("ARIBA_AW_SEARCH_PATH"));
     }
 
     public boolean isStateValidationEnabled ()

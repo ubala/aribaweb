@@ -12,16 +12,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContextDataSource.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContextDataSource.java#2 $
 */
 package ariba.ui.meta.persistence;
 
 import ariba.ui.table.AWTDataSource;
 import ariba.ui.table.AWTEntity;
+import ariba.ui.table.AWTSortOrdering;
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.Context;
 import ariba.ui.meta.core.ObjectMeta;
 import ariba.util.fieldvalue.FieldPath;
+import ariba.util.core.ListUtil;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public class ObjectContextDataSource extends AWTDataSource
 {
     Class _entityClass;
     QuerySpecification _querySpecification;
+    boolean _doSortInQuery = true;
     ObjectContext.ChangeWatch _changeWatch;
 
     public ObjectContextDataSource (Class entityClass)
@@ -40,6 +43,26 @@ public class ObjectContextDataSource extends AWTDataSource
     public List fetchObjects()
     {
         return (_querySpecification != null) ? ObjectContext.get().executeQuery(_querySpecification) : null;
+    }
+
+    public void setSortOrderings (List<AWTSortOrdering> orderings)
+    {
+        _querySpecification.setSortOrderings((orderings == null || !_doSortInQuery) ? null : createSortOrderings(orderings));
+    }
+
+    public boolean doSortInQuery ()
+    {
+        return _doSortInQuery;
+    }
+
+    public void setDoSortInQuery (boolean doSortInQuery)
+    {
+        _doSortInQuery = doSortInQuery;
+    }
+
+    public boolean dataSourceDoesSort ()
+    {
+        return _doSortInQuery;
     }
 
     public Object insert()
@@ -60,12 +83,6 @@ public class ObjectContextDataSource extends AWTDataSource
             _changeWatch = ObjectContext.get().createChangeWatch();
         }
         return _changeWatch.hasChanged();
-    }
-
-    public AWTEntity entity()
-    {
-        // Todo?
-        return null;
     }
 
     public Class getEntityClass ()
@@ -89,5 +106,19 @@ public class ObjectContextDataSource extends AWTDataSource
     public void setQuerySpecification (QuerySpecification querySpecification)
     {
         _querySpecification = querySpecification;
+    }
+
+    public static SortOrdering createSortOrdering (AWTSortOrdering ordering)
+    {
+        return new SortOrdering(ordering.key(), SortOrdering.Direction.values()[ordering.selector()]);
+    }
+
+    public static List<SortOrdering>createSortOrderings (List<AWTSortOrdering> orderings)
+    {
+        List<SortOrdering> result = ListUtil.list(orderings.size());
+        for (AWTSortOrdering ordering : orderings) {
+            result.add(createSortOrdering(ordering));
+        }
+        return result;
     }
 }

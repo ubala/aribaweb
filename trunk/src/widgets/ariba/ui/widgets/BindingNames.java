@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BindingNames.java#52 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BindingNames.java#53 $
 */
 
 package ariba.ui.widgets;
@@ -125,7 +125,6 @@ public class BindingNames extends ariba.ui.aribaweb.html.BindingNames
     public static final String isLazy           = "isLazy";
     public static final String isClickable      = "isClickable";
     public static final String omitWrapperFrame = "omitWrapperFrame";
-    public static final String sessionless      = "sessionless";
     public static final String clientFormat     = "clientFormat";
     public static final String okAction         = "okAction";
     public static final String cancelAction     = "cancelAction";
