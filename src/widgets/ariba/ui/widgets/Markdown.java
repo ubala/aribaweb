@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Markdown.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Markdown.java#6 $
 */
 package ariba.ui.widgets;
 
@@ -104,7 +104,7 @@ public class Markdown extends AWContainerElement
     static final Pattern _LeadingWS = Pattern.compile("(?m)^([^\\n\\S]*)\\S");
     static final Pattern _CodeBlocks = Pattern.compile("(?s)\\<pre\\>\\<code\\>(.+?)\\<\\/code\\>\\<\\/pre\\>");
     static final Pattern _Headings = Pattern.compile("\\<(h\\d)\\>(.+?)\\<\\/h\\d\\>");
-    static final Pattern _LocalAnchors = Pattern.compile("\\[(.+?)\\]\\#");
+    static final Pattern _LocalAnchors = Pattern.compile("\\[(.+?)\\]\\#(\\w+)?");
 
     static String trimLeadingWhitespace (String content)
     {
@@ -124,8 +124,9 @@ public class Markdown extends AWContainerElement
         while (m.find()) {
             String title = m.group(1);
             String id = title.replaceAll("[^\\w]+", "_").toLowerCase();
-            String replacement = Fmt.S("[%s](#%s)",
-                                    title, id);
+            String replacement = (m.group(2) != null)
+                            ? Fmt.S("[%s](/%s/%s)", title, m.group(2), title)
+                            : Fmt.S("[%s](#%s)", title, id);
             m.appendReplacement(sb, replacement);
         }
         m.appendTail(sb);

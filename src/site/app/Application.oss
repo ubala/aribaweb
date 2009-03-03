@@ -7,25 +7,44 @@ module {
     }
 
     layout { portletWrapper:AWTNullWrapper; }
-    @layout=Download {
-        wrapperComponent:SitePortletWrapper;
-        wrapperBindings:{title:"Get it now!";portletClass:sitePortletNarrow;}
+    layout=Download#NarrowPortlet {
+        label:"Get it now!";
         component:DownloadContent;
-        after:zNone; rank:9999999;
     }
     @layout=Banner {
        after:zTop;
        component:BannerContent;
        bindings: { title:${pushAndResolve([module:"*"], "label")}; value:${pushAndResolve([module:"*"], "description")} }
     }
-
+    layout=BlogNews#NarrowPortlet {
+       label:"News from the AW Blog"
+       component:NewsContent;
+       bindings:{
+          label:"Visit AW Blog";
+          url:"http://aribaweb.blogspot.com";
+          name:"blog";
+          feedUrl:"http://aribaweb.blogspot.com/feeds/posts/default";
+          showContent:true;
+       };
+    }
+    layout=GroupNews#NarrowPortlet {
+       label:"Recent AW Discussion Group Posts"
+       component:NewsContent;
+       bindings:{
+          label:"Join the Group";
+          url:"http://groups.google.com/group/aribaweb";
+          name:"group";
+          feedUrl:"http://groups.google.com/group/aribaweb/feed/rss_v2_0_topics.xml";
+          count:6;
+       };
+    }
     @layout=Footer {
        after:zBottom;
        component:FooterContent;
     }
 }
 
-module=(Home, Product, Demo, Download) layout=Download { after:zRight }
+module=(Home, Product, Demo, Download) @layout=Download { rank:999999; }
 
 layout {
     trait=WidePortlet {
@@ -43,6 +62,10 @@ layout {
 layout trait=Markdown {
     component:MetaMarkdown;
     bindings:{resourcePath:$properties.resourceName};
+}
+
+trait=ApiLinkFilter {
+    bindings:{urlFilter:${ariba.ui.dev.AWApiUrlLookupFilter.defaultInstance()}};
 }
 
 layout layout_trait=Markdown {
@@ -77,13 +100,12 @@ layout layout_trait=Markdown {
        component:ScreencastContent;
        bindings:{smallPlayer:true; twoColThumbnails:true; }
     }
-    @layout=News#NarrowPortlet {
+
+    @layout=BlogNews {
        after:Download;
-       label:"News from the AW Blog";
-       component:NewsContent;
     }
     @layout=CommunityResources#NarrowPortlet,Markdown {
-       after:News;
+       after:BlogNews;
        resourceName:"Community/CommunityLinks.txt";
     }
 }
@@ -93,6 +115,7 @@ layout layout_trait=Markdown {
 
     @layout=ProductOverview#WidePortlet,Markdown {
        resourceName:"Product/Overview.txt";
+       wrapperBindings:{portletClass:"bigImgMarg sitePortletWide";}
     }
     @layout=ProductFeatures#WidePortlet,Markdown {
        resourceName:"Product/Features.txt";
@@ -135,7 +158,7 @@ layout layout_trait=Markdown {
 @module=Documentation  {
     description:"Dig into the details!";
 
-    @layout=Documentation#WidePortlet,Markdown {
+    @layout=Documentation#WidePortlet,Markdown,ApiLinkFilter {
        homeResourceName:"Documentation/Documentation.txt";
     }
     @layout=Resources#NarrowPortlet,Markdown {
@@ -153,9 +176,10 @@ layout layout_trait=Markdown {
     @layout=KeyLinks#NarrowPortlet,Markdown {
        resourceName:"Community/CommunityLinks.txt";
     }
-    @layout=News#NarrowPortlet {
+    @layout=GroupNews {
        after:KeyLinks;
-       label:"News from the AW Blog";
-       component:NewsContent;
+    }
+    @layout=BlogNews {
+       after:GroupNews;
     }
 }

@@ -37,6 +37,9 @@
         </tr>
     </table>
 </form>
+<a:GenericContainer tagName="script" type="text/javascript">
+    google.setOnLoadCallback(loadFeeds);
+</a:GenericContainer>
 <!--- Google analytics -->
 <a:GenericContainer tagName="script" type="text/javascript">
      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

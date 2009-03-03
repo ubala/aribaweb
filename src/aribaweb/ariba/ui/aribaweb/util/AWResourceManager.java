@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWResourceManager.java#11 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWResourceManager.java#12 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -22,6 +22,18 @@ import ariba.util.core.ListUtil;
 import java.util.List;
 import java.util.Locale;
 
+/**
+    The application-wide manager of resource lookups.  AWResourceManagers handle lookup of
+    localized strings, webserver resources, and (packaged) UI templates.
+
+    {@link AWMultiLocaleResourceManager} is the typical concrete master resource manager used
+    by {@link ariba.ui.aribaweb.core.AWConcreteApplication}.  It, in turn, uses multiple
+    {@link AWSingleLocaleResourceManager}s.
+
+    ResourceManagers support "flattening out" multiple resgistered directories into a single
+    coalesced lookup space, and support unpackaged lookups of packaged resources
+    (via {@link #packageResourceNamed(String)}) and classes (via {@link #classForName(String)}). 
+ */
 public abstract class AWResourceManager extends AWBaseObject
 {
     abstract public void setSystemDefaultLocale (Locale locale);

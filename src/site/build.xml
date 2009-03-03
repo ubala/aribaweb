@@ -26,21 +26,13 @@
     <property name="enable.groovy" value="true"/>
     <property name="aw.packagedResourceExtensions" value="awl,oss,csv,xml"/>
 
+    <property name="tomcat.port.prefix.override" value="7"/>
+    <property name="servlet.port" value="7080"/>
+    <property name="jpda.address" value="7000"/>
+
     <property environment="env"/>
     <property name="aw.home" location="${env.AW_HOME}"/>
+
     <import file="${aw.home}/tools/build-metaui-app.xml"/>
 
-        <!-- Docroot :
-        resource/webserver  ->  docroot/config/branding
-    -->
-    <property name="docroot.destpath" value="docroot/config/branding"/>
-    <resources id="src.docroot.resources">
-        <fileset dir="${src.dir}/resource/webserver"/>
-    </resources>
-
-    <target name="copy-docroot-resources" depends="common.copy-docroot-resources">
-        <copy todir="${build.classes.dir}/docroot">
-            <fileset dir="${src.dir}" includes="**/*.js"/>
-        </copy>
-    </target>
 </project>

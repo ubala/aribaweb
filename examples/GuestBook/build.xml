@@ -1,12 +1,5 @@
 <?xml version="1.0"?>
-<project name="GuestBook" default="launch">
-
-    <description>
-        Simple Sample AW GuestBook App
-    </description>
-
-    <!-- jar name, war name, defaulted by project name.
-         web.xml and aribaweb.properties automatically generated -->
+<project name="HelloWorld" default="launch">
     <property environment="env"/>
     <property name="aw.home" location="${env.AW_HOME}"/>
     <import file="${aw.home}/tools/build-widgets-app.xml"/>

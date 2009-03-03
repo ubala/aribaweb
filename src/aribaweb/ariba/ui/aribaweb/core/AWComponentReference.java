@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#61 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#62 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -855,6 +855,7 @@ public class AWComponentReference extends AWContainerElement
             super(instance.componentDefinition());
             _instance = instance;
             init(componentDefinition().componentName(), EmptyHashtable);
+            _isStateless = false;
         }
 
         protected AWComponent statefulSubcomponentInstanceInComponent (AWRequestContext requestContext,

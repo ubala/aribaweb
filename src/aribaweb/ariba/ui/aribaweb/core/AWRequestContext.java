@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#133 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#134 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -44,6 +44,13 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
+/**
+    The context tracking state through all phases of a single request/response cycle.
+    The RequestContext encapsulates the incoming {@link AWRequest} and the outgoing
+    {@link AWResponse}.  As the primary argument in the {@link AWCycleable methods}
+    it tracks the evolving ElementId as the document structure unfolds, providing Ids
+    through {@link #nextElementId()}, {@link #pushElementIdLevel()}, and {@link @popElementIdLevel}. 
+  */
 public class AWRequestContext extends AWBaseObject implements DebugState
 {
     public static final AWEncodedString TopFrameName =

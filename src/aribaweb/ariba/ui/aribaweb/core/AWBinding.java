@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBinding.java#46 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBinding.java#47 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1054,9 +1054,18 @@ final class AWBooleanNotBinding extends AWVariableBinding
     }
 }
 
-///////////////////
-// AWBinding
-///////////////////
+/**
+    Represents a binding between a named property and a constant or dynamic
+    expression in the context of the parent component.
+    <p>
+    Many binding subtypes are supported, including:
+    <ol>
+    <li>{@link AWConstantBinding}: e.g.: "10" or "A long string"
+    <li>{@link AWKeyPathBinding}: e.g.: "$userName" or "$project.costCenter.budget" or "$delete"</li>
+    <li>{@link AWExpressionBinding}: e.g. '${firstName + " " + lastName}' or '${pageWithName("Page2")}'</li>
+    <li>{@link AWLocalizedBinding}: e.g. "$[a002]Delete Items"</li>
+    </ol>
+ */
 abstract public class AWBinding extends AWBaseObject implements Cloneable
 {
     // ThrowValidationExceptions is false for now (May 8, 2002) but should be made

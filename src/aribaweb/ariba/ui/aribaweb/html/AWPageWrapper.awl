@@ -13,15 +13,22 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPageWrapper.awl#2 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPageWrapper.awl#3 $
     </Copyright>
 
     <Overview>
-        AWPageWrapper
+        AWPageWrapper is a simple, low-level wrapper for page-level component content.  It will emit the
+        standard doctype, html, head, and body tags, optionally wrap its content in an AWForm, and includes
+        the AW JavaScript libraries necessary for AJAX refresh.
     </Overview>
 
+    <Binding key="hasForm" direction="get" type="boolean" default="$false">
+        If hasForm is true, an html form tag is provided in the page wrapper
+        and will serve as the form container for the entire page.
+    </Binding>
+
     <Binding key="action" direction="get" type="AWResponseGenerating" required="$false">
-        See PageWrapperForm
+        AWForm action
     </Binding>
 
     <Binding key="applicationCSS" direction="get" type="String" default="$null">
@@ -66,14 +73,6 @@
         component-levels to locate a named template with the name "commands".
     </NamedContent>
 </a:Api>\
-<!--- AWPageWrapper
-
-applicationCSS="$^applicationCSS"
-windowTitle="$windowTitle"
-escapeTitle="$^escapeTitle:$true"
-sessionless="$^sessionless"
-onLoad="$^onLoad"
--->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="$languageDirection">\
 <head>
@@ -92,7 +91,15 @@ onLoad="$^onLoad"
     <link rel="shortcut icon" href="$favIconUrl" type="image/x-icon"/>
 </head>
 <a:Body onLoad="$^onLoad">\
-    <a:IncludeContent name="body" required="$false"/>
+    <a:RefreshRegion>
+        <a:If ifTrue="$^hasForm">
+            <a:Form action="$^action" style="margin:0px;padding:0px;">\
+                <a:IncludeContent/>
+            </a:Form>
+        <a:Else/>
+            <a:IncludeContent/>
+        </a:If>
+    </a:RefreshRegion>
 
     <!--- NOTE: make sure that the AWRichClientFooter comes after all components which require
           refreshRegion support.  The AWRichClientFooter completes the incremental

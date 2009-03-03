@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentDefinition.java#45 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentDefinition.java#46 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -273,7 +273,7 @@ public class AWComponentDefinition extends AWBaseObject
         Only called from newComponentInstance, this method
         refreshes the class if we are debugging.
     */
-    long _lastClassScan = 0;
+    long _lastClassScan = -1;
 
     public Class componentClass ()
     {

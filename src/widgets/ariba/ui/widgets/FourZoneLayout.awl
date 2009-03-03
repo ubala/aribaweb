@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FourZoneLayout.awl#10 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FourZoneLayout.awl#11 $
     </Copyright>
 
     <Overview>
@@ -53,7 +53,7 @@
         </td>
     </tr>
     <tr>
-        <a:SetValue dict.wL="$^widthLeft:auto"/>
+        <a:SetValue dict.wL="$^widthLeft:50%"/>
         <td width='${dict.wL.endsWith("px") ? "1%" : dict.wL }' valign="top">\
             <a:RefreshRegion class="flexContainer">\
                 <a:IncludeContent name="left" required="$false"/>\
@@ -66,7 +66,7 @@
             <div style='${"width:"+dict.wA}'></div>\
         </td>
 
-        <td width="$^widthRight:auto" valign="top">\
+        <td width="$^widthRight:50%" valign="top">\
             <a:RefreshRegion class="flexContainer">
                 <a:IncludeContent name="right" required="$false"/>
             </a:RefreshRegion>

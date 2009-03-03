@@ -1448,11 +1448,11 @@ ariba.Datatable = function() {
             return row.getAttribute("_AWTIsPrimaryRow") == "1";
         },
 
-        rowForChild : function (target)
+        rowForChild : function (target, checkCurrent)
         {
             var row = Dom.findParentUsingPredicate(target, function(n) {
                 return n.nodeName == "TR" && n.parentNode.parentNode.className == "tableBody";
-            });
+            }, checkCurrent);
 
             var prev;
             while (row && !this.isPrimaryRow(row) && (prev = this.rowSibling(row, -1))) {
@@ -1517,7 +1517,7 @@ ariba.Datatable = function() {
             var handled = false;
 
             // Debug.log("Row clicked: " + evt.type + " - " + target.tagName + " " + target.className);
-            var row = this.rowForChild(target);
+            var row = this.rowForChild(target, true);
             if (row && _awtMouseDown) {
                 var tableInfo = this.tableInfoForRow(row);
                 var targetTable = tableInfo.bodyTable;

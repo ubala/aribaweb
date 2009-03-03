@@ -35,6 +35,7 @@ ariba.Calendar = function() {
     var AWTodayStyle = "today";
     var AWSelectedDayStyle = "selectedDay";
     var AWFocusStyle = "calendar_focus";
+    var AWDisabledStyle = "calendar_disabled";
     var AWPreviousYearClass = "calendarPreviousYear";
     var AWPreviousMonthClass = "calendarPreviousMonth";
     var AWNextMonthClass = "calendarNextMonth";
@@ -67,7 +68,7 @@ ariba.Calendar = function() {
 
     var Calendar = {
 
-        Control : function (tableId, selectedDate)
+        Control : function (tableId, selectedDate, enabledDays)
         {
             this.getTable = function ()
             {
@@ -79,13 +80,40 @@ ariba.Calendar = function() {
             this._calendarDate = null;
             this._selectedDate = selectedDate;
 
+            this.prepCalendar = function (cdata)
+            {
+                this._enabledDays = [true, true, true, true, true, true, true];
+                if(cdata.length == 0) {
+                    return;
+                }
+                var darr = cdata.split(",");
+                for(i = 0; i < darr.length; i++) {
+                    if(darr[i] == "-*") {
+                        for(j = 0; j < 7; j++) {
+                            this._enabledDays[j] = false;
+                        }
+                        continue;
+                    }
+                    var d = Math.abs(darr[i]);
+                    if(d > 0 && d < 8) {
+                        this._enabledDays[d - 1] = darr[i] > 0;
+                    }
+                }
+            }
+
+            this.prepCalendar(enabledDays);
+
             this.setCalendarDate = function (date)
             {
                 var year = date.getFullYear();
                 var month = date.getMonth();
-            // always set to last day of month so
+                // always set to last day of month so
                 // we can easily get days in month
                 this._calendarDate = new Date(year, (month + 1), 0);
+            }
+
+            this.showDay = function (dayOfWeek){
+                return this._enabledDays[dayOfWeek];
             }
 
             /////////////
@@ -158,16 +186,27 @@ ariba.Calendar = function() {
                         var cell = cells[cellIndex];
                         Dom.setInnerText(cell, "");
                         if (currentDay > 0 && currentDay <= daysInMonth) {
-                            var anchor = document.createElement("A");
-                            anchor.href = "#";
-                            cell.appendChild(anchor);
-                            Dom.setInnerText(anchor, currentDay);
+                            if(this.showDay(cellIndex)){
+                                var anchor = document.createElement("A");
+                                anchor.href = "#";
+                                cell.appendChild(anchor);
+                                Dom.setInnerText(anchor, currentDay);
+                            }
+                            else {
+                                Dom.setInnerText(cell, currentDay);
+                            }
                         }
                         if (currentDay == todaysDate && calendarMonth == todaysMonth && calendarYear == todaysYear) {
                             Dom.addClass(cell, AWTodayStyle);
                         }
                         else {
                             Dom.removeClass(cell, AWTodayStyle);
+                        }
+                        if (!this.showDay(cellIndex)) {
+                            Dom.addClass(cell, AWDisabledStyle);
+                        }
+                        else {
+                            Dom.removeClass(cell, AWDisabledStyle);
                         }
                         if ((selectedDay == currentDay) && (selectedMonth == calendarMonth) && (selectedYear == calendarYear)) {
                             Dom.addClass(cell, AWSelectedDayStyle);

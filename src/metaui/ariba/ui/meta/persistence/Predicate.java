@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/Predicate.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/Predicate.java#3 $
 */
 package ariba.ui.meta.persistence;
 
@@ -29,6 +29,7 @@ abstract public class Predicate implements QueryGenerator.Visitor
 
     public static Predicate fromKeyValueMap (Map<String, Object> toMatch)
     {
+        if (toMatch == null) return null;
         List <Predicate> preds = new ArrayList();
         for (Map.Entry<String,Object> e : toMatch.entrySet()) {
             Object val = e.getValue();

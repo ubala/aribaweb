@@ -13,11 +13,19 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#54 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#55 $
     </Copyright>
 
     <Overview>
-        TBD
+        Primary page wrapper for wrapping page with modal behavior (i.e. the user must ultimately
+        complete the page and return to the previous page.
+
+        ModalPageWrapper enables its content to be either rendered as page-level content
+        (in which case it disables app level navigation controls) or (if AWCompoent.setClientPanel(true)
+        is in effect) to render as a modal *panel* (over the previous page's content).
+
+        ModalPageWrapper automatically remembers it predecessor page and provides default implementations
+        of the okAction and cancelAction which will return to that page.
     </Overview>
 
     <Binding key="action" direction="get" type="AWResponseGenerating" required="$false">
@@ -25,7 +33,7 @@
     </Binding>
 
     <Binding key="title" direction="get" type="String" default="$null">
-        TBD
+        The title to be displayed as the document / panel title.
     </Binding>
 
     <Binding key="disableHelpAction" direction="get" type="boolean" default="$false">
@@ -65,19 +73,20 @@
     </Binding>
 
     <Binding key="editable" direction="get" type="boolean" default="$false">
-        TBD
+        If true, separate "Ok" and "Cancel" buttons are rendered.  If not,
+        a single "Done" button is provided.
     </Binding>
 
     <Binding key="okHint" direction="get" type="String" default="OK BUtton">
-        TBD
+        Hover tip on the Ok button
     </Binding>
 
     <Binding key="okTitle" direction="get" type="String" default="OK">
-        TBD
+        Label for the Ok button
     </Binding>
 
     <Binding key="okButtonClass" direction="get" type="String">
-        TBD
+        TextButton buttonClass for the Ok button.
     </Binding>
 
     <Binding key="okButtonWrapperStyle" direction="get" type="String">
@@ -152,15 +161,16 @@
     </Binding>
 
     <NamedContent name="buttons" required="$false">
-        TBD
+        Additional buttons to be display in the button area
     </NamedContent>
 
     <NamedContent name="titleArea" required="$false">
-        TBD
+        Additional title area content
     </NamedContent>
 
     <NamedContent name="bodyArea" required="$false">
-        TBD
+        The body of the page wrapper (same as the unnamed/main content area, if named a:Content areas
+        are not used)
     </NamedContent>
 
     <NamedContent name="commands" required="$false">

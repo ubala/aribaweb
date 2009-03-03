@@ -50,6 +50,8 @@
                     value="$hibernate.connection.url"/>
           <property name="hibernate.connection.username"
                     value="$hibernate.connection.username"/>
+          <property name="hibernate.connection.password"
+                    value="$hibernate.connection.password"/>
           <property name="hibernate.dialect"
                     value="$hibernate.dialect"/>
 

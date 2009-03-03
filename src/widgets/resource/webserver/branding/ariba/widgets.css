@@ -508,7 +508,7 @@ tr.top {
 }
 
 td#prodimg {
-    padding:10px 10px 0px 30px;
+    padding:15px 10px 5px 30px;
     margin:0px;
 }
 
@@ -1805,6 +1805,10 @@ table.hoverLink .awmenuLink:hover {
     text-align:right;
     padding:0px 2px 3px 0px;
     border-bottom:1px solid #CCCCDD;
+}
+
+.calendar_disabled {
+    background-color:#D8D8E0;
 }
 
 tr.navigation td {

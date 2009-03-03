@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldValue.java#6 $
 */
 
 package ariba.util.fieldvalue;
@@ -21,18 +21,22 @@ import ariba.util.core.ClassExtension;
 import ariba.util.core.ClassExtensionRegistry;
 
 /**
-The FieldValue class provides convenience methods which dispatch
-methods of the FieldValue interface for a target object.  This class
-maintains a cache of ClassExtension implementations for the FieldValue
-interface and will lookup a classExtension for each convenience method in
-here before forwarding to the classExtension for the actual implementation of the method.
-
-You may use these convenience methods to always do the dispatching,
-but this incurrs a lookup of the classExtension each time.  If you will be invoking
-these methods on several instances all known to be the same class, you can
- do the lookup of the classExtension yourself (see get(...)) and
-invoke the classExtension methods directly.
-*/
+    The FieldValue class defines a {@link ClassExtension} for JavaBean-like property
+    access on target objects.  Static methods {@link #getFieldValue(Object, String)}
+    and {@link #setFieldValue(Object, String, Object)} are provided for convenience.
+    Higher performance access can be achieved by caching {@link FieldPath} instances
+    for particular key paths.  Not only does that avoid per-access accessor lookup, but the
+    field path caches {@link FieldValueSetter} and {@link FieldValueGetter} instances
+    from its most recent lookup and can reuse them if the next access targets the
+    same class.
+    <p>
+    The default implementation of FieldValue is {@link FieldValue_Object} -- it resolves
+    property access using reflection to get/set using accessor methods or direct field access.
+    (note that, unlike JavaBeans, FieldValue_Object will resolve a get on key "foo" by checking for
+    foo(), getFoo, and the fields named foo and _foo).
+    <p>
+    Other specialized implementation of FieldValue exist for Maps, XML Nodes, etc. 
+ */
 abstract public class FieldValue extends ClassExtension
 {
     public static final int Setter = 0;

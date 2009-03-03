@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavCommandBar.java#7 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavCommandBar.java#8 $
 */
 package ariba.ui.meta.layouts;
 
@@ -84,6 +84,8 @@ public class MetaNavCommandBar extends BrandingComponent
             disableHome = parentComponent.booleanValueForBinding(
                                 ariba.ui.widgets.BindingNames.disableHomeAction);
         }
+        if (!disableHome) disableHome = MetaNavTabBar.getState(session()).getModules().size() == 0;
+        
         // temporary check for login page
         return !disableHome && !(pageComponent() instanceof MetaHomePage);
     }

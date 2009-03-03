@@ -12,12 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseGenerating.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseGenerating.java#7 $
 */
 
 package ariba.ui.aribaweb.core;
 
-/** @aribaapi private */
+/**
+    Interface for results of an action.  The most common action result is {@link AWComponent}.
+    Actions may also return {@link AWResponse} objects (when, for instance, returning a file).
+ 
+    @aribaapi private
+ */
 
 public interface AWResponseGenerating
 {

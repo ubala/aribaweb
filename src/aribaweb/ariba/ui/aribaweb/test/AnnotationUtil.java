@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#9 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -112,7 +112,19 @@ public class AnnotationUtil
         return obj;
     }
 
-    public static Object invokeMethod (AWRequestContext requestContext, TestContext testContext, Method method, Object onObject)
+    public static Object invokeMethod (AWRequestContext requestContext,
+                                       TestContext testContext,
+                                       Method method,
+                                       Object onObject)
+    {
+        return invokeMethod(requestContext, testContext, method, onObject, null);
+    }
+
+    public static Object invokeMethod (AWRequestContext requestContext,
+                                       TestContext testContext,
+                                       Method method,
+                                       Object onObject,
+                                       Object objectForValidation)
     {
         Class[] methodTypes = method.getParameterTypes();
         Object[] args = new Object[methodTypes.length];
@@ -122,6 +134,10 @@ public class AnnotationUtil
             }
             else if (TestContext.class.equals(methodTypes[i])) {
                 args[i] = testContext;
+            }
+            else if (objectForValidation != null &&
+                    methodTypes[i].isInstance(objectForValidation)){
+                args[i] = objectForValidation;
             }
             else {
                 args[i] = testContext.get(methodTypes[i]);

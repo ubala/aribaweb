@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApplication.java#33 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApplication.java#34 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -25,6 +25,15 @@ import ariba.ui.aribaweb.util.AWParameters;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
 
+/**
+    A process wide coordinator of AribaWeb processing.  AWApplication (and its main concrete implementations
+    {@link AWConcreteServerApplication},
+    {@link AWConcreteApplication}, and {@link ariba.ui.servletadaptor.AWServletApplication}
+    provide methods links to via services (e.g. {@link #resourceManager()}) and methods overridden,
+    acts as a factory for vital objects involved in request handling (e.g. {@link #createSession(AWRequestContext)},
+    {@link #createRequestContext(AWRequest)}, and provides hooks to be overridden by
+    by subclasses to affect process flow (e.g. {@link #handleSessionRestorationError(AWRequestContext)}. 
+ */
 public interface AWApplication extends AWServerApplication
 {
     ///////////////////

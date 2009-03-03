@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorBucket.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorBucket.java#7 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -32,6 +32,7 @@ public interface AWErrorBucket
     public int getDisplayOrder ();
     public int getUnnavigableDisplayOrder ();
     public int getRegistrationOrder ();
+    public void setRegistrationOrder (int order);
     public Object getKey ();
     public Object[] getKeys ();
     public boolean keysEqual (Object[] theirKeys);
@@ -41,9 +42,23 @@ public interface AWErrorBucket
     public AWErrorBucket add (AWErrorInfo error);
     public int size ();
     public AWErrorInfo get (int i);
-    public List<AWErrorInfo> getErrorInfos();
     public boolean hasDuplicate ();
     public AWComponent getAssociatedDataTable ();
     public Object getAssociatedTableItem ();
     public void setAssociatedTableItem (AWComponent table, Object item);
+
+    /**
+        Returns a list of all the <code>AWErrorInfos</code> in <code>this</code>.
+        @aribaapi ariba
+    */
+    public List<AWErrorInfo> getErrorInfos();
+
+    /**
+        Returns a list of all the error infos in <code>this</code>
+        that satisfy the condition
+        {@link AWErrorInfo#isValidationError()} == <code>validationErrors</code>.
+        All error infos are returned if <code>validationErrors == null</code>.
+        @aribaapi ariba
+    */
+    public List<AWErrorInfo> getErrorInfos (Boolean validationErrors);
 }

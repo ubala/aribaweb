@@ -1,0 +1,15 @@
+h1 {
+    color:#691331;
+}
+
+.cmdBarWrapper .cmdLeft,
+.cmdBarWrapper .cmdFill,
+.cmdBarWrapper .cmdRight {
+    background-image:none;
+    background-color:#BD5152;
+}
+
+.cmdBarWrapper .mastCmdContainer {
+    padding:0px;
+}
+

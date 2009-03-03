@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletResponse.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletResponse.java#3 $
 */
 
 package ariba.ui.servletadaptor;
@@ -37,7 +37,10 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import javax.servlet.http.HttpServletResponse;
 
-// subclassed by orms/ServletRequest
+/**
+    An @{link ariba.ui.aribaweb.core.AWResponse} that ultimately writes its data to an
+    HttpServletResponse.
+ */
 public class AWServletResponse extends AWBaseResponse
 {
     private Map _headers = MapUtil.map();

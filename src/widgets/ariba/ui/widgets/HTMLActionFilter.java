@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.java#11 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HTMLActionFilter.java#12 $
 */
 
 package ariba.ui.widgets;
@@ -37,6 +37,12 @@ public final class HTMLActionFilter extends AWComponent
     public String _staticUrl;
     protected int _readPos;
 
+    public interface UrlFilter
+    {
+        // Should return null if no replacement made
+        String replacementForUrl (String url);
+    }
+        
     public Object nextAction ()
     {
         if (_matcher == null) {

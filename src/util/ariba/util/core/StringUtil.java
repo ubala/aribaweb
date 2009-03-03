@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,13 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#29 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#30 $
 */
 
 package ariba.util.core;
 
 import ariba.util.formatter.Formatter;
+import ariba.util.i18n.I18NUtil;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.lang.Character; // OK for javadoc bug
 import java.text.BreakIterator;
 import java.util.List;
@@ -1455,6 +1457,34 @@ public final class StringUtil
         }
 
         return string;
+    }
+
+    // some convenience methods
+
+    public static byte[] getBytesUTF8 (String string)
+    {
+        try {
+            return string.getBytes(I18NUtil.EncodingUTF8);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            Assert.fail(e, "This VM is not worthy!");
+            return null;
+        }
+
+    }
+
+    public static String getStringUTF8 (byte[] bytes)
+    {
+        try {
+            return new String(bytes, I18NUtil.EncodingUTF8);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            Assert.fail(e, "This VM is not worthy!");
+            return null;
+        }
+
     }
 
     /**

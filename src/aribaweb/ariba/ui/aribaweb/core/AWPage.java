@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#126 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#127 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1093,9 +1093,11 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
                 // lookup configuration source for each class
                 AWComponentConfigurationSource componentConfigurationSource =
                         application.getComponentConfigurationSource(componentClass);
-                Map componentConfigurationsByName =
-                        (Map)_componentConfigurations.get(componentClass);
-                componentConfigurationSource.saveConfigurations(componentConfigurationsByName);
+                if (componentConfigurationSource != null) {
+                    Map componentConfigurationsByName =
+                            (Map)_componentConfigurations.get(componentClass);
+                    componentConfigurationSource.saveConfigurations(componentConfigurationsByName);
+                }
             }
         }
         // dispose component configurations on flush

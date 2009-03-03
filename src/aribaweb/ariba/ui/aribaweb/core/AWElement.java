@@ -12,11 +12,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElement.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElement.java#8 $
 */
 
 package ariba.ui.aribaweb.core;
 
+/**
+    The base interface for objects living in an {@link AWTemplate} (i.e. .awl file).  Its key
+    implementor, {@link AWComponentReference} bridges from the static (and multithreaded) world
+    of templates, into the world of {@link AWComponent}.
+
+    The {@link AWCycleable} interface is key to its role in the template.
+ */
 public interface AWElement extends AWCycleable, AWCycleableReference, Cloneable, AWVisitable
 {
     public Object clone ();

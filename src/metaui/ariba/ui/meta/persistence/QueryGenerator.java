@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QueryGenerator.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QueryGenerator.java#3 $
 */
 package ariba.ui.meta.persistence;
 
@@ -21,6 +21,8 @@ import ariba.util.core.Assert;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+
 import ariba.ui.meta.persistence.Predicate.Operator;
 
 public class QueryGenerator
@@ -62,6 +64,8 @@ public class QueryGenerator
             sb.append(" WHERE ");
             sb.append(_whereClause);
         }
+
+        if (_spec.getSortOrderings() != null) generateOrderBy(_spec.getSortOrderings(), sb);
 
         return sb.toString();
     }
@@ -119,6 +123,21 @@ public class QueryGenerator
                     formatKeyPath(keyPath),
                     formatOperator(operator),
                     formatValue(value)));
+        }
+    }
+
+    void generateOrderBy (List<SortOrdering> orderings, StringBuffer buf)
+    {
+        boolean first = true;
+        for (SortOrdering ordering : orderings) {
+            if (first) {
+                buf.append(" order by ");
+                first = false;
+            } else {
+                buf.append(", ");
+            }
+            buf.append(Fmt.S((ordering.isCaseInsensitive() ? "LOWER(%s)" : "%s"), formatKeyPath(ordering.getKey())));
+            buf.append(ordering.isAscending() ? " asc" : " desc");
         }
     }
 

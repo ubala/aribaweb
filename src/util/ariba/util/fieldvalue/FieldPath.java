@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldPath.java#3 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldPath.java#4 $
 */
 
 package ariba.util.fieldvalue;
@@ -21,20 +21,24 @@ import ariba.util.core.StringUtil;
 import ariba.util.core.GrowOnlyHashtable;
 
 /**
-The FieldPath class is an object representation of a dotted fieldPath.
-A String such as "foo.bar.baz" can be used to access a value on a target
-object using the FieldValue interface.  Such a string might be the equivalent
-of the following Java code:  target.getFoo().getBar().getBaz();.  In order
-to avoid reparsing this string each time its used, the FieldPath object
-provides a way to store the parsed version of this string as a linked list
-of three nodes "foo"->"bar"->"baz".
-
-In addition to avoiding the need to reparse the dotted fieldPath each time,
-we can also use the FieldPath object as a place to store the previous
-FieldValueAccessor to which the node's fieldName resolved.  Of course, the
-class for which the previousAccessor applies my not apply for the next usage,
-but in many cases it does, and so improves the performance of the dispatch
-operation by avoid a more costly hash lookup.
+    The FieldPath class is an object representation of a dotted fieldPath.
+    A String such as "foo.bar.baz" can be used to access a value on a target
+    object using the FieldValue interface.  Such a string might be the equivalent
+    of the following Java code:  target.getFoo().getBar().getBaz();.  In order
+    to avoid reparsing this string each time its used, the FieldPath object
+    provides a way to store the parsed version of this string as a linked list
+    of three nodes "foo"->"bar"->"baz".
+    <p>
+    In addition to avoiding the need to reparse the dotted fieldPath each time,
+    we also use the FieldPath object as a place to store the previous
+    FieldValueAccessor to which the node's fieldName resolved.  Of course, the
+    class for which the previousAccessor applies my not apply for the next usage,
+    but in the common case it does, and so the performance of the dispatch
+    operation is improved by avoiding a more costly hash lookup.  Finally, the
+    underlying Accessor (e.g. {@link ReflectionFieldAccessor} or
+    {@link ReflectionMethodAccessor}) may itself cache a byte-code compiled accesor
+    for the target, thereby turning field access into a no-lookup, no-reflection
+    direct access.
 */
 public class FieldPath extends Object
 {

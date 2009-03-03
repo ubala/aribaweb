@@ -30,7 +30,9 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import ariba.util.core.SecurityHelper;
 
 /**
  * Default class resolution.  Uses Class.forName() to look up classes by name.
@@ -53,12 +55,20 @@ public class DefaultClassResolver extends Object implements ClassResolver
 	    Class       result = null;
 
         if ((result = (Class)classes.get(className)) == null) {
+            if (!SecurityHelper.isScriptableClass(className)) {
+                throw new ClassNotFoundException();
+            }
+
     		try {
     		    result = Class.forName(className);
     		} catch (ClassNotFoundException ex) {
     			if (className.indexOf('.') == -1) {
-    			    result = Class.forName("java.lang." + className);
-        			classes.put("java.lang." + className, result);
+                    String javaClassName = "java.lang."+className;
+                    if (!SecurityHelper.isScriptableClass(javaClassName)) {
+                        throw new ClassNotFoundException();
+                    }
+    			    result = Class.forName(javaClassName);
+        			classes.put(javaClassName, result);
         		}
     		}
 			classes.put(className, result);

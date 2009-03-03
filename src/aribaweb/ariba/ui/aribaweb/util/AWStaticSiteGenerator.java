@@ -260,7 +260,11 @@ public class AWStaticSiteGenerator
                 resourceManager().registerPackageName("app");
 
                 resourceManager().registerResourceDirectory(AppDir, "/");
-                File resourceDir = new File(AppDir, "resource/webserver");
+                File resourceDir = new File(AppDir, "resource/webserver/branding");
+                if (resourceDir.exists()) resourceManager().registerResourceDirectory(resourceDir.getPath(), "/");
+
+                resourceManager().registerResourceDirectory(AppDir, "/");
+                resourceDir = new File(AppDir, "resource/webserver");
                 if (resourceDir.exists()) resourceManager().registerResourceDirectory(resourceDir.getPath(), "/");
             }
         }

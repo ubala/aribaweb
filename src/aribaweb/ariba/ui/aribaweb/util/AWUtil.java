@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#51 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#52 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -35,6 +35,7 @@ import ariba.util.core.MapUtil;
 import ariba.util.core.StringArray;
 import ariba.util.core.StringUtil;
 import ariba.util.core.SystemUtil;
+import ariba.util.core.Fmt;
 import ariba.util.formatter.IntegerFormatter;
 import ariba.util.i18n.I18NUtil;
 import ariba.util.i18n.MergedStringLocalizer;
@@ -1682,15 +1683,25 @@ public final class AWUtil extends AWBaseObject
     }
 
     // E.g. decamelize("firstName", ' ', true) --> "First Name"
+    static final Pattern _InitialDigits = Pattern.compile("^(\\d+)_(.+)");
+
     public static String decamelize (String string, char separator, boolean initialCaps)
     {
+        // Turn "1_Foo" to "1. Foo"
+        Matcher m = _InitialDigits.matcher(string);
+        if (m.matches()) {
+            string = Fmt.S("%s. %s", m.group(1), m.group(2));
+        }
+
+        boolean splitOnUC = !string.contains("_");
+        
         boolean allCaps = true;
         FastStringBuffer buf = new FastStringBuffer();
         int lastUCIndex = -1;
         for (int i=0, len = string.length(); i < len; i++) {
             char c = string.charAt(i);
             if (Character.isUpperCase(c)) {
-                if (i-1 != lastUCIndex) buf.append(separator);
+                if (i-1 != lastUCIndex && splitOnUC) buf.append(separator);
                 lastUCIndex = i;
                 if (!initialCaps) c = Character.toLowerCase(c);
             }

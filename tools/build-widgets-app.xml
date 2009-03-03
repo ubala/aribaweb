@@ -44,6 +44,26 @@
         <resources refid="aw.resources"/>
     </resources>
 
+    <!---
+    <property name="docroot.destpath" value="docroot"/>
+    <resources id="src.docroot.resources">
+        <fileset dir="${src.dir}" includes="**/*.gif,**/*.jpg,**/*.css,**/*.js"/>
+    </resources>
+    -->
+
+    <target name="copy-docroot-resources">
+        <echo message="WIDGETS copy-docroot resources"/>
+        <copy todir="${build.classes.dir}/docroot" failonerror="false">
+            <fileset dir="${src.dir}" includes="**/*.gif,**/*.jpg,**/*.css,**/*.js" excludes="resource/"/>
+        </copy>
+        <copy todir="${build.classes.dir}/docroot" failonerror="false">
+            <fileset dir="${src.dir}/resource/webserver" excludes="branding/"/>
+        </copy>
+        <copy todir="${build.classes.dir}/docroot/config/branding" failonerror="false">
+            <fileset dir="${src.dir}/resource/webserver/branding"/>
+        </copy>
+    </target>    
+
     <property name="dependsOn.jar" value="ariba.widgets"/>
 
     <target name="init-groovy" if="enable.groovy">

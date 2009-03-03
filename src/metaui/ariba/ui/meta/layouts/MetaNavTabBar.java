@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#17 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#18 $
 */
 package ariba.ui.meta.layouts;
 
@@ -154,6 +154,11 @@ public class MetaNavTabBar extends AWComponent
             return ((val instanceof List) && ((List)val).size() == 1)
                     ? ((List)val).get(0)
                     : val;
+        }
+
+        public List<ModuleProperties> getModules ()
+        {
+            return _modules;
         }
 
         // Used by page content areas to re-push the module context onto the meta context

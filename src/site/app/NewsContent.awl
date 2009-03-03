@@ -1,46 +1,69 @@
-<div id="blogfeed"><div style="height:200px">Loading...</div></div>
+<div id='${stringValueForBinding("name") + "feed"}'><div style="height:200px">Loading...</div></div>
 <div style="height:30px;margin-left:80px">
     <w:TextButton buttonWrapperStyle="LeftRight"
                   buttonClass="siteBtn"
-                  action='${ariba.ui.aribaweb.core.AWRedirect.getRedirect(requestContext,"http://aribaweb.blogspot.com")}'>
-        Visit AW Blog
+                  action='${ariba.ui.aribaweb.core.AWRedirect.getRedirect(requestContext,stringValueForBinding("url"))}'
+                  target='${"AW" + stringValueForBinding("name")}'>
+        $^label
     </w:TextButton>
 </div>
+<a:Singleton>
+    \<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAAGMX3oLJ07djx78_srCuVfxTzWqljhZ9jcDunEJwsomxdtxdBcxQP9oF7nqe3CU-p4arkkQJMiLdrug">
+    \</script>
+    \<script type="text/javascript">
 
-\<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAAGMX3oLJ07djx78_srCuVfxTzWqljhZ9jcDunEJwsomxdtxdBcxQP9oF7nqe3CU-p4arkkQJMiLdrug">
-\</script>
-\<script type="text/javascript">
+    google.load("feeds", "1");
 
-google.load("feeds", "1");
+    var _Feeds = new Array();
 
-function initialize() {
-  loadFeed("http://aribaweb.blogspot.com/feeds/posts/default", "blogfeed");
-}
-
-function loadFeed (url, containerId) {
-  var feed = new google.feeds.Feed(url);
-  feed.load(function(result) {
-    if (!result.error) {
-      var container = document.getElementById(containerId);
-      container.innerHTML="";
-      for (var i = 0, c=Math.min(result.feed.entries.length, 3); i \< c; i++) {
-          var entry = result.feed.entries[i];
-          var h = document.createElement("h3");
-          var a = document.createElement("a");
-          a.href = entry["link"];
-          a.target = "AWBlog";
-          a.appendChild(document.createTextNode(entry["title"]));
-          h.appendChild(a);
-          container.appendChild(h);
-          var ul = document.createElement("ul");
-          ul.className="blogSnippet";
-          ul.appendChild(document.createTextNode(entry["contentSnippet"]));
-          container.appendChild(ul);
-      }
+    function registerFeed (url, name, count, showContent)
+    {
+        var feed = new Object();
+        feed.url = url;
+        feed.name = name;
+        feed.count = count;
+        feed.showContent = showContent;
+        _Feeds[_Feeds.length] = feed;
     }
-  });
-}
 
-google.setOnLoadCallback(initialize);
+    function loadFeeds ()
+    {
+       for (var i = 0; i \< _Feeds.length; i++) {
+           loadFeed(_Feeds[i]);
+       }
+    }
 
+    function loadFeed (feedInfo) {
+      var feed = new google.feeds.Feed(feedInfo.url);
+      feed.setNumEntries(feedInfo.count);
+      feed.load(function(result) {
+        if (!result.error) {
+          var container = document.getElementById(feedInfo.name + "feed");
+          container.innerHTML="";
+          var length = result.feed.entries.length;
+          for (var i = 0, c = Math.min(length, feedInfo.count); i \< c ; i++) {
+              var entry = result.feed.entries[i];
+              var h = document.createElement("h3");
+              var a = document.createElement("a");
+              a.href = entry["link"];
+              a.target = "AW" +feedInfo.name;
+              a.appendChild(document.createTextNode(entry["title"]));
+              h.appendChild(a);
+              container.appendChild(h);
+              if (feedInfo.showContent) {
+                  var ul = document.createElement("ul");
+                  ul.className="blogSnippet";
+                  ul.appendChild(document.createTextNode(entry["contentSnippet"]));
+                  container.appendChild(ul);
+              }
+           }
+        }
+      });
+    }
+
+    \</script>\
+</a:Singleton>
+\<script type="text/javascript">
+    registerFeed("$^feedUrl", "$^name",
+                 <a:String value="$^count:3"/>, <a:String value="$^showContent:false"/>);
 \</script>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#79 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#80 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -616,11 +616,14 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
      */
     private boolean isValidNode (AWRequestContext requestContext)
     {
+        return true;
+        /*
         AWNodeValidator val = AWNodeManager.getDefaultNodeValidator();
         if (val == null) {
             return true;
         }
         return val.isValid(requestContext);
+        */
     }
 
     static class NullResponse extends AWBaseResponse

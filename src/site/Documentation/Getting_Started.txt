@@ -94,3 +94,5 @@ For more information see:
 
   - [Setting up IDE Integration](IDE_Plugins.txt).
 
+  - [Catalog of Distribution contents](Distribution_Contents.txt).
+
