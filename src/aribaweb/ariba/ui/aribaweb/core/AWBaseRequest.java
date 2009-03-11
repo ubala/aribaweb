@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#71 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#72 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -30,6 +30,7 @@ import ariba.ui.aribaweb.util.AWStringKeyHashtable;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.Log;
 import ariba.ui.aribaweb.util.Parameters;
+import ariba.ui.aribaweb.html.BindingNames;
 import ariba.util.core.ArrayUtil;
 import ariba.util.core.Assert;
 import ariba.util.core.FastStringBuffer;
@@ -226,11 +227,16 @@ abstract public class AWBaseRequest extends AWBaseObject
                     Locale locale = preferredLocale();
                     // get max size for this request
                     int maxLength = AWMimeReader.maxBytesPerChunk();
+                    boolean encrypted = false;
                     HttpSession httpSession = getSession(false);
                     if (httpSession != null) {
                         Integer length = (Integer)httpSession.getAttribute(name);
                         if (length != null) {
                             maxLength = length.intValue();
+                        }
+                        Boolean enc = (Boolean)httpSession.getAttribute(BindingNames.encrypt +"."+name);
+                        if (enc != null) {
+                            encrypted = enc;
                         }
                         locale = (Locale)httpSession.getAttribute(Locale.class.getName());
                     }
@@ -245,7 +251,7 @@ abstract public class AWBaseRequest extends AWBaseObject
                     ProgressMonitor.instance().prepare(msg, contentLength()/1024);
 
                     AWFileData fileData =
-                        mimeReader.nextChunk(fileName, headerContentType, maxLength);
+                        mimeReader.nextChunk(fileName, headerContentType, maxLength, encrypted);
 
                     if (fileData != null) {
                         newHashtable.put(name, fileData);

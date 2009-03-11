@@ -12,10 +12,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/AribaExprEvaluator.java#22 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/AribaExprEvaluator.java#23 $
 */
 package ariba.util.expr;
 
+import ariba.util.fieldvalue.Expression;
 import ariba.util.fieldvalue.ExpressionEvaluator;
 import ariba.util.fieldvalue.ExpressionException;
 import ariba.util.fieldvalue.ExpressionEvaluatorException;
@@ -29,9 +30,11 @@ import ariba.util.core.ListUtil;
 import ariba.util.core.FastStringBuffer;
 import ariba.util.core.Assert;
 import ariba.util.core.StringUtil;
+import ariba.util.fieldtype.NullTypeInfo;
 import ariba.util.fieldtype.TypeInfo;
 import ariba.util.fieldtype.JavaTypeRegistry;
 import ariba.util.fieldtype.PropertyInfo;
+import ariba.util.fieldtype.TypeRetriever;
 
 /**
     Factory for Expr-based expressions
@@ -131,6 +134,17 @@ public class AribaExprEvaluator extends ExpressionEvaluator
         if (expr != null) {
             typeCheck(env, rootType, fieldName, expr, expectedType, containerType,
                       exactMatch, errorCollector);
+            Node exprRootNode = expr.getRootNode();
+            if (exprRootNode != null &&
+                (exprRootNode.getTypeInfo() == null ||
+                    exprRootNode.getTypeInfo() instanceof NullTypeInfo)) {
+                TypeRetriever retriever = env.getTypeRetriever();
+                TypeInfo typeInfo = (!StringUtil.nullOrEmptyOrBlankString(expectedType) ?
+                                 retriever.getTypeInfo(expectedType) :
+                                 null);
+                exprRootNode.setTypeInfo(typeInfo);
+
+            }
         }
         return expr;
     }
@@ -187,7 +201,7 @@ public class AribaExprEvaluator extends ExpressionEvaluator
             SymbolTable table = TypeChecker.check(env, rootType, fieldName,
                 expectedType, containerType, exactMatch, aExpr._exprNode, errorCollector);
             aExpr.setSymbolTable(table);
-	    }
+        }
     }
 
     /**
@@ -213,7 +227,7 @@ public class AribaExprEvaluator extends ExpressionEvaluator
             TypeChecker.verifyReturnedType(env,
                 aExpr._exprNode, expectedType, containerType, exactMatch,
                 env.getErrorCollector(), skipForObjectType);
-	    }
+        }
     }
 
     private List getErrorCollector (Environment env, List errorCollector)
@@ -377,7 +391,7 @@ public class AribaExprEvaluator extends ExpressionEvaluator
          * Get all the semantic records for this path.  The semantic records
          * contain parsed information about each element in the path.  The
          * returned is ordered based on the position of the element in the
-         * path.  A path element can be a field or a method.  
+         * path.  A path element can be a field or a method.
          * @param path
          * @return list of records
          */

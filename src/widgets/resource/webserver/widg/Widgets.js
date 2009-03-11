@@ -475,7 +475,7 @@ ariba.Widgets = function() {
             evt = (evt) ? evt : event;
 
             // if a tab key caused the about box to be called, then noop
-            if (evt.type == "keydown" && Event.keyCode(evt) != 13) {
+            if (evt.type == "keydown" && Event.keyCode(evt) != Input.KeyCodeEnter) {
                 return true;
             }
 
@@ -605,14 +605,14 @@ ariba.Widgets = function() {
 
         openHintMessageKeyDown : function (element, mevent)
         {
-            if (Event.keyCode(mevent) == 13) {
+            if (Event.keyCode(mevent) == Input.KeyCodeEnter) {
                 this.openHintMessage(element);
             }
         },
 
         closeHintMessageKeyDown : function (element, mevent)
         {
-            if (Event.keyCode(mevent) == 13) {
+            if (Event.keyCode(mevent) == Input.KeyCodeEnter) {
                 this.closeHintMessage(element);
             }
         },
@@ -1260,7 +1260,7 @@ ariba.Widgets = function() {
 
         toggleFooterKeyDown : function (mevent)
         {
-            if (Event.keyCode(mevent) == 13) {
+            if (Event.keyCode(mevent) == Input.KeyCodeEnter) {
                 this.toggleFooter();
             }
         },
@@ -1324,7 +1324,7 @@ ariba.Widgets = function() {
 
 
             keypress : function (elm, evt) {
-                return (evt.keyCode == 13) ? Event.behaviors.TB.click(elm, evt) : true;
+                return (evt.keyCode == Input.KeyCodeEnter) ? Event.behaviors.TB.click(elm, evt) : true;
             }
         },
 
@@ -1338,7 +1338,7 @@ ariba.Widgets = function() {
              },
 
              keypress : function (elm, evt) {
-                 return (evt.keyCode == 13) ? Event.behaviors.TFSB.click(elm, evt) : true;
+                 return (evt.keyCode == Input.KeyCodeEnter) ? Event.behaviors.TFSB.click(elm, evt) : true;
              }
         },
 

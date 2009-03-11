@@ -2,7 +2,7 @@
     Copyright (c) 1996-2009 Ariba, Inc.
     All rights reserved. Patents pending.
     
-    $Id: //ariba/platform/util/core/ariba/util/core/SecurityHelper.java#1 $
+    $Id: //ariba/platform/util/core/ariba/util/core/SecurityHelper.java#2 $
     
     Responsible: bjegerlehner
 */

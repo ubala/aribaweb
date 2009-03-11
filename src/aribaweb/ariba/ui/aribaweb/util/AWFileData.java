@@ -12,21 +12,20 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWFileData.java#14 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWFileData.java#15 $
 */
 
 package ariba.ui.aribaweb.util;
 
-import ariba.util.core.MIME;
 import ariba.util.core.IOUtil;
-
-import javax.mail.internet.SharedInputStream;
+import ariba.util.core.MIME;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import javax.mail.internet.SharedInputStream;
 
 /**
     This object encapsulates the data from file uploads.
@@ -48,8 +47,9 @@ public final class AWFileData extends AWBaseObject implements AWDisposable
     private InputStream _inputStream;
     private final int _bytesRead;
     private final SharedInputStream _sharedInputStream;
+    private final boolean _encrypted;
 
-    public AWFileData (String filename, File file, String mimeType, boolean fileIncomplete, int bytesRead)
+    public AWFileData (String filename, File file, String mimeType, boolean fileIncomplete, int bytesRead, boolean encrypted)
     {
         super();
         _filename = filename;
@@ -59,6 +59,7 @@ public final class AWFileData extends AWBaseObject implements AWDisposable
         _file = file;
         _bytesRead = bytesRead;
         _sharedInputStream = null;
+        _encrypted = encrypted;
     }
 
     public AWFileData (String filename, byte[] data)
@@ -71,6 +72,7 @@ public final class AWFileData extends AWBaseObject implements AWDisposable
         _file = null;
         _bytesRead = data == null ? 0 : data.length;
         _sharedInputStream = null;
+        _encrypted = false;
 
     }
 
@@ -89,6 +91,7 @@ public final class AWFileData extends AWBaseObject implements AWDisposable
         _file = null;
         _bytesRead = bytesRead;
         _sharedInputStream = stream;
+        _encrypted = false;
 
     }
 
@@ -103,6 +106,7 @@ public final class AWFileData extends AWBaseObject implements AWDisposable
         _file = null;
         _bytesRead = data == null ? 0 : data.length;
         _sharedInputStream = null;
+        _encrypted = false;
 
     }
 
@@ -116,6 +120,7 @@ public final class AWFileData extends AWBaseObject implements AWDisposable
         _file = null;
         _bytesRead = data == null ? 0 : data.length;
         _sharedInputStream = null;
+        _encrypted = false;
     }
 
     public String filename ()
@@ -164,7 +169,10 @@ public final class AWFileData extends AWBaseObject implements AWDisposable
         int length = (int)file.length();
         byte[] byteArray = new byte[length];
         try {
-            FileInputStream istream = new FileInputStream(file);
+            InputStream istream = new FileInputStream(file);
+            if (_encrypted) {
+                istream = AWEncryptionProvider.getProvider().getCleartextInputStream(istream);
+            }
             istream.read(byteArray);
             istream.close();
         }
@@ -183,6 +191,9 @@ public final class AWFileData extends AWBaseObject implements AWDisposable
         else if (_file != null) {
             try {
                 _inputStream = new FileInputStream(_file);
+                if (_encrypted) {
+                    _inputStream = AWEncryptionProvider.getProvider().getCleartextInputStream(_inputStream);
+                }
             }
             catch (IOException ioe) {
                 throw new AWGenericException("Could not create stream from downloaded file: " + ioe);

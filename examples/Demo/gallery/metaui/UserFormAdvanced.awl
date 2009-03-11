@@ -66,7 +66,6 @@ Operation:
                     @layout=Projects#Form {
                         class { bindings:{ width:"100%" } }
                         zonePath:Projects;
-                        field { label:null; }
                     }
                 }
             }
@@ -74,7 +73,7 @@ Operation:
                 @action=Save#instance { actionResults:${requestContext.currentComponent.errorManager.checkErrorsAndEnableDisplay(); null} }
             }
         }
-        field=projects { class { bindings: {class:"noBox scrollTableWrapper"} } }
+        field=projects { class { bindings: {class:"noBox scrollTableWrapper"; title:null;} } }
 
         class=busobj.Project operation=list {
             zDetail => description;

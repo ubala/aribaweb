@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaDetailTable.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaDetailTable.java#5 $
 */
 package ariba.ui.meta.layouts;
 
@@ -28,7 +28,6 @@ import ariba.ui.aribaweb.core.AWRequestContext;
 public class MetaDetailTable extends AWComponent
 {
     public AWTDisplayGroup _displayGroup;
-    public String _title;
     
     public boolean isStateless()
     {

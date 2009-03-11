@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.awl#6 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.awl#7 $
     </Copyright>
 
     <Overview>
@@ -97,6 +97,13 @@
         If there are multiple AWFileUpload controls on a page, the max length for each
         AWFileUpload can be set independently.  Any AWFileUpload without this binding
         will have a maxlength based on the global setting for the system.
+    </Binding>
+
+    <Binding key="encrypt" type="boolean" direction="get" required="$false">
+        Request to not store the content unencrypted on disk. This option cannot be used with the
+        file bindig.
+
+        This option can only be selected if the AWApplication provides an encryption provider.
     </Binding>
 
 </a:Api>\

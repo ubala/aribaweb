@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#36 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#37 $
 */
 package ariba.ui.meta.core;
 
@@ -647,7 +647,7 @@ public class Context implements Extensible
                 // Todo: this isn't quite right -- a chaining assignment from a *newer frame* should
             }
 
-            Assert.that(_entries.size() <= MaxContextStackSize, "MetaUI context stack exceeded max size (%d) -- likely infinite chaining", _entries.size());
+            Assert.that(_entries.size() <= MaxContextStackSize, "MetaUI context stack exceeded max size (%s) -- likely infinite chaining", _entries.size());
             _StaticRec srec = new _StaticRec();
             srec.key = key;
             // todo: conversion

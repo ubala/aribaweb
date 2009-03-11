@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.java#34 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.java#35 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -42,7 +42,6 @@ public class AWForm extends AWComponent implements AWHtmlForm
         BindingNames.autocomplete,
         BindingNames.id, BindingNames.name, BindingNames.onKeyPress}; // deprecated?
 
-    private static final AWEncodedString AWFormCR = new AWEncodedString("return ariba.Handlers.formCR(this, event);");
     public AWEncodedString _formElementId;
     public AWEncodedString _hiddenFieldElementId;
     private AWEncodedString _frameName = AWUtil.UndefinedEncodedString;
@@ -218,11 +217,6 @@ public class AWForm extends AWComponent implements AWHtmlForm
             }
         }
         return formInputIds;
-    }
-
-    public AWEncodedString keyPressString ()
-    {
-        return hasBinding(BindingNames.action) ? AWFormCR : null;
     }
 
     public boolean isFormSender ()

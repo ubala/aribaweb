@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaPageContent.java#21 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaPageContent.java#22 $
 */
 
 package ariba.ui.widgets;
@@ -23,12 +23,10 @@ import ariba.ui.aribaweb.core.AWSession;
 
 public final class AribaPageContent extends BrandingComponent
 {
-    public static final String MessageKey = "AribaPageContentMessage";
-    public static final String StickyMessageKey = "AribaPageContentStickyMessage";
+    public static final String MessageKey = MessageBanner.MessageKey;
+    public static final String StickyMessageKey = MessageBanner.StickyMessageKey;
 
     private AWComponent _context = null;
-    private Object _oneTimeMessage = null;
-    private AWComponent _stickyMessage = null;
 
     public void awake ()
     {
@@ -45,8 +43,6 @@ public final class AribaPageContent extends BrandingComponent
     {
         super.sleep();
         _context = null;
-        _oneTimeMessage = null;
-        _stickyMessage = null;
     }
 
     public String bodyHeader ()
@@ -74,57 +70,36 @@ public final class AribaPageContent extends BrandingComponent
         return addContentMargin != null ? addContentMargin.booleanValue() : true;
     }
 
-    public void updateMessage ()
-    {
-        AWSession session = requestContext().session(false);
-        if (session != null) {
-            _oneTimeMessage = session.dict().get(MessageKey);
-            _stickyMessage = (AWComponent)session.dict().get(StickyMessageKey);
-            session.dict().remove(MessageKey);
-        }
-    }
-
-    public Object getMessage ()
-    {
-        if (_oneTimeMessage != null) {
-            return _oneTimeMessage;
-        }
-        return _stickyMessage;
-    }
-
-    public boolean isTextMessage ()
-    {
-        return (getMessage() instanceof String);
-    }
-
+    /**
+        @deprecated Use MessageBanner.setMessage instead
+    */
     public static void setMessage (Object message, AWSession session)
     {
-        setMessage(message, false, session);
+        MessageBanner.setMessage(message, false, session);
     }
 
+    /**
+        @deprecated Use MessageBanner.setMessage instead
+    */
     public static void setMessage (Object message, boolean sticky, AWSession session)
     {
-        if (sticky) {
-            session.dict().put(StickyMessageKey, message);
-        }
-        else {
-            session.dict().put(MessageKey, message);
-        }
+        MessageBanner.setMessage(message, sticky, session);
     }
 
+    /**
+        @deprecated Use MessageBanner.clearMessage instead
+    */
     public static void clearMessage (AWSession session)
     {
-        clearMessage(false, session);
+        MessageBanner.clearMessage(session);
     }
 
+    /**
+        @deprecated Use MessageBanner.clearMessage instead
+    */
     public static void clearMessage (boolean sticky, AWSession session)
     {
-        if (sticky) {
-            session.dict().remove(StickyMessageKey);
-        }
-        else {
-            session.dict().remove(MessageKey);
-        }
+        MessageBanner.clearMessage(sticky, session);
     }
 
     public boolean isNested () {

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.java#22 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.java#24 $
 */
 
 package ariba.ui.richtext;
@@ -61,6 +61,10 @@ public class RichTextArea extends AWComponent
         _areaName = AWInputId.getAWInputId(requestContext());
         _displayValue = (String)valueForBinding(BindingNames.value);
         if (_displayValue != null) {
+            /* dfinlay 3.6.09: we always filter before rendering even though we we filter
+               on setting (see setDisplayValue) becuase the text might be coming from
+               another input field that didn't filter on entry (as most of our fields don't) */
+            _displayValue = HTML.filterUnsafeHTML(_displayValue);
             _displayValue = _displayValue.replaceAll("\n", "<br/>");
         }
         super.renderResponse(requestContext, component);
@@ -68,7 +72,9 @@ public class RichTextArea extends AWComponent
 
     public void setAreaName (AWEncodedString areaName)
     {
-        if (_areaName == null) _areaName = areaName;
+        if (_areaName == null) {
+            _areaName = areaName;
+        }
     }
 
     private Object errorKey ()
@@ -94,6 +100,8 @@ public class RichTextArea extends AWComponent
         value = insertLinkTarget(value);
 
         String safeHTML = HTML.filterUnsafeHTML(value);
+        safeHTML = convertEmptyPTags(safeHTML);
+        safeHTML = HTML.filterMargins(safeHTML);
 
         if (!safeHTML.equals(value)) {
             // this results in an error message that (should)
@@ -101,10 +109,9 @@ public class RichTextArea extends AWComponent
             // will fail
             recordError();
         }
-        else {
-            // final pass only, after the submission is successful
-            safeHTML = HTML.filterMargins(safeHTML);
-        }
+        // We don't want to edit the HTML further here because we want
+        // our changes to result in a notification to the end-user so that
+        // they can verify that everything still appears correctly.
 
         setValueForBinding(safeHTML, BindingNames.value);
     }
@@ -164,6 +171,24 @@ public class RichTextArea extends AWComponent
         return string;
     }
 
+    private static final Pattern ConvertEmptyPTagPattern =
+        Pattern.compile("<p[^>]*>\\s*</p>", Pattern.MULTILINE);
+
+    /**
+     * This converts empty p tags (even with attributes) to \ns.
+     * We have this function because when you paste into the Xinha RTE from
+     * MSWord the blank lines will be represented by empty paragraphs.
+     * In our CSS we set the p.margin to 0 so empty paragraphs produce no
+     * whitespace.  This function will convert these empty paragraphs to
+     * end of line characters so that they will be displayed to the user.
+     * @param input
+     * @return
+     */
+    private String convertEmptyPTags (String input)
+    {
+        return ConvertEmptyPTagPattern.matcher(input).replaceAll("\n");
+    }
+
     private static final Pattern RemoveLinkTargetPattern =
         Pattern.compile("<a (.*?) target=\"_blank\"([^>]*)>", Pattern.MULTILINE);
     private static final Pattern InsertLinkTargetPattern =
@@ -172,7 +197,8 @@ public class RichTextArea extends AWComponent
     private String insertLinkTarget (String string)
     {
         string = RemoveLinkTargetPattern.matcher(string).replaceAll("<a $1$2>");
-        return InsertLinkTargetPattern.matcher(string).replaceAll("<a target=\"_blank\" $1>");
+        return InsertLinkTargetPattern.matcher(string).replaceAll(
+            "<a target=\"_blank\" $1>");
     }
 
     public static String convertToPlainText (String richText)
@@ -186,7 +212,10 @@ public class RichTextArea extends AWComponent
     private void recordError ()
     {
         recordValidationError(errorKey(),
-            localizedJavaString(1, "Content that you pasted into this page contained errors. The invalid text has been removed--check your entries and resubmit."), "");
+            localizedJavaString(1,
+                "Content that you pasted into this page contained errors. " +
+                "The invalid text has been removed" +
+                "--check your entries and resubmit."), "");
     }
 
 }

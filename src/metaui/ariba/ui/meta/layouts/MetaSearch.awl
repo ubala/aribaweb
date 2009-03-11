@@ -1,22 +1,5 @@
 <m:Context class="$metaContext.values.class" operation="list"
-           displayGroup="$displayGroup" dataSourceType="${displayGroup.dataSource.class.getName()}">\
-    <t:DataTable enableScrolling="$true" displayGroup="$displayGroup"
-                 awbindingsDictionary="$metaContext.properties.bindingsDictionary"
-                 singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true">
-        <m:TableColumns/>
-        <t:HeadingArea>
-            <m:SearchForm querySpecification="$querySpecification"/>
-        </t:HeadingArea>
-        <t:SelectionButtonArea>\
-            <m:Context object="$displayGroup.selectedObject" layout="SelectionButtonArea" filterActions="instance">\
-                <m:IncludeComponent/>\
-            </m:Context>\
-        </t:SelectionButtonArea>
-        <t:ButtonArea>
-            <m:Context layout="ButtonArea">
-                <m:IncludeComponent/>\
-            </m:Context>
-        </t:ButtonArea>
-    </t:DataTable>
-    <a:PhaseInvocation append='${setValueForBinding(displayGroup.selectedObject, "selectedObject")}'/>
+           dataSourceType="${displayGroup.dataSource.class.getName()}" layout="Table"
+           scopeKey="class">\
+    <m:IncludeComponent/>
 </m:Context>

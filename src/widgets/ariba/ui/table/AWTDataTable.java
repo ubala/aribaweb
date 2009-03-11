@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#187 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#188 $
 */
 
 package ariba.ui.table;
@@ -1545,7 +1545,7 @@ public final class AWTDataTable extends AWComponent
 
     public boolean showTitle ()
     {
-        return hasBinding(BindingNames.title);
+        return valueForBinding(BindingNames.title) != null;
     }
 
     public boolean showNavigationRowTop ()

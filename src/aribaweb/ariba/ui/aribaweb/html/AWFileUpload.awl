@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUpload.awl#15 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUpload.awl#16 $
     </Copyright>
 
     <Overview>
@@ -99,11 +99,18 @@
         will have a maxlength based on the global setting for the system.
     </Binding>
 
+    <Binding key="encrypt" type="boolean" direction="get" required="$false">
+        Request to not store the content unencrypted on disk. This option cannot be used with the
+        file bindig.
+
+        This option can only be selected if the AWApplication provides an encryption provider.
+    </Binding>
+    
 </a:Api>\
 <!--- Bogus conditional to deal elementId cross-phase mismatch in AWFileUploadInternals -->
 <a:If ifTrue="$true">
     <a:FileUploadInternals inputStream="$^inputStream" bytes="$^bytes" file="$^file"
         filename="$^filename" mimeType="$^mimeType" fileSizeExceeded="$^fileSizeExceeded"
-        name="$^name" newMode="$^newMode" maxLength="$^maxLength"
+        name="$^name" newMode="$^newMode" maxLength="$^maxLength" encrypt="$^encrypt"
         otherBindings="$otherBindingsValues"/>
 </a:If>

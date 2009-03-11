@@ -1,5 +1,8 @@
-<m:Context operation="$searchOperation" layout="SearchForm" object="$searchMap">
+<m:Context scopeKey="class" dataSourceType="${metaContext.displayGroup.dataSource.class.getName()}">\
+  <m:Context operation="$searchOperation">
+    <m:Context layout="SearchForm" object="$searchMap">
     <div bh="DTBS">
+        <m:IncludeComponent/>
         <div style="float:right">\
             <w:TextButton action="$search" isDefault="$true">Search</w:TextButton>\
         </div>
@@ -19,8 +22,7 @@
                 </w:PopupMenuItem>
             </w:PopupMenu>
         </div>
-        <div style="float:left">\
-            <m:IncludeComponent/>
-        </div>
     </div>
+    </m:Context>
+  </m:Context>
 </m:Context>

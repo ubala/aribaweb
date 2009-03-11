@@ -1,22 +1,6 @@
-<a:SetValue title="$metaContext.properties.label"/>
 <m:Context class="$metaContext.properties.elementType" object="$false">
     <m:Context displayGroup="$displayGroup" dataSourceType="${displayGroup.dataSource.class.getName()}" layout="DetailTable"
                operation="list" scopeKey="class">\
-        <t:DataTable enableScrolling="$true" displayGroup="$displayGroup" title="$title"
-                     singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
-                     awbindingsDictionary="$metaContext.properties.bindingsDictionary">
-            <m:TableColumns/>
-            <t:SelectionButtonArea>\
-                <m:Context object="$displayGroup.selectedObject" layout="SelectionButtonArea" filterActions="instance">\
-                    <m:IncludeComponent/>\
-                </m:Context>\
-            </t:SelectionButtonArea>
-            <t:ButtonArea>
-                <m:Context layout="ButtonArea">
-                    <m:IncludeComponent/>\
-                </m:Context>
-            </t:ButtonArea>
-        </t:DataTable>
+        <m:IncludeComponent/>
     </m:Context>
 </m:Context>
-        

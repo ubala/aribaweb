@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.awl#42 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TextButton.awl#43 $
     </Copyright>
 
     <Overview>
@@ -141,7 +141,7 @@
                 class="$buttonClassString"
                 _cl="$buttonClassString"
                 bh="$^behavior:$behaviorName"
-                _isDef="$^isDefault"
+                _isdef="$^isDefault"
                 _cnf="$confirmationId"
                 awname="$^awname" _awname="$^action"
                 disableClick="$^disableClick"
@@ -173,7 +173,7 @@
                 title="$^title"
                 bh="$behaviorName"
                 _cnf="$confirmationId"
-                _isDef="$^isDefault"                    
+                _isdef="$^isDefault"                    
                 tabIndex="$^tabIndex">\
                 <a:IncludeBlock name="wrapper">\
                     <a:IncludeContent/>\

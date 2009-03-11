@@ -35,9 +35,10 @@ class=model.Issue {
         operation=edit  { trait:bold;  }
         editable:false;
     }
+    /*
     field=lastModified#noSearch { editable:false }
     field=created#noSearch { editable:false }
-
+    */
     operation=edit field=id { after:zNone;  }
     operation=textSearch field=subject {
         editable:true!;

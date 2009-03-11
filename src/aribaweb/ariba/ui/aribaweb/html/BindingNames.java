@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/BindingNames.java#21 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/BindingNames.java#22 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -33,6 +33,7 @@ abstract public class BindingNames extends AWBindingNames
     public static final String submitFormDefault          = "submitFormDefault";
     public static final String fileSizeExceeded           = "fileSizeExceeded";
     public static final String file                       = "file";
+    public static final String encrypt                    = "encrypt";
     public static final String windowAttributes           = "windowAttributes";
     public static final String isValid                    = "isValid";
     public static final String message                    = "message";

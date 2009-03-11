@@ -212,11 +212,11 @@ field {
     @trait=derived {
         editable:false;
         editing { after:zNone; }
+    }
 
-        @trait=searchable {
-            operation=search {
-                visible:true; editable:true!; after:null!;
-            }
+    @trait=searchable {
+        operation=search {
+            visible:true; editable:true!; after:null!;
         }
     }
 
@@ -344,7 +344,7 @@ action {
     }
 
     filterActions=instance {
-    	visible:${properties.isInstanceAction}
+    	visible:${properties.isInstanceAction == true}
     }
     filterActions=static {
     	visible:${!properties.isInstanceAction}
@@ -397,7 +397,12 @@ layout {
         after:zTop;
         component:AWString;
         bindings:{escapeUnsafeHtml:true; value:"Message..."};
+    }
 
+    component=MetaForm @trait=labelsOnTop;
+
+    layout_trait=labelsOnTop class {
+        bindings:{showLabelsAboveControls:true}    
     }
 }
 
@@ -450,6 +455,22 @@ layout=SelectionButtonArea { trait:InstanceActionButtons }
 layout=LabelField field {
     visible:false;
     @trait=labelField { visible:true! }
+}
+
+layout=(Table, DetailTable) class {
+    component:MetaTable;
+    bindings: {
+        displayGroup:$displayGroup;
+        enableScrolling:true;
+        title:$properties.label;
+        singleSelect:true;
+        showSelectionColumn:false;
+        submitOnSelectionChange:true;
+    }
+}
+
+layout=DetailTable class {
+    label:$${ariba.ui.meta.core.UIMeta.defaultLabelForIdentifier(field)};
 }
 
 object class  { objectTitle:${ariba.util.fieldvalue.FieldValue.getFieldValue(object,

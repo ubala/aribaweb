@@ -1,3 +1,25 @@
+New in Version 5.0RC3 (3/2009)
+------------------------------
+
+- Form layout: support for labels above fields (instead of to the left)
+    - MetaUI layout trait 'labelsOnTop' to use this layout
+
+- MetaUI Search
+    - Support for Range search on Number and Date fields (when using database "Structured Search")
+    - Support for rendering Search Form outside of result table header
+        - Module trait "SearchInToc" to put search form in TOC (with narrow labelsOnTop rendering)
+        - Refactored MetaSearch and MetaDetailTable to create MetaTable -- more meta-controllable table setup
+
+- Build system improvements
+    - Faster builds and smaller wars: strip unneeded Xinha files from ariba.widgets.jar
+    - Fix resource packaging error when rebuilding from clean on Windows (was resulting in exceptions about
+      "bad date format", etc, due to missing resources).
+    - ariba.src-all.jar should include metaui-jpa and awreload source
+
+- Widgets fixes
+    - Keyboard nav: retain text focus upon edit to choosers and popups
+    
+
 New in Version 5.0RC2 (3/2009)
 ------------------------------
 

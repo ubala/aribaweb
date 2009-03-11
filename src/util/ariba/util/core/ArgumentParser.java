@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ArgumentParser.java#14 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ArgumentParser.java#15 $
 */
 
 package ariba.util.core;
@@ -108,21 +108,42 @@ public class ArgumentParser
         its arguments;
         (3) <code>startup</code> to run the client.
 
-
         @param className the command line client class
         @param args the command line arguments of the class. Must be non null.
         @param ignoreCase when <b>true</b> flags of differing case compare equal
+        @param context information to be passed to the command, in addition to
+            the args.
 
         @see CommandLine
         @aribaapi documented
     */
-    public static void create (String className, String[] args, boolean ignoreCase)
+    public static void create (String className, String[] args, boolean ignoreCase, Object context)
     {
             // we stash the args here, as well as in startup, because
             // sometimes an application may access them during
             // newInstance
         globalArgs = args;
-        startup(newInstance(className, args, ignoreCase));
+        CommandLine cmd = newInstance(className, args, ignoreCase);
+        if (cmd instanceof ContextCommandLine) {
+           ((ContextCommandLine)cmd).setContext(context);
+        }
+        startup(cmd);
+    }
+
+    /**
+     * Convenience method for creating a command line client without the optional context.
+     * @param className the command line client class
+     * @param args the command line arguments of the class. Must be non null.
+     * @param ignoreCase when <b>true</b> flags of differing case compare equal.
+     */
+    public static void create (String className, String[] args, boolean ignoreCase)
+    {
+    	create(className, args, ignoreCase, null);
+    }
+
+    public static void create (String className, String[] args, Object context)
+    {
+    	create(className, args, IgnoreCaseDefault, context);
     }
 
     /**
@@ -942,7 +963,7 @@ public class ArgumentParser
         setup is done.
 
         DO not use it without talking to the core server group!
- 
+
         @param name the name of the parameter
         @return the value of the parameter.
         @aribaapi ariba
@@ -989,7 +1010,7 @@ class ArgumentHandler
     boolean optional;
 
     /**
-        TypeString, TypeBoolean, TypeInteger, TypeDouble, TypeFile, TypeURL, 
+        TypeString, TypeBoolean, TypeInteger, TypeDouble, TypeFile, TypeURL,
         TypeIntegerList
     */
     int type;
@@ -1098,11 +1119,11 @@ class ArgumentHandler
       throws ParseException
     {
         List/*<Integer>*/ output = ListUtil.list();
-        List ids = ListUtil.delimitedStringToList(input, 
+        List ids = ListUtil.delimitedStringToList(input,
                 CommaSeparatedDelimiter);
         for (int i = 0; i < ids.size(); i++) {
             String id = (String)ids.get(i);
-            List ranges = ListUtil.delimitedStringToList(id, 
+            List ranges = ListUtil.delimitedStringToList(id,
                     HyphenSeparatedDelimiter);
             if (ranges.size() > 2) {
                 throw new ParseException(Fmt.S(
@@ -1135,7 +1156,7 @@ class ArgumentHandler
         String indexValue = (String)ranges.get(index);
         if (StringUtil.nullOrEmptyString(indexValue)) {
             throw new ParseException(Fmt.S(
-                        "Unrecognized value in %s at pos %s", 
+                        "Unrecognized value in %s at pos %s",
                         ranges, Constants.getInteger(index)), index);
         }
         Integer value = Constants.getInteger(IntegerFormatter.parseInt(indexValue));

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.awl#13 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormRow.awl#14 $
     </Copyright>
 
     <Overview>
@@ -86,18 +86,55 @@
 <a:If ifFalse="$^hidden">
     <a:IncludeBlock name="$rowBlockName"
                     dragAction="$^dragAction" dropAction="$^dropAction">
-        <a:If ifFalse="$^useNoLabelLayout">\
+        <a:If ifTrue="$env.showLabelsAbove">\
+            <!--- No Label Layout -->
+            <a:HighLightedErrorScope errorKey="$^errorKey"
+                                     errorValueSource="$^errorValueSource"
+                                     errorFieldPath="$^errorFieldPath"
+                                     errorGroupName="$^errorGroupName">
+                <td colspan="3" style='${dragType ? "padding-left:15px" : null}'>
+                    <a:IncludeBlock name="DragHandle" dragAction="$^dragAction"
+                                    dragHandleClickAction="$^dragHandleClickAction">\
+                        <table class="cueT" cellpadding="0">\
+                            <tr>
+                                <td class="ffl">\
+                                    <a:If notEqualNull="$^label">\
+                                        <label elementId="$elementId" for="$elementId">\
+                                            <a:String value="$^label"/>\
+                                            :\
+                                        </label>\
+                                    </a:If>\
+                                </td>\
+                                <td class="ffi" width="1px" style="white-space:nowrap">\
+                                    <w:ErrorIndicator showRequired="$^required"/>\
+                                </td>\
+                                <td class="ffi" width="1px" style="white-space:nowrap">\
+                                    <a:If notEqualNull="$^cueTip">\
+                                        <w:CueTip value="$^cueTip"/>\
+                                    </a:If>\
+                                </td>\
+                            </tr>\
+                        </table>
+                        <table class="cueT" cellpadding="0" width="100%">\
+                            <tr>
+                                <td class="ffp"><a:IncludeContent/></td>
+                            </tr>\
+                        </table>
+                    </a:IncludeBlock>\
+                </td>
+            </a:HighLightedErrorScope>
+        <a:Else ifFalse="$^useNoLabelLayout"/>\
             <td class="$labelClass" style='${dragType ? "padding-left:15px" : null}'>\
                 <a:IncludeBlock name="DragHandle" dragAction="$^dragAction"
-                                dragHandleClickAction="$^dragHandleClickAction">
-                    <a:If notEqualNull="$^label">
+                                dragHandleClickAction="$^dragHandleClickAction">\
+                    <a:If notEqualNull="$^label">\
                         <label elementId="$elementId" for="$elementId">\
                             <a:String value="$^label"/>\
                             :\
                         </label>\
                     </a:If>\
-                </a:IncludeBlock>
-            </td>
+                </a:IncludeBlock>\
+            </td>\
 
             <a:If ifTrue="$env.showErrorFlags">
                 <a:HighLightedErrorScope errorKey="$^errorKey"

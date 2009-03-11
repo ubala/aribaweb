@@ -64,8 +64,7 @@ ariba.Handlers = function() {
         actionPopupKeyDown : function (popup, mevent)
         {
             var keyCode = mevent.keyCode;
-        // accept CR or TAB keys
-            if (keyCode == 13 || keyCode == 9) {
+            if (keyCode == Input.KeyCodeEnter || keyCode == Input.KeyCodeTab) {
                 var selectedCaptured = popup.getAttribute(AWPopupSelectedCaptured);
                 if (popup.getAttribute(AWDidChangeKey) == "1" ||
                     (!Util.isNullOrUndefined(selectedCaptured) &&
@@ -74,8 +73,7 @@ ariba.Handlers = function() {
                     return this.actionPopupChanged(popup, mevent);
                 }
             }
-                // 38 == uparrow   40 == downarrow
-            else if (keyCode == 38 || keyCode == 40) {
+            else if (keyCode == Input.KeyCodeArrowUp || keyCode == Input.KeyCodeArrowDown) {
                 popup.setAttribute(AWDidChangeKey, "1");
                 popup.setAttribute(AWPopupSelectedCaptured, null);
                 this.AWActionPopupEnabled = false;
@@ -107,7 +105,8 @@ ariba.Handlers = function() {
         textRefresh : function (mevent, textField)
         {
             var keyCode = mevent.keyCode;
-            if ((keyCode == 13 && textField.nodeName != 'TEXTAREA') || keyCode == 9) {
+            if (keyCode == Input.KeyCodeShift) return true;
+            if ((keyCode == Input.KeyCodeEnter && textField.nodeName != 'TEXTAREA') || keyCode == Input.KeyCodeTab) {
                 if (textField.getAttribute(AWDidChangeKey) == "1") {
                     textField.setAttribute(AWDidChangeKey, "0");
                     return this.textFieldRefresh(textField.form.id, textField.name);
@@ -143,7 +142,7 @@ ariba.Handlers = function() {
         checkCapsLockError : function (evt)
         {
             if (AWCapsLockErrorDiv) {
-                if (evt.keyCode == 20 || evt.keyCode == 8) {
+                if (evt.keyCode == Input.KeyCodeCapsLock || evt.keyCode == Input.KeyCodeBackspace) {
                     this.hideCapsLockError();
                 }
             }
@@ -203,10 +202,7 @@ ariba.Handlers = function() {
 
         textNoSubmit : function (mevent, textField)
         {
-            if (Event.keyCode(mevent) == 13
-                    && !Dom.findParentUsingPredicate(textField, function(e) { 
-                            return e.tagName && Event.hasHandler(e, "keypress") }))
-            {
+            if (Event.keyCode(mevent) == Input.KeyCodeEnter) {
                 Event.cancelBubble(mevent);
                 return false;
             }
@@ -216,7 +212,7 @@ ariba.Handlers = function() {
         {
             mevent = mevent ? mevent : event;
             var keyCode = Event.keyCode(mevent);
-            if (keyCode == 13) {
+            if (keyCode == Input.KeyCodeEnter) {
                 var senderId = spanObject.id;
                 var formObject = Dom.findParent(spanObject, "FORM", false);
                 Dom.addFormField(formObject, Request.AWSenderIdKey, senderId);
@@ -235,7 +231,7 @@ ariba.Handlers = function() {
 
         hKeyDown : function (formName, elementId, mevent)
         {
-            if ((mevent.type == "keypress") && (Event.keyCode(mevent) != 13)) {
+            if ((mevent.type == "keypress") && (Event.keyCode(mevent) != Input.KeyCodeEnter)) {
                 return true;
             }
             return Request.submitFormForElementName(formName, elementId, mevent);
@@ -252,7 +248,7 @@ ariba.Handlers = function() {
                 AWDisableMouseClick = false;
                 return false;
             }
-            if ((mevent.type == "keypress") && (Event.keyCode(mevent) != 13)) {
+            if ((mevent.type == "keypress") && (Event.keyCode(mevent) != Input.KeyCodeEnter)) {
                 return true;
             }
             Request.gotoLink(senderId, windowName, windowAttributes, mevent);
@@ -318,16 +314,17 @@ ariba.Handlers = function() {
 
         tagOnKeyPress : function (tagObject, formId, windowName, actionName, mevent, windowAttributes)
         {
-            if (mevent.keyCode == 13) {
+            if (mevent.keyCode == Input.KeyCodeEnter) {
                 this.tagOnClick(tagObject, formId, windowName, actionName, mevent, windowAttributes);
+                ariba.Event.cancelBubble(mevent);
                 return false;
             }
             return true;
         },
 
-        formCR : function (formObject, mevent)
+        fireActionInScope : function (formObject, mevent)
         {
-            if (Event.keyCode(mevent) == 13) {
+            if (Event.keyCode(mevent) == Input.KeyCodeEnter) {
                 // restrict to only text and password field
                 var srcElement = Event.eventSourceElement(mevent);
                 var isTextField = false;
@@ -336,11 +333,15 @@ ariba.Handlers = function() {
                     srcElement.type == 'text' || srcElement.type == 'password';
                 }
                 if (isTextField) {
-                    var formAction = formObject[AWFormActionKey];
-                    Event.cancelBubble(mevent);
-                    Dom.addFormField(formObject, Request.AWSenderIdKey, formAction.value);
-                    Request.submitForm(formObject);
-                    return false;
+                    var ret = ariba.Handlers.fireDefaultActionButton(formObject, mevent);
+                    if (Event.shouldBubble(mevent)) {
+                        var formAction = formObject[AWFormActionKey];
+                        Event.cancelBubble(mevent);
+                        Dom.addFormField(formObject, Request.AWSenderIdKey, formAction.value);
+                        Request.submitForm(formObject);
+                        ret = false;
+                    }
+                    return ret;
                 }
             }
             return true;
@@ -371,7 +372,7 @@ ariba.Handlers = function() {
 
         fireDefaultActionButton : function (elm, evt)
         {
-            var actionElm = Dom.findChildUsingPredicate(elm, function (e) { return e.tagName && Dom.boolAttr(e, "_isDef", false) });
+            var actionElm = Dom.findChildUsingPredicate(elm, function (e) { return e.tagName && Dom.boolAttr(e, "_isdef", false) });
             return this.fakeClick(actionElm, evt);
         },
 
@@ -414,7 +415,7 @@ ariba.Handlers = function() {
 
         keypress : function (elm, evt) {
             if (Dom.boolAttr(elm, "_dC", false)) return true;
-            return (evt.keyCode == 13) ? GAT.click(elm, evt) : true;
+            return (evt.keyCode == Input.KeyCodeEnter) ? GAT.click(elm, evt) : true;
         }
     };
 
@@ -452,11 +453,10 @@ ariba.Handlers = function() {
             }
         },
 
-        // Default TextButton Scope
-        DTBS : {
-            keypress : function (elm, evt) {
-                var target = (evt.srcElement) ? evt.srcElement : evt.target;
-                return (evt.keyCode == 13 && target.tagName != "TEXTAREA") ? ariba.Handlers.fireDefaultActionButton(elm, evt) : true;
+        // Action Scope
+        AS : {
+            keydown : function (elm, evt) {
+                Handlers.fireActionInScope(elm, evt);
             }
         },
 
