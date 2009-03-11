@@ -401,7 +401,7 @@
     <condition property="src.resource.pattern" value="resource/**/*">
         <equals arg1="${src.resource.path}" arg2=""/>
     </condition>
-    <property name="src.resource.pattern" value="resource/**/*"/>
+    <property name="src.resource.pattern" value="${src.resource.path}/resource/**/*"/>
 
     <fileset id="jar.resources" dir="${basedir}" excludes="build/">
         <patternset refid="jar.resource.patterns"/>
