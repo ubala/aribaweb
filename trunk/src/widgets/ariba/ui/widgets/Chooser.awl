@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#23 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#24 $
     </Copyright>
 
     <Overview>
@@ -93,13 +93,13 @@
                                      size="$^size"/>
                     </td>
                     <td class="chWrapRight">
-                        <a href="javascript:void(0);" omitTags="$isDisabled" tabindex="-1">
+                        <a href="javascript:void(0);" omitTags="$isDisabled" tabindex="-1">\
                             <a:Image class="chModeLink" filename="pull_down.gif" title="$[a002]Select from the list"
-                                     awname="$chooserDropDownSemanticKey"/>                                    
-                        </a>
-                        <a:Image class="chPickListImg hide" filename="pull_down.gif" title="$[a002]Select from the list"/>
-                        <a:Image class="chSearchImg hide" filename="search.gif" title="$[a001]Search for more"/>
-                    </td>
+                                     awname="$chooserDropDownSemanticKey"/>\
+                        </a>\
+                        <a:Image class="chPickListImg hide" filename="pull_down.gif" title="$[a002]Select from the list"/>\
+                        <a:Image class="chSearchImg hide" filename="search.gif" title="$[a001]Search for more"/>\
+                    </td>\
                     <a:If ifTrue="$chooserState.multiSelect">
                         <td>
                             <a href="javascript:void(0);" omitTags="$isDisabled" tabindex="-1">
@@ -133,23 +133,23 @@
                             <span class="chSelectionContainer">\
                                 <a:Checkbox class="chRemove hide" value="$removeValue"/>\
                                 <a:Hyperlink action="$null" omitTags="$isDisabled" tabindex="-1" submitForm="$true" behavior="CHR">\
-                                    <a:Image class="chRemoveLink" filename="remove_off.gif" awname="$chooserRemoveLinkSemanticKey"/>
-                                    <a:Image class="chRemoveOffImg hide" filename="remove_off.gif"/>
-                                    <a:Image class="chRemoveOnImg hide" filename="remove_on.gif" title="$[a004]Remove selection"/>
-                                </a:Hyperlink>
-                            </span>
+                                    <a:Image class="chRemoveLink" filename="remove_off.gif" awname="$chooserRemoveLinkSemanticKey"/>\
+                                    <a:Image class="chRemoveOffImg hide" filename="remove_off.gif"/>\
+                                    <a:Image class="chRemoveOnImg hide" filename="remove_on.gif" title="$[a004]Remove selection"/>\
+                                </a:Hyperlink>\
+                            </span>\
                         </td>
                     </tr>
                     </a:For>\
                     <a:If ifTrue="$showMoreSelected">
                         <tr class="chMoreSelectedRow">
-                            <td>
-                                <a:Hyperlink action="$searchAction">
+                            <td>\
+                                <a:Hyperlink action="$searchAction">\
                                     <span class="chMoreSelected">$moreSelectedString</span>\
                                     <span class="chMoreSelectedPlusOne" style="display:none">$moreSelectedStringPlusOne</span>\
                                     <span class="chMoreSelectedPlusTwo" style="display:none">$moreSelectedStringPlusTwo</span>\
-                                </a:Hyperlink>
-                            </td>
+                                </a:Hyperlink>\
+                            </td>\
                         </tr>
                     </a:If>
                 </a:If>

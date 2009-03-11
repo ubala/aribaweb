@@ -35,7 +35,7 @@
     <property name="src.dist.zip" location="${dist.dir}/aribaweb-src-${version}.zip"/>
 
     <!-- J A R                                                              -->
-    <target name="jars" description="Packages the JAR file">
+    <target name="jars" description="Packages the JAR file" depends="init">
         <module-crawl target="jar"/>
     </target>
 
@@ -45,6 +45,19 @@
 
     <target name="wars" depends="jars">
         <module-crawl target="war"/>
+    </target>
+
+    <target name="samples-check1" unless="all.samples">
+        <fileset id="src.samples" dir="${src.samples.dir}" includes="**/build.xml" excludes="**/AtIssue/build.xml,**/GuestBook/build.xml"/>
+        <fileset id="src.ui.samples" dir="${src.ui.dir}" includes="*/examples/*/build.xml" excludes="**/AtIssue/build.xml,**/GuestBook/build.xml" erroronmissingdir="false"/>
+    </target>
+
+    <target name="samples-check2" if="all.samples">
+        <fileset id="src.samples" dir="${src.samples.dir}" includes="**/build.xml"/>
+        <fileset id="src.ui.samples" dir="${src.ui.dir}" includes="*/examples/*/build.xml"/>
+    </target>
+
+    <target name="init" depends="common.init, samples-check1, samples-check2">
     </target>
 
     <target name="clean"
@@ -296,6 +309,8 @@
             <zipfileset dir="${src.ui.dir}/aribaweb"><patternset refid="src.jar.patterns"/></zipfileset>
             <zipfileset dir="${src.ui.dir}/widgets"><patternset refid="src.jar.patterns"/></zipfileset>
             <zipfileset dir="${src.ui.dir}/metaui"><patternset refid="src.jar.patterns"/></zipfileset>
+            <zipfileset dir="${src.ui.dir}/metaui-jpa"><patternset refid="src.jar.patterns"/></zipfileset>
+            <zipfileset dir="${src.ui.dir}/awreload"><patternset refid="src.jar.patterns"/></zipfileset>
         </zip>
     </target>
 
@@ -409,8 +424,8 @@
                 <fileset dir="${src.dir}" includes="build.xml" erroronmissingdir="false"/>
                 <fileset dir="${src.ui.dir}" includes="metaui-jpa/examples/appcore/build.xml" erroronmissingdir="true"/>
                 <fileset dir="${src.samples.dir}" includes="**/appcore/build.xml"/>
-                <fileset dir="${src.samples.dir}" includes="**/build.xml" excludes="**/AtIssue/build.xml,**/GuestBook/build.xml"/>
-                <fileset dir="${src.ui.dir}" includes="*/examples/*/build.xml" excludes="**/AtIssue/build.xml,**/GuestBook/build.xml" erroronmissingdir="false"/>
+                <fileset refid="src.samples"/>
+                <fileset refid="src.ui.samples"/>
             </subant>
         </sequential>
     </macrodef>

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PulldownButton.awl#14 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PulldownButton.awl#15 $
     </Copyright>
 
     <Overview>
@@ -66,7 +66,7 @@
     
 </a:Api>\
 
-<w:PopupMenuLink tagName="span" menuId="$^menuId" class="" actionSetup="$^actionSetup" position="this">\
+<w:PopupMenuLink tagName="div" style="display:inline" menuId="$^menuId" class="" actionSetup="$^actionSetup" position="this">\
     <w:TextButton disableClick="$true"
                 style="$^style"
                 buttonClass="$^buttonClass"

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormTable.awl#17 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormTable.awl#18 $
     </Copyright>
 
     <Overview>
@@ -53,6 +53,10 @@
         Should omit the minimum label padding used to create alignment across forms
     </Binding>
 
+    <Binding key="showLabelsAboveControls" direction="get" type="boolean" default="$false">
+        Render labels over the controls (instead of to the left)
+    </Binding>
+
     <NamedContent name="top" required="$false">
         top zone rows (assuming useFourZones=true)
     </NamedContent>
@@ -70,13 +74,14 @@
     </NamedContent>
 
 </a:Api>\
-<span class="ftRO" omitTags="$^editable:$true">\
+<span class="$ftClass" emitTags="$ftClass">\
 <a:If ifTrue="$^useFourZones">\
     <a:If ifTrue="$hasTop">
         <a:RefreshRegion tagName="table" class="ftL " isScope="$true" omitTags="$omitOuterTable"
                          border="0" cellspacing="0" cellpadding="0" width="$^width:100%">
             <tr _ifFalse="$omitPaddingRow"><td class="fflS"></td><td class="ffiS"></td><td class="ffpS"></td></tr>
-            <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags" inFormTable="$true">
+            <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags"
+                           showLabelsAbove="$^showLabelsAboveControls" inFormTable="$true">
                 <a:IncludeContent name="top" required="$false"/>\
             </a:Environment>
         </a:RefreshRegion>
@@ -85,7 +90,8 @@
     <a:If ifTrue="$hasLR">\
         <a:RefreshRegion tagName="table" isScope="$true" omitTags="$omitOuterTable"
                          border="0" cellspacing="0" cellpadding="0" width="$^width">
-            <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags" inFormTable="$true">
+            <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags"
+                           showLabelsAbove="$^showLabelsAboveControls" inFormTable="$true">
                 <a:RefreshRegion tagName="tr">
                     <td valign="top">\
                         <a:If ifTrue="$hasLeft">
@@ -113,7 +119,8 @@
         <a:RefreshRegion tagName="table" class="ftL" isScope="$true" omitTags="$omitOuterTable"
                          border="0" cellspacing="0" cellpadding="0" width="$^width:100%">
             <tr _ifFalse="$omitPaddingRow"><td class="fflS"></td><td class="ffiS"></td><td class="ffpS"></td></tr>
-            <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags" inFormTable="$true">
+            <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags"
+                           showLabelsAbove="$^showLabelsAboveControls" inFormTable="$true">
                 <a:IncludeContent name="bottom" required="$false"/>\
             </a:Environment>
         </a:RefreshRegion>
@@ -122,7 +129,8 @@
     <a:RefreshRegion tagName="table" class="ftL" isScope="$true" omitTags="$omitOuterTable"
                      border="0" cellspacing="0" cellpadding="0" width="$^width">
         <tr _ifFalse="$omitPaddingRow"><td class="fflS"></td><td class="ffiS"></td><td class="ffpS"></td></tr>
-        <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags" inFormTable="$true">
+        <a:Environment formRowTrailingColspan="$null" showErrorFlags="$^showErrorFlags"
+                       showLabelsAbove="$^showLabelsAboveControls" inFormTable="$true">
             <a:IncludeContent/>
         </a:Environment>
     </a:RefreshRegion>

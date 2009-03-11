@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#25 $
+    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#26 $
 */
 
 package ariba.util.core;
@@ -569,7 +569,9 @@ public class HTML
                 dq1Index <= eqIndex || dq1Index >= to ||
                 dq2Index <= dq1Index || dq2Index >= to) {
                 // cannot find the definition of an attribute
-                throw new HTMLSyntaxException(Fmt.S("HTML.escapeUnsafe: Unmatched quotes found in %s", buf.substring(from, to)));
+                throw new HTMLSyntaxException(
+                    Fmt.S("HTML.escapeUnsafe: Unmatched quotes found in %s",
+                        buf.substring(from, to)));
             }
             String attr = buf.substring(p, eqIndex).trim();
             String value = (isQuoted ?
@@ -577,7 +579,9 @@ public class HTML
                             buf.substring(dq1Index, dq2Index+1).toLowerCase());
             // check if the value contains any unsafe string
             if (!isSafeAttributeValue(value)) {
-                throw new HTMLSyntaxException(Fmt.S("HTML.escapeUnsafe: Attribute %s=%s is not safe.", attr, value));
+                throw new HTMLSyntaxException(
+                    Fmt.S("HTML.escapeUnsafe: Attribute %s=%s is not safe.",
+                        attr, value));
             }
             boolean isSafe = false;
             for (int j = 0; j < safeAttrs.length; ++j) {
@@ -596,7 +600,9 @@ public class HTML
                 }
             }
             if (!isSafe) {
-                throw new HTMLSyntaxException(Fmt.S("HTML.escapeUnsafe: Unsafe attribute %s found.", attr));
+                throw new HTMLSyntaxException(
+                    Fmt.S("HTML.escapeUnsafe: Unsafe attribute %s found.",
+                        attr));
             }
         }
         return to;
@@ -680,7 +686,8 @@ public class HTML
             if (safeConfigDefined) {
                 return escapeUnsafe(new FastStringBuffer(str));
             }
-        } catch(HTMLSyntaxException hse) {
+        }
+        catch(HTMLSyntaxException hse) {
             Log.util.debug("HTML.escapeUnsafe: Exception in parsing HTML: %s ", hse.getMessage());
         }
         // do a full escape if unsafe escape failed or safe config undefined
@@ -709,18 +716,22 @@ public class HTML
                 try {
                     // a tag is detected
                     int offset = i + 1;
-                    boolean closingTag = offset < bufferLength && '/' == buf.charAt(offset);
+                    boolean closingTag =
+                        offset < bufferLength && '/' == buf.charAt(offset);
                     if (closingTag) {
                         ++offset;
                     }
                     // find the close bracket
                     int close = buf.indexOf(">", offset);
                     if (close == -1) {
-                        throw new HTMLSyntaxException("HTML.escapeUnsafe: Missing '>'.");
+                        throw new HTMLSyntaxException(
+                            "HTML.escapeUnsafe: Missing '>'.");
                     }
                     int nextOpen = buf.indexOf("<", offset);
                     if (nextOpen > 0 && nextOpen < close) {
-                        throw new HTMLSyntaxException("HTML.escapeUnsafe: Found '<' between '<' and '>'.");
+                        throw new HTMLSyntaxException(
+                            "HTML.escapeUnsafe: Found '<' " +
+                            "between '<' and '>'.");
                     }
                     // find the end index of the tag
                     int tagEndsAt = findTagEndIndex(buf, offset, close);
@@ -738,11 +749,15 @@ public class HTML
                     boolean selfClosed = buf.charAt(close-1) == '/';
                     if (closingTag) {
                         // if the tag is a closing, it must match the last open tag
-                        if (tags.size() == 0 || !tag.equalsIgnoreCase(tags.get(tags.size()-1).toString())) {
-                             throw new HTMLSyntaxException(Fmt.S("Tag %s closed but not currently open.", tag));
+                        if (tags.isEmpty() ||
+                            !tag.equalsIgnoreCase(
+                                tags.get(tags.size()-1).toString())) {
+                             throw new HTMLSyntaxException(
+                                 Fmt.S("Tag %s closed but not currently open.",
+                                     tag));
                         }
                         tags.remove(tags.size()-1);
-                     }
+                    }
                     // check if the tag is safe
                     for (int j = 0; j < safeTags.length; ++j) {
                         if (tag.equalsIgnoreCase(safeTags[j])) {
@@ -761,7 +776,8 @@ public class HTML
                             break;
                         }
                     }
-                } catch (HTMLSyntaxException hse) {
+                }
+                catch (HTMLSyntaxException hse) {
                     Log.util.debug("HTML.escapeUnsafe: Exception in parsing HTML: %s ", hse.getMessage());
                 }
             }
@@ -803,7 +819,7 @@ public class HTML
             }
         }
         // Force closing open safe tags
-        if (tags.size() > 0) {
+        if (!tags.isEmpty()) {
             Log.util.debug("HTML.escapeUnsafe: Force closing of unclosed tags:%s", tags);
             for (int n = tags.size()-1; n >= 0; --n) {
                 String tag = (String)tags.get(n);
@@ -833,7 +849,9 @@ public class HTML
     private static final String safeTagBegin = "&STB;", stb = safeTagBegin;
     private static final String safeTagEnd = "&STE;", ste = safeTagEnd;
     private static final Pattern _slashEndOfTagPattern = Pattern.compile("^/\\s*>");
-    private static final ThreadLocal<Matcher> _slashEndOfTagMatchers = new ThreadLocal<Matcher>() {
+    private static final ThreadLocal<Matcher> _slashEndOfTagMatchers =
+        new ThreadLocal<Matcher>()
+    {
         protected Matcher initialValue ()
         {
             return _slashEndOfTagPattern.matcher("");
@@ -847,11 +865,11 @@ public class HTML
         then, if the next substring isn't the end of a tag, fail.
         The following forms won't match and cause entire regex to fail:
         href=content<nextTag>
-        href= "more content" !!sf!
+        href= "more content" &stb;
         These will match and allow the entire match to succeed:
         attribute="value">
-        attribute = "value" attribute2=value!sf!!
-        attribute=HeavyEmphasis!!!!!!!!!!!!!!!!!!!sf!!
+        attribute = "value" attribute2=value&ste;
+        attribute=HeavyEmphasis!!!!!!!!!!!!!!!!!!&ste;
 
         Before reading the pattern below, remember that:
         ?= is lookahead and match (note that lookaheads don't capture)
@@ -861,13 +879,13 @@ public class HTML
         The idiom (?:(?!regex).)* means match until regex.
         It is similar to [^chars] but much less intuitive.
     */
-    private static final String regexIsInTag =
+    private static final String endOfTagRegex =
         "(?=(?:(?![<>]|"+stb+"|"+ste+").)*(?:>|"+ste+"))";
 
     /**
         This string holds a regex that will match a HTML string literal.
         It takes into account quoted and unquoted values.
-        See {@link #regexIsInTag} for regex documentation.
+        See {@link #endOfTagRegex} for regex documentation.
      */
     private static final String stringLiteral =
         // This part matches a quoted string literal
@@ -876,8 +894,8 @@ public class HTML
         // The following forms won't match:
         // href = stuff
         // href =/>
-        // href =!!sf!
-        // href =!sf!!
+        // href =&stb;
+        // href =&ste;
         // It will allow matches to:
         // href =stuff
         "(?:(?![\\s<>]|/\\s*>|"+stb+"|"+ste+").)*)";
@@ -890,9 +908,6 @@ public class HTML
     {
         // specially escape some equal signs(=)
         str = encodeEqualsInStringLiteral(str);
-
-        // create shorthand aliases
-        final String stb = safeTagBegin, ste = safeTagEnd;
 
         // prevent safe tags from being stripped
         for (String safeTag : safeTags) {
@@ -913,7 +928,7 @@ public class HTML
         // invalidate unsafe substrings in HTML attribute values
         for (String unsafeAttrVal : unsafeAttrValues) {
             String unsafeAttrValPattern =
-                Fmt.S("(?i)(%s:)" + regexIsInTag, unsafeAttrVal);
+                Fmt.S("(?i)(%s:)" + endOfTagRegex, unsafeAttrVal);
             safeHTML = safeHTML.replaceAll(unsafeAttrValPattern, "x$1");
         }
 
@@ -921,6 +936,8 @@ public class HTML
         safeHTML = safeHTML.replaceAll(stb+"((?:(?!"+ste+").)*)"+ste, "<$1>");
         safeHTML = safeHTML.replaceAll("@sf@(.*?)@sf@(.*?)@sf@", "$1=$2");
         safeHTML = unencodeEqualsInStringLiteral(safeHTML);
+        safeHTML = safeHTML.trim();
+        safeHTML = safeHTML.replaceAll(" class=\"MsoNormal\"", "");
         return safeHTML;
     }
 
@@ -948,7 +965,7 @@ public class HTML
         regex += "|(?:<\\s*/?\\s*[^\\s>]++[^>]*>)";
         // remove all remaining attributes
         //                 theAttr=
-        regex += "|(?:\\s+[^\\s=]+\\s*=" + stringLiteral + regexIsInTag + ")";
+        regex += "|(?:\\s+[^\\s=]+\\s*=" + stringLiteral + endOfTagRegex + ")";
         return Pattern.compile(regex, Pattern.DOTALL);
     }
 
@@ -960,7 +977,7 @@ public class HTML
         return Pattern.compile(
             // This first bit matches the initial tag and quoted attributes.
             //        href    =     "stuff"
-            Fmt.S("\\s(%s)\\s*=(" + stringLiteral + ")" + regexIsInTag, safeAttr));
+            Fmt.S("\\s(%s)\\s*=(" + stringLiteral + ")" + endOfTagRegex, safeAttr));
     }
 
     /**
@@ -999,7 +1016,7 @@ public class HTML
                 // white space, > or /> end the raw string literal
                 inRawStringLiteral = false;
             }
-            else if (c == '/'){
+            else if (c == '/') {
                 Matcher matcher = _slashEndOfTagMatchers.get();
                 matcher.reset(str);
                 if (matcher.find(i)) {
@@ -1049,7 +1066,7 @@ public class HTML
 
         // This part matches the margin property.
         //                 margin-left  :0 3px 10 em ;
-        String regex = "(?>margin[^<:]*+:[^\\\";<>]++);?+" + regexIsInTag;
+        String regex = "(?>margin[^<:]*+:[^\\\";<>]++);?+" + endOfTagRegex;
         return Pattern.compile(regex, Pattern.DOTALL);
     }
 
@@ -1066,6 +1083,31 @@ public class HTML
             }
         }
         return true;
+    }
+
+    private static final Pattern linksWithoutTargetsPattern =
+        createLinksWithoutTargetsPattern();
+
+    public static String linksOpenInNewWindow (String html)
+    {
+        String str = "<a$1 target=\"_blank\"$2";
+        return linksWithoutTargetsPattern.matcher(html).replaceAll(str);
+    }
+
+    private static Pattern createLinksWithoutTargetsPattern ()
+    {
+        String regex;
+        /* basic form
+            regex = "<a[^>]*>";
+            fail on target=
+            regex = "<a((?:(?!target).)*)"+regexIsInTag;
+        */
+        // unless it's in a value
+        String attributeValuePairRegex = "\\s*(?:(?!(?:target|[<>=])).)*\\s*="
+            + stringLiteral;
+        String avpr = attributeValuePairRegex;
+        regex = "<a((?:"+avpr+")*)\\s*(/?\\s*>)";
+        return Pattern.compile(regex, Pattern.DOTALL);
     }
 
 

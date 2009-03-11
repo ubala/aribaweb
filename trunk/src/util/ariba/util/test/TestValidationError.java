@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationError.java#3 $
+    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationError.java#4 $
     Responsible: jimh
 */
 package ariba.util.test;
@@ -53,6 +53,9 @@ public class TestValidationError {
     public String getOldValue ()
     {
         if (_oldValue != null) {
+            if (_oldValue.getValue() == null) {
+                return "null";
+            }
             return _oldValue.getValue().toString();
         }
         return "MISSING PARAMETER*";
@@ -61,6 +64,9 @@ public class TestValidationError {
     public String getNewValue ()
     {
         if (_newValue != null) {
+            if (_newValue.getValue() == null) {
+                return "null";
+            }
             return _newValue.getValue().toString();
         }
         return "MISSING PARAMETER";

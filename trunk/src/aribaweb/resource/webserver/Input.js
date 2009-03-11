@@ -42,6 +42,15 @@ ariba.Input = function() {
         AWWaitMillis : 20000,
         AWAutomationTestModeEnabled : false,
 
+        KeyCodeBackspace : 8,
+        KeyCodeTab       : 9,
+        KeyCodeEnter     : 13,
+        KeyCodeShift     : 16,
+        KeyCodeCapsLock  : 20,
+        KeyCodeEscape    : 27,
+        KeyCodeArrowUp   : 38,
+        KeyCodeArrowDown : 40,
+
         keyDownEvtHandler : function (evt)
         {
             var sourceElm = Event.eventSourceElement(evt);
@@ -232,9 +241,9 @@ ariba.Input = function() {
 
         registerCoverDiv : function (div) {
             AWCoverDiv = div;
-            AWPrevFocusId = Dom.getActiveElementId();
-            if (AWPrevFocusId) {
-                Debug.log("reg cover div " + AWPrevFocusId);
+            if (AWActiveElementId) {
+                Debug.log("reg cover div " + AWActiveElementId);
+                AWPrevFocusId = AWActiveElementId;
                 var prevFocusElement = Dom.getElementById(AWPrevFocusId);
                 if (prevFocusElement && prevFocusElement.blur) {
                     prevFocusElement.blur(); // release main window focus                    
@@ -289,9 +298,10 @@ ariba.Input = function() {
             return true;
         },
 
+        // call before Dom update to save current active element
         registerActiveElementId : function (elementId) {
-            Debug.log("registerActiveElementId: " + elementId);
             AWActiveElementId = elementId ? elementId : Dom.getActiveElementId();
+            Debug.log("registerActiveElementId: " + AWActiveElementId);
         },
 
         // focus on control when page load complete
@@ -304,29 +314,27 @@ ariba.Input = function() {
         },
 
         focusOnActiveElement : function () {
-            var elementFocused = false;
             if (AWActiveElementId) {
                 try {
                     var activeElement = Dom.getElementById(AWActiveElementId);
                     if (Dom.elementInDom(activeElement) &&
                         !this.modallyDisabled(activeElement)) {
                         Debug.log("Focusing on element id: " + AWActiveElementId);
-                        if (activeElement.focus) {
-                            activeElement.focus();
-                            activeElement.focus();
-                        }
-                        elementFocused = true;
+                        var activeElementId = AWActiveElementId;
                         function checkFocus () {
+                            // no active element, refocus
                             if (!Dom.getActiveElementId()) {
-                                Debug.log("Refocusing on element id: " + AWActiveElementId);
+                                Debug.log("Refocusing on element id: " + activeElementId);
                                 if (activeElement.focus) {
                                     activeElement.focus();
                                     activeElement.focus();
                                 }
                             }
                         }
-                        if (Dom.IsIE) {
-                            setTimeout(checkFocus, 0);
+                        setTimeout(checkFocus, 1000);
+                        if (activeElement.focus) {
+                            activeElement.focus();
+                            activeElement.focus();
                         }
                     }
                 }
@@ -337,7 +345,7 @@ ariba.Input = function() {
                     AWActiveElementId = null;
                 }
             }
-            if (!elementFocused && AWAllowSelectFirstText) {
+            if (!Dom.getActiveElementId() && AWAllowSelectFirstText) {
                 AWAllowSelectFirstText = false;
                 Debug.log("Focusing on first text: ");
                 this.selectFirstText();

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#34 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#35 $
 */
 package ariba.ui.meta.core;
 
@@ -202,8 +202,7 @@ public class Meta
                 if ((dataMask & declMask) != 0) declKey = (String)p._value;
 
             } else {
-                // Anti mask applies only to decls
-                if (declKey != null) antiMask |= dataMask;
+                antiMask |= dataMask;
             }
         }
 

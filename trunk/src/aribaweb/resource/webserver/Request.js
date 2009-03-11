@@ -682,7 +682,6 @@ ariba.Request = function() {
         prepareRedirectRequest : function ()
         {
             this.refreshRequestComplete();
-            AWRequestInProgress = false;
             AWPollEnabled = false;
         },
 

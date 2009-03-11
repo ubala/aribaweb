@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/PropertyValue.java#6 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/PropertyValue.java#7 $
 */
 package ariba.ui.meta.core;
 
@@ -27,6 +27,11 @@ public class PropertyValue
     public interface Dynamic
     {
         public Object evaluate (Context context);
+    }
+
+    public interface DynamicSettable
+    {
+        public void evaluateSet (Context context, Object value);
     }
 
     // "marker" interface for DynamicPropertyValues that depend only on their
@@ -97,7 +102,7 @@ public class PropertyValue
         }
     }
 
-    static class ContextFieldPath extends FieldPath implements Dynamic
+    static class ContextFieldPath extends FieldPath implements Dynamic, DynamicSettable
     {
         public ContextFieldPath (String path)
         {
@@ -107,6 +112,11 @@ public class PropertyValue
         public Object evaluate(Context context)
         {
             return getFieldValue(context);
+        }
+
+        public void evaluateSet (Context context, Object value)
+        {
+            setFieldValue(context, value);
         }
     }
 

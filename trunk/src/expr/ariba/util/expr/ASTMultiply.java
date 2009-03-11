@@ -53,7 +53,7 @@ class ASTMultiply extends ExpressionNode
     protected Object getValueBody( ExprContext context, Object source ) throws ExprException
     {
         Object result = children[0].getValue( context, source );
-        TypeInfo resultInfo = children[0].getTypeInfo();
+        TypeInfo resultInfo = getTypeInfo();
         String resultType = resultInfo != null? resultInfo.getName(): null; 
         for ( int i=1; i < children.length; ++i ) {
         	TypeInfo info = children[i].getTypeInfo();

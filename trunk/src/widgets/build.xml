@@ -40,17 +40,21 @@
     <property name="xinha.base.dir" location="${src.dir}"/>
 
     <!-- Docroot -->
-    <target name="copy-docroot-resources" depends="common.copy-docroot-resources">
+    <target name="copy-docroot-resources">
         <copy todir="${build.classes.dir}/docroot">
-            <fileset dir="${src.dir}" includes="ariba/**/*.gif"/>
+            <fileset dir="${src.dir}" includes="ariba/**/*.gif" 
+	                                  excludes="ariba/ui/richtext/xinha/"/>
         </copy>
         <copy todir="${build.classes.dir}/docroot">
+			<!--- The full Xinha distribution is HUGE (> 9000 files) so we cherry pick -->
             <fileset dir="${xinha.base.dir}">
-                <include name="ariba/ui/richtext/*.gif"/>
-                <include name="ariba/ui/richtext/*.js"/>
-                <include name="ariba/ui/richtext/*.css"/>
-                <include name="ariba/ui/richtext/*.html"/>
-                <include name="ariba/ui/richtext/xinha/**/*"/>
+                <include name="ariba/ui/richtext/xinha/*.js"/>
+                <include name="ariba/ui/richtext/xinha/*.css"/>
+                <include name="ariba/ui/richtext/xinha/modules/"/>
+                <include name="ariba/ui/richtext/xinha/lang/"/>
+                <include name="ariba/ui/richtext/xinha/skins/ariba/"/>
+                <include name="ariba/ui/richtext/xinha/images/"/>
+                <include name="ariba/ui/richtext/xinha/popups/blank.html"/>
             </fileset>
         </copy>
         <copy todir="${build.classes.dir}/docroot/ariba/ui">

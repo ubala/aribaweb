@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#26 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#27 $
 */
 
 package ariba.util.core;
@@ -307,6 +307,7 @@ public class PerformanceState
 
         protected String realm;
         protected String sessionID;
+        protected String ipAddress;
         protected String user;
         protected String sourcePage;
         protected String sourceArea;
@@ -372,6 +373,16 @@ public class PerformanceState
         public void setSessionID (String sessionID)
         {
             this.sessionID = sessionID;
+        }
+
+        public String getIPAddress ()
+        {
+            return ipAddress;
+        }
+
+        public void setIPAddress (String ipAddress)
+        {
+            this.ipAddress = ipAddress;
         }
 
         public String getUser ()
@@ -542,6 +553,9 @@ public class PerformanceState
             if (sessionID != null) {
                 m.put("sessionID", sessionID);
             }
+            if (ipAddress != null) {
+                m.put("ipAddress", ipAddress);
+            }
             if (appInfo != null) {
                 m.put("appInfo", appInfo);
             }
@@ -629,7 +643,7 @@ public class PerformanceState
 
         buf.append(stats.getRealm()); buf.append(sep);
         buf.append(PerformanceState.getNodeName()); buf.append(sep);
-        buf.append(stats.getSessionID()); buf.append(sep);
+        buf.append(stats.getSessionID()); buf.append(":"); buf.append(stats.getIPAddress()); buf.append(sep);
         buf.append(stats.getUser()); buf.append(sep);
         buf.append(stats.getSourcePage());buf.append(sep);
         buf.append(stats.getSourceArea());buf.append(sep);

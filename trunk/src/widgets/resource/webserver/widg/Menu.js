@@ -12,7 +12,8 @@ ariba.Menu = function() {
     var Refresh = ariba.Refresh;
     var Widgets = ariba.Widgets;
     var Dom = ariba.Dom;
-    
+    var Input = ariba.Input;
+
     // private vars
 
     // var AWMenuLinkSenderIdKey = 'awmls';
@@ -22,6 +23,7 @@ ariba.Menu = function() {
         // Public / Protected Globals
         AWActiveMenu : null,
         AWLinkId : null,
+        AWActiveItemId : null,
         AWMenuOffset : 15,
 
 
@@ -43,51 +45,84 @@ ariba.Menu = function() {
         {
             if (this.AWActiveMenu != null && Dom.elementInDom(this.AWActiveMenu)) {
                 Event.disableDocumentClick();
-                var menuLinks = this.menuLinks(this.AWActiveMenu.id);
-                for (var i = 0; i < menuLinks.length; i++) {
-                    this.cellMouseOut(menuLinks[i]);
-                }
                 Refresh.undisplayDiv(this.AWActiveMenu);
             }
             this.AWActiveMenu = null;
+            this.AWActiveItemId = null;
         },
-        /*
-            Called when the user types a key on the popup menu link
-        */
 
+        menuItemClicked : function (elm, evt)
+        {
+            var formId = Dom.boolAttr(elm, "_sf", true) ? Dom.lookupFormId(elm) : null;
+            Menu.handleClientTrigger(elm, evt);
+            if (Event.shouldBubble(evt)) {
+                return Menu.menuClicked(elm, elm.id, formId);
+            }
+            return false;
+        },
+
+        /*
+                Called when the user types a key on the popup menu link
+        */
         menuLinkOnKeyDown : function (positioningObject, menuName, linkId, mevent)
         {
-            if (Event.keyCode(mevent) == 13) {
-                this.menuLinkOnClick(positioningObject, menuName, linkId, mevent);
-                var firstMenuLink = this.firstMenuLink(menuName);
-                if (firstMenuLink != null) {
-                    firstMenuLink.focus();
-                }
+            var keyCode = Event.keyCode(mevent);
+            var menu = Dom.getElementById(menuName);
+
+            if (this.AWActiveMenu && this.AWLinkId == linkId) {
+                // forward key down to menu item
+                return Menu.menuKeyDown(mevent);
+            }
+            else if (keyCode == Input.KeyCodeEnter || keyCode == Input.KeyCodeArrowDown) {
+                this.menuLinkOnClick(positioningObject, menuName, linkId, mevent, true);
                 return false;
             }
             return true;
         },
 
-        menuLinks : function (menuName)
+        getActiveItem : function ()
         {
-            var menu = Dom.getElementById(menuName);
+            if (this.AWActiveItemId) {
+                return Dom.getElementById(this.AWActiveItemId);
+            }
+            return null;
+        },
+
+        setActiveItem : function (menuItemId)
+        {
+            this.AWActiveItemId = menuItemId;
+        },
+
+        hiliteMenuItem : function (menuItem, menu)
+        {
+            if (!menu) {
+                menu = this.menu(menuItem);
+            }
+            var menuItems = this.menuItems(menu);
+            if (menuItems.length == 0) return;
+            if (!menuItem) {
+                menuItem = menuItems[0];
+            }
+            var currentItem;
+            for (var i = 0; i < menuItems.length; i++) {
+                currentItem = menuItems[i];
+                if (menuItem == currentItem) {
+                    this.cellMouseOver(currentItem);
+                    this.setActiveItem(currentItem.id);
+                }
+                else {
+                    this.cellMouseOut(currentItem);
+                }
+            }
+        },
+        
+        menuItems : function (menu)
+        {
             return Dom.findChildrenUsingPredicate(menu, function (e) {
                     return e.tagName == "A" &&
                            (e.className.indexOf("awmenuCell") > -1 || e.className.indexOf("mC") > -1) &&
                            e.getAttribute("skipLink") != "1";
                 }, true);
-        },
-
-        firstMenuLink : function (menuName)
-        {
-            var menuLinks = this.menuLinks(menuName);
-            return menuLinks[0];
-        },
-
-        lastMenuLink : function (menuName)
-        {
-            var menuLinks = this.menuLinks(menuName);
-            return menuLinks[menuLinks.length - 1];
         },
 
         menu : function (menuCellDivLink)
@@ -111,7 +146,7 @@ ariba.Menu = function() {
             return false;
         },
 
-        menuLinkOnClick : function (positioningObject, menuName, linkId, mevent)
+        menuLinkOnClick : function (positioningObject, menuName, linkId, mevent, hilite)
         {
             var divObject = Dom.getElementById(menuName);
             var x;
@@ -138,6 +173,9 @@ ariba.Menu = function() {
 
                 this.AWLinkId = linkId;
                 this.AWActiveMenu = divObject;
+                if (hilite) {
+                    this.hiliteMenuItem(null, divObject);
+                }
                 Event.enableDocumentClick(this.hideActiveMenu.bind(this));
                 Dom.removeClass(divObject, "awmenuEx");  // collapse expanded menu on new open
                 this.checkMenuLayout(divObject);
@@ -253,102 +291,95 @@ ariba.Menu = function() {
             }
         },
 
-        menuKeyDown : function (menuCellDivLink, senderId, formId, mevent)
+        menuKeyDown : function (mevent)
         {
-            var returnVal = this.shouldHandleMenuKeyDown(menuCellDivLink, mevent);
-            if (returnVal) {
-                returnVal = this.menuClicked(menuCellDivLink, senderId, formId);
-                this.hideActiveMenu();
-            }
-            return returnVal;
-        },
-
-        /*
-            Called when the user types a key while in the popup menu
-        */
-        shouldHandleMenuKeyDown : function (menuCellDivLink, mevent)
-        {
-            var shouldHandle = false;
+            var shouldBubble = true;
             var keyCode = Event.keyCode(mevent);
 
-            var menu = this.menu(menuCellDivLink);
-            var menuDivId = menu.id;
-            var i, menuLinks;
+            var activeItem = this.getActiveItem();
+            var formId = null;
+            if (activeItem) {
+                formId = Dom.boolAttr(activeItem, "_sf", true) ? Dom.lookupFormId(activeItem) : null;
+                if (Event.keyCode(mevent) == Input.KeyCodeEnter) {
+                    Menu.handleClientTrigger(activeItem, mevent);
+                }
+            }
+            if (!Event.shouldBubble(mevent)) {
+                return false;
+            }
 
-            if (keyCode == 16) {
-                // ignore shift button press
-                shouldHandle = false;
-            }
-            else if (keyCode == 13) {
-                shouldHandle = true;
-            }
-            else if (keyCode == 27) {
-                shouldHandle = false;
-            // Escape key
+            if (keyCode == Input.KeyCodeTab) {
                 this.hideActiveMenu();
+                return true;
             }
-            else if (keyCode == 9) {
-                // tab key
-                var stopBubbling = false;
-                if (mevent.shiftKey) {
-                    if (menuCellDivLink == this.firstMenuLink(menuDivId)) {
-                        stopBubbling = true;
-                        shouldHandle = false;
-                    }
+            if (keyCode == Input.KeyCodeEscape) { 
+                this.hideActiveMenu();
+                return false;
+            }            
+            var senderId = activeItem.id;
+            var menu = this.menu(activeItem);
+            var menuDivId = menu.id;
+            var i, menuItems;
+
+            if (keyCode == Input.KeyCodeEnter) {
+                this.menuClicked(activeItem, senderId, formId);
+                this.hideActiveMenu();
+                shouldBubble = false;
+            }
+            else if (keyCode == Input.KeyCodeArrowUp) {
+                menuItems = this.menuItems(menu);
+                if (menuItems.length == 0) return;
+                var prevLink = null;
+                if (activeItem == menuItems[0]) {
+                    prevLink = menuItems[menuItems.length - 1];
                 }
                 else {
-                    if (menuCellDivLink == this.lastMenuLink(menuDivId)) {
-                        stopBubbling = true;
-                        shouldHandle = false;
+                    for (i = menuItems.length - 1; i > 0; i--) {
+                        var menuLink = menuItems[i];
+                        if (menuLink == activeItem) {
+                            prevLink = menuItems[i - 1];
+                            break;
+                        }
                     }
                 }
-                if (stopBubbling) {
-                    Event.cancelBubble(mevent);
-                }
-            }
-            else if (keyCode == 38) {
-                // up arrow
-                menuLinks = this.menuLinks(menuDivId);
-                var prevLink = null;
-                if (menuCellDivLink == menuLinks[0]) {
-                    prevLink = menuLinks[menuLinks.length - 1];
-                }
-                for (i = menuLinks.length - 1; i > 0; i--) {
-                    menuLink = menuLinks[i];
-                    if (menuLink == menuCellDivLink) {
-                        prevLink = menuLinks[i - 1];
-                    }
-                }
-                Event.elementInvoke(menuCellDivLink, "blur");
-                Event.elementInvoke(prevLink, "focus");
-                prevLink.focus();
+                this.hiliteMenuItem(prevLink, menu);
                 Event.cancelBubble(mevent);
+                shouldBubble = false;
             }
-            else if (keyCode == 40) {
-                // down arrow
-                menuLinks = this.menuLinks(menuDivId);
+            else if (keyCode == Input.KeyCodeArrowDown) {
+                menuItems = this.menuItems(menu);
+                if (menuItems.length == 0) return;
                 var nextLink = null;
-                if (menuCellDivLink == menuLinks[menuLinks.length - 1]) {
-                    nextLink = menuLinks[0];
+                if (activeItem == menuItems[menuItems.length - 1]) {
+                    nextLink = menuItems[0];
                 }
-                for (i = 0; i < menuLinks.length - 1; i++) {
-                    var menuLink = menuLinks[i];
-                    if (menuLink == menuCellDivLink) {
-                        nextLink = menuLinks[i + 1];
+                else {
+                    for (i = 0; i < menuItems.length - 1; i++) {
+                        var menuLink = menuItems[i];
+                        if (menuLink == activeItem) {
+                            nextLink = menuItems[i + 1];
+                            break;
+                        }
                     }
                 }
-                Event.elementInvoke(menuCellDivLink, "blur");
-                Event.elementInvoke(nextLink, "focus");
-                nextLink.focus();
+                this.hiliteMenuItem(nextLink, menu);
+                Event.cancelBubble(mevent);
+                shouldBubble = false;
+            }
+            if (!shouldBubble) {
                 Event.cancelBubble(mevent);
             }
-            return shouldHandle;
+            return false;
         },
         /**
          Called when user makes a menuItem choice.
          */
-        menuClicked : function (menuCellDiv, senderId, formId, target)
+        menuClicked : function (menuCellDiv, senderId, formId)
         {
+            var target = null;
+            if (menuCellDiv) {
+                target = menuCellDiv.getAttribute("_t");
+            }
             // pass the menuItemSender and linkId as comma delimited list
             var senderList = (this.AWLinkId == null) ? senderId : this.AWLinkId + "," + senderId;
             if (formId != null) {
@@ -357,6 +388,7 @@ ariba.Menu = function() {
             else {
                 var url = Request.formatUrl(senderList);
                 this.AWLinkId = null;
+                this.AWActiveItemId = null;
                 Request.setDocumentLocation(url, target);
             }
             return false;
@@ -694,52 +726,19 @@ ariba.Menu = function() {
              keydown : function (elm, evt) {
                  return Menu.menuLinkOnKeyDown(elm, elm.getAttribute("_mid"), elm.id, evt);
              }
-         },
-
-         // PMI - PopupMenuItem
-         PMI_NoHover : {
-             mousedown : function (elm, evt) {
-                 var formId = Dom.boolAttr(elm, "_sf", true) ? Dom.lookupFormId(elm) : null;
-                 Menu.handleClientTrigger(elm, evt);
-                 if (Event.shouldBubble(evt)) {
-                     return Menu.menuClicked(elm, elm.id, formId, elm.getAttribute("_t"));
-                 }
-                 return false;
-             },
-
-             keydown : function (elm, evt) {
-                 var formId = Dom.boolAttr(elm, "_sf", true) ? Dom.lookupFormId(elm) : null;
-                 Menu.handleClientTrigger(elm, evt);
-                 if (Event.shouldBubble(evt)) {
-                     return Menu.menuKeyDown(elm, elm.id, formId, evt, elm.getAttribute("_t"));
-                 }
-                 return false;
-             }
          }
+
     });
 
     Event.registerBehaviors({
         // Popup Menu Item
         PMI : {
-            prototype : Event.behaviors.PMI_NoHover,
+            mousedown : function (elm, evt) {
+                return Menu.menuItemClicked(elm, evt);
+            },
 
             mouseover : function (elm, evt) {
-                return Menu.cellMouseOver(elm);
-            },
-
-
-            mouseout : function (elm, evt) {
-                return Menu.cellMouseOut(elm);
-            },
-
-
-            focus : function (elm, evt) {
-                return Menu.cellMouseOver(elm);
-            },
-
-
-            blur : function (elm, evt) {
-                return Menu.cellMouseOut(elm);
+                return Menu.hiliteMenuItem(elm, null);
             }
         }
     });

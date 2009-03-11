@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#80 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#81 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1381,6 +1381,10 @@ public class AWSession extends AWBaseObject
 
             if (PerformanceState.threadStateEnabled()) {
                 PerformanceState.getThisThreadHashtable().setSessionID(sessionId());
+                InetAddress addr = remoteIPAddress();
+                if (addr != null) {
+                    PerformanceState.getThisThreadHashtable().setIPAddress(addr.getHostAddress());
+                }
                 PerformanceState.DispatchTimer.start();
             }
 

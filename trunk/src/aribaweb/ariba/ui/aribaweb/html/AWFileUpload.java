@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUpload.java#19 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUpload.java#20 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -24,7 +24,7 @@ public final class AWFileUpload extends AWComponent
     private static final String[] SupportedBindingNames = {
         BindingNames.inputStream, BindingNames.bytes, BindingNames.name,
         BindingNames.filename, BindingNames.mimeType, BindingNames.fileSizeExceeded,
-        BindingNames.file, BindingNames.newMode, BindingNames.maxLength
+        BindingNames.file, BindingNames.newMode, BindingNames.maxLength,BindingNames.encrypt
     };
 
     public String[] supportedBindingNames ()

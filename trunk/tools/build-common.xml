@@ -141,7 +141,7 @@
     <property name="build.encoding" value="utf-8"/>
 
     <property name="src.dir" location="${basedir}"/>
-    <property name="src.resource.path" value="${src.dir}/resource/ariba"/>
+    <property name="src.resource.path" value="resource/ariba"/>
     <property name="dist.dir" location="${dist.root.dir}/dist"/>
     <property name="src.derived.dir" value="${build.dir}/derived-src/${name}"/>
     <property name="build.classes.dir" value="${build.dir}/classes/${name}"/>
@@ -398,8 +398,14 @@
                 excludes="build.*,install.csv"
             />
 
+    <condition property="src.resource.pattern" value="resource/**/*">
+        <equals arg1="${src.resource.path}" arg2=""/>
+    </condition>
+    <property name="src.resource.pattern" value="resource/**/*"/>
+
     <fileset id="jar.resources" dir="${basedir}" excludes="build/">
         <patternset refid="jar.resource.patterns"/>
+        <exclude name="${src.resource.pattern}"/>
     </fileset>
 
     <resources id="aw.resources"/>

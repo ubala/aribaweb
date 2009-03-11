@@ -1,0 +1,21 @@
+<a:SetValue bindingsDictionary="$metaContext.properties.bindingsDictionary"/>
+<t:DataTable awbindingsDictionary="$bindingsDictionary">
+    <m:TableColumns/>
+
+    <t:HeadingArea isVisible="$^showHeadingArea:$false">
+        <m:Context layout="HeadingArea">
+            <m:IncludeComponent/>\
+        </m:Context>
+    </t:HeadingArea>
+
+    <t:SelectionButtonArea>\
+        <m:Context object="$metaContext.displayGroup.selectedObject" layout="SelectionButtonArea">\
+            <m:IncludeComponent/>\
+        </m:Context>\
+    </t:SelectionButtonArea>
+    <t:ButtonArea>
+        <m:Context layout="ButtonArea">
+            <m:IncludeComponent/>\
+        </m:Context>
+    </t:ButtonArea>
+</t:DataTable>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/Predicate.java#3 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/Predicate.java#4 $
 */
 package ariba.ui.meta.persistence;
 
@@ -33,16 +33,26 @@ abstract public class Predicate implements QueryGenerator.Visitor
         List <Predicate> preds = new ArrayList();
         for (Map.Entry<String,Object> e : toMatch.entrySet()) {
             Object val = e.getValue();
-            if (val != null
-                    && (!(val instanceof String) || !StringUtil.nullOrEmptyOrBlankString((String)val))
-                    && (!(val instanceof Collection) || !((Collection)val).isEmpty())) {
-                Predicate p = new KeyValue(e.getKey(), val);
-                preds.add(p);
+            if (val instanceof RangeValue) {
+                addKeyValueToPreds(e.getKey(), ((RangeValue)val).from, Operator.Gte, preds);
+                addKeyValueToPreds(e.getKey(), ((RangeValue)val).to, Operator.Lte, preds);
+            } else {
+                addKeyValueToPreds(e.getKey(), val, Operator.Eq, preds);
             }
         }
         return (preds.size() == 0) ? null
                 : (preds.size() == 1)
                     ? preds.get(0) : new And(preds);
+    }
+
+    static void addKeyValueToPreds (String key, Object val, Operator op, List <Predicate> preds)
+    {
+        if (val != null
+                && (!(val instanceof String) || !StringUtil.nullOrEmptyOrBlankString((String)val))
+                && (!(val instanceof Collection) || !((Collection)val).isEmpty())) {
+            Predicate p = new KeyValue(key, val, op);
+            preds.add(p);
+        }
     }
 
     public static class KeyValue extends Predicate
@@ -51,12 +61,16 @@ abstract public class Predicate implements QueryGenerator.Visitor
         Object _value;
         Operator _operator;
 
-
-        public KeyValue (String key, Object value)
+        public KeyValue (String key, Object value, Operator op)
         {
             _key = key;
             _value = value;
-            _operator = Operator.Eq;
+            _operator = op;
+        }
+
+        public KeyValue (String key, Object value)
+        {
+            this(key, value, Operator.Eq);
         }
 
         public void generate(QueryGenerator generator)
@@ -132,5 +146,13 @@ abstract public class Predicate implements QueryGenerator.Visitor
         {
             return " OR ";
         }
+    }
+
+    /**
+        When used as a value in map for fromKeyValueMap, results in > < used in predicate
+     */
+    public static class RangeValue
+    {
+        public Object from, to;
     }
 }

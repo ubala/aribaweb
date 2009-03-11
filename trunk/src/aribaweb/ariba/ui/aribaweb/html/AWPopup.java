@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#52 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#53 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -21,8 +21,10 @@ import ariba.ui.aribaweb.core.AWAction;
 import ariba.ui.aribaweb.core.AWBinding;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWComponentReference;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWConcreteTemplate;
 import ariba.ui.aribaweb.core.AWElement;
+import ariba.ui.aribaweb.core.AWErrorManager;
 import ariba.ui.aribaweb.core.AWGenericActionTag;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWTemplate;
@@ -235,11 +237,20 @@ public class AWPopup extends AWComponent
                 Object selection = OrderedList.get(_orderedList).elementAt(_orderedList, index);
                 setSelection(selection);                }
             catch (NumberFormatException numberFormatException) {
-                if ("".equals(formValue)) {
-                    Assert.that(requestContext().allowFailedComponentRendezvous(), 
-                            "AWPopup: Bad form value received (\"\").  " +
-                            "This usually occurs when an AWIf or AWFor was altered" +
-                            " during applyValues or invokeAction.");
+                if(!AWConcreteApplication.IsDebuggingEnabled){
+                    recordValidationError(
+                        numberFormatException,
+                        AWErrorManager.getErrorKeyForComponent(this),
+                        formValue);
+                }
+                else if ("".equals(formValue)) {
+                    if (AWConcreteApplication.IsDebuggingEnabled) {
+                        Assert.that(
+                            requestContext().allowFailedComponentRendezvous(),
+                            "AWPopup: Bad form value received (\"\").  "
+                                + "This usually occurs when an AWIf or AWFor was altered"
+                                + " during applyValues or invokeAction.");
+                    }
                 }
                 else {
                     throw new AWGenericException(numberFormatException);

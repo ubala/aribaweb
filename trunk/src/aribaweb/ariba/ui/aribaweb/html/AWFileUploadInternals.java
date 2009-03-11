@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#7 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -47,7 +47,8 @@ public final class AWFileUploadInternals extends AWComponent
     private static final String[] SupportedBindingNames = {
         BindingNames.inputStream, BindingNames.bytes, BindingNames.name,
         BindingNames.filename, BindingNames.mimeType, BindingNames.fileSizeExceeded,
-        BindingNames.file, BindingNames.newMode, BindingNames.maxLength
+        BindingNames.file, BindingNames.newMode, BindingNames.maxLength,
+        BindingNames.encrypt
     };
 
     public AWEncodedString _elementId;
@@ -91,6 +92,14 @@ public final class AWFileUploadInternals extends AWComponent
         if (parent().hasBinding(BindingNames.maxLength)) {
             Integer maxLength = new Integer(intValueForBinding(BindingNames.maxLength));
             session.httpSession().setAttribute(fileUploadName(),maxLength);
+        }
+        if (parent().hasBinding(BindingNames.encrypt)) {
+            boolean encrypt = booleanValueForBinding(BindingNames.encrypt);
+            if (encrypt && parent().hasBinding(BindingNames.file)) {
+                throw new AWGenericException("File binding not supported when encrypt is requested. Use inputStream binding instead.");
+            }
+            session.httpSession().setAttribute(BindingNames.encrypt +"."+fileUploadName(),
+                                               encrypt);
         }
         // stash the user's preferred locale for use to construct localized messages
         session.httpSession().setAttribute(Locale.class.getName(), session.preferredLocale());
@@ -170,7 +179,8 @@ public final class AWFileUploadInternals extends AWComponent
                 File uploadDirectory = new File(uploadDirPath);
                 File uploadFile = File.createTempFile("awupload", ".tmp", uploadDirectory);
                 AWUtil.writeToFile(bytes, uploadFile);
-                return new AWFileData(fileName, uploadFile, MIME.ContentTypeApplicationOctetStream, false, bytes.length);
+                return new AWFileData(fileName, uploadFile, MIME.ContentTypeApplicationOctetStream, false, bytes.length,
+                                      false);
             }
             return new AWFileData(fileName, bytes);
         } catch (IOException e) {

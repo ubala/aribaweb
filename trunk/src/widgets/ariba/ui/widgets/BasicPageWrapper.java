@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.java#31 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.java#32 $
 */
 
 package ariba.ui.widgets;
@@ -23,6 +23,10 @@ import ariba.util.core.StringUtil;
 
 public final class BasicPageWrapper extends PageWrapper
 {
+    static {
+        FooterIncludes.registerInclude(MessageBanner.class.getName());
+    }
+
     public String  _formActionUrl;
     public String  _formName;
     public String  _formEncodingType;

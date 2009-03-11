@@ -376,7 +376,7 @@ ariba.Event = function() {
             var handler = elm[onName];
         // note -- handler.call is undefined for some VBScript-based handlers!
             if (handler && (handler.call != null)) {
-                // debugEvent(evt, elm,  "Local Handler: " + handler.toString());
+                // Debug.logEvent(evt, elm,  "Local Handler: " + handler.toString());
                 ret = handler.call(elm, evt);
             }
             else if (elm.tagName) {
@@ -386,29 +386,14 @@ ariba.Event = function() {
                     ret = this.handleInline(handler, evt, elm);
                 }
                 else if (func = this.bhHandler(elm, evt.type)) {
-                    // debugEvent(evt, elm, "Behavior Handler: " + func.toString());
+                    // Debug.logEvent(evt, elm, "Behavior Handler: " + func.toString());
                     ret = func(elm, evt);
                 }
                 else if (evt.type == 'click') {
-                    // Fire click for raw links.
-                    // The browser default will not fire it if the the link contains other elements,
-                    // since the link is not the event source element.
                     var sourceElm = this.eventSourceElement(evt);
-                    if (elm.tagName == 'A' &&
-                        sourceElm != elm &&
-                        elm.href &&
-                        elm.href.indexOf('#') != elm.href.length - 1) {
-                        if (elm.target) {
-                            Dom.openWindow(elm.href);
-                        }
-                        else {
-                            window.location.href = elm.href;
-                        }
-                        return false;
-                    }
-                        // Fire the click event for input element that the label is for.
-                    else if (elm.tagName == 'LABEL' &&
-                             elm == this.eventSourceElement(evt)) {
+                    // Fire the click event for input element that the label is for.
+                    if (elm.tagName == 'LABEL' &&
+                             elm == sourceElm) {
                         var forId = elm.htmlFor;
                         if (forId) {
                             var target = Dom.getElementById(forId);
@@ -447,7 +432,7 @@ ariba.Event = function() {
             if (!elm) return true;
 
             var ret = this._elementInvoke(elm, evt, onName, xName);
-// Debug.log(onName, elm.tagName)
+            //Debug.logEvent(evt, elm, this.shouldBubble(evt));
             return (this.shouldBubble(evt) && (elm != window.document))
                     ? (this.fireBehaviors(elm.parentNode, evt, onName, xName) && ret)
                     : ret;
@@ -456,7 +441,7 @@ ariba.Event = function() {
         handleInline : function (handler, evt, elm)
         {
             var ret = true;
-        // debugEvent(evt, elm, "Inline Handler: " + handler.toString());
+        // Debug.logEvent(evt, elm, "Inline Handler: " + handler.toString());
             // Dynamic dispatch with 'this' and 'event' set correctly
             eval("_LastFunc = function(event) {" + handler + "}");
             ret = _LastFunc.call(elm, evt);

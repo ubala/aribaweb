@@ -8,7 +8,7 @@ if (!this.ariba) this.ariba = { awCurrWindow : null };
 // Null logging implementation if Debug.js is not loaded
 ariba.Debug = {
     log : function () {},
-    debugEvent : function () {}
+    logEvent : function () {}
 }
 
 ariba.Util = function() {

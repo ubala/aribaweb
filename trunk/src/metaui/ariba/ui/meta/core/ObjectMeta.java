@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ObjectMeta.java#18 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ObjectMeta.java#19 $
 */
 package ariba.ui.meta.core;
 
@@ -154,11 +154,16 @@ public class ObjectMeta extends Meta
 
         public void setValue (Object val)
         {
-            Object object = object();
-            Assert.that(object != null, "Call to value() with no current object");
             FieldPath fieldPath = fieldPath();
-            Assert.that(fieldPath != null, "Can't set derived property (yet)");
-            fieldPath.setFieldValue(object, val);
+            if (fieldPath != null) {
+                Object object = object();
+                Assert.that(object != null, "Call to setValue() with no current object");
+                fieldPath.setFieldValue(object, val);
+            } else {
+                Object value = allProperties().get(KeyValue);
+                Assert.that(value instanceof PropertyValue.DynamicSettable, "Can't set derived property: %s", value);
+                ((PropertyValue.DynamicSettable)value).evaluateSet(this, val);
+            }
         }
 
         public FieldPath fieldPath()

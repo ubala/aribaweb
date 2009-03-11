@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaSearch.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaSearch.java#3 $
 */
 package ariba.ui.meta.layouts;
 
@@ -29,6 +29,7 @@ import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.ObjectMeta;
 import ariba.ui.meta.core.Context;
 import ariba.util.core.ClassUtil;
+import ariba.util.core.Assert;
 
 import java.util.List;
 import java.util.Map;
@@ -45,23 +46,37 @@ public class MetaSearch extends AWComponent
         return false;
     }
 
+    public static AWTDisplayGroup setupDisplayGroup (AWRequestContext requestContext)
+    {
+        UIMeta.UIContext ctx = MetaContext.currentContext(requestContext.getCurrentComponent());
+        AWTDisplayGroup displayGroup = (AWTDisplayGroup)ctx.values().get("displayGroup");
+        Assert.that(displayGroup != null, "MetaSearch used without displayGroup in Meta Context");
+        String className = (String)ctx.values().get(ObjectMeta.KeyClass);
+        Class cls = (className != null) ? ClassUtil.classForName(className) : null;
+        ObjectContextDataSource dataSource = (ObjectContextDataSource)displayGroup.dataSource();
+        if (dataSource == null) {
+            dataSource = new ObjectContextDataSource(cls);
+            displayGroup.setDataSource(dataSource);
+        }
+        else {
+            dataSource.setEntityClass(cls);
+        }
+
+        return displayGroup;
+    }
+
     public void renderResponse (AWRequestContext requestContext, AWComponent component)
     {
-        String className = (String)MetaContext.currentContext(this).values().get(ObjectMeta.KeyClass);
-        Class cls = (className != null) ? ClassUtil.classForName(className) : null;
-        if (_displayGroup == null) {
-            _displayGroup = new AWTDisplayGroup();
-            _displayGroup.setDataSource(new ObjectContextDataSource(cls));
-        } else {
-            ((ObjectContextDataSource)_displayGroup.dataSource()).setEntityClass(cls);
-        }
+        _displayGroup = setupDisplayGroup(requestContext);
 
         super.renderResponse(requestContext, component);
     }
 
-    public void setQuerySpecification (QuerySpecification spec)
+    public static void updateQuerySpecification (AWRequestContext requestContext, QuerySpecification spec)
     {
-        ((ObjectContextDataSource)_displayGroup.dataSource()).setQuerySpecification(spec);
-        _displayGroup.fetch();
+        AWTDisplayGroup displayGroup = setupDisplayGroup(requestContext);
+
+        ((ObjectContextDataSource)displayGroup.dataSource()).setQuerySpecification(spec);
+        displayGroup.fetch();
     }
 }

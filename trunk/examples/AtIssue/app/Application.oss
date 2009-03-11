@@ -10,5 +10,5 @@ module=model.Issue {
             }
         }
     }
-    field=notes { label:null; class { bindings: {class:"noBox scrollTableWrapper"} } }
+    field=notes { class { bindings: {class:"noBox scrollTableWrapper"; title:null } } }
 }

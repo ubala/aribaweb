@@ -98,6 +98,15 @@ field {
         editable=false  { trait: toManyLink }
         trait=ownedToMany { trait: toManyTable }
     }
+
+    valueRedirector {
+        value:$values.valueRedirector.val;
+    }
+    operation=search ~valueRedirector  {
+        type=(java.util.Date, java.lang.Number) {
+            component:MetaRange;
+        }
+    }
 }
 
 @traitGroup=RelViewers {
@@ -201,6 +210,7 @@ module {
         homePage:MetaContentPage;
         pageBindings: {
             class:${properties.moduleClassName};
+            displayGroup:${new ariba.ui.table.AWTDisplayGroup()};
             module:$module;
             scopeKey:layout;
         }
@@ -211,10 +221,13 @@ module {
         homePage:MetaContentPage;
         pageBindings: {
             class:${properties.moduleClassName};
+            displayGroup:${new ariba.ui.table.AWTDisplayGroup()};
             module:$module;
             scopeKey:layout;
         }
     }
+
+    @trait=SearchInToc;
 }
 
 layout=SearchPage {
@@ -226,10 +239,17 @@ layout=SearchPage {
        after:zToc;
        area:Global;
     }
-    @layout=SearchPortlet {
+    @layout=Search {
        label:"Search";
        component:MetaSearch;
        after:zTop;
+    }
+}
+
+layout=Search layout=Table {
+    class { bindings: { showHeadingArea:true; } }
+    layout=HeadingArea {
+        component:MetaSearchForm;
     }
 }
 
@@ -243,8 +263,13 @@ module_trait=SearchDetail {
         @layout=Search {
             label:"Search";
             component:MetaSearch;
-            bindings: { selectedObject:$requestContext.pageComponent.dict.selectedObject }
             after:zLeft;
+        }
+
+        layout=SearchForm {
+            wrapperComponent:AWGenericContainer;
+            wrapperBindings: { tagName:div; style:"padding:0px 5px" }
+            class { bindings:{ omitLabelPadding:true; } }
         }
 
         @layout=Detail {
@@ -252,9 +277,9 @@ module_trait=SearchDetail {
             component:MetaContext;
             portletWrapper:AWTNullWrapper;
             bindings: {
-                object:$requestContext.pageComponent.dict.selectedObject;
+                object:$displayGroup.selectedObject;
                 layout:InspectStack;
-                operation:${requestContext.pageComponent.dict.selectedObject ? "edit" : "view"};
+                operation:${displayGroup.selectedObject ? "edit" : "view"};
                 awcontentElement:MetaIncludeComponent;
             }
         }
@@ -286,4 +311,23 @@ module_trait=SearchDetail {
     }
 
     field=ActionCol { after:zNone }
+}
+
+module_trait=SearchInToc {
+    layout {
+        @layout=SearchToc {
+            label:"Search";
+            component:MetaSearchForm;
+            after:zToc;
+            layout=SearchForm#labelsOnTop {
+                class {
+                    trait:oneZone;
+                }
+            }
+        }
+        layout=Search {
+            label:"Search Results";
+            layout=Table { class { bindings: { showHeadingArea:false; title:null; } } }
+        }
+    }
 }

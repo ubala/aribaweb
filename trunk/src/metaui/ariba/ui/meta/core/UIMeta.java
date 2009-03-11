@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#50 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#51 $
 */
 package ariba.ui.meta.core;
 
@@ -299,19 +299,19 @@ public class UIMeta extends ObjectMeta
         public _DefaultLabelGenerator (String key) { _key = key; }
 
         public Object evaluate(Context context) {
-            Object fieldName = context.propertyForKey(_key);
+            Object fieldName = context.values().get(_key);
             return (fieldName != null && fieldName instanceof String)
                     ? defaultLabelForIdentifier((String)fieldName)
                     : null;
         }
     }
 
-    static PropertyValue.Dynamic defaultLabelGeneratorForKey (final String key)
+    static public PropertyValue.Dynamic defaultLabelGeneratorForKey (final String key)
     {
         return new _DefaultLabelGenerator(key);
     }
 
-    protected static Object defaultLabelForIdentifier (String fieldName)
+    public static Object defaultLabelForIdentifier (String fieldName)
     {
         int lastDot = fieldName.lastIndexOf('.');
         if (lastDot != -1 && lastDot != fieldName.length() -1) fieldName = fieldName.substring(lastDot+1);

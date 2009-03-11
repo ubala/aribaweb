@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMimeReader.java#20 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMimeReader.java#21 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -20,13 +20,14 @@ package ariba.ui.aribaweb.util;
 import ariba.util.core.FastStringBuffer;
 import ariba.util.core.Fmt;
 import ariba.util.core.MIME;
-import ariba.util.core.StringUtil;
 import ariba.util.core.ProgressMonitor;
-import java.io.BufferedOutputStream ;
+import ariba.util.core.StringUtil;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.StringTokenizer;
 
 public final class AWMimeReader extends AWBaseObject
@@ -294,10 +295,10 @@ public final class AWMimeReader extends AWBaseObject
 
     public AWFileData nextChunk (String fileName, String mimeType) throws IOException
     {
-        return nextChunk(fileName, mimeType, _MaxBytesPerChunk);
+        return nextChunk(fileName, mimeType, _MaxBytesPerChunk, false);
     }
 
-    public AWFileData nextChunk (String fileName, String mimeType, int maxBytes)
+    public AWFileData nextChunk (String fileName, String mimeType, int maxBytes, boolean encrypted)
         throws IOException
     {
         _MaxChunkSizeExceeded = false;
@@ -320,14 +321,18 @@ public final class AWMimeReader extends AWBaseObject
         else {
             File uploadDirectory = new File(_fileUploadDirectory);
             File uploadFile = File.createTempFile("awupload", ".tmp", uploadDirectory);
+            OutputStream tempStream = new FileOutputStream(uploadFile);
+            if (encrypted) {
+                tempStream = AWEncryptionProvider.getProvider().getCipherOutputStream(tempStream);
+            }
             BufferedOutputStream ostream =
-                new BufferedOutputStream(new FileOutputStream(uploadFile));
+                new BufferedOutputStream(tempStream);
             int bytesRead = readToMarker(_boundaryMarker, ostream, maxBytes);
             Log.aribaweb_request.debug("nextChunk byteRead: %s", bytesRead);
             ostream.close();
             if (!StringUtil.nullOrEmptyOrBlankString(fileName)) {
                 fileData = new AWFileData(fileName, uploadFile, mimeType,
-                                          maxChunkSizeExceeded(), bytesRead);
+                                          maxChunkSizeExceeded(), bytesRead, encrypted);
             }
             else {
                 // Need to remove temporary file because no data bytes were read

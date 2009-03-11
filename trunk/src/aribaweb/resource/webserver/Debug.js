@@ -79,7 +79,7 @@ ariba.Util.extend(ariba.Debug, function() {
         // Public Globals
         AWDebugJSUrl : '',
 
-        debugEvent : function (evt, target, sMsg, iHistory) {
+        logEvent : function (evt, target, sMsg, iHistory) {
             if (evt && AWDebugEvents[evt.type]) {
                 var source = Event.eventSourceElement(evt);
                 var sourceTag = '';
@@ -375,10 +375,19 @@ ariba.Util.extend(ariba.Debug, function() {
                 senderId = senderId + "&cpDebug=" + ((evt.shiftKey) ? "2" : "1");
                 this.log("** Component Path this.log, id=" + senderId);
 
+                var openNewWindow = false;
                 // pop window to foreground
-                if (!_ComponentInspectorWin || !_ComponentInspectorWin.open
-                        || !_ComponentInspectorWin.ariba.Request.invoke)
-                {
+                try {
+                    if (!_ComponentInspectorWin || !_ComponentInspectorWin.open
+                            || !_ComponentInspectorWin.ariba.Request.invoke)
+                    {
+                        openNewWindow = true;
+                    }
+                } catch (e) {
+                    openNewWindow = true;
+                }
+
+                if (openNewWindow) {
                     _ComponentInspectorWin = window.open("", "AWComponentPath", _AWCPIWindOpts);
                 }
 

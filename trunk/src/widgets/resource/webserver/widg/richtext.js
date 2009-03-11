@@ -144,6 +144,12 @@ function createRTA (id)
             ariba.Dom.findParentUsingPredicate(editor._textArea, function (e) {
                     return ariba.Dom.hasClass(e, "rtaWrapper");
             });
+        //For IE6, when a modal dialog is displayed the underlying 
+        //select elements have to be disabled. If there are any edits
+        //to the richtext editor, it gets refreshed and selects get enabled.
+        //This method call with disable the select elements on IE6 if there
+        //is a modal window displayed.
+        ariba.Input.hideSelects(false);
         wrapper.style.visibility = "visible";
 
         // For Ariba Selenium test automation

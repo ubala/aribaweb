@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/awreload/ariba/awreload/JavaReloadClassLoader.java#3 $
+    $Id: //ariba/platform/ui/awreload/ariba/awreload/JavaReloadClassLoader.java#4 $
 */
 package ariba.awreload;
 
@@ -197,7 +197,14 @@ public class JavaReloadClassLoader extends AWClassLoader.PairedFileLoader implem
 
         // in case we haven't seen a class in this build directory before, find it now
         File classFile = getClassFile(className);
-        if (classFile != null) noteClassDirectory(classFile.getParentFile());
+        if (classFile != null) {
+            noteClassDirectory(classFile.getParentFile());
+        }
+        else {
+            Assert.assertNonFatal(false, "Compilation of class: %s did not result in class file -- " +
+                    "perhaps class has mismatched 'package' declaration?", className);
+            recordClassForResource(className, null, sourceResource);
+        }
     }
 
     protected void reloadModifiedClasses ()

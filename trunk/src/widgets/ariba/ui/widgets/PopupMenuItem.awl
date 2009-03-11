@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuItem.awl#26 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuItem.awl#27 $
     </Copyright>
 
     <Overview>
@@ -105,11 +105,7 @@
         <a:IncludeContent/>\
     </div>\
 <a:Else/>\
-    <!--- the following link is used to handle keyboard menu events. The tabindex=1000 is required
-      for Netscape browsers because when a user tries to tab off of the menu, the event handler
-      resets the focus to the first or last item in the menu, but this screws up the tab traversal
-      order unless all items in the menu have the same tab order --->\
-    <a:GenericContainer tagName="$tagName" tabindex="99" href="#"
+    <a:GenericContainer tagName="$tagName" tabIndex="-1" href="#"
         class="$classString" style="$^style"
         bh="PMI"
         _sf="$bhSubmitForm"

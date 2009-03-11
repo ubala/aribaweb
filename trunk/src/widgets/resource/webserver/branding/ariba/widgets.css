@@ -83,6 +83,9 @@ A:link, A:visited {
 
 FORM {
     margin: 0px;
+}
+
+.IsIE6 form {
     display:inline;
 }
 
@@ -1437,14 +1440,14 @@ td.ffl {
     padding:6px 3px 3px 8px;
     height:18px;
 }
-table.ftL td.ffl, table.ftR td.ffl { width:1%; }
-tr.arwRow td.ffl                   { width:160px; }
-
 td.ffi {
     padding:3px 1px 3px 0px;
     width:10px;
     height:21px;
 }
+
+table.ftL td.ffl, table.ftR td.ffl { width:1%; }
+tr.arwRow td.ffl                   { width:160px; }
 
 td.ffp        { padding-left:5px; }
 td.ffp td.ffp { padding:0px; }
@@ -1473,6 +1476,21 @@ td.ffp div.ffpNF td.ffp { padding-top:6px; }
 }
 .smallForm td.ffp {
     padding-left:4px;
+}
+
+.ftLOT td.ffl {
+    text-align:left;
+    height:auto;
+    white-space:nowrap;
+}
+.ftLOT td.ffl, .ftLOT td.ffi {
+    padding:0px;
+}
+.ftLOT td.ffi {
+    height:auto;
+}
+.ftLOT td.ffp {
+    padding:4px 0px 6px 4px;
 }
 
 /* Adjustments when in section */
@@ -4138,6 +4156,10 @@ table.inline {
 .btnBrandWrap .rbBC {
     background-color:#000000;
     border-color:#000000;
+}
+
+.btnWrap .rbB {
+    border-bottom:none;
 }
 
 .btnSeparator {

@@ -12,15 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/CommandLine.java#6 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ContextCommandLine.java#1 $
 */
 
 package ariba.util.core;
 
 /**
     This interface provides a general mechanism for its clients to set up
-    the command line arguments that it is expecteing, to process the arguments,
-    and finally to run with the input arguments.
+    the command line arguments that it is expecting, to process the arguments,
+    and finally to run with the input arguments. In addition to the command
+    line arguments, the command may be passed additional context, such as
+    other streams or processes.
 
     Normally, a class implementing this interface implements its <code>main</code>
     method which calls the <code>create</code> method of the <code>ArgumentParser</code>
@@ -35,41 +37,12 @@ package ariba.util.core;
 
     @aribaapi documented
 */
-public interface CommandLine
+public interface ContextCommandLine extends CommandLine
 {
     /**
-        registers the arguments this class expects. This can include
-        the name of the command line option, the type of input
-        arguments, and whether the option is optional or not.
-
-        @param arguments the ArgumentParser object that stores the
-        registered information. The implementation of this method
-        can expect this ArgumnentParser object to be non null.
-
-        @see ArgumentParser
-
-        @aribaapi documented
-    */
-    public void setupArguments (ArgumentParser arguments);
-
-    /**
-        processes the arguments previously registered during
-        setupArguments.
-
-        @param arguments the ArgumentParser object that provides
-        the registered information to be processed.
-
-        @see ArgumentParser
-
-        @aribaapi documented
-    */
-    public void processArguments (ArgumentParser arguments);
-
-    /**
-        Called to allow client to begin running
-
-        @aribaapi documented
-    */
-    public void startup ();
+     * Hook for invoker to pass information other than what is in the arguments
+     * @aribaapi documented
+     */
+    public void setContext (Object context);
 
 }

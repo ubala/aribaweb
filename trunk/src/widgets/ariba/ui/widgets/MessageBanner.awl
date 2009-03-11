@@ -1,0 +1,31 @@
+<a:PhaseInvocation append="$updateMessage"/>
+<a:If notEqualNull="$message">\
+    <div id="apcMessage" class="apcMessage fixedTop">
+        <table border="0" cellspacing="0" cellpadding="0" style="width:100%; align:center;">\
+            <tr>\
+                <td width="1%"><div style="width:20px"></div></td>
+                <td class="brandAccent" valign="bottom" width="1%" border="0">\
+                    <a:Image filename="awxMessageCornerLeft.gif"/>\
+                </td>\
+                <td class="brandAccent" style="padding:3px 8px 2px 0px;" width="1%">\
+                    <a:Image filename="awxMessageIcon.gif" align="absmidle"/>\
+                </td>\
+                <td class="brandAccent" style="padding:3px 0px 2px 0px">\
+                    <a:If ifTrue="$isTextMessage">\
+                        <a:String escapeUnsafeHtml="$true" value="$message"/>\
+                    <a:Else/>\
+                        <a:ComponentInclude awcomponent="$message"/>
+                    </a:If>\
+                </td>\
+                <td class="brandAccent" align="right" width="21%">\
+                    <a:Image filename="portletCloseGray.gif"
+                             onClick="ariba.Dom.getElementById('apcMessage').style.display='none'"/>\
+                </td>
+                <td class="brandAccent" valign="bottom" width="1%" align="right"  border="0">\
+                    <a:Image filename="awxMessageCornerRight.gif"/>\
+                </td>\
+                <td width="1%"><div style="width:20px"></div></td>
+            </tr>\
+        </table>\
+    </div>
+</a:If>

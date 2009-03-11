@@ -9,6 +9,7 @@ import javax.persistence.*
 import java.util.*
 import ariba.ui.meta.annotations.Property.Visible
 import ariba.ui.meta.persistence.ObjectContext
+import ariba.util.core.ListUtil
 import javax.mail.internet.InternetAddress
 import javax.mail.Message.RecipientType
 import org.compass.annotations.*

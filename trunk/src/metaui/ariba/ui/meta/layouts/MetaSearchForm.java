@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaSearchForm.java#6 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaSearchForm.java#7 $
 */
 
 package ariba.ui.meta.layouts;
@@ -30,7 +30,7 @@ import java.util.Map;
 public class MetaSearchForm extends AWComponent
 {
     public Map _searchMap = new PersistenceMeta.SearchMap();
-    public String _searchOperation;
+    String _searchOperation;
     public boolean _supportsTextSearch;
     public Object _mid;
 
@@ -39,12 +39,25 @@ public class MetaSearchForm extends AWComponent
         return false;
     }
 
+    public String searchOperation ()
+    {
+        if (_searchOperation == null) {
+            Context context = MetaContext.currentContext(this);
+            _searchOperation = (String)context.propertyForKey("searchOperation");
+            _supportsTextSearch = context.booleanPropertyForKey("textSearchSupported", false);
+        }
+        return _searchOperation;
+    }
+
+    public void setSearchOperation (String op)
+    {
+        _searchOperation = op;
+    }
+
     public void init ()
     {
         super.init();
-        Context context = MetaContext.currentContext(this);
-        _searchOperation = (String)context.propertyForKey("searchOperation");
-        _supportsTextSearch = context.booleanPropertyForKey("textSearchSupported", false);
+        MetaSearch.setupDisplayGroup(requestContext());
     }
 
     public boolean showSearchTypeChooser ()
@@ -54,6 +67,7 @@ public class MetaSearchForm extends AWComponent
 
     public void search ()
     {
+        if (errorManager().checkErrorsAndEnableDisplay()) return;
         Predicate pred = Predicate.fromKeyValueMap(_searchMap);
         Context context = MetaContext.currentContext(this);
         String className = (String)context.values().get(UIMeta.KeyClass);
@@ -64,7 +78,7 @@ public class MetaSearchForm extends AWComponent
         spec.setUseTextIndex(pred != null
                 && context.booleanPropertyForKey(PersistenceMeta.PropUseTextSearch, false));
         context.pop();
-        
-        setValueForBinding(spec, "querySpecification");
+
+        MetaSearch.updateQuerySpecification(requestContext(), spec);
     }
 }
