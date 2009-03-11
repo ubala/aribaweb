@@ -82,7 +82,7 @@
         <a:RefreshRegion alwaysRender="$chooserState.render">
             <table cellspacing="0" cellpadding="0" awmenuId="$menuId" class="chWrap">
                 <tr>
-                    <td class="chWrapLeft">
+                    <td class="chWrapLeft">\
                         <a:TextField class="$cssClass"
                                      value="$displayValue"
                                      behavior="$behavior"
@@ -90,7 +90,7 @@
                                      onBLur="return ariba.Chooser.chooserBlur(this, event);"
                                      autocomplete="off"
                                      disabled="$^disabled"
-                                     size="$^size"/>
+                                     size="$^size"/>\
                     </td>
                     <td class="chWrapRight">
                         <a href="javascript:void(0);" omitTags="$isDisabled" tabindex="-1">\
