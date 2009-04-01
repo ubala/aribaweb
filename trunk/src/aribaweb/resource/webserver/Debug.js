@@ -16,6 +16,7 @@ ariba.Util.extend(ariba.Debug, function() {
     var gAWDebugWin = null;
     var _AWDebugWindow;
     var awDeepestChild;
+    var _AWHierarchy = null;
 
     /**
      Set the event flag(s) to true to turn on debug logging.
@@ -67,7 +68,44 @@ ariba.Util.extend(ariba.Debug, function() {
                 iframe.src = url;
                 return false;
             }
-        }
+        },
+        _MO : {
+            mousemove : function(elm, evt) {
+                var currElm = evt.target;
+                if(!currElm){
+                    // For IE, target is not set. find target based on mouse position.
+                    currElm = document.elementFromPoint(evt.clientX, evt.clientY);
+                }
+                if(ariba.Debug._AWHierarchy && (!this.lastTarget || this.lastTarget != currElm)) {
+                    this.lastTarget = currElm;
+                    var rowElm = null;
+
+                    //find the primary data row, this has the attribute "dr" set to 1
+                    while(!rowElm && currElm.parentNode){
+                         currElm = currElm.parentNode;
+                        if(currElm.tagName == "TR" && currElm.getAttribute("dr") == "1") {
+                            rowElm = currElm;
+                        }
+                    }
+
+                    if(rowElm) {
+                        //search child nodes for span tag with targetId
+                        var spanElm = Dom.findChildUsingPredicate(rowElm, function(e) {
+                            try{
+                                return e.getAttribute("targetId") != null;
+                            }catch(e){
+                                //handle error when getAttribute is not available
+                            }
+                            return false;
+                        },false);
+                        if(spanElm) {
+                            var targetId = spanElm.getAttribute("targetId");
+                            _AWXMainWindow.ariba.Debug.highlightElementIds(targetId, ariba.Debug._AWHierarchy);
+                        }
+                    }
+                }
+            }
+        } 
     });
 
     var Debug = {
@@ -355,13 +393,109 @@ ariba.Util.extend(ariba.Debug, function() {
             _ComponentInspectorWin = window.open("", "AWComponentPath", _AWCPIWindOpts);
         },
 
+        recurseComputeBounds : function(currId, hierarchy, bounds) {
+            var elm = ariba.Dom.getElementById(currId);
+            if(elm){
+                // found element on the dom, get bounds
+                var ntop = ariba.Dom.absoluteTop(elm);
+                var nleft = ariba.Dom.absoluteLeft(elm);
+                var nright = elm.offsetWidth + nleft;
+                var nbottom = elm.offsetHeight + ntop;
+                if(nright == 0 && nbottom == 0 )
+                    //This is happening for some anchor tags, we don't get the
+                    //correct position? need to investigate.
+                    return;
+                if(ntop < bounds.top)
+                    bounds.top = ntop;
+                if(nleft < bounds.left)
+                    bounds.left = nleft;
+                if(nbottom > bounds.bottom)
+                    bounds.bottom = nbottom;
+                if(nright > bounds.right)
+                    bounds.right = nright;                
+            }
+            else {
+                // get child elements and digg further
+                var children = hierarchy[currId];
+                if(children){
+                    for(var i in children){
+                        if(children[i] != currId){
+                            this.recurseComputeBounds(children[i], hierarchy, bounds);
+                        }
+                    }
+                }
+            }
+        },
+
+        highlightElementIds : function (targetId, hierarchy) 
+        {
+            var bounds = {
+                top : 0xFFFFF,
+                left : 0xFFFFF,
+                bottom : 0,
+                right : 0
+            };
+            
+            this.recurseComputeBounds(targetId, hierarchy, bounds);
+            this.highlightRegion(bounds.top, bounds.left, bounds.bottom, bounds.right);
+        },
+
+        highlightElement : function (elm)
+        {
+            var top = ariba.Dom.absoluteTop(elm);
+            var left = ariba.Dom.absoluteLeft(elm);
+            var width = elm.offsetWidth;
+            var height = elm.offsetHeight;
+            this.highlightRegion(top, left, top + height, left + width);           
+        },
+
+        highlightRegion : function (top, left, bottom, right)
+        {
+            if(!this.highlightRect){
+                this.highlightRect = document.createElement("div");
+                document.body.appendChild(this.highlightRect);
+
+                this.highlightRect.style.backgroundColor = "#BBD6EA";
+                this.highlightRect.style.filter = "alpha(opacity=50)";
+                this.highlightRect.style.opacity = "0.5";
+                this.highlightRect.style.borderColor = "blue";
+                this.highlightRect.style.position = "absolute";
+                this.highlightRect.style.borderStyle = "solid";
+                this.highlightRect.style.borderWidth = 1;
+            }
+            this.highlightRect.style.width = (right - left + 2) + "px";
+            this.highlightRect.style.height = (bottom - top + 2) + "px";
+            this.highlightRect.style.left = (left - 2) + "px";
+            this.highlightRect.style.top = (top - 2) + "px";
+            this.highlightRect.style.visibility = "visible";
+        },
+        
         // Called by AWXRichClientScriptFunctions.js:gl_handler to see if an event is
         // an invocation of component inspector        
         checkDebugClick : function (evt)
         {
-            if (!evt || evt.type != "click" || !evt.altKey) return false;
+            //Continue on two conditions
+            // 1) ALT key is pressed
+            // 2) This is a click or mousemove
+            if (!evt || !evt.altKey || (evt.type != "click" && evt.type != "mousemove")) {
+                if(this.highlightRect && evt.type == "mousemove" && this.highlightRect.style.visibility == "visible") {
+                    //If this is a mousemove and there is a highlight on the screen
+                    //hide the highlight and return.
+                    this.highlightRect.style.visibility = "hidden";
+                }
+                return false;
+            }
+
             var senderId = null;
             var target = (evt.srcElement) ? evt.srcElement : evt.target;
+
+            //If the target was the highlight, hide the highlight
+            //and check for the element under the hightlight region
+            if(target == this.highlightRect) {
+                this.highlightRect.style.visibility = "hidden";
+                target = document.elementFromPoint(evt.clientX, evt.clientY);
+            }
+
             while (target) {
                 senderId = target.name;
                 if (senderId) break;
@@ -371,36 +505,41 @@ ariba.Util.extend(ariba.Debug, function() {
                 if (senderId) break;
                 target = target.parentNode;
             }
-            if (senderId) {
-                senderId = senderId + "&cpDebug=" + ((evt.shiftKey) ? "2" : "1");
-                this.log("** Component Path this.log, id=" + senderId);
+            if(senderId) {
+                if(evt.type == "mousemove") {
+                    this.highlightElement(target);
+                }
+                else if(evt.type == "click") {
+                    senderId = senderId + "&cpDebug=" + ((evt.shiftKey) ? "2" : "1");
+                    this.log("** Component Path this.log, id=" + senderId);
 
-                var openNewWindow = false;
-                // pop window to foreground
-                try {
-                    if (!_ComponentInspectorWin || !_ComponentInspectorWin.open
-                            || !_ComponentInspectorWin.ariba.Request.invoke)
-                    {
+                    var openNewWindow = false;
+                    // pop window to foreground
+                    try {
+                        if (!_ComponentInspectorWin || !_ComponentInspectorWin.open
+                                || !_ComponentInspectorWin.ariba.Request.invoke)
+                        {
+                            openNewWindow = true;
+                        }
+                    } catch (e) {
                         openNewWindow = true;
                     }
-                } catch (e) {
-                    openNewWindow = true;
+
+                    if (openNewWindow) {
+                        _ComponentInspectorWin = window.open("", "AWComponentPath", _AWCPIWindOpts);
+                    }
+
+                    // Setup back pointer
+                    var mainWindow = window;
+                    setTimeout(function() {
+                        _ComponentInspectorWin._AWXMainWindow = mainWindow;
+                    }, 2000);
+
+                    // Call on main window with path debug click
+                    Request.invoke(null, senderId)
+
+                    return true;
                 }
-
-                if (openNewWindow) {
-                    _ComponentInspectorWin = window.open("", "AWComponentPath", _AWCPIWindOpts);
-                }
-
-                // Setup back pointer
-                var mainWindow = window;
-                setTimeout(function() {
-                    _ComponentInspectorWin._AWXMainWindow = mainWindow;
-                }, 2000);
-
-                // Call on main window with path debug click
-                Request.invoke(null, senderId)
-
-                return true;
             }
             return false;
         },

@@ -1,0 +1,15 @@
+<h1>Welcome to the MasterDetail example!</h1>
+<p>
+    This example demonstrates a basic MetaUI-JPA application, enhanced with the "AppCore"
+    framework (for User and Permission Management).
+</p>
+
+<p>
+    You are currently: <b><a:String value="$loggedInString"/></b>.
+
+    <a:If ifFalse="$ariba.appcore.User.isLoggedIn">
+        <br/>
+        <i>To see all application options, click on "Sign In" in the upper right and
+        login as User:"admin" password:"ariba"</i>
+    </a:If>
+</p>

@@ -1,0 +1,8 @@
+GB2312,,,,
+"AWBody",a001,"Please wait. An action is pending...","请稍等。正在处理...",""
+"AWErrorFlag",a001,"Error","错误",""
+"AWPasswordField",a001,"Warning","警告",""
+"AWPasswordField",a002,"Warning: Caps Lock is on.  This may cause you to enter your password incorrectly.","警告: Caps Lock 键处于打开状态。这可能导致您输入的密码不正确。",""
+"AWSubmitButton",a001,"Submit","提交",""
+"AWFileUploadInternals","a001","Error: Your request cannot be processed.  Please check that file paths for all file uploads are valid.","错误: 无法处理您的请求。请检查所有文件上载的文件路径是否有效。",""
+"AWTextArea","a001","Characters left","剩余的字符数",""

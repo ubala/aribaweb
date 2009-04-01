@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPageWrapper.awl#3 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPageWrapper.awl#4 $
     </Copyright>
 
     <Overview>
@@ -76,6 +76,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="$languageDirection">\
 <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
     <meta http-equiv="imagetoolbar" content="no"/>
     <a:MetaContentType/>
 

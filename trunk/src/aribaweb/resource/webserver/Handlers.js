@@ -334,7 +334,7 @@ ariba.Handlers = function() {
                 }
                 if (isTextField) {
                     var ret = ariba.Handlers.fireDefaultActionButton(formObject, mevent);
-                    if (Event.shouldBubble(mevent)) {
+                    if (Dom.boolAttr(formObject, "_hfa", false) && Event.shouldBubble(mevent)) {
                         var formAction = formObject[AWFormActionKey];
                         Event.cancelBubble(mevent);
                         Dom.addFormField(formObject, Request.AWSenderIdKey, formAction.value);

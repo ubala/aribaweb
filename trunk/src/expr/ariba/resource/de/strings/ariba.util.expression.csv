@@ -1,0 +1,3 @@
+Cp1252,,
+,,
+MalformedExpression,"Parsing-Fehler in der Nähe von Token ""{0}"" in Zeile ""{1}"" und Spalte ""{2}"".", "An syntactic error has occured while parsing the expression"

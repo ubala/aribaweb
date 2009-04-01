@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Action.java#1 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/annotations/Action.java#2 $
 */
 package ariba.ui.meta.annotations;
 
@@ -35,7 +35,7 @@ public @interface Action
 {
     public enum ResponseType { messageResults, pageAction }
 
-    public abstract String category() default "Manage";
+    public abstract String category() default "General";
     public abstract ResponseType ResponseType() default ResponseType.messageResults;
     public abstract String message() default "";
     public abstract String pageName() default "";

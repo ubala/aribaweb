@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericElement.java#44 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericElement.java#45 $
 */
 
 package ariba.ui.aribaweb.core;
 
+import ariba.ui.aribaweb.util.AWDebugTrace;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWStringDictionary;
 import ariba.ui.aribaweb.util.AWUtil;
@@ -481,12 +482,19 @@ public final class AWGenericElement extends AWBindableElement
     public static void appendOtherBindings (AWResponse response, AWComponent component, AWBindingDictionary unrecognizedBindingsDictionary, AWBinding otherBindings)
     {
         if (unrecognizedBindingsDictionary != null) {
+            boolean pathDebug = AWConcreteApplication.IsDebuggingEnabled && 
+                            component.requestContext().componentPathDebuggingEnabled();
             for (int index = unrecognizedBindingsDictionary.size() - 1; index >= 0; index--) {
                 // Note: bindingName needs to be encodedString
                 AWEncodedString bindingName = unrecognizedBindingsDictionary.nameAt(index);
                 AWBinding binding = unrecognizedBindingsDictionary.elementAt(index);
                 AWEncodedString attributeValue = binding.encodedStringValue(component);
                 AWGenericElement.appendHtmlAttributeToResponse(response, component, bindingName, attributeValue);
+                if (pathDebug && bindingName.equals(AWBindingNames.id)) {
+                    AWDebugTrace trace = component.requestContext().debugTrace();
+                    trace.pushElementId(attributeValue);
+                    trace.popElementId();
+                }
             }
         }
         if (otherBindings != null) {

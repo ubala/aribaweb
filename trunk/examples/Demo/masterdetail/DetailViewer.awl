@@ -1,14 +1,14 @@
 <w:FormTable showErrorFlags="$true" omitLabelPadding="$true">
-    <w:FormRow label="Date">
+    <w:FormRow label="$[a001]Date">
         <w:DateField value="$^currentItem.Year" size="17"/>
     </w:FormRow>
-    <w:FormRow label="Amount" size="17">
+    <w:FormRow label="$[a002]Amount" size="17">
         <a:TextField value="$^currentItem.Amount" formatter="$formatters.money"/>
     </w:FormRow>
-    <w:FormRow label="Attendees">
+    <w:FormRow label="$[a003]Attendees">
         <a:IncludeComponent name="UserListEditorControl" list="$attendees"/>
     </w:FormRow>
-    <w:FormRow label="Accounting">
-        <w:TextButton action="$itemize">Itemize</w:TextButton><br/>
+    <w:FormRow label="$[a004]Accounting">
+        <w:TextButton action="$itemize"><a:Local key="a005">Itemize</a:Local></w:TextButton><br/>
     </w:FormRow>
 </w:FormTable>

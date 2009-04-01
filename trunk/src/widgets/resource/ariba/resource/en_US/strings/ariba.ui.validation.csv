@@ -1,2 +1,7 @@
 8859_1,,,,
 "AWVErrorFlag",1,"Please correct the fields marked in red","Please correct the fields marked in red",""
+"AWVFormatterFactory",1,"Value required","Value required",""
+"FormRow",a001,"Required Field","Required Field",""
+"GenericChooser",a001,"(no selection)","(no selection)",""
+"GenericChooser",a002,"(no selection)","(no selection)",""
+"GenericChooser",a003,"(no selection)","(no selection)",""

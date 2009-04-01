@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#24 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#25 $
     </Copyright>
 
     <Overview>
@@ -82,7 +82,7 @@
         <a:RefreshRegion alwaysRender="$chooserState.render">
             <table cellspacing="0" cellpadding="0" awmenuId="$menuId" class="chWrap">
                 <tr>
-                    <td class="chWrapLeft">\
+                    <td class="chWrapLeft">
                         <a:TextField class="$cssClass"
                                      value="$displayValue"
                                      behavior="$behavior"
@@ -90,7 +90,7 @@
                                      onBLur="return ariba.Chooser.chooserBlur(this, event);"
                                      autocomplete="off"
                                      disabled="$^disabled"
-                                     size="$^size"/>\
+                                     size="$^size"/>
                     </td>
                     <td class="chWrapRight">
                         <a href="javascript:void(0);" omitTags="$isDisabled" tabindex="-1">\
@@ -122,7 +122,7 @@
                         style="$recentSelectedStyle"
                         bh="CHM">
                         <td class="chMultiWrap chMultiWrapLeft">
-                            <input class="chMultiText chValidSelection"
+                            <input class="chTW chMultiText chValidSelection"
                                    type="text"
                                    value="$currentItemString"
                                    size="$^size"
@@ -208,7 +208,7 @@
                 <w:PopupMenuItem action="$null"
                                  showBullet="$^showBullet:$false"
                                  showCheck="$^showCheck:$false"
-                                 clientTrigger="ariba.Chooser.chooserMenuTrigger(event)">\
+                                 clientTrigger="ariba.Chooser.chooserMenuTrigger(this, event)">\
                     <a:IncludeContent/>\
                 </w:PopupMenuItem>
             </a:For>

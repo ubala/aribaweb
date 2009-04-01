@@ -3,6 +3,7 @@ package gallery.metaui;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.meta.annotations.Trait;
 import ariba.ui.meta.annotations.Traits;
+import ariba.ui.meta.annotations.Action;
 import ariba.util.core.Date;
 
 import java.math.BigDecimal;
@@ -24,6 +25,9 @@ public class MetaSimple extends AWComponent {
         public @Trait.RichText String description;
         public @Traits("imageData") byte[] logo;
         public File otherInstructions;
+
+        @Action
+        public void doSomething () { System.out.println("I did it!"); }
     }
     public static enum Choices { Small, Medium, Large, ExtraLarge }
 }

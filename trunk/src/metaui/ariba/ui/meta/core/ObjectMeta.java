@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ObjectMeta.java#19 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ObjectMeta.java#21 $
 */
 package ariba.ui.meta.core;
 
@@ -64,7 +64,8 @@ public class ObjectMeta extends Meta
     public final static String KeyEditable = "editable";
     public final static String KeyValid = "valid";
     public final static String KeyRank = "rank";
-    
+    public static final String DefaultActionCategory = "General";
+
     Map<Class, List<AnnotationProcessor>> _annotationProcessors = new HashMap();
     Map<String, String> _traitToGroup;
     int _traitToGroupGeneration = -1;
@@ -366,7 +367,10 @@ public class ObjectMeta extends Meta
         Map properties = new HashMap();
 
         List<Rule.Selector> selectors = new ArrayList(selectorList.subList(0,selectorList.size()-1));
-        selectors.add(new Rule.Selector(KeyActionCategory, annotation.category()));
+        String actionCategory = annotation.category();
+        if (!DefaultActionCategory.equals(actionCategory)) {
+            selectors.add(new Rule.Selector(KeyActionCategory, actionCategory));
+        }
         if (!isStatic) selectors.add(new Rule.Selector(KeyObject, KeyAny));
         // properties.put(KeyActionCategory, annotation.category());
         Rule.Selector origSel = ListUtil.lastElement(selectorList);
@@ -486,13 +490,12 @@ public class ObjectMeta extends Meta
 
             beginRuleSet(cls.getName().replace(".", "/") + ".java");
             try {
-                List selectorList = Arrays.asList(new Rule.Selector(KeyClass, className));
+                List<Rule.Selector> selectorList = Arrays.asList(new Rule.Selector(KeyClass, className));
                 Map properties = newPropertiesMap();
                 processAnnotations(cls, selectorList, properties, false);
-                if (!properties.isEmpty()) {
-                    Rule r = new Rule(selectorList, properties, ClassRulePriority);
-                    addRule(r);
-                }
+                selectorList.get(0)._isDecl = true;
+                Rule r = new Rule(selectorList, properties, ClassRulePriority);
+                addRule(r);
 
                 _registerActionsForClass(className, cls);
                 _registerFieldsForClass(className, cls);

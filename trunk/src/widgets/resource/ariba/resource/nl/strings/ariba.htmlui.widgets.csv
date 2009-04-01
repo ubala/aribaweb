@@ -1,0 +1,8 @@
+Cp1252
+,, This file has a single-column lookup key
+,,
+,, AWMessagesList
+,,
+ErrorMessage, "Fout: {0}", generic error message printed *usually* at the top of the page. The argument #0 is a localized string
+AlertMessage, "Melding: {0}", generic warning message printed *usually* at the top of the page. The argument #0 is a localized string
+ConfirmMessage, "Bevestiging: {0}", generic confirmation message printed *usually* at the top of the page. The argument #0 is a localized string

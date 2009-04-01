@@ -22,7 +22,7 @@
             <a:For item="$itemName" list="$peerItems">\
                 <w:PopupMenuItem action="$selectItem" showBullet="$itemVisible"><b emitTags="$itemVisible">$itemName</b></w:PopupMenuItem>
             </a:For>
-            <w:PopupMenuHeading showSeparator="$true">Parent Context</w:PopupMenuHeading>
+            <w:PopupMenuHeading showSeparator="$true"><a:Local key="a004">Parent Context</a:Local></w:PopupMenuHeading>
             <a:For item="$assignmentInfo" list="$editorProperties.activeAssignments">\
                 <w:PopupMenuItem action="$selectAssignment">$assignmentInfo.key = $assignmentInfo.value</w:PopupMenuItem>
             </a:For>
@@ -168,10 +168,10 @@
                         </div>
                     </t:Column>
 
-                    <t:Column class="label" align="right" label="Property" key="key" width="1px" nowrap>\
+                    <t:Column class="label" align="right" label="$[a001]Property" key="key" width="1px" nowrap>\
                         <a:String value="$assignment.key"/>:\
                     </t:Column>
-                    <t:Column class="ffp" style="padding-top:4px" label="Value" key="value">\
+                    <t:Column class="ffp" style="padding-top:4px" label="$[a002]Value" key="value">\
                         <a:If ifFalse="$editingCurrentAssignment">\
                             <a:GenericActionTag tagName="span" action="$editCurrentAssignment" disableClick="$!editing">\
                                 <a:If ifTrue="$compactMode">\
@@ -204,13 +204,13 @@
 <a:If ifTrue="$compactMode">
     <table cellpadding="0" cellspacing="0" class="scrollTableWrapper" style="border-width:1px 0px 0px 0px" width="100%"><tr>
         <td class="tableFooter" style="padding-left:3px">\
-            <w:PulldownButton menuId="mipGEdit">Edit</w:PulldownButton>
+            <w:PulldownButton menuId="mipGEdit"><a:Local key="a005">Edit</a:Local></w:PulldownButton>
             <w:PopupMenu menuId="mipGEdit">
-                <w:PopupMenuItem action="$addRule">Add Rule</w:PopupMenuItem>
+                <w:PopupMenuItem action="$addRule"><a:Local key="a006">Add Rule</a:Local></w:PopupMenuItem>
                 <a:IncludeBlock name="AddPropertyMenuItems"/>
             </w:PopupMenu>
             <a:If ifTrue="$editSet.isDirty">\
-                <w:TextButton action="$saveChanges" isBrandStyle="$true">Save</w:TextButton>\
+                <w:TextButton action="$saveChanges" isBrandStyle="$true"><a:Local key="a007">Save</a:Local></w:TextButton>\
             </a:If>\
         </td>
         <td class="tableFooter" width="1px" style="padding-right:3px">\
@@ -229,21 +229,21 @@
 </a:If>        
 \
 <w:Confirmation id="AddPropertyPanel" okAction="$addProperty">
-    <a:Content name="header">Add Property</a:Content>\
+    <a:Content name="header"><a:Local key="a008">Add Property</a:Local></a:Content>\
     <a:Content name="content">
         <w:FormTable showErrorFlags="$true">
-            <w:FormRow label="Property Key"><a:TextField value="$propertyKey"/></w:FormRow>
+            <w:FormRow label="$[a003]Property Key"><a:TextField value="$propertyKey"/></w:FormRow>
         </w:FormTable>
     </a:Content>\
 </w:Confirmation>
 \
 <a:Block name="AddPropertyMenuItems">
-    <w:PopupMenuHeading>Edit Property</w:PopupMenuHeading>
+    <w:PopupMenuHeading><a:Local key="a009">Edit Property</a:Local></w:PopupMenuHeading>
     <a:For item="$propertyKey" list="$compatibleProperties">\
         <w:PopupMenuItem action="$addProperty">$propertyKey</w:PopupMenuItem>
     </a:For>
     <a:SetValue propertyKey="$null"/>
-    <w:PopupMenuItem action="$addProperty">Other...</w:PopupMenuItem>
+    <w:PopupMenuItem action="$addProperty"><a:Local key="a010">Other...</a:Local></w:PopupMenuItem>
 </a:Block>
 <a:Block name="RuleMenuLink">
     <a:SetValue menuId="$requestContext.nextElementId"/>\
@@ -255,7 +255,7 @@
     <w:PopupMenu menuId="$menuId">
         <a:LazyDiv>
             <a:IncludeContent name="MenuItems" required="$false"/>
-            <w:PopupMenuHeading>Rule Selectors</w:PopupMenuHeading>
+            <w:PopupMenuHeading><a:Local key="a011">Rule Selectors</a:Local></w:PopupMenuHeading>
             <a:For item="$contextKey" list="$contextInfo.contextKeys">\
                 <w:PopupMenuItem action="$toggleSelector" showCheck="$selectorUsesContextKey">\
                     $contextKey = $contextValue\

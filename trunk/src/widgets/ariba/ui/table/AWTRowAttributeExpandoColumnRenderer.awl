@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowAttributeExpandoColumnRenderer.awl#1 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTRowAttributeExpandoColumnRenderer.awl#2 $
     </Copyright>
 
     <Overview>
@@ -40,9 +40,9 @@
                             <a:String value="$label" escapeUnsafeHtml="$true"/>:\
                         <a:Else/>\
                             <a:If ifTrue="$table.pivotState.detailAttributesExpanded">
-                                <a:Local>Less...</a:Local> \
+                                <a:Local key="a001">Less...</a:Local> \
                             <a:Else/>
-                                <a:Local>More...</a:Local> \
+                                <a:Local key="a002">More...</a:Local> \
                             </a:If>\
                         </a:If>\
                         <a:Image class="pivAttIcon"

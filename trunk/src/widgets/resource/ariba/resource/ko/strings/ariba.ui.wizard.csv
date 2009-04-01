@@ -1,0 +1,12 @@
+KS_C_5601-1987,,,,
+"WizardMeta","NextActionHint","Go to next step","다음 단계로 이동",""
+"WizardMeta","PrevActionHint","Go to previous step","이전 단계로 이동",""
+"WizardMeta","ExitActionHint","Exit","종료",""
+"WizardMeta","OkActionHint","OK","확인",""
+"WizardMeta","CancelActionHint","Cancel","취소",""
+"WizardMeta","NextAction","Next >","다음 >",""
+"WizardMeta","PreviousAction","< Previous","< 이전",""
+"WizardMeta","ExitAction","Exit","종료",""
+"WizardMeta","OkAction","OK","확인",""
+"WizardMeta","CancelAction","Cancel","취소",""
+"WizardMeta","RefreshAction","Refresh","새로 고침",""

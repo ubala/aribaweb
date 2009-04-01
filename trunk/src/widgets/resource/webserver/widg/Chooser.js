@@ -145,21 +145,26 @@ ariba.Chooser = function() {
             setTimeout(chooserFocus.bind(this), 1);
         },
 
-        chooserMenuTrigger : function (evt)
+        chooserMenuTrigger : function (elm, evt)
         {
-            var menuCellDivLink = Menu.getActiveItem();
-            var menu = Menu.menu(menuCellDivLink);
-            var selectionIndex = this.selectionIndex(menuCellDivLink);
+            var menu = Menu.menu(elm);
+            var selectionIndex = this.selectionIndex(elm);
+
             var menuItems = Menu.menuItems(menu);
             for (var i = 0; i < menuItems.length; i++) {
-                if (menuItems[i] == menuCellDivLink) {
+                if (menuItems[i] == elm) {
                     selectionIndex.value = i;
                     break;
                 }
             }
-            var selectionListName = this.selectionListName(menuCellDivLink);
-            var selectionList = this.selectionList(menuCellDivLink);
+            var selectionListName = this.selectionListName(elm);
+            var selectionList = this.selectionList(elm);
             selectionList.value = selectionListName;
+            var keyCode = Event.keyCode(evt);
+            if (keyCode == Input.KeyCodeTab) {
+                var formId = Dom.boolAttr(elm, "_sf", true) ? Dom.lookupFormId(elm) : null;
+                Menu.menuClicked(elm, elm.id, formId);
+            }
         },
 
         chooserRemoveClick : function (evt)
@@ -498,14 +503,19 @@ ariba.Chooser = function() {
             var sourceElm = Event.eventSourceElement(event);
             this.cancelChooserFetchTimeout(chooserInfo);
 
-            chooserInfo.skipBlur = keyCode == Input.KeyCodeEnter;
-            Debug.log("skipBlur " + chooserInfo.skipBlur);
-
-            if (Menu.AWActiveMenu && Menu.AWLinkId == chooserInfo.textField.id) {
-                // forward key down to menu item
-                Menu.menuKeyDown(event);
+            if (sourceElm == chooserInfo.textField &&
+                    elm == chooserInfo.textField) {
+                chooserInfo.skipBlur = keyCode == Input.KeyCodeEnter;
+                if (Menu.AWActiveMenu && Menu.AWLinkId == chooserInfo.textField.id) {
+                    // forward key down to menu item
+                    Menu.menuKeyDown(event, chooserInfo.menu);
+                    var menuItems = Menu.menuItems(chooserInfo.menu);
+                    if (menuItems.length > 1) {
+                        chooserInfo.skipBlur = keyCode == Input.KeyCodeTab;
+                    }
+                }
+                Debug.log("skipBlur " + chooserInfo.skipBlur + " keycode " + keyCode);
             }
-
             if (!Event.shouldBubble(event)) {
                 return false;
             }

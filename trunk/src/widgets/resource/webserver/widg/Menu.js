@@ -71,11 +71,14 @@ ariba.Menu = function() {
 
             if (this.AWActiveMenu && this.AWLinkId == linkId) {
                 // forward key down to menu item
-                return Menu.menuKeyDown(mevent);
+                return Menu.menuKeyDown(mevent, menu);
             }
-            else if (keyCode == Input.KeyCodeEnter || keyCode == Input.KeyCodeArrowDown) {
+            else if (keyCode == Input.KeyCodeEnter) {
+                this.clearActiveItem(menu);
+                this.menuLinkOnClick(positioningObject, menuName, linkId, mevent, false);                
+            }
+            else if (keyCode == Input.KeyCodeArrowDown) {
                 this.menuLinkOnClick(positioningObject, menuName, linkId, mevent, true);
-                return false;
             }
             return true;
         },
@@ -91,6 +94,16 @@ ariba.Menu = function() {
         setActiveItem : function (menuItemId)
         {
             this.AWActiveItemId = menuItemId;
+        },
+
+        clearActiveItem : function (menu)
+        {
+            this.AWActiveItemId = null;
+            var menuItems = this.menuItems(menu);
+            var currentItem;
+            for (var i = 0; i < menuItems.length; i++) {
+                this.cellMouseOut(menuItems[i]);
+            }
         },
 
         hiliteMenuItem : function (menuItem, menu)
@@ -291,7 +304,7 @@ ariba.Menu = function() {
             }
         },
 
-        menuKeyDown : function (mevent)
+        menuKeyDown : function (mevent, menu)
         {
             var shouldBubble = true;
             var keyCode = Event.keyCode(mevent);
@@ -300,32 +313,35 @@ ariba.Menu = function() {
             var formId = null;
             if (activeItem) {
                 formId = Dom.boolAttr(activeItem, "_sf", true) ? Dom.lookupFormId(activeItem) : null;
-                if (Event.keyCode(mevent) == Input.KeyCodeEnter) {
+                if (Event.keyCode(mevent) == Input.KeyCodeEnter ||
+                    Event.keyCode(mevent) == Input.KeyCodeTab) {
                     Menu.handleClientTrigger(activeItem, mevent);
                 }
             }
             if (!Event.shouldBubble(mevent)) {
                 return false;
             }
-
-            if (keyCode == Input.KeyCodeTab) {
-                this.hideActiveMenu();
-                return true;
-            }
-            if (keyCode == Input.KeyCodeEscape) { 
+            if (keyCode == Input.KeyCodeEscape) {
                 this.hideActiveMenu();
                 return false;
             }            
-            var senderId = activeItem.id;
-            var menu = this.menu(activeItem);
-            var menuDivId = menu.id;
-            var i, menuItems;
+            var senderId = null;
+            if (activeItem) {
+                senderId = activeItem.id;
+                menu = this.menu(activeItem);
+            }
 
-            if (keyCode == Input.KeyCodeEnter) {
+            var i, menuItems;
+            if (keyCode == Input.KeyCodeEnter && activeItem) {
                 this.menuClicked(activeItem, senderId, formId);
                 this.hideActiveMenu();
                 shouldBubble = false;
             }
+            else if (keyCode == Input.KeyCodeTab) {
+                this.hideActiveMenu();
+                return true;
+            }
+
             else if (keyCode == Input.KeyCodeArrowUp) {
                 menuItems = this.menuItems(menu);
                 if (menuItems.length == 0) return;
@@ -349,16 +365,22 @@ ariba.Menu = function() {
             else if (keyCode == Input.KeyCodeArrowDown) {
                 menuItems = this.menuItems(menu);
                 if (menuItems.length == 0) return;
+
                 var nextLink = null;
-                if (activeItem == menuItems[menuItems.length - 1]) {
+                if (activeItem == null) {
                     nextLink = menuItems[0];
                 }
                 else {
-                    for (i = 0; i < menuItems.length - 1; i++) {
-                        var menuLink = menuItems[i];
-                        if (menuLink == activeItem) {
-                            nextLink = menuItems[i + 1];
-                            break;
+                    if (activeItem == menuItems[menuItems.length - 1]) {
+                        nextLink = menuItems[0];
+                    }
+                    else {
+                        for (i = 0; i < menuItems.length - 1; i++) {
+                            var menuLink = menuItems[i];
+                            if (menuLink == activeItem) {
+                                nextLink = menuItems[i + 1];
+                                break;
+                            }
                         }
                     }
                 }
@@ -387,10 +409,10 @@ ariba.Menu = function() {
             }
             else {
                 var url = Request.formatUrl(senderList);
-                this.AWLinkId = null;
-                this.AWActiveItemId = null;
                 Request.setDocumentLocation(url, target);
             }
+            this.AWLinkId = null;
+            this.AWActiveItemId = null;            
             return false;
         },
 
@@ -726,13 +748,21 @@ ariba.Menu = function() {
              keydown : function (elm, evt) {
                  return Menu.menuLinkOnKeyDown(elm, elm.getAttribute("_mid"), elm.id, evt);
              }
-         }
+         },
 
+         // PMI - PopupMenuItem
+         PMI_NoHover : {
+            mousedown : function (elm, evt) {
+                return Menu.menuItemClicked(elm, evt);
+            }
+         }
     });
 
     Event.registerBehaviors({
         // Popup Menu Item
         PMI : {
+            prototype : Event.behaviors.PMI_NoHover,
+
             mousedown : function (elm, evt) {
                 return Menu.menuItemClicked(elm, evt);
             },

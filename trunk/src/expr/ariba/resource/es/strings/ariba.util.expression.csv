@@ -1,0 +1,3 @@
+Cp1252,,
+,,
+MalformedExpression,"Error de análisis se produce cerca del indicativo ""{0}"" en la línea ""{1}"" y columna ""{2}"".", "An syntactic error has occured while parsing the expression"

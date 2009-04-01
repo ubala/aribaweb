@@ -1,6 +1,35 @@
 New in Version 5.0RC3 - PREVIEW (3/2009)
 ----------------------------------------
 
+- Localization support
+    - Distribution now includes localized resources for aribaweb and widgets frameworks
+        (German, Spanish, French, Italian, Japanese, Korean,Dutch, Brazilian Portuguese,
+        Russian, Swedish, and Simplified and Traditional Chinese)
+    - MetaUI string externalization support
+        - Support for $[] localized string contants in .oss files
+        - Support for externalization of auto-generated labels (e.g. string file lookup is
+          performed for class, module and layout labels that would otherwise be defaulted
+          based on "decamelized" version of name)
+    - New localization script and ant targets:
+        - ant localize:         externalize strings from source to base locale (en_US) csvs
+        - ant localize-meta:    externalize default metaui labels to base locale
+        - ant localize-locales: propagate new strings locale-specific resource directories
+    - New "Pseudo-Localization" mode to enable seeing strings tagged for externalization/localization
+        (before they are actaully translated)
+    - New Localization Editor tool
+        - Embedded UI to manage localization process
+            - See all app project directories and their locales and strings files
+            - Menus for running the above ant targets to perform externalization
+            - String file editor for viewing, editing and saving .csv files
+            - BabelFish service integration for performing sample auto-translations
+    - Partial localization of Demo and MasterDetail examples
+    
+- Component Inspector: Content Highlighting
+    - Alt-hover in the main document now shows the region for the leaf component that will
+      be inspected (upon click) in the Component Inspector
+    - Hovering over lines in component inspector highlights the corresponding area in the document
+      window 
+
 - Form layout: support for labels above fields (instead of to the left)
     - MetaUI layout trait 'labelsOnTop' to use this layout
 
@@ -10,15 +39,32 @@ New in Version 5.0RC3 - PREVIEW (3/2009)
         - Module trait "SearchInToc" to put search form in TOC (with narrow labelsOnTop rendering)
         - Refactored MetaSearch and MetaDetailTable to create MetaTable -- more meta-controllable table setup
 
+- IE8 support
+    - Pages are auto-tagged with IE7 meta tag and javascript updated to parse for IE8
+    
+- Misc fixes
+   - AppCore apps not showing new global tabs (@module added in Application.oss) by default
+   - .oss files should be parsed as UTF-8 by default (support for extended character is string constants)
+   - Fix MySQL inactivity disconnect issue (by setting c3p0 connection pool to
+     testConnectionOnCheckout=true)
+   - Chooser: Many fixes - Keyboard nav: retain text focus upon edit to choosers and popups, ...
+   - AWReload: avoid loop when dynamic source recompilation fails to yield expected new .class file
+   - Hitting return incorrectly submitting forms that don't have explicit actions
+   - PulldownButton shouldn't show menu on click when disabled=$true
+
+- Enhanced examples
+    - MasterDetail example now demonstrates 1) adding a tab via metaui module,
+      2) top-level nav actions
+
 - Build system improvements
     - Faster builds and smaller wars: strip unneeded Xinha files from ariba.widgets.jar
     - Fix resource packaging error when rebuilding from clean on Windows (was resulting in exceptions about
       "bad date format", etc, due to missing resources).
     - ariba.src-all.jar should include metaui-jpa and awreload source
+    - Fix 'war' target not forcing build of app jar
+    - Fix bug with resource copy resulting in every bigger copy of build directory into docroot
 
-- Widgets fixes
-    - Keyboard nav: retain text focus upon edit to choosers and popups
-    
+
 
 New in Version 5.0RC2 (3/2009)
 ------------------------------

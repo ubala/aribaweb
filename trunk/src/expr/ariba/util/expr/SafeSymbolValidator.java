@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,14 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/SafeSymbolValidator.java#5 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/SafeSymbolValidator.java#6 $
 */
 
 package ariba.util.expr;
 
 import ariba.util.core.Fmt;
 import ariba.util.fieldtype.FieldInfo;
-import ariba.util.fieldtype.MethodInfo;
 import ariba.util.fieldtype.TypeInfo;
 import ariba.util.fieldvalue.Expression;
 import java.util.List;
@@ -46,18 +45,6 @@ public class SafeSymbolValidator extends SymbolValidator
         int fieldAccess = field.getAccessibility();
         if (fieldAccess < TypeInfo.AccessibilitySafe) {
             addError(field, Fmt.S("Field is not safe: %s", field.getName()));
-        }
-    }
-
-    protected void validate (MethodInfo method)
-    {
-        List reservedNames = TypeChecker.getReservedMethodNames();
-
-        int fieldAccess = method.getAccessibility();
-        if (fieldAccess < TypeInfo.AccessibilitySafe &&
-            !reservedNames.contains(method.getName())) {
-            addError(method, Fmt.S("Method is not safe: %s",
-                                   method.getName()));
         }
     }
 }

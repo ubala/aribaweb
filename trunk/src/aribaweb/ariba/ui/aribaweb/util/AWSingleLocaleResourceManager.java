@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSingleLocaleResourceManager.java#16 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSingleLocaleResourceManager.java#17 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -24,10 +24,18 @@ import java.util.Map;
 import ariba.util.core.StringUtil;
 import ariba.util.core.Assert;
 import ariba.util.core.MultiKeyHashtable;
+import ariba.util.core.ResourceService;
+
 import java.util.List;
 import ariba.util.i18n.LocaleSupport;
+import ariba.util.i18n.I18NUtil;
+import ariba.ui.aribaweb.core.AWSession;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
+
 import java.io.InputStream;
 import java.util.Locale;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class AWSingleLocaleResourceManager extends AWResourceManager
 {
@@ -399,5 +407,107 @@ public class AWSingleLocaleResourceManager extends AWResourceManager
         slrm.setBaseResourceManager(this);
 
         return slrm;
+    }
+
+    static Locale _PseudoLocaleFiles = I18NUtil.getLocaleFromString("eu");  // basque
+    static Locale _PseudoLocaleAll = I18NUtil.getLocaleFromString("ee");    // ewe
+
+    static class PseudoLocalizer implements ResourceService.PseudoLocalizer
+    {
+        public Map process (Locale locale, Map strings)
+        {
+            return (locale == _PseudoLocaleFiles || locale == _PseudoLocaleAll) ? pseudoLocalize(strings, true) : strings;
+        }
+
+        public String process (Locale locale, String string)
+        {
+            return (locale == _PseudoLocaleFiles || locale == _PseudoLocaleAll) ? pseudoLocalize(string) : string;
+        }
+
+        Map pseudoLocalize (Map<String, Object> strings, boolean recurse)
+        {
+            Map localized = MapUtil.map();
+            for (Map.Entry<String, Object> e : strings.entrySet()) {
+                Object val = e.getValue();
+                if (val instanceof String) {
+                    val = pseudoLocalize((String) val);
+                }
+                else if (val instanceof Map) {
+                    val = recurse ? pseudoLocalize((Map)val, false) : null;
+                }
+                localized.put(e.getKey(), val);
+            }
+            return localized;
+        }
+
+        Pattern _TagPattern = Pattern.compile("([^<]*)(?:(<[^>]+?>)(.*?))?");
+
+        String pseudoLocalize (String s)
+        {
+            Matcher m = _TagPattern.matcher(s);
+            StringBuffer sb = new StringBuffer();
+            while (m.find()) {
+                String pre = m.group(1), tag = m.group(2), suf = m.group(3);
+                if (pre != null) sb.append(pseudoLocalizePart(pre));
+                if (tag != null) sb.append(tag);
+                if (suf != null) sb.append(pseudoLocalizePart(suf));
+            }
+            return sb.toString();
+        }
+
+        String pseudoLocalizePart (String s)
+        {
+            s = StringUtil.replaceCharByChar(s, 'a', '\u00e0');
+            s = StringUtil.replaceCharByChar(s, 'e', '\u00e8');
+            s = StringUtil.replaceCharByChar(s, 'i', '\u00ed');
+            s = StringUtil.replaceCharByChar(s, 'o', '\u00f4');
+            s = StringUtil.replaceCharByChar(s, 'u', '\u00fc');
+            s = StringUtil.replaceCharByChar(s, 'c', '\u00e7');
+            s = StringUtil.replaceCharByChar(s, 'n', '\u00f1');
+            return s;
+        }
+    }
+
+    public enum PseudoMode { Off, Files, All }
+
+    public PseudoMode _pseudoLocalizationMode ()
+    {
+        Locale locale = locale();
+        return (locale == _PseudoLocaleFiles) ? PseudoMode.Files
+                : ((locale == _PseudoLocaleAll) ? PseudoMode.All :PseudoMode.Off);
+    }
+
+    public boolean pseudoLocalizingAll ()
+    {
+        return AWConcreteApplication.IsDebuggingEnabled && _pseudoLocalizationMode() == PseudoMode.All;
+    }
+
+    public String pseudoLocalizeUnKeyed (String string)
+    {
+        return (_pseudoLocalizationMode() == PseudoMode.All)
+                ? ResourceService._getPseudoLocalizer().process(locale(), string) 
+                : string;
+    }
+
+    static public void _setPseudoLocalizationMode (AWSession session, PseudoMode mode)
+    {
+        if (mode != PseudoMode.Off) {
+            PseudoLocalizer pl = (PseudoLocalizer)ResourceService._getPseudoLocalizer();
+            if (pl == null) {
+                pl = new PseudoLocalizer();
+                ResourceService._setPseudoLocalizer(pl);
+            }
+            session.dict().put(PseudoLocalizer.class, session.preferredLocale());            
+            session._forceLocale(mode == PseudoMode.Files ? _PseudoLocaleFiles : _PseudoLocaleAll);
+        } else {
+            Locale l = (Locale)session.dict().get(PseudoLocalizer.class);
+            session._forceLocale(l != null ? l : Locale.US);
+        }
+        
+    }
+
+    static public PseudoMode _pseudoLocalizationMode (AWSession session)
+    {
+        return ((AWSingleLocaleResourceManager)session.resourceManager())._pseudoLocalizationMode();
     }
 }

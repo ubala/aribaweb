@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormTable.java#9 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/FormTable.java#10 $
 */
 package ariba.ui.validation;
 
@@ -45,7 +45,7 @@ public class FormTable extends AWComponent
 
     public String ftClass ()
     {
-        boolean editable = booleanValueForBinding("editable");
+        boolean editable = booleanValueForBinding("editable", true);
         boolean labelsOnTop = booleanValueForBinding("showLabelsAboveControls");
         if (!editable && labelsOnTop) return "ftRO ftLOT";
         if (!editable) return "ftRO";

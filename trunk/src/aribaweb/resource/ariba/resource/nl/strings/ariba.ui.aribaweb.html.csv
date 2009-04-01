@@ -1,0 +1,8 @@
+Cp1252,,,,
+"AWBody",a001,"Please wait. An action is pending...","Ogenblik geduld. Er moet nog een actie worden uitgevoerd...",""
+"AWErrorFlag",a001,"Error","Fout",""
+"AWPasswordField",a001,"Warning","Waarschuwing",""
+"AWPasswordField",a002,"Warning: Caps Lock is on.  This may cause you to enter your password incorrectly.","Waarschuwing: Caps Lock staat aan. Het kan zijn dat hierdoor het wachtwoord niet juist wordt ingevoerd.",""
+"AWSubmitButton",a001,"Submit","Indienen",""
+"AWFileUploadInternals","a001","Error: Your request cannot be processed.  Please check that file paths for all file uploads are valid.","Fout: uw aanvraag kan niet worden verwerkt. Controleer of de bestandspaden voor alle te laden bestanden geldig zijn.",""
+"AWTextArea","a001","Characters left","Tekens resterend",""

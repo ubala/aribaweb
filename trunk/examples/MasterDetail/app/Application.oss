@@ -1,7 +1,44 @@
 /* Application.oss -- application global rules */
+@module=Home {
+    @layout=Welcome#pad8 {
+	    component:WelcomeContent;
+	    after:zTop;
+    }
+
+    @layout=UserTable {
+	    component:UserTable;
+	    needsForm:true;
+	    after:zBottom;
+    }
+
+    @layout=Actions {
+       label:"Actions";
+       component:"MetaActionList";
+       after:zToc;
+    }
+}
+
 module=model.Issue {
     @layout#Hint {
         bindings:{value:"Demo Note: <i>currently logged in as Anonymous</i> -- To see full functionality click <b>Sign In</b> (User: admin, Password: ariba)"};
         visible:${!ariba.appcore.User.isLoggedIn()}
+    }
+}
+
+@actionCategory=Navigation {
+    after:zNav;
+
+    @action=ShowIssueTab {
+        actionResults:${ariba.ui.meta.layouts.MetaNavTabBar.getState(requestContext.session).gotoModule("model.Issue", requestContext)};
+    }
+
+    @action=ShowIssueList#pageAction {
+        pageName:MetaContentPage;
+        pageBindings: {
+            module:model.Issue;
+            class:model.Issue;
+            displayGroup:${new ariba.ui.table.AWTDisplayGroup()};
+            layout:SearchPage;
+        }
     }
 }

@@ -5,15 +5,19 @@
                 <a:Image filename="cmdbar_prod.gif"/>
                 <br/><br/>
                 <w:FormTable showErrorFlags="$true">
-                    <w:FormRow label="User Name" errorKey="username">
+                    <w:FormRow label="$[a001]User Name" errorKey="username">
                         <a:TextField value="$userName"/>
                     </w:FormRow>
-                    <w:FormRow label="Password" errorKey="password">
+                    <w:FormRow label="$[a002]Password" errorKey="password">
                         <a:PasswordField value="$password"/>
                     </w:FormRow>
                     <w:FormRow >
-                        <w:TextButton action="$login" isDefault="$true">Login</w:TextButton>
-                        <w:TextButton action="$cancel">Cancel</w:TextButton>
+                        <w:TextButton action="$login" isDefault="$true">
+                            <a:Local key="a003">Login</a:Local>
+                        </w:TextButton>
+                        <w:TextButton action="$cancel">
+                            <a:Local key="a004">Cancel</a:Local>
+                        </w:TextButton>
                     </w:FormRow>
                 </w:FormTable>
             </div>

@@ -1,0 +1,7 @@
+Shift_JIS,,,,
+"AWBaseRequest",1,"Uploaded %s KB of %s KB...","%s KB / %s KB をアップロード中...","Appears in file upload panel"
+"AWComponentActionRequestHandler",1,"Waiting for previous request to complete ...","前の処理の完了待ち ...","Appears in page loading status panel"
+"AWComponentActionRequestHandler",2,"Processing request ...","処理中 ...","Appears in page loading status panel"
+"AWErrorInfo",1,"Unknown Error","不明なエラー",""
+"AWLazyDivInternals",a001,"Loading...","ロード中...",""
+"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","このサイトに対するウィンドウポップアップを有効にし、この機能を利用できるようにしてください。",""

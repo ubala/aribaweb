@@ -1,0 +1,3 @@
+Cp1252,,
+,,
+MalformedExpression,"Ett tolkningsfel inträffar nära strängen ""{0}"" på rad ""{1}"" och kolumn ""{2}"".", "An syntactic error has occured while parsing the expression"

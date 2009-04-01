@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentInspector.java#17 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentInspector.java#18 $
 */
 package ariba.ui.dev;
 
@@ -29,9 +29,6 @@ import ariba.ui.aribaweb.core.AWConstants;
 import ariba.ui.aribaweb.util.AWDebugTrace;
 import ariba.ui.aribaweb.util.AWDebugTrace.ComponentTraceNode;
 import ariba.ui.aribaweb.util.AWDebugTrace.MetadataTraceNode;
-import ariba.ui.aribaweb.util.AWDebugTrace.AssignmentRecorder;
-import ariba.ui.aribaweb.util.AWDebugTrace.AssignmentSource;
-import ariba.ui.aribaweb.util.AWDebugTrace.Assignment;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWUtil;
@@ -43,16 +40,13 @@ import ariba.ui.widgets.AribaPageContent;
 import ariba.util.core.ListUtil;
 import ariba.util.core.URLUtil;
 import ariba.util.core.Fmt;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.StringReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InputStream;
-import java.io.Reader;
 import java.util.List;
-import java.util.Map;
 import java.util.ArrayList;
 import java.net.UnknownHostException;
 import java.net.InetAddress;
@@ -613,5 +607,40 @@ public class AWComponentInspector extends AWComponent
         };
         thr.setPriority(Thread.MAX_PRIORITY - 1);
         thr.start();
+    }
+
+    public List<AWEncodedString> parentNodes ()
+    {
+        return _debugTrace.getHierarchy() == null ? null : new ArrayList<AWEncodedString>(
+            _debugTrace.getHierarchy().keySet());
+    }
+
+    private AWEncodedString _parentNode;
+
+    public AWEncodedString getParentNode ()
+    {
+        return _parentNode;
+    }
+
+    public void setParentNode (AWEncodedString parentNode)
+    {
+        this._parentNode = parentNode;
+    }
+    
+    public List<AWEncodedString> childList ()
+    {
+        return _debugTrace.getHierarchy().get(_parentNode);
+    }
+    
+    private AWEncodedString _currChild;
+
+    public AWEncodedString getCurrChild ()
+    {
+        return _currChild;
+    }
+
+    public void setCurrChild (AWEncodedString child)
+    {
+        _currChild = child;
     }
 }

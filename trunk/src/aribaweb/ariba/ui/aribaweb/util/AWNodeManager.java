@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNodeManager.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNodeManager.java#7 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -24,6 +24,7 @@ public abstract class AWNodeManager
 {
     private MultiKeyHashtable _directActionValidatorTable;
     private AWNodeValidator _defaultNodeValidator;
+    private AWNodeValidator _componentActionNodeValidator;
 
     public AWNodeManager ()
     {
@@ -39,6 +40,12 @@ public abstract class AWNodeManager
     private void registerComponentAction (AWNodeValidator nv)
     {
         nv.setNodeManager(this);
+    }
+
+    private void registerForComponentAction(AWNodeValidator nv)
+    {
+        nv.setNodeManager(this);
+        _componentActionNodeValidator = nv;
     }
 
     /**
@@ -59,6 +66,11 @@ public abstract class AWNodeManager
     public AWNodeValidator defaultNodeValidator ()
     {
         return _defaultNodeValidator;
+    }
+
+    public AWNodeValidator componentActionNodeValidator()
+    {
+        return _componentActionNodeValidator;
     }
 
 
@@ -110,6 +122,15 @@ public abstract class AWNodeManager
         }
     }
 
+    public static void registerDefaultComponentActionNodeValidator (AWNodeValidator nv)
+    {
+        AWNodeManager nm = getNodeManager();
+        if (nm != null) {
+            // registerForComponentAction
+            nm.registerForComponentAction(nv);
+        }
+    }
+
     public static void registerDefaultNodeValidator (AWNodeValidator nv)
     {
         AWNodeManager nm = getNodeManager();
@@ -127,6 +148,17 @@ public abstract class AWNodeManager
             nv = nm.defaultNodeValidator();
         }
         return nv;
+    }
+
+    public static AWNodeValidator getComponentActionNodeValidator()
+    {
+        AWNodeValidator nv = null;
+        AWNodeManager nm = getNodeManager();
+        if (nm != null) {
+            nv = nm.componentActionNodeValidator();
+        }
+        return nv;
+
     }
 
     public static AWNodeValidator getNodeValidatorForDirectAction (String className,

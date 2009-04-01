@@ -18,19 +18,24 @@ ariba.Dom = function() {
     var WindowsArray = new Array();
     var _apV = navigator.appVersion;
     var IsIE = (window.attachEvent && !window.opera) ? true : false;
-    var IsIE6Only = _apV.indexOf("MSIE 6") != -1;
+    var IsIE8 = _apV.indexOf("MSIE 8") != -1;
+    var IsIE7 = _apV.indexOf("MSIE 7") != -1;
+    var IsIE6 = _apV.indexOf("MSIE 6") != -1;
+    var IsIE7Up = IsIE7 || IsIE8;
+    var IsIE6Up = IsIE6 || IsIE7Up;
 
     var Dom = {
         // Public Globals
         IsIE : IsIE,
-        IsIE7 : _apV.indexOf("MSIE 7") != -1,
-        IsIE6Only : IsIE6Only,
-        IsIE6 :  _apV.indexOf("MSIE 7") != -1 || _apV.indexOf("MSIE 6") != -1,
+        IsIE8 : IsIE8,
+        IsIE7 : IsIE7Up,
+        IsIE6Only : IsIE6,
+        IsIE6 :  IsIE6Up,
         IsIEonMac : (IsIE && (navigator.platform != "Win32")) ? true : false,
         IsNS6 : (!document.all && document.getElementById) ? true : false,
         IsMoz : (!document.all && document.getElementById) ? true : false,
         isSafari : navigator.appVersion.indexOf("Safari") != -1,
-        AWEmptyDocScriptlet : IsIE6Only ? "javascript:false" : "javascript:void(0);",
+        AWEmptyDocScriptlet : IsIE6 ? "javascript:false" : "javascript:void(0);",
 
         AWOpenWindowErrorMsg : null,
 
@@ -212,8 +217,14 @@ ariba.Dom = function() {
                         namedWindow = window.open(urlString, windowName);
                     }
                     WindowsArray[windowName] = namedWindow;
-                    if (navigator.appVersion.indexOf(IdentIE5) != -1 || navigator.appName.indexOf(IdentNS) != -1) {
+                    if (navigator.appVersion.indexOf(IdentIE5) != -1
+                            || navigator.appName.indexOf(IdentNS) != -1) {
                         namedWindow.focus();
+                    }
+                    else if (this.IsIE6) {
+                        // 6 or 7
+                        function focusDelay(){namedWindow.focus();}
+                        setTimeout(focusDelay);
                     }
                 }
                 else if (navigator.appVersion.indexOf(IdentIE5) != -1 || navigator.appName.indexOf(IdentNS) != -1) {

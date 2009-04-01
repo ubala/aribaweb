@@ -1,26 +1,26 @@
 <w:BucketsTOC>\
-    <w:BucketHeading label="Browse">
-        <w:BucketItem label="Documentation" action='${pageWithName("SearchSource")}'/>
-        <w:BucketItem label="Component Inspector" tdBh="${ariba.ui.dev.AWComponentInspector.ciLinkBH(requestContext)}"
+    <w:BucketHeading label="$[a001]Browse">
+        <w:BucketItem label="$[a002]Documentation" action='${pageWithName("SearchSource")}'/>
+        <w:BucketItem label="$[a003]Component Inspector" tdBh="${ariba.ui.dev.AWComponentInspector.ciLinkBH(requestContext)}"
                       action='${ariba.ui.dev.AWComponentInspector.togglePathDebugging(requestContext())}'/>
     </w:BucketHeading>
-    <w:BucketHeading label="Gallery">
-        <w:BucketItem label="Data Tables" action='${pageWithName("TableTabs")}'/>
-        <w:BucketItem label="Pivot Tables" action='${pageWithName("PivotTabs")}'/>
-        <w:BucketItem label="Forms (MetaUI)" action='${pageWithName("MetaUIForms")}'/>
-        <w:BucketItem label="File Upload" action='${pageWithName("FileUploadExamples")}'/>
+    <w:BucketHeading label="$[a004]Gallery">
+        <w:BucketItem label="$[a005]Data Tables" action='${pageWithName("TableTabs")}'/>
+        <w:BucketItem label="$[a006]Pivot Tables" action='${pageWithName("PivotTabs")}'/>
+        <w:BucketItem label="$[a007]Forms (MetaUI)" action='${pageWithName("MetaUIForms")}'/>
+        <w:BucketItem label="$[a008]File Upload" action='${pageWithName("FileUploadExamples")}'/>
     </w:BucketHeading>
-    <w:BucketHeading label="Fun">
-        <w:BucketItem label="Master Detail app" action='${pageWithName("ERPage")}'/>
-        <w:BucketItem label="YouTube Browser" action='${pageWithName("YouTubeBrowser")}'/>
-        <w:BucketItem label="Charts" action='${pageWithName("ChartTabs")}'/>
-        <w:BucketItem label="Maps" action='${pageWithName("MapTabs")}'/>
-        <w:BucketItem label="Mail Reader" action='${pageWithName("MailReader")}'/>
+    <w:BucketHeading label="$[a009]Fun">
+        <w:BucketItem label="$[a010]Master Detail app" action='${pageWithName("ERPage")}'/>
+        <w:BucketItem label="$[a011]YouTube Browser" action='${pageWithName("YouTubeBrowser")}'/>
+        <w:BucketItem label="$[a012]Charts" action='${pageWithName("ChartTabs")}'/>
+        <w:BucketItem label="$[a013]Maps" action='${pageWithName("MapTabs")}'/>
+        <w:BucketItem label="$[a014]Mail Reader" action='${pageWithName("MailReader")}'/>
     </w:BucketHeading>
 <!--
-    <w:BucketItem label="Map Race" action='${pageWithName("MapRace")}'/>
-    <w:BucketHeading label="Tests">
-        <w:BucketItem label="Refresh Region Test" action='${pageWithName("RefreshRegionTest")}'/>
+    <w:BucketItem label="$[a015]Map Race" action='${pageWithName("MapRace")}'/>
+    <w:BucketHeading label="$[a016]Tests">
+        <w:BucketItem label="$[a017]Refresh Region Test" action='${pageWithName("RefreshRegionTest")}'/>
     </w:BucketHeading>
 -->
 </w:BucketsTOC>\

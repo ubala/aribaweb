@@ -1,0 +1,17 @@
+Cp1252,
+, This file is a of audit categories (from the logger names) to friendlier names
+
+aribaAudit, "Generale"
+aribaAuditCommitNow, "Generale"
+aribaAudit.admin, "Amministrazione"
+aribaAuditCommitNow.admin, "Amministrazione (attività/file)"
+aribaAuditCommitNow.apputil, "Amministrazione AppUtil"
+aribaAuditCommitNow.sso, "SSO"
+aribaAuditCommitNow.exception, "Eccezione"
+aribaAuditCommitNow.parameters, "Parametri"
+aribaAuditCommitNow.approvable, "Generale"
+aribaAuditCommitNow.realmPurge, "Eliminazione realm"
+aribaAuditCommitNow.integration, "Integrazione"
+aribaAuditCommitNow.reportTimeout, "Timeout rapporto"
+aribaAuditCommitNow.schemaRealmMapping, "Mapping realm schema"
+aribaAuditCommitNow.cdsSyncVerifier, "Verificatore sincronizzazione CDS"

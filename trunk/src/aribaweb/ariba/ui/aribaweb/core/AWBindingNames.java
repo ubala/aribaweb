@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBindingNames.java#30 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBindingNames.java#31 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -189,6 +189,7 @@ abstract public class AWBindingNames extends AWBaseObject
     public static final String behavior               = "behavior";
     public static final String visibles               = "visibles";
     public static final String sessionless            = "sessionless";
+    public static final String focus                  = "focus";
 
 
     // ** These are not a binding names -- just a constants that need homes

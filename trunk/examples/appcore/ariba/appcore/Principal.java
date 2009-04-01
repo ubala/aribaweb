@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Principal.java#4 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Principal.java#5 $
 */
 package ariba.appcore;
 
@@ -26,7 +26,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Transient;
 
 import ariba.ui.meta.annotations.Trait;
-import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.ListUtil;
 
 import java.util.List;
@@ -106,6 +105,7 @@ public class Principal
 
     public boolean hasPermissions (List<Integer> ids, boolean all)
     {
+        if (ListUtil.nullOrEmptyList(ids)) return true;
         for (Integer id : ids) {
             if (hasPermission(id)) {
                 if (!all) return true;
@@ -118,6 +118,6 @@ public class Principal
 
     public boolean hasPermission (String name)
     {
-        return permissionSet().hasPermission(PermissionSet.idForPermissionName(name));
+        return permissionSet().hasPermission(Permission.idForPermissionName(name));
     }
 }

@@ -12,53 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWMetaInspectorPane.java#1 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWMetaInspectorPane.java#3 $
 */
 package ariba.ui.dev;
 
 import ariba.ui.aribaweb.core.AWComponent;
-import ariba.ui.aribaweb.core.AWComponentApiManager;
-import ariba.ui.aribaweb.core.AWComponentDefinition;
-import ariba.ui.aribaweb.core.AWComponentReference;
-import ariba.ui.aribaweb.core.AWRequestContext;
-import ariba.ui.aribaweb.core.AWResponse;
-import ariba.ui.aribaweb.core.AWResponseGenerating;
-import ariba.ui.aribaweb.core.AWBindableElement;
-import ariba.ui.aribaweb.core.AWSession;
-import ariba.ui.aribaweb.core.AWConstants;
 import ariba.ui.aribaweb.util.AWDebugTrace;
 import ariba.ui.aribaweb.util.AWDebugTrace.ComponentTraceNode;
 import ariba.ui.aribaweb.util.AWDebugTrace.MetadataTraceNode;
-import ariba.ui.aribaweb.util.AWDebugTrace.AssignmentRecorder;
 import ariba.ui.aribaweb.util.AWDebugTrace.AssignmentSource;
 import ariba.ui.aribaweb.util.AWDebugTrace.Assignment;
-import ariba.ui.aribaweb.util.AWEncodedString;
-import ariba.ui.aribaweb.util.AWResource;
-import ariba.ui.aribaweb.util.AWUtil;
-import ariba.ui.aribaweb.util.AWGenericException;
-import ariba.ui.outline.OutlineState;
-import ariba.ui.table.AWTDisplayGroup;
-import ariba.ui.widgets.Log;
-import ariba.ui.widgets.AribaPageContent;
-import ariba.util.core.ListUtil;
-import ariba.util.core.URLUtil;
-import ariba.util.core.Fmt;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.StringReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.InputStream;
-import java.io.Reader;
-import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
-import java.net.UnknownHostException;
-import java.net.InetAddress;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 
 public class AWMetaInspectorPane extends AWComponent
 {
@@ -67,13 +31,61 @@ public class AWMetaInspectorPane extends AWComponent
     AWDebugTrace _debugTrace;
 
     public boolean _showProperties;
-    public String _propertyKey;
+    private String _propertyKey;
+    private Object _propertyValue;
     public AssignmentSource _assignmentSource;
     public Assignment _assignment;
 
     public boolean isStateless ()
     {
         return false;
+    }
+
+    public String propertyKey ()
+    {
+        return _propertyKey;
+    }
+
+    public void setPropertyKey (String key)
+    {
+        _propertyKey = key;
+        _propertyValue = null;
+    }
+
+    public Object propertyValue ()
+    {
+        if (_propertyValue == null) {
+            Map map = _traceNode.associatedMetadataProperties();
+            _propertyValue = map != null ? map.get(_propertyKey) : null;
+        }
+        return _propertyValue;
+    }
+
+    public String propertyValueAsString ()
+    {
+        Object value = propertyValue();
+        return value != null ? value.toString() : null;
+    }
+
+    public int newlineIdx ()
+    {
+        String val = propertyValueAsString();
+        return val != null ? val.indexOf('\n') : -1;
+    }
+
+    public boolean isPropertyValueMultiline ()
+    {
+        return newlineIdx() >= 0;
+    }
+
+    public Object propertyValueFirstLine ()
+    {
+        String val = propertyValueAsString();
+        int idx = (val != null) ? val.indexOf('\n') : -1;
+        if (idx >= 0) {
+            return val.substring(0, idx);
+        }
+        return propertyValue();
     }
 
     protected void awake ()

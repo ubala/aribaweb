@@ -1,5 +1,5 @@
 <table cellspacing="0" width="100%" class="dbTitleWrapper"><tr>
-    <td class="dbTitle">$metaContext.properties.label <b><a:Local>Dashboard</a:Local></b></td>
+    <td class="dbTitle">$metaContext.properties.label <b><a:Local key="a001">Dashboard</a:Local></b></td>
     <td align="right" nowrap>\
         <!--- Imagine Something useful here -->
     </td>

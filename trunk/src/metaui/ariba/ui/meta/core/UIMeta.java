@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#51 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#55 $
 */
 package ariba.ui.meta.core;
 
@@ -24,19 +24,26 @@ import ariba.ui.aribaweb.core.AWPage;
 import ariba.ui.aribaweb.core.AWBindingDictionary;
 import ariba.ui.aribaweb.core.AWBinding;
 import ariba.ui.aribaweb.core.AWValidationContext;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
+import ariba.ui.aribaweb.core.AWSession;
+import ariba.ui.aribaweb.core.AWStringLocalizer;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWResourceManager;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWJarWalker;
 import ariba.ui.aribaweb.util.AWFileResource;
+import ariba.ui.aribaweb.util.AWResourceManagerDictionary;
+import ariba.ui.aribaweb.util.AWSingleLocaleResourceManager;
 import ariba.ui.validation.AWVIdentifierFormatter;
 import ariba.ui.meta.annotations.NavModuleClass;
+import ariba.ui.meta.annotations.Localized;
 import ariba.util.core.Assert;
 import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
 import ariba.util.fieldvalue.FieldValue;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,6 +53,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Locale;
 
 public class UIMeta extends ObjectMeta
 {
@@ -63,12 +71,12 @@ public class UIMeta extends ObjectMeta
     public final static String PropFieldsByZone = "fieldsByZone";
     public final static String PropFieldPropertyList = "fieldPropertyList";
     public final static String PropLayoutsByZone = "layoutsByZone";
-    static final String DefaultActionCategory = "General";
 
     static UIMeta _Instance;
 
     protected Map <AWResource, RuleSet> _loadedResources = new HashMap();
-    protected List<String> _navModuleClasses = new ArrayList();
+    protected static List<String> _NavModuleClasses = new ArrayList();
+    protected static Set<String> _LocalizedClasses = new HashSet();
 
     public static UIMeta getInstance ()
     {
@@ -78,16 +86,28 @@ public class UIMeta extends ObjectMeta
         return _Instance;
     }
 
-    public UIMeta()
-    {
+    static protected void initialize () {}
+    
+    static {
         AWJarWalker.registerAnnotationListener(NavModuleClass.class,
                 new AWJarWalker.AnnotationListener () {
                     public void annotationDiscovered(String className, String annotationType)
                     {
-                        _navModuleClasses.add(className);
+                        _NavModuleClasses.add(className);
+                        _LocalizedClasses.add(className);
                     }
                 });
+        AWJarWalker.registerAnnotationListener(Localized.class,
+                new AWJarWalker.AnnotationListener () {
+                    public void annotationDiscovered(String className, String annotationType)
+                    {
+                        _LocalizedClasses.add(className);
+                    }
+                });        
+    }
 
+    public UIMeta()
+    {
         beginRuleSet(UIMeta.class.getName());
         try {
             registerKeyInitObserver(KeyClass, new FileMetaProvider());
@@ -98,9 +118,9 @@ public class UIMeta extends ObjectMeta
             defineKeyAsPropertyScope(KeyModule);
 
             // Default rule for converting field name to label
+            registerDefaultLabelGeneratorForKey(KeyClass);
             registerDefaultLabelGeneratorForKey(KeyField);
             registerDefaultLabelGeneratorForKey(KeyLayout);
-            registerDefaultLabelGeneratorForKey(KeyClass);
             registerDefaultLabelGeneratorForKey(KeyModule);
             registerDefaultLabelGeneratorForKey(KeyAction);
             registerDefaultLabelGeneratorForKey(KeyActionCategory);
@@ -243,7 +263,7 @@ public class UIMeta extends ObjectMeta
         AWResource resource = resourceManager.packageResourceNamed(filename);
         Assert.that(!required || resource != null, "Rule file not found in resource search path: %s", filename);
         if (resource != null) {
-            beginRuleSet(rank, filename);
+            beginRuleSet(rank, resource.relativePath());
             _loadRuleFile(resource);
             return true;
         }
@@ -311,7 +331,7 @@ public class UIMeta extends ObjectMeta
         return new _DefaultLabelGenerator(key);
     }
 
-    public static Object defaultLabelForIdentifier (String fieldName)
+    public static String defaultLabelForIdentifier (String fieldName)
     {
         int lastDot = fieldName.lastIndexOf('.');
         if (lastDot != -1 && lastDot != fieldName.length() -1) fieldName = fieldName.substring(lastDot+1);
@@ -337,8 +357,7 @@ public class UIMeta extends ObjectMeta
 
     public void registerDefaultLabelGeneratorForKey (String key)
     {
-        registerDerivedValue(KeyLabel, defaultLabelGeneratorForKey(key),
-                key, KeyAny);
+        registerDerivedValue(KeyLabel, new LocalizedLabelString(), key, KeyAny);
     }
 
     public List<ItemProperties> fieldList (Context context)
@@ -523,8 +542,8 @@ public class UIMeta extends ObjectMeta
     }
 
 
-    public static String[] ModuleActionZones = { "zGlobal" };
-    public static String[] ActionZones = { "zGlobal", "zMain" };
+    public static String[] ModuleActionZones = { "zGlobal", "zNav" };
+    public static String[] ActionZones = { "zGlobal", "zMain", "zGeneral" };
 
     public enum ModuleMatch { AsHome, AsShow, NoMatch };
 
@@ -839,7 +858,7 @@ public class UIMeta extends ObjectMeta
     {
         if (_didDeclareModules) return;
         _didDeclareModules = true;
-        declareModulesForClasses(_navModuleClasses);
+        declareModulesForClasses(_NavModuleClasses);
     }
 
     void declareModulesForClasses (List<String> moduleClasses)
@@ -847,7 +866,8 @@ public class UIMeta extends ObjectMeta
         if (moduleClasses.size() == 0) return;
         Log.meta.debug("Auto declaring modules for classes: %s ", moduleClasses);
         for (String className : moduleClasses) {
-            beginRuleSet(className);
+            String classFileName = className.replace(".", "/") + ".java";
+            beginRuleSet(classFileName);
             try {
                 List <Rule.Selector> selectors = Arrays.asList(new Rule.Selector(KeyModule, className));
                 ListUtil.lastElement(selectors)._isDecl = true;
@@ -889,6 +909,94 @@ public class UIMeta extends ObjectMeta
         }
     }
 
+    // Marker interface
+    public interface AutoLocalized
+    {
+        String packageName ();
+        String fileKey ();
+        String key ();
+    }
+
+    LocalizedString createLocalizedString (String key, String defaultValue)
+    {
+        Assert.that(_currentRuleSet != null, "Attempt to create localized string without currentRuleSet in place");
+        return new LocalizedString(_currentRuleSet.filePath(), key, defaultValue);
+    }
+
+    public static class LocalizedStringCache
+    {
+        private AWResourceManagerDictionary _localizedStringsHashtable = new AWResourceManagerDictionary();
+
+        AWResourceManager resourceManager (Context context)
+        {
+            AWResourceManager resourceManager = null;
+            if (context instanceof UIContext) {
+                AWRequestContext requestContext = ((UIContext)context).requestContext();
+                HttpSession existingHttpSession = (requestContext != null) ? requestContext.existingHttpSession() : null;
+                if (existingHttpSession != null) {
+                    resourceManager = AWSession.session(existingHttpSession).resourceManager();
+                }
+            }
+            return (resourceManager != null) ? resourceManager
+                    : AWConcreteApplication.SharedInstance.resourceManager(Locale.US);
+        }
+
+
+        public String cacheLookup (Context context, String key)
+        {
+            AWSingleLocaleResourceManager resourceManager = (AWSingleLocaleResourceManager)resourceManager(context);
+            return (String)_localizedStringsHashtable.get(resourceManager);
+        }
+
+        public String fullLookup (Context context, String key, String stringTable, String fileKey, String defaultString)
+        {
+            AWSingleLocaleResourceManager resourceManager = (AWSingleLocaleResourceManager)resourceManager(context);
+            synchronized (this) {
+                String localizedString = (String)_localizedStringsHashtable.get(resourceManager);
+                if (localizedString == null) {
+                    AWStringLocalizer localizer = AWConcreteApplication.SharedInstance.getStringLocalizer();
+
+                    Map localizedStringsHashtable =  localizer.getLocalizedStrings (stringTable, fileKey, resourceManager);
+                    if (localizedStringsHashtable != null) {
+                        localizedString = (String)localizedStringsHashtable.get(key);
+                    }
+                    if (localizedString == null) {
+                        localizedString = resourceManager.pseudoLocalizeUnKeyed(defaultString);
+                    }
+                    if (!AWConcreteApplication.IsRapidTurnaroundEnabled) {
+                        _localizedStringsHashtable.put(resourceManager, localizedString);
+                    }
+                }
+                return localizedString;
+            }
+        }
+    }
+
+    public static class LocalizedString extends LocalizedStringCache implements PropertyValue.Dynamic
+    {
+        String _filePath;
+        String _key;
+        String _defaultString;
+
+        public LocalizedString (String filePath, String key, String defaultValue)
+        {
+            _filePath = filePath;
+            _key = key;
+            _defaultString = defaultValue;
+        }
+
+        public Object evaluate (Context context)
+        {
+            String localizedString = cacheLookup(context, _key);
+            if (localizedString == null) {
+                String stringTable = AWUtil.fileNameToJavaPackage(_filePath);
+                String fileKey = AWUtil.stripToBaseFilename(_filePath);
+                localizedString = fullLookup(context, _key, stringTable, fileKey, _defaultString);
+            }
+            return localizedString;
+        }
+    }
+
     public void throwSampleException ()
     {
         try {
@@ -903,4 +1011,68 @@ public class UIMeta extends ObjectMeta
         throw new AWGenericException("_throwSampleException always throws!");
     }
 
+    public static void registerLocalizedClass (String className)
+    {
+        _LocalizedClasses.add(className);
+    }
+
+    public static Set<String> localizedClasses ()
+    {
+        return _LocalizedClasses;
+    }
+
+    public static class LocalizedLabelString extends LocalizedString
+            implements Meta.PropertyMapAwaking, AutoLocalized
+    {
+        public LocalizedLabelString ()
+        {
+            super(null, null, null);
+        }
+
+        public Object evaluate (Context context)
+        {
+            if (_key == null) {
+                // our contextKey scope determines our declaration location (file / package)
+                Rule.Wrapper wrapper = (Rule.Wrapper)context.propertyForKey(DeclRule);
+                if (wrapper != null) {
+                    _filePath = wrapper.rule.getRuleSet().filePath();
+                } else {
+                    System.out.println("Mising rule wrapper for localized string!");
+                    context.debug();
+                }
+                // if declaration was in java file, then key is just field/method name
+                boolean isJava = (_filePath != null && _filePath.endsWith(".java"));
+
+                String scopeKey = (String)context.values().get(Meta.ScopeKey);
+                String scopeVal = (String)context.values().get(scopeKey);
+                if (UIMeta.KeyClass.equals(scopeKey) || UIMeta.KeyModule.equals(scopeKey)) {
+                    scopeVal = AWUtil.lastComponent(scopeVal, ".");
+                }
+                _defaultString = defaultLabelForIdentifier(scopeVal);
+                _key = isJava ? scopeVal : (scopeKey + "_" + scopeVal);
+
+            }
+            return _filePath != null ? super.evaluate(context) : _defaultString;
+        }
+
+        public Object awakeForPropertyMap (Meta.PropertyMap map)
+        {
+            return new LocalizedLabelString();
+        }
+
+        public String packageName ()
+        {
+            return AWUtil.fileNameToJavaPackage(_filePath);
+        }
+
+        public String fileKey ()
+        {
+            return AWUtil.stripToBaseFilename(_filePath);
+        }
+
+        public String key ()
+        {
+            return _key;
+        }
+    }
 }

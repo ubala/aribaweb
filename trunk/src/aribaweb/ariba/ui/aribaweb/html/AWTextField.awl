@@ -114,12 +114,12 @@
         bh="$^behavior:TF"
         otherBindings="$otherBindingsValues"/>\
     <a:RefreshRegion>\
-        <a:If ifTrue="$isInHighLightedErrorScope">\
+        <a:If ifTrue="$isInHighLightedErrorScope">
             <a:ClientSideScript>\
                 ariba.Input.setTextFocus('$textFieldId');\
             </a:ClientSideScript>\
-        </a:If>\
-    </a:RefreshRegion>\
+        </a:If>
+    </a:RefreshRegion>
 <a:Else/>\
     <a:String value="$formattedValue"/>\
 </a:If>\

@@ -1,0 +1,40 @@
+Cp1252,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+TemplateParserPageTitle,"Erro do analisador de modelos","Page title for the error message; "
+TemplateParserTitle,"Erro do analisador de modelos","Title for the template parser error; "
+FileErrorMsg,"Analisador de modelos: erro de arquivo: o arquivo de modelo não existe ou é ilegível.","Invalid template name encountered; "
+IOErrorMsg,"Analisador de modelos: erro de E/S: ocorreu um erro durante a leitura do arquivo de modelo.","Error while trying to read template file; IO stands for Input / Output; "
+,,
+BlockoutChar,"X","default blockout character for SecureStringFormatter; Do we have to translate this ?; "
+,,
+,,
+,,
+,,
+,,
+ListSeparator,", ","used to delimit a series of strings when presented "
+DayAbbrev,"d","abbreviation for day; "
+HourAbbrev,"h","abbreviation for hours; "
+MinutesAbbrev,"min","abbreviation for minutes; "
+,,
+,, keys used in formatters
+,,
+BooleanTrue,"Sim","This is used from BooleanFormatter; "
+BooleanFalse,"Não","This is used from BooleanFormatter; "
+BooleanTrueOrFalse,"Os booleanos devem ter o valor ""verdadeiro"" ou ""falso""","error when a boolean doesn't contain true or false string"
+CannotParseDate,"Não é possível analisar os caracteres ""{0}"" como uma data","error when a date cannot be parsed - 0: the date string"
+InvalidCharacterInNumber,"Caractere inválido no número","error when there is a non-numeric character in a number"
+InvalidYear,"Ano inválido","error when the year is invalid in a date"
+NoDigitsFound,"Valor numérico obrigatório","error when a number is required and no digits are entered"
+NumberFormatError,"O valor numérico não está no formato adequado.","friendly error msg for NumberFormatException"
+MaxValueExceeded,"O valor ""{0}"" é maior que o valor máximo permitido ""{1}"".", "Error when value is greater than allowed (integer overflow)"
+MinValueExceeded,"O valor ""{0}"" é menor que o valor mínimo permitido ""{1}"".", "Error when value is less than allowed (integer underflow)"
+WholeNumberRequiredKey,"O valor ""{0}"" deve ser um número inteiro.", "Error when integer value contains fractions"

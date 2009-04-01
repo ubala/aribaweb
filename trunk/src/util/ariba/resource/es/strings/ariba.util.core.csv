@@ -1,0 +1,40 @@
+Cp1252,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+TemplateParserPageTitle,"Error de analizador sintáctico de plantilla","Page title for the error message; "
+TemplateParserTitle,"Error de analizador sintáctico de plantilla","Title for the template parser error; "
+FileErrorMsg,"Analizador sintáctico de plantilla: Error de archivo: el archivo de la plantilla no existe o no se puede leer.","Invalid template name encountered; "
+IOErrorMsg,"AnalizadorSintácticoDePlantilla: Error de ES: se ha producido un error al leer la plantilla.","Error while trying to read template file; IO stands for Input / Output; "
+,,
+BlockoutChar,"X","default blockout character for SecureStringFormatter; Do we have to translate this ?; "
+,,
+,,
+,,
+,,
+,,
+ListSeparator,", ","used to delimit a series of strings when presented "
+DayAbbrev,"d","abbreviation for day; "
+HourAbbrev,"hr","abbreviation for hours; "
+MinutesAbbrev,"min","abbreviation for minutes; "
+,,
+,, keys used in formatters
+,,
+BooleanTrue,"Sí","This is used from BooleanFormatter; "
+BooleanFalse,"No","This is used from BooleanFormatter; "
+BooleanTrueOrFalse,"Los booleanos deben ser ""verdadero"" o ""falso""","error when a boolean doesn't contain true or false string"
+CannotParseDate,"No se puede analizar la cadena ""{0}"" como una fecha","error when a date cannot be parsed - 0: the date string"
+InvalidCharacterInNumber,"Carácter no válido en el número","error when there is a non-numeric character in a number"
+InvalidYear,"Año no válido","error when the year is invalid in a date"
+NoDigitsFound,"Se necesita un valor numérico","error when a number is required and no digits are entered"
+NumberFormatError,"El valor numérico no es el formato apropiado.","friendly error msg for NumberFormatException"
+MaxValueExceeded,"El valor ""{0}"" es mayor que el máximo valor permitido ""{1}"".", "Error when value is greater than allowed (integer overflow)"
+MinValueExceeded,"El valor ""{0}"" es menor que el mínimo valor permitido ""{1}"".", "Error when value is less than allowed (integer underflow)"
+WholeNumberRequiredKey,"El valor ""{0}"" debe ser un número entero.", "Error when integer value contains fractions"

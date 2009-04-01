@@ -1,0 +1,17 @@
+Big5,
+, This file is a of audit categories (from the logger names) to friendlier names
+
+aribaAudit, "一般"
+aribaAuditCommitNow, "一般"
+aribaAudit.admin, "管理員"
+aribaAuditCommitNow.admin, "管理員 (工作/檔案)"
+aribaAuditCommitNow.apputil, "管理應用程式"
+aribaAuditCommitNow.sso, "SSO"
+aribaAuditCommitNow.exception, "異議"
+aribaAuditCommitNow.parameters, "參數"
+aribaAuditCommitNow.approvable, "一般"
+aribaAuditCommitNow.realmPurge, "Realm 清除"
+aribaAuditCommitNow.integration, "整合"
+aribaAuditCommitNow.reportTimeout, "報告逾時"
+aribaAuditCommitNow.schemaRealmMapping, "綱要 Realm 映射"
+aribaAuditCommitNow.cdsSyncVerifier, "CDS 同步驗證程式"

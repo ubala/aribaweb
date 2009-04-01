@@ -23,6 +23,7 @@
         AW Demo -- Demo app and widget gallery
     </description>
 
+    <property name="locale.list" value="fr es de"/>
     <property name="enable.groovy" value="true"/>
     <property name="aw.packagedResourceExtensions" value="awl,oss,csv,xml"/>
 

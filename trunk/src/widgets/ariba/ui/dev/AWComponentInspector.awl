@@ -30,6 +30,7 @@
     <w:TabSet class="noPadding tabWrapper" index="$tabIndex" action="$mainTabSelectionChanged">
         <w:Tab label="Content Tree">
             <a:If ifTrue="$traceDisplayGroup.filteredObjects.size">
+                <span bh="_MO">
                 <t:DataTable item="$traceNode" children="$traceNode.children" displayGroup="$currentTraceDisplayGroup"
                               singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
                               showColumnHeader="$false" enableScrolling="$true" showOptionsMenu="$true"
@@ -61,6 +62,7 @@
                     </a:Content>
 
                     <t:Column label="Component" isValueColumn="$true">\
+                        <span targetId="$traceNode.elementId"/>
                         <w:OutlineControl indentationPerLevel="12" renderAsTable="$true" style="font:9px Verdana, Arial, Helvetica, sans-serif">\
                             <a:Content name="icon">\
                                 <span _ifTrue="$traceNode.associatedMetadata" class="cueTip" style="padding:1px; line-height:9px; margin-right:4px">M</span>\
@@ -76,6 +78,7 @@
                         </a:DebugRemoteOpen>\
                     </t:RowDetail>
                 </t:DataTable>
+                </span>
             <a:Else/>
                 <br/>
                 <i>Component inspector not yet enabled.  Enabling...</i>
@@ -177,6 +180,15 @@
 <a:ClientSideScript>
     ariba.Debug.cpiCheckWindowSize( <a:String value="${showingFileContents ? 960 : 320}"/>, 760);
 </a:ClientSideScript>
+<a:RefreshRegion>
+    <a:ClientSideScript>
+        ariba.Debug._AWHierarchy ={ "empth8576" : ["empty324"]
+        <a:For list="$parentNodes" item="$parentNode"> 
+            ,"$parentNode.string":<a:JSListRepetition list="$childList" item="$currChild" condition="$true">"$currChild.string"</a:JSListRepetition>
+        </a:For>
+        };
+    </a:ClientSideScript>
+</a:RefreshRegion>
 </w:BasicPageWrapper>\
 \
 <a:Block name="Source">\

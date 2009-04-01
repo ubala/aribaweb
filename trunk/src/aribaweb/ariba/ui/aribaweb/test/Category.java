@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/Category.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/Category.java#4 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -27,6 +27,7 @@ public class Category
 {
     private String _name;
     private List<TestUnit> _testUnitList = ListUtil.list();
+    private List<TestUnitPair> _testUnitPairs = null;
 
     public Category (String name)
     {
@@ -41,11 +42,29 @@ public class Category
     public void add (TestUnit testUnit)
     {
         _testUnitList.add(testUnit);
+        _testUnitPairs = null;
     }
 
     public List<TestUnit> getTestUnitList ()
     {
         return _testUnitList;
+    }
+
+    public List<TestUnitPair> getTestUnitPairs ()
+    {
+        if (_testUnitPairs == null) {
+            _testUnitPairs = ListUtil.list();
+            for (int i = 0; i < _testUnitList.size(); i=i+2) {
+                TestUnit leftUnit = _testUnitList.get(i);
+                TestUnit rightUnit = null;
+                if (i + 1 < _testUnitList.size()) {
+                    rightUnit = _testUnitList.get(i + 1);
+                }
+                TestUnitPair pair = new TestUnitPair(leftUnit, rightUnit);
+                _testUnitPairs.add(pair);
+            }
+        }
+        return _testUnitPairs;
     }
 
     public void sort ()
@@ -67,6 +86,6 @@ public class Category
         for (TestUnit tu : _testUnitList) {
             tu.sort();
         }
-
+        _testUnitPairs = null;
     }
 }

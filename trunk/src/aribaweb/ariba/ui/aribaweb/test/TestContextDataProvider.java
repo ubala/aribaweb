@@ -8,10 +8,12 @@ import ariba.ui.aribaweb.core.AWSession;
  */
 public interface TestContextDataProvider {
 
-	public void register(TestContext tc, AWSession session);
+    public void register (TestContext tc, AWSession session);
 
-	public void unregister(TestContext tc, AWSession session);
+    public void unregister (TestContext tc, AWSession session);
 
-	public Object resolve(TestContext tc, Object obj);
+    public Object resolveForPut (TestContext tc, Object obj);
+
+    public Object resolveForGet (TestContext tc, Object obj);
 
 }

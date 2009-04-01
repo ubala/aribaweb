@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.awl#9 $
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.awl#10 $
     </Copyright>
 
     <Overview>
@@ -70,14 +70,14 @@
     <a:Else ifTrue="$^renderAsMenu"/>\
         <a:SetValue menuId="$requestContext.nextElementId"/>\
         <w:PulldownButton menuId="$menuId">\
-            <a:String value="$^menuButtonLabel:$[]Actions"/>\
+            <a:String value="$^menuButtonLabel:$[a001]Actions"/>\
             <a:IncludeContent name="menuLabel" required="$false"/>\
         </w:PulldownButton>\
         <a:IncludeBlock name="Menu"><a:IncludeContent name="menuItems" required="$false"/></a:IncludeBlock>
     <a:Else ifTrue="$^renderAsMenuLink"/>\
         <a:SetValue menuId="$requestContext.nextElementId"/>\
         <w:PopupMenuLink menuId="$menuId">
-            <a:String value="$^menuButtonLabel:$[]Actions"/>\
+            <a:String value="$^menuButtonLabel:$[a002]Actions"/>\
             <a:IncludeContent name="menuLabel"  required="$false"/>\
         </w:PopupMenuLink>\
         <a:IncludeBlock name="Menu"><a:IncludeContent name="menuItems" required="$false"/></a:IncludeBlock>

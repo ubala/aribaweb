@@ -1,0 +1,8 @@
+Big5
+,, This file has a single-column lookup key
+,,
+,, AWMessagesList
+,,
+ErrorMessage, "¿ù»~: {0}", generic error message printed *usually* at the top of the page. The argument #0 is a localized string
+AlertMessage, "Äµ§i: {0}", generic warning message printed *usually* at the top of the page. The argument #0 is a localized string
+ConfirmMessage, "½T»{: {0}", generic confirmation message printed *usually* at the top of the page. The argument #0 is a localized string

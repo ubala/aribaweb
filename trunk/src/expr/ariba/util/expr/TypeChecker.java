@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeChecker.java#29 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeChecker.java#30 $
 */
 
 package ariba.util.expr;
@@ -230,7 +230,9 @@ public class TypeChecker extends ASTNodeVisitor
                                             List errors,
                                             boolean skipForObjectClass)
     {
-         if (!StringUtil.nullOrEmptyOrBlankString(expectedType)) {
+         boolean verifyReturnType = env.getBooleanEnvVariable(
+                                             Environment.CheckReturnType, true);
+         if (!StringUtil.nullOrEmptyOrBlankString(expectedType) && verifyReturnType) {
              TypeRetriever retriever = env.getTypeRetriever();
              TypeInfo convertedTo = retriever.getTypeInfo(expectedType);
              if (convertedTo != null) {
@@ -515,16 +517,19 @@ public class TypeChecker extends ASTNodeVisitor
                         // look for the return type of the arithmetic operations
                         String operandType = getTypeName(operandTypeInfo);
                         String infoType = getTypeName(info);
-                        ArithmeticOperations op = 
+                        ArithmeticOperations op =
                             getArithmeticOperations(node, operandType, infoType);
                         if (op != null) {
                             Class operandTypeClass = ClassUtil.classForName(operandType, false);
                             Class infoTypeClass = ClassUtil.classForName(infoType, false);
                             if (operandTypeClass != null && infoTypeClass != null) {
                                 Class resultClass = getArithmeticOperationsReturnTypeClass(
-                                        node, op, operandTypeClass, infoTypeClass);                             
+                                        node, op, operandTypeClass, infoTypeClass);
                                 if (resultClass != null) {
-                                    operandTypeInfo = getTypeInfo(resultClass.getName());   
+                                    operandTypeInfo = getTypeInfo(resultClass.getName());
+                                }
+                                else {
+                                    return null;
                                 }
                             }
                         }
@@ -539,7 +544,7 @@ public class TypeChecker extends ASTNodeVisitor
         }
         return null;
     }
-    
+
     /**
         Returns the {@link ArithmeticOperations} for the given
         <code>node</code> with operands with the given
@@ -553,7 +558,7 @@ public class TypeChecker extends ASTNodeVisitor
         ArithmeticOperations result = null;
         if (node instanceof ASTAdd ||
             node instanceof ASTSubtract) {
-            result = ExprOps.getArithmeticOperations(type1, type2);         
+            result = ExprOps.getArithmeticOperations(type1, type2);
         }
         else if (node instanceof ASTMultiply) {
             result = ExprOps.getArithmeticOperations(type1);
@@ -566,7 +571,7 @@ public class TypeChecker extends ASTNodeVisitor
         }
         return result;
     }
-    
+
     /**
         Gets the type name for the given <code>info</code>.  If the
         given <code>info</code> is unboxed type, it returns the
@@ -582,12 +587,12 @@ public class TypeChecker extends ASTNodeVisitor
         }
         return info.getName();
     }
-    
+
     private Class getArithmeticOperationsReturnTypeClass (
             Node node,
             ArithmeticOperations op,
             Class operandType1,
-            Class operandType2) 
+            Class operandType2)
     {
         Class result = null;
         if (node instanceof ASTAdd) {

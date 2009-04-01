@@ -41,7 +41,7 @@
                             <a:If notEqualNull="$overflowActions">
                                 <w:PopupMenuItem action="$showAllClicked"
                                                collapsed="$true">\
-                                    <i><a:Local>More...</a:Local></i>
+                                    <i><a:Local key="a005">More...</a:Local></i>
                                 </w:PopupMenuItem>\
                             </a:If>
                         </w:PopupMenu>\

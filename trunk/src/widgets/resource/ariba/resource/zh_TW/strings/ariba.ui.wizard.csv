@@ -1,0 +1,12 @@
+Big5,,,,
+"WizardMeta","NextActionHint","Go to next step","前往下一步",""
+"WizardMeta","PrevActionHint","Go to previous step","返回前一步",""
+"WizardMeta","ExitActionHint","Exit","退出",""
+"WizardMeta","OkActionHint","OK","確定",""
+"WizardMeta","CancelActionHint","Cancel","取消",""
+"WizardMeta","NextAction","Next >","下一步 >",""
+"WizardMeta","PreviousAction","< Previous","< 上一步",""
+"WizardMeta","ExitAction","Exit","退出",""
+"WizardMeta","OkAction","OK","確定",""
+"WizardMeta","CancelAction","Cancel","取消",""
+"WizardMeta","RefreshAction","Refresh","重新整理",""

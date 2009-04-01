@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#62 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#63 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -369,14 +369,7 @@ public class AWComponentReference extends AWContainerElement
             sharedComponentInstance = (AWComponent)_sharedComponentPool.checkout();
         }
         else {
-            if (AWConcreteServerApplication.AllowsConcurrentRequestHandling) {
-                synchronized (_componentDefinition) {
-                    sharedComponentInstance = _componentDefinition.sharedComponentInstance();
-                }
-            }
-            else {
-                sharedComponentInstance = _componentDefinition.sharedComponentInstance();
-            }
+            sharedComponentInstance = _componentDefinition.sharedComponentInstance();
         }
         if (sharedComponentInstance == null) {
             sharedComponentInstance = _componentDefinition.newComponentInstance();

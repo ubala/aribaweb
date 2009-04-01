@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaAboutBox.awl#16 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaAboutBox.awl#17 $
     </Copyright>
 
     <Overview>
@@ -36,7 +36,7 @@
             used in this Site are the trademarks, service marks or logos of their respective
             owners.</a:Local>
         </div><br/>\
-        <div style="text-align:right; color:#666699; background-color:#FFFFFF; margin-top:10px;"><a:Local key="a009">&copy; 1996 - 2006 Ariba Inc.  All Rights Reserved.</a:Local></div>\
+        <div style="text-align:right; color:#666699; background-color:#FFFFFF; margin-top:10px;"><a:Local key="a009">&copy; 1996 - 2009 Ariba Inc.  All Rights Reserved.</a:Local></div>\
     </div>\
 </a:LazyDiv>\
 </w:DialogBox>\

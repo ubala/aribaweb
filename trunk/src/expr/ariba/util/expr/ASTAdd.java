@@ -30,6 +30,7 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
+import ariba.util.fieldtype.NullTypeInfo;
 import ariba.util.fieldtype.TypeInfo;
 
 /**
@@ -53,7 +54,10 @@ class ASTAdd extends ExpressionNode
     protected Object getValueBody( ExprContext context, Object source ) throws ExprException
     {
         Object result = children[0].getValue( context, source );
-        TypeInfo resultInfo = getTypeInfo();
+        TypeInfo resultInfo = children[0].getTypeInfo();
+        if (resultInfo == null || resultInfo instanceof NullTypeInfo) {
+            resultInfo = getTypeInfo();
+        }
         String resultType = resultInfo != null? resultInfo.getName(): null;
         for ( int i=1; i < children.length; ++i ) {
             TypeInfo info = children[i].getTypeInfo();

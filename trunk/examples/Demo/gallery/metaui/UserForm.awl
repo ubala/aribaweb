@@ -59,9 +59,11 @@ Operation:
         </div>
     </a:If>
     <m:Context object="$user" layout="Inspect">
+        <m:ActionList renderAsButtons="$true"/>
         <!-- The whole from comes from THIS!  The bindings (i.e. user, operation)
              in its containing context dictate what gets generated here -->
         <!--<pre>$metaContext.debugString</pre>-->
         <m:IncludeComponent/>
+
     </m:Context>
 </m:Context>

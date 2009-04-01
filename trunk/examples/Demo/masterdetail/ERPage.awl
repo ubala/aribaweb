@@ -1,7 +1,7 @@
 <w:BasicPageWrapper hasForm="$true">
 
 <w:HintMessage showTopLine="$true">
-    A side-by-side master-detail layout with type-specific detail panels!
+    <a:Local key="a010">A side-by-side master-detail layout with type-specific detail panels!</a:Local>
 </w:HintMessage>
 <w:FourZoneLayout widthLeft="auto" widthRight="300px">
     <a:Content name="left">
@@ -10,32 +10,33 @@
                      submitOnSelectionChange="$true"
                      dropAction="$chargeDropped" dropType="charge"                
                      enableScrolling="$true" showOptionsMenu="$true"
-                     title="Expense Items">
+                     title="$[a001]Expense Items">
 
-            <t:Column key="Year" label="Date" formatter="$formatters.shortDate"/>
-            <t:Column key="Type" label="Type!"/>
-            <t:Column key="Amount" formatter="$formatters.money" align="right"/>
+            <t:Column key="Year" label="$[a002]Date" formatter="$formatters.shortDate"/>
+            <t:Column key="Type" label="$[a003]Type!"/>
+            <t:Column key="Amount" label="$[a004]Amount" formatter="$formatters.money" align="right"/>
 
             <t:ButtonArea>
-                <w:TextButton action="$deleteSelected">Delete</w:TextButton>\
-                <w:PulldownButton menuId="AddItem">AddNewItem</w:PulldownButton>
-                <w:TextButton action="$bigPanel">Big Panel</w:TextButton>\
-                <w:TextButton action="$longRunningAction" confirmationId="LRAConf">Long
-                    Running Action</w:TextButton>\
-                <w:TextButton action="$secureAction">Secure Action</w:TextButton>\
+                <w:TextButton action="$deleteSelected"><a:Local key="a011">Delete</a:Local></w:TextButton>\
+                <w:PulldownButton menuId="AddItem"><a:Local key="a012">Add New Item</a:Local></w:PulldownButton>
+                <w:TextButton action="$bigPanel"><a:Local key="a013">Big Panel</a:Local></w:TextButton>\
+                <w:TextButton action="$longRunningAction" confirmationId="LRAConf">\
+                    <a:Local key="a014">Long Running Action</a:Local>
+                </w:TextButton>\
+                <w:TextButton action="$secureAction"><a:Local key="a015">Secure Action</a:Local></w:TextButton>\
             </t:ButtonArea>
         </t:DataTable>
         <br/>
         <w:PopupMenu menuId="AddItem">
             <w:PopupMenuHeading showSeparator="$false">\
-                Create New Expense\
+                <a:Local key="a016">Create New Expense</a:Local>\
             </w:PopupMenuHeading>
 
             <w:PopupMenuItem action='${addItem("Hotel")}'>\
-                Hotel\
+                <a:Local key="a017">Hotel</a:Local>\
             </w:PopupMenuItem>
             <w:PopupMenuItem action='${addItem("Meal")}'>\
-                Meal\
+                <a:Local key="a018">Meal</a:Local>\
             </w:PopupMenuItem>
         </w:PopupMenu>\
     </a:Content>
@@ -44,13 +45,15 @@
         <div style="width:300px">
             <w:TabSet class="tabWrapper noPadding" contentClass="noPadding tabContentWrapper"
                       index="$tabIndex">
-                <w:Tab label="Expense Items" dropType="Expense" dropAction="$null">
+                <w:Tab label="$[a005]Expense Items" dropType="Expense" dropAction="$null">
                     <a:If notEqualNull="$displayGroup.selectedObject">
                         <div style="padding:5px">
                             <h1 class="flL">\
                                 <a:String value="$displayGroup.selectedObject.Type"/>\
                             </h1>
-                            <div class="flR"><w:TextButton action="$save">Save</w:TextButton></div>
+                            <div class="flR">\
+                                <w:TextButton action="$save"><a:Local key="a019">Save</a:Local></w:TextButton>\
+                            </div>
                             <div style="clear:both">
                                 <a:IncludeComponent
                                         awcomponentName="$viewerForSelectedItem"
@@ -59,26 +62,26 @@
                         </div>
                     <a:Else/>
                         <div style="padding:5px">
-                            <h1>Add Expense Line</h1>
+                            <h1><a:Local key="a020">Add Expense Line</a:Local></h1>
                             <a:For item="$expenseType" list="$expenseTypes">
                                 <li><a:Hyperlink action="${addItem(expenseType)}">$expenseType</a:Hyperlink></li>
                             </a:For>
                         </div>
                     </a:If>
                 </w:Tab>
-                <w:Tab label="Charges" dropType="Expense" dropAction="$null">
+                <w:Tab label="$[a006]Charges" dropType="Expense" dropAction="$null">
                     <t:DataTable class="noBox scrollTableWrapper smallFont" multiSelect="$true"
                                  csvPath="Charges.csv" displayGroup="$chargeDisplayGroup"
                                  dragAction="$chargeDragged" dragType="charge"
                                  initialSortDirection="descending" initialSortKey="Year"
                                  enableScrolling="$true" showOptionsMenu="$false">
 
-                        <t:Column key="Year" label="Date" formatter="$formatters.shortDate"/>
-                        <t:Column key="Type" label="Type!"/>
-                        <t:Column key="Amount" formatter="$formatters.money" align="right"/>
+                        <t:Column key="Year" label="$[a007]Date" formatter="$formatters.shortDate"/>
+                        <t:Column key="Type" label="$[a008]Type!"/>
+                        <t:Column key="Amount" label="$[a009]Amount" formatter="$formatters.money" align="right"/>
                         
                         <t:ButtonArea>
-                            <w:TextButton action="$addCharges">Add Charge</w:TextButton>
+                            <w:TextButton action="$addCharges"><a:Local key="a021">Add Charge</a:Local></w:TextButton>
                         </t:ButtonArea>
                     </t:DataTable>
                 </w:Tab>
@@ -90,11 +93,11 @@
 <a:PhaseInvocation append="$rememberLastSelected"/>
 <w:Confirmation id="LRAConf" lazyLoadConfirmation="$false" okAction="$longRunningAction">
     <a:Content name="header">\
-        Sample Long Running Operation Alert!
+        <a:Local key="a022">Sample Long Running Operation Alert!</a:Local>
     </a:Content>\
     <a:Content name="content">\
         <table><tr><td>\
-            Are you sure that you want to do this? This will take > 30 seconds!
+            <a:Local key="a023">Are you sure that you want to do this? This will take > 30 seconds!</a:Local>
         </td></tr></table>\
     </a:Content>\
 </w:Confirmation>

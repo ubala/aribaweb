@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ChooserState.java#10 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ChooserState.java#11 $
 */
 
 package ariba.ui.widgets;
@@ -27,6 +27,7 @@ public class ChooserState
     private Object _currentItem;
     private List _filteredSelections;
     private String _pattern;
+    private String _lastFullMatchPattern;
     private List _matches;
     private List _recentSelectedObjects;
     private int _recentSelectedDisplayed;
@@ -245,6 +246,16 @@ public class ChooserState
     public boolean addMode ()
     {
         return _addMode;
+    }
+
+    public String getLastFullMatchPattern ()
+    {
+        return _lastFullMatchPattern;
+    }
+
+    public void setLastFullMatchPattern (String fullMatchPattern)
+    {
+        _lastFullMatchPattern = fullMatchPattern;
     }
 
     /**

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#62 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#64 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -50,7 +50,6 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.File;
-import java.net.URL;
 
 import org.apache.log4j.Level;
 
@@ -248,7 +247,25 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
 
     public static void registerDebugSearchPath (String pathString)
     {
-        _ExtraSearchPaths.add(pathString);
+        Set jarNameSuffixes = _awJarNameSuffixes();
+
+        // we suppress any directories for which we can deduce the
+        // jar name and can tell that it's not in our search path
+
+        String[] paths = AWUtil.componentsSeparatedByString(pathString, ";").array();
+        for (String path : paths) {
+            if (!StringUtil.nullOrEmptyOrBlankString(path)) {
+                String jarSuffix = _jarNameSuffixForSourceDirectory(path);
+                if (jarSuffix == null || jarNameSuffixes.contains(jarSuffix)) {
+                    _ExtraSearchPaths.add(path);
+                }
+            }
+        }
+    }
+
+    public static List<String>_debugSearchPaths ()
+    {
+        return _ExtraSearchPaths;
     }
 
     protected void registerResourceDirectories (AWMultiLocaleResourceManager resourceManager)
@@ -257,7 +274,7 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
             String awSearchPath = AWUtil.getenv("ARIBA_AW_SEARCH_PATH");
             if (awSearchPath != null) registerDebugSearchPath(awSearchPath);
         }
-        for (String p : _ExtraSearchPaths) registerAWSourcePaths(p, resourceManager);
+        for (String p : _ExtraSearchPaths) registerAWSourcePath(p, resourceManager);
         
         String aribaDeployRoot = deploymentRootDirectory();
         if (aribaDeployRoot != null) {
@@ -350,36 +367,25 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         SystemUtil.setLocalTempDirectory(new File(tempName, _AppName).getAbsolutePath());
     }
 
-    private static void registerAWSourcePaths (String awSearchPath, AWMultiLocaleResourceManager resourceManager)
+    private static String urlForPath (String path)
     {
-        if (awSearchPath != null) {
-            String[] paths = AWUtil.componentsSeparatedByString(awSearchPath, ";").array();
-            Set jarNameSuffixes = _awJarNameSuffixes();
+        return AWXDebugResourceActions.urlForResourceInDirectory(null, path, "");
+    }
 
-            // compute a debugging URL for resource lookup from source directory
-            String resourceUrl = AWXDebugResourceActions.urlForResourceNamed(null, "");
-            for (String path : paths) {
-                if (!StringUtil.nullOrEmptyOrBlankString(path)) {
-                    // we suppress any directories for which we can deduce the
-                    // jar name and can tell that it's not in our search path
-                    String jarSuffix = _jarNameSuffixForSourceDirectory(path);
-                    if (jarSuffix == null || jarNameSuffixes.contains(jarSuffix)) {
-                        resourceManager.registerResourceDirectory(path, resourceUrl);
-                        File resourceDir = new File(path, "resource/webserver/branding/ariba");
-                        if (resourceDir.exists() && resourceDir.isDirectory()) {
-                            resourceManager.registerResourceDirectory(resourceDir.getPath(), resourceUrl, false);
-                        }
-                        resourceDir = new File(path, "resource/webserver/branding");
-                        if (resourceDir.exists() && resourceDir.isDirectory()) {
-                            resourceManager.registerResourceDirectory(resourceDir.getPath(), resourceUrl, false);
-                        }
-                        resourceDir = new File(path, "resource/webserver");
-                        if (resourceDir.exists() && resourceDir.isDirectory()) {
-                            resourceManager.registerResourceDirectory(resourceDir.getPath(), resourceUrl, false);
-                        }
-                    }
-                }
-            }
+    private static void registerAWSourcePath (String path, AWMultiLocaleResourceManager resourceManager)
+    {
+        resourceManager.registerResourceDirectory(path, urlForPath(path));
+        File resourceDir = new File(path, "resource/webserver/branding/ariba");
+        if (resourceDir.exists() && resourceDir.isDirectory()) {
+                        resourceManager.registerResourceDirectory(resourceDir.getPath(), urlForPath(resourceDir.getPath()), false);
+        }
+        resourceDir = new File(path, "resource/webserver/branding");
+        if (resourceDir.exists() && resourceDir.isDirectory()) {
+                        resourceManager.registerResourceDirectory(resourceDir.getPath(), urlForPath(resourceDir.getPath()), false);
+        }
+        resourceDir = new File(path, "resource/webserver");
+        if (resourceDir.exists() && resourceDir.isDirectory()) {
+                        resourceManager.registerResourceDirectory(resourceDir.getPath(), urlForPath(resourceDir.getPath()), false);
         }
     }
 

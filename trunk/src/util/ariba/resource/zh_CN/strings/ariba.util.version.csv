@@ -1,0 +1,19 @@
+GB2312,,
+copyright, "版权所有 (c) 1996-2008 Ariba, Inc. 保留所有权利。专利正在申请中。",
+versionWithSvPackWithDateWithPatchWithLangPack, "{0}.{1}.{2} Service Pack {5} 语言包 {6} (内部版本号 {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateWithPatchWithLangPack, "{0}.{1}.{2} Service Pack {5} 语言包 {6} (内部版本号 {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackWithDateNoPatchWithLangPack, "{0}.{1} Service Pack {5} 语言包 {6} (内部版本号 {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackWithDateWithPatchNoLangPack, "{0}.{1}.{2} Service Pack {5} (内部版本号 {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateNoPatchWithLangPack, "{0}.{1} Service Pack {5} 语言包 {6} (内部版本号 {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateWithPatchNoLangPack, "{0}.{1}.{2} Service Pack {5} (内部版本号 {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackWithDateNoPatchNoLangPack, "{0}.{1} Service Pack {5} (内部版本号 {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateNoPatchNoLangPack, "{0}.{1} Service Pack {5} (内部版本号 {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+
+versionNoSvPackWithDateWithPatchWithLangPack, "{0}.{1}.{2} 语言包 {6} (内部版本号 {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateWithPatchWithLangPack, "{0}.{1}.{2} 语言包 {6} (内部版本号 {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackWithDateNoPatchWithLangPack, "{0}.{1} 语言包 {6} (内部版本号 {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackWithDateWithPatchNoLangPack, "{0}.{1}.{2} (内部版本号 {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateNoPatchWithLangPack, "{0}.{1} 语言包 {6} (内部版本号 {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateWithPatchNoLangPack, "{0}.{1}.{2} (内部版本号 {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackWithDateNoPatchNoLangPack, "{0}.{1} (内部版本号 {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateNoPatchNoLangPack, "{0}.{1} (内部版本号 {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack

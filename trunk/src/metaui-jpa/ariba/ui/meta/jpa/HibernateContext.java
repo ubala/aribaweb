@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/HibernateContext.java#1 $
+    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/HibernateContext.java#2 $
 */
 package ariba.ui.meta.jpa;
 
@@ -44,7 +44,7 @@ public class HibernateContext extends JPAContext
     {
         public ObjectContext create()
         {
-            return new HibernateContext(createEntityManager(_DefaultFactory));
+            return new HibernateContext(createEntityManager(getDefaultFactory()));
         }
     }
 

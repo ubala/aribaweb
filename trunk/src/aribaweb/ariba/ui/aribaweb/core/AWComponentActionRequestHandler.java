@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#80 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#81 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -30,7 +30,6 @@ import ariba.util.core.WrapperRuntimeException;
 import ariba.util.core.Assert;
 import ariba.util.core.PerformanceState;
 import ariba.util.core.ProgressMonitor;
-
 import javax.servlet.http.HttpSession;
 
 public final class AWComponentActionRequestHandler extends AWConcreteRequestHandler
@@ -156,7 +155,8 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
             }
         }
         formattedUrl = StringUtil.strcat(formattedUrl, "&",
-                AWRequestContext.SessionSecureIdKeyEquals , sessionSecureId(requestContext));
+                AWRequestContext.SessionSecureIdKeyEquals,
+                sessionSecureId(requestContext));
         if (frameName != null) {
             formattedUrl = StringUtil.strcat(formattedUrl, "&",
                 AWRequestContext.FrameNameKey, "=", frameName.string());
@@ -164,9 +164,12 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         return formattedUrl;
     }
 
-    private void appendUrl (AWRequestContext requestContext, AWEncodedString requestHandlerUrl,
-                            AWEncodedString senderId, String sessionId,
-                            AWEncodedString responseId, AWEncodedString frameName)
+    private void appendUrl (AWRequestContext requestContext,
+                            AWEncodedString requestHandlerUrl,
+                            AWEncodedString senderId,
+                            String sessionId,
+                            AWEncodedString responseId,
+                            AWEncodedString frameName)
     {
         AWResponse response = requestContext.response();
         response.appendContent(requestHandlerUrl);
@@ -260,9 +263,12 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     public String fullUrlWithSenderId (AWRequestContext requestContext,
                                        AWEncodedString senderId)
     {
-        return formatUrl(requestContext, fullRequestHandlerBaseUrl(requestContext), senderId.string(),
-                         sessionId(requestContext), requestContext.responseId(),
-                         requestContext.frameName());
+        return formatUrl(requestContext,
+                fullRequestHandlerBaseUrl(requestContext),
+                senderId.string(),
+                sessionId(requestContext),
+                requestContext.responseId(),
+                requestContext.frameName());
     }
 
     public void appendFullUrlWithSenderId (AWRequestContext requestContext,
@@ -312,7 +318,8 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     //////////////////////
     // handleRequest
     //////////////////////
-    private AWResponse historyRequestFilter (AWRequest request, AWRequestContext requestContext)
+    private AWResponse historyRequestFilter (AWRequest request,
+                                             AWRequestContext requestContext)
     {
         String historyAction = request.formValueForKey(HistoryKey);
         if (!StringUtil.nullOrEmptyOrBlankString(historyAction)) {
@@ -338,15 +345,20 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     // Return a static cacheable resource for IE backtrack support.
     // See Refresh.js:historyEvent() -- if invokes this in an iframe, and
     // this code triggers a callback to historyEvent() when loaded
-    protected AWResponse checkHistoryRequest (AWRequest request, AWRequestContext requestContext)
+    protected AWResponse checkHistoryRequest (AWRequest request,
+                                              AWRequestContext requestContext)
     {
         String historyAction = request.formValueForKey(HistoryKey);
-        if (!StringUtil.nullOrEmptyOrBlankString(historyAction) && HistoryScriptActionName.equals(historyAction)) {
+        if (!StringUtil.nullOrEmptyOrBlankString(historyAction)
+                && HistoryScriptActionName.equals(historyAction)) {
             AWResponse response = application().createResponse(request);
-            // set this response to be client-cacheable so no server roundtrips result from spinning up backtrack state
+            // set this response to be client-cacheable so
+            // no server roundtrips result from spinning up backtrack state
             response.setBrowserCachingEnabled(true);
             response.setHeaderForKey("max-age=3600", "Cache-control");
-            response.appendContent("<html><body onload='parent.ariba.Refresh.historyEvent(window.location);'>AW backtrack</body></html>\n");
+            response.appendContent("<html><body onload=" +
+                    "'parent.ariba.Refresh.historyEvent(window.location);'>" +
+                    "AW backtrack</body></html>\n");
             return response;
         }
         return null;
@@ -383,9 +395,11 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         AWResponse response = null;
         AWApplication application = application();
 
-        // check if this is a request for static history iframe context.  If so, invoke before
-        // accessing session
-        if ((response = checkHistoryRequest(request, requestContext)) != null) return response;
+        // check if this is a request for static history iframe context.
+        // If so, invoke before accessing session
+        if ((response = checkHistoryRequest(request, requestContext)) != null) {
+            return response;
+        }
 
         // register even before we try for the session lock
         String sessionId = ((AWBaseRequest)request).initSessionId();
@@ -393,7 +407,8 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
 
         // Appears in page loading status panel
         // use browser preferred locale since we don't have access to session yet
-        String msg = localizedJavaString(ComponentName, 1, "Waiting for previous request to complete ...",
+        String msg = localizedJavaString(ComponentName, 1,
+                                         "Waiting for previous request to complete ...",
                                          AWConcreteApplication.SharedInstance.resourceManager(request.preferredLocale()));
 
         ProgressMonitor.instance().prepare(msg, 0);
@@ -546,7 +561,8 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                             if (actionResultsComponent.shouldValidateSession()) {
                                 try {
                                     actionResultsComponent.validateSession(requestContext);
-                                } catch (AWSessionValidationException e) {
+                                }
+                                catch (AWSessionValidationException e) {
                                     session.savePage(actionResultsPage, true);
                                     throw e;
                                 }
@@ -616,14 +632,12 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
      */
     private boolean isValidNode (AWRequestContext requestContext)
     {
-        return true;
-        /*
-        AWNodeValidator val = AWNodeManager.getDefaultNodeValidator();
+        AWNodeValidator val = AWNodeManager.getComponentActionNodeValidator();
         if (val == null) {
             return true;
         }
         return val.isValid(requestContext);
-        */
+
     }
 
     static class NullResponse extends AWBaseResponse
@@ -691,7 +705,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         }
     }
 
-    protected void _runNullRender(AWRequestContext requestContext,
+    protected void _runNullRender (AWRequestContext requestContext,
                                 AWComponent actionResultsComponent,
                                 AWRequest request,
                                 boolean runAsRefresh)

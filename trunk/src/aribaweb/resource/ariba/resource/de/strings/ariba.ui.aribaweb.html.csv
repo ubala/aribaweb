@@ -1,0 +1,8 @@
+Cp1252,,,,
+"AWBody",a001,"Please wait. An action is pending...","Bitte warten, es wird eine Aktion ausgeführt...",""
+"AWErrorFlag",a001,"Error","Fehler",""
+"AWPasswordField",a001,"Warning","Warnung",""
+"AWPasswordField",a002,"Warning: Caps Lock is on.  This may cause you to enter your password incorrectly.","Warnung: Die Feststelltaste ist eingeschaltet. Dies kann dazu führen, dass Sie Ihr Passwort falsch eingeben.",""
+"AWSubmitButton",a001,"Submit","Einreichen",""
+"AWFileUploadInternals","a001","Error: Your request cannot be processed.  Please check that file paths for all file uploads are valid.","Fehler: Ihre Anforderung kann nicht verarbeitet werden. Überprüfen Sie, ob die Dateipfade für alle Dateiladevorgänge gültig sind.",""
+"AWTextArea","a001","Characters left","Verbleibende Zeichen",""

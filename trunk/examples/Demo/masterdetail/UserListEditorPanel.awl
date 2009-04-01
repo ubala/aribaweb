@@ -1,28 +1,33 @@
-<w:ModalPageWrapper title="Edit User List (ClientWrapper)" okAction="$okAction">
+<w:ModalPageWrapper title="$[a001]Edit User List (ClientWrapper)" okAction="$okAction">
     <t:DataTable list="$users" item="$user" enableScrolling="$true">
-        <t:Column label="Name" nowrap>
+        <t:Column label="$[a002]Name" nowrap>
             <a:HighLightedErrorScope>\
                 <w:ErrorIndicator/>\
                 <a:TextField value="$user.Name" formatter="$formatters.requiredString"/>
             </a:HighLightedErrorScope>
         </t:Column>
-        <t:Column label="Title">
+        <t:Column label="$[a003]Title">
             <a:TextField value="$user.Title"/>
         </t:Column>
-        <t:Column label="Company">
+        <t:Column label="$[a004]Company">
             <w:Chooser selectionSource="$companySource" state="$companyChooserState"/>
         </t:Column>
         <t:ButtonArea>
-            <w:TextButton action="$add">Add</w:TextButton>
-            <w:TextButton action="$massAdd">Mass Add</w:TextButton>
+            <w:TextButton action="$add"><a:Local key="a007">Add</a:Local></w:TextButton>
+            <w:TextButton action="$massAdd"><a:Local key="a008">Mass Add</a:Local></w:TextButton>
         </t:ButtonArea>
     </t:DataTable>
     <br/>
-    Date:  <w:DateField value="$testDate"/><br/>
-    Some popup: <w:PopupMenuLink menuId="myMenu">Menu Here...</w:PopupMenuLink>
+    <w:FormTable showErrorFlags="$true">
+        <w:FormRow label="$[a005]Date"><w:DateField value="$testDate"/></w:FormRow>
+        <w:FormRow label="$[a006]Sample Popup">
+            <w:PopupMenuLink menuId="myMenu"><a:Local key="a009">Menu Here...</a:Local></w:PopupMenuLink>
+        </w:FormRow>
+    </w:FormTable>
+
     <w:PopupMenu menuId="myMenu">
-        <w:PopupMenuItem>Item 1</w:PopupMenuItem>
-        <w:PopupMenuItem>Item 2</w:PopupMenuItem>
-        <w:PopupMenuItem>Item 3</w:PopupMenuItem>
+        <w:PopupMenuItem><a:Local key="a010">Item</a:Local> 1</w:PopupMenuItem>
+        <w:PopupMenuItem><a:Local key="a011">Item</a:Local> 2</w:PopupMenuItem>
+        <w:PopupMenuItem><a:Local key="a012">Item</a:Local> 3</w:PopupMenuItem>
     </w:PopupMenu>
 </w:ModalPageWrapper>

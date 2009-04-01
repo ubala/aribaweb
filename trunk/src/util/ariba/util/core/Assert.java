@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Assert.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Assert.java#9 $
 */
 
 package ariba.util.core;
@@ -48,7 +48,7 @@ public final class Assert
      * error message
      * @aribaapi ariba
      */
-    public static void fail (String fmt, Object[] args)
+    public static void fail (String fmt, Object... args)
     {
         assertFatal(Fmt.S(fmt, args));
     }
@@ -72,7 +72,7 @@ public final class Assert
      * error message
      * @aribaapi private
      */
-    public static void fail (Throwable t, String fmt, Object[] args)
+    public static void fail (Throwable t, String fmt, Object... args)
     {
         assertFatal(Fmt.S(fmt, args), t);
     }

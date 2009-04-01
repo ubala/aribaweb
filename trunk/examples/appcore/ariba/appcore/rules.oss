@@ -7,7 +7,9 @@
 
 /* Enforce module visibility*/
 module {
-    requiredPermissionIds:$${ariba.appcore.Initialization.moduleClassViewPermissions(this)}
+    trait=ModuleClassPage {
+        requiredPermissionIds:$${ariba.appcore.Initialization.moduleClassViewPermissions(this)}
+    }
     visible:${ariba.appcore.User.currentUser().hasPermissions(properties.requiredPermissionIds, false)}
 }
 

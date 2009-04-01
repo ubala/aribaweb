@@ -1,0 +1,28 @@
+8859_1,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+TemplateParserPageTitle,"Erreur de l'analyseur syntaxique","Page title for the error message; "
+TemplateParserTitle,"Erreur de l'analyseur syntaxique","Title for the template parser error; "
+FileErrorMsg,"Analyseur syntaxique de modèle : Erreur de fichier : le fichier modèle n'existe pas ou est illisible.","Invalid template name encountered; "
+IOErrorMsg,"TemplateParser : Erreur E-S : une erreur s'est produite lors de la lecture du fichier modèle.","Error while trying to read template file; IO stands for Input / Output; "
+,,
+BlockoutChar,"X","default blockout character for SecureStringFormatter; Do we have to translate this ?; "
+,,
+,,
+,,
+,,
+,,
+BooleanTrue,"Oui","This is used from BooleanFormatter; "
+BooleanFalse,"Non","This is used from BooleanFormatter; "
+ListSeparator,", ","used to delimit a series of strings when presented "
+DayAbbrev,"d","abbreviation for day; "
+HourAbbrev,"h","abbreviation for hours; "
+MinutesAbbrev,"mn","abbreviation for minutes; "

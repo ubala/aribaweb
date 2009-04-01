@@ -1,0 +1,3 @@
+Cp1252,,
+,,
+MalformedExpression,"Une erreur d''analyse s''est produite au niveau du jeton ""{0}"", ligne ""{1}"", colonne ""{2}"".", "An syntactic error has occured while parsing the expression"

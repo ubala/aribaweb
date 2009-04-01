@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/opensourceui/examples/Demo/busobj/Project.java#2 $
+    $Id: //ariba/platform/ui/opensourceui/examples/Demo/busobj/Project.java#3 $
 */
 package busobj;
 
@@ -23,7 +23,10 @@ import java.math.BigDecimal;
 import ariba.util.core.ListUtil;
 import ariba.ui.meta.annotations.Action;
 import ariba.ui.meta.annotations.Properties;
+import ariba.ui.meta.annotations.Localized;
+import ariba.ui.meta.annotations.Property;
 
+@Localized
 public class Project
 {
     public String _title;
@@ -94,6 +97,7 @@ public class Project
         return _deals;
     }
 
+    @Property.Label("Squad")
     public List getTeam ()
     {
         return _team;

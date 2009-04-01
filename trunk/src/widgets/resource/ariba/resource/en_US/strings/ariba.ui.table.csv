@@ -28,5 +28,7 @@
 "AWTPivotConfigurationPanel",a004,"Column Attributes","Column Attributes",""
 "AWTPivotConfigurationPanel",a005,"Detail Attributes","Detail Attributes",""
 "AWTPivotConfigurationPanel",a006,"Hidden Attributes","Hidden Attributes",""
+"AWTRowAttributeExpandoColumnRenderer",a001,"Less...","Less...",""
+"AWTRowAttributeExpandoColumnRenderer",a002,"More...","More...",""
 "AWTScrollTableWrapper",a001,"Retrieving data...","Retrieving data...",""
 "AWTSortHeading",a001,"Click to reverse the sorting order for this column","Click to reverse the sorting order for this column",""

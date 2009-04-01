@@ -1,4 +1,4 @@
-<m:Context object="$model" operation="edit" layout="Inspect">
+<m:Context object="$model" operation="edit" layout="InspectWithActions">
     <m:IncludeComponent/>
     <w:TextButton action="${errorManager.checkErrorsAndEnableDisplay(); null}">Submit</w:TextButton>
 </m:Context>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugOptions.java#17 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugOptions.java#18 $
 */
 
 package ariba.ui.dev;
@@ -21,6 +21,7 @@ import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWSession;
 import ariba.ui.aribaweb.core.AWConstants;
+import ariba.ui.aribaweb.util.AWSingleLocaleResourceManager;
 import ariba.ui.widgets.ChooserSelectionSource;
 import ariba.ui.widgets.ChooserState;
 import ariba.util.core.ListUtil;
@@ -167,6 +168,28 @@ public final class AWDebugOptions extends AWComponent
     public void setAccessibilityEnabled (boolean yn)
     {
         session().setAccessibilityEnabled(yn);
+    }
+
+    public boolean pseudoLocalizationEnabled ()
+    {
+        return AWSingleLocaleResourceManager._pseudoLocalizationMode(session()) == AWSingleLocaleResourceManager.PseudoMode.Files;
+    }
+
+    public void setPseudoLocalizationEnabled (boolean yn)
+    {
+        AWSingleLocaleResourceManager._setPseudoLocalizationMode(session(),
+                yn ? AWSingleLocaleResourceManager.PseudoMode.Files
+                   : AWSingleLocaleResourceManager.PseudoMode.Off);
+    }
+
+    public void setPseudoLocalizationMode (AWSingleLocaleResourceManager.PseudoMode mode)
+    {
+        AWSingleLocaleResourceManager._setPseudoLocalizationMode(session(), mode);
+    }
+
+    public AWSingleLocaleResourceManager.PseudoMode pseudoLocalizationMode ()
+    {
+        return AWSingleLocaleResourceManager._pseudoLocalizationMode(session());
     }
 
     public void setPerfWarningsEnabled (boolean yn)

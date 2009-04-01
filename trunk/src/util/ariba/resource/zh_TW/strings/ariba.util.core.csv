@@ -1,0 +1,40 @@
+Big5,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+TemplateParserPageTitle,"範本解析器錯誤","Page title for the error message; "
+TemplateParserTitle,"範本解析器錯誤","Title for the template parser error; "
+FileErrorMsg,"範本解析器: 檔案錯誤: 範本檔案不存在或不可讀取。","Invalid template name encountered; "
+IOErrorMsg,"TemplateParser: IO 錯誤: 讀取範本檔案時出錯。","Error while trying to read template file; IO stands for Input / Output; "
+,,
+BlockoutChar,"X","default blockout character for SecureStringFormatter; Do we have to translate this ?; "
+,,
+,,
+,,
+,,
+,,
+ListSeparator,", ","used to delimit a series of strings when presented "
+DayAbbrev,"D","abbreviation for day; "
+HourAbbrev,"人力資源","abbreviation for hours; "
+MinutesAbbrev,"最小","abbreviation for minutes; "
+,,
+,, keys used in formatters
+,,
+BooleanTrue,"是","This is used from BooleanFormatter; "
+BooleanFalse,"否","This is used from BooleanFormatter; "
+BooleanTrueOrFalse,"布林值必須為 ""真"" 或 ""假""","error when a boolean doesn't contain true or false string"
+CannotParseDate,"無法將字串 ""{0}"" 解析為日期","error when a date cannot be parsed - 0: the date string"
+InvalidCharacterInNumber,"數字中的字元無效","error when there is a non-numeric character in a number"
+InvalidYear,"年份無效","error when the year is invalid in a date"
+NoDigitsFound,"必須輸入數值","error when a number is required and no digits are entered"
+NumberFormatError,"該數值的格式不正確。","friendly error msg for NumberFormatException"
+MaxValueExceeded,"值 ""{0}"" 大於最大允許值 ""{1}""。", "Error when value is greater than allowed (integer overflow)"
+MinValueExceeded,"值 ""{0}"" 小於最小允許值 ""{1}""。", "Error when value is less than allowed (integer underflow)"
+WholeNumberRequiredKey,"值 ""{0}"" 必須是整數。", "Error when integer value contains fractions"

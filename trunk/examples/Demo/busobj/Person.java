@@ -1,9 +1,11 @@
 package busobj;
 
 import ariba.util.core.Fmt;
+import ariba.ui.meta.annotations.Localized;
 
 import java.util.Date;
 
+@Localized
 public class Person
 {
     String firstName;
