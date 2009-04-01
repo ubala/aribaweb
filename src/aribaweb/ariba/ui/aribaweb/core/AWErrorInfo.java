@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorInfo.java#20 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorInfo.java#22 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -146,7 +146,7 @@ public class AWErrorInfo implements AWErrorBucket
         _isWarning = isWarning;
 
         if (_message == null) {
-            _message = /* [] */"Unknown Error";
+            _message = "Unknown Error";
         }
     }
 

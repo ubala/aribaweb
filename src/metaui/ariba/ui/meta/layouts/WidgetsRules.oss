@@ -432,7 +432,7 @@ layout=InspectStack {
         visible:true;
         component:OutlineBox;
         bindings: {
-            title:"No item selected";
+            title:$[a002]"No item selected";
             showExpandoCollapso:true;
             verboseCollapsedContent:false;
             awcontentLayouts:{body:Inspect; buttonArea:Actions};
@@ -469,9 +469,11 @@ layout=(Table, DetailTable) class {
     }
 }
 
+/*
 layout=DetailTable class {
     label:$${ariba.ui.meta.core.UIMeta.defaultLabelForIdentifier(field)};
 }
+*/
 
 object class  { objectTitle:${ariba.util.fieldvalue.FieldValue.getFieldValue(object,
                     ariba.ui.meta.core.UIMeta.getInstance().displayKeyForClass(values.class))}; }
@@ -507,8 +509,7 @@ module {
 actionCategory {
     visible:true;
 }
-@actionCategory=General {  after:zMain;  }
-@actionCategory=Manage { after:Search; }
+@actionCategory=General { after:zMain;  label:$[a001]General }
 
 
 /* For groovy */

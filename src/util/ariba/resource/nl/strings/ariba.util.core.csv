@@ -1,0 +1,40 @@
+Cp1252,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+TemplateParserPageTitle,"Sjabloonparseerfout","Page title for the error message; "
+TemplateParserTitle,"Sjabloonparseerfout","Title for the template parser error; "
+FileErrorMsg,"Sjabloonparseerfout: het sjabloonbestand bestaat niet of is onleesbaar.","Invalid template name encountered; "
+IOErrorMsg,"Sjabloon parseren: IO-fout: er is een fout opgetreden tijdens het lezen van het sjabloonbestand.","Error while trying to read template file; IO stands for Input / Output; "
+,,
+BlockoutChar,"X","default blockout character for SecureStringFormatter; Do we have to translate this ?; "
+,,
+,,
+,,
+,,
+,,
+ListSeparator,", ","used to delimit a series of strings when presented "
+DayAbbrev,"dag","abbreviation for day; "
+HourAbbrev,"uur","abbreviation for hours; "
+MinutesAbbrev,"min","abbreviation for minutes; "
+,,
+,, keys used in formatters
+,,
+BooleanTrue,"Ja","This is used from BooleanFormatter; "
+BooleanFalse,"Nee","This is used from BooleanFormatter; "
+BooleanTrueOrFalse,"Boole-variabelen moeten ""waar"" of ""onwaar"" zijn","error when a boolean doesn't contain true or false string"
+CannotParseDate,"Kan de string ""{0}"" niet parseren als datum","error when a date cannot be parsed - 0: the date string"
+InvalidCharacterInNumber,"Ongeldig teken in getal","error when there is a non-numeric character in a number"
+InvalidYear,"Ongeldig jaar","error when the year is invalid in a date"
+NoDigitsFound,"Numerieke waarde verplicht","error when a number is required and no digits are entered"
+NumberFormatError,"De numerieke waarde staat niet in de juiste opmaak.","friendly error msg for NumberFormatException"
+MaxValueExceeded,"Waarde ""{0}"" is groter dan de maximaal toegestane waarde ""{1}"".", "Error when value is greater than allowed (integer overflow)"
+MinValueExceeded,"Waarde ""{0}"" is kleiner dan de minimaal toegestane waarde ""{1}"".", "Error when value is less than allowed (integer underflow)"
+WholeNumberRequiredKey,"Waarde ""{0}"" moet een geheel getal zijn.", "Error when integer value contains fractions"

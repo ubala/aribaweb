@@ -30,6 +30,7 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
+import ariba.util.fieldtype.NullTypeInfo;
 import ariba.util.fieldtype.TypeInfo;
 
 /**
@@ -53,15 +54,18 @@ class ASTMultiply extends ExpressionNode
     protected Object getValueBody( ExprContext context, Object source ) throws ExprException
     {
         Object result = children[0].getValue( context, source );
-        TypeInfo resultInfo = getTypeInfo();
-        String resultType = resultInfo != null? resultInfo.getName(): null; 
+        TypeInfo resultInfo = children[0].getTypeInfo();
+        if (resultInfo == null || resultInfo instanceof NullTypeInfo) {
+            resultInfo = getTypeInfo();
+        }
+        String resultType = resultInfo != null? resultInfo.getName(): null;
         for ( int i=1; i < children.length; ++i ) {
-        	TypeInfo info = children[i].getTypeInfo();
+            TypeInfo info = children[i].getTypeInfo();
             result = ExprOps.multiply(
-            		result, 
-            		children[i].getValue(context, source),
-            		resultType,
-            	    info != null? info.getName(): null);
+                    result,
+                    children[i].getValue(context, source),
+                    resultType,
+                    info != null? info.getName(): null);
             resultType = result != null? result.getClass().getName(): null;
         }
         return result;
@@ -70,7 +74,7 @@ class ASTMultiply extends ExpressionNode
     public String getExpressionOperator(int index)
     {
         return "*";
-    }    
+    }
 
     public int getExpressionType ()
     {

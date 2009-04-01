@@ -1,30 +1,36 @@
 <w:HintMessage>
-          Try selecting <b>Component Inspector</b> from the <b>AW Options</b> link above...
+    <a:Local key="a004">Try selecting <b>Component Inspector</b> from the <b>AW Options</b> link above...</a:Local>
 </w:HintMessage>
 
 <div style="padding:0px 8px 8px 8px" class="doc">
+    <a:Local key="a001">
     <b><a href="http://aribaweb.org" target="_blank">AribaWeb</a> is the Open Source component-based web application
     development framework for creating rich, AJAX-enabled applications with the absolute minimum of code
     (and no hand-coded Javascript).</b>
     The AW distribution includes both the (relatively) low-level
     core rendering and request handling framework (ariba.aribaweb) as well
     as a higher level library of ui components (ariba.widgets, ariba.metaui, ...)
+    </a:Local>
     <br/><br/>
 
-    <h2>The Demo Application</h2>
+    <h2><a:Local key="a002">The Demo Application</a:Local></h2>
+    <a:Local key="a003">
     This application shows off some of AW's bundled widgets.  Click across the tabs
     at the top and explore
     <b><a:Hyperlink action='${pageWithName("TableTabs")}'>Data Tables</a:Hyperlink></b>,
     <b><a:Hyperlink action='${pageWithName("PivotTabs")}'>Pivot Tables</a:Hyperlink></b>,
     <b><a:Hyperlink action='${pageWithName("MetaUIForms")}'>Data Forms</a:Hyperlink></b>
     (of both the template-specified and meta-data derived varieties), and a more complex 
-    <b><a:Hyperlink action='${pageWithName("ERPage")}'>Master Detail App</a:Hyperlink></b>
+    <b><a:Hyperlink action='${pageWithName("ERPage")}'>Mini App</a:Hyperlink></b>
     (simulated Expense Report editor) that pulls some of this together.
+    </a:Local>
     <br/><br/>
 
+    <a:Local key="a005">
     <h2>Source Search</h2>
     Check out the  <b><a:Hyperlink action='${pageWithName("SearchSource")}'>Documentation</a:Hyperlink></b>
     tab for to search or browse the AribaWeb documentation and source code.
+    </a:Local>
     <br/><br/>
 
     <h2>X-Ray</h2>

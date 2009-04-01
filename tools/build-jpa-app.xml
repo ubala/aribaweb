@@ -121,7 +121,7 @@
         <copy file="${persistence.xml}" todir="${build.classes.dir}/META-INF" failonerror="true"/>
 
         <copy todir="${build.classes.dir}" failonerror="false">
-            <fileset dir="${jpa.templates.dir}" includes="log4j.properties"/>
+            <fileset dir="${jpa.templates.dir}" includes="log4j.properties,c3p0.properties"/>
         </copy>
     </target>
 

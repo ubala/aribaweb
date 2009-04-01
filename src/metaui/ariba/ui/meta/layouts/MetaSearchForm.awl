@@ -4,21 +4,21 @@
     <div bh="DTBS">
         <m:IncludeComponent/>
         <div style="float:right">\
-            <w:TextButton action="$search" isDefault="$true">Search</w:TextButton>\
+            <w:TextButton action="$search" isDefault="$true"><a:Local key="a001">Search</a:Local></w:TextButton>\
         </div>
         <a:SetValue mid="$requestContext.nextElementId"/>
         <div _ifTrue="$showSearchTypeChooser" style="float:right">
-            <w:PopupMenuLink menuId="$mid" position="this">Options</w:PopupMenuLink>
+            <w:PopupMenuLink menuId="$mid" position="this"><a:Local key="a002">Options</a:Local></w:PopupMenuLink>
             <w:PopupMenu menuId="$mid">
                 <w:PopupMenuHeading>Search Type</w:PopupMenuHeading>
                 <w:PopupMenuItem showBullet='${searchOperation=="keywordSearch"}' action='${searchOperation="keywordSearch"; null}'>\
-                    Keyword Search
+                    <a:Local key="a003">Keyword Search</a:Local>
                 </w:PopupMenuItem>
                 <w:PopupMenuItem showBullet='${searchOperation=="textSearch"}' action='${searchOperation="textSearch"; null}'>\
-                    Advanced Search
+                    <a:Local key="a004">Advanced Search</a:Local>
                 </w:PopupMenuItem>
                 <w:PopupMenuItem showBullet='${searchOperation=="search"}' action='${searchOperation="search"; null}'>\
-                    Structured Search
+                    <a:Local key="a005">Structured Search</a:Local>
                 </w:PopupMenuItem>
             </w:PopupMenu>
         </div>

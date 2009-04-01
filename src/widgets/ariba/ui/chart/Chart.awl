@@ -67,7 +67,7 @@
 <a:RefreshRegion>
     <a:Comment>$type</a:Comment>
     <div id="$objId">\
-        <a:Local>\
+        <a:Local key="a001">\
             Loading Graph...
         </a:Local>\
     </div>\

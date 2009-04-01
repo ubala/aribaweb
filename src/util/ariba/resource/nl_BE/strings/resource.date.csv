@@ -1,0 +1,33 @@
+8859_1,,
+Today,heden, Technical: String representing today (for convenient input).  Must be lowercase.
+Yesterday,gisteren, Technical: String representing yesterday (for convenient input).  Must be lowercase.
+Tomorrow,morgen, Technical: String representing tomorrow (for convenient input).  Must be lowercase.
+YearRelativeFmt, d/M, Technical: Must be a valid java.text.DateFormat format.
+DefaultFmt, "EEE d MMM yyyy", Technical: Must be a valid java.text.DateFormat format.
+LongDefaultFmt,"EEE d MMM yyyy H:mm","Technical: Must be a valid java.text.DateFormat format.; "
+TodayTimeFmt, "'Heden' H:mm", Technical: Must be a valid java.text.DateFormat format.
+TodayFmt, "'Heden'", Technical: Must be a valid java.text.DateFormat format.
+ConciseDateTimeFmt, "d/M/yyyy H:mm", Technical: Must be a valid java.text.DateFormat format.
+PaddedConciseDateTimeFmt, "dd/MM/yyyy H:mm", Technical: Must be a valid java.text.DateFormat format.
+PaddedDateTimeFmt,"dd/MM/yyyy H:mm:ss","Technical: Must be a valid java.text.DateFormat format.; "
+PaddedPreciseDateTimeFmt,"dd/MM/yyyy H:mm:ss:SSS","Technical: Must be a valid java.text.DateFormat format.; "
+ConciseFmt,d/M/yyyy, Technical: Must be a valid java.text.DateFormat format.
+PaddedConciseFmt, dd/MM/yyyy, Technical: Must be a valid java.text.DateFormat format.
+ExtraConciseFmt,"dd/MM/yy","Technical: Must be a valid java.text.DateFormat format.; "
+DayDateMonthYearFmt, "d MMM yyyy", Technical: Must be a valid java.text.DateFormat format.
+DateMonthYearFmt, "d MMMM yyyy", Technical: Must be a valid java.text.DateFormat format.
+FullDateMonthYearFmt, "d MMMM yyyy H:mm", Technical: Must be a valid java.text.DateFormat format.
+FullDateMonthYearTZFmt,"d MMMM yyyy H:mm, zzzz","Technical: Must be a valid java.text.DateFormat format.; "
+LongDayDateMonthYearFmt, "EEEE d MMMM yyyy", Technical: Must be a valid java.text.DateFormat format.
+FullDayDateMonthYearFmt, "EEEE d MMMM yyyy H:mm", Technical: Must be a valid java.text.DateFormat format.
+FullDayDateMonthYearTZFmt,"EEEE d MMMM yyyy H:mm, zzzz","Technical: Must be a valid java.text.DateFormat format.; "
+HoursMinutesSecondsFmt, "H:mm:ss", Technical: Must be a valid java.text.DateFormat format.
+DayOfWeekFmt, "EEE", Technical: Must be a valid java.text.DateFormat format.
+FormatsSeparator, ";", Technical: separator character for date format pattern lists
+SystemFormats, "d/M/yy;d/M/yyyy;d-MMM-yyyy;d-MMM-yy", Technical: list of date formats to try when parsing any date string
+UserFormats, "d MMM yyyy;d MMM yy;yyyy-M-dd;EEE d MMM yyyy;EEE d MMM yy;d MMM yyyy;d MMM yy", Technical: list of date formats to try when parsing user date strings
+ReportingDateFmt,"d MMM yyyy","Date format for reporting."
+HourMinuteSecond,"H:mm:ss", "Technical: Must be a valid java.text.DateFormat format."
+HourMinuteAMPM,"H:mm", "e.g. 12:08 PM Technical: Must be a valid java.text.DateFormat format."
+DayOfWeekStart,"1","Sunday:0 Monday:1 e.g., French calendar starts on Monday"
+CalendarHeaderFmt,"MMM yyyy", "Header of calender shown in Date Chooser."

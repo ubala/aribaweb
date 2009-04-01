@@ -12,20 +12,37 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXDebugResourceActions.java#11 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXDebugResourceActions.java#13 $
 */
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWContentType;
+import ariba.ui.aribaweb.util.AWResourceManager;
+import ariba.ui.aribaweb.util.AWFileResource;
+import ariba.ui.aribaweb.util.Log;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.util.core.Assert;
 import ariba.util.core.StringUtil;
+import ariba.util.core.GrowOnlyHashtable;
+import ariba.util.core.Fmt;
+
+import javax.servlet.http.HttpSession;
+import java.util.Locale;
+import java.util.Map;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 public class AWXDebugResourceActions extends AWDirectAction
 {
-    protected final static String ResourceNameKey = "rn";
-    protected final static String ActionPrefix = "content/AWXDebugResourceActions/";
     public final static String Name = "AWXDebugResourceActions";
+    public final static String ContentActionName = "content";
+    protected final static String ActionPrefix = ContentActionName + "/" + Name + "/";
+
+    // All three of these (two maps and the int) should be protected by syncing on IdsForResourceRoots
+    private static int NextId = 0;
+    private final static Map<String,String> ResourceRootsForIds = new GrowOnlyHashtable<String,String>();
+    private final static Map<String,String> IdsForResourceRoots = new GrowOnlyHashtable<String,String>();
 
     protected boolean shouldValidateSession ()
     {
@@ -34,29 +51,53 @@ public class AWXDebugResourceActions extends AWDirectAction
         return false;
     }
 
+    private static AWResourceManager resourceManager (AWRequestContext requestContext)
+    {
+        // TODO this block is basically duplicating code in AWPage.resourceManager()
+
+        AWResourceManager rm;
+        HttpSession httpSession = requestContext.existingHttpSession();
+        if (httpSession != null) {
+            rm = AWSession.session(httpSession).resourceManager();
+        }
+        else {
+            rm = AWConcreteApplication.SharedInstance.resourceManager(Locale.US);
+        }
+        return rm;
+    }
+
     public AWResponseGenerating contentAction ()
     {
         Assert.that(AWConcreteApplication.IsRapidTurnaroundEnabled, "Action available only if debugging is enabled -- not for production use.");
-        String url = request().uri();
-        String prefix = ActionPrefix;
-        int index = url.indexOf(prefix);
-        int keyStart = index + prefix.length();
-        Assert.that(((index > 0) || keyStart < url.length()), "Incorrect form for request URL: %s", url);
 
-        int keyEnd = url.indexOf('?', keyStart);
-        if (keyEnd <=0) keyEnd = url.length();
+        String[] path = request().requestHandlerPath();
+        Assert.that(path.length > 3, "Incorrect form for request URL");
+        Assert.that(path[0].equals(ContentActionName), "Incorrect form for request URL");
+        Assert.that(path[1].equals(Name), "Incorrect form for request URL");
+        String id = path[2];
 
-        String resourceName = url.substring(keyStart, keyEnd);
+        // Since it's a GrowOnlyHashtable, safe to access here without synchronization
+        String dir = ResourceRootsForIds.get(id);
+        Assert.that(dir != null, "Not a registered resource directory: %s", id);
 
-        Assert.that(resourceName!=null, "No resource name on request URL");
-
-        AWResource resource = application().resourceManager().resourceNamed(resourceName);
-        Assert.that(resource!=null, "Can't find requested resource named: %s", resourceName);
-
+        String resourceName = StringUtil.join(path, "/", 3, path.length - 3);
+        // Make sure nobody tries to sneak out of the registered path,
+        // e.g. AWXDebugResourceActions/99/../../../StevesBankAccount.qif.
+        // In WebObjects world, requestHandlerPath() will already have
+        // normalized away the "..", but not in servlet world, so we need
+        // to do this check.
+        Assert.that(resourceName.indexOf("..") == -1, "'..' not allowed in resource path");
+        String filename = Fmt.S("%s/%s", dir, resourceName);
         // System.out.println("*** Callback resourceName = " + resourceName + "   (url: " + url + "):   path: " + resource.fullUrl());
 
+        File f = new File(filename);
         AWResponse response = application().createResponse();
-        ((AWBaseResponse)response).setContentFromStream(resource.inputStream());
+
+        try {
+            ((AWBaseResponse)response).setContentFromStream(new FileInputStream(f));
+        } catch (FileNotFoundException e) {
+            Assert.fail(e, "Requested file %s not found", resourceName);
+        }
 
         int dot = resourceName.lastIndexOf('.');
         if (dot > 0) {
@@ -77,9 +118,26 @@ public class AWXDebugResourceActions extends AWDirectAction
         return response;
     }
 
-    public static String  urlForResourceNamed (AWRequestContext requestContext, String name)
+    public static String urlForResourceInDirectory (AWRequestContext requestContext, String dir, String resourcePath)
     {
-        Assert.that((StringUtil.nullOrEmptyString(name) || (AWConcreteApplication.sharedInstance().resourceManager().resourceNamed(name) != null)), "Unable to locate resource: %s", name);
+        String id;
+        synchronized (IdsForResourceRoots) {
+            id = IdsForResourceRoots.get(dir);
+            if (id == null) {
+                // Canonicalize the directory to forward-slashes, make sure it doesn't end with a slash
+                String canonicalizedDir = dir.replace('\\', '/');
+                if (canonicalizedDir.endsWith("/")) {
+                    canonicalizedDir = canonicalizedDir.substring(0, canonicalizedDir.length() - 1);
+                }
+
+                // get next ID
+                id = Integer.toString(NextId);
+                NextId++;
+                IdsForResourceRoots.put(dir, id);
+                ResourceRootsForIds.put(id, canonicalizedDir);
+                Log.aribawebResource_register.debug("AWXDebugResourceActions: ID %s -> %s", id, dir);
+            }
+        }
 
         AWDirectActionUrl url = AWDirectActionUrl.checkoutUrl();
 
@@ -87,9 +145,9 @@ public class AWXDebugResourceActions extends AWDirectAction
             url.setRequestContext(requestContext);
         }
 
-        // hack: attach resource name additional component of the file path.  We do this so that when relative URLs are constructed by the
-        // browser they are processed correctly
-        url.setDirectActionName(ActionPrefix + name);
+        // Include the directory id as part of the URL path, not a query parameter, so
+        // that relative URL references will work
+        url.setDirectActionName(ActionPrefix + id + "/" + resourcePath);
 
         String urlString = url.finishUrl();
 
@@ -99,5 +157,26 @@ public class AWXDebugResourceActions extends AWDirectAction
             urlString = urlString.substring(0, index);
         }
         return urlString;
+
+    }
+
+    public static String  urlForResourceNamed (AWRequestContext requestContext, String name)
+    {
+        Assert.that(!StringUtil.nullOrEmptyOrBlankString(name), "Unable to provide url for null/empty/blank resource");
+        AWResourceManager resourceManager = resourceManager(requestContext);
+        AWResource res = resourceManager.resourceNamed(name);
+
+        if (!(res instanceof AWFileResource)) {
+            boolean useFullUrl = requestContext.isMetaTemplateMode();
+            boolean isSecure = useFullUrl ? requestContext.request() != null && requestContext.request().isSecureScheme() : false;
+            return resourceManager.urlForResourceNamed(name, useFullUrl, isSecure, false);
+        }
+
+        String path = ((AWFileResource)res)._fullPath();
+        Assert.that(path.endsWith(name), "Resource %s resolved to file path %s, which does not end with the requested resource!", name, path);
+
+        // We allow relative references within this resource dir, since it was a registered resource dir
+        String resourceDir = path.substring(0, path.length() - name.length());
+        return urlForResourceInDirectory(requestContext, resourceDir, name);
     }
 }

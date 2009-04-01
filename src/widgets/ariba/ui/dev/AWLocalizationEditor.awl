@@ -1,0 +1,87 @@
+<w:BasicPageWrapper hasForm="$true">
+    <w:HintMessage>
+        <b>Instructions:</b> 1) Run under Pseudo-locale mode and mark up your .awls with a:Local and \$[] bindings (and your .oss with \$[] bindings),<br/>
+        2) Select your project and Run Actions -\> Externalize to Base Locale.<br/>
+        3) For MetaUI app, also run Actions -\> Externalize Meta Labels to Base Locale.<br/>
+        4) Add your target locales via Actions -\> Add Locale...<br/>
+        5) Select each locale in turn, and each file within the locale, and enter translated strings.  You can use the "BabelFish"
+           button to do some machine assisted translation.  For each file, <b>Click Save!</b>
+        6) Re-build / re-start your app (run ant), set your browser's preferred locale to a target locale, and enjoy!
+    </w:HintMessage>
+    <w:FourZoneLayout widthLeft="250px" widthRight="auto">
+        <a:Content name="top">
+
+        </a:Content>
+        <a:Content name="left">
+            Project: <w:GenericChooser list='$stringManager.projectDirs' key="selectedProjectDir" displayKey="name" type="Popup" action="$null"/>
+
+            <t:DataTable list="$projectFiles.locales.toArray" item="$currentLocale" displayGroup="$localeDisplayGroup"
+                         singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                         title="Locales" showColumnHeader="$false" initialSortKey="self" enableScrolling="$true">
+                <t:HeadingArea>
+                    <h2 class="flL">Locales</h2>
+                    <div class="flR"><w:PulldownButton menuId="ProjActions" disabled="$!antAvailable">Actions</w:PulldownButton></div>
+                    <w:PopupMenu menuId="ProjActions">
+                        <w:PopupMenuItem action="$antLocalize">Externalize to Base Locale</w:PopupMenuItem>
+                        <w:PopupMenuItem action="$antLocalizeMeta">Externalize Meta labels to Base Locale</w:PopupMenuItem>
+                        <w:PopupMenuItem action="$antLocalizeLocales" disabled='${projectFiles.locales.size <= 1}'>\
+                            Update Locales with Base Strings\
+                        </w:PopupMenuItem>
+                        <w:PopupMenuItem action="$showAddLocale">Add Locale...</w:PopupMenuItem>
+                    </w:PopupMenu>
+                </t:HeadingArea>
+                <t:Column>
+                    $currentLocale (<a:String value="${filesForProjectAndLocale(selectedProjectDir, currentLocale).size}"/>)
+                </t:Column>
+            </t:DataTable>
+            <w:Confirmation id="AddLocalePanel" okAction="$antAddLocale">
+                <a:Content name="header">Add Locale</a:Content>\
+                <a:Content name="content">
+                    <w:FormTable showErrorFlags="$true" omitLabelPadding="$true">
+                        <w:FormRow label="Locale Name"><a:TextField value="$currentLocale" formatter="$formatters.requiredString"/></w:FormRow>
+                    </w:FormTable>
+                    <br/>
+                    <i>(e.g. "de", "fr", "zh_CN", "pt_BR", ...)</i>
+                </a:Content>\
+            </w:Confirmation>
+
+            <t:DataTable list="${filesForProjectAndLocale(selectedProjectDir, localeDisplayGroup.selectedObject)}"
+                         displayGroup="$fileDisplayGroup"
+                         singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                         title="Files" enableScrolling="$true">
+                <t:Column key="name"/>
+            </t:DataTable>
+        </a:Content>
+        <a:Content name="right">
+            <a:If ifTrue="$fileDisplayGroup.selectedObject">
+                <t:DataTable list="$currentStringFile.strings" item="$currentString"
+                             groupByColumn="file" showColumnLabelWhenGrouping="$false" showGroupCounts="$false"
+                             initialSortKey="key"
+                             singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                             title="$selectedFileTitle" enableScrolling="$true">
+                    <t:Column key="file" label="Component"/>
+                    <t:Column key="key" label="Key"/>
+                    <t:Column key="orig" label="Original">
+                        $currentString.orig\
+                        <a:If ifTrue="$currentString.hasComment"><w:CueTip value="$currentString.comment"/></a:If>
+                    </t:Column>
+                    <t:Column key="trans" label="Translation">\
+                        <a:TextArea rows="$rowsForCurrentTrans" cols="40" value="$currentString.trans" isRefresh="$true"/>\
+                    </t:Column>
+                    <t:Column>\
+                        <a:If ifTrue="$currentString.needsTranslation">*</a:If>
+                    </t:Column>
+                    <t:ButtonArea>\
+                        <w:TextButton action="$saveFileChanges">Save</w:TextButton>
+                        <w:TextButton action="$autoTranslate" disabled="$!translationSupported">Babel Fish</w:TextButton>
+                        <w:CueTip>Use of BabelFish covered by their terms of service -- see http://babelfish.yahoo.com/</w:CueTip>
+                    </t:ButtonArea>
+                </t:DataTable>
+            </a:If>
+        </a:Content>
+        <a:Content name="bottom">
+
+        </a:Content>
+    </w:FourZoneLayout>
+
+</w:BasicPageWrapper>

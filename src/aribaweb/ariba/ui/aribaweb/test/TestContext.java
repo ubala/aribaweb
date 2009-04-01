@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#12 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -143,19 +143,23 @@ public class TestContext
     {
         Object obj = _context.get(type);
         if (_dataProvider != null) {
-            obj = _dataProvider.resolve(this, obj);
+            obj = _dataProvider.resolveForGet(this, obj);
         }
         return obj;
     }
 
     public void put (Object object)
     {
-        _context.put(object.getClass(), object); 
+        put(object.getClass(), object); 
     }
     
     public void put (Object key, Object value)
     {
-        _context.put(key, value); 
+        Object obj = value;
+        if (_dataProvider != null) {
+            obj = _dataProvider.resolveForPut(this, obj);
+        }
+        _context.put(key, obj); 
     }
 
     public void setUsername (String username)
@@ -260,11 +264,15 @@ public class TestContext
                         I18NUtil.EncodingUTF_8
                         );
                     TestContextObjectFactory f = factoryForId(factoryId);
-                    Assert.that(f != null,
-                                "No factory found for ID %s", factoryId);
-                    Object obj = f.reconstituteObject(requestContext, objId);
-                    if (obj != null) {
-                        put(obj);
+                    Assert.assertNonFatal(f != null,
+                                          "No factory found for ID '%s', object '%s'", factoryId, objId);
+                    if (f != null) {
+                        Object obj = f.reconstituteObject(requestContext, objId);
+                        Assert.assertNonFatal(obj != null,
+                                              "Failed to reconstitute object with factory '%s', object '%s'", factoryId, objId);
+                        if (obj != null) {
+                            put(obj);
+                        }
                     }
                 }
                 catch (UnsupportedEncodingException e) {

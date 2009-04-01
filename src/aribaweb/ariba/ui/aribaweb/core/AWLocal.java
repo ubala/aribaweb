@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWLocal.java#23 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWLocal.java#25 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -22,10 +22,16 @@ import ariba.util.core.ListUtil;
 import ariba.ui.aribaweb.util.AWResourceManagerDictionary;
 import ariba.ui.aribaweb.util.AWSingleLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWUtil;
+import ariba.ui.aribaweb.util.AWResourceManager;
+
 import java.util.Map;
 import java.util.List;
+import java.util.Locale;
 import java.lang.reflect.Field;
 import ariba.util.core.MultiKeyHashtable;
+import ariba.util.core.MapUtil;
+
+import javax.servlet.http.HttpSession;
 
 public final class AWLocal extends AWContainerElement
 {
@@ -50,6 +56,28 @@ public final class AWLocal extends AWContainerElement
         AWEncodedString.setDebuggingEnabled(IsDebuggingEnabled);
     }
 
+    public static AWSingleLocaleResourceManager resourceManager (AWRequestContext requestContext)
+    {
+        AWResourceManager resourceManager = null;
+        HttpSession existingHttpSession = (requestContext != null) ? requestContext.existingHttpSession() : null;
+        if (existingHttpSession != null) {
+            resourceManager = AWSession.session(existingHttpSession).resourceManager();
+        }
+        else {
+            resourceManager = AWConcreteApplication.SharedInstance.resourceManager(Locale.US);
+        }
+
+        return AWSingleLocaleResourceManager.ensureSingleLocale(resourceManager);
+    }
+
+    public static String localizedJavaString (int key, String originalString, Class cls, AWRequestContext requestContext)
+    {
+        return ariba.util.i18n.LocalizedJavaString.getLocalizedString(
+            cls.getName(),
+            key, originalString, resourceManager(requestContext).locale());
+    }
+
+
     protected static Map loadLocalizedAWLStrings (AWComponent component)
     {
         if (component instanceof AWIncludeBlock) {
@@ -71,20 +99,54 @@ public final class AWLocal extends AWContainerElement
 
     private AWElement localizedElement (AWComponent component)
     {
+        boolean UseStaticCache = !AWConcreteApplication.IsRapidTurnaroundEnabled;
         AWSingleLocaleResourceManager resourceManager = (AWSingleLocaleResourceManager)component.resourceManager();
         AWElement localizedElement = (AWElement)_localizedElements.get(resourceManager);
         if (localizedElement == null) {
             synchronized (this) {
                 localizedElement = (AWElement)_localizedElements.get(resourceManager);
                 if (localizedElement == null) {
+
+                    Map elementCache = null;
+                    String stringTableEntry = null;
                     Map localizedStringsHashtable = loadLocalizedAWLStrings(component);
                     if (localizedStringsHashtable != null && _key != null) {
-                        Object stringTableEntry = localizedStringsHashtable.get(_key);
-                        if (stringTableEntry instanceof AWElement) {
-                            localizedElement = (AWElement)stringTableEntry;
+                        if (!UseStaticCache) {
+                            elementCache = (Map)localizedStringsHashtable.get("___cache___");
+                            if (elementCache != null) {
+                                // check if we've inherited some other locales map
+                                if (elementCache.get("__RM__") != resourceManager) {
+                                    elementCache = null;
+                                } else {
+                                    localizedElement = (AWElement)elementCache.get(_key);
+                                }
+                            }
+
+                            if (elementCache == null) {
+                                // we put a cache map in the ResourceService strings Map (hack!)
+                                // Unfortunately, when en_US is copied to another locale we can inherit that
+                                // cache, so we tag the cache and check for it (above)
+                                elementCache = MapUtil.map();
+                                localizedStringsHashtable.put("___cache___", elementCache);
+                                elementCache.put("__RM__", resourceManager);
+                            }
                         }
-                        else if (stringTableEntry != null) {
-                            String translatedString = (String)stringTableEntry;
+                        if (localizedElement == null) {
+                            stringTableEntry = (String)localizedStringsHashtable.get(_key);
+                        }
+                    } else {
+                        // Pseudo localizing?
+                        if (resourceManager.pseudoLocalizingAll() && contentElement() != null) {
+                            stringTableEntry = localizedStringForElement(contentElement());
+                            stringTableEntry = resourceManager.pseudoLocalizeUnKeyed(stringTableEntry);
+                        } else {
+                            // No key, just use the template content as is
+                            localizedElement = contentElement();
+                        }
+                    }
+                    if (localizedElement == null) {
+                        if (stringTableEntry != null) {
+                            String translatedString = stringTableEntry;
                             // CR 1-3EG7T - This is to make the escaping rule consistent with java.text.MessageFormat
                             if (translatedString.indexOf("{") != -1) {
                                 translatedString = translatedString.replaceAll("''", "'");
@@ -99,8 +161,8 @@ public final class AWLocal extends AWContainerElement
                             AWElement[] elementArray = localizedTemplate.elementArray();
                             // This unwraps templates that have a single element in them
                             localizedElement = (elementArray.length == 1) ? elementArray[0] : (AWElement)localizedTemplate;
-                            // replace localized string with parsed element for use later during rapid turnaround.
-                            localizedStringsHashtable.put(_key, localizedElement);
+                            // cache localized string with parsed element for use later during rapid turnaround.
+                            if (elementCache != null) elementCache.put(_key, localizedElement);
                         }
                         else {
                             if (HasLoggedFlags == null) {
@@ -119,21 +181,48 @@ public final class AWLocal extends AWContainerElement
                             localizedElement = contentElement();
                         }
                     }
-                    else {
-                        localizedElement = contentElement();
-                    }
-                    if (!AWConcreteApplication.IsRapidTurnaroundEnabled) {
-                        // If we do not put the localizedElement in this cache, we will always
-                        // get it from the resourceManager's cache (resource.object()).  That way,
-                        // if the file is changed and we reload the csv file, we automatically
-                        // throw out al the elements derived from that file.  This avoids chache
-                        // synchronization/coherency problems during rapidturnaround mode.
-                        _localizedElements.put(resourceManager, localizedElement);
-                    }
+                }
+                if (UseStaticCache) {
+                    // If we do not put the localizedElement in this cache, we will always
+                    // get it from the resourceManager's cache (resource.object()).  That way,
+                    // if the file is changed and we reload the csv file, we automatically
+                    // throw out al the elements derived from that file.  This avoids chache
+                    // synchronization/coherency problems during rapidturnaround mode.
+                    _localizedElements.put(resourceManager, localizedElement);
                 }
             }
         }
         return localizedElement;
+    }
+
+    String localizedStringForElement (AWElement element)
+    {
+        StringBuffer buf = new StringBuffer();
+        appendLocalizedString(element, buf, 0);
+        return buf.toString();
+    }
+
+    int appendLocalizedString(AWElement element, StringBuffer buf, int nextId)
+    {
+        if (element instanceof AWTemplate) {
+            AWElement[] els = ((AWTemplate)element).elementArray();
+            for (AWElement e : els) {
+                nextId = appendLocalizedString(e, buf, nextId);
+            }
+        }
+        else if (hasDynamicBinding(element)) {
+            int id = nextId++;
+            if (element instanceof AWContainerElement) {
+                buf.append("{" + id + "}");
+                nextId = appendLocalizedString(((AWContainerElement)element).contentElement(), buf, nextId);
+                buf.append("{/" + id + "}");
+            } else {
+                buf.append("{" + id + "/}");
+            }
+        } else {
+            element.appendTo(buf);
+        }
+        return nextId;
     }
 
     private void substituteArguments (

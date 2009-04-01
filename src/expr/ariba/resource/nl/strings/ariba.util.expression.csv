@@ -1,0 +1,3 @@
+Cp1252,,
+,,
+MalformedExpression,"Er is een fout opgetreden bij het parseren rond teken ""{0}"" op regel ""{1}"" en kolom ""{2}"".", "An syntactic error has occured while parsing the expression"

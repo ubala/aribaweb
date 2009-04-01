@@ -12,13 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestUnit.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestUnit.java#5 $
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.util.core.ClassUtil;
 import ariba.util.core.ListUtil;
+import ariba.util.core.StringUtil;
+
 import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,6 +35,9 @@ public class TestUnit
     private List<TestLinkHolder> _uiNoParamLinks = ListUtil.list();
     private List<TestLinkHolder> _noUIWithParamLinks = ListUtil.list();
     private List<TestLinkHolder> _noUiNoParamLinks = ListUtil.list();
+
+    private List<TestLinkHolder> _stagers = ListUtil.list();
+    private List<TestLinkHolder> _pageAccessLinks = ListUtil.list();
 
     private boolean _displayTestContextValue = false;
 
@@ -50,6 +55,7 @@ public class TestUnit
                 else {
                     _uiNoParamLinks.add(link);
                 }
+                _pageAccessLinks.add(link);
             }
             else {
                 if (link.requiresParam()) {
@@ -58,6 +64,7 @@ public class TestUnit
                 else {
                     _noUiNoParamLinks.add(link);
                 }
+                _stagers.add(link);
             }
         }
         if (links.size() > 0) {
@@ -105,6 +112,16 @@ public class TestUnit
     {
         return _noUiNoParamLinks;
     }
+
+    public List stagers ()
+    {
+        return _stagers;
+    }
+
+    public List pageAccessLinks ()
+    {
+        return _pageAccessLinks;
+    }
     
 
     public boolean hasUiParamLinks ()
@@ -127,15 +144,27 @@ public class TestUnit
         return _noUiNoParamLinks.size() > 0;
     }
 
+    public boolean hasStagers ()
+    {
+        return _stagers.size() > 0;
+    }
+
+    public boolean hasPageAccessLinks ()
+    {
+        return _pageAccessLinks.size() > 0;
+    }
+
     public void sort ()
     {
         sort(_uiWithParamLinks);
         sort(_uiNoParamLinks);
         sort(_noUIWithParamLinks);
         sort(_noUiNoParamLinks);
+        sort(_pageAccessLinks);
+        sort(_stagers);
 
     }
-
+    
     private void sort (List<TestLinkHolder> list)
     {
         Collections.sort(list,

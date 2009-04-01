@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMultiLocaleResourceManager.java#51 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMultiLocaleResourceManager.java#52 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -116,12 +116,8 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
         AWResourceDirectory.setSystemDefaultLocale(locale);
     }
 
-    public AWResourceManager resourceManagerForLocale (Locale locale)
+    public AWResourceManager _resourceManagerForLocale (Locale locale)
     {
-        // we will return the resource manager appropriate for for this thread
-        // this is determined by the ResourceService (and ultimately by RealmProfile)
-        locale = ResourceService.getService().getRestrictedLocale(locale);
-
         AWResourceManager resourceManager =
             (AWResourceManager)_singleLocaleResourceManagers.get(locale);
         if (resourceManager == null) {
@@ -136,6 +132,15 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
         }
         return resourceManager;
     }
+
+    public AWResourceManager resourceManagerForLocale (Locale locale)
+    {
+        // we will return the resource manager appropriate for for this thread
+        // this is determined by the ResourceService (and ultimately by RealmProfile)
+        locale = ResourceService.getService().getRestrictedLocale(locale);
+        return _resourceManagerForLocale(locale);
+    }
+
     public AWResourceManager[] resourceManagers ()
     {
         return (AWResourceManager[])_singleLocaleResourceManagers.elementsArray();

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/PermissionSet.java#3 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/PermissionSet.java#4 $
 */
 package ariba.appcore;
 
@@ -56,25 +56,6 @@ public class PermissionSet
         }
     }
 
-    static int idForPermissionName (String name)
-    {
-        Integer id = (Integer)_idsByName.get(name);
-        if (id == null) {
-            synchronized (PermissionSet.class) {
-                Permission p = getContext().findOne(Permission.class, AWUtil.map("name", name));
-                Assert.that(p != null, "Lookup of unknown permission: %s", name);
-                id = p.getId();
-                _idsByName.put(name, id);
-            }
-        }
-        return id.intValue();
-    }
-
-    static Permission permissionForName (String name)
-    {
-        return ObjectContext.get().find(Permission.class, idForPermissionName(name));
-    }
-
     public boolean hasPermission (int id)
     {
         return _permissions != null && _permissions.contains(id);
@@ -106,7 +87,6 @@ public class PermissionSet
     // ToDo: listen for notification on edit to Groups and bump _GroupVersion
 
     static ObjectContext _ObjectContext;
-    static GrowOnlyHashtable _idsByName = new GrowOnlyHashtable();
     static GroupListGrowOnlyHashtable _permissionSetByGroupList = new GroupListGrowOnlyHashtable();
 
     static ObjectContext getContext()

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#72 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#73 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -386,7 +386,7 @@ abstract public class AWBaseRequest extends AWBaseObject
     {
         boolean isBrowserFirefox = false;
         String userAgent = userAgent();
-        if ((userAgent != null) && (userAgent.indexOf("Firefox") != -1)) {
+        if ((userAgent != null) && (userAgent.indexOf("Gecko/") != -1)) {
             isBrowserFirefox = true;
         }
         return isBrowserFirefox;

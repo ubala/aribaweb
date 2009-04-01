@@ -1,17 +1,17 @@
 <w:PopupMenuLink class="hoverArrow hoverLink" menuId="MetaNEM" position="this">\
     <a:If ifTrue="$editingEnabled">
-        <b>Editing</b>
+        <b><a:Local key="a001">Editing</a:Local></b>
     <a:Else/>
-        Editor
+        <a:Local key="a002">Editor</a:Local>
     </a:If>
 </w:PopupMenuLink>
 <w:PopupMenu menuId="MetaNEM">
-    <w:PopupMenuHeading>Metadata Editor</w:PopupMenuHeading>
+    <w:PopupMenuHeading><a:Local key="a003">Metadata Editor</a:Local></w:PopupMenuHeading>
     <a:If ifTrue="$editingEnabled">
-        <w:PopupMenuItem action="$disableEditing">Disable Editing</w:PopupMenuItem>
-        <w:PopupMenuItem action="$saveChanges" disabled="$!hasChanges">Save Changes</w:PopupMenuItem>
+        <w:PopupMenuItem action="$disableEditing"><a:Local key="a004">Disable Editing</a:Local></w:PopupMenuItem>
+        <w:PopupMenuItem action="$saveChanges" disabled="$!hasChanges"><a:Local key="a005">Save Changes</a:Local></w:PopupMenuItem>
     <a:Else/>
-        <w:PopupMenuItem action="$enableEditing">Enable Editing</w:PopupMenuItem>
+        <w:PopupMenuItem action="$enableEditing"><a:Local key="a006">Enable Editing</a:Local></w:PopupMenuItem>
     </a:If>
 <!---
     <w:PopupMenuHeading showSeparator="$true">Debug</w:PopupMenuHeading>

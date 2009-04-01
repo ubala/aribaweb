@@ -1,0 +1,11 @@
+Cp1252,,
+MilliSecond,"millisekund","singular translation of a 1/1000 of a second; "
+MilliSeconds,"millisekunder","plural translation of a 1/1000 of a second; "
+Second,"sekund","singular translation for a Unit of measure that represents 1/60th of a minute; "
+Seconds,"sekunder","plural translation for a Unit of measure that represents 1/60th of a minute; "
+Minute,"minut","singular translation of a 1/60th of an hour; "
+Minutes,"minuter","plural translation of a 1/60th of an hour; "
+Hour,"timme","singular translation for a hour unit of measure; "
+Hours,"timmar","plural translation for a hour unit of measure; "
+Day,"dag","singular translation of the unit of measure that represents one day (1/7th of a week); "
+Days,"dagar","Plural translation for the unit of measure that represents 1/7th of a week; "

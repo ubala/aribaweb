@@ -1,0 +1,17 @@
+Shift_JIS,
+, This file is a of audit categories (from the logger names) to friendlier names
+
+aribaAudit, "一般"
+aribaAuditCommitNow, "一般"
+aribaAudit.admin, "管理"
+aribaAuditCommitNow.admin, "管理 (タスク/ファイル)"
+aribaAuditCommitNow.apputil, "管理アプリユーティリティ"
+aribaAuditCommitNow.sso, "SSO"
+aribaAuditCommitNow.exception, "例外"
+aribaAuditCommitNow.parameters, "パラメータ"
+aribaAuditCommitNow.approvable, "一般"
+aribaAuditCommitNow.realmPurge, "レルム消去"
+aribaAuditCommitNow.integration, "統合"
+aribaAuditCommitNow.reportTimeout, "レポートタイムアウト"
+aribaAuditCommitNow.schemaRealmMapping, "スキーマレルムマッピング"
+aribaAuditCommitNow.cdsSyncVerifier, "CDS 同期検証"

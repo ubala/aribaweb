@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#11 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -24,16 +24,17 @@ import ariba.ui.aribaweb.util.SemanticKeyProvider;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.MapUtil;
 import ariba.util.core.StringUtil;
+import ariba.util.core.ListUtil;
 import ariba.util.test.StagerArgs;
 import ariba.util.test.TestPageLink;
 import ariba.util.test.TestParam;
 import ariba.util.test.TestStager;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 public class TestLinkHolder implements SemanticKeyProvider
 {
@@ -47,11 +48,13 @@ public class TestLinkHolder implements SemanticKeyProvider
 
     String _displayName;
     String _secondaryName;
+    String _linkText;
     
     String _firstLevelCategory;
     String _secondLevelCategory;
 
     boolean _hidden = false;
+    Boolean _requiresParams = null;
 
     static {
         _badCategoryNames.put("ariba","ariba");
@@ -64,12 +67,12 @@ public class TestLinkHolder implements SemanticKeyProvider
         _hidden = true;
     }
 
-    public TestLinkHolder(Annotation annotation, Object annotatedItem)
+    public TestLinkHolder (Annotation annotation, Object annotatedItem)
     {
         init(annotation, annotatedItem, null);
     }
 
-    public TestLinkHolder(Annotation annotation, Object annotatedItem, String type)
+    public TestLinkHolder (Annotation annotation, Object annotatedItem, String type)
     {
         init(annotation, annotatedItem, type);
     }
@@ -81,6 +84,7 @@ public class TestLinkHolder implements SemanticKeyProvider
         _type = type;
 
         _displayName = computeDisplayName ();
+        _linkText = TestInspectorLink.decamelize(_displayName);
         _secondaryName = computeSecondaryName();
         if (!StringUtil.nullOrEmptyOrBlankString(_type)) {
             _firstLevelCategory = categoryForClassName(_type, _DefaultFirstLevelCategory);
@@ -140,7 +144,8 @@ public class TestLinkHolder implements SemanticKeyProvider
                 displayName = m.getName();
             }
             else if (_annotatedItem.getClass() == Class.class) {
-                displayName = ClassUtil.stripPackageFromClassName(((Class) _annotatedItem).getName());
+                displayName = ClassUtil.stripPackageFromClassName(
+                        ((Class) _annotatedItem).getName());
             }
         }
         return displayName;
@@ -159,6 +164,11 @@ public class TestLinkHolder implements SemanticKeyProvider
     public String getDisplayName ()
     {
         return _displayName;
+    }
+
+    public String getLinkText ()
+    {
+        return _linkText;
     }
 
     public String getSecondaryName ()
@@ -224,6 +234,25 @@ public class TestLinkHolder implements SemanticKeyProvider
             active = checkTestLinkParams(testContext);
         }
         return active;    
+    }
+
+    public List<Class> getRequiredContextItems (AWRequestContext requestContext)
+    {
+        List<Class> classesRequired = ListUtil.list();
+        if (requiresParam()) {
+            if (_annotatedItem.getClass() == Method.class) {
+                Method method = (Method) _annotatedItem;
+                Class[] methodTypes = method.getParameterTypes();
+                for (int i = 0; i < methodTypes.length; i++) {
+                    classesRequired.add(methodTypes[i]);
+                }
+                if (useAnnotationType(requestContext, method)) {
+                    Class typeOnAnnotation = ClassUtil.classForName(_type);
+                    classesRequired.add(typeOnAnnotation);
+                }
+            }
+        }
+        return classesRequired;
     }
 
     public boolean hasDynamicArgument()
@@ -325,14 +354,17 @@ public class TestLinkHolder implements SemanticKeyProvider
 
     public boolean requiresParam ()
     {
-        boolean requiresParam = false;
-        if (_annotatedItem.getClass() == Method.class) {
-            Method method = (Method) _annotatedItem;
-            Class[] methodTypes = method.getParameterTypes();
+        if (_requiresParams == null) {
+            boolean requiresParam = false;
+            if (_annotatedItem.getClass() == Method.class) {
+                Method method = (Method) _annotatedItem;
+                Class[] methodTypes = method.getParameterTypes();
 
-            requiresParam = !allInternalParameters(methodTypes);
+                requiresParam = !allInternalParameters(methodTypes);
+            }
+            _requiresParams = Boolean.valueOf(requiresParam);
         }
-        return requiresParam;
+        return _requiresParams.booleanValue();
     }
 
     private boolean allInternalParameters (Class[] params)

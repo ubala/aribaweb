@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#52 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#53 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -225,6 +225,13 @@ public final class AWUtil extends AWBaseObject
 
     public static String stringWithContentsOfInputStream (InputStream inputStream, boolean shouldExpectEncoding)
     {
+        return stringWithContentsOfInputStream(inputStream, shouldExpectEncoding, AWCharacterEncoding.ISO8859_1.name);
+    }
+
+    public static String stringWithContentsOfInputStream (InputStream inputStream,
+                                                          boolean shouldExpectEncoding,
+                                                          String defaultCharsetName)
+    {
         InputStreamReader inputStreamReader = null;
         if (shouldExpectEncoding) {
             try {
@@ -237,7 +244,7 @@ public final class AWUtil extends AWBaseObject
         }
         else {
             try {
-                inputStreamReader = new InputStreamReader(inputStream, AWCharacterEncoding.ISO8859_1.name);
+                inputStreamReader = new InputStreamReader(inputStream, defaultCharsetName);
             }
             catch (UnsupportedEncodingException unsupportedEncodingException) {
                 throw new AWGenericException(unsupportedEncodingException);

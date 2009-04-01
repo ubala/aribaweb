@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/Environment.java#4 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/Environment.java#5 $
 */
 
 package ariba.util.expr;
@@ -25,11 +25,12 @@ import ariba.util.fieldtype.TypeRetriever;
 import ariba.util.fieldtype.TypeRetrieverChain;
 
 /**
-    @aribaapi private 
+    @aribaapi private
 */
-public class Environment 
+public class Environment
 {
     public static final String CheckSideEffect = "CheckSideEffect";
+    public static final String CheckReturnType = "CheckReturnType";
 
     private Map _envVariables = MapUtil.map();
     private List _errorCollector = ListUtil.list();

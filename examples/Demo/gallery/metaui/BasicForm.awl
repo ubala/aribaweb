@@ -1,12 +1,12 @@
 <w:BasicPageWrapper hasForm="$true">
     <w:FormTable showErrorFlags="$true">
-        <w:FormRow label="Title" errorKey="project.title">
+        <w:FormRow label="$[a001]Title" errorKey="project.title">
             <a:TextField value="$project.title"/>
         </w:FormRow>
-        <w:FormRow label="Deals">
+        <w:FormRow label="$[a002]Deals">
             <a:String value="$project.deals.size"/>
         </w:FormRow>
-        <w:FormRow label="Team Members">
+        <w:FormRow label="$[a003]Team Members">
             <w:GenericChooser object="$project" key="team" displayKey="name" multiSelect="$true"
                               type="Chooser" destinationClass="busobj.User"/>
         </w:FormRow>

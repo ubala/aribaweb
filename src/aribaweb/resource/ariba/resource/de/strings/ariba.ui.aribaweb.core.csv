@@ -1,0 +1,6 @@
+Cp1252,,,,
+"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","Um diese Funktion nutzen zu können, müssen Sie Fenster-Popups für diese Site aktivieren.",""
+"AWBaseRequest",1,"Uploaded %s KB of %s KB...","%s KB von %s KB heraufgeladen...","Appears in file upload panel"
+"AWComponentActionRequestHandler",1,"Waiting for previous request to complete ...","Warten auf Abschluss der vorigen Anforderung...","Appears in page loading status panel"
+"AWComponentActionRequestHandler",2,"Processing request ...","Anforderung wird verarbeitet...","Appears in page loading status panel"
+"AWLazyDivInternals",a001,"Loading...","Daten werden geladen...",""

@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/Predicate.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/Predicate.java#5 $
 */
 package ariba.ui.meta.persistence;
 
 import ariba.util.core.StringUtil;
+import ariba.util.core.ListUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -98,6 +99,11 @@ abstract public class Predicate implements QueryGenerator.Visitor
             _predicates = predicates;
         }
 
+        public Junction (Predicate ...predicates)
+        {
+            _predicates = ListUtil.arrayToList(predicates);
+        }
+
         public void generate(QueryGenerator generator)
         {
             int count = _predicates.size();
@@ -127,6 +133,11 @@ abstract public class Predicate implements QueryGenerator.Visitor
             super(predicates);
         }
 
+        public And (Predicate ...predicates)
+        {
+            super(predicates);
+        }
+
         protected String operatorString()
         {
             return " AND ";
@@ -138,6 +149,11 @@ abstract public class Predicate implements QueryGenerator.Visitor
         List<Predicate> _predicates;
 
         public Or (List<Predicate> predicates)
+        {
+            super(predicates);
+        }
+
+        public Or (Predicate ...predicates)
         {
             super(predicates);
         }

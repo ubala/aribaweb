@@ -1,0 +1,8 @@
+Cp1252,,,,
+"AWBody",a001,"Please wait. An action is pending...","Espere. Queda una acción pendiente...",""
+"AWErrorFlag",a001,"Error","Error",""
+"AWPasswordField",a001,"Warning","Aviso",""
+"AWPasswordField",a002,"Warning: Caps Lock is on.  This may cause you to enter your password incorrectly.","Aviso: Bloq Mayús está activado. Esto puede hacer que introduzca la contraseña de forma incorrecta.",""
+"AWSubmitButton",a001,"Submit","Enviar",""
+"AWFileUploadInternals","a001","Error: Your request cannot be processed.  Please check that file paths for all file uploads are valid.","Error: Su solicitud no puede procesarse. Compruebe que las rutas de archivo para todas las cargas de archivo son válidas.",""
+"AWTextArea","a001","Characters left","Caracteres que quedan",""

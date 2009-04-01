@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#37 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#38 $
 */
 package ariba.ui.meta.core;
 
@@ -223,7 +223,7 @@ public class Context implements Extensible
         return value;
     }
 
-    public Object pushAndResolve (Map<String,Object> contextVals, String propertyKey)
+    public Object pushAndResolve (Map<String,Object> contextVals, String propertyKey, boolean staticResolve)
     {
         String scopeKey = null;
         push();
@@ -236,10 +236,16 @@ public class Context implements Extensible
             }
         }
         if (scopeKey != null) setScopeKey(scopeKey);
-        Object val = propertyForKey(propertyKey);
+        Object val = allProperties().get(propertyKey);
+        val = staticResolve ? staticallyResolveValue(val) : resolveValue(val);
         pop();
 
         return val;
+    }
+
+    public Object pushAndResolve (Map<String,Object> contextVals, String propertyKey)
+    {
+        return pushAndResolve(contextVals, propertyKey, false);
     }
 
     // a (usable) snapshot of the current state of the context
@@ -1193,6 +1199,20 @@ public class Context implements Extensible
 
             return _propertyActivation != this ? _propertyActivation : null;
         }
+
+        _Activation findExistingPropertyActivation ()
+        {
+            _Activation activation = this;
+            while (activation != null) {
+                _Activation propertyActivation = activation._propertyActivation;
+                if (propertyActivation != null && propertyActivation != activation
+                        && !ListUtil.nullOrEmptyList(propertyActivation._recs)) {
+                    return propertyActivation;
+                }
+                activation = activation._parent;
+            }
+            return null;
+        }
     }
 
     static class _DeferredAssignment {
@@ -1457,14 +1477,7 @@ public class Context implements Extensible
         _Activation findPropertyActivation (_StaticRec srec)
         {
             _Activation activation = srec.activation;
-            while (activation != null) {
-                if (activation._propertyActivation != null
-                        && !ListUtil.nullOrEmptyList(activation._propertyActivation._recs)) {
-                    return activation._propertyActivation;
-                }
-                activation = activation._parent;
-            }
-            return null;
+            return activation != null ? activation.findExistingPropertyActivation() : null;
         }
 
         _StaticRec firstRecWithKey (_Activation activation, String key)

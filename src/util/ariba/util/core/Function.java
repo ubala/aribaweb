@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Function.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Function.java#3 $
 */
 package ariba.util.core;
 
@@ -72,6 +72,46 @@ public abstract class Function<K>
 
         @aribaapi ariba
     */
+    public <V> void splitInto (Collection<V> collection, Map<K,List<V>> result, boolean includeNulls)
+    {
+        if (collection == null || collection.isEmpty()) {
+            return;
+        }
+        Iterator<V> iter = collection.iterator();
+        while (iter.hasNext()) {
+            V value = iter.next();
+            K key = this.evaluate(value);
+            if (key != null || includeNulls) {
+                MapUtil.merge(result, key, value);
+            }
+        }
+    }
+
+    /**
+        Efficiently, splits the supplied <code>collection</code> of a value type
+        <code>V</code> returning a map which is a partition of the collection using
+        this function. <p/>
+
+        Specifically, this method splits <code>collection</code> into sub-lists
+        each of which has the same value when evaluated by this function.
+
+        @aribaapi ariba
+    */
+    public <V> void splitInto (Collection<V> collection, Map<K,List<V>> result)
+    {
+        splitInto(collection, result, false);
+    }
+
+    /**
+        Efficiently, splits the supplied <code>collection</code> of a value type
+        <code>V</code> returning a map which is a partition of the collection using
+        this function. <p/>
+
+        Specifically, this method splits <code>collection</code> into sub-lists
+        each of which has the same value when evaluated by this function.
+
+        @aribaapi ariba
+    */
     public <V> Map<K,List<V>> split (Collection<V> collection)
     {
         if (collection == null || collection.isEmpty()) {
@@ -99,7 +139,7 @@ public abstract class Function<K>
         }
         if (result == null) {
             /* all the same */
-            result = MapUtil.map();
+            result   = MapUtil.map();
             List<V> values = (collection instanceof List)
                              ? (List<V>)collection
                              : new ArrayList(collection);

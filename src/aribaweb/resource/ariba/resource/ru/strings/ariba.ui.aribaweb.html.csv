@@ -1,0 +1,8 @@
+Cp1251,,,,
+"AWBody",a001,"Please wait. An action is pending...","Подождите, выполняется действие...",""
+"AWErrorFlag",a001,"Error","Ошибка",""
+"AWPasswordField",a001,"Warning","Предупреждение",""
+"AWPasswordField",a002,"Warning: Caps Lock is on.  This may cause you to enter your password incorrectly.","Предупреждение. Включена клавиша Caps Lock. Это может привести к неверному вводу пароля.",""
+"AWSubmitButton",a001,"Submit","Отправить",""
+"AWFileUploadInternals","a001","Error: Your request cannot be processed.  Please check that file paths for all file uploads are valid.","Ошибка: не удалось обработать запрос. Проверьте все пути загружаемых файлов.",""
+"AWTextArea","a001","Characters left","Осталось символов",""

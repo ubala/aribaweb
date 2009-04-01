@@ -1,37 +1,26 @@
-/* Generic Action Set up */
-@actionCategory=Create { }
-@actionCategory=Search { }
-@actionCategory=Manage { }
-
-action=create {
-    actionCategory:Create;
-    label:${ariba.ui.meta.core.UIMeta.beautifyClassName(properties.class)};
-}
-
-action=search {
-    actionCategory:Search;
-    label:${ariba.ui.meta.core.UIMeta.beautifyClassName(properties.class)};
-}
-
 /* Used for Dashboard modules rules */
 @module=Home  {
+    label:$[a001]Home;
     @layout=Main {
        after:zTop;
-       label:"Welcome to AribaWeb!";
+       label:$[a003]"Welcome to AribaWeb!";
        component:HomeContent;
     }
 
     @layout=Actions {
+       label:$[a004]Actions;
        after:zToc;
        component:Toc;
     }
 }
 
 @module=Documentation {
+    label:$[a005]Documentation;
     homePage:SearchSource;
 }
 
-@module="DataTables"  {
+@module=DataTables  {
+    label:$[a002]"Data Tables";
     needsForm:true;
     component:MetaTabs;
     layout {
@@ -47,14 +36,25 @@ action=search {
     }
 }
 
-@module="PivotTables"  {
+@module=PivotTables  {
+    label:$[a006]"Pivot Tables";
     homePage:"PivotTabs";
 }
 
 @module="Forms"  {
+    label:$[a007]Forms;
     homePage:MetaUIForms;
 }
 
-@module="Master Detail"  {
+@module=MiniApp {
+    label:$[a008]"Mini App";
     homePage:ERPage;
+}
+
+/* Action Set up */
+@actionCategory=Favorites {
+    after:zNav; 
+    label:$[a009]Favorites;
+    @action=MiniApp#pageAction { pageName:ERPage;}
+    @action=Documentation#pageAction { pageName:SearchSource }
 }

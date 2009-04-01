@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#11 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#13 $
 */
 package ariba.ui.meta.persistence;
 
@@ -38,6 +38,7 @@ public class PersistenceMeta
     public static final String PropUseTextSearch = "useTextIndex";
     public static final String PropTextSearchSupported = "textSearchSupported";
     public static final String KeywordsField = "keywords";
+    static boolean _DoNotConnect = false;
 
     public static void initialize ()
     {
@@ -59,6 +60,7 @@ public class PersistenceMeta
     public static void registerEntityClass (String className)
     {
         _EntityClasses.add(className);
+        UIMeta.registerLocalizedClass(className);
 
         ChoiceSourceRegistry.registerProvider(className,
                 new ChoiceSourceRegistry.Provider() {
@@ -79,6 +81,16 @@ public class PersistenceMeta
         _EmbeddableClasses.add(className);
     }
 
+    public static boolean doNotConnect ()
+    {
+        return _DoNotConnect;
+    }
+
+    public static void setDoNotConnect (boolean doNotConnect)
+    {
+        PersistenceMeta._DoNotConnect = doNotConnect;
+    }
+    
     static class TypeToOneMetaProvider implements Meta.ValueQueriedObserver
     {
         Map<String, Meta.RuleSet> _ruleSetsByClassName = new HashMap();

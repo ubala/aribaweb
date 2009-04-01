@@ -12,15 +12,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#26 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#27 $
 */
 package ariba.ui.validation;
 
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWPage;
 import ariba.ui.aribaweb.core.AWSession;
+import ariba.ui.aribaweb.core.AWLocal;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.util.AWFormatter;
 import ariba.ui.aribaweb.util.AWFormatting;
+import ariba.ui.aribaweb.util.AWBaseObject;
 import ariba.ui.widgets.FormatterFactory;
 import ariba.util.core.Assert;
 import ariba.util.core.FastStringBuffer;
@@ -31,6 +34,7 @@ import ariba.util.formatter.DateFormatter;
 import ariba.util.formatter.IntegerFormatter;
 import ariba.util.formatter.DoubleFormatter;
 import ariba.util.formatter.LongFormatter;
+import ariba.util.formatter.Formatter;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -298,22 +302,38 @@ public final class AWVFormatterFactory
         }
     }
 
-    static public final class NonBlankString extends AWFormatter
+    static public final class NonBlankString extends Formatter
     {
         public NonBlankString ()
         {
             super();
         }
 
-        public String format (Object value)
+        protected String formatObject (Object object, Locale locale)
         {
-            return value.toString();
+            return object.toString();
         }
 
-        public Object parseObject (String stringToParse) throws ParseException
+        protected Object parseString (String stringToParse, Locale locale) throws ParseException
         {
-            if (StringUtil.nullOrEmptyOrBlankString(stringToParse)) throw new ParseException("Value required", 0);
+            if (StringUtil.nullOrEmptyOrBlankString(stringToParse)) {
+
+                throw new ParseException(AWBaseObject.localizedJavaString(AWVFormatterFactory.class.getName(), 1,
+                        "Value required" /*  */, AWConcreteApplication.SharedInstance.resourceManager(locale)), 0);
+            }
             return stringToParse;
+        }
+
+        public Object getValue (Object object, Locale locale)
+        {
+            return object;
+        }
+
+        protected int compareObjects (Object o1, Object o2, Locale locale)
+        {
+            return (o1 instanceof Comparable && o2 instanceof Comparable)
+                    ? ((Comparable)o1).compareTo(o2)
+                    : 0;
         }
     }
 

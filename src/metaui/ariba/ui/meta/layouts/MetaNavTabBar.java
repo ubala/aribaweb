@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#18 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#19 $
 */
 package ariba.ui.meta.layouts;
 
@@ -51,7 +51,7 @@ public class MetaNavTabBar extends AWComponent
         session.dict().remove("_MNBSessState");
     }
 
-    public static String[] ActionZones = { "zGlobal" };
+    public static String[] ActionZones = { "zNav", "zGlobal" };
 
     public static class State
     {

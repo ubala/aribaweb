@@ -27,11 +27,8 @@ public class Initialization
         _DidInit = true;
         PersistenceMeta.initialize();
 
-        // Set up JPAContext provider, with default persistence factory
-        EntityManagerFactory emf =
-                Persistence.createEntityManagerFactory("Main");
+        // Set up JPAContext provider
         JPAContext.initialize();
-        JPAContext.setDefaultFactory(emf);
 
         // Auto-bind ObjectContexts to AWPages
         ContextBinder.initialize();

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ResourceService.java#56 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ResourceService.java#57 $
 */
 
 package ariba.util.core;
@@ -1715,6 +1715,25 @@ public class ResourceService
         }
     }
 
+    /* Debug facility for runtime pseudo localization */
+    public interface PseudoLocalizer {
+        // Should process strings if this is the pseudo-localized locale, or return unmolested map otherwise
+        Map process (Locale locale, Map strings);
+        String process (Locale locale, String string);
+    }
+
+    static PseudoLocalizer _PseudoLocalizer = null;
+
+    public static void _setPseudoLocalizer (PseudoLocalizer pl)
+    {
+        _PseudoLocalizer = pl;
+    }
+
+    public static PseudoLocalizer _getPseudoLocalizer ()
+    {
+        return _PseudoLocalizer;
+    }
+    
     private static void loadStringsIntoTable (URL stringBaseURL,
                                               Gridtable stringTables,
                                               List/*<Locale>*/ searchLocales,
@@ -1765,6 +1784,9 @@ public class ResourceService
                 //twinMap contains two keys, Boolean.TRUE and Boolean FALSE,
                 //that indicated the detaultingLocale is true or false. The
                 //values are the strings tables. twinMap resides in the gridtable.
+                if (_PseudoLocalizer != null) {
+                    allStrings = _PseudoLocalizer.process(searchLocale, allStrings);
+                }
                 twinMap.put(Constants.getBoolean(defaultingLocale),
                             MapUtil.copyMap(allStrings));
                 synchronized (stringTables) {

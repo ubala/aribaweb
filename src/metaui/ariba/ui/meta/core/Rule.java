@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Rule.java#14 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Rule.java#15 $
 */
 package ariba.ui.meta.core;
 
@@ -181,6 +181,17 @@ public class Rule
                 && (_id >= _ruleSet._editableStart);
     }
 
+    // here so logging of property map doesn't infinitely recurse
+    public static class Wrapper
+    {
+        Rule rule;
+
+        public Wrapper (Rule rule)
+        {
+            this.rule = rule;
+        }
+    }
+
     protected Rule createDecl ()
     {
         /*
@@ -198,6 +209,8 @@ public class Rule
         for (Selector p : selectors) {
             if (!(p._value instanceof  List)) _properties.put(p._key, p._value);
         }
+        // Flag the declaring rule as a property
+        _properties.put(Meta.DeclRule, new Wrapper(this));
 
         // check for override scope
         boolean hasOverrideScope = false;

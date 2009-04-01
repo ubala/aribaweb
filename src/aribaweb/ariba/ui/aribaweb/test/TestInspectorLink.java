@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestInspectorLink.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestInspectorLink.java#8 $
 */
 package ariba.ui.aribaweb.test;
 
@@ -147,7 +147,8 @@ public class TestInspectorLink
                 annotatedClassName = parts[0];
                 annotatedMethodName = parts[1];
                 objectClassName = parts[2].equals("null") ? null : parts[2];
-                actualValidatedObjectClassName = parts[3].equals("null") ? null : parts[3];
+                actualValidatedObjectClassName =
+                        parts[3].equals("null") ? null : parts[3];
             }
 
             Class annotatedClass = ClassUtil.classForName(annotatedClassName);
@@ -205,11 +206,13 @@ public class TestInspectorLink
                 }
             }
             if (actualValidatedObjectClassName != null) {
-                _actualValidatedObjectClass = ClassUtil.classForName(actualValidatedObjectClassName);
+                _actualValidatedObjectClass =
+                        ClassUtil.classForName(actualValidatedObjectClassName);
                 if (_actualValidatedObjectClass == null) {
                     throw new ValidatorLoadException(
                         constructNonAppSpecificError(annotatedClassName,
-                                annotatedMethodName, objectClassName, actualValidatedObjectClassName,
+                                annotatedMethodName, objectClassName,
+                                actualValidatedObjectClassName,
                                 Fmt.S("Could not load specified class: %s",
                                         actualValidatedObjectClassName)));
                 }
@@ -217,7 +220,8 @@ public class TestInspectorLink
         }
     }
 
-    private Method getBestMethod (Class annotatedClass, String methodName, Class argumentClass)
+    private Method getBestMethod (Class annotatedClass, String methodName,
+                                  Class argumentClass)
     {
         Method method = null;
         boolean methodFound = false;
@@ -359,7 +363,8 @@ public class TestInspectorLink
         return _appSpecificValidatorName;
     }
 
-    public List<TestValidationParameter> invoke (AWRequestContext requestContext, Object objToValidate)
+    public List<TestValidationParameter> invoke (AWRequestContext requestContext,
+                                                 Object objToValidate)
     {
         List<TestValidationParameter> result = null;
         if (_appSpecificValidatorName != null) {
@@ -441,14 +446,16 @@ public class TestInspectorLink
         return newLink;
     }
 
-    private static String decamelize (String string)
+    static String decamelize (String string)
     {
         FastStringBuffer buf = new FastStringBuffer();
-        int lastUCIndex = -1;
+            int lastUCIndex = -1;
         for (int i=0, len = string.length(); i < len; i++) {
             char c = string.charAt(i);
             if (Character.isUpperCase(c)) {
-                if (i-1 != lastUCIndex) buf.append(" ");
+                if (i-1 != lastUCIndex) {
+                    buf.append(" ");
+                }
                 lastUCIndex = i;
             }
             else if (Character.isLowerCase(c)) {

@@ -1,0 +1,17 @@
+Cp1251,
+, This file is a of audit categories (from the logger names) to friendlier names
+
+aribaAudit, "Общая"
+aribaAuditCommitNow, "Общая"
+aribaAudit.admin, "Администрирование"
+aribaAuditCommitNow.admin, "Администрирование (зачади и файлы)"
+aribaAuditCommitNow.apputil, "AppUtil администрирования"
+aribaAuditCommitNow.sso, "SSO"
+aribaAuditCommitNow.exception, "Исключение"
+aribaAuditCommitNow.parameters, "Параметры"
+aribaAuditCommitNow.approvable, "Общая"
+aribaAuditCommitNow.realmPurge, "Очистка сферы"
+aribaAuditCommitNow.integration, "Интеграция"
+aribaAuditCommitNow.reportTimeout, "Время ожидания создания отчета"
+aribaAuditCommitNow.schemaRealmMapping, "Сопоставление «схема-сфера»"
+aribaAuditCommitNow.cdsSyncVerifier, "Проверка синхронизации CDS"

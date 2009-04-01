@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#2 $
+    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#3 $
 */
 package ariba.ui.meta.jpa;
 
@@ -21,6 +21,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
+import javax.persistence.Persistence;
 
 import ariba.ui.meta.persistence.ObjectContext;
 import ariba.ui.meta.persistence.QuerySpecification;
@@ -65,6 +66,12 @@ abstract public class JPAContext extends ObjectContext
 
     public static EntityManagerFactory getDefaultFactory()
     {
+        if (_DefaultFactory == null) {
+            // if none, use default persistence factory
+            EntityManagerFactory emf =
+                    Persistence.createEntityManagerFactory("Main");
+            JPAContext.setDefaultFactory(emf);
+        }
         return _DefaultFactory;
     }
 

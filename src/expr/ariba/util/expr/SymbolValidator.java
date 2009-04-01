@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/SymbolValidator.java#10 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/SymbolValidator.java#11 $
 */
 
 package ariba.util.expr;
@@ -30,7 +30,7 @@ import java.util.List;
 /**
     @aribaapi private
 */
-public abstract class SymbolValidator extends ASTNodeVisitor
+public class SymbolValidator extends ASTNodeVisitor
 {
     private Environment _env;
     private Node        _tree;
@@ -42,7 +42,7 @@ public abstract class SymbolValidator extends ASTNodeVisitor
 
    /////////////////////////////////////////////////////////////////
 
-    SymbolValidator (Environment env,
+    public SymbolValidator (Environment env,
                      Expression expression,
                      List errorCollector)
     {
@@ -212,13 +212,12 @@ public abstract class SymbolValidator extends ASTNodeVisitor
         return buffer.toString();
     }
 
-    ////////////////////////////////////////////////////////////////////////
 
-    protected abstract void validate (FieldInfo field, int usage);
+    protected void validate (FieldInfo field, int usage)
+    {
+        ;
+    }
 
-    protected abstract void validate (MethodInfo method);
-
-    ////////////////////////////////////////////////////////////////////////
 
     protected void addError (PropertyInfo property, String errorStr)
     {
@@ -247,5 +246,17 @@ public abstract class SymbolValidator extends ASTNodeVisitor
                 (node.jjtGetParent() != null ?
                     node.jjtGetParent().getClass().getName() +
                     "," + node.jjtGetParent().hashCode() : "") + ")");
+    }
+
+    protected void validate (MethodInfo method)
+    {
+        List reservedNames = TypeChecker.getReservedMethodNames();
+
+        int fieldAccess = method.getAccessibility();
+        if (fieldAccess < TypeInfo.AccessibilitySafe &&
+            !reservedNames.contains(method.getName())) {
+            addError(method, Fmt.S("Method is not safe: %s",
+                                   method.getName()));
+        }
     }
 }

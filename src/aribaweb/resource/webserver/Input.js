@@ -31,6 +31,7 @@ ariba.Input = function() {
     var AWCoverDiv = null, AWPrevFocusId = null;
     var AWActiveElementId = null;
     var AWTextFocusId = null;
+    var AWFocusRegionId = null;
     var AWAllowSelectFirstText = false;
     var AWModalPanelId = null;
     var _disableShowUntil = 0;
@@ -304,6 +305,11 @@ ariba.Input = function() {
             Debug.log("registerActiveElementId: " + AWActiveElementId);
         },
 
+        setFocusRegion : function (regionId)
+        {
+            AWFocusRegionId = regionId;
+        },
+
         // focus on control when page load complete
         postLoadFocusOnActiveElement : function ()
         {
@@ -313,7 +319,23 @@ ariba.Input = function() {
           }, null, true);
         },
 
+        /////////////////////////////////////////
+        //   Precendence:                      //
+        //   first text in focus region        //
+        //   current browser active element    //
+        //   first text on page if allowed     //
+        /////////////////////////////////////////
         focusOnActiveElement : function () {
+            if (AWFocusRegionId) {
+                var focusRegion = Dom.getElementById(AWFocusRegionId);
+                AWFocusRegionId = null;
+                if (focusRegion) {
+                    var firstRegionText = this.findFirstText(focusRegion);
+                    if (firstRegionText) {
+                        AWActiveElementId = firstRegionText.id;
+                    }
+                }
+            }
             if (AWActiveElementId) {
                 try {
                     var activeElement = Dom.getElementById(AWActiveElementId);
@@ -356,7 +378,6 @@ ariba.Input = function() {
         // Select First TextField
         // or TextArea
         ///////////////////////////
-
         selectFirstText : function ()
         {
             // focus on the first text field or the one specified
@@ -387,13 +408,15 @@ ariba.Input = function() {
             }
         },
 
-        findFirstText : function (form)
+        findFirstText : function (parentElm)
         {
-            if (form == null) return null;
-            var inputs = form.getElementsByTagName("input");
+            if (parentElm == null) return null;
+            var inputs = Dom.findChildrenUsingPredicate(parentElm, function (e) {
+                    return e.tagName == "INPUT" || e.tagName == "TEXTAREA";
+                });
             for (var i = 0, c = inputs.length; i < c; i++) {
                 var element = inputs[i];
-                if (( ((element.type == "text" || element.type == "password") &&
+                if (( ((element.type == "text" || element.type == "password" || element.type == "file") &&
                        element.getAttribute('awautoselect') != "0" ) ||
                       element.nodeName == "TEXTAREA"
                         ) &&

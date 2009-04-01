@@ -1,0 +1,40 @@
+Cp1252,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+TemplateParserPageTitle,"Erreur de l'analyseur syntaxique de modèle","Page title for the error message; "
+TemplateParserTitle,"Erreur de l'analyseur syntaxique de modèle","Title for the template parser error; "
+FileErrorMsg,"Analyseur syntaxique de modèle : erreur de fichier - le fichier modèle n'existe pas ou est illisible.","Invalid template name encountered; "
+IOErrorMsg,"Analyseur syntaxique de modèle : erreur E/S - une erreur s'est produite lors de la lecture du fichier modèle.","Error while trying to read template file; IO stands for Input / Output; "
+,,
+BlockoutChar,"X","default blockout character for SecureStringFormatter; Do we have to translate this ?; "
+,,
+,,
+,,
+,,
+,,
+ListSeparator,", ","used to delimit a series of strings when presented "
+DayAbbrev,"j","abbreviation for day; "
+HourAbbrev,"h","abbreviation for hours; "
+MinutesAbbrev,"mn","abbreviation for minutes; "
+,,
+,, keys used in formatters
+,,
+BooleanTrue,"Oui","This is used from BooleanFormatter; "
+BooleanFalse,"Non","This is used from BooleanFormatter; "
+BooleanTrueOrFalse,"Les éléments booléens doivent avoir la valeur Vrai ou Faux.","error when a boolean doesn't contain true or false string"
+CannotParseDate,"Impossible d''analyser la chaîne ""{0}"" en tant que date","error when a date cannot be parsed - 0: the date string"
+InvalidCharacterInNumber,"Caractère non valide dans un nombre","error when there is a non-numeric character in a number"
+InvalidYear,"Année non valide","error when the year is invalid in a date"
+NoDigitsFound,"Valeur numérique obligatoire","error when a number is required and no digits are entered"
+NumberFormatError,"Le format de la valeur numérique n''est pas approprié.","friendly error msg for NumberFormatException"
+MaxValueExceeded,"La valeur ""{0}"" est supérieure à la valeur maximum autorisée ""{1}"".", "Error when value is greater than allowed (integer overflow)"
+MinValueExceeded,"La valeur ""{0}"" est inférieure à la valeur minimum autorisée ""{1}"".", "Error when value is less than allowed (integer underflow)"
+WholeNumberRequiredKey,"La valeur ""{0}"" doit être un nombre entier.", "Error when integer value contains fractions"

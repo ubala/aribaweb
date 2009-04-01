@@ -1,0 +1,40 @@
+Shift_JIS,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+TemplateParserPageTitle,"テンプレートパーサーのエラー","Page title for the error message; "
+TemplateParserTitle,"テンプレートパーサーのエラー","Title for the template parser error; "
+FileErrorMsg,"テンプレートパーサー: ファイルエラー: テンプレートファイルは存在しないか読み取れません。","Invalid template name encountered; "
+IOErrorMsg,"テンプレートパーサー: IO エラー: テンプレートファイルを読み取り中にエラーが発生しました。","Error while trying to read template file; IO stands for Input / Output; "
+,,
+BlockoutChar,"X","default blockout character for SecureStringFormatter; Do we have to translate this ?; "
+,,
+,,
+,,
+,,
+,,
+ListSeparator,", ","used to delimit a series of strings when presented "
+DayAbbrev,"日","abbreviation for day; "
+HourAbbrev,"時間","abbreviation for hours; "
+MinutesAbbrev,"分","abbreviation for minutes; "
+,,
+,, keys used in formatters
+,,
+BooleanTrue,"はい","This is used from BooleanFormatter; "
+BooleanFalse,"いいえ","This is used from BooleanFormatter; "
+BooleanTrueOrFalse,"ブール値は 'true' または 'false' である必要があります。","error when a boolean doesn't contain true or false string"
+CannotParseDate,"文字列「{0}」を日付として解析できません","error when a date cannot be parsed - 0: the date string"
+InvalidCharacterInNumber,"数値に無効な文字列があります","error when there is a non-numeric character in a number"
+InvalidYear,"無効な年","error when the year is invalid in a date"
+NoDigitsFound,"数値を入力してください","error when a number is required and no digits are entered"
+NumberFormatError,"この数値の形式が正しくありません。","friendly error msg for NumberFormatException"
+MaxValueExceeded,"値「{0}」が上限値「{1}」を超えています。", "Error when value is greater than allowed (integer overflow)"
+MinValueExceeded,"値「{0}」が下限値「{1}」を下回っています。", "Error when value is less than allowed (integer underflow)"
+WholeNumberRequiredKey,"値「{0}」は整数でなければなりません。", "Error when integer value contains fractions"

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#27 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#28 $
     </Copyright>
 
     <Overview>
@@ -58,7 +58,8 @@
     </Binding>
 
     <Binding key="isRefresh" type="boolean" default="$false" direction="get">
-        Specifies that the form be submitted using a refresh region.
+        Specifies that the form be submitted immediately when a change is made and the field
+        loses focus (e.g. when the user tabs out).
     </Binding>
 
     <Binding key="maxLength" type="int" required="$false" direction="get">

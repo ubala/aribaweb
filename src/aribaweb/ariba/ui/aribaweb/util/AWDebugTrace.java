@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#11 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#13 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -26,8 +26,7 @@ import ariba.ui.aribaweb.core.AWComponentDefinition;
 import ariba.ui.aribaweb.core.AWComponentReference;
 import ariba.ui.aribaweb.core.AWBaseElement;
 import ariba.ui.aribaweb.core.AWBindableElement;
-import ariba.ui.aribaweb.core.AWResponseGenerating;
-
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -40,6 +39,8 @@ public class AWDebugTrace
     AWRequestContext _requestContext;
     ComponentTraceNode _currentComponentTraceNode;
     MetadataTraceNode _currentMetadataTraceNode;
+    Map<AWEncodedString, List<AWEncodedString>> _hierarchy;
+    LinkedList<AWEncodedString> _hierarchyStack;
     boolean _assignMetaDataToNext;
     boolean _doingPathTrace;
     List<ComponentTraceNode> _componentPathList;
@@ -58,6 +59,8 @@ public class AWDebugTrace
         _assignMetaDataToNext = false;
         _doingPathTrace = false;
         _mainComponentDefinition = null;
+        _hierarchy = null;
+        _hierarchyStack = null;
     }
 
     public List<ComponentTraceNode> componentPathList ()
@@ -78,7 +81,7 @@ public class AWDebugTrace
     public void pushComponentPathEntry (AWBindableElement componentReference)
     {
         if (_componentPathList == null) _componentPathList = ListUtil.list();
-        _currentComponentTraceNode = new ComponentTraceNode(componentReference, ListUtil.lastElement(_componentPathList));
+        _currentComponentTraceNode = new ComponentTraceNode(componentReference, ListUtil.lastElement(_componentPathList), _requestContext.currentElementId());
         _componentPathList.add(_currentComponentTraceNode);
         if (_assignMetaDataToNext && _currentMetadataTraceNode != null) {
             _currentComponentTraceNode._associatedMetadata = _currentMetadataTraceNode;
@@ -98,21 +101,56 @@ public class AWDebugTrace
     public ComponentTraceNode currentComponentTraceNode ()
     {
         if (_currentComponentTraceNode == null) {
-            _currentComponentTraceNode = new AWDebugTrace.ComponentTraceNode(AWComponentReference.create(_requestContext.pageComponent().componentDefinition()), null);
+            _currentComponentTraceNode = new AWDebugTrace.ComponentTraceNode(AWComponentReference.create(_requestContext.pageComponent().componentDefinition()), null, null);
             _requestContext.session().dict().put("componentTrace", _currentComponentTraceNode);
         }
         return _currentComponentTraceNode;
     }
-
+    
     public AWComponentDefinition mainComponentDefinition ()
     {
         return _mainComponentDefinition != null ? _mainComponentDefinition
                 : componentTraceRoot().componentDefinition();
     }
-    
+ 
+    public Map<AWEncodedString, List<AWEncodedString>> getHierarchy ()
+    {
+        return _hierarchy;
+    }
+
+    public void pushElementId (AWEncodedString id)
+    {
+        if (_hierarchyStack == null) {
+            _hierarchyStack = new LinkedList<AWEncodedString>();
+            _hierarchyStack.add(new AWEncodedString("root"));
+            _hierarchy = MapUtil.map();
+        }
+        AWEncodedString currId = _hierarchyStack.getLast();
+        List<AWEncodedString> echildren = null;
+        if (!_hierarchy.containsKey(currId)) {
+            echildren = ListUtil.list();
+            _hierarchy.put(currId, echildren);
+        }
+        else {
+            echildren = _hierarchy.get(currId);
+        }
+        echildren.add(id);
+        _hierarchyStack.addLast(id);
+    }
+
+    public void popElementId ()
+    {
+        _hierarchyStack.removeLast();
+    }
+
     public void pushTraceNode (AWBindableElement element)
     {
-        _currentComponentTraceNode = currentComponentTraceNode().pushChild(element);
+        ComponentTraceNode newComponentTraceNode = currentComponentTraceNode()
+                .pushChild(element, _requestContext.currentElementId());
+        if (newComponentTraceNode != _currentComponentTraceNode) {
+            pushElementId(_requestContext.currentElementId());
+        }
+        _currentComponentTraceNode = newComponentTraceNode;
 
         // See if we have a pending metadata association
         if (_assignMetaDataToNext && _currentMetadataTraceNode != null) {
@@ -136,7 +174,11 @@ public class AWDebugTrace
 
     public void popTraceNode ()
     {
-        _currentComponentTraceNode = _currentComponentTraceNode.popChild();
+        ComponentTraceNode traceNode = _currentComponentTraceNode.popChild();
+        if (_currentComponentTraceNode != traceNode) {
+            popElementId();
+        }
+        _currentComponentTraceNode = traceNode;
     }
 
     public void suppressTraceForCurrentScopingElement ()
@@ -185,15 +227,17 @@ public class AWDebugTrace
         AWBindableElement _element;
         AWBindableElement _sourceReference;
         ComponentTraceNode _parent;
+        AWEncodedString _elementId;
         List<ComponentTraceNode> _children;
         int _suppressLevels = 0;
         AWBaseElement _suppressingElement;
         MetadataTraceNode _associatedMetadata;
 
-        public ComponentTraceNode (AWBindableElement ref, ComponentTraceNode parent)
+        public ComponentTraceNode (AWBindableElement ref, ComponentTraceNode parent, AWEncodedString id)
         {
             _parent = parent;
             _element = ref;
+            _elementId = id;
         }
 
         protected Object clone() throws CloneNotSupportedException
@@ -207,6 +251,11 @@ public class AWDebugTrace
                 clone._children = newList;
             }
             return clone;
+        }
+
+        public String elementId ()
+        {
+            return _elementId == null ? null : _elementId.string();
         }
 
         public ComponentTraceNode cloneTree ()
@@ -229,7 +278,7 @@ public class AWDebugTrace
             return false;
         }
 
-        public ComponentTraceNode pushChild (AWBindableElement ref)
+        public ComponentTraceNode pushChild (AWBindableElement ref, AWEncodedString id)
         {
             // already suppressing children?
             boolean suppress = (_suppressLevels > 0) || (_suppressingElement != null);
@@ -253,7 +302,7 @@ public class AWDebugTrace
                 return this;
             }
 
-            ComponentTraceNode child = new ComponentTraceNode(ref, this);
+            ComponentTraceNode child = new ComponentTraceNode(ref, this, id);
             if (_children == null) _children = ListUtil.list();
             _children.add(child);
 
@@ -446,6 +495,13 @@ public class AWDebugTrace
                 : null;
         }
 
+        public String longTitle (AWBindableElement element)
+        {
+            return (_metaPropertyProvider != null)
+                ? MetaProvider.get(_metaPropertyProvider).longTitle(_metaPropertyProvider, _title, element)
+                : null;
+        }
+
         public Map properties (AWBindableElement element)
         {
             if (_properties == null) {
@@ -475,7 +531,7 @@ public class AWDebugTrace
         {
             return MetaProvider.get(_metaPropertyProvider).inspectorComponentName(_metaPropertyProvider, element);
         }
-    }
+        }
 
     abstract static public class MetaProvider extends ClassExtension
     {
@@ -513,11 +569,16 @@ public class AWDebugTrace
             return title;
         }
 
+        public String longTitle (Object receiver, String title, AWBindableElement element)
+        {
+            return title;
+        }
+
         public String inspectorComponentName (Object receiver, AWBindableElement element)
         {
             return "AWMetaInspectorPane";
         }
-    }
+        }
 
     static public class AssignmentRecorder
     {
@@ -536,9 +597,11 @@ public class AWDebugTrace
             setCurrentSource(new AssignmentSourceImpl(rank, description, location));
         }
 
-        public void registerAssignment (String key, Object value)
+        public Assignment registerAssignment (String key, Object value)
         {
-            _assignments.get(_currentSource).add(new Assignment(_currentSource, key, value));
+            Assignment result = new Assignment(_currentSource, key, value);
+            _assignments.get(_currentSource).add(result);
+            return result;
         }
 
         public Map<AssignmentSource, List<Assignment>> getAssignments()
@@ -578,12 +641,14 @@ public class AWDebugTrace
         String key;
         Object value;
         boolean isOverridden;
+        boolean isComputed;
 
         public Assignment(AssignmentSource source, String key, Object value)
         {
             this.source = source;
             this.key = key;
             this.value = value;
+            this.isComputed = false;
         }
 
         public AssignmentSource getSource ()
@@ -606,11 +671,47 @@ public class AWDebugTrace
             return isOverridden;
         }
 
+        public boolean isComputed ()
+        {
+            return isComputed;
+        }
+
+        public void setComputed (boolean computed)
+        {
+            isComputed = computed;
+        }
+
+        public String valueAsString ()
+        {
+            return value != null ? value.toString() : null;
+        }
+
+        public int newlineIdx ()
+        {
+            String val = valueAsString();
+            return val != null ? val.indexOf('\n') : -1;
+        }
+
+        public boolean isMultiline ()
+        {
+            return newlineIdx() >= 0;
+        }
+
+        public Object firstLine ()
+        {
+            String val = valueAsString();
+            int idx = (val != null) ? val.indexOf('\n') : -1;
+            if (idx >= 0) {
+                return val.substring(0, idx);
+            }
+            return value;
+        }
+
         public String toString ()
         {
             return Fmt.S("%s : %s", key, value);
         }
-    }
+        }
 
     public static abstract class AssignmentSource
     {

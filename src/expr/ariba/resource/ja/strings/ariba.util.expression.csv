@@ -1,0 +1,3 @@
+Shift_JIS,,
+,,
+MalformedExpression,"行「{1}」および列「{2}」にあるトークン「{0}」の近くで、構文解析エラーが発生しました。", "An syntactic error has occured while parsing the expression"

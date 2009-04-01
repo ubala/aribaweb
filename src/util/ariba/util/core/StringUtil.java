@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#30 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#31 $
 */
 
 package ariba.util.core;
@@ -97,6 +97,39 @@ public final class StringUtil
             }
         }
         return result;
+    }
+
+    /*
+        @see separateAtCapitalization(String, char)
+    */
+    public static String separateAtCapitalization (String string)
+    {
+        return separateAtCapitalization(string, ' ');
+    }
+
+    /*
+        @param string the string being acted upon
+        @param separationCharacter the character used to separate the parts of the string
+        @return the string with separation at a capitalized letter
+        eg. separateAtCapitalization("ApprovableSummary", ' ') returns "Approvable Summary"
+    */
+    public static String separateAtCapitalization (String string, char separationChar)
+    {
+        if (string == null || (string.length() <= 1)) {
+            return string;
+        }
+        int len = string.length();
+        FastStringBuffer fsb = new FastStringBuffer(len);
+        fsb.append(string.charAt(0));
+          //No separation for the first character
+        for (int i = 1; i < len; i++) {
+            char c = string.charAt(i);
+            if (Character.isUpperCase(c)) {
+                fsb.append(separationChar);
+            }
+            fsb.append(c);
+        }
+        return fsb.toString();
     }
 
     /**

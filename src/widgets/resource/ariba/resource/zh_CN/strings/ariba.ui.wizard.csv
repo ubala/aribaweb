@@ -1,0 +1,12 @@
+GB2312,,,,
+"WizardMeta","NextActionHint","Go to next step","转至下一步",""
+"WizardMeta","PrevActionHint","Go to previous step","转至上一步",""
+"WizardMeta","ExitActionHint","Exit","退出",""
+"WizardMeta","OkActionHint","OK","确定",""
+"WizardMeta","CancelActionHint","Cancel","取消",""
+"WizardMeta","NextAction","Next >","下一步 >",""
+"WizardMeta","PreviousAction","< Previous","< 上一步",""
+"WizardMeta","ExitAction","Exit","退出",""
+"WizardMeta","OkAction","OK","确定",""
+"WizardMeta","CancelAction","Cancel","取消",""
+"WizardMeta","RefreshAction","Refresh","刷新",""

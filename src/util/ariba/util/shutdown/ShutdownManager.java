@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 2006-2008 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#17 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#18 $
 */
 
 package ariba.util.shutdown;
@@ -184,6 +184,16 @@ public class ShutdownManager
     }
 
     /**
+     * Adds a ShutdownHook to be invoked before the exit
+     * @param hook the ShutdownHook to be added
+     * @aribaapi ariba
+     */
+    public static void addLastShutdownHook (Thread hook)
+    {
+        get().registerLastShutdownHook(hook);
+    }
+
+    /**
      * Changes the ExitHook
      * @param hook the new ExitHook to use
      * @aribaapi ariba
@@ -215,6 +225,7 @@ public class ShutdownManager
 
     private ExitHook _exitHook;
     private final List/*<Thread>*/ _hooks;
+    private Thread _lastHook;
     private final List/*<ShutdownDelayer>*/ _delayers;
 
     private long _hookRunnerTimeout;
@@ -233,6 +244,7 @@ public class ShutdownManager
     {
         _exitHook = new DefaultVMExit();
         _hooks = ListUtil.list();
+        _lastHook = null;
         _delayers = ListUtil.list();
         setHookRunnerTimeout(60);
         setPingInterval(30);
@@ -449,7 +461,7 @@ public class ShutdownManager
     public void registerShutdownManagerProcessor (
         ShutdownManagerProcessorIfc smp)
     {
-        Assert.that(shutdownManagerProcessor == null, 
+        Assert.that(shutdownManagerProcessor == null,
                     "shutdownManagerProcessor is not null");
         shutdownManagerProcessor = smp;
     }
@@ -647,6 +659,20 @@ public class ShutdownManager
     }
 
     /**
+     * Adds a ShutdownHook to be invoked before the exit
+     * @param hook the ShutdownHook to be added
+     * @aribaapi ariba
+     */
+    private void registerLastShutdownHook (Thread hook)
+    {
+        //thread should not be started already
+        if (hook.isAlive()) {
+            throw new IllegalArgumentException("Shutdown hook has already been started");
+        }
+        _lastHook = hook;
+    }
+
+    /**
      * Changes the ExitHook
      * @param hook the new ExitHook to use
      * @aribaapi ariba
@@ -710,8 +736,8 @@ public class ShutdownManager
             t.updateNodeStatus(status);
         }
     }
-    
-    /** 
+
+    /**
      * Update the node status and have ShutdownManagerProcessor send
      * out notification.
      * Caller should already be synchronized.
@@ -861,6 +887,15 @@ public class ShutdownManager
                 Thread hook = (Thread)i.next();
                 try {
                     hook.join();
+                }
+                catch (InterruptedException e) {
+                }
+            }
+            if (_lastHook != null) {
+                Log.shutdown.debug("Executing last shutdown hook");
+                _lastHook.start();
+                try {
+                    _lastHook.join();
                 }
                 catch (InterruptedException e) {
                 }

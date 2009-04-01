@@ -1,12 +1,3 @@
-@actionCategory=Create { }
-@actionCategory=Search { }
-
-actionCategory=Create {
-    action=Create {
-        label:${ariba.ui.meta.core.UIMeta.beautifyClassName(properties.class)};
-    }
-}
-
 class {
     displayKey:toString;
 
@@ -50,7 +41,7 @@ field {
             bindings: {
                 action: ${
                     set("object", value);
-                    set("actionCategory", "Manage");
+                    set("actionCategory", "General");
                     set("action", "Inspect");
                     ariba.ui.meta.core.UIMeta.getInstance().fireAction(this, requestContext)
                 };
@@ -72,7 +63,7 @@ field {
         bindings: {
             action: ${
                 set("object", value);
-                set("actionCategory", "Manage");
+                set("actionCategory", "General");
                 set("action", "Inspect");
                 ariba.ui.meta.core.UIMeta.getInstance().fireAction(this, requestContext)
             };
@@ -141,18 +132,36 @@ action=Create {
     }
 
     displayGroup dataSourceType="ariba.ui.meta.persistence.DetailDataSource" {
-        label:"Add";
+        label:$[a001]"Add";
         visible:${displayGroup.dataSource.parentObject != null}
     }
 }
 
-layout=Global {
-    @actionCategory=Create {
-        @action=Create { }
+/*
+@actionCategory=Create {
+    after:zNav;
+    label:$[a002]Create;
+    class {
+        @action=Create {
+            label:${ariba.ui.meta.core.UIMeta.beautifyClassName(properties.class)};
+        }
     }
 }
 
+@actionCategory=Search {
+    after:zNav;
+}
+*/
+
+
 @actionCategory=Manage {
+    after:zNav;
+}
+
+@actionCategory=Editing {
+    label:$[a003]Editing;
+    after:zMain;
+
     layout=(SelectionButtonArea, TableRow) {
         @action=Inspect {
             trait:instance, pageAction;
@@ -180,7 +189,7 @@ layout=Global {
                 null};
 
             displayGroup dataSourceType="ariba.ui.meta.persistence.DetailDataSource" {
-                label:"Remove";
+                label:$[a004]"Remove";
                 actionResults:${
                     displayGroup.dataSource.delete(object);
                     null};
@@ -192,13 +201,7 @@ layout=Global {
     }
 }
 
-/*
-field { label: ${ariba.ui.meta.core.UIMeta.getInstance().throwSampleException()} }
-*/
-
 operation=list {
-    @actionCategory=Manage { visible:true }
-    
     field=ActionCol {
         after:zBottom;
     }
@@ -206,6 +209,7 @@ operation=list {
 
 module {
     @trait=ModuleClassPage {
+        label:$${pushAndResolve([class:properties.moduleClassName], "label", true)};
         layout:SearchPage;
         homePage:MetaContentPage;
         pageBindings: {
@@ -231,16 +235,17 @@ module {
 }
 
 layout=SearchPage {
+    label:${pushAndResolve([module:"*"], "label")};
     component:MetaDashboardLayout;
     @layout=SearchTOC {
-       label:"Actions";
+       label:$[a005]"Actions";
        component:MetaActionList;
        bindings: { filterActions:static }
        after:zToc;
        area:Global;
     }
     @layout=Search {
-       label:"Search";
+       label:$[a006]"Search";
        component:MetaSearch;
        after:zTop;
     }
@@ -261,7 +266,7 @@ module_trait=SearchDetail {
         label:${pushAndResolve([module:"*"], "label")};
 
         @layout=Search {
-            label:"Search";
+            label:$[a007]"Search";
             component:MetaSearch;
             after:zLeft;
         }
@@ -297,7 +302,7 @@ module_trait=SearchDetail {
 
     displayGroup dataSourceType="ariba.ui.meta.persistence.ObjectContextDataSource" {
         action=Create {
-            label:"New";
+            label:$[a008]"New";
             actionResults:${displayGroup.insert(); null}
         }
         action=Inspect {
@@ -316,7 +321,7 @@ module_trait=SearchDetail {
 module_trait=SearchInToc {
     layout {
         @layout=SearchToc {
-            label:"Search";
+            label:$[a009]"Search";
             component:MetaSearchForm;
             after:zToc;
             layout=SearchForm#labelsOnTop {
@@ -326,7 +331,7 @@ module_trait=SearchInToc {
             }
         }
         layout=Search {
-            label:"Search Results";
+            label:$[a010]"Search Results";
             layout=Table { class { bindings: { showHeadingArea:false; title:null; } } }
         }
     }

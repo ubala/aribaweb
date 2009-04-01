@@ -1,0 +1,23 @@
+<w:HintMessage>
+    Example of a manually constructed table of database results
+    (Normally we'd let metaui create this for us, but sometimes it is worth understanding
+    how to do it ourselves).
+</w:HintMessage>
+<t:DataTable title="Users" enableScrolling="$true"
+        displayGroup="$displayGroup" singleSelect="$true"
+        initialSortDirection="descending"
+        showOptionsMenu="$true" list="$users" item="$currentUser">
+    <t:Column key="name"/>
+
+	<t:Column label="Email" >
+	    <w:GenericChooser list='${["ariba.com", "aribaweb.org", "other"]}' object="$currentUser" key="email" type="Popup" action="$null"/>
+	</t:Column>
+
+	<t:Column label="Groups" >
+	    <w:GenericChooser type="Chooser" destinationClass="ariba.appcore.Group" object="$currentUser" key="memberOf" multiSelect="$true" displayKey="name"/>
+	</t:Column>
+
+	<t:ButtonArea>
+        <w:TextButton action="$null">Sample Button</w:TextButton>\
+    </t:ButtonArea>
+</t:DataTable>

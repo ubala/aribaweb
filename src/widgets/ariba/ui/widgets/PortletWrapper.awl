@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PortletWrapper.awl#4 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PortletWrapper.awl#5 $
     </Copyright>
 
     <Overview>
@@ -97,7 +97,7 @@
                         <a:If ifTrue="$^showMaxMin">
                             <td align="$languageRight" width="1%" class="titleBarAction">\
                                 <a:IncludeBlock name="TitleBarAction" action="$^toggleMinMaxAction"
-                                    tooltip="$[]Show / Hide content">
+                                    tooltip="$[a006]Show / Hide content">
                                     <a:Image filename="$minMaxButtonImage"/>
                                 </a:IncludeBlock>
                             </td>
@@ -105,7 +105,7 @@
                         <td align="$languageRight" width="1%" class="titleBarAction" style="padding-right:2px">\
                             <a:If ifTrue="$^showClose">\
                                 <a:IncludeBlock name="TitleBarAction" action="$^closeAction"
-                                    tooltip="$[]Remove this item">
+                                    tooltip="$[a007]Remove this item">
                                     <a:Image filename="$portletStyle.closeImage"/>
                                 </a:IncludeBlock>
                             </a:If>

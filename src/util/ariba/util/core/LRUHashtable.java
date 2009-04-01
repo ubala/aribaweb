@@ -1,6 +1,11 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2009 Ariba, Inc.
+    All rights reserved. Patents pending.
 
+    $Id: //ariba/platform/util/core/ariba/util/core/LRUHashtable.java#14 $
+    
+    Responsible: hcai
+        
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -11,8 +16,6 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
-    $Id: //ariba/platform/util/core/ariba/util/core/LRUHashtable.java#13 $
 */
 
 package ariba.util.core;
@@ -338,6 +341,18 @@ public class LRUHashtable
     }
 
 
+    /**
+       Return the oldest object in the LRU
+     */
+    public final Object getOldestKey ()
+    {
+        if (this.inUse == 0) {
+            return null;
+        }
+
+        return this.ents[this.oldest].key;
+    }
+
     /*
         Find LRU entry for key. If the entry is empty then the entry
         was not in the table and the returned index is where the entry
@@ -537,7 +552,7 @@ public class LRUHashtable
 
             // Move the entries
         int num = 0;
-        for (i = oldOldest; /**/; i = old[i].newer) {
+        for (i = oldOldest; /* null condition*/; i = old[i].newer) {
             put(old[i].key, old[i].value);
             if (i == oldNewest) {
                 break;
@@ -796,6 +811,21 @@ public class LRUHashtable
 
     protected void removeOldestUntil (int target, Object leave)
     {
+        deleteOldestUntil(target, leave);
+    }
+    
+    public int getTotalInUseEntries ()
+    {
+        return this.inUse;
+    }
+    
+    public List purgeOldestEntries (int totalOldestEntries)
+    {
+        return deleteOldestUntil(this.inUse - totalOldestEntries, null);
+    }
+
+    private List deleteOldestUntil (int target, Object leave)
+    {
 
         if (Log.lruCheck.isDebugEnabled()) {
             sane(Log.lruCheck);
@@ -816,6 +846,8 @@ public class LRUHashtable
 
         i = this.oldest;
         int limit = this.inUse;
+        List values = ListUtil.list();
+        
         for (j = 0; j < limit ; j++) {
 
             if (this.inUse == target) {
@@ -843,6 +875,7 @@ public class LRUHashtable
                     }
 
                     this.removeAtIndex(i);
+                    values.add(o);
                 }
                 else {
                     this.unPurged++;
@@ -875,6 +908,8 @@ public class LRUHashtable
                 dumpSummary(Log.lruDebug);
             }
         }
+        
+        return values;
     }
 
 

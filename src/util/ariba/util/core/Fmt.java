@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Fmt.java#12 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Fmt.java#13 $
 */
 
 package ariba.util.core;
@@ -2375,6 +2375,44 @@ public class Fmt
     }
 
     /**
+        Vararg-based format function based on Fmt.S but escaping every string
+        argument in the list
+
+        @param  control control string determining format of the output
+        @param  args    varargs list of arguments
+        @return formatted string with string parameters being single quote escaped
+
+    */
+    public static String Sq (String control, Object... args)
+    {
+        for (int i = 0;i < args.length;i++) {
+            if (args[i] instanceof String) {
+                args[i] = escapeSingleQuote((String)args[i]);
+            }
+        }
+        return Fmt.S(control, args);
+    }
+
+    /**
+        Vararg-based format function based on Fmt.B but escaping every string
+        argument in the list
+
+        @param  buffer  FormatBuffer into which the formatted string is output
+        @param  control control string determining format of the output
+        @param  args    varargs list of arguments
+
+    */
+    public static void Bq (FormatBuffer buffer, String control, Object... args)
+    {
+        for (int i = 0;i < args.length;i++) {
+            if (args[i] instanceof String) {
+                args[i] = escapeSingleQuote((String)args[i]);
+            }
+        }
+        Fmt.B(buffer, control, args);
+    }
+
+    /**
         @aribaapi ariba
     */
     public static final char SingleQuoteChar = '\'';
@@ -2401,6 +2439,20 @@ public class Fmt
         return StringUtil.replaceCharByString(value,
                                            SingleQuoteChar,
                                            EscapedSingleQuoteString);
+    }
+
+    /**
+        Safe escape for single quotes, without doubling up on the escape. This is not
+        intended to prevent AQL injection, but NOT necessarily provide correctness. All it ensures is
+        that ANY quote character shows up in doubles. If you know the string has not been escaped, use
+        escapeSingleQuote instead.
+
+    */
+    public static String safeEscapeSingleQuote (String value)
+    {
+        return value == null ? null :
+               value.replaceAll(EscapedSingleQuoteString, SingleQuoteString)
+                    .replaceAll(SingleQuoteString, EscapedSingleQuoteString);
     }
 
     /**

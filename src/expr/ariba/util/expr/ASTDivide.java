@@ -30,6 +30,7 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
+import ariba.util.fieldtype.NullTypeInfo;
 import ariba.util.fieldtype.TypeInfo;
 
 /**
@@ -50,7 +51,10 @@ class ASTDivide extends ExpressionNode
     {
         Object v1 = children[0].getValue( context, source );
         Object v2 = children[1].getValue( context, source );
-        TypeInfo v1Info = getTypeInfo();
+        TypeInfo v1Info = children[0].getTypeInfo();
+        if (v1Info == null || v1Info instanceof NullTypeInfo) {
+            v1Info = getTypeInfo();
+        }
         return ExprOps.divide(
                 v1,
                 v2,

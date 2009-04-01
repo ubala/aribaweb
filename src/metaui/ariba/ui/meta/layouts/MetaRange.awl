@@ -10,7 +10,7 @@
         </tr>
         <tr>
             <td>
-                &nbsp;<a:Local>to</a:Local>&nbsp;\
+                &nbsp;<a:Local key="a001">to</a:Local>&nbsp;\
             </td>\
             <td>\
                 <m:Context valueRedirector="$redirectorTo">\
@@ -27,7 +27,7 @@
     </div>\
     <div style="white-space:nowrap; float:left">
         <div style="float:left;height:2em">\
-            &nbsp;<a:Local>to</a:Local>&nbsp;&nbsp;\
+            &nbsp;<a:Local key="a002">to</a:Local>&nbsp;&nbsp;\
         </div>\
         <div style="float:left;">\
             <m:Context valueRedirector="$redirectorTo">\

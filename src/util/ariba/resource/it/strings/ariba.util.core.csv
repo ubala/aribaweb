@@ -1,0 +1,40 @@
+Cp1252,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+,,
+TemplateParserPageTitle,"Errore parser modelli","Page title for the error message; "
+TemplateParserTitle,"Errore parser modelli","Title for the template parser error; "
+FileErrorMsg,"Parser modelli - Errore file: il modello di file non esiste o non è leggibile.","Invalid template name encountered; "
+IOErrorMsg,"Parser modelli: errore di I/O: si è verificato un errore durante la lettura del file modello.","Error while trying to read template file; IO stands for Input / Output; "
+,,
+BlockoutChar,"X","default blockout character for SecureStringFormatter; Do we have to translate this ?; "
+,,
+,,
+,,
+,,
+,,
+ListSeparator,", ","used to delimit a series of strings when presented "
+DayAbbrev,"g","abbreviation for day; "
+HourAbbrev,"h","abbreviation for hours; "
+MinutesAbbrev,"min","abbreviation for minutes; "
+,,
+,, keys used in formatters
+,,
+BooleanTrue,"Sì","This is used from BooleanFormatter; "
+BooleanFalse,"No","This is used from BooleanFormatter; "
+BooleanTrueOrFalse,"I valori booleani devono essere 'true' o 'false'","error when a boolean doesn't contain true or false string"
+CannotParseDate,"Impossibile analizzare come data la stringa ""{0}""","error when a date cannot be parsed - 0: the date string"
+InvalidCharacterInNumber,"Carattere non valido nel numero","error when there is a non-numeric character in a number"
+InvalidYear,"Anno non valido","error when the year is invalid in a date"
+NoDigitsFound,"È richiesto un valore numerico","error when a number is required and no digits are entered"
+NumberFormatError,"Il valore numerico non è nel formato appropriato.","friendly error msg for NumberFormatException"
+MaxValueExceeded,"Il valore ""{0}"" è superiore al valore massimo consentito ""{1}"".", "Error when value is greater than allowed (integer overflow)"
+MinValueExceeded,"Il valore ""{0}"" è inferiore al valore massimo consentito ""{1}"".", "Error when value is less than allowed (integer underflow)"
+WholeNumberRequiredKey,"Il valore ""{0}"" deve essere un numero intero.", "Error when integer value contains fractions"

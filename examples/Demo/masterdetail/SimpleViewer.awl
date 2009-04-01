@@ -1,9 +1,9 @@
 <w:FormTable showErrorFlags="$true" omitLabelPadding="$true">
-    <w:FormRow label="Amount">
+    <w:FormRow label="$[a001]Amount">
         <a:String value="$^currentItem.Amount" formatter="$formatters.money"/>
     </w:FormRow>
-    <w:FormRow label="Popup">
+    <w:FormRow label="$[a002]Popup">
         <a:Popup list="${[1, 2, 3, 4]}" item="$dict.item" selection="$^currentItem.popupSelection">$dict.item</a:Popup>
     </w:FormRow>
-    <w:FormRow label="Comments"> <a:TextArea cols="25" value="$^currentItem.comment"/></w:FormRow>
+    <w:FormRow label="$[a003]Comments"> <a:TextArea cols="25" value="$^currentItem.comment"/></w:FormRow>
 </w:FormTable>

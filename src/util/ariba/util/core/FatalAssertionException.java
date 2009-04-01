@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/FatalAssertionException.java#7 $
+    $Id: //ariba/platform/util/core/ariba/util/core/FatalAssertionException.java#8 $
 */
 
 package ariba.util.core;
@@ -52,5 +52,10 @@ public class FatalAssertionException extends RuntimeException
     public FatalAssertionException (String message)
     {
         super(message);
+    }
+
+    public FatalAssertionException (Throwable cause, String message, Object... args)
+    {
+        super(Fmt.S(message, args), cause);
     }
 }

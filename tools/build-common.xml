@@ -710,7 +710,7 @@
         </copy>
     </target>
 
-    <target name="war" depends="webapp, war-check" if="war.name" unless="war.uptodate">
+    <target name="war" depends="jar, webapp, war-check" if="war.name" unless="war.uptodate">
         <zip destfile="${build.war.file}">
             <zipfileset dir="${build.war.dir}"/>
         </zip>
@@ -900,7 +900,61 @@
         <pathconvert property="classpath.string" refid="classpath" pathsep=";"/>
         <echo message="CLASSPATH: ${classpath.string}"/>
     </target>
+
+    <target name="localize">
+        <property name="en.strings.dir" location="${basedir}/${src.resource.path}/resource/en_US/strings"/>
+        <mkdir dir="${en.strings.dir}"/>
+
+        <groovy src="${aw.home}/bin/localize.groovy" classpathref="groovy.script.classpath">
+            <arg value="-d"/>
+            <arg value="${basedir}"/>
+        </groovy>
+    </target>
+
+    <target name="check-locale-list" unless="locale.list">
+        <!--
+        <fail message="Unable to run target: localize-locales - you must define the property 'locale.list' with a space-separated list of target locales"/>
+        -->
+        <property name="locale.list" value=""/>
+        <echo message="No locale.list specified.  Will update existing locales (if any).  To add more, set the 'locale.list' property."/>
+    </target>
+
+    <target name="localize-locales" depends="check-locale-list">
+        <groovy src="${aw.home}/bin/localize.groovy" classpathref="groovy.script.classpath">
+            <arg line="-d ${basedir} -u ${locale.list}"/>
+        </groovy>
+    </target>
+
+    <target name="localize-meta" depends="init, jar">
+        <path id="localize.all.libs">
+            <resources refid="build-only.deps"/>
+            <resources refid="merge.jars"/>
+            <resources refid="build.deps"/>
+            <resources refid="build.deps2"/>
+            <resources refid="build.jars"/>
+            <resources refid="war.jars"/>
+            <resources refid="groovy.support.jars"/>
+            <resources refid="app.war.jars"/>
+            <resources refid="module.libs"/>
+            <resources refid="module.libs2"/>
+            <resources refid="module.libs3"/>
+        </path>
+
+        <!--
+        <pathconvert refid="localize.all.libs" property="localize.all.libs.path"/>
+        <echo message="CP: ${localize.all.libs.path}"/>
+        -->
         
+        <property name="en.strings.dir" location="${basedir}/${src.resource.path}/resource/en_US/strings"/>
+        <mkdir dir="${en.strings.dir}"/>
+
+        <groovy src="${aw.home}/bin/localize.groovy" classpathref="localize.all.libs">
+            <arg value="-m"/>
+            <arg value="-d"/>
+            <arg value="${basedir}"/>
+        </groovy>
+    </target>
+
     <!--+
     | M A C R O S
     +-->

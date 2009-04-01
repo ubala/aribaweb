@@ -1,0 +1,19 @@
+KS_C_5601-1987,,
+copyright, "Copyright (c) 1996-2008 Ariba, Inc. All rights reserved. Æ¯Çã Ãâ¿ø Áß.",
+versionWithSvPackWithDateWithPatchWithLangPack, "{0}.{1}.{2} ¼­ºñ½º ÆÑ {5} ¾ð¾î ÆÑ {6}(ºôµå {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateWithPatchWithLangPack, "{0}.{1}.{2} ¼­ºñ½º ÆÑ {5} ¾ð¾î ÆÑ {6}(ºôµå {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackWithDateNoPatchWithLangPack, "{0}.{1} ¼­ºñ½º ÆÑ {5} ¾ð¾î ÆÑ {6}(ºôµå {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackWithDateWithPatchNoLangPack, "{0}.{1}.{2} ¼­ºñ½º ÆÑ {5}(ºôµå {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateNoPatchWithLangPack, "{0}.{1} ¼­ºñ½º ÆÑ {5} ¾ð¾î ÆÑ {6}(ºôµå {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateWithPatchNoLangPack, "{0}.{1}.{2} ¼­ºñ½º ÆÑ {5}(ºôµå {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackWithDateNoPatchNoLangPack, "{0}.{1} ¼­ºñ½º ÆÑ {5}(ºôµå {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionWithSvPackNoDateNoPatchNoLangPack, "{0}.{1} ¼­ºñ½º ÆÑ {5}(ºôµå {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+
+versionNoSvPackWithDateWithPatchWithLangPack, "{0}.{1}.{2} ¾ð¾î ÆÑ {6}(ºôµå {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateWithPatchWithLangPack, "{0}.{1}.{2} ¾ð¾î ÆÑ {6}(ºôµå {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackWithDateNoPatchWithLangPack, "{0}.{1} ¾ð¾î ÆÑ {6}(ºôµå {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackWithDateWithPatchNoLangPack, "{0}.{1}.{2}(ºôµå {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateNoPatchWithLangPack, "{0}.{1} ¾ð¾î ÆÑ {6}(ºôµå {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateWithPatchNoLangPack, "{0}.{1}.{2}(ºôµå {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackWithDateNoPatchNoLangPack, "{0}.{1}(ºôµå {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
+versionNoSvPackNoDateNoPatchNoLangPack, "{0}.{1}(ºôµå {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack

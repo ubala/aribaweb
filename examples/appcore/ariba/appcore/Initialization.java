@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Initialization.java#6 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Initialization.java#9 $
 */
 package ariba.appcore;
 
@@ -33,6 +33,7 @@ import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWSessionValidationException;
 import ariba.ui.aribaweb.core.AWComponentActionRequestHandler;
+import ariba.ui.aribaweb.core.AWLocal;
 import ariba.ui.widgets.ActionHandler;
 import ariba.ui.widgets.AribaAction;
 import ariba.ui.widgets.ConditionHandler;
@@ -80,7 +81,7 @@ public class Initialization
             public void applicationDidInit (AWConcreteApplication application) {
                 metaInitialize(UIMeta.getInstance());
 
-                checkDataInitLoaders(_InitLoaderClasses);
+                if (!PersistenceMeta.doNotConnect()) checkDataInitLoaders(_InitLoaderClasses);
 
                 User.initializeSessionBinder();
 
@@ -132,7 +133,7 @@ public class Initialization
     static void checkDataInitLoaders (Set<String>loaderClasses)
     {
         ObjectContext.bindNewContext();
-        
+
         // Todo: check if schema has already been loaded
         Global global = Global.find(_DataLoadGlobalKey);
         if (global != null) {
@@ -215,7 +216,7 @@ public class Initialization
                 AWUtil.collect(classNames, permIds, new AWUtil.ValueMapper() {
                     public Object valueForObject (Object object)
                     {
-                        return PermissionSet.idForPermissionName(
+                        return Permission.idForPermissionName(
                                 Permission.nameForClassOp((String)object, Permission.ClassOperation.view));
                     }
                 });
@@ -233,7 +234,7 @@ public class Initialization
         Permission.ClassOperation op = Permission.ClassOperation.valueOf(operation);
         // FIXME: map unknown ops to parent ops?  (e.g. keywordSearch to search)
         if (op == null) return true;
-        final int id = PermissionSet.idForPermissionName(Permission.nameForClassOp(cls, op));
+        final int id = Permission.idForPermissionName(Permission.nameForClassOp(cls, op));
         return new PropertyValue.Dynamic() {
             public Object evaluate (Context context)
             {
@@ -282,7 +283,7 @@ public class Initialization
                 return !User.isLoggedIn();
             }
         });
-        
+
         if (allowAccessWithoutLogin) {
             ConditionHandler.setHandler("showLoginAction", new ConditionHandler() {
                 public boolean evaluateCondition (AWRequestContext requestContext)
@@ -310,31 +311,40 @@ public class Initialization
 
     public static class DefaultStringHandler extends StringHandler
     {
-        // Todo:  replace with use of (localized) strings files
-        private static final Map Strings = AWUtil.map(
-                    "applicationName", "AribaWeb Demonstration",
-                    Home, Home,
-                    Help, Help,
-                    Logout, Logout,
-                    "Login","Sign in",
-                    Preferences, Preferences);
-
         public String getString (AWRequestContext requestContext)
         {
-            // really these would be localized based on requestContext.session
-            return (String)Strings.get(this.name());
+            String name = name();
+            if ("applicationName".equals(name)) {
+                return AWLocal.localizedJavaString(1, "AribaWeb Demonstration" /*  */, Initialization.class, requestContext);
+            }
+            if ("Login".equals(name)) {
+                return AWLocal.localizedJavaString(2, "Sign in" /*  */, Initialization.class, requestContext);
+            }
+            if (Home.equals(name)) {
+                return AWLocal.localizedJavaString(5, "Home" /*  */, Initialization.class, requestContext);
+            }
+            if (Logout.equals(name)) {
+                return AWLocal.localizedJavaString(6, "Logout" /*  */, Initialization.class, requestContext);
+            }
+            if (Logout.equals(name)) {
+                return AWLocal.localizedJavaString(7, "Logout" /*  */, Initialization.class, requestContext);
+            }
+            if (Preferences.equals(name)) {
+                return AWLocal.localizedJavaString(8, "Preferences" /*  */, Initialization.class, requestContext);
+            }
+            return null;
         }
     }
 
     static void setupStringHandlers ()
     {
         StringHandler.setDefaultHandler(new DefaultStringHandler());
-        
+
         StringHandler.setHandler(StringHandler.UserGreeting, new StringHandler() {
             public String getString (AWRequestContext requestContext)
             {
-                return User.isLoggedIn() ? Fmt.S("Welcome %s", User.currentUser().getName())
-                                    : "(Not logged in)";
+                return User.isLoggedIn() ? Fmt.S(AWLocal.localizedJavaString(3, "Welcome %s" /*  */, Initialization.class, requestContext), User.currentUser().getName())
+                                    : AWLocal.localizedJavaString(4, "(Not logged in)" /*  */, Initialization.class, requestContext);
             }
         });
     }
@@ -412,7 +422,7 @@ public class Initialization
         Group anonGroup = getDefaultGroup(Group.DefaultGroup.AnonymousUsers);
         anonymous.setMemberOf(AWUtil.list(anonGroup));
         anonymous.setPassword("");
-        
+
         ctx.save();
     }
 

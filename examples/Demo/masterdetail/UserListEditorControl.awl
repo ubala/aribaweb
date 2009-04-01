@@ -8,12 +8,12 @@
     </a:Content>
 
     <a:Content name="overflow">
-        (More...)
+        <a:Local key="a001">(More...)</a:Local>
     </a:Content>
 
     <a:Content name="empty">
-        (None)
+        <a:Local key="a002">(None)</a:Local>
     </a:Content>
 
 </w:ComplexRepetition>
-<w:TextButton action="$showUserEditor">Edit</w:TextButton>
+<w:TextButton action="$showUserEditor"><a:Local key="a003">Edit</a:Local></w:TextButton>

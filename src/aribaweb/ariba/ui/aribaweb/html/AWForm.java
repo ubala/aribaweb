@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.java#35 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.java#36 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -223,6 +223,11 @@ public class AWForm extends AWComponent implements AWHtmlForm
     {
         String requestSenderId = requestContext().requestSenderId();
         return _hiddenFieldElementId.equals(requestSenderId);
+    }
+
+    public Boolean hasFormAction ()
+    {
+        return hasBinding(BindingNames.action) ? Boolean.TRUE : null;
     }
 
     // record & playback

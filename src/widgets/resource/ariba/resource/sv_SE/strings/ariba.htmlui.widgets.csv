@@ -1,0 +1,8 @@
+Cp1252
+,, This file has a single-column lookup key
+,,
+,, AWMessagesList
+,,
+ErrorMessage, "Fel: {0}", generic error message printed *usually* at the top of the page. The argument #0 is a localized string
+AlertMessage, "Varning: {0}", generic warning message printed *usually* at the top of the page. The argument #0 is a localized string
+ConfirmMessage, "Bekräftelse: {0}", generic confirmation message printed *usually* at the top of the page. The argument #0 is a localized string

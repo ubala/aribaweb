@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBinding.java#47 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBinding.java#48 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -576,11 +576,12 @@ final class AWLocalizedBinding extends AWVariableBinding
                         }
                     }
                     if (localizedString == null) {
+                        String string = resourceManager.pseudoLocalizeUnKeyed(_defaultString);
                         if (AWLocal.IsDebuggingEnabled) {
-                            localizedString = AWEncodedString.sharedEncodedString(addEmbeddedContextToString(_key, _defaultString, component));
+                            localizedString = AWEncodedString.sharedEncodedString(addEmbeddedContextToString(_key, string, component));
                         }
                         else {
-                            localizedString = AWEncodedString.sharedEncodedString(_defaultString);
+                            localizedString = AWEncodedString.sharedEncodedString(string);
                         }
                     }
                     if (!AWConcreteApplication.IsRapidTurnaroundEnabled) {

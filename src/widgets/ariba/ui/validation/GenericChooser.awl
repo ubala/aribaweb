@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.awl#4 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.awl#5 $
     </Copyright>
 
     <Overview>
@@ -101,19 +101,19 @@
 <a:Else isEqual="$type.name" value="Popup"/>
     <a:Popup list="$list" item="$item" selection="$selection"
              action="$^action" isRefresh="$^isRefresh" disabled="$^disabled" size="$^size"
-             noSelectionString="$^noSelectionString:$[](no selection)">\
+             noSelectionString="$^noSelectionString:$[a001](no selection)">\
         <a:String value="$displayValue" formatter="$formatter"/>\
     </a:Popup>
 <a:Else isEqual="$type.name" value="PopupControl"/>
     <w:PopupControl list="$list" item="$item" selection="$selection"
              action="$^action" disabled="$^disabled" size="$^size"
-             noSelectionString="$^noSelectionString:$[](no selection)">\
+             noSelectionString="$^noSelectionString:$[a002](no selection)">\
         <a:String value="$displayValue" formatter="$formatter"/>\
     </w:PopupControl>
 <a:Else isEqual="$type.name" value="Chooser"/>
     <w:Chooser selectionSource="$chooserSource" state="$chooserState" formatter="$chooserFormatter"
                multiSelect="$isMulti" disabled="$^disabled" size="$^size"
                selection="$selectedObjects"
-               noSelectionString="$^noSelectionString:$[](no selection)"
+               noSelectionString="$^noSelectionString:$[a003](no selection)"
                allowFullMatchOnInput="$^allowFullMatchOnInput:true"/>\
 </a:If>

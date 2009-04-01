@@ -227,9 +227,11 @@ Object value() : {
      |
         v=map()
      |
-        v = bindingValue()
+        v=bindingValue()
      |
-        v = exprValue()
+        v=localizedString()
+     |
+        v=exprValue()
     )
     { return v; }
 }
@@ -327,6 +329,7 @@ Object key() : {
 
 Object simpleValue() : {
     Token t;
+    Object v;
 }
 {
     (
@@ -355,6 +358,17 @@ Object bindingValue() : {
         {
             return new PropertyValue.ContextFieldPath(t.image.substring(1));
         }
+}
+
+Object localizedString() : {
+    Token t;
+    Object v;
+}
+{
+    t=<LOCALIZATION_KEY> v=key()
+    {
+        return ((UIMeta)_meta).createLocalizedString(t.image.substring(2, t.image.length()-1), (String)v);
+    }
 }
 
 Object exprValue() : {
@@ -503,6 +517,12 @@ TOKEN:
 TOKEN:
 {
   < FIELDPATHBINDING: "$" ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","_","0"-"9", "."] )* >
+}
+
+// Localized string key.
+TOKEN:
+{
+  < LOCALIZATION_KEY: "$" "[" ( ["a"-"z","A"-"Z","_","0"-"9"] )* "]" >
 }
 
 /**

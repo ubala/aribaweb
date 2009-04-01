@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#27 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#28 $
 */
 
 
@@ -65,6 +65,7 @@ public class Chooser extends AWComponent
     private ChooserState _chooserState;
     private Object /*AWFormatting*/ _formatter;
     private boolean _disabled;
+    private boolean _fullMatchNeeded;
     private Object _errorKey;
     private boolean _allowFullMatchOnInput;
     private List _selectionList;
@@ -92,6 +93,8 @@ public class Chooser extends AWComponent
         _disabled = false;
         _errorKey = null;
         _allowFullMatchOnInput = false;
+        _selectionList = null;
+        _fullMatchNeeded = false;
     }
 
     public String noSelectionString ()
@@ -300,8 +303,36 @@ public class Chooser extends AWComponent
 
     public void applyValues(AWRequestContext requestContext, AWComponent component)
     {
+        _fullMatchNeeded = true;
         template().elementArray()[1].applyValues(requestContext, this);
         requestContext.incrementElementId();
+
+        processFullMatch();
+    }
+
+    private void processFullMatch ()
+    {
+        //_chooserState.hasChanged is set when the user actually types something in.
+        //  We need to check this because there are cases when the user selects something
+        //  in name table, the field is populated without any typing.
+        //_fullMatchNeeded is to ensure we do not run a full match when the user selects
+        //  something from the drop down or if it's blur event and the full match was
+        //  already run
+        if(_chooserState.hasChanged() && _fullMatchNeeded) {
+            String pattern = _chooserState.pattern();
+            boolean changedLastFullMatch = _chooserState.getLastFullMatchPattern() == null ||
+                !_chooserState.getLastFullMatchPattern().equals(pattern);
+
+            if (changedLastFullMatch) {
+                if (StringUtil.nullOrEmptyOrBlankString(pattern)) {
+                    resetChooser();
+                }
+                else {
+                    match(true, pattern, null);
+                    validateAndRecordErrors();
+                }
+            }
+        }
     }
 
     public boolean isSender ()
@@ -381,6 +412,7 @@ public class Chooser extends AWComponent
         int selectionIndex = Integer.parseInt(selectionIndexValue);
         if (selectionIndex > -1) {
             selectAction(_selectionList, selectionIndex);
+            _fullMatchNeeded = false;
         }
     }
 
@@ -391,6 +423,7 @@ public class Chooser extends AWComponent
             _chooserState.setAddMode(true);
             List selections = (List)valueForBinding(BindingNames.selections);
             selectAction(selections, selectionIndex);
+            _fullMatchNeeded = false;
         }
     }
 
@@ -405,9 +438,11 @@ public class Chooser extends AWComponent
 
     private void selectAction (List selections, int selectionIndex)
     {
-        Object item = selections.get(selectionIndex);
-        _chooserState.updateSelectedObjects(item);
-        updateState();
+        if (selections.size() > selectionIndex) {
+            Object item = selections.get(selectionIndex);
+            _chooserState.updateSelectedObjects(item);
+            updateState();
+        }
     }
 
     private void updateState ()
@@ -431,45 +466,55 @@ public class Chooser extends AWComponent
         }
         String pattern = _chooserState.pattern();
         if (StringUtil.nullOrEmptyString(pattern)) {
-            // if blank, and we had valid object, then set it back
-            if (!_chooserState.addMode() && !_chooserState.isInvalid()) {
-                Object selectedObject = _chooserState.selectedObject();
-                if (selectedObject != null) {
-                    _chooserState.setSelectionState(selectedObject, false);
-                }
+            resetChooser();
+        }
+        else {
+            match(true);
+            validateAndRecordErrors();
+        }
+        _chooserState.setRender(true);
+        _fullMatchNeeded = false;
+    }
+
+    private void resetChooser(){
+        // if blank, and we had valid object, then set it back
+        if (!_chooserState.addMode() && !_chooserState.isInvalid()) {
+            Object selectedObject = _chooserState.selectedObject();
+            if (selectedObject != null) {
+                _chooserState.setSelectionState(selectedObject, false);
             }
+        }
+        _chooserState.setIsInvalid(false);
+        _chooserState.setAddMode(false);
+        clearValidationError(errorKey());        
+    }
+
+    private void validateAndRecordErrors ()
+    {
+        Object match = null;
+        List filterSelections = _chooserState.filteredSelections();
+        if (filterSelections != null && filterSelections.size() > 0) {
+            match = filterSelections.get(0);
+        }
+        else {
+            List matches = _chooserState.matches();
+            if (matches != null && matches.size() == 1) {
+                match = matches.get(0);
+            }
+        }
+        if (match != null) {
+            _chooserState.updateSelectedObjects(match);
             _chooserState.setIsInvalid(false);
             _chooserState.setAddMode(false);
             clearValidationError(errorKey());
         }
         else {
-            match(true);
-            Object match = null;
-            List filterSelections = _chooserState.filteredSelections();
-            if (filterSelections != null && filterSelections.size() > 0) {
-                match = filterSelections.get(0);
+            if (!_chooserState.addMode() && !_chooserState.isInvalid()) {
+                _chooserState.setSelectionState(_chooserState.selectedObject(), false);
             }
-            else {
-                List matches = _chooserState.matches();
-                if (matches != null && matches.size() == 1) {
-                    match = matches.get(0);
-                }
-            }
-            if (match != null) {
-                _chooserState.updateSelectedObjects(match);
-                _chooserState.setIsInvalid(false);
-                _chooserState.setAddMode(false);
-                clearValidationError(errorKey());
-            }
-            else {
-                if (!_chooserState.addMode() && !_chooserState.isInvalid()) {
-                     _chooserState.setSelectionState(_chooserState.selectedObject(), false);
-                }
-                _chooserState.setIsInvalid(true);
-                recordValidationError(errorKey(), noMatchFoundString(), pattern);
-            }
+            _chooserState.setIsInvalid(true);
+            recordValidationError(errorKey(), noMatchFoundString(), _chooserState.pattern());
         }
-        _chooserState.setRender(true);
     }
 
     public AWResponse matchAction ()
@@ -487,7 +532,11 @@ public class Chooser extends AWComponent
     {
         String pattern = request().formValueForKey("chsp");
         String addMode = request().formValueForKey("chadd");
+        match(fullMatch, pattern, addMode);
+    }
 
+    private void match (boolean fullMatch, String pattern, String addMode)
+    {
         _chooserState.setPattern(pattern);
         if (addMode != null) {
             _chooserState.setAddMode(true);
@@ -518,6 +567,7 @@ public class Chooser extends AWComponent
         }
 
         if (fullMatch && filteredSelectionsSize == 0) {
+            _chooserState.setLastFullMatchPattern(pattern);
             int maxLength = intValueForBinding(BindingNames.maxLength);
             maxLength = maxLength > 0 ? maxLength : MaxLength;
             List matches = selectionSource.match(pattern, maxLength);

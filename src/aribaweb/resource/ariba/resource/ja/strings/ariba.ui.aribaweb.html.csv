@@ -1,0 +1,8 @@
+Shift_JIS,,,,
+"AWBody",a001,"Please wait. An action is pending...","お待ちください。処理が順番待ちです。",""
+"AWErrorFlag",a001,"Error","エラー",""
+"AWFileUploadInternals",a001,"Error: Your request cannot be processed. Please check that file paths for all file uploads are valid.","エラー: リクエストを処理することができません。すべてのファイルのアップロードについて、ファイルのパスが正しいことを確認してください。",""
+"AWPasswordField",a001,"Warning","注意",""
+"AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","注意: Caps Lock が有効になっているので、パスワードが正しく入力されない可能性があります。",""
+"AWSubmitButton",a001,"Submit","提出",""
+"AWTextArea",a001,"Characters left","残り文字数",""

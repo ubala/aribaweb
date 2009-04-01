@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#81 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#82 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -520,6 +520,11 @@ final class AWRequestHistory extends AWBaseObject implements AWDisposable
             Log.aribaweb.debug("Attempt to forwardtrack off of request history");
         }
     }
+
+    protected List<AWPage> _getPages()
+    {
+        return _pages;
+    }
 }
 
 /**
@@ -852,6 +857,14 @@ public class AWSession extends AWBaseObject
         _characterEncoding = null;
     }
 
+    // Used for debugging purposes to force a new (unrestricted) locale on the session
+    public void _forceLocale (Locale locale)
+    {
+        setResourceManager(application().resourceManager()._resourceManagerForLocale(locale));
+        _characterEncoding = null;
+        _updatePageResourceManager(resourceManager());
+    }
+
     public Locale preferredLocale ()
     {
         AWResourceManager resourceManager = resourceManager();
@@ -1175,6 +1188,17 @@ public class AWSession extends AWBaseObject
         while (requestHistoryIterator.hasNext()) {
             AWRequestHistory currentRequestHistory = (AWRequestHistory)requestHistoryIterator.next();
             currentRequestHistory.clear();
+        }
+    }
+
+    public void _updatePageResourceManager (AWResourceManager resourceManager)
+    {
+        Iterator requestHistoryIterator = _requestHistories.values().iterator();
+        while (requestHistoryIterator.hasNext()) {
+            AWRequestHistory currentRequestHistory = (AWRequestHistory)requestHistoryIterator.next();
+            for (AWPage page : currentRequestHistory._getPages()) {
+                page.setResourceManager(resourceManager);
+            }
         }
     }
 

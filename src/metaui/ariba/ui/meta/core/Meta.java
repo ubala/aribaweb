@@ -12,13 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#35 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#37 $
 */
 package ariba.ui.meta.core;
 
 import ariba.ui.aribaweb.util.AWDebugTrace;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.ui.aribaweb.util.AWCharacterEncoding;
 import ariba.util.core.Assert;
 import ariba.util.core.Fmt;
 import ariba.util.core.ListUtil;
@@ -36,6 +37,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 /**
     Meta is the core class in MetaUI.  An instance of meta represents a "Rule Base"
@@ -67,6 +70,7 @@ public class Meta
     static final int MaxKeyDatas = 64;
     static final Object NullMarker = new Object();
     protected static final String ScopeKey = "scopeKey";
+    protected static final String DeclRule = "declRule";
 
     // PartialIndexing indexes each rule by a single (well chosen) key and evaluates
     // other parts of the selector on the index-filtered matches (generally this is a
@@ -410,7 +414,16 @@ public class Meta
     {
         Log.meta_detail.debug("Loading rule file: %s", filename);
         try {
-            String editRules = null, userRules = AWUtil.stringWithContentsOfInputStream(inputStream);
+            // String editRules = null, userRules = AWUtil.stringWithContentsOfInputStream(inputStream);
+            String editRules = null, userRules;
+            try {
+                InputStreamReader isr = new InputStreamReader(inputStream, AWCharacterEncoding.UTF8.name);
+                userRules = AWUtil.getString(isr);
+            }
+            catch (UnsupportedEncodingException unsupportedEncodingException) {
+                throw new AWGenericException(unsupportedEncodingException);
+            }
+
             // Read ruls
             int sepStart = userRules.indexOf(RuleFileDelimeterStart);
             if (sepStart != -1) {

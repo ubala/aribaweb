@@ -1,0 +1,17 @@
+GB2312,
+, This file is a of audit categories (from the logger names) to friendlier names
+
+aribaAudit, "常规"
+aribaAuditCommitNow, "常规"
+aribaAudit.admin, "管理"
+aribaAuditCommitNow.admin, "管理 (任务/文件)"
+aribaAuditCommitNow.apputil, "管理应用程序"
+aribaAuditCommitNow.sso, "SSO"
+aribaAuditCommitNow.exception, "异议"
+aribaAuditCommitNow.parameters, "参数"
+aribaAuditCommitNow.approvable, "常规"
+aribaAuditCommitNow.realmPurge, "Realm 清除"
+aribaAuditCommitNow.integration, "集成"
+aribaAuditCommitNow.reportTimeout, "报告超时"
+aribaAuditCommitNow.schemaRealmMapping, "架构 Realm 映射"
+aribaAuditCommitNow.cdsSyncVerifier, "CDS 同步验证程序"

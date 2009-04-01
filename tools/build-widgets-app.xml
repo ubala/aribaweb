@@ -25,6 +25,7 @@
 
     <property name="final.name" value="app.${ant.project.name}"/> <!-- -${version} -->
 
+    <property name="src.resource.path" value=""/>
     <property name="build.war" value="true"/>
     <condition property="war.name" value="${ant.project.name}">
         <equals arg1="${build.war}" arg2="true"/>
@@ -54,7 +55,7 @@
     <target name="copy-docroot-resources">
         <echo message="WIDGETS copy-docroot resources"/>
         <copy todir="${build.classes.dir}/docroot" failonerror="false">
-            <fileset dir="${src.dir}" includes="**/*.gif,**/*.jpg,**/*.css,**/*.js" excludes="resource/"/>
+            <fileset dir="${src.dir}" includes="**/*.gif,**/*.jpg,**/*.css,**/*.js" excludes="resource/,build/"/>
         </copy>
         <copy todir="${build.classes.dir}/docroot" failonerror="false">
             <fileset dir="${src.dir}/resource/webserver" excludes="branding/"/>

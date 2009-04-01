@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.io.File;
 
+@Localized
 public class User extends Person
 {
     public enum AccountStatus { PendingReview, Active, Suspended }
@@ -111,6 +112,8 @@ public class User extends Person
     {
         _accountStatus = AccountStatus.Active;
     }
+
+    @Action public void doIt () {}
 
     public boolean hasPermissions (List<String> permissions)
     {

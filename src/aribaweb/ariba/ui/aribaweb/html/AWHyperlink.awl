@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.awl#33 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHyperlink.awl#34 $
     </Copyright>
 
     <Overview>
@@ -102,12 +102,12 @@
             <a:IncludeContent/>\
         </a>\
     </a:If>
-<a:Else ifFalse="$isSubmitForm"/>\
+<a:Else/>\
     <!--- regular hyperlink -->\
     <a:If ifFalse="$^omitTags">\
         <a:MetaTemplateConditional>\
             <a elementId="$elementId" href="#" id="$elementId" bh="$^behavior:HL"
-                    _t="$frameName" _w="$^windowAttributes" _sf="false"
+                    _t="$frameName" _w="$^windowAttributes" _sf="$isSubmitForm"
                     onKeyPress="$^onKeyPress" onClick="$^onClick"
                     invokeAction="$invokeAction" isSender="$isSender" omitTags="$^omitTags" otherBindings="$otherBindingsValues">\
                 <a:IncludeContent/>\
@@ -122,23 +122,4 @@
     <a:Else/>\
         <a:IncludeContent/>\
     </a:If>\
-<a:Else ifFalse="$^omitTags"/>\
-    <a:MetaTemplateConditional>\
-        <!--- isSubmit: this href is *only* thing we found that works on IE, NS, and IE/Mac
-            which has proper link coloring and does not adversely affect backtracking -->\
-        <a href="#" elementId="$elementId" id="$elementId" bh="$^behavior:HL"
-                _t="$frameName" _w="$^windowAttributes"
-                onKeyPress="$^onKeyPress" onClick="$^onClick"
-                isSender="$isHiddenFieldSender" invokeAction="$invokeAction" otherBindings="$otherBindingsValues">\
-            <a:IncludeContent/>\
-        </a>\
-    <a:Else/>\
-        <a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWRemotePageWrapper.DynamicTagMarker"/>\
-        <a:GenericContainer tagName="AWRemoteLink" elementId="$elementId" href="$remoteLinkUrl">\
-            <a:IncludeContent/>\
-        <a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWRemotePageWrapper.DynamicTagMarker"/>\
-        </a:GenericContainer>\
-    </a:MetaTemplateConditional>\
-<a:Else/>\
-    <a:IncludeContent/>\
 </a:If>\

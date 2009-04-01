@@ -1,0 +1,3 @@
+Cp1252,,
+,,
+MalformedExpression,"Si è verificato un errore di analisi vicino al token ""{0}"" alla voce d''ordine ""{1}"", nella colonna ""{2}"".", "An syntactic error has occured while parsing the expression"
