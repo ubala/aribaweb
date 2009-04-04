@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/DetailDataSource.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/DetailDataSource.java#5 $
 */
 package ariba.ui.meta.persistence;
 
@@ -21,7 +21,10 @@ import ariba.ui.table.AWTEntity;
 import ariba.ui.meta.core.UIMeta;
 import ariba.ui.meta.core.Context;
 import ariba.ui.meta.core.ObjectMeta;
+import ariba.ui.aribaweb.core.AWChecksum;
 import ariba.util.fieldvalue.FieldPath;
+import ariba.util.fieldvalue.RelationshipField;
+import ariba.util.fieldvalue.OrderedList;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -30,6 +33,7 @@ public class DetailDataSource extends AWTDataSource
 {
     Object _parentObject;
     FieldPath _detailFieldPath;
+    long _prevCRC = 0;
 
     public DetailDataSource (Object parent, String keyPath)
     {
@@ -47,9 +51,28 @@ public class DetailDataSource extends AWTDataSource
         _parentObject = parentObject;
     }
 
+    public boolean hasChanges ()
+    {
+        long crc = -1;
+        if (_parentObject != null) {
+            Object list = _detailFieldPath.getFieldValue(_parentObject);
+            crc = (list == null) ? -1 : AWChecksum.crc32HashOrderedList(1, list);
+            if (crc == 0) crc = -2;
+        }
+
+        if (crc != _prevCRC) {
+            _prevCRC = crc;
+            return true;
+        }
+
+        return false;
+    }
+
     public List fetchObjects()
     {
-        return (_parentObject != null) ? (List)_detailFieldPath.getFieldValue(_parentObject) : null;
+        if (_parentObject == null) return null;
+        Object list = _detailFieldPath.getFieldValue(_parentObject);
+        return (list == null) ? null : OrderedList.get(list).toList(list);
     }
 
     public AWTEntity entity()
@@ -67,29 +90,17 @@ public class DetailDataSource extends AWTDataSource
         return (String)context.propertyForKey(ObjectMeta.KeyElementType);
     }
 
-    List listForUpdate ()
-    {
-        // make sure we're updating the right instance...
-        Object parent = _parentObject; // ObjectContext.get().merge(_parentObject);
-        List list = (List)_detailFieldPath.getFieldValue(parent);
-        if (list == null) {
-            list = new ArrayList();
-            _detailFieldPath.setFieldValue(parent, list);
-        }
-        return list;
-    }
-
     public Object insert()
     {
         if (_parentObject == null) return null;
         Object instance = ObjectContext.get().create(detailClassName());
-        listForUpdate().add(instance);
+        RelationshipField.addTo(_parentObject, _detailFieldPath, instance);
         return instance;
     }
 
     public void delete(Object object)
     {
         if (_parentObject == null) return;
-        listForUpdate().remove(object);
+        RelationshipField.removeFrom(_parentObject, _detailFieldPath, object);
     }
 }

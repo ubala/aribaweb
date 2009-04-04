@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QueryGenerator.java#3 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QueryGenerator.java#4 $
 */
 package ariba.ui.meta.persistence;
 
 import ariba.util.core.Fmt;
 import ariba.util.core.Assert;
+import ariba.util.core.ClassUtil;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -33,15 +34,17 @@ public class QueryGenerator
     Map<String, Object> _values = new HashMap();
     int _nextValueId = 0;
     StringBuffer _whereClause = new StringBuffer();
+    TypeProvider _typeProvider;
 
     public interface Visitor
     {
         void generate (QueryGenerator generator);
     }
 
-    public QueryGenerator (QuerySpecification spec)
+    public QueryGenerator (QuerySpecification spec, TypeProvider typeProvider)
     {
         _spec = spec;
+        _typeProvider = typeProvider;
     }
 
     public String generate ()
@@ -136,7 +139,12 @@ public class QueryGenerator
             } else {
                 buf.append(", ");
             }
-            buf.append(Fmt.S((ordering.isCaseInsensitive() ? "LOWER(%s)" : "%s"), formatKeyPath(ordering.getKey())));
+            TypeProvider.Info type = _typeProvider.infoForKeyPath(ordering.getKey());
+            Class typeClass = type != null ? type.typeClass() : null;
+            boolean useCaseInsensitive = ordering.isCaseInsensitive()
+                                                && typeClass != null
+                                                && ClassUtil.instanceOf(typeClass, String.class);
+            buf.append(Fmt.S((useCaseInsensitive ? "LOWER(%s)" : "%s"), formatKeyPath(ordering.getKey())));
             buf.append(ordering.isAscending() ? " asc" : " desc");
         }
     }

@@ -3,7 +3,6 @@ package model
 
 import ariba.appcore.*
 import ariba.ui.meta.annotations.*
-import ariba.util.core.*
 import ariba.ui.meta.annotations.Property.*
 import ariba.ui.meta.persistence.*
 import ariba.appcore.annotations.*
@@ -31,8 +30,14 @@ class Issue
    @ManyToOne Category category
 
    @OneToMany @SearchableComponent
-   List <Note> notes = ListUtil.list()
+   Set <Note> notes
 
+   void addToNotes (Note note)
+   {
+       if (!notes) notes = []
+       notes += note
+   }
+  
    void setCategory (Category cat)
    {
        category = cat

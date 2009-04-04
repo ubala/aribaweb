@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldInfo.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/FieldInfo.java#3 $
 */
 package ariba.util.fieldvalue;
 
@@ -80,6 +80,11 @@ public class FieldInfo
                 if (f.isPublic()) result.add(f);
             }
             return result;
+        }
+
+        FieldInfo infoForField (String name)
+        {
+            return _infoByName.get(name);
         }
 
         public Class getCls ()

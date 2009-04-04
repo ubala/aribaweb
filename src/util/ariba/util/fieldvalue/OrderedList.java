@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/OrderedList.java#3 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/OrderedList.java#4 $
 */
 
 package ariba.util.fieldvalue;
@@ -21,8 +21,11 @@ import ariba.util.core.ClassExtension;
 import ariba.util.core.ClassExtensionRegistry;
 import ariba.util.core.FastStringBuffer;
 import ariba.util.core.WrapperRuntimeException;
+import ariba.util.core.ListUtil;
+
 import java.util.List;
 import java.util.Iterator;
+import java.util.Collection;
 
 /**
 
@@ -53,6 +56,7 @@ abstract public class OrderedList extends ClassExtension
         short shortArray[] = {};
 
         registerClassExtension(ariba.util.core.Vector.class, new OrderedList_AribaVector());
+        registerClassExtension(Collection.class, new OrderedList_Collection());
         registerClassExtension(List.class, new OrderedList_List());
         registerClassExtension(java.util.Vector.class, new OrderedList_JavaVector());
 
@@ -305,4 +309,15 @@ abstract public class OrderedList extends ClassExtension
         stringBuffer.append("]");
         return stringBuffer.toString();
     }
+
+    public List toList (Object receiver)
+    {
+        OrderedList orderedList = OrderedList.get(receiver);
+        int count = orderedList.size(receiver);
+        List result = ListUtil.list(count);
+        for (int i=0; i<count; i++) {
+            result.add(orderedList.elementAt(receiver, i));
+        }
+        return result;
+    }    
 }

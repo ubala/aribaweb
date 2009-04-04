@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/Loader.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/Loader.java#3 $
 */
 package ariba.ui.meta.persistence;
 
@@ -27,6 +27,7 @@ import ariba.util.io.CSVReader;
 import ariba.util.i18n.I18NUtil;
 import ariba.util.fieldvalue.FieldValue;
 import ariba.util.fieldvalue.FieldPath;
+import ariba.util.fieldvalue.RelationshipField;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWFormatting;
@@ -321,15 +322,7 @@ public class Loader
             void assignValue (Object obj, Object val)
             {
                 if (_elementType != null) {
-                    // Todo: use proper protocol for adding to a to-many property
-                    Collection coll = (Collection)_fieldPath.getFieldValue(obj);
-                    if (coll == null) {
-                        coll = ListUtil.list(); // ToDo: deal with sets!
-                        _fieldPath.setFieldValue(obj, coll);
-                    }
-                    if (!coll.contains(val)) {
-                        coll.add(val);
-                    }
+                    RelationshipField.addTo(obj, _fieldPath, val);
                 } else {
                     _fieldPath.setFieldValue(obj, val);
                 }

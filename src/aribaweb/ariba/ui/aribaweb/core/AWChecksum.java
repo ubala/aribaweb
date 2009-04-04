@@ -12,12 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWChecksum.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWChecksum.java#14 $
 */
 
 package ariba.ui.aribaweb.core;
 
+import ariba.util.fieldvalue.OrderedList;
+
 import java.util.List;
+import java.util.Iterator;
 
 public class AWChecksum
 {
@@ -248,6 +251,21 @@ public class AWChecksum
 
         for (int i=0, c=list.size(); i < c; i++) {
             Object o = list.get(i);
+            if (o != null) {
+                crc = crc32(crc, o.hashCode());
+            } else {
+                crc = crc32(crc, 2);
+            }
+        }
+        return crc;
+    }
+
+    public static long crc32HashOrderedList (long crc, Object list)
+    {
+        if (list instanceof List) return crc32HashList(crc, (List)list);
+        Iterator iter = OrderedList.get(list).elements(list);
+        while (iter.hasNext()) {
+            Object o = iter.next();
             if (o != null) {
                 crc = crc32(crc, o.hashCode());
             } else {

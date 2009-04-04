@@ -87,6 +87,12 @@
         <fileset id="app.war.jars" dir="${build.jars.dir}">
             <include name="${jar.name}"/>
         </fileset>
+
+        <!-- check for any local libs -->
+        <fileset id="app.ext.jars" dir="${src.dir}" erroronmissingdir="false">
+            <include name="lib/*.jar"/>
+            <include name="lib/*.zip"/>
+        </fileset>
     </target>
 
     <target name="build-and-run" depends="init, jar, webapp, tomcat"

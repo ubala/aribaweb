@@ -1,5 +1,19 @@
-New in Version 5.0RC3 - PREVIEW (3/2009)
-----------------------------------------
+New in Version 5.0RC3 - PREVIEW 2 (4/1//2009)
+---------------------------------------------
+
+- Database Mapping fixes / enhancements
+    - Correct exception on Create of objects with nullable=false fields
+        - Hibernate commits these on persist().  We now defer persist() until just pre-save()
+        - @Column(nullable=false) now implies @Trait.Required (so we catch errors in UI pre-save).
+    - Support for to-many properties of type Set (java.util.Set)
+        - Sets now supported just like java.util.List
+        - AppCore examples updated to use Sets in several places
+    - Ability for domain class to intervene in update to collection properties
+        - Domain classes can implement "addTo<PropName>(val)" and/or "removeFrom<PropName>(val)"
+          to take over add/remove on a to-many Collection property
+    - Project templates for Database apps now consistently use java.util.Date instead of
+      ariba.util.core.Date
+        - Eliminates issue with JPA exception if Date fields are marked @Temporal
 
 - Localization support
     - Distribution now includes localized resources for aribaweb and widgets frameworks
@@ -51,6 +65,7 @@ New in Version 5.0RC3 - PREVIEW (3/2009)
    - AWReload: avoid loop when dynamic source recompilation fails to yield expected new .class file
    - Hitting return incorrectly submitting forms that don't have explicit actions
    - PulldownButton shouldn't show menu on click when disabled=$true
+   - Fix broken look of "More..." pseudo-tab (shown when more top level tabs than will fit)
 
 - Enhanced examples
     - MasterDetail example now demonstrates 1) adding a tab via metaui module,

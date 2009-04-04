@@ -11,6 +11,8 @@ import ariba.ui.widgets.ChooserState;
 import ariba.ui.widgets.ChooserSelectionState;
 import ariba.util.fieldvalue.FieldValue;
 import ariba.util.fieldvalue.FieldPath;
+import ariba.util.fieldvalue.OrderedList;
+import ariba.util.fieldvalue.RelationshipField;
 import ariba.util.core.Assert;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.ListUtil;
@@ -22,6 +24,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.text.ParseException;
 
 /*
@@ -38,7 +42,7 @@ import java.text.ParseException;
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.java#6 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.java#7 $
 */
 public class GenericChooser extends AWComponent implements ChooserSelectionState
 {
@@ -155,13 +159,11 @@ public class GenericChooser extends AWComponent implements ChooserSelectionState
         if (selected == isSelected(selection)) return;
 
         if (_isMulti) {
-            // ToDo:  need extensible protocol for add/remove
-            // -- should we replace array? call add/remove methods? update in place?
             if (selected) {
-                selectedObjects().add(selection);
+                RelationshipField.addTo(_object, _keyPath, selection);
             }
             else {
-                selectedObjects().remove(selection);
+                RelationshipField.removeFrom(_object, _keyPath, selection);
             }
         }
         else {
@@ -183,10 +185,9 @@ public class GenericChooser extends AWComponent implements ChooserSelectionState
     {
         Object selection = selection();
         if (_isMulti && selection == null) {
-            selection = new ArrayList();
-            setSelection(selection);
+            selection = Collections.EMPTY_LIST;
         }
-        return (_isMulti) ? (List)selection : Arrays.asList(selection);
+        return (_isMulti) ? OrderedList.get(selection).toList(selection) : Arrays.asList(selection);
     }
 
     public boolean isSelected (Object selection)

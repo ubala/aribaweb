@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#3 $
+    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#5 $
 */
 package ariba.ui.meta.jpa;
 
@@ -34,12 +34,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.IdentityHashMap;
 
 abstract public class JPAContext extends ObjectContext
 {
     static List<QueryProcessor> _queryProcessors = ListUtil.list();
     EntityManager _entityManager;
     Map<Object, Object> _updatedObjects = new HashMap();
+    Map<Object, Boolean> _pendingPersists = new IdentityHashMap<Object, Boolean>();
+    boolean _deferPersists = true;
 
     // register us as the context provider
     private static boolean _DidInit = false;
@@ -89,7 +92,8 @@ abstract public class JPAContext extends ObjectContext
 
         public List executeQuery (ObjectContext context, QuerySpecification spec)
         {
-            QueryGenerator generator = new QueryGenerator(spec);
+
+            QueryGenerator generator = new QueryGenerator(spec, context.typeProvider(spec.getEntityName()));
             String queryString = generator.generate();
             Map queryParams = generator.queryParams();
 
@@ -138,13 +142,41 @@ abstract public class JPAContext extends ObjectContext
 
     // <T> T getReference(java.lang.Class<T> tClass, Object o);
 
+    public void recordForInsert (Object o)
+    {
+        if (_deferPersists) {
+            _pendingPersists.put(o, true);
+        }
+        else {
+            persist(o);
+        }
+    }
+
     public void save()
     {
+        _validateChanges();
+        _flushPendingPersists();
         EntityTransaction tx = _entityManager.getTransaction();
         tx.begin();
         _entityManager.flush();
         tx.commit();
         notifyGroupOfSave();
+    }
+
+    void _validateChanges ()
+    {
+
+    }
+
+    void _flushPendingPersists ()
+    {
+        Iterator iter = _pendingPersists.keySet().iterator();
+        // If we throw on a particular object, it and the remainder of unpersisted objects will remain
+        while (iter.hasNext()) {
+            Object o = iter.next();
+            persist(o);
+            iter.remove();
+        }
     }
 
     // void revert();
