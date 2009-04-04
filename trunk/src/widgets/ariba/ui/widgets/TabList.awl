@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#7 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#8 $
     </Copyright>
 
     <Overview>
@@ -143,6 +143,7 @@
                         </a:For>\
                         <a:If ifTrue="$hasHiddenTabs">
                             <a:SetValue allTabsMenuId="$requestContext.nextElementId"/>
+                            <td class="lastTab tab"><div class="tabLeft"></div></td>\
                             <td>
                                 <div class="lastTab tab">\
                                     <w:PopupMenuLink menuId="$allTabsMenuId"
@@ -162,6 +163,7 @@
                                     </a:For>
                                 </w:PopupMenu>
                             </td>
+                            <td class="lastTab tab"><div class="tabRight"></div></td>\                            
                         </a:If>
                     </tr>
                 </table>

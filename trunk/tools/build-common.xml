@@ -274,6 +274,7 @@
     <fileset id="groovy.support.jars" dir="." excludes="**"/>
     <fileset id="merge.jars" dir="." excludes="**"/>
     <fileset id="app.war.jars" dir="." excludes="**"/>
+    <fileset id="app.ext.jars" dir="." excludes="**"/>
     <fileset id="module.libs" dir="." excludes="**"/>
     <fileset id="module.libs2" dir="." excludes="**"/>
     <fileset id="module.libs3" dir="." excludes="**"/>
@@ -667,10 +668,12 @@
             <resources refid="war.jars"/>
             <resources refid="groovy.support.jars"/>
             <resources refid="app.war.jars"/>
+            <resources refid="app.ext.jars"/>
             <resources refid="module.libs"/>
             <resources refid="module.libs2"/>
             <resources refid="module.libs3"/>
         </resources>
+
         <pathconvert refid="war.all.libs" property="war.all.libs.path" pathsep=";"/>
 
         <groovy>

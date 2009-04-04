@@ -12,36 +12,23 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/OrderedList_List.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/OrderedList_List.java#3 $
 */
 
 package ariba.util.fieldvalue;
 
+import ariba.util.core.ListUtil;
+
 import java.util.List;
 import java.util.ArrayList;
 
-public class OrderedList_List extends OrderedList
+public class OrderedList_List extends OrderedList_Collection
 {
     // ** Thread Safety Considerations: no state here -- no locking required.
-
-    public void addElement (Object receiver, Object element)
-    {
-        ((List)receiver).add(element);
-    }
-
-    public boolean contains (Object receiver, Object targetElement)
-    {
-        return ((List)receiver).contains(targetElement);
-    }
 
     public Object elementAt (Object receiver, int elementIndex)
     {
         return ((List)receiver).get(elementIndex);
-    }
-
-    public java.util.Iterator elements (Object receiver)
-    {
-        return ((List)receiver).iterator();
     }
 
     public Object firstElement (Object receiver)
@@ -56,17 +43,12 @@ public class OrderedList_List extends OrderedList
 
     public int indexOfIdentical (Object receiver, Object targetElement)
     {
-        throw new RuntimeException("Not supported");
+        return ListUtil.indexOfIdentical(((List)receiver), targetElement);
     }
 
     public void insertElementAt (Object receiver, Object element, int elementIndex)
     {
         ((List)receiver).add(elementIndex, element);
-    }
-
-    public boolean isEmpty (Object receiver)
-    {
-        return ((List)receiver).isEmpty();
     }
 
     public Object lastElement (Object receiver)
@@ -75,24 +57,9 @@ public class OrderedList_List extends OrderedList
         return List.get(List.size());
     }
 
-    public void removeAllElements (Object receiver)
-    {
-        ((List)receiver).clear();
-    }
-
     public void setElementAt (Object receiver, Object element, int elementIndex)
     {
         ((List)receiver).set(elementIndex, element);
-    }
-
-    public int size (Object receiver)
-    {
-        return ((List)receiver).size();
-    }
-
-    public String toString (Object receiver)
-    {
-        return receiver.toString();
     }
 
     public Object sublist (Object receiver, int beginIndex, int endIndex)
@@ -114,5 +81,10 @@ public class OrderedList_List extends OrderedList
     public Object mutableInstance (Object receiver)
     {
         return new ArrayList();
+    }
+
+    public List toList (Object receiver)
+    {
+        return (List)receiver;
     }
 }

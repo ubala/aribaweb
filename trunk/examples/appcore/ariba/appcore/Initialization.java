@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Initialization.java#9 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Initialization.java#10 $
 */
 package ariba.appcore;
 
@@ -354,13 +354,13 @@ public class Initialization
         ObjectContext ctx = ObjectContext.get();
 
         // Permissions for every Entity
-        Map<String, List<Permission>> permissionsByPackage = MapUtil.map();
+        Map<String, Set<Permission>> permissionsByPackage = MapUtil.map();
         for (String className : PersistenceMeta.getEntityClasses()) {
             // get list for package
             String pkg = AWUtil.stripLastComponent(className, '.');
-            List<Permission> permissionsForClass = permissionsByPackage.get(pkg);
+            Set<Permission> permissionsForClass = permissionsByPackage.get(pkg);
             if (permissionsForClass == null) {
-                permissionsForClass = ListUtil.list();
+                permissionsForClass = SetUtil.set();
                 permissionsByPackage.put(pkg,permissionsForClass);
             }
 
@@ -375,7 +375,7 @@ public class Initialization
 
         // Groups for every package
         List<Group>pkgGroups = ListUtil.list();
-        for (Map.Entry<String, List<Permission>> e : permissionsByPackage.entrySet()) {
+        for (Map.Entry<String, Set<Permission>> e : permissionsByPackage.entrySet()) {
             Group group = ctx.create(Group.class);
             group.setName(Fmt.S("%s:ALL", e.getKey()));
             group.setPermissions(e.getValue());

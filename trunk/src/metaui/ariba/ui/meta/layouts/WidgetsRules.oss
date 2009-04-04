@@ -110,7 +110,7 @@ field {
         }
     }
 
-    type=java.util.List {
+    type=(java.util.List, java.util.Set) {
         @trait=enum editable {
             component:GenericChooser;
             bindings:{

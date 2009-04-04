@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Principal.java#5 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Principal.java#6 $
 */
 package ariba.appcore;
 
@@ -27,8 +27,11 @@ import javax.persistence.Transient;
 
 import ariba.ui.meta.annotations.Trait;
 import ariba.util.core.ListUtil;
+import ariba.util.core.SetUtil;
 
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 public class Principal
@@ -40,7 +43,7 @@ public class Principal
     String name;
 
     @ManyToMany
-    List<Permission> permissions;
+    Set<Permission> permissions;
 
     @ManyToMany
     List<Group> memberOf;
@@ -72,20 +75,20 @@ public class Principal
         this.name = name;
     }
 
-    public List<Permission> getPermissions ()
+    public Set<Permission> getPermissions ()
     {
         return permissions;
     }
 
-    public void setPermissions (List<Permission> permissions)
+    public void setPermissions (Set<Permission> permissions)
     {
         this.permissions = permissions;
     }
 
     public void addToPermissions (Permission p)
     {
-        if (permissions == null) permissions = ListUtil.list();
-        ListUtil.addElementIfAbsent(permissions, p);
+        if (permissions == null) permissions = new HashSet();
+        permissions.add(p);
     }
 
     public PermissionSet permissionSet ()
@@ -93,7 +96,7 @@ public class Principal
         // Todo: should have cache by memberOf list (most entities have no local permission and share memberOf list)
         if (permissionSet == null || permissionSet.isStale()) {
             permissionSet = PermissionSet.permissionSetForGroups(memberOf);
-            if (!ListUtil.nullOrEmptyList(permissions)) permissionSet = new PermissionSet(getPermissions(), permissionSet);
+            if (!SetUtil.nullOrEmptySet(permissions)) permissionSet = new PermissionSet(getPermissions(), permissionSet);
         }
         return permissionSet;
     }

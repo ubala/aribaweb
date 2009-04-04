@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.Embeddable;
 import javax.persistence.OneToMany;
 import javax.persistence.ManyToMany;
+import javax.persistence.Column;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
@@ -64,5 +65,11 @@ public class Initialization
             }
         });
 
+        UIMeta.getInstance().registerAnnotationListener(Column.class, new ObjectMeta.AnnotationProcessor() {
+            public void processAnnotation(Annotation annotation, AnnotatedElement prop, List predicateList, Map propertyMap, boolean isAction)
+            {
+                if (!((Column)annotation).nullable()) ObjectMeta.addTrait("required", propertyMap);
+            }
+        });
     }
 }

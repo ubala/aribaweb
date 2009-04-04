@@ -5,8 +5,6 @@ package @ModelPkg@;
 
 import ariba.appcore.*;
 import ariba.ui.meta.annotations.*;
-import ariba.util.core.*;
-import ariba.util.core.Date;
 import ariba.ui.meta.annotations.Property.*;
 import ariba.ui.meta.persistence.*;
 import ariba.appcore.annotations.*;

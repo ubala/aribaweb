@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#8 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#10 $
 */
 package ariba.ui.meta.persistence;
 
@@ -20,6 +20,7 @@ import ariba.util.core.ClassUtil;
 import ariba.util.core.Assert;
 import ariba.util.core.ListUtil;
 import ariba.ui.aribaweb.util.AWUtil;
+import ariba.ui.meta.core.UIMeta;
 
 import java.util.List;
 import java.util.Map;
@@ -58,8 +59,19 @@ public abstract class ObjectContext
     {
         T o = (T)ClassUtil.newInstance(tClass);
         Assert.that(o != null, "Unable to create instance of class: %s", tClass.getName());
-        persist(o);
+        recordForInsert(o);
         return o;
+    }
+
+    /**
+     * Records object for insert on next save().  Some contexts may persist here, others
+     * may defer the persist until just pre-save, to give the newly created object a change
+     * to be fully initialized prior to persist()
+     * @param o object instance to be inserted
+     */
+    public void recordForInsert (Object o)
+    {
+        persist(o);
     }
 
     /**
@@ -110,6 +122,11 @@ public abstract class ObjectContext
     }
 
     public abstract QueryProcessor processorForQuery (QuerySpecification spec);
+
+    public TypeProvider typeProvider (String entityName)
+    {
+        return new TypeProvider(UIMeta.getInstance(), entityName);
+    }
 
     /*
         ThreadLocal context binding
