@@ -1,2 +1,7 @@
 Cp1251,,,,
 "AWVErrorFlag",1,"Please correct the fields marked in red","Исправьте поля, отмеченные красным цветом",""
+"AWVFormatterFactory",1,"Value required","Введите значение",""
+"FormRow",a001,"Required Field","Обязательное поле",""
+"GenericChooser",a001,"(no selection)","(не выбрано)",""
+"GenericChooser",a002,"(no selection)","(не выбрано)",""
+"GenericChooser",a003,"(no selection)","(не выбрано)",""

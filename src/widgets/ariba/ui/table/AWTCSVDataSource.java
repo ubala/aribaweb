@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTCSVDataSource.java#20 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTCSVDataSource.java#21 $
 */
 package ariba.ui.table;
 
@@ -37,6 +37,7 @@ import ariba.util.io.CSVConsumer;
 import ariba.util.io.CSVReader;
 import ariba.util.i18n.I18NUtil;
 import ariba.util.formatter.DateFormatter;
+import ariba.util.formatter.BigDecimalFormatter;
 import ariba.util.fieldvalue.FieldValue;
 
 import java.io.File;
@@ -55,6 +56,7 @@ public final class AWTCSVDataSource extends AWTDataSource implements CSVConsumer
     protected Entity _entity = new Entity();
     ParsePosition _parsePosition = new ParsePosition(0);
     static NumberFormat _NumberFormatter = NumberFormat.getNumberInstance(Locale.US);
+    static BigDecimalFormatter _BigDecimalFormatter = new BigDecimalFormatter();
     static DateFormatter _DateFormatter = new DateFormatter();
     protected static final Class _NullMarker = AWTCSVDataSource.class;
 
@@ -264,7 +266,14 @@ protected Entity (List keys, List classes)
         if (incompleteParse(stringVal)) {
             obj = null;
         }
-        else if (!(obj instanceof Double || obj instanceof Float || obj instanceof Integer)) {
+        else if (obj instanceof Double || obj instanceof Float) {
+            try {
+                obj = _BigDecimalFormatter.parse(stringVal);
+            } catch (ParseException e) {
+                // swallow
+            }
+        }
+        else if (!(obj instanceof Integer)) {
             obj = Constants.getInteger(((Number)obj).intValue());
         }
 

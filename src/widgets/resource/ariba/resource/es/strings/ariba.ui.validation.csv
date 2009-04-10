@@ -1,2 +1,7 @@
 Cp1252,,,,
 "AWVErrorFlag",1,"Please correct the fields marked in red","Corrija los campos marcados con rojo",""
+"AWVFormatterFactory",1,"Value required","Valor necesario",""
+"FormRow",a001,"Required Field","Campo necesario",""
+"GenericChooser",a001,"(no selection)","(sin selección)",""
+"GenericChooser",a002,"(no selection)","(sin selección)",""
+"GenericChooser",a003,"(no selection)","(sin selección)",""

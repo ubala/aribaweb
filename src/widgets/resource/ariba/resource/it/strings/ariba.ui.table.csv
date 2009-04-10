@@ -28,5 +28,7 @@ Cp1252,,,,
 "AWTPivotConfigurationPanel",a004,"Column Attributes","Attributi colonne",""
 "AWTPivotConfigurationPanel",a005,"Detail Attributes","Attributi dettagli",""
 "AWTPivotConfigurationPanel",a006,"Hidden Attributes","Attributi nascosti",""
+"AWTRowAttributeExpandoColumnRenderer",a001,"Less...","Comprimi...",""
+"AWTRowAttributeExpandoColumnRenderer",a002,"More...","Espandi...",""
 "AWTScrollTableWrapper",a001,"Retrieving data...","Recupero dati in corso...",""
 "AWTSortHeading",a001,"Click to reverse the sorting order for this column","Fare clic per invertire l'ordine di questa colonna",""

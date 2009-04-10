@@ -12,14 +12,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWMonitorStats.java#15 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWMonitorStats.java#16 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWBaseObject;
 import ariba.ui.aribaweb.util.Log;
+import ariba.util.core.ListUtil;
+import ariba.util.core.MapUtil;
+import ariba.util.core.NamedValue;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 // subclassed by AWWOMonitorStats
 public class AWMonitorStats extends AWBaseObject
@@ -33,6 +38,7 @@ public class AWMonitorStats extends AWBaseObject
     private int _totalRequestsServed;
     private int _terminatedSessionCount;
     private final Date _upSince;
+    private Map<Object,Integer> _activeSessionCountPerBucket = MapUtil.map();
 
     public AWMonitorStats ()
     {
@@ -59,26 +65,62 @@ public class AWMonitorStats extends AWBaseObject
         _totalSessionsServed++;
     }
 
+
+    public synchronized void incrementActiveSessionCount (AWSession session)
+    {
+        incrementActiveSessionCount();
+        incrementSessionCount(session,1);
+    }
+
     public synchronized void decrementActiveSessionCount ()
     {
         Log.aribaweb_monitor_sessionCount.debug("--- decrement active count");
         _activeSessionCount--;
     }
 
-    public synchronized void incrementMarkedForTerminationSessionCount ()
+    public synchronized void decrementActiveSessionCount (AWSession session)
+    {
+        decrementActiveSessionCount();
+        incrementSessionCount(session,-1);
+    }
+
+
+    public synchronized void incrementMarkedForTerminationSessionCount (AWSession session)
     {
         Log.aribaweb_monitor_sessionCount.debug("--- increment terminate count");
         Log.logStack(Log.aribaweb_shutdown);
 
+        incrementSessionCount(session,-1);
+
         _terminatedSessionCount++;
     }
 
-    public synchronized void decrementMarkedForTerminationSessionCount ()
+    public synchronized void decrementMarkedForTerminationSessionCount (AWSession session)
     {
         Log.aribaweb_monitor_sessionCount.debug("--- decrement terminate count");
         Log.logStack(Log.aribaweb_shutdown);
 
+        incrementSessionCount(session, 1);
+
         _terminatedSessionCount--;
+    }
+
+    private void incrementSessionCount (AWSession session, int increment)
+    {
+        if (session == null) {
+            return;
+        }
+        Object bucket = session.monitorBucket();
+        if (bucket == null) {
+            return;
+        }
+        Integer count = _activeSessionCountPerBucket.get(bucket);
+        if (count == null) {
+            _activeSessionCountPerBucket.put(bucket, increment);
+        }
+        else {
+            _activeSessionCountPerBucket.put(bucket, count+increment);
+        }
     }
 
     public synchronized void incrementTotalRequestsServed ()
@@ -122,6 +164,17 @@ public class AWMonitorStats extends AWBaseObject
     public int activeSessionCount ()
     {
         return _activeSessionCount - _terminatedSessionCount;
+    }
+
+    public synchronized List<NamedValue> activeSessionCountBuckets ()
+    {
+        List<NamedValue> result = ListUtil.list();
+        for (Object bucket : _activeSessionCountPerBucket.keySet()) {
+            result.add(new NamedValue(bucket == null ? "null" : bucket.toString(),
+                                      _activeSessionCountPerBucket.get(bucket)));
+        }
+
+        return result;
     }
 
     public int totalSessionsServed ()

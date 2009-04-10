@@ -1,6 +1,7 @@
 KS_C_5601-1987,,,,
-"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","이 기능을 사용하려면 이 사이트에서 창 팝업을 사용할 수 있도록 설정하십시오.",""
 "AWBaseRequest",1,"Uploaded %s KB of %s KB...","%sKB/%sKB 업로드됨...","Appears in file upload panel"
 "AWComponentActionRequestHandler",1,"Waiting for previous request to complete ...","이전 요청이 완료되기를 기다리는 중입니다...","Appears in page loading status panel"
 "AWComponentActionRequestHandler",2,"Processing request ...","요청을 처리하는 중...","Appears in page loading status panel"
+"AWErrorInfo",1,"Unknown Error","알 수 없는 오류",""
 "AWLazyDivInternals",a001,"Loading...","로드 중...",""
+"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","이 기능을 사용하려면 이 사이트에서 창 팝업을 사용할 수 있도록 설정하십시오.",""

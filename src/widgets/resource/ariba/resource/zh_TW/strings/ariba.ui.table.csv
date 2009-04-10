@@ -28,5 +28,7 @@ Big5,,,,
 "AWTPivotConfigurationPanel",a004,"Column Attributes","欄屬性",""
 "AWTPivotConfigurationPanel",a005,"Detail Attributes","細節屬性",""
 "AWTPivotConfigurationPanel",a006,"Hidden Attributes","隱藏屬性",""
+"AWTRowAttributeExpandoColumnRenderer",a001,"Less...","精簡檢視...",""
+"AWTRowAttributeExpandoColumnRenderer",a002,"More...","更多...",""
 "AWTScrollTableWrapper",a001,"Retrieving data...","正在擷取資料...",""
 "AWTSortHeading",a001,"Click to reverse the sorting order for this column","按一下以反轉此欄的排序順序",""

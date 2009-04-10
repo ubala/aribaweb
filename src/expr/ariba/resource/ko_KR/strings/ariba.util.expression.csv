@@ -1,3 +1,0 @@
-KS_C_5601-1987,,
-,,
-MalformedExpression,"라인 ""{1}"", 열 ""{2}""의 토큰 ""{0}"" 근처에서 구문 분석 오류가 발생했습니다.", "An syntactic error has occured while parsing the expression"

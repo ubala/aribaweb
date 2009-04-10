@@ -1,8 +1,8 @@
 Cp1252,,,,
 "AWBody",a001,"Please wait. An action is pending...","Action en attente...Veuillez patienter.",""
 "AWErrorFlag",a001,"Error","Erreur",""
+"AWFileUploadInternals",a001,"Error: Your request cannot be processed. Please check that file paths for all file uploads are valid.","Erreur : Impossible de traiter votre demande. Veuillez vérifier que les chemins de téléchargement des fichiers sont valides.",""
 "AWPasswordField",a001,"Warning","Avertissement",""
-"AWPasswordField",a002,"Warning: Caps Lock is on.  This may cause you to enter your password incorrectly.","Avertissement : le verrouillage des majuscules est activé. Cela peut entraîner une saisie incorrecte de votre mot de passe.",""
+"AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","Avertissement : Le verrouillage des majuscules est activé. Cela peut entraîner une saisie incorrecte de votre mot de passe.",""
 "AWSubmitButton",a001,"Submit","Soumettre",""
-"AWFileUploadInternals","a001","Error: Your request cannot be processed.  Please check that file paths for all file uploads are valid.","Erreur : impossible de traiter votre demande. Veuillez vérifier que les chemins des téléchargements de fichiers sont valides.",""
-"AWTextArea","a001","Characters left","Nbre de caractères restant",""
+"AWTextArea",a001,"Characters left","Nbre de caractères restant",""

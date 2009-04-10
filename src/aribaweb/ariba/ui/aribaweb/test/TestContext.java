@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#12 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#13 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -27,6 +27,7 @@ import ariba.util.core.MapUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.i18n.I18NUtil;
 
+import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -125,8 +126,19 @@ public class TestContext
     
     static public TestContext getTestContext (AWRequestContext requestContext)
     {
-        AWSession session = requestContext.session(false);
-        return getTestContext(session);
+        // Don't call requestContext.session(false) here; that will attempt to checkout the session
+        // which could block if the session is in use by another thread, e.g., if this is a progressCheck request.
+        // ProgressCheck requests aren't "supposed" to be assoicated with the session (they take the session ID as
+        // query parameter awpcid instead) but in the case of cookie session tracking they have the session
+        // cookie anyway since it seems impossible to suppress that...
+        HttpSession httpSession = requestContext.existingHttpSession();
+        if (httpSession != null) {
+            AWSession session = AWSession.session(httpSession);
+            if (session != null) {
+                return getTestContext(session);
+            }
+        }
+        return null;
     }
 
     static public TestContext getTestContext (AWSession session)

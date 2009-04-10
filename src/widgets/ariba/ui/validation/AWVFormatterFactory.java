@@ -12,14 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#27 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#28 $
 */
 package ariba.ui.validation;
 
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWPage;
 import ariba.ui.aribaweb.core.AWSession;
-import ariba.ui.aribaweb.core.AWLocal;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.util.AWFormatter;
 import ariba.ui.aribaweb.util.AWFormatting;
@@ -30,6 +29,7 @@ import ariba.util.core.FastStringBuffer;
 import ariba.util.core.Gridtable;
 import ariba.util.core.MapUtil;
 import ariba.util.core.StringUtil;
+import ariba.util.core.ListUtil;
 import ariba.util.formatter.DateFormatter;
 import ariba.util.formatter.IntegerFormatter;
 import ariba.util.formatter.DoubleFormatter;
@@ -40,6 +40,7 @@ import java.text.ParseException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.List;
 
 /**
     Provides a default (localized) set of formatters accessible via "$formatters.{name}" bindings
@@ -92,6 +93,20 @@ public final class AWVFormatterFactory
     private static int CanonicalFormatter = 0;
     private static int ObjectFormatter = 1;
 
+    static String DefaultCurrencyName = "USD";
+
+    public interface FormatterProvider
+    {
+        void populateFormatters (Map<String, Object> formatters, Locale locale, TimeZone timeZone);
+    }
+
+    static List<FormatterProvider> _Providers = ListUtil.list();
+
+    public static void registerProvider (FormatterProvider provider)
+    {
+        _Providers.add(provider);
+    }
+
     static {
         TimeZone defaultTimeZone = DateFormatter.getDefaultTimeZone();
         Locale defaultLocale = DateFormatter.getDefaultLocale();
@@ -99,6 +114,14 @@ public final class AWVFormatterFactory
                 new AWVDateFormatter(CanonicalDateTimeFormatString, defaultLocale, defaultTimeZone);
         CanonicalDateFormatter = new AWVDateFormatter(CanonicalDateFormatString, defaultLocale, defaultTimeZone);
         CanonicalNumberFormatter = new AWVBigDecimalFormatter("####.##", 0, defaultLocale);
+
+        // Register ours as the first provider (so that other sources can override ours)
+        registerProvider(new FormatterProvider() {
+            public void populateFormatters (Map<String, Object> formatters, Locale locale, TimeZone timeZone)
+            {
+                populate(formatters, locale, timeZone);
+            }
+        });
     }
 
     private static boolean _DidInit = false;
@@ -124,6 +147,16 @@ public final class AWVFormatterFactory
             assignFormattersForPage(page, formatters);
         }
         return formatters;
+    }
+
+    public static String getDefaultCurrencyName ()
+    {
+        return DefaultCurrencyName;
+    }
+
+    public static void setDefaultCurrencyName (String defaultCurrencyName)
+    {
+        DefaultCurrencyName = defaultCurrencyName;
     }
 
     // called directly by sessionless renderers to initialize with appropriate timezone / locale
@@ -193,11 +226,23 @@ public final class AWVFormatterFactory
     public static Map createFormattersForSession (Locale locale, TimeZone timeZone)
     {
         Map<String, Object> formatters = MapUtil.map();
+        for (FormatterProvider provider : _Providers) {
+            provider.populateFormatters(formatters, locale, timeZone);
+        }
+        return formatters;
+    }
 
+    static Map populate (Map<String, Object>formatters, Locale locale, TimeZone timeZone)
+    {
         // $formatters.xml.<xxx> returns a formatter that will convert from a canonical string
         // represenation of a date or number, to whatever <xxx> does..
         formatters.put(RequiredStringFormatterKey, new NonBlankString());
         Map xml = MapUtil.map();
+
+        // Currency-specific big decimals formatters
+        // Used as: $formatters.currency.USD
+        formatters.put("currency", BigDecimalMoneyFormatter.formattersByCurrency());
+        formatters.put("currencyLong", BigDecimalMoneyFormatter.formattersByCurrencyWithSuffix());
 
         // Because of component dependency, we cannot reference the money formatter
         // directly.  Instead, it is registered dynamically.  If none has been register,
@@ -210,7 +255,8 @@ public final class AWVFormatterFactory
             xml.put(MoneyFormatterKey, new PipedFormatter(canonicalFmt, objectFmt));
         }
         else {
-            Object money = new AWVBigDecimalFormatter("$#,###.##", 2, locale);
+            // Object money = new AWVBigDecimalFormatter("$#,###.##", 2, locale);
+            Object money = BigDecimalMoneyFormatter.formattersByCurrency().get(DefaultCurrencyName);
             formatters.put(MoneyFormatterKey, money);
             xml.put(MoneyFormatterKey, new PipedFormatter(CanonicalNumberFormatter, money));
         }

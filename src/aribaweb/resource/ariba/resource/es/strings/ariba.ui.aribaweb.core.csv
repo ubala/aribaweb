@@ -1,6 +1,7 @@
 Cp1252,,,,
-"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","Active la ventana emergente para este sitio para utilizar esta función",""
 "AWBaseRequest",1,"Uploaded %s KB of %s KB...","Cargados %s KB de %s KB...","Appears in file upload panel"
 "AWComponentActionRequestHandler",1,"Waiting for previous request to complete ...","Esperando a que se complete la solicitud anterior...","Appears in page loading status panel"
 "AWComponentActionRequestHandler",2,"Processing request ...","Procesando la solicitud...","Appears in page loading status panel"
+"AWErrorInfo",1,"Unknown Error","Error desconocido",""
 "AWLazyDivInternals",a001,"Loading...","Cargando...",""
+"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","Active la ventana emergente para este sitio para utilizar esta función",""

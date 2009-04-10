@@ -28,5 +28,7 @@ Cp1252,,,,
 "AWTPivotConfigurationPanel",a004,"Column Attributes","Kolumnattribut",""
 "AWTPivotConfigurationPanel",a005,"Detail Attributes","Detaljattribut",""
 "AWTPivotConfigurationPanel",a006,"Hidden Attributes","Dolda attribut",""
+"AWTRowAttributeExpandoColumnRenderer",a001,"Less...","Färre...",""
+"AWTRowAttributeExpandoColumnRenderer",a002,"More...","Mer...",""
 "AWTScrollTableWrapper",a001,"Retrieving data...","Hämtar data...",""
 "AWTSortHeading",a001,"Click to reverse the sorting order for this column","Klicka om du vill byta sorteringsordning i kolumnen",""

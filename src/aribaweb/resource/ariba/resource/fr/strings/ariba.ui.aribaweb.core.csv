@@ -1,6 +1,7 @@
 Cp1252,,,,
-"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","Veuillez activer les fenêtres contextuelles pour utiliser cette fonction.",""
 "AWBaseRequest",1,"Uploaded %s KB of %s KB...","%s Ko sur %s Ko téléchargés...","Appears in file upload panel"
 "AWComponentActionRequestHandler",1,"Waiting for previous request to complete ...","Fin du traitement de la demande précédente...","Appears in page loading status panel"
 "AWComponentActionRequestHandler",2,"Processing request ...","Traitement de la demande en cours...","Appears in page loading status panel"
+"AWErrorInfo",1,"Unknown Error","Erreur inconnue",""
 "AWLazyDivInternals",a001,"Loading...","Chargement en cours...",""
+"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","Veuillez activer les fenêtres contextuelles pour utiliser cette fonction.",""

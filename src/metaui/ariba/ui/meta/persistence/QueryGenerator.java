@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QueryGenerator.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/QueryGenerator.java#5 $
 */
 package ariba.ui.meta.persistence;
 
@@ -119,7 +119,6 @@ public class QueryGenerator
             String likePattern = ((String)value).replace("*", "%");
             appendToWhere(Fmt.S("%s LIKE %s",
                     formatKeyPath(keyPath),
-                    formatOperator(operator),
                     formatValue(likePattern)));
         } else {
             appendToWhere(Fmt.S("%s %s %s",

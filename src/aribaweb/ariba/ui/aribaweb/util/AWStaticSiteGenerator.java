@@ -151,6 +151,10 @@ public class AWStaticSiteGenerator
     {
         if (component instanceof AWRedirect) return ((AWRedirect)component).url();
         String url = urlForComponent(component);
+        url = url.replaceAll("\\\\", "/");
+        if (url.startsWith("/")) {
+            url = url.substring(1);
+        }
         System.out.printf("  -- Ref to %s\n", url);
         if (_componentForUrl.get(url) == null) {
             System.out.printf("  -- Enqueing %s\n", url);
