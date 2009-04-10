@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#120 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#121 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -683,15 +683,15 @@ abstract public class AWConcreteApplication
         // we need to decrement the marked for termination session count.
         // Otherwise, the active session count will be incorrect.
         if (session.isMarkedForTermination()) {
-            monitorStats().decrementMarkedForTerminationSessionCount();
+            monitorStats().decrementMarkedForTerminationSessionCount(session);
         }
         session.unregisterActiveSession();
         removeSessionFromStatusTable(session);
     }
 
-    public void incrementMarkedForTerminationSessionCount ()
+    public void incrementMarkedForTerminationSessionCount (AWSession session)
     {
-        monitorStats().incrementMarkedForTerminationSessionCount();
+        monitorStats().incrementMarkedForTerminationSessionCount(session);
     }
 
     protected void updateSessionStatusTable (ConcurrentLinkedQueue<AWConcreteApplication.SessionWrapper> connectList, List existingSessions)

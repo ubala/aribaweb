@@ -28,5 +28,7 @@ Cp1252,,,,
 "AWTPivotConfigurationPanel",a004,"Column Attributes","Kolomeigenschappen",""
 "AWTPivotConfigurationPanel",a005,"Detail Attributes","Detaileigenschappen",""
 "AWTPivotConfigurationPanel",a006,"Hidden Attributes","Verborgen eigenschappen",""
+"AWTRowAttributeExpandoColumnRenderer",a001,"Less...","Minder...",""
+"AWTRowAttributeExpandoColumnRenderer",a002,"More...","Meer...",""
 "AWTScrollTableWrapper",a001,"Retrieving data...","Gegevens worden opgehaald...",""
 "AWTSortHeading",a001,"Click to reverse the sorting order for this column","Klikken om sorteervolgorde voor deze kolom om te draaien",""

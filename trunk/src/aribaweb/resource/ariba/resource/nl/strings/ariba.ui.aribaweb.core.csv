@@ -1,6 +1,7 @@
 Cp1252,,,,
-"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","Om deze functie te kunnen gebruiken moeten popup-vensters voor deze site zijn toegestaan.",""
 "AWBaseRequest",1,"Uploaded %s KB of %s KB...","%s KB van %s KB geüploaded...","Appears in file upload panel"
 "AWComponentActionRequestHandler",1,"Waiting for previous request to complete ...","Wachten tot vorige aanvraag is voltooid...","Appears in page loading status panel"
 "AWComponentActionRequestHandler",2,"Processing request ...","Aanvraag wordt verwerkt...","Appears in page loading status panel"
+"AWErrorInfo",1,"Unknown Error","Onbekende fout",""
 "AWLazyDivInternals",a001,"Loading...","Bezig met laden...",""
+"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","Om deze functie te kunnen gebruiken moeten popup-vensters voor deze site zijn toegestaan.",""

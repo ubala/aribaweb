@@ -1,2 +1,7 @@
 Cp1252,,,,
 "AWVErrorFlag",1,"Please correct the fields marked in red","Rätta fälten med röd markering",""
+"AWVFormatterFactory",1,"Value required","Ett värde krävs",""
+"FormRow",a001,"Required Field","Obligatoriskt fält",""
+"GenericChooser",a001,"(no selection)","(inget val)",""
+"GenericChooser",a002,"(no selection)","(inget val)",""
+"GenericChooser",a003,"(no selection)","(inget val)",""

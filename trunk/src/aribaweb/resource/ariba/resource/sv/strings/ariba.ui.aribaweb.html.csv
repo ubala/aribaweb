@@ -1,8 +1,8 @@
 Cp1252,,,,
 "AWBody",a001,"Please wait. An action is pending...","Vänta. En åtgärd väntar...",""
 "AWErrorFlag",a001,"Error","Fel",""
+"AWFileUploadInternals",a001,"Error: Your request cannot be processed. Please check that file paths for all file uploads are valid.","Fel: Din begäran kan inte behandlas. Kontrollera att filsökvägarna för alla filöverföringar är giltiga.",""
 "AWPasswordField",a001,"Warning","Varning",""
-"AWPasswordField",a002,"Warning: Caps Lock is on.  This may cause you to enter your password incorrectly.","Varning: CapsLock-tangenten har aktiverats. Detta kan leda till att ditt lösenord matas in fel.",""
+"AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","Varning: CapsLock-tangenten har aktiverats. Detta kan leda till att ditt lösenord matas in fel.",""
 "AWSubmitButton",a001,"Submit","Skicka",""
-"AWFileUploadInternals","a001","Error: Your request cannot be processed.  Please check that file paths for all file uploads are valid.","Fel: Din begäran kan inte behandlas. Kontrollera att filsökvägarna för alla filöverföringar är giltiga.",""
-"AWTextArea","a001","Characters left","Tecken kvar",""
+"AWTextArea",a001,"Characters left","Tecken kvar",""

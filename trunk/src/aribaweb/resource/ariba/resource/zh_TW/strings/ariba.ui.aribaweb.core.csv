@@ -1,6 +1,7 @@
 Big5,,,,
-"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","請啟用視窗彈出功能以便在此網站使用此功能。",""
 "AWBaseRequest",1,"Uploaded %s KB of %s KB...","已上載 %s KB，共 %s KB...","Appears in file upload panel"
 "AWComponentActionRequestHandler",1,"Waiting for previous request to complete ...","等候前一個請求完成...","Appears in page loading status panel"
 "AWComponentActionRequestHandler",2,"Processing request ...","處理請求中...","Appears in page loading status panel"
+"AWErrorInfo",1,"Unknown Error","未知錯誤",""
 "AWLazyDivInternals",a001,"Loading...","載入中...",""
+"AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","請啟用視窗彈出功能以便在此網站使用此功能。",""

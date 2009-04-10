@@ -28,5 +28,7 @@ GB2312,,,,
 "AWTPivotConfigurationPanel",a004,"Column Attributes","列属性",""
 "AWTPivotConfigurationPanel",a005,"Detail Attributes","详细信息属性",""
 "AWTPivotConfigurationPanel",a006,"Hidden Attributes","隐藏属性",""
+"AWTRowAttributeExpandoColumnRenderer",a001,"Less...","精简视图...",""
+"AWTRowAttributeExpandoColumnRenderer",a002,"More...","更多...",""
 "AWTScrollTableWrapper",a001,"Retrieving data...","检索数据...",""
 "AWTSortHeading",a001,"Click to reverse the sorting order for this column","单击此处可按相反顺序将此列排序",""

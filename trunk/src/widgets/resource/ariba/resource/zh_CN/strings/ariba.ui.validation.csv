@@ -1,2 +1,7 @@
 GB2312,,,,
 "AWVErrorFlag",1,"Please correct the fields marked in red","请更正标红的字段",""
+"AWVFormatterFactory",1,"Value required","必须提供值",""
+"FormRow",a001,"Required Field","必填字段",""
+"GenericChooser",a001,"(no selection)","(无选项)",""
+"GenericChooser",a002,"(no selection)","(无选项)",""
+"GenericChooser",a003,"(no selection)","(无选项)",""

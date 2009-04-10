@@ -1,2 +1,7 @@
 KS_C_5601-1987,,,,
 "AWVErrorFlag",1,"Please correct the fields marked in red","빨간색으로 표시된 필드를 수정하십시오.",""
+"AWVFormatterFactory",1,"Value required","값이 필요합니다.",""
+"FormRow",a001,"Required Field","필수 필드",""
+"GenericChooser",a001,"(no selection)","(선택한 항목 없음)",""
+"GenericChooser",a002,"(no selection)","(선택한 항목 없음)",""
+"GenericChooser",a003,"(no selection)","(선택한 항목 없음)",""

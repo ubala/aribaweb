@@ -1,4 +1,28 @@
-New in Version 5.0RC3 - PREVIEW 2 (4/1//2009)
+New in Version 5.0RC3 - PREVIEW 3 (4/8/2009)
+---------------------------------------------
+- Formatter enhancements
+    - AWVFormatterFactory has new FormatterProvider interface where external providers can
+      register handlers to add/override formatters in the default $formatters set
+	- Multi-currency formatter support
+	    - New GenericMoneyFormatter: formatter with interfaces to be adapted to various Money/Currency implementations (via class extensions)
+        - New BigDecimalMoneyFormatter: based on GenericMoneyFormatter, provides currency formatting of BigDecimals based on formatter-specified currency
+	    - New $formatter.currency and $formatters.currencyLong formatter maps.
+	      E.g. can use $formatters.currency.EUR to get a formatter with a euro symbol prefix,
+	      or $formatters.currencyLong.EUR to get one that will prefix with the Euro symbol and suffix with "EUR".
+	    - $formatters.money now returns a BigDecimalMoneyFormatter from the $formatters.currency set, based on the AWVFormatterFactory.getDefaultCurrencyName().
+	      Apps may override the application-wide default currency by calling AWVFormatterFactory.getDefaultCurrencyName("GBP") from their application init() method.
+	    - AWTCSVDataSource now parses decimal numbers as BigDecimals instead of as Doubles
+
+- MetaUI: fixes/enhancements
+    - Fix broken LIKE query generation
+    - Add support for overriding persistent classes with subclass with 
+      the @SupercedesSuperclass annotation
+
+- Build system improvements
+    - Support for app including local lib/ directory. zips/jars in lib/ directory of project
+      will be automatically copy them into the web app, and be included in the build time classpath.
+
+New in Version 5.0RC3 - PREVIEW 2 (4/1/2009)
 ---------------------------------------------
 
 - Database Mapping fixes / enhancements

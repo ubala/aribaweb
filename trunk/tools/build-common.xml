@@ -313,6 +313,7 @@
         <resources refid="groovy.support.jars"/>
         <resources refid="merge.jars"/>
         <resources refid="app.war.jars"/>
+        <resources refid="app.ext.jars"/>        
         <pathelement location="${build.dir}/classes/java"/>
     </path>
 
@@ -854,7 +855,7 @@
     </target>
 
     <target name="-tomcat-debug" if="env.JPDA_ADDRESS">
-        <echo message="Launching tomcat in debug mode (port ${env.JPDA_ADDRESS}) with CATALINA_BASE=${catalina.base.dir}, ([CTRL-C] to stop)..."/>
+        <echo message="Launching tomcat in debug mode (port ${env.JPDA_ADDRESS}) with CATALINA_BASE=${catalina.base.dir}, CATALINA_HOME=${catalina.home.dir}, ([CTRL-C] to stop)..."/>
         <launch-tomcat>
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=${env.JPDA_TRANSPORT},address=${env.JPDA_ADDRESS},server=y,suspend=n"/>

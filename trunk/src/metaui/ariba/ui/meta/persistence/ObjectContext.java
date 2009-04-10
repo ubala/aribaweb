@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#10 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#11 $
 */
 package ariba.ui.meta.persistence;
 
@@ -57,6 +57,7 @@ public abstract class ObjectContext
 
     public <T> T create (Class<T> tClass)
     {
+        tClass = PersistenceMeta.supercedingChildClass(tClass);
         T o = (T)ClassUtil.newInstance(tClass);
         Assert.that(o != null, "Unable to create instance of class: %s", tClass.getName());
         recordForInsert(o);

@@ -28,5 +28,7 @@ KS_C_5601-1987,,,,
 "AWTPivotConfigurationPanel",a004,"Column Attributes","열 속성",""
 "AWTPivotConfigurationPanel",a005,"Detail Attributes","세부 속성",""
 "AWTPivotConfigurationPanel",a006,"Hidden Attributes","숨겨진 속성",""
+"AWTRowAttributeExpandoColumnRenderer",a001,"Less...","축소 보기...",""
+"AWTRowAttributeExpandoColumnRenderer",a002,"More...","더 보기...",""
 "AWTScrollTableWrapper",a001,"Retrieving data...","데이터 검색 중...",""
 "AWTSortHeading",a001,"Click to reverse the sorting order for this column","클릭하면 이 열이 역순으로 정렬됩니다.",""

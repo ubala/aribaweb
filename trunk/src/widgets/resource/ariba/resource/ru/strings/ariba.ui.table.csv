@@ -28,5 +28,7 @@ Cp1251,,,,
 "AWTPivotConfigurationPanel",a004,"Column Attributes","Атрибуты столбца",""
 "AWTPivotConfigurationPanel",a005,"Detail Attributes","Атрибуты детали",""
 "AWTPivotConfigurationPanel",a006,"Hidden Attributes","Скрытые атрибуты",""
+"AWTRowAttributeExpandoColumnRenderer",a001,"Less...","Меньше...",""
+"AWTRowAttributeExpandoColumnRenderer",a002,"More...","Дополнительно...",""
 "AWTScrollTableWrapper",a001,"Retrieving data...","Получение данных...",""
 "AWTSortHeading",a001,"Click to reverse the sorting order for this column","Щелкните для изменения порядка сортировки столбца",""

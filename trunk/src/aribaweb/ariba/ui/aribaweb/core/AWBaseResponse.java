@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#38 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#39 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -240,6 +240,43 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
         if (contentString != null) {
             AWEncodedString encodedString = AWEncodedString.sharedEncodedString(contentString);
             appendContent(encodedString);
+        }
+    }
+
+    public void appendContent (AWBaseResponse response)
+    {
+        AWResponseBuffer root = response.rootBuffer();
+        if (root != null) {
+            root.close();
+            recurseCopy(root, false);
+        }
+    }
+
+    private void recurseCopy (AWResponseBuffer buff, boolean pushLevel) {
+        if (pushLevel) {
+            pushBuffer(buff.getName(), buff.isScope(), buff.isScopeChild(), buff.isAlwaysRender());
+        }
+        int start = buff.getContentStartIndex();
+        int end = buff.getContentEndIndex();
+        AWPagedVector.AWPagedVectorIterator elements = buff.getGlobalContents().elements(start,end);
+        try {
+            while (elements.hasNext()) {
+                Object element = elements.next();
+                if (element instanceof AWEncodedString) {
+                    appendContent(((AWEncodedString)element));
+                }
+                else {
+                    AWResponseBuffer childBuffer = (AWResponseBuffer)element;
+                    recurseCopy(childBuffer, true);
+                    elements.skipTo(childBuffer.getContentEndIndex());
+                }
+            }
+        }
+        finally {
+            elements.release();
+        }
+        if (pushLevel) {
+            popBuffer(false);// no support for forceRefresh
         }
     }
 

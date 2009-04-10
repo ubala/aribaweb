@@ -12,15 +12,20 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#13 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#14 $
 */
 package ariba.ui.meta.persistence;
 
 import ariba.ui.meta.core.*;
+import ariba.ui.meta.annotations.SupercedesSuperclass;
 import ariba.ui.validation.ChoiceSourceRegistry;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWConcreteServerApplication;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.aribaweb.util.AWJarWalker;
+import ariba.ui.aribaweb.util.AWUtil;
+import ariba.util.core.MapUtil;
+import ariba.util.core.ClassUtil;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -39,6 +44,7 @@ public class PersistenceMeta
     public static final String PropTextSearchSupported = "textSearchSupported";
     public static final String KeywordsField = "keywords";
     static boolean _DoNotConnect = false;
+    static Map<Class, Class> _SupercededClassMap = MapUtil.map();
 
     public static void initialize ()
     {
@@ -52,8 +58,19 @@ public class PersistenceMeta
             application.registerDidInitCallback(new AWConcreteApplication.DidInitCallback() {
                 public void applicationDidInit (AWConcreteApplication application) {
                     UIMeta.getInstance().loadRuleFile("PersistenceRules.oss", true, Meta.SystemRulePriority + 2000);
+                    hideSupercededClasses(UIMeta.getInstance());
                 }
             });
+
+            AWJarWalker.registerAnnotationListener(SupercedesSuperclass.class,
+                new AWJarWalker.AnnotationListener () {
+                    public void annotationDiscovered(String className, String annotationType)
+                    {
+                        // Ick: forces non-lazy class initialization!
+                        Class sub = ClassUtil.classForName(className);
+                        _SupercededClassMap.put(sub.getSuperclass(), sub);
+                    }
+                });
        }
     }
 
@@ -74,6 +91,17 @@ public class PersistenceMeta
     public static Set<String> getEntityClasses ()
     {
         return _EntityClasses;
+    }
+
+    public static Set<Class>getSupercededClasses ()
+    {
+        return _SupercededClassMap.keySet();
+    }
+
+    public static Class supercedingChildClass (Class parentClass)
+    {
+        Class child = _SupercededClassMap.get(parentClass);
+        return child == null ? parentClass : child;
     }
 
     public static void registerEmbeddableClass (String className)
@@ -155,6 +183,18 @@ public class PersistenceMeta
         public boolean equals (Object o)
         {
             return (o instanceof SearchMap) && (o == this);
+        }
+    }
+
+    public static void hideSupercededClasses(UIMeta meta)
+    {
+        for (Map.Entry<Class, Class> e : _SupercededClassMap.entrySet()) {
+            Class overrider = e.getValue();
+            meta.beginRuleSet(Meta.ClassRulePriority + 1000, overrider.getName().replace(".", "/") +".java");
+            Rule rule = new Rule(AWUtil.list(new Rule.Selector(UIMeta.KeyModule, e.getKey().getName())),
+                    AWUtil.map(UIMeta.KeyAfter, "zNone"));
+            meta.addRule(rule);
+            meta.endRuleSet();
         }
     }
 }

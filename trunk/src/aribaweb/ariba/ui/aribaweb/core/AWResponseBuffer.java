@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#21 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#22 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -280,6 +280,49 @@ public final class AWResponseBuffer extends AWBaseObject
     public void setIgnoreWhitespaceDiffs (boolean yn)
     {
         _ignoreWhitespaceDiffs = yn;
+    }
+
+    //////////////////
+    // Accessors
+    //////////////////
+    protected AWEncodedString getName ()
+    {
+        return _name;
+    }
+
+    protected boolean isScopeChild ()
+    {
+        return _type == Type.ScopeChild;
+    }
+
+    protected boolean isAlwaysRender ()
+    {
+        return _alwaysRender;
+    }
+
+    protected int getContentStartIndex ()
+    {
+        return _contentsStartIndex;
+    }
+    
+    protected int getContentEndIndex ()
+    {
+        return _contentsEndIndex;
+    }
+
+    protected AWPagedVector getGlobalContents ()
+    {
+        return _globalContents;
+    }
+
+    protected AWResponseBuffer getFirstChild ()
+    {
+        return _children;
+    }
+
+    protected AWResponseBuffer getNext ()
+    {
+        return _next;
     }
 
     //////////////////

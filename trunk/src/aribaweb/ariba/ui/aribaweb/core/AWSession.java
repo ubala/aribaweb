@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#82 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#83 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -680,7 +680,7 @@ public class AWSession extends AWBaseObject
      */
     public boolean registerActiveSession ()
     {
-        _application.monitorStats().incrementActiveSessionCount();
+        _application.monitorStats().incrementActiveSessionCount(this);
         return true;
     }
 
@@ -689,7 +689,7 @@ public class AWSession extends AWBaseObject
      */
     public boolean unregisterActiveSession ()
     {
-        _application.monitorStats().decrementActiveSessionCount();
+        _application.monitorStats().decrementActiveSessionCount(this);
         return true;
     }
 
@@ -1455,6 +1455,14 @@ public class AWSession extends AWBaseObject
     public PerformanceState.Stats lastRequestPerfStats ()
     {
         return _performanceStateHashtable;
+    }
+
+    /**
+        Support to segment monitor Stats
+    */
+    protected Object monitorBucket ()
+    {
+        return null;
     }
     
     /**
