@@ -6,3 +6,4 @@ Cp1252,,,,
 "AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","Varning: CapsLock-tangenten har aktiverats. Detta kan leda till att ditt lösenord matas in fel.",""
 "AWSubmitButton",a001,"Submit","Skicka",""
 "AWTextArea",a001,"Characters left","Tecken kvar",""
+"AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","Ett fel har inträffat medan din förfrågan behandlades. Uppdatera sidan och försök igen.",""

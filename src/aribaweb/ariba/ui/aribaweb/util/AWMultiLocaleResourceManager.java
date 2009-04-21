@@ -911,6 +911,8 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
 
     private void addClassPackages (AWResourceDirectory fileResourceDirectory, String packageDirPath, String packageName)
     {
+        if (!(fileResourceDirectory instanceof AWFileResourceDirectory)) return;
+        
         String directoryPathString = fileResourceDirectory.directoryPath();
         String packageResourcePath = StringUtil.strcat(directoryPathString, "/", packageDirPath);
 

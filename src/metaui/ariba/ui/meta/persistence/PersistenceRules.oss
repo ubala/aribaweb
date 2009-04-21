@@ -240,7 +240,7 @@ layout=SearchPage {
     @layout=SearchTOC {
        label:$[a005]"Actions";
        component:MetaActionList;
-       bindings: { filterActions:static }
+       bindings: { filterActions:static; showGlobal:true }
        after:zToc;
        area:Global;
     }
@@ -287,14 +287,14 @@ module_trait=SearchDetail {
                 operation:${displayGroup.selectedObject ? "edit" : "view"};
                 awcontentElement:MetaIncludeComponent;
             }
-        }
-
-        layout=Actions#ActionButtons {
-            elementStyle:"padding-top:10px";
-            @actionCategory=Data {
-                @action=Save {
-                    actionResults:${ariba.ui.meta.persistence.PersistenceMeta.validateAndSave(this)};
-                    visible:${properties.editing}
+            layout=Actions#ActionButtons {
+                elementStyle:"padding-top:10px";
+                bindings: {showGlobal:false};
+                @actionCategory=Data {
+                    @action=Save {
+                        actionResults:${ariba.ui.meta.persistence.PersistenceMeta.validateAndSave(this)};
+                        visible:${properties.editing}
+                    }
                 }
             }
         }

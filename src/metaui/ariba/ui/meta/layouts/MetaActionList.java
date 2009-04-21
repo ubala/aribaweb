@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.java#10 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.java#11 $
 */
 package ariba.ui.meta.layouts;
 
@@ -48,7 +48,7 @@ public class MetaActionList extends AWComponent
     public void prepareForGlobal ()
     {
         Context context = MetaContext.currentContext(this);
-        _isGlobal = context.values().get(UIMeta.KeyClass) == null;
+        _isGlobal = booleanValueForBinding("showGlobal", context.values().get(UIMeta.KeyClass) == null);
         if (_isGlobal) {
             MetaContext.currentContext(this);
             MetaNavTabBar.getState(session()).assignCurrentModuleContext(context);
@@ -65,10 +65,9 @@ public class MetaActionList extends AWComponent
     {
         if (!_isGlobal) {
             Context context = MetaContext.currentContext(this);
-            UIMeta meta = (UIMeta)context.meta();
             context.push();
-            _actionsByCategory = new HashMap();
-            List<ItemProperties> categories = meta.actionsByCategory(context, _actionsByCategory, UIMeta.ActionZones);
+            _actionsByCategory = (Map<String, List<ItemProperties>>)context.propertyForKey(UIMeta.PropActionsByCategory);
+            List<ItemProperties> categories = (List<ItemProperties>)context.propertyForKey(UIMeta.PropActionCategories);
             context.pop();
             return categories;
         }

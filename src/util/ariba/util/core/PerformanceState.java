@@ -734,10 +734,15 @@ public class PerformanceState
                     }
                     }); // OK
 
-                instance = new WatcherDaemon();
-                Thread t = new Thread(instance, "Perf_Log_Exception_Daemon");
-                t.setDaemon(true);
-                t.start();
+                try {
+                    instance = new WatcherDaemon();
+                    Thread t = new Thread(instance, "Perf_Log_Exception_Daemon");
+                    t.setDaemon(true);
+                    t.start();
+                } catch (java.security.AccessControlException e) {
+                    // will throw in restricted environments (e.g. Google AppEngine) where thread creation
+                    // is not supported.
+                }
             }
         }
 

@@ -48,6 +48,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.ServletConfig;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Enumeration;
 import java.net.URL;
 import java.net.MalformedURLException;
 
@@ -65,12 +66,23 @@ public class AWServletApplication extends AWConcreteApplication
 
     private static boolean _allowDefaultDirectAction = false;
     protected static ServletConfig _ServletConfig;
+    protected static String _ServletUrlPrefix = null;
     protected static boolean _servingResourcesFromWAR;
 
     // ** Thread Safety Considerations: everything in here (as of 9/2/99) executes at init time, which should all happen in a single thread.
 
     public void init ()
     {
+        // Horrible hack:  Under appengine we have no app name in the URL, but I can't find a portable
+        // way to get the contextPath, so I'm testing explicitly for app engine...
+        _ServletUrlPrefix = "/".concat(_ServletConfig.getServletName());
+        Enumeration en = _ServletConfig.getServletContext().getAttributeNames();
+        while (en.hasMoreElements()) {
+            String name = (String)en.nextElement();
+            if (name.startsWith("com.google.appengine.")) _ServletUrlPrefix = "";
+            // System.out.printf(" && %s = %s\n", name, _ServletConfig.getServletContext().getAttribute(name));
+        }
+
         // serve resources from WAR if we find a docroot there
         _servingResourcesFromWAR = (_ServletConfig != null) &&
                 (_ServletConfig.getServletContext().getResourcePaths("/docroot") != null);
@@ -299,6 +311,7 @@ public class AWServletApplication extends AWConcreteApplication
             int firstSecondSlash = servletUrlPrefix.indexOf("//");
             servletUrlPrefix = servletUrlPrefix.substring(servletUrlPrefix.indexOf("/", firstSecondSlash + 2) + 1);
         }
+        if ("".equals(servletUrlPrefix)) return 0;
         StringArray pathComponents = AWUtil.componentsSeparatedByString(servletUrlPrefix, "/");
         // subtract one here to account for preceeding slash.
         int servletUrlPrefixComponentCount = pathComponents.inUse();
@@ -326,7 +339,7 @@ public class AWServletApplication extends AWConcreteApplication
 
     public String servletUrlPrefix ()
     {
-        return "/".concat(_ServletConfig.getServletName());
+        return _ServletUrlPrefix;
     }
 
     public String applicationNameSuffix ()

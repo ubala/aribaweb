@@ -1,0 +1,10 @@
+Cp1252,,
+,,
+MoneyPattern,"{1}#.##0,## {2};-{1}#.##0,## {2}","currency pattern; {1} is the placehoder for the leading currency symbol; {2} is the placeholder for the trailing currency code e.g. $ 5,000.00 USD, £ 4,000 GBP. Replace the comma in this resource with the thousand separator for your particular country, and also replace the period with the decimal spearator for your country.; "
+MoneyNoSuffixPattern,"{1}#.##0,##;-{1}#.##0,##","currency pattern; {1} is the placehoder for the leading currency symbol; e.g. $5,000.00, £4,000. Replace the comma in this resource with the thousand separator for your particular country, and also replace the period with the decimal spearator for your country.; "
+MoneyComboPattern,"{0} ~ {1}","for display two alternate money amounts; "
+MoneyParsePattern,"#,##0.##;-#,##0.##","currency parsing pattern; Do not translate this resource, or change the decimal separator.; "
+MoneyUserEuroPattern,"{0} ({1})","Display string format for dual display (i.e. 100FRF (200 EUR)); "
+MoneyTextFieldInvalidValueError,"valor ""{0}"" inválido.","Error message when input value is not valid; {0} input value entered by user in the field; "
+MoneyStringTooLongError,"O valor monetário inserido é muito grande.","Error message when string input in a money field is longer than allowed in database"
+CurrencyNotFoundErrorKey,"Não foi possível encontrar moeda com prefixo={0} e sufixo={1}.","Error message when string prefix and suffix in a money field do not map to any currency."

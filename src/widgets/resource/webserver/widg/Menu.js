@@ -405,9 +405,11 @@ ariba.Menu = function() {
             // pass the menuItemSender and linkId as comma delimited list
             var senderList = (this.AWLinkId == null) ? senderId : this.AWLinkId + "," + senderId;
             if (formId != null) {
-                Request.submitFormForElementName(formId, senderList);
+                // POST
+                Request.submitFormForElementName(formId, senderList, null, target);
             }
             else {
+                // GET
                 var url = Request.formatUrl(senderList);
                 Request.setDocumentLocation(url, target);
             }

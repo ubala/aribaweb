@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionalColumnsPage.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionalColumnsPage.java#3 $
 */
 
 package ariba.ui.table;
 
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.table.AWTDynamicColumns.DynamicColumn;
 import ariba.ui.widgets.ModalPageWrapper;
 import ariba.util.core.ListUtil;
 import java.util.List;
@@ -27,7 +28,7 @@ public class AWTOptionalColumnsPage extends AWComponent
 {
     public static final String Name = AWTOptionalColumnsPage.class.getName();
 
-    public AWTDataTable.Column _currentColumn;
+    private AWTDataTable.Column _currentColumn;
     public AWTDataTable _table;
     private AWTDisplayGroup _displayGroup;
 
@@ -60,6 +61,19 @@ public class AWTOptionalColumnsPage extends AWComponent
             _displayGroup = new AWTDisplayGroup();
         }
         return _displayGroup;
+    }
+
+    public AWTDataTable.Column getCurrentColumn ()
+    {
+        return _currentColumn;
+    }
+
+    public void setCurrentColumn (AWTDataTable.Column column)
+    {
+        if (column instanceof DynamicColumn) {
+            ((DynamicColumn)column).prepare(_table);
+        }
+        _currentColumn = column;
     }
 
     public String currentColumnLabel ()

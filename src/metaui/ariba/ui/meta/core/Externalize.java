@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Externalize.java#2 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Externalize.java#3 $
 */
 package ariba.ui.meta.core;
 
@@ -152,7 +152,7 @@ public class Externalize
     void registerActions (Context ctx, boolean global)
     {
         // action categories and actions
-        String[] zones = (global) ? MetaNavTabBar.ActionZones : UIMeta.ActionZones;
+        String[] zones = (global) ? UIMeta.ModuleActionZones : UIMeta.ActionZones;
         Map<String, List<ItemProperties>> actionsByCategory = new HashMap();
         List<ItemProperties> actionCategories = _meta.actionsByCategory(ctx, actionsByCategory, zones);
         for (ItemProperties cat : actionCategories) {

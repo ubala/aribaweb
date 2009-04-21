@@ -6,3 +6,4 @@ GB2312,,,,
 "AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","警告: Caps Lock 键处于打开状态。这可能导致您输入的密码不正确。",""
 "AWSubmitButton",a001,"Submit","提交",""
 "AWTextArea",a001,"Characters left","剩余的字符数",""
+"AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","处理您的请求时出错。请刷新页面，然后重试。",""

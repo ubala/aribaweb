@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Gridtable.java#12 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Gridtable.java#13 $
 */
 
 package ariba.util.core;
@@ -70,14 +70,28 @@ public class Gridtable
         }
         Map secondaryTable = (Map)primaryTable.get(key1);
         if (secondaryTable == null) {
-            secondaryTable = MapUtil.map();
+            secondaryTable = makeMap();
             primaryTable.put(key1, secondaryTable);
         }
         Object oldElement = secondaryTable.put(key2, element);
         if (oldElement == null) {
             size++;
         }
+        Map optimized = optimize(secondaryTable);
+        if (optimized != secondaryTable) {
+            primaryTable.put(key1, optimized);
+        }
         return oldElement;
+    }
+
+    protected Map makeMap ()
+    {
+        return MapUtil.map();
+    }
+
+    protected Map optimize (Map m)
+    {
+        return m;
     }
 
 

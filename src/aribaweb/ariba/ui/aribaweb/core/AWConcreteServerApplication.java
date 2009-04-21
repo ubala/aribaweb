@@ -351,20 +351,26 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
     }
 
     static String _AppName = null;
+    public static boolean IsJarApplication = false;
 
     // Invoked by aribaweb.properties to set defaults if we're in an Open Source AW (jar) application
     static public void initializeForJarApplication ()
     {
         // we default to true for OSAW apps, false for Ariba apps (unless overridded by ARIBA_AW_USE_XMLHTTP)
         AWRequestContext.UseXmlHttpRequests = true;
-
+        IsJarApplication = true;
+        
         // Set util temp dir (used, for instance, in storing file uploads)
         _AppName = (String)AWClasspathResourceDirectory.aribawebPropertyValue("app-name");
         if (_AppName == null) _AppName = "AWApp";
         String tempName = System.getProperty("java.io.tmpdir");
-        SystemUtil.setSharedTempDirectory(new File(tempName, _AppName).getAbsolutePath());
-        // todo: unique local directory (using PID equivalent?)
-        SystemUtil.setLocalTempDirectory(new File(tempName, _AppName).getAbsolutePath());
+        try {
+            SystemUtil.setSharedTempDirectory(new File(tempName, _AppName).getAbsolutePath());
+            // todo: unique local directory (using PID equivalent?)
+            SystemUtil.setLocalTempDirectory(new File(tempName, _AppName).getAbsolutePath());
+        } catch (java.security.AccessControlException e) {
+            // Swallow
+        }
     }
 
     private static String urlForPath (String path)

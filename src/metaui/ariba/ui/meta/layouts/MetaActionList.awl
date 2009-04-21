@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.awl#10 $
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.awl#11 $
     </Copyright>
 
     <Overview>
@@ -50,6 +50,10 @@
 
     <NamedContent name="menuItems" required="$false">
         Extra menu items to be placed at the top of the generated PopupMenu
+    </NamedContent>
+
+    <NamedContent name="showGlobal" required="$false">
+        Show the global (Navigation) action zones (zNav, zGlobal) as opposed to the class-scoped actions.
     </NamedContent>
 </a:Api>\
 <m:Context>

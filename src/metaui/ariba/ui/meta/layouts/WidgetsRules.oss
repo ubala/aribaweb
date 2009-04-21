@@ -34,7 +34,7 @@ operation=(view, list) {
 }
 
 field {
-    visible:true;
+    visible:$${!properties.hidden};
     editing=true  { editable:true; }
     editing=false { editable:false; }
 }
@@ -304,7 +304,7 @@ field {
 */
 
 action {
-    visible:true;
+    visible:$${!properties.hidden};
     enabled:true;
 
     @trait=pageAction {
@@ -421,6 +421,8 @@ layout {
 }
 
 class layout=(Inspect, SearchForm) { trait:Form; label:${ariba.ui.meta.core.UIMeta.beautifyClassName(values.class)}; }
+~class layout=(Inspect, SearchForm) {component:AWString; bindings:{value:null}; }
+
 layout=InspectWithActions {
     trait:Stack;
     @layout=Actions#ActionMenu;
@@ -491,9 +493,9 @@ operation=list {
 }
 
 module {
-    visible:true;
+    visible:$${!properties.hidden};
     homePage:MetaHomePage;
-    pageBindings:${properties.homePage == "MetaHomePage" ? java.util.Collections.singletonMap("module", values.module) : null};
+    pageBindings:${properties.homePage == "MetaHomePage" ? [module:values.module] : null};
     component:MetaDashboardLayout;
     layout { visible:true }
 
@@ -507,7 +509,7 @@ module {
 }
 
 actionCategory {
-    visible:true;
+    visible:$${!properties.hidden};
 }
 @actionCategory=General { after:zMain;  label:$[a001]General }
 

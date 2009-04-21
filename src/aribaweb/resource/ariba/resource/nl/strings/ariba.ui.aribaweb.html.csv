@@ -6,3 +6,4 @@ Cp1252,,,,
 "AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","Waarschuwing: Caps Lock staat aan. Het kan zijn dat hierdoor het wachtwoord niet juist wordt ingevoerd.",""
 "AWSubmitButton",a001,"Submit","Indienen",""
 "AWTextArea",a001,"Characters left","Tekens resterend",""
+"AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","Er is een fout opgetreden bij het verwerken van uw verzoek. Klik op pagina vernieuwen en probeer het opnieuw.",""

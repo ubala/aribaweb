@@ -6,3 +6,4 @@ Cp1252,,,,
 "AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","Avertissement : Le verrouillage des majuscules est activé. Cela peut entraîner une saisie incorrecte de votre mot de passe.",""
 "AWSubmitButton",a001,"Submit","Soumettre",""
 "AWTextArea",a001,"Characters left","Nbre de caractères restant",""
+"AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","Une erreur s'est produite lors du traitement de votre demande. Actualisez la page, puis réessayez.",""

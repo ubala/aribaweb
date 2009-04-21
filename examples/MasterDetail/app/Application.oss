@@ -11,7 +11,7 @@
 	    after:zBottom;
     }
 
-    @layout=Actions {
+    @layout=ActionTOC {
        label:"Actions";
        component:"MetaActionList";
        after:zToc;

@@ -5,3 +5,4 @@ GB2312,,,,
 "AWErrorInfo",1,"Unknown Error","未知错误",""
 "AWLazyDivInternals",a001,"Loading...","正在加载...",""
 "AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","要使用该功能，请允许该站点显示弹出窗口。",""
+"AWComponentReference",1,"An error has occurred while processing your request. Refresh the page and try again.","处理您的请求时出错。请刷新页面，然后重试。","An error has occurred while processing your request. Refresh the page and try again.","An error has occurred while processing your request. Refresh the page and try again.",""

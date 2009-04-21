@@ -6,3 +6,4 @@ Cp1251,,,,
 "AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","Предупреждение. Включена клавиша Caps Lock. Это может привести к неверному вводу пароля.",""
 "AWSubmitButton",a001,"Submit","Отправить",""
 "AWTextArea",a001,"Characters left","Осталось символов",""
+"AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","Ошибка обработки запроса. Обновите страницу и повторите попытку.",""

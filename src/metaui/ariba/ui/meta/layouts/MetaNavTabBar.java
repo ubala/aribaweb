@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#19 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaNavTabBar.java#20 $
 */
 package ariba.ui.meta.layouts;
 
@@ -51,8 +51,6 @@ public class MetaNavTabBar extends AWComponent
         session.dict().remove("_MNBSessState");
     }
 
-    public static String[] ActionZones = { "zNav", "zGlobal" };
-
     public static class State
     {
         UIMeta.ModuleInfo _moduleInfo;
@@ -75,7 +73,7 @@ public class MetaNavTabBar extends AWComponent
                 Context context = meta.newContext();
                 _moduleInfo = meta.computeModuleInfo(context, true);
                 _modules = _moduleInfo.modules;
-                _selectedModule = null;
+                if (_selectedModule != null)_selectedModule = moduleNamed(_selectedModule.name());
                 _ruleSetGeneration = meta.ruleSetGeneration();
             }
         }
@@ -99,13 +97,18 @@ public class MetaNavTabBar extends AWComponent
             return gotoModule(_modules.get(0), requestContext);
         }
 
-        public AWResponseGenerating gotoModule (String name, AWRequestContext requestContext)
+        ModuleProperties moduleNamed (String name)
         {
             for (ModuleProperties m : _modules) {
-                if (m.name().equals(name)) return gotoModule(m, requestContext);
+                if (m.name().equals(name)) return m;
             }
-
             return null;
+        }
+
+        public AWResponseGenerating gotoModule (String name, AWRequestContext requestContext)
+        {
+            ModuleProperties m = moduleNamed(name);
+            return (m != null) ? gotoModule(m, requestContext) : null;
         }
 
         public AWResponseGenerating gotoModule (ModuleProperties module, AWRequestContext requestContext)
@@ -144,7 +147,7 @@ public class MetaNavTabBar extends AWComponent
             return _actionsByCategory;
         }
 
-        public void setSelectedModule(ModuleProperties selectedModule)
+        public void setSelectedModule (ModuleProperties selectedModule)
         {
             _lastSelectedModule = selectedModule;
         }
@@ -168,7 +171,7 @@ public class MetaNavTabBar extends AWComponent
             context.set(UIMeta.KeyClass, listOrSingleton(_selectedModule.getAllTypes()));
         }
 
-        public void selectModule(ModuleProperties selectedModule)
+        public void selectModule (ModuleProperties selectedModule)
         {
             if (_selectedModule == selectedModule) return;
             _selectedModule = selectedModule;
@@ -178,10 +181,9 @@ public class MetaNavTabBar extends AWComponent
             context.push();
 
             assignCurrentModuleContext(context);
-            _actionCategories = meta.itemList(context, UIMeta.KeyActionCategory, ActionZones);
 
             _actionsByCategory = new HashMap();
-            meta.actionsByCategory(context, _actionsByCategory, ActionZones);
+            _actionCategories = meta.actionsByCategory(context, _actionsByCategory, UIMeta.ModuleActionZones);
 
             context.pop();
         }

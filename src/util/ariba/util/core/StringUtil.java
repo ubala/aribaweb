@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#31 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#32 $
 */
 
 package ariba.util.core;
@@ -163,6 +163,16 @@ public final class StringUtil
         }
 
         return -1;
+    }
+
+    public static String intern (String source)
+    {
+        if (source == null) {
+            return null;
+        }
+        else {
+            return source.intern();
+        }
     }
 
     private static Perl5Util perlUtil = new Perl5Util();

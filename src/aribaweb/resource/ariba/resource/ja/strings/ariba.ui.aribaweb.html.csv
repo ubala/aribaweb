@@ -6,3 +6,4 @@ Shift_JIS,,,,
 "AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","注意: Caps Lock が有効になっているので、パスワードが正しく入力されない可能性があります。",""
 "AWSubmitButton",a001,"Submit","提出",""
 "AWTextArea",a001,"Characters left","残り文字数",""
+"AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","要求の処理中にエラーが発生しました。ページを再表示して、再試行してください。",""

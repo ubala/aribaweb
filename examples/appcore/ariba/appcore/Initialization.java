@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Initialization.java#10 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Initialization.java#11 $
 */
 package ariba.appcore;
 
@@ -229,9 +229,36 @@ public class Initialization
 
     public static Object userClassOperationPermissionCheck (Context context, String operation)
     {
-        final String cls = (String)context.values().get(ObjectMeta.KeyClass);
-        if (cls == null || operation == null) return true;
+        if (operation == null) return true;
         Permission.ClassOperation op = Permission.ClassOperation.valueOf(operation);
+        Object classes = context.values().get(ObjectMeta.KeyClass);
+        String cls = null;
+
+        // Clumsy support for contexts with multiple classes: allowed if user has *any* permissions
+        if (classes != null && classes instanceof List) {
+            int size = ((List)classes).size();
+            if (size == 0) return true;
+            if (size == 1) {
+                cls = (String)((List)classes).get(0);
+            } else {
+                // multi-class path
+                final List<Integer>permissions = ListUtil.list();
+                for (String cl : (List<String>)classes) {
+                    permissions.add(Permission.idForPermissionName(Permission.nameForClassOp(cl, op)));
+                }
+                
+                return new PropertyValue.Dynamic() {
+                    public Object evaluate (Context context)
+                    {
+                        for (int p : permissions) {
+                            if (User.currentUser().hasPermission(p)) return true;
+                        }
+                        return false;
+                    }
+                };
+            }
+        }
+        if (cls == null) return true;
         // FIXME: map unknown ops to parent ops?  (e.g. keywordSearch to search)
         if (op == null) return true;
         final int id = Permission.idForPermissionName(Permission.nameForClassOp(cls, op));
