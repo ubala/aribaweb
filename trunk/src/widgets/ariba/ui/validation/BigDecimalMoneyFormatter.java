@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/BigDecimalMoneyFormatter.java#1 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/BigDecimalMoneyFormatter.java#2 $
 */
 package ariba.ui.validation;
 
@@ -47,7 +47,7 @@ public class BigDecimalMoneyFormatter extends GenericMoneyFormatter
     static CurrencyFormatterMap _CurrencyFormatterWithSuffixMap = new CurrencyFormatterMap(true);
 
     static {
-        _MoneyAdapter = (BigDecimalMoneyAdaptor)MoneyAdapter.registerClassExtension(BigDecimal.class, new BigDecimalMoneyAdaptor());
+        _MoneyAdapter = (BigDecimalMoneyAdaptor)MoneyAdapter.registerClassExtension(Number.class, new BigDecimalMoneyAdaptor());
         _CurrencyAdapter = (CurrencyAdapter)GenericMoneyFormatter.CurrencyAdapter.registerClassExtension(Currency.class, new CurrencyAdapter());
     }
     public static class Currency
@@ -93,9 +93,14 @@ public class BigDecimalMoneyFormatter extends GenericMoneyFormatter
 
     public static class BigDecimalMoneyAdaptor extends MoneyAdapter
     {
+        public boolean isInstance (Object obj)
+        {
+            return obj instanceof Number;
+        }
+
         public BigDecimal getAmount (Object target)
         {
-            return (BigDecimal)target;
+            return (target instanceof BigDecimal) ? (BigDecimal)target : new BigDecimal(((Number)target).doubleValue());
         }
 
         public Object create (BigDecimal amount, Object currency)

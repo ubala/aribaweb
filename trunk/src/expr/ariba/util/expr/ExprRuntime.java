@@ -124,7 +124,7 @@ public abstract class ExprRuntime extends Object
     private static ClassCache               primitiveDefaults = new ClassCache();
     private static Map                      methodParameterTypesCache = new HashMap(101);
     private static Map                      ctorParameterTypesCache = new HashMap(101);
-    private static SecurityManager          securityManager = System.getSecurityManager();
+    private static SecurityManager          securityManager = null; // System.getSecurityManager();
     private static EvaluationPool           evaluationPool = new EvaluationPool();
     private static ObjectArrayPool          objectArrayPool = new ObjectArrayPool();
 

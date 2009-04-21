@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#59 $
+    $Id$
 */
 
 package ariba.ui.aribaweb.core;
@@ -572,7 +572,7 @@ abstract public class AWDirectAction extends AWBaseObject
     protected boolean skipValidation (String actionName)
     {
         return ProgressCheckActionName.equals(actionName) ||
-               AWResActionName.equals(actionName);
+               AWResActionName.equals(actionName) || AWImgActionName.equals(actionName);
     }
 
     /**

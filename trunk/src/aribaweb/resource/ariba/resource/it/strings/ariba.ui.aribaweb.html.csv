@@ -6,3 +6,4 @@ Cp1252,,,,
 "AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","Avviso: il tasto Bloc maiusc è attivato. La password potrebbe non essere immessa correttamente.",""
 "AWSubmitButton",a001,"Submit","Invia",""
 "AWTextArea",a001,"Characters left","Caratteri rimanenti",""
+"AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","Si è verificato un errore durante l'elaborazione della richiesta. Aggiornare la pagina e riprovare.",""

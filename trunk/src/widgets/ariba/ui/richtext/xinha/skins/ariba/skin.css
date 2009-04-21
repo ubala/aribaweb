@@ -1,0 +1,52 @@
+p.htmlarea iframe.xinha_iframe, p.htmlarea textarea.xinha_textarea {
+   margin:0px;
+}
+
+.htmlarea iframe.xinha_iframe, .htmlarea textarea.xinha_textarea {
+   margin:0px;
+}
+
+.htmlarea {
+    border:1px solid #7F9DB9; !important;
+}
+
+.htmlarea .toolbar {
+    background:#EEEEEE;
+    border: 0px;
+    border-bottom: 1px solid #7F9DB9;
+}
+
+.htmlarea .toolbar .button {
+    background:#EEEEEE;
+    border: 1px solid #EEEEEE;
+}
+
+.htmlarea .toolbar .buttonActive,
+.htmlarea .toolbar .buttonPressed
+{
+  padding: 2px 0px 0px 2px;
+  border: 1px solid;
+  border-color: ButtonShadow ButtonHighlight ButtonHighlight ButtonShadow;
+}
+.htmlarea .toolbar .buttonPressed {
+  background: ButtonHighlight;
+}
+
+td.toolbarElement {
+    padding-left:4px;
+}
+
+.dialog .title, .dialog h1 {
+    background-color:#EEEEEE;
+    color:#000000;
+}
+
+.dialog .buttonColor {
+    border-top:1px solid #FFFFFF !important;
+    border-right:1px solid #000000 !important;
+    border-bottom:1px solid #000000 !important;
+    border-left:1px solid #FFFFFF !important;
+
+    color: #000000;
+    background-color:#CCCCCC !important;
+}

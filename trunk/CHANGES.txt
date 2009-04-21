@@ -13,11 +13,6 @@ New in Version 5.0RC3 - PREVIEW 3 (4/8/2009)
 	      Apps may override the application-wide default currency by calling AWVFormatterFactory.getDefaultCurrencyName("GBP") from their application init() method.
 	    - AWTCSVDataSource now parses decimal numbers as BigDecimals instead of as Doubles
 
-- MetaUI: fixes/enhancements
-    - Fix broken LIKE query generation
-    - Add support for overriding persistent classes with subclass with 
-      the @SupercedesSuperclass annotation
-
 - Build system improvements
     - Support for app including local lib/ directory. zips/jars in lib/ directory of project
       will be automatically copy them into the web app, and be included in the build time classpath.
@@ -90,6 +85,12 @@ New in Version 5.0RC3 - PREVIEW 2 (4/1/2009)
    - Hitting return incorrectly submitting forms that don't have explicit actions
    - PulldownButton shouldn't show menu on click when disabled=$true
    - Fix broken look of "More..." pseudo-tab (shown when more top level tabs than will fit)
+   - MetaNavTabBar: NPE when on tab click if more meta rules added during previous operation
+   - GlobalActions not always showing up in TOC MetaActionLists (Added showGlobal binding;  used in the basic MetaUI layout)
+   - AppCore: ClassCastException on pages with multiple classes in scope on the tab
+   - Fix extra NavModuleTabs not showing up when @SupercededSuperclass used on User
+   - MetaActionList: Cache actionsByCategory as a static/dynamic context property
+       (applying the same technique we use to cache FieldsByZone for form layouts)
 
 - Enhanced examples
     - MasterDetail example now demonstrates 1) adding a tab via metaui module,

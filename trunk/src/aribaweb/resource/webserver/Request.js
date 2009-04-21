@@ -95,13 +95,13 @@ ariba.Request = function() {
             return false;
         },
 
-        submitFormForElementName : function (formName, elementId, mevent)
+        submitFormForElementName : function (formName, elementId, mevent, target)
         {
             var formObject = Dom.formForName(formName);
             if (elementId) {
                 Dom.addFormField(formObject, this.AWSenderIdKey, elementId);
             }
-            this.submitForm(formObject);
+            this.submitForm(formObject, target);
             Event.cancelBubble(mevent);
             return false;
         },

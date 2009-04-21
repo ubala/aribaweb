@@ -5,3 +5,4 @@ KS_C_5601-1987,,,,
 "AWErrorInfo",1,"Unknown Error","알 수 없는 오류",""
 "AWLazyDivInternals",a001,"Loading...","로드 중...",""
 "AWXBasicScriptFunctions",1,"Please enable window popup for this site to use this function.","이 기능을 사용하려면 이 사이트에서 창 팝업을 사용할 수 있도록 설정하십시오.",""
+"AWComponentReference",1,"An error has occurred while processing your request. Refresh the page and try again.","요청을 처리하는 중 오류가 발생했습니다. 페이지를 새로 고친 다음 다시 시도하십시오.","An error has occurred while processing your request. Refresh the page and try again.","An error has occurred while processing your request. Refresh the page and try again.",""

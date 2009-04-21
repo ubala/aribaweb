@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuItem.awl#27 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuItem.awl#28 $
     </Copyright>
 
     <Overview>
@@ -114,7 +114,7 @@
         elementId="$elementId"
         id="$elementId"
         invokeAction="$invokeAction"
-        awname="$^awname" title="$^title" target="$^target">\
+        awname="$^awname" title="$^title">\
         <a:IncludeBlock name="Preface"/>\
         <a:IncludeContent/>\
     </a:GenericContainer>\

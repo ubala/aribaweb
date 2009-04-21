@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#18 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#19 $
 */
 
 package ariba.util.shutdown;
@@ -30,7 +30,7 @@ import ariba.util.log.LogManager;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Random;
 /**
  * The ShutdownManager is responsible for executing shutdown requests
  * as graceful as possible.
@@ -147,6 +147,8 @@ public class ShutdownManager
     private AsyncShutdown asyncShutdown = null;
     private Thread asyncShutdownThread;
     private static final long CancelledShutdownJoinLimit = 30 * Date.MillisPerSecond;
+
+    private static final int ShutdownMaxRandomDelayPeriod = 5*(int)Date.SecondsPerMinute;
 
     /**
      * Returns the instance of the ShutdownManager
@@ -789,6 +791,29 @@ public class ShutdownManager
         {
             Log.shutdown.info(9264);
             _shutdownScheduledTime = System.currentTimeMillis() + _delayRunnerTimeout;
+
+            // A random delay of 5 minutes will ensure that the nodes
+            // in the cluster does not go down rapidly particularly
+            // during rolling restart.
+            try {
+                Random delay = new Random();
+                long delayInMillis =
+                delay.nextInt((int)ShutdownMaxRandomDelayPeriod)*1000;
+                if(delayInMillis == 0) {
+                   delayInMillis = 30000;
+                }
+
+                synchronized (this) {
+                  Log.shutdown.info(
+                      "Shutdown pending for (" + delayInMillis + ")" );
+                  wait(delayInMillis);
+                }
+
+	        }
+            catch (InterruptedException ex) {
+
+            }
+
             for (Iterator i = _delayers.iterator(); i.hasNext();) {
                 ShutdownDelayer delayer = (ShutdownDelayer)i.next();
                 try {
@@ -855,6 +880,7 @@ public class ShutdownManager
                     Log.shutdown.warning(
                         9258, millisToMinutes(_delayRunnerTimeout));
                 }
+
                 // Continue with immediate shutdown.
                 shutdownNow(_exitCode, false);
             }

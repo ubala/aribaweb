@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#55 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#56 $
 */
 package ariba.ui.meta.core;
 
@@ -63,12 +63,15 @@ public class UIMeta extends ObjectMeta
     public final static String KeyArea = "area";
     public final static String KeyEditing = "editing";
     public final static String KeyAfter = "after";
+    public final static String KeyHidden = "hidden";
     public final static String KeyLabel = "label";
     public final static String KeyComponentName = "component";
     public final static String KeyBindings = "bindings";
     public final static String KeyHomePage = "homePage";
     public final static String KeyZonePath = "zonePath";
     public final static String PropFieldsByZone = "fieldsByZone";
+    public final static String PropActionsByCategory = "actionsByCategory";
+    public final static String PropActionCategories = "actionCategories";
     public final static String PropFieldPropertyList = "fieldPropertyList";
     public final static String PropLayoutsByZone = "layoutsByZone";
 
@@ -171,6 +174,22 @@ public class UIMeta extends ObjectMeta
                     }
                 }, KeyLayout);
 
+            // Register cached derived properties for actionCategories (list) and actionsByCategory (map)
+            for (String key : new String[] { KeyModule, KeyLayout, KeyClass, KeyField }) {
+                registerStaticallyResolvable(PropActionsByCategory, new PropertyValue.StaticallyResolvable() {
+                        public Object evaluate(Context context) {
+                            Map<String, List<ItemProperties>> result = MapUtil.map();
+                            ((UIMeta)context.meta()).actionsByCategory(context, result, ActionZones);
+                            return result;
+                        }
+                    }, key);
+                registerStaticallyResolvable(PropActionCategories, new PropertyValue.StaticallyResolvable() {
+                        public Object evaluate(Context context) {
+                            return ((UIMeta)context.meta()).itemList(context, KeyActionCategory, ActionZones);
+                        }
+                    }, key);
+            }
+            
             PropertyValue.StaticallyResolvable dyn = new PropertyValue.StaticallyResolvable() {
                     public Object evaluate(Context context) {
                         return bindingDictionaryForValueMap((Map)context.propertyForKey("bindings"));
@@ -542,7 +561,7 @@ public class UIMeta extends ObjectMeta
     }
 
 
-    public static String[] ModuleActionZones = { "zGlobal", "zNav" };
+    public static String[] ModuleActionZones = { "zNav", "zGlobal" };
     public static String[] ActionZones = { "zGlobal", "zMain", "zGeneral" };
 
     public enum ModuleMatch { AsHome, AsShow, NoMatch };

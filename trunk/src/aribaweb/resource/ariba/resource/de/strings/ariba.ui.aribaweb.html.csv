@@ -6,3 +6,4 @@ Cp1252,,,,
 "AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","Warnung: Die Feststelltaste ist eingeschaltet. Dies kann dazu führen, dass Sie Ihr Passwort falsch eingeben.",""
 "AWSubmitButton",a001,"Submit","Einreichen",""
 "AWTextArea",a001,"Characters left","Verbleibende Zeichen",""
+"AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","Während der Verarbeitung Ihrer Anforderung ist ein Fehler aufgetreten. Aktualisieren Sie die Seite und versuchen Sie es erneut.",""

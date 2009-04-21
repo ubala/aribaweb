@@ -63,7 +63,7 @@ ariba.Handlers = function() {
 
         actionPopupKeyDown : function (popup, mevent)
         {
-            var keyCode = mevent.keyCode;
+            var keyCode = Event.keyCode(mevent);
             if (keyCode == Input.KeyCodeEnter || keyCode == Input.KeyCodeTab) {
                 var selectedCaptured = popup.getAttribute(AWPopupSelectedCaptured);
                 if (popup.getAttribute(AWDidChangeKey) == "1" ||
@@ -104,7 +104,7 @@ ariba.Handlers = function() {
 
         textRefresh : function (mevent, textField)
         {
-            var keyCode = mevent.keyCode;
+            var keyCode = Event.keyCode(mevent);
             if (keyCode == Input.KeyCodeShift) return true;
             if ((keyCode == Input.KeyCodeEnter && textField.nodeName != 'TEXTAREA') || keyCode == Input.KeyCodeTab) {
                 if (textField.getAttribute(AWDidChangeKey) == "1") {
@@ -142,7 +142,7 @@ ariba.Handlers = function() {
         checkCapsLockError : function (evt)
         {
             if (AWCapsLockErrorDiv) {
-                if (evt.keyCode == Input.KeyCodeCapsLock || evt.keyCode == Input.KeyCodeBackspace) {
+                if (Event.keyCode(evt) == Input.KeyCodeCapsLock || Event.keyCode(evt) == Input.KeyCodeBackspace) {
                     this.hideCapsLockError();
                 }
             }
@@ -314,7 +314,7 @@ ariba.Handlers = function() {
 
         tagOnKeyPress : function (tagObject, formId, windowName, actionName, mevent, windowAttributes)
         {
-            if (mevent.keyCode == Input.KeyCodeEnter) {
+            if (Event.keyCode(mevent) == Input.KeyCodeEnter) {
                 this.tagOnClick(tagObject, formId, windowName, actionName, mevent, windowAttributes);
                 ariba.Event.cancelBubble(mevent);
                 return false;
@@ -415,7 +415,7 @@ ariba.Handlers = function() {
 
         keypress : function (elm, evt) {
             if (Dom.boolAttr(elm, "_dC", false)) return true;
-            return (evt.keyCode == Input.KeyCodeEnter) ? GAT.click(elm, evt) : true;
+            return (Event.keyCode(evt) == Input.KeyCodeEnter) ? GAT.click(elm, evt) : true;
         }
     };
 

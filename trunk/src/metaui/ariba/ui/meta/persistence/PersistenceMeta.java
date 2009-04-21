@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#14 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/PersistenceMeta.java#15 $
 */
 package ariba.ui.meta.persistence;
 
@@ -192,7 +192,7 @@ public class PersistenceMeta
             Class overrider = e.getValue();
             meta.beginRuleSet(Meta.ClassRulePriority + 1000, overrider.getName().replace(".", "/") +".java");
             Rule rule = new Rule(AWUtil.list(new Rule.Selector(UIMeta.KeyModule, e.getKey().getName())),
-                    AWUtil.map(UIMeta.KeyAfter, "zNone"));
+                    AWUtil.map(UIMeta.KeyHidden, true));
             meta.addRule(rule);
             meta.endRuleSet();
         }

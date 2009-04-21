@@ -6,3 +6,4 @@ Cp1252,,,,
 "AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","Aviso: Bloq Mayús está activado. Esto puede hacer que introduzca la contraseña de forma incorrecta.",""
 "AWSubmitButton",a001,"Submit","Enviar",""
 "AWTextArea",a001,"Characters left","Caracteres que quedan",""
+"AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","Se ha producido un error mientras se procesaba su solicitud. Actualice la página e inténtelo de nuevo.",""

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#53 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#54 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -238,10 +238,12 @@ public class AWPopup extends AWComponent
                 setSelection(selection);                }
             catch (NumberFormatException numberFormatException) {
                 if(!AWConcreteApplication.IsDebuggingEnabled){
+                    String msg = ariba.util.i18n.LocalizedJavaString.getLocalizedString(
+                        AWPopup.class.getName(), 1, 
+                        "An error has occurred while processing your request. Refresh the page and try again.", 
+                        preferredLocale());
                     recordValidationError(
-                        numberFormatException,
-                        AWErrorManager.getErrorKeyForComponent(this),
-                        formValue);
+                        AWErrorManager.getErrorKeyForComponent(this),msg,"");
                 }
                 else if ("".equals(formValue)) {
                     if (AWConcreteApplication.IsDebuggingEnabled) {

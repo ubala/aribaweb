@@ -493,6 +493,7 @@ ariba.Chooser = function() {
             else {
                 chooserInfo.textField.select();
             }
+            Event.cancelBubble(evt);
             return false;
         },
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#63 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#64 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -300,11 +300,20 @@ public class AWComponentReference extends AWContainerElement
             AWComponentDefinition componentDefinition = componentDefinition();
             String componentNamePath = componentDefinition == null ?
                     "no component definition" : componentDefinition.componentNamePath();
-            Assert.that(requestContext.allowFailedComponentRendezvous(),
-                    "Cannot rendezvous with stateful subcomponent: %s\nelement id trace %s\ncomponentNamePath: %s\nstateful components: %s",
-                    AWElementIdPath.debugElementIdPath(elementIdPath),
-                    requestContext.currentElementIdTrace(), componentNamePath,
-                    parentComponent.page()._debugSubcomponentString(componentNamePath));
+            if(AWConcreteApplication.IsDebuggingEnabled){
+                Assert.that(requestContext.allowFailedComponentRendezvous(),
+                        "Cannot rendezvous with stateful subcomponent: %s\nelement id trace %s\ncomponentNamePath: %s\nstateful components: %s",
+                        AWElementIdPath.debugElementIdPath(elementIdPath),
+                        requestContext.currentElementIdTrace(), componentNamePath,
+                        parentComponent.page()._debugSubcomponentString(componentNamePath));
+            }
+            
+            String msg = ariba.util.i18n.LocalizedJavaString.getLocalizedString(
+                AWComponentReference.class.getName(), 1, 
+                "An error has occurred while processing your request. Refresh the page and try again.", 
+                parentComponent.preferredLocale());
+
+            parentComponent.recordValidationError(AWErrorManager.GeneralErrorKey, msg, "");
         }
         return subcomponentInstance;
     }

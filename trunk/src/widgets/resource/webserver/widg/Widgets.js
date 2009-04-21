@@ -1324,7 +1324,7 @@ ariba.Widgets = function() {
 
 
             keypress : function (elm, evt) {
-                return (evt.keyCode == Input.KeyCodeEnter) ? Event.behaviors.TB.click(elm, evt) : true;
+                return (Event.keyCode(evt) == Input.KeyCodeEnter) ? Event.behaviors.TB.click(elm, evt) : true;
             }
         },
 
@@ -1338,7 +1338,7 @@ ariba.Widgets = function() {
              },
 
              keypress : function (elm, evt) {
-                 return (evt.keyCode == Input.KeyCodeEnter) ? Event.behaviors.TFSB.click(elm, evt) : true;
+                 return (Event.keyCode(evt) == Input.KeyCodeEnter) ? Event.behaviors.TFSB.click(elm, evt) : true;
              }
         },
 

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFocusRegion.awl#1 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFocusRegion.awl#2 $
     </Copyright>
 
     <Overview>
@@ -29,11 +29,13 @@
     </Binding>
 </a:Api>
 <a:RefreshRegion elementId="$elementId">
-    <a:RefreshRegion alwaysRender="$shouldFocus">
-        <a:ClientSideScript>
-            ariba.Input.setFocusRegion('$elementId');
-        </a:ClientSideScript>
-    </a:RefreshRegion>
+    <a:If ifTrue="$^focus">
+    	<a:RefreshRegion alwaysRender="$shouldFocus">
+    		<a:ClientSideScript>
+    			ariba.Input.setFocusRegion('$elementId');
+			</a:ClientSideScript>
+		</a:RefreshRegion>
+    </a:If>
     <a:IncludeContent/>
 </a:RefreshRegion>
         

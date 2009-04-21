@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#25 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#26 $
     </Copyright>
 
     <Overview>
@@ -93,7 +93,7 @@
                                      size="$^size"/>
                     </td>
                     <td class="chWrapRight">
-                        <a href="javascript:void(0);" omitTags="$isDisabled" tabindex="-1">\
+                        <a href="#" omitTags="$isDisabled" tabindex="-1">\
                             <a:Image class="chModeLink" filename="pull_down.gif" title="$[a002]Select from the list"
                                      awname="$chooserDropDownSemanticKey"/>\
                         </a>\
@@ -102,7 +102,7 @@
                     </td>\
                     <a:If ifTrue="$chooserState.multiSelect">
                         <td>
-                            <a href="javascript:void(0);" omitTags="$isDisabled" tabindex="-1">
+                            <a href="#" omitTags="$isDisabled" tabindex="-1">
                                 <a:Image class="chAddLink" filename="add_off.gif" awname="$chooserAddLinkSemanticKey"/>
                             </a>
                             <a:Image class="chAddOffImg hide" filename="add_off.gif" title="$[a005]Multiple selections allowed"/>

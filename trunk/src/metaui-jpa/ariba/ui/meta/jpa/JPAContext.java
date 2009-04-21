@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#5 $
+    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#6 $
 */
 package ariba.ui.meta.jpa;
 
@@ -210,6 +210,12 @@ abstract public class JPAContext extends ObjectContext
     {
         return _entityManager;
     }
+
+    public EntityManager getJPAEntityManager ()
+    {
+        return _entityManager;
+    }
+
 
     /*
         Called by external interceptors
