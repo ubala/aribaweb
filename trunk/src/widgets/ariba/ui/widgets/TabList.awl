@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#8 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#9 $
     </Copyright>
 
     <Overview>
@@ -151,7 +151,7 @@
                                                    class="lastTab tab"
                                                    submitForm="$isSubmitForm"
                                                    position="this">\
-                                        <a:Local key="a002">More</a:Local>...\
+                                        <a:Local key="a002">More...</a:Local>\
                                     </w:PopupMenuLink>\
                                 </div>\
                                 <w:PopupMenu menuId="$allTabsMenuId">

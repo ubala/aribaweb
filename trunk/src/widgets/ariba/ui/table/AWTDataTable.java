@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#188 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#192 $
 */
 
 package ariba.ui.table;
@@ -490,7 +490,7 @@ public final class AWTDataTable extends AWComponent
 
                 // remember this template (and flag that we're done with initialization)
                 _processedReference = componentReference();
-            } else if (shouldForceColumnUpdate() && !isExportMode()) {
+            } else if (shouldForceColumnUpdate() && !isExportMode() && !_isScrollFaultAction) {
                 invalidateColumns();
                 columns();  // force refresh
             }
@@ -2266,12 +2266,13 @@ public final class AWTDataTable extends AWComponent
      */
     public String primaryDataRowIndicator ()
     {
-        return ( _useParentLayout || !_renderingPrimaryRow) ? null : "1";
+        return ( _useParentLayout || !_renderingPrimaryRow ) ? null : "1";
     }
 
     public String groupingRowIndicator ()
     {
-        return ((primaryDataRowIndicator() != null) && !_displayGroup.isCurrentItemVisible ())
+        return !displayGroup().currentGroupingExpanded() ||
+            ((primaryDataRowIndicator() != null) && !_displayGroup.isCurrentItemVisible ())
             ? "1": null;
     }
 
@@ -2318,6 +2319,11 @@ public final class AWTDataTable extends AWComponent
         return groupByColumn() != null;
     }
 
+    public boolean isGroupByAllowed ()
+    {
+        return displayedColumns().size() > 1;
+    }
+    
     public boolean groupingByCurrentColumn ()
     {
         return _currentColumn == _groupByColumn;
@@ -2346,6 +2352,9 @@ public final class AWTDataTable extends AWComponent
 
     protected void setGroupByColumn (Column column)
     {
+        if (column != null && !isGroupByAllowed()) {
+            return;
+        }
         if (_groupByColumn != column) {
             if (_groupByColumn != null) {
                 setColumnVisibility(_groupByColumn, true);  // restore visibility
@@ -2363,12 +2372,12 @@ public final class AWTDataTable extends AWComponent
                 // check for override sortOrdering
                 column.prepare(this);
                 AWTSortOrdering ordering = column.createSortOrdering(this);
+                String key = _groupByColumn.keyPathString();
+                _displayGroup.setGroupingKey(key);
                 if (ordering != null){
                     _displayGroup.setGroupSortOrdering(ordering);
                 } else {
                     _displayGroup.setGroupSortOrdering(null);
-                    String key = _groupByColumn.keyPathString();
-                    _displayGroup.setGroupingKey(key);
                 }
             }
             resetScrollTop();

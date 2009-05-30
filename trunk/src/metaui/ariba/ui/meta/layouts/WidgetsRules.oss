@@ -23,6 +23,7 @@ operation=search {
 }
 
 operation=(edit, create, search) {
+    layout { editing:true; }
     class { editing:true; }
     field { editing:true; }
     action { editing:true; }

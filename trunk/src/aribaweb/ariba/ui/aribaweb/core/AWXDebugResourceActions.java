@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXDebugResourceActions.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXDebugResourceActions.java#14 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -68,7 +68,7 @@ public class AWXDebugResourceActions extends AWDirectAction
 
     public AWResponseGenerating contentAction ()
     {
-        Assert.that(AWConcreteApplication.IsRapidTurnaroundEnabled, "Action available only if debugging is enabled -- not for production use.");
+        Assert.that(AWConcreteApplication.IsRapidTurnaroundEnabled || AWConcreteApplication.IsDirectConnectEnabled, "Action available only if debugging is enabled -- not for production use.");
 
         String[] path = request().requestHandlerPath();
         Assert.that(path.length > 3, "Incorrect form for request URL");

@@ -1,10 +1,5 @@
 /*
-    Copyright (c) 1996-2009 Ariba, Inc.
-    All rights reserved. Patents pending.
-
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDynamicColumns.java#23 $
-
-    Responsible: kngan
+    Copyright 1996-2008 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -17,13 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDynamicColumns.java#24 $
 */
 
 package ariba.ui.table;
 
 import ariba.ui.aribaweb.core.AWBinding;
-import ariba.ui.aribaweb.core.AWBindingNames;
-import ariba.ui.aribaweb.util.AWUtil;
 import java.util.List;
 import java.util.Map;
 
@@ -118,7 +112,6 @@ public final class AWTDynamicColumns extends AWTDataTable.Column
             return;
         }
 
-
         // iterate through column list, pushing item, and pulling data to initialize our column
         for (int i=0, c=list.size(); i<c; i++) {
             // push item
@@ -134,9 +127,7 @@ public final class AWTDynamicColumns extends AWTDataTable.Column
             if (col == null) {
                 col = new DynamicColumn();
                 col.setContentElement(this.contentElement());
-                col.init("AWTColumn", AWUtil.map(AWBindingNames.key,
-                    AWBinding.bindingWithNameAndConstant(AWBindingNames.key, key),
-                    AWBindingNames.label, _labelBinding));
+                col.init(key, label, null, null, null);
                 col._item = item;
                 col._parentColumn = this;
                 col._styleBinding = _styleBinding;
@@ -154,7 +145,7 @@ public final class AWTDynamicColumns extends AWTDataTable.Column
                 col._formatterBinding = _formatterBinding;
                 col.setUniquingKeyPath(table.stringValueForBinding(_uniquingKeyPathBinding));
             }
-            table.registerColumn(col);
+            table.registerColumn(col);                
         }
     }
 
@@ -172,6 +163,6 @@ public final class AWTDynamicColumns extends AWTDataTable.Column
         public Object purgatoryKey ()
         {
             return keyPathString();
-        }
+        }        
     }
 }

@@ -2,7 +2,7 @@
     Copyright (c) 1996-2008 Ariba, Inc.
     All rights reserved. Patents pending.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#25 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#26 $
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public final class MapUtil
     */
     public static <K,V> Map<K,V> map ()
     {
-        return new HashMap<K,V>(); // OK
+        return new HashMap<K,V>(2); // OK
     }
 
     /**

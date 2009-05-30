@@ -350,6 +350,9 @@ ariba.Input = function() {
                                 if (activeElement.focus) {
                                     activeElement.focus();
                                     activeElement.focus();
+                                    if (activeElement.select) {
+                                        activeElement.select();
+                                    }
                                 }
                             }
                         }
@@ -357,6 +360,9 @@ ariba.Input = function() {
                         if (activeElement.focus) {
                             activeElement.focus();
                             activeElement.focus();
+                            if (activeElement.select) {
+                                activeElement.select();
+                            }                            
                         }
                     }
                 }
@@ -411,14 +417,15 @@ ariba.Input = function() {
         findFirstText : function (parentElm)
         {
             if (parentElm == null) return null;
+            var allowAnchor = Dom.boolAttr(parentElm, "_aa", false);
             var inputs = Dom.findChildrenUsingPredicate(parentElm, function (e) {
-                    return e.tagName == "INPUT" || e.tagName == "TEXTAREA";
+                    return e.tagName == "INPUT" || e.tagName == "TEXTAREA" || (allowAnchor && e.tagName == "A");
                 });
             for (var i = 0, c = inputs.length; i < c; i++) {
                 var element = inputs[i];
                 if (( ((element.type == "text" || element.type == "password" || element.type == "file") &&
                        element.getAttribute('awautoselect') != "0" ) ||
-                      element.nodeName == "TEXTAREA"
+                      element.nodeName == "TEXTAREA" || element.nodeName == "A"
                         ) &&
                     Dom.visibleInScrollArea(element) && !element.getAttribute('disabled') &&
                     !this.modallyDisabled(element) &&

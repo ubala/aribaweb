@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Externalize.java#3 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Externalize.java#4 $
 */
 package ariba.ui.meta.core;
 
@@ -79,7 +79,7 @@ public class Externalize
         Context ctx = _meta.newContext();
 
         // First, actions and fields on all localizedClasses
-        System.out.println ("Localized MetaUI classes: " + _meta.localizedClasses());
+        Log.meta.debug("Localized MetaUI classes: " + _meta.localizedClasses());
         for (String className : _meta.localizedClasses()) {
             registerFieldsForClass(ctx, className);
         }

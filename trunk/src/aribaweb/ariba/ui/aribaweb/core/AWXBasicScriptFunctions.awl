@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#41 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#42 $
     </Copyright>
 
     <Overview>
@@ -33,6 +33,7 @@
             if (window.name == "AWRefreshFrame") {
                 ariba_IR = true;
                 RJS = function (inc, sync, isGS, f) { if (inc) parent.ariba.Refresh.RSS(sync, isGS, f.toString()); }
+                ariba.Request.requestNotInProgress();
             }\
         </a:GenericContainer>\
         <a:If ifTrue="$isBrowserMicrosoft">\

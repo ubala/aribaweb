@@ -7,7 +7,7 @@
 <a:Block name="pagewrapper">\
     <a:If ifTrue="$useModal">\
         <w:ModalPageWrapper hasForm="$true" title="$metaContext.properties.label"
-                            editable="$metaContext.properties.editing"
+                            editable="$false"
                             okAction="$save">\
             <!--- Todo: ActionCategory PageActions in button bar -->
             <!--- $ariba.ui.meta.persistence.ObjectContext.get ($ariba.ui.meta.persistence.ObjectContext.get.groupName_debug) -->

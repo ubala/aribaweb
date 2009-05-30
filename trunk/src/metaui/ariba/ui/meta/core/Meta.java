@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#37 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#38 $
 */
 package ariba.ui.meta.core;
 
@@ -1220,6 +1220,10 @@ public class Meta
             if ((orig instanceof Boolean) && ((Boolean)orig)) {
                 return (override instanceof PropertyValue.Dynamic) ? override : booleanValue(override);
             }
+            if ((override instanceof Boolean) && ((Boolean)override)) {
+                return (orig instanceof PropertyValue.Dynamic) ? orig : booleanValue(orig);
+            }
+
             // if one of our values is dynamic, defer
             if ((orig instanceof PropertyValue.Dynamic || override instanceof PropertyValue.Dynamic)) {
                 return new PropertyValue.DeferredOperationChain(this, orig, override);

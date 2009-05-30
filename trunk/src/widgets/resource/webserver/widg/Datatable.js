@@ -363,14 +363,16 @@ ariba.Datatable = function() {
                                 rowspan--;
                             } else {
                                 var row = headerRows[i];
-                                var protoCell = row.cells[row.cells.length - 1];
-                                rowspan = protoCell.rowSpan;
-                                var th = document.createElement(protoCell.tagName);
-                                th.appendChild(document.createTextNode(''));
-                                if (i > 0) th.innerHTML = "&nbsp;"
-                                th.className = protoCell.className + " thSpacer";
-                                if (rowspan) th.rowSpan = rowspan;
-                                row.appendChild(th);
+                                if (row && row.cells && row.cells.length > 0) {
+                                    var protoCell = row.cells[row.cells.length - 1];
+                                    rowspan = protoCell.rowSpan;
+                                    var th = document.createElement(protoCell.tagName);
+                                    th.appendChild(document.createTextNode(''));
+                                    if (i > 0) th.innerHTML = "&nbsp;"
+                                    th.className = protoCell.className + " thSpacer";
+                                    if (rowspan) th.rowSpan = rowspan;
+                                    row.appendChild(th);
+                                }
                             }
                         }
 
@@ -409,6 +411,15 @@ ariba.Datatable = function() {
             this.setupTable(tableInfo);
         },
 
+        handleDataTableException : function (exception, id)
+        {
+            var msg = "datatable exception: " + exception + ", id: " + id;
+            Debug.log(msg);
+            if (Request.AWDebugEnabled) {
+                alert(msg);
+            }
+        },
+
         postLoad : function ()
         {
             // re-enable the WaitCursor ()  (see this.scrollFaultAction(...))
@@ -416,21 +427,25 @@ ariba.Datatable = function() {
             Debug.log("awtPostLoad running...");
             var faultTableInfo = new Array();
             for (var id in _awtTables) {
-                var tableInfo = this.infoForScrollableTable(id);
-                // Debug.log("Looking for Id: " + id + ", info:" + _awtTables[id] + ", scroll" + tableInfo);
-                if (tableInfo) {
-                    this.setupScrollTable(tableInfo);
-                    // keep a list of all faulting tables, for additional initialization
-                    if (tableInfo.topIndexId) {
-                        faultTableInfo.push(tableInfo);
+                try {
+                    var tableInfo = this.infoForScrollableTable(id);
+                    // Debug.log("Looking for Id: " + id + ", info:" + _awtTables[id] + ", scroll" + tableInfo);
+                    if (tableInfo) {
+                        this.setupScrollTable(tableInfo);
+                        // keep a list of all faulting tables, for additional initialization
+                        if (tableInfo.topIndexId) {
+                            faultTableInfo.push(tableInfo);
+                        }
                     }
-                }
+                } catch (e) { this.handleDataTableException(e, id); }
             }
 
             // initialize faulting tables`
             for (var i = 0; i < faultTableInfo.length; i++) {
-                // setup top and bottom fault areas, and restore scroll position
-                this.setupScrollFaulting(faultTableInfo[i]);
+                try {
+                    // setup top and bottom fault areas, and restore scroll position
+                    this.setupScrollFaulting(faultTableInfo[i]);
+                } catch (e) { this.handleDataTableException(e, ""); } 
             }
 
             // force an initial resize
@@ -491,10 +506,12 @@ ariba.Datatable = function() {
         fixAllHeadingWidths : function ()
         {
             for (var id in _awtTables) {
-                var info = this.infoForScrollableTable(id);
-                if (info) {
-                    this.fixHeadingWidths(info);
-                }
+                try {
+                    var info = this.infoForScrollableTable(id);
+                    if (info) {
+                        this.fixHeadingWidths(info);
+                    }
+                } catch (e) { this.handleDataTableException(e, id); }
             }
         },
 
@@ -611,16 +628,18 @@ ariba.Datatable = function() {
             var footerHidden = false;
             var groups = new Object();
             for (var id in _awtTables) {
-                var info = this.infoForScrollableTable(id);
-                if (info) {
-                    var containerId = (info.flexContainer) ? info.flexContainer.getAttribute("_cid") : "00";
-                    var list = (groups[containerId] || (groups[containerId] = new Object()));
-                    list[id] = info;
-                    if (!footerHidden) {
-                        Widgets.hideFloatingFooter();
-                        footerHidden = true;
+                try {
+                    var info = this.infoForScrollableTable(id);
+                    if (info) {
+                        var containerId = (info.flexContainer) ? info.flexContainer.getAttribute("_cid") : "00";
+                        var list = (groups[containerId] || (groups[containerId] = new Object()));
+                        list[id] = info;
+                        if (!footerHidden) {
+                            Widgets.hideFloatingFooter();
+                            footerHidden = true;
+                        }
                     }
-                }
+                } catch (e) { this.handleDataTableException(e, id); }
             }
             // Debug.log("awtWindowResized: groups: %d", groups.length-1)
 
@@ -634,10 +653,12 @@ ariba.Datatable = function() {
                 // if things change, then run through header/body table sync up
                 for (var g in groups) {
                     for (var id in groups[g]) {
-                        var tableInfo = this.infoForScrollableTable(id);
-                        if (tableInfo) {
-                            this.fixHeadingWidths(tableInfo);
-                        }
+                        try {
+                            var tableInfo = this.infoForScrollableTable(id);
+                            if (tableInfo) {
+                                this.fixHeadingWidths(tableInfo);
+                            }
+                        } catch (e) { this.handleDataTableException(e, id); }
                     }
                 }
             }
@@ -655,23 +676,26 @@ ariba.Datatable = function() {
             var htInfo = [];
             Debug.log("<b><u>**** Datatable Resizing Group</u></b>");
             for (var id in tableGroup) {
-                Debug.log("Table <b>" + id + "</b>");
-                var tableInfo = tableGroup[id];
-                var wrapperTable = tableInfo.wrapperTable;
+                try {
+                    Debug.log("Table <b>" + id + "</b>");
+                    var tableInfo = this.infoForScrollableTable(id);
+                    if (!tableInfo) continue;
+                    var wrapperTable = tableInfo.wrapperTable;
 
-                //Panel support: set strut width to influence parent size.  If our rows
-                // appear to be wrapping, ask for more
-                var desiredWidth = this.desiredWidth(tableInfo);
-                this.checkWidthStrut(tableInfo, tableInfo.positioningParent, desiredWidth);
+                    //Panel support: set strut width to influence parent size.  If our rows
+                    // appear to be wrapping, ask for more
+                    var desiredWidth = this.desiredWidth(tableInfo);
+                    this.checkWidthStrut(tableInfo, tableInfo.positioningParent, desiredWidth);
 
-                // Compute size for this one
-                var rec = this.computeMinMaxHt(tableInfo, desiredWidth);
-                totalUsed += wrapperTable.offsetHeight;
-                // Debug.log ("SIZE (" + id + "): " + rec.minHt + "/" + rec.maxHt);
-                htInfo[id] = rec;
+                    // Compute size for this one
+                    var rec = this.computeMinMaxHt(tableInfo, desiredWidth);
+                    totalUsed += wrapperTable.offsetHeight;
+                    // Debug.log ("SIZE (" + id + "): " + rec.minHt + "/" + rec.maxHt);
+                    htInfo[id] = rec;
 
-                totalExtraWanted += (rec.maxHt - rec.minHt);
-                totalReq += rec.minHt;
+                    totalExtraWanted += (rec.maxHt - rec.minHt);
+                    totalReq += rec.minHt;
+                } catch (e) { this.handleDataTableException(e, id); }
             }
 
             // Figure out window / container space
@@ -729,91 +753,94 @@ ariba.Datatable = function() {
             var totalScroll = 0;
             // resize tables, doling out any extra space
             for (var id in tableGroup) {
-                Debug.log("** Table: <b>" + id + "</b>");
-                var tableInfo = tableGroup[id];
-                var rec = htInfo[id];
-                var wrapperTable = tableInfo.wrapperTable;
-                var bodyDiv = tableInfo.body;
-                var maxHeight = rec.maxHt;
-                var minHeight = rec.minHt;
+                try {
+                    Debug.log("** Table: <b>" + id + "</b>");
+                    var tableInfo = this.infoForScrollableTable(id);
+                    if (!tableInfo) continue;
+                    var rec = htInfo[id];
+                    var wrapperTable = tableInfo.wrapperTable;
+                    var bodyDiv = tableInfo.body;
+                    var maxHeight = rec.maxHt;
+                    var minHeight = rec.minHt;
 
-                var extraWanted = (maxHeight - minHeight);
+                    var extraWanted = (maxHeight - minHeight);
 
-                var max = ((windowExtra > 0) && (extraWanted > 0))
-                        ? (minHeight + Math.round(extraWanted * 1.0 / totalExtraWanted * windowExtra))
-                        : minHeight;
-                var newHeight = Math.min(maxHeight, max);
-                if (tableInfo.maxHeight) {
-                    newHeight = Math.min(newHeight, tableInfo.maxHeight);
-                }
-                var bodyHt = newHeight - (wrapperTable.offsetHeight - bodyDiv.offsetHeight);
+                    var max = ((windowExtra > 0) && (extraWanted > 0))
+                            ? (minHeight + Math.round(extraWanted * 1.0 / totalExtraWanted * windowExtra))
+                            : minHeight;
+                    var newHeight = Math.min(maxHeight, max);
+                    if (tableInfo.maxHeight) {
+                        newHeight = Math.min(newHeight, tableInfo.maxHeight);
+                    }
+                    var bodyHt = newHeight - (wrapperTable.offsetHeight - bodyDiv.offsetHeight);
 
-                // fix the table body height
-                var hasVertScroll = maxHeight > newHeight; // (div.scrollHeight > div.clientHeight);
-                if (hasVertScroll) totalScroll += (maxHeight - newHeight);
-                Debug.log("newHeight=" + newHeight + ", maxHeight=" + maxHeight + "  (showVertScroll:" + hasVertScroll + ")");
+                    // fix the table body height
+                    var hasVertScroll = maxHeight > newHeight; // (div.scrollHeight > div.clientHeight);
+                    if (hasVertScroll) totalScroll += (maxHeight - newHeight);
+                    Debug.log("newHeight=" + newHeight + ", maxHeight=" + maxHeight + "  (showVertScroll:" + hasVertScroll + ")");
 
 
-                // Skip if we're the same as before
-                if (bodyHt != tableInfo.bodyHt || rec.desiredWidth != tableInfo.desiredWidth) {
-                    // remember for next time
-                    tableInfo.bodyHt = bodyHt;
-                    tableInfo.desiredWidth = rec.desiredWidth;
+                    // Skip if we're the same as before
+                    if (bodyHt != tableInfo.bodyHt || rec.desiredWidth != tableInfo.desiredWidth) {
+                        // remember for next time
+                        tableInfo.bodyHt = bodyHt;
+                        tableInfo.desiredWidth = rec.desiredWidth;
 
-                    var cells = tableInfo.bodyTable.rows[0].cells;
-                    var spacerCell = cells[cells.length - 1];
-                    var curSpacer = spacerCell.clientWidth;
-                    var realScrollWidth = tableInfo.bodyTable.offsetWidth - curSpacer;
-                    var visibleWidth = bodyDiv.offsetWidth; // ((UseScrollPad && Dom.hasClass(wrapperTable, "yScroll")) ? ScrollSize : 0)
-                    var clippedWidth = realScrollWidth - visibleWidth;
-                    var showHorizScroll = (clippedWidth > 2);  // 2 is fudge factor
+                        var cells = tableInfo.bodyTable.rows[0].cells;
+                        var spacerCell = cells[cells.length - 1];
+                        var curSpacer = spacerCell.clientWidth;
+                        var realScrollWidth = tableInfo.bodyTable.offsetWidth - curSpacer;
+                        var visibleWidth = bodyDiv.offsetWidth; // ((UseScrollPad && Dom.hasClass(wrapperTable, "yScroll")) ? ScrollSize : 0)
+                        var clippedWidth = realScrollWidth - visibleWidth;
+                        var showHorizScroll = (clippedWidth > 2);  // 2 is fudge factor
 
-                    Debug.log("bodyHt (" + id + ") = " + bodyHt);
-                    /*
-                    Debug.log("realScrollWidth=" + realScrollWidth + ", visibleWidth=" + visibleWidth +", clippedWidth=" + clippedWidth
-                        + ", curSpacer=" + curSpacer + "-->" + wrapperTable.className);
-                    Debug.log ("Horiz scroll: " +  showHorizScroll + " -- realScrollWidth=" + realScrollWidth + ", offsetWidth=" + tableInfo.wrapperTable.offsetWidth);
-                    */
+                        Debug.log("bodyHt (" + id + ") = " + bodyHt);
+                        /*
+                        Debug.log("realScrollWidth=" + realScrollWidth + ", visibleWidth=" + visibleWidth +", clippedWidth=" + clippedWidth
+                            + ", curSpacer=" + curSpacer + "-->" + wrapperTable.className);
+                        Debug.log ("Horiz scroll: " +  showHorizScroll + " -- realScrollWidth=" + realScrollWidth + ", offsetWidth=" + tableInfo.wrapperTable.offsetWidth);
+                        */
 
-                    bodyDiv.style.height = bodyHt + "px";
+                        bodyDiv.style.height = bodyHt + "px";
 
-                    if (hasVertScroll) {
-                        // spacer cell auto-set by yScroll
-                        if (!Dom.hasClass(bodyDiv, "yScroll")) {
-                            Dom.addClass(bodyDiv, "yScroll");
+                        if (hasVertScroll) {
+                            // spacer cell auto-set by yScroll
+                            if (!Dom.hasClass(bodyDiv, "yScroll")) {
+                                Dom.addClass(bodyDiv, "yScroll");
+                            }
+                        } else {
+                            bodyDiv.scrollTop = 0;
+                            if (tableInfo.head) tableInfo.head.scrollTop = 0;
+                            Dom.removeClass(bodyDiv, "yScroll");
                         }
-                    } else {
-                        bodyDiv.scrollTop = 0;
-                        if (tableInfo.head) tableInfo.head.scrollTop = 0;
-                        Dom.removeClass(bodyDiv, "yScroll");
-                    }
-                    if (showHorizScroll) {
-                        if (!Dom.hasClass(bodyDiv, "xScroll")) {
-                            bodyDiv.style.overflowY = "auto";
-                            Dom.addClass(bodyDiv, "xScroll");
-                            bodyDiv.style.overflowY = "";
+                        if (showHorizScroll) {
+                            if (!Dom.hasClass(bodyDiv, "xScroll")) {
+                                bodyDiv.style.overflowY = "auto";
+                                Dom.addClass(bodyDiv, "xScroll");
+                                bodyDiv.style.overflowY = "";
+                            }
                         }
+                        else {
+                            bodyDiv.scrollLeft = 0;
+                            if (tableInfo.head) tableInfo.head.scrollLeft = 0;
+                            Dom.removeClass(bodyDiv, "xScroll");
+                        }
+
+                        // Fix min/maximize control
+                        if (tableInfo.mmControl) {
+                            var newClass = (tableInfo.maximize) ? "awtMMMax" : ((hasVertScroll) ? "awtMMScroll" : "awtMMNone");
+                            if (tableInfo.mmControl.className != newClass) tableInfo.mmControl.className = newClass;
+                        }
+
+                        //Panel support: set strut width to influence parent size.  If our rows appear to be wrapping, ask for more
+                        this.checkWidthStrut(tableInfo, positioningParent, this.desiredWidth(tableInfo));
+
+                        // force a resize to fix heading width
+                        this.fixHeadingWidths(tableInfo);
                     }
-                    else {
-                        bodyDiv.scrollLeft = 0;
-                        if (tableInfo.head) tableInfo.head.scrollLeft = 0;
-                        Dom.removeClass(bodyDiv, "xScroll");
-                    }
 
-                    // Fix min/maximize control
-                    if (tableInfo.mmControl) {
-                        var newClass = (tableInfo.maximize) ? "awtMMMax" : ((hasVertScroll) ? "awtMMScroll" : "awtMMNone");
-                        if (tableInfo.mmControl.className != newClass) tableInfo.mmControl.className = newClass;
-                    }
-
-                    //Panel support: set strut width to influence parent size.  If our rows appear to be wrapping, ask for more
-                    this.checkWidthStrut(tableInfo, positioningParent, this.desiredWidth(tableInfo));
-
-                    // force a resize to fix heading width
-                    this.fixHeadingWidths(tableInfo);
-                }
-
-                this.tryScrollSet(tableInfo);
+                    this.tryScrollSet(tableInfo);
+                } catch (e) { this.handleDataTableException(e, id); }
             }
 
             // Panel support: record with positioningParent if we want more space

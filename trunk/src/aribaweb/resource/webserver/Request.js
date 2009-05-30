@@ -33,6 +33,8 @@ ariba.Request = function() {
     var AWPingCompleteTimeout;
     var AWPingCheckCount = 0;
     var _AWProgressTimerHandle;
+    var AWCancelRequestDelay = 0;
+    var AWCancelRequestDelayHandle;
 
     var _XMLHTTP_COUNT = 0;
     var _XMLQUEUE = [];
@@ -672,9 +674,14 @@ ariba.Request = function() {
             return AWRequestInProgress;
         },
 
-        requestComplete : function ()
+        requestNotInProgress : function ()
         {
             AWRequestInProgress = false;
+        },
+
+        requestComplete : function ()
+        {
+            this.requestNotInProgress();
             Input.hideWaitCursor();
         },
 
@@ -966,8 +973,20 @@ ariba.Request = function() {
                 Debug.log("Progress check.  Message:" + message);
                 if (message == "--NO_REQUEST--") {
                     // no request in progress now.  Hide panel
-                    Event.notifyRefreshComplete();
-                    Request.requestComplete();
+                    var notifyRefreshComplete = function() {
+                        Event.notifyRefreshComplete();
+                        Request.requestComplete();
+                    };
+
+                    if (AWCancelRequestDelay <= 0) {
+                        notifyRefreshComplete();
+                    }
+                    else {
+                        Debug.log("setTimeout: AWCancelRequestDelayHandle, delay = " + AWCancelRequestDelay);
+                        AWCancelRequestDelayHandle = setTimeout(
+                            notifyRefreshComplete, AWCancelRequestDelay);
+                    }
+
                 } else {
                     Input.updateWaitMessage(xmlhttp.responseText);
 
@@ -992,6 +1011,25 @@ ariba.Request = function() {
             }
 
             timer(initialDelay);
+        },
+
+        setCancelRequestDelay : function (delay)
+        {
+            AWCancelRequestDelay = delay;
+        },
+
+        getCancelRequestDelay : function ()
+        {
+            return AWCancelRequestDelay;
+        },
+
+        clearCancelRequestDelayHandle : function ()
+        {
+            if (AWCancelRequestDelayHandle) {
+                Debug.log("clearTimeout: AWCancelRequestDelayHandle");
+                clearTimeout(AWCancelRequestDelayHandle);
+                AWCancelRequestDelayHandle = null;
+            }
         },
 
         setStatusDone : function ()

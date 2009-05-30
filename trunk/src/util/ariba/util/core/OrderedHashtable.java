@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/OrderedHashtable.java#12 $
+    $Id: //ariba/platform/util/core/ariba/util/core/OrderedHashtable.java#13 $
 */
 
 package ariba.util.core;
@@ -49,6 +49,7 @@ public class OrderedHashtable extends Hashtable
 
     public OrderedHashtable ()
     {
+        super(2);
     }
 
     public Object put (Object key, Object value)

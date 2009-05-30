@@ -104,7 +104,7 @@
         </fileset>
     </target>
 
-    <!-- Use concrete aribaweb.properties in src directory or generate one, if none -->
+    <!-- Use concrete persistence.xml in src directory or generate one, if none -->
     <target name="explicit-persistence-xml">
         <available file="${src.dir}/persistence.xml" property="persistence.xml" value="${src.dir}/persistence.xml"/>
         <condition property="persistence.xml" value="">
@@ -116,7 +116,7 @@
         <property name="persistence.xml" location="${src.derived.dir}/persistence.xml"/>
         <evaluate-template templateFile="${jpa.templates.dir}/persistence.xml" outputFile="${persistence.xml}"/>
     </target>
-
+    
     <target name="copy-resources" depends="common.copy-resources, check-persistence-xml" if="war.name">
         <copy file="${persistence.xml}" todir="${build.classes.dir}/META-INF" failonerror="true"/>
 

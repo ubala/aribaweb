@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#10 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/MetaContext.java#11 $
 */
 package ariba.ui.meta.core;
 
@@ -26,6 +26,7 @@ import ariba.ui.aribaweb.core.AWElement;
 import ariba.ui.aribaweb.core.AWTemplate;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWBindingNames;
+import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWEnvironmentStack;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWUtil;
@@ -246,13 +247,16 @@ public class MetaContext extends AWContainerElement
         boolean needCleanup = pushPop(true, false, component);
         AWResponseGenerating actionResults = null;
         try {
+            AWEncodedString elementId = AWConcreteApplication.IsDebuggingEnabled
+                && requestContext.isPathDebugRequest() ? 
+                    requestContext.currentElementId() : null;
             actionResults = super.invokeAction(requestContext, component);
 
             if (actionResults != null && requestContext.isPathDebugRequest()) {
                 Context context = MetaContext.currentContext(component);
                 Object provider = context.debugTracePropertyProvider();
                 if (provider != null) {
-                    requestContext.debugTrace().pushComponentPathEntry(this);
+                    requestContext.debugTrace().pushComponentPathEntry(this, elementId);
                     requestContext.debugTrace().pushMetadata(null, provider, true);
                 }
             }

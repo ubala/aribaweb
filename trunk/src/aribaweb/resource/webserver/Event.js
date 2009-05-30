@@ -163,6 +163,9 @@ ariba.Event = function() {
             }
 
         // execute on every page load (incremental or full page)
+            if (ariba.Request.clearCancelRequestDelayHandle) {
+                ariba.Request.clearCancelRequestDelayHandle();
+            }
             if (AWOnRefreshCallbacks) {
                 for (i = 0; i < AWOnRefreshCallbacks.length; i++) {
                     // try {

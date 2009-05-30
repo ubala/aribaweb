@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Initialization.java#11 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Initialization.java#12 $
 */
 package ariba.appcore;
 
@@ -257,7 +257,10 @@ public class Initialization
                     }
                 };
             }
+        } else {
+            cls = (String)classes;
         }
+        
         if (cls == null) return true;
         // FIXME: map unknown ops to parent ops?  (e.g. keywordSearch to search)
         if (op == null) return true;

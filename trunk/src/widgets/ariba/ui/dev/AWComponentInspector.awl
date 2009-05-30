@@ -91,6 +91,7 @@
 
         <w:Tab label="Click Path">
             <a:If ifTrue="$pathDisplayGroup.filteredObjects.size">
+                <span bh="_MO">
                 <t:DataTable item="$traceNode" displayGroup="$currentPathDisplayGroup"
                               singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
                               showColumnHeader="$false" enableScrolling="$true" showOptionsMenu="$true"
@@ -122,6 +123,7 @@
                     </a:Content>
 
                     <t:Column label="Component" isValueColumn="$true">
+                        <span targetId="$traceNode.elementId"/>
                         <div _ifTrue="$traceNode.associatedMetadata" class="flL cueTip" style="padding:1px; line-height:9px; margin:2px 4px 0px 0px">M</div>\
                         <b omitTags="$traceNode.elementIsStateless">$nodeTitle</b>\
                     </t:Column>
@@ -133,6 +135,7 @@
                         </a:DebugRemoteOpen>
                     </t:RowDetail>
                 </t:DataTable>
+                </span>
             <a:Else/>
                 <br/>
                 <i><b>Alt-Click</b> On the area of interest in the main window to see its Component Path trace</i>

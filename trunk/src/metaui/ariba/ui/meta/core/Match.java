@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Match.java#13 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Match.java#14 $
 */
 package ariba.ui.meta.core;
 
@@ -284,11 +284,11 @@ class Match
                     iA++; iB++;
                 } else if (c < 0) {
                     // If A not in B, but A doesn't filter on B's mask, then add it
-                    System.out.println("  -- Only in A: " + _meta._rules[a[iA]]);
+                    Log.meta.debug("  -- Only in A: " + _meta._rules[a[iA]]);
                     iA++;
                 }
                 else {
-                    System.out.println("  -- Only in B: " + _meta._rules[b[iB]]);
+                    Log.meta.debug("  -- Only in B: " + _meta._rules[b[iB]]);
                     iB++;
                 }
             }

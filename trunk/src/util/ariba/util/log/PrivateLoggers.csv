@@ -77,6 +77,7 @@ aribaAuditCommitNow.exception, ariba.app.audit.AuditLoggerFactory
 aribaAuditCommitNow.parameters, ariba.app.audit.AuditLoggerFactory
 aribaAuditCommitNow.approvable, ariba.app.audit.AuditLoggerFactory
 aribaAuditCommitNow.realmPurge, ariba.app.audit.AuditLoggerFactory
+aribaAuditCommitNow.translations, ariba.app.audit.AuditLoggerFactory
 aribaAuditCommitNow.reportTimeout, ariba.app.audit.AuditLoggerFactory
 aribaAuditCommitNow.schemaRealmMapping, ariba.app.audit.AuditLoggerFactory
 aribaAuditCommitNow.cdsSyncVerifier, ariba.app.audit.AuditLoggerFactory

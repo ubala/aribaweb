@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.awl#22 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.awl#24 $
     </Copyright>
 
     <Overview>
@@ -131,7 +131,7 @@
     </a:If>
 <a:Else/>
     <a:If equalNull="$table.pivotState">
-        <a:If ifTrue="$^showGroupBy:$true">
+        <a:If ifTrue="$showGroupBy">
             <w:PopupMenuHeading showSeparator="$true">\
                 <a:Local key="a005">\
                     Group by Column\

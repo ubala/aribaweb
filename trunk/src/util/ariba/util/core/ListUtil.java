@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#31 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#32 $
 */
 
 package ariba.util.core;
@@ -133,7 +133,7 @@ public abstract class ListUtil
     */
     public static <T> List<T> list ()
     {
-        return new ArrayList<T>(); // OK
+        return new ArrayList<T>(1); // OK
     }
 
     /**
