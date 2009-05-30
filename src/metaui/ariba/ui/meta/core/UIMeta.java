@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#56 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#58 $
 */
 package ariba.ui.meta.core;
 
@@ -174,6 +174,7 @@ public class UIMeta extends ObjectMeta
                     }
                 }, KeyLayout);
 
+            /* actions by category caching visibility.  need to be fixed before reeneabling this  
             // Register cached derived properties for actionCategories (list) and actionsByCategory (map)
             for (String key : new String[] { KeyModule, KeyLayout, KeyClass, KeyField }) {
                 registerStaticallyResolvable(PropActionsByCategory, new PropertyValue.StaticallyResolvable() {
@@ -189,7 +190,8 @@ public class UIMeta extends ObjectMeta
                         }
                     }, key);
             }
-            
+            */
+
             PropertyValue.StaticallyResolvable dyn = new PropertyValue.StaticallyResolvable() {
                     public Object evaluate(Context context) {
                         return bindingDictionaryForValueMap((Map)context.propertyForKey("bindings"));
@@ -642,7 +644,10 @@ public class UIMeta extends ObjectMeta
             context.push();
             context.set(KeyModule, module.name());
 
-            if (checkVisibility && !context.booleanPropertyForKey(KeyVisible, true)) continue;
+            if (checkVisibility && !context.booleanPropertyForKey(KeyVisible, true)) {
+            	context.pop();
+            	continue;
+            }
 
             moduleInfo.moduleNames.add(module.name());
 
@@ -1056,7 +1061,7 @@ public class UIMeta extends ObjectMeta
                 if (wrapper != null) {
                     _filePath = wrapper.rule.getRuleSet().filePath();
                 } else {
-                    System.out.println("Mising rule wrapper for localized string!");
+                    Log.meta.debug("Mising rule wrapper for localized string!");
                     context.debug();
                 }
                 // if declaration was in java file, then key is just field/method name

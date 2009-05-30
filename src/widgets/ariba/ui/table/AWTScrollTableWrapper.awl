@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.awl#65 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.awl#67 $
     </Copyright>
 
     <Overview>
@@ -227,7 +227,7 @@
                             <a:ClientSideScript executeOnIncrementalUpdate="$true" isSingleton="$false">
                                 ariba.Datatable.updateScrollTable("$tableId", <a:String value="$^isDragDropEnabled:false"/>, "$isMaximizedId" ,
                                         "$^topCount", "$^bottomCount", "$topIndexId", "$topOffsetId", "<a:ActionId action="$^scrollFaultAction"/>",
-                                        "<a:String value="$^elementIdForVisibleRow"/>", "<a:ActionId action="$^updateSelectAllAction"/>", $^rowCount);
+                                        "<a:String value="$^elementIdForVisibleRow"/>", "<a:ActionId action="$^updateSelectAllAction"/>", <a:String value="$^rowCount:0"/>);
                             </a:ClientSideScript>
                         </a:RefreshRegion>\
                     </a:Form>\

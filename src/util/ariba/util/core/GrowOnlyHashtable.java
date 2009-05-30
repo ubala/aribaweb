@@ -94,7 +94,7 @@ public class GrowOnlyHashtable<K,V> extends AbstractMap<K,V>
     static final String keysField = "keys";
     static final String elementsField = "elements";
 
-    static final int DefaultSize = 4;
+    static final int DefaultSize = 2;
 
     static final Object DeletedMarker = new Object();
     private static final Object emptyArray[] = new Object[0];

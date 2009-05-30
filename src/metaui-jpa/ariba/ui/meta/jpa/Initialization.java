@@ -38,7 +38,7 @@ public class Initialization
                 new AWJarWalker.AnnotationListener () {
                     public void annotationDiscovered(String className, String annotationType)
                     {
-                        System.out.println("++++++++ Entity Annotation on class: " + className);
+                        Log.metajpa.debug("++++++++ Entity Annotation on class: " + className);
                         PersistenceMeta.registerEntityClass(className);
                     }
                 });
@@ -46,7 +46,7 @@ public class Initialization
                 new AWJarWalker.AnnotationListener () {
                     public void annotationDiscovered(String className, String annotationType)
                     {
-                        System.out.println("++++++++ Embeddable Annotation on class: " + className);
+                        Log.metajpa.debug("++++++++ Embeddable Annotation on class: " + className);
                         PersistenceMeta.registerEntityClass(className);
                     }
                 });

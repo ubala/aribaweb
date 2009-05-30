@@ -78,7 +78,7 @@
                 <a:IncludeContent/>\
             </graph>\
         </pre>\
-        <a:ClientSideScript>
+        <a:ClientSideScript isSingleton="$false">
             // This will open / update the flash graph
             awInsertFlashGraph("$objId", "$dataId", "$swfUrl",
                 "<a:String value='$^width:480'/>", "<a:String value='$^height:320'/>");

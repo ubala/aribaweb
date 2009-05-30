@@ -29,7 +29,7 @@ class Issue
 
    @ManyToOne Category category
 
-   @OneToMany @SearchableComponent
+   @OneToMany(cascade = CascadeType.ALL) @SearchableComponent
    Set <Note> notes
 
    void addToNotes (Note note)

@@ -1,0 +1,32 @@
+<w:BasicPageWrapper hasForm="$false">
+
+    <a:DropContainer type="demoDragType" dropAction="$dropToTopAction"
+       style="border:1px solid #777777;margin:5px;padding:5px" tagName="div">
+        Top Drop Container
+        <a:RefreshRegion>
+            <a:For list="$topList" item="$item">
+                <a:DragContainer type="demoDragType" dragAction="$dragAction">
+                    <div style="border:1px solid red;margin:5px;padding:5px;width:200px">
+                        Drag and drop me below
+                    </div>
+                </a:DragContainer>
+            </a:For>
+        </a:RefreshRegion>
+    </a:DropContainer>
+
+    <a:DropContainer type="demoDragType" dropAction="$dropToBottomAction"
+       style="border:1px solid #777777;margin:5px;padding:5px" tagName="div">
+        Bottom Drop Container
+        <a:RefreshRegion>
+            <a:For list="$bottomList" item="$item">
+                <a:DragContainer type="demoDragType" dragAction="$dragAction">
+                    <div style="border:1px solid red;margin:5px;padding:5px;width:200px">
+                        Drag and drop me above
+                    </div>
+                </a:DragContainer>
+            </a:For>
+        </a:RefreshRegion>
+    </a:DropContainer>
+
+
+</w:BasicPageWrapper>

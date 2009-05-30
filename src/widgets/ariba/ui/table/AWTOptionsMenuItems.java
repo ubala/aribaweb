@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.java#14 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.java#16 $
 */
 package ariba.ui.table;
 
@@ -142,5 +142,10 @@ public final class AWTOptionsMenuItems extends AWComponent
     public boolean disableHideColumn ()
     {
         return _table.displayedColumns().size() == 1 && _table.isCurrentColumnDisplayed();
+    }
+
+    public boolean showGroupBy ()
+    {
+        return booleanValueForBinding("showGroupBy", true) && _table.isGroupByAllowed();
     }
 }

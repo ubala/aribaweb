@@ -111,6 +111,10 @@ action {
         actionResults:${ariba.ui.meta.persistence.ObjectContext.bindNewContext();
                     requestContext.pageWithName(properties.pageName)}
     }
+    trait=nestedContext {
+        actionResults:${ariba.ui.meta.persistence.ObjectContext.bindNestedContext();
+                    requestContext.pageWithName(properties.pageName)}
+    }
 }
 
 action=Create {
@@ -136,23 +140,6 @@ action=Create {
         visible:${displayGroup.dataSource.parentObject != null}
     }
 }
-
-/*
-@actionCategory=Create {
-    after:zNav;
-    label:$[a002]Create;
-    class {
-        @action=Create {
-            label:${ariba.ui.meta.core.UIMeta.beautifyClassName(properties.class)};
-        }
-    }
-}
-
-@actionCategory=Search {
-    after:zNav;
-}
-*/
-
 
 @actionCategory=Manage {
     after:zNav;

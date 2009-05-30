@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#64 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentReference.java#65 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -307,10 +307,10 @@ public class AWComponentReference extends AWContainerElement
                         requestContext.currentElementIdTrace(), componentNamePath,
                         parentComponent.page()._debugSubcomponentString(componentNamePath));
             }
-            
+
             String msg = ariba.util.i18n.LocalizedJavaString.getLocalizedString(
-                AWComponentReference.class.getName(), 1, 
-                "An error has occurred while processing your request. Refresh the page and try again.", 
+                AWComponentReference.class.getName(), 1,
+                "An error has occurred while processing your request. Refresh the page and try again.",
                 parentComponent.preferredLocale());
 
             parentComponent.recordValidationError(AWErrorManager.GeneralErrorKey, msg, "");
@@ -469,7 +469,7 @@ public class AWComponentReference extends AWContainerElement
         } else {
             // requestContext.popElementIdLevel();
         }
-        
+
         if (LogComponentEvaluation) {
             logPhase(requestContext, "applyValues", false);
         }
@@ -497,6 +497,9 @@ public class AWComponentReference extends AWContainerElement
             return null;
 
         requestContext.pushCurrentComponent(subcomponentInstance);
+        AWEncodedString elementId = AWConcreteApplication.IsDebuggingEnabled
+            && requestContext.isPathDebugRequest() ?
+            requestContext.currentElementId() : null;
         try {
             actionResults = subcomponentInstance.invokeAction(requestContext, component);
         }
@@ -518,7 +521,7 @@ public class AWComponentReference extends AWContainerElement
             logPhase(requestContext, "invokeAction", false);
         }
         if (actionResults != null && requestContext.isPathDebugRequest()) {
-            requestContext.debugTrace().pushComponentPathEntry(this);
+            requestContext.debugTrace().pushComponentPathEntry(this, elementId);
         }
 
         return actionResults;
@@ -583,7 +586,7 @@ public class AWComponentReference extends AWContainerElement
     {
         ag.addReferenceElement(this);
         throw ag;
-    }    
+    }
 
     public void validate (AWValidationContext validationContext, AWComponent component)
     {

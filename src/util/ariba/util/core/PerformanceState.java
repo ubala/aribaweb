@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#27 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#28 $
 */
 
 package ariba.util.core;

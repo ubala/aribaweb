@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#6 $
+    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#8 $
 */
 package ariba.ui.meta.jpa;
 
@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.IdentityHashMap;
+import java.io.Serializable;
+
+import org.hibernate.CallbackException;
 
 abstract public class JPAContext extends ObjectContext
 {
@@ -155,13 +158,74 @@ abstract public class JPAContext extends ObjectContext
     public void save()
     {
         _validateChanges();
-        _flushPendingPersists();
-        EntityTransaction tx = _entityManager.getTransaction();
-        tx.begin();
-        _entityManager.flush();
-        tx.commit();
-        notifyGroupOfSave();
+
+        if (getParentContext() != null) {
+            saveToParentContext();
+        } else {
+            _flushPendingPersists();
+            EntityTransaction tx = _entityManager.getTransaction();
+            tx.begin();
+            _entityManager.flush();
+            tx.commit();
+            notifyGroupOfSave();
+        }
     }
+
+    /**
+     * NOTE: this implementation is currently BROKEN!  The JPA EntityManager API does not include support
+     * for nested EntityManagers, and this attempt to emulate from the outside (including using Hibernate
+     * interceptor APIs) does not work completely (do to issues with applying merge() when saving back
+     * unsaved objects from the child back to the parent). 
+     * @return the new child context instance
+     */
+    public ObjectContext createNestedContext ()
+    {
+        ObjectContext child = super.createNestedContext();
+
+        // Need to flush our persists and merge them up so they same copy is in the child
+        Object[] toMerge = _pendingPersists.keySet().toArray();
+
+        _flushPendingPersists();
+
+        // We expect an interceptor hook to catch get() calls in the child, and merge such
+        // entities on-demand into the child context
+
+        return child;
+    }
+
+    protected void saveToParentContext ()
+    {
+        /*
+        // FIXME!  How do we do a *merge* to an not-yet persisted object?
+
+        for (Object obj :_pendingPersists.keySet()) {
+            Object parentCopy = obj;
+            parent.recordForInsert(parentCopy);
+        }
+        */
+        // we don't want to do this until the final save, but right now we may not have a choice...
+        _flushPendingPersists();
+
+        JPAContext parent = (JPAContext)getParentContext();
+        Map objectsById = getPotentiallyModifiedObjects();
+        for (Object obj : objectsById.values()) {
+            parent.merge(obj);
+        }
+
+    }
+
+    public Boolean isTransient (Object o)
+    {
+        return _pendingPersists.containsKey(o);
+    }
+
+
+    /**
+     * Get list of objects that have unsaved changes (or, if that's not possible, all objects in the context)
+     * @return Map from id to object instance
+     */
+    abstract protected Map getPotentiallyModifiedObjects ();
+
 
     void _validateChanges ()
     {
@@ -234,7 +298,7 @@ abstract public class JPAContext extends ObjectContext
     protected void objectUpdatedInPeerContext (Object key, Object o)
     {
         if (getIfAlreadyLoaded(o.getClass(), key) != null) {
-            System.out.println(this + ": Object updated by peer: " + o);
+            Log.metajpa.debug(this + ": Object updated by peer: " + o);
 
             // refresh?
             merge(o);
@@ -255,5 +319,35 @@ abstract public class JPAContext extends ObjectContext
             }
         }
         _updatedObjects.clear();
+    }
+
+    /**
+     * Used to provide a child context with object instances that include modifications from the parent context.
+     * @param entityName
+     * @param id
+     * @return a merged instance from parent context, or null if none
+     * @throws CallbackException
+     */
+
+    Object _mergeId;
+
+    protected Object overrideEntityInstance(String entityName, Serializable id)
+    {
+        Object override = null;
+        JPAContext parent = (JPAContext)getParentContext();
+        if (parent != null && !id.equals(_mergeId)) {
+            Class entityClass = ClassUtil.classForName(entityName);
+            Object parentObject = parent.getIfAlreadyLoaded(entityClass, id);
+            if (parentObject != null) {
+                Object prevMergeId = _mergeId;
+                _mergeId = id;
+                try {
+                    override = merge(parentObject);
+                } finally {
+                    _mergeId = prevMergeId;
+                }
+            }
+        }
+        return override;
     }
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#71 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#73 $
 */
 package ariba.ui.table;
 
@@ -840,6 +840,9 @@ public final class AWTDisplayGroup
     {
         _itemToForceVisible = leafItem;
         int index = ListUtil.indexOfIdentical(filteredObjects(), rootItem);
+        // Safe guard against item that is not in the filteredObjects.
+        // Otherwise, this will cause a scrollTop reset. 
+        if (index < 0) return;
         int topIndex = 0;
         if (_useBatching) {
             // find the closest batch top index
@@ -1348,12 +1351,21 @@ public final class AWTDisplayGroup
 
     public Object insert ()
     {
+        return insert(true);
+    }
+
+    public Object insert (boolean autoAdd)
+    {
         if (_dataSource == null) return null;  // Assert?
         Object obj = _dataSource.insert();
-        List newAllObjs = new ArrayList(allObjects());
-        newAllObjs.add(obj);
-        setObjectArray(newAllObjs);
-        setSelectedObject(obj);
+        checkDataSource();
+
+        if (autoAdd) {
+            List newAllObjs = new ArrayList(allObjects());
+            newAllObjs.add(obj);
+            setObjectArray(newAllObjs);
+            setSelectedObject(obj);
+        }
         return obj;
     }
 

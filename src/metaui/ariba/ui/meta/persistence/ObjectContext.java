@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#11 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#12 $
 */
 package ariba.ui.meta.persistence;
 
@@ -30,6 +30,7 @@ import java.util.Iterator;
 
 public abstract class ObjectContext
 {
+    ObjectContext _parentContext;
     ContextGroup _contextGroup;
     Map _userMap;
 
@@ -144,11 +145,15 @@ public abstract class ObjectContext
         threadLocal.set(null);
     }
 
-    public static void bindNewContext (String groupName)
+    static void bindContext (ObjectContext ctx, String groupName)
     {
-        ObjectContext ctx = createContext();
         ctx._contextGroup = associateContextGroup(ctx, groupName);
         bind(ctx);
+    }
+
+    public static void bindNewContext (String groupName)
+    {
+        bindContext(createContext(), groupName);
     }
 
     public static void bindNewContext ()
@@ -156,6 +161,13 @@ public abstract class ObjectContext
         ObjectContext ctx = peek();
         String groupName = (ctx != null) ? ctx._contextGroup._name : null;
         bindNewContext(groupName);
+    }
+
+    public static void bindNestedContext ()
+    {
+        ObjectContext ctx = peek();
+        assert ctx != null : "Can't bind nested context when no current context";
+        bindContext(ctx.createNestedContext(), ctx._contextGroup._name);
     }
 
     public static ObjectContext createContext ()
@@ -197,6 +209,34 @@ public abstract class ObjectContext
     public static void setProvider(Provider provider)
     {
         _Provider = provider;
+    }
+
+    /**
+     * Create a nested ObjectContext.  Nested contexts have visibility to their parent's uncommited
+     * changes, and commit to their parent's in-memory objects rather than to to database.
+     * Nested Contexts are useful for modal UI flows, where an operation may be cancelled and
+     * doing so should leave the parent's objects unaffected -- by "sandboxing" these changes in
+     * copies of objects in a nested context, the Cancel is handled by simply discarding the child context,
+     * and Okay by doing a save().
+     *
+     * NOTE: not all ObjectContext implementations can support Nested Contexts.  (e.g. such support is
+     * not part of the JPA EntityManager specification)
+     * @return the new child context instance
+     */
+    public ObjectContext createNestedContext ()
+    {
+        ObjectContext child = _Provider.create();
+        child._parentContext = this;
+        return child;
+    }
+
+    /**
+     * Returns parent context for a nested child context
+     * @return the parent context, or null if not nested.
+     */
+    public ObjectContext getParentContext ()
+    {
+        return _parentContext;
     }
 
     public static class ChangeWatch

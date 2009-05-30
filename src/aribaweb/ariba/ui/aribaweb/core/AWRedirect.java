@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#31 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#32 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -161,7 +161,7 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
         AWResponse redirectResponse = requestContext.application().createResponse();
         redirectResponse.appendContent(RedirectStringStart);
         redirectResponse.appendContent(AWCurrWindowDecl.currWindowDecl(requestContext));
-        redirectResponse.appendContent(Fmt.S("var url = '%s'; if (ariba.Request) ariba.Request.redirect(url); "
+        redirectResponse.appendContent(Fmt.S("var url = '%s'; if (ariba.Request && ariba.Dom && !ariba.Dom.IsIE6Only) ariba.Request.redirect(url); "
                                                 + "else top.location.href = url;",
                                         escapeJavascript(url)));
         redirectResponse.appendContent(RedirectStringFinish);

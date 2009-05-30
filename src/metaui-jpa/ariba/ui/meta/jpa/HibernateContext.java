@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/HibernateContext.java#2 $
+    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/HibernateContext.java#3 $
 */
 package ariba.ui.meta.jpa;
 
@@ -28,6 +28,7 @@ import javax.persistence.EntityManagerFactory;
 
 import ariba.ui.meta.persistence.ObjectContext;
 import java.io.Serializable;
+import java.util.Map;
 
 public class HibernateContext extends JPAContext
 {
@@ -83,6 +84,11 @@ public class HibernateContext extends JPAContext
         // return (T)getSession().get(tClass, (Serializable)primaryKey);
     }
 
+    protected Map getPotentiallyModifiedObjects ()
+    {
+        return ((SessionImpl)getSession()).getPersistenceContext().getEntitiesByKey();
+    }
+    
     protected static EntityManager createEntityManager (EntityManagerFactory factory)
     {
         EntityManager em = factory.createEntityManager();

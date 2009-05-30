@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWDebugTrace.java#14 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -77,11 +77,11 @@ public class AWDebugTrace
     {
         return _currentMetadataTraceNode;
     }
-    
-    public void pushComponentPathEntry (AWBindableElement componentReference)
+
+    public void pushComponentPathEntry (AWBindableElement componentReference, AWEncodedString elementId)
     {
         if (_componentPathList == null) _componentPathList = ListUtil.list();
-        _currentComponentTraceNode = new ComponentTraceNode(componentReference, ListUtil.lastElement(_componentPathList), _requestContext.currentElementId());
+        _currentComponentTraceNode = new ComponentTraceNode(componentReference, ListUtil.lastElement(_componentPathList), elementId);
         _componentPathList.add(_currentComponentTraceNode);
         if (_assignMetaDataToNext && _currentMetadataTraceNode != null) {
             _currentComponentTraceNode._associatedMetadata = _currentMetadataTraceNode;
@@ -106,13 +106,13 @@ public class AWDebugTrace
         }
         return _currentComponentTraceNode;
     }
-    
+
     public AWComponentDefinition mainComponentDefinition ()
     {
         return _mainComponentDefinition != null ? _mainComponentDefinition
                 : componentTraceRoot().componentDefinition();
     }
- 
+
     public Map<AWEncodedString, List<AWEncodedString>> getHierarchy ()
     {
         return _hierarchy;
@@ -157,7 +157,7 @@ public class AWDebugTrace
             _currentComponentTraceNode._associatedMetadata = _currentMetadataTraceNode;
             _assignMetaDataToNext = false;
         }
-        
+
         // Record the "main" component to highlight by default in the viewer
         if (_mainComponentDefinition == null) {
             if (element instanceof AWComponentReference) {
@@ -418,7 +418,7 @@ public class AWDebugTrace
 
         public AWComponentDefinition componentDefinition()
         {
-            return (_element instanceof AWComponentReference) 
+            return (_element instanceof AWComponentReference)
                     ? ((AWComponentReference)_element).componentDefinition()
                     : null;
         }

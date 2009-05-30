@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#127 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#128 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -529,10 +529,6 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
             session.postInvoke();
         }
 
-        if (formManager != null) {
-            formManager.clear();
-        }
-
         return actionResults;
     }
 
@@ -703,6 +699,12 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
         AWSession session = _requestContext.session(false);
         if (session != null) {
             session.preAppend();
+        }
+
+        if (hasFormValueManager()) {
+            // we don't call formValueManager directly in order to avoid creating
+            // one unnecessarily
+            formValueManager().clear();
         }
 
         BrowserState browserState = browserState();

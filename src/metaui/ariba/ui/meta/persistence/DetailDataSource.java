@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/DetailDataSource.java#5 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/DetailDataSource.java#6 $
 */
 package ariba.ui.meta.persistence;
 
@@ -93,14 +93,18 @@ public class DetailDataSource extends AWTDataSource
     public Object insert()
     {
         if (_parentObject == null) return null;
-        Object instance = ObjectContext.get().create(detailClassName());
-        RelationshipField.addTo(_parentObject, _detailFieldPath, instance);
+        ObjectContext ctx = ObjectContext.get();
+        Object instance = ctx.create(detailClassName());
+        Object parent = ctx.merge(_parentObject);
+        RelationshipField.addTo(parent, _detailFieldPath, instance);
         return instance;
     }
 
     public void delete(Object object)
     {
         if (_parentObject == null) return;
-        RelationshipField.removeFrom(_parentObject, _detailFieldPath, object);
+        ObjectContext ctx = ObjectContext.get();
+        Object parent = ctx.merge(_parentObject);
+        RelationshipField.removeFrom(parent, _detailFieldPath, object);
     }
 }

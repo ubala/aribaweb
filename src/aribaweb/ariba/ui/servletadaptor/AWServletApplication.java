@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#14 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#16 $
 */
 
 package ariba.ui.servletadaptor;
@@ -73,19 +73,19 @@ public class AWServletApplication extends AWConcreteApplication
 
     public void init ()
     {
-        // Horrible hack:  Under appengine we have no app name in the URL, but I can't find a portable
-        // way to get the contextPath, so I'm testing explicitly for app engine...
-        _ServletUrlPrefix = "/".concat(_ServletConfig.getServletName());
-        Enumeration en = _ServletConfig.getServletContext().getAttributeNames();
-        while (en.hasMoreElements()) {
-            String name = (String)en.nextElement();
-            if (name.startsWith("com.google.appengine.")) _ServletUrlPrefix = "";
-            // System.out.printf(" && %s = %s\n", name, _ServletConfig.getServletContext().getAttribute(name));
-        }
+        if (_ServletConfig != null) {
+            // serve resources from WAR if we find a docroot there
+            _servingResourcesFromWAR = (_ServletConfig.getServletContext().getResourcePaths("/docroot") != null);
 
-        // serve resources from WAR if we find a docroot there
-        _servingResourcesFromWAR = (_ServletConfig != null) &&
-                (_ServletConfig.getServletContext().getResourcePaths("/docroot") != null);
+            // Horrible hack:  Under appengine we have no app name in the URL, but I can't find a portable
+            // way to get the contextPath, so I'm testing explicitly for app engine...
+            Enumeration en = _ServletConfig.getServletContext().getAttributeNames();
+            while (en.hasMoreElements()) {
+                String name = (String)en.nextElement();
+                if (name.startsWith("com.google.appengine.")) _ServletUrlPrefix = "";
+                // System.out.printf(" && %s = %s\n", name, _ServletConfig.getServletContext().getAttribute(name));
+            }
+        }
 
         // Note: must init *after* line above, because super will call our resourceUrl()
         super.init();
@@ -200,11 +200,6 @@ public class AWServletApplication extends AWConcreteApplication
     public boolean allowsConcurrentRequestHandling ()
     {
         return true;
-    }
-
-    protected int initSessionTimeout ()
-    {
-        return 3600;
     }
 
     protected Class sessionClass ()
@@ -339,6 +334,9 @@ public class AWServletApplication extends AWConcreteApplication
 
     public String servletUrlPrefix ()
     {
+        if (_ServletUrlPrefix == null) {
+            _ServletUrlPrefix = "/".concat(_ServletConfig.getServletName());
+        }
         return _ServletUrlPrefix;
     }
 

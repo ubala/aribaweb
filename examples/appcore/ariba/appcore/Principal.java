@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Principal.java#6 $
+    $Id: //ariba/platform/ui/metaui-jpa/examples/appcore/ariba/appcore/Principal.java#7 $
 */
 package ariba.appcore;
 
@@ -91,12 +91,24 @@ public class Principal
         permissions.add(p);
     }
 
-    public PermissionSet permissionSet ()
+    PermissionSet _permissionSet ()
     {
         // Todo: should have cache by memberOf list (most entities have no local permission and share memberOf list)
         if (permissionSet == null || permissionSet.isStale()) {
             permissionSet = PermissionSet.permissionSetForGroups(memberOf);
             if (!SetUtil.nullOrEmptySet(permissions)) permissionSet = new PermissionSet(getPermissions(), permissionSet);
+        }
+        return permissionSet;
+    }
+
+    public PermissionSet permissionSet ()
+    {
+        if (permissionSet == null || permissionSet.isStale()) {
+            // call on shared instance of user object (to avoid object copying in nested / peer contexts)
+            synchronized (PermissionSet.class) {
+                Principal principal = PermissionSet.getContext().find(this.getClass(), id);
+                permissionSet = principal._permissionSet();
+            }
         }
         return permissionSet;
     }
