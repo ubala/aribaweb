@@ -1,5 +1,5 @@
-<!--
-    Copyright 1996-2008 Ariba, Inc.
+/*
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -11,31 +11,21 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
--->
 
-<!ELEMENT frame (doc?, actions?, content)>
-<!ATTLIST frame
-    label        CDATA #REQUIRED
-    delegate     CDATA #IMPLIED
-    help         CDATA #IMPLIED
-    formEncoding CDATA #IMPLIED
-    submitFormDefault CDATA #IMPLIED
->
+    $Id: //ariba/platform/ui/opensourceui/examples/Demo/gallery/wizard/Title.java#1 $
+*/
+package gallery.wizard;
 
-<!ELEMENT actions (doc?, action+)>
-<!ATTLIST actions
-    default CDATA #IMPLIED
->
+import ariba.ui.wizard.component.WizardPage;
+import ariba.ui.wizard.component.WizardFrameContent;
+import ariba.ui.wizard.core.WizardStep;
 
-<!ELEMENT action (doc?)>
-<!ATTLIST action
-    name CDATA #REQUIRED
->
+import ariba.ui.aribaweb.core.AWComponent;
+import ariba.util.core.ListUtil;
 
-<!ELEMENT content (doc?)>
-<!ATTLIST content
-    type   (jsp | aw) #IMPLIED
-    source CDATA #REQUIRED
->
+import java.util.List;
 
-<!ELEMENT doc (#PCDATA)>
+public class Title extends WizardFrameContent
+{
+
+}

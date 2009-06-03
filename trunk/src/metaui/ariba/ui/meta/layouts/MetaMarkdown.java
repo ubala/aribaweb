@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaMarkdown.java#6 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaMarkdown.java#7 $
 */
 package ariba.ui.meta.layouts;
 
@@ -173,7 +173,7 @@ public class MetaMarkdown extends AWComponent
     public static String resourceRelative (String baseResourcePath, String relativePath, AWRequestContext requestContext)
     {
         AWResource resource = lookupRelativeResource(baseResourcePath, relativePath, requestContext);
-        return resource != null ? resource.relativePath() : null;
+        return resource != null ? resource.relativePath().replace('\\', '/') : null;
     }
 
     public static String moduleForResource (String resourcePath, UIMeta.UIContext context)

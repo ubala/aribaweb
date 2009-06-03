@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#28 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVFormatterFactory.java#29 $
 */
 package ariba.ui.validation;
 
@@ -58,6 +58,10 @@ import java.util.List;
         <li>longDate</li>
         <li>dateTime</li>
         <li>longDateTime</li>
+        <li>shortAbsoluteDate</li>
+        <li>longAbsoluteDate</li>
+        <li>absoluteDateTime</li>
+        <li>longAbsoluteDateTime</li>
         <li>duration</li>
         <li>timeMillis</li>
         <li>hiddenPassword</li>
@@ -72,9 +76,13 @@ public final class AWVFormatterFactory
     public static final String MoneyFormatterKey = "money";
     public static final String ShortDateFormatterKey = "shortDate";
     public static final String LongDateFormatterKey = "longDate";
+    public static final String ShortAbsoluteDateFormatterKey = "shortAbsoluteDate";
+    public static final String LongAbsoluteDateFormatterKey = "longAbsoluteDate";
     public static final String BigDecimalFormatterKey = "bigDecimal";
     public static final String DateTimeFormatterKey = "dateTime";
+    public static final String AbsoluteDateTimeFormatterKey = "absoluteDateTime";
     public static final String LongDateTimeFormatterKey = "longDateTime";
+    public static final String LongAbsoluteDateTimeFormatterKey = "longAbsoluteDateTime";
     public static final String BooleanFormatterKey = "boolean";
     public static final String DurationFormatterKey = "duration";
     public static final String TimeMillisFormatterKey = "timeMillis";
@@ -291,17 +299,37 @@ public final class AWVFormatterFactory
         formatters.put(ShortDateFormatterKey, shortDate);
         xml.put(ShortDateFormatterKey, new PipedFormatter(CanonicalDateFormatter, shortDate));
 
+        AWVShortDateFormatter shortAbsoluteDate = new AWVShortDateFormatter(locale, timeZone);
+        shortAbsoluteDate.setCalendarDate(false);
+        formatters.put(ShortAbsoluteDateFormatterKey, shortAbsoluteDate);
+        xml.put(ShortAbsoluteDateFormatterKey, new PipedFormatter(CanonicalDateFormatter, shortAbsoluteDate));
+
         Object longDate = new AWVLongDateFormatter(locale, timeZone);
         formatters.put(LongDateFormatterKey, longDate);
         xml.put(LongDateFormatterKey, new PipedFormatter(CanonicalDateFormatter, longDate));
+
+        AWVLongDateFormatter longAbsoluteDate = new AWVLongDateFormatter(locale, timeZone);
+        longAbsoluteDate.setCalendarDate(false);
+        formatters.put(LongAbsoluteDateFormatterKey, longAbsoluteDate);
+        xml.put(LongAbsoluteDateFormatterKey, new PipedFormatter(CanonicalDateFormatter, longAbsoluteDate));
 
         Object dateTime = new AWVConciseDateTimeFormatter(locale, timeZone);
         formatters.put(DateTimeFormatterKey, dateTime);
         xml.put(DateTimeFormatterKey, new PipedFormatter(JavaFormatDateFormatter, dateTime));
 
+        AWVConciseDateTimeFormatter absoluteDateTime = new AWVConciseDateTimeFormatter(locale, timeZone);
+        absoluteDateTime.setCalendarDate(false);
+        formatters.put(AbsoluteDateTimeFormatterKey, absoluteDateTime);
+        xml.put(AbsoluteDateTimeFormatterKey, new PipedFormatter(JavaFormatDateFormatter, absoluteDateTime));
+
         Object longDateTime = new AWVLongDateTimeFormatter(locale, timeZone);
         formatters.put(LongDateTimeFormatterKey, longDateTime);
         xml.put(LongDateTimeFormatterKey, new PipedFormatter(JavaFormatDateFormatter, longDateTime));
+
+        AWVLongDateTimeFormatter longAbsoluteDateTime = new AWVLongDateTimeFormatter(locale, timeZone);
+        longAbsoluteDateTime.setCalendarDate(false);
+        formatters.put(LongAbsoluteDateTimeFormatterKey, longAbsoluteDateTime);
+        xml.put(LongAbsoluteDateTimeFormatterKey, new PipedFormatter(JavaFormatDateFormatter, longAbsoluteDateTime));
 
         Object timeMillis = new AWVTimeMillisFormatter(locale, timeZone);
         formatters.put(TimeMillisFormatterKey, timeMillis);

@@ -10,6 +10,7 @@
         <w:BucketItem label="$[a007]Forms (MetaUI)" action='${pageWithName("MetaUIForms")}'/>
         <w:BucketItem label="$[a008]File Upload" action='${pageWithName("FileUploadExamples")}'/>
         <w:BucketItem label="$[a018]Drag and Drop" action='${pageWithName("DragDropExamples")}'/>
+        <w:BucketItem label="$[a019]Wizard" action='$startWizard'/>
     </w:BucketHeading>
     <w:BucketHeading label="$[a009]Fun">
         <w:BucketItem label="$[a010]Master Detail app" action='${pageWithName("ERPage")}'/>

@@ -122,7 +122,9 @@
         [id:"1844030", title:"MetaUI Database App",
          description:"MetaUI-JPA & Hibernate 3:  full DB App with just domain objects + annotations."],
         [id:"1840925", title:"MetaUI In Detail",
-         description:"Derive full-UI from domain POJOs + rules or annotations."]
+         description:"Derive full-UI from domain POJOs + rules or annotations."],
+        [id:"3959864", title:"Localization Made Easy",
+         description:"Localize an application in a matter of minutes!"]
     ];
 
     def rowCount() { (videos.size()+1) / 2 }
