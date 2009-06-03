@@ -118,5 +118,8 @@ For Eclipse, look for a directory that includes something like the following:
 
 Invoke your ant build as follows:
 
-    ant -eclipse.lib.dir=/Applications/eclipse/plugins
+    ant -Declipse.lib.dir=/Applications/eclipse/plugins
 
+If you see out of memory exception, pass the following arguments to increase the heap size:
+
+    -vmargs -Xms512m -Xmx512m

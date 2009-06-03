@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/WizardFrameContent.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/WizardFrameContent.java#3 $
 */
 package ariba.ui.wizard.component;
 
@@ -49,7 +49,7 @@ abstract public class WizardFrameContent extends AWComponent
         }
     }
     
-    protected Object getContext ()
+    public Object getContext ()
     {
         return _frame.getWizard().getContext();
     }

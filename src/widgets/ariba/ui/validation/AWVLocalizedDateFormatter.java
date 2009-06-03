@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVLocalizedDateFormatter.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVLocalizedDateFormatter.java#6 $
 */
 package ariba.ui.validation;
 
@@ -31,18 +31,25 @@ public abstract class AWVLocalizedDateFormatter extends  AWFormatter
 {
     private TimeZone _timeZone;
     private Locale _locale;
+    private boolean _calendarDate;
 
     public AWVLocalizedDateFormatter (Locale locale, TimeZone timeZone)
     {
         _locale = locale;
         _timeZone = timeZone;
+        _calendarDate = true;
     }
 
+    public void setCalendarDate (boolean calendarDate)
+    {
+        _calendarDate = calendarDate;
+    }
+    
     public Object parseObject (String stringToParse) throws ParseException
     {
         if (StringUtil.nullOrEmptyOrBlankString(stringToParse)) return null;
         Date date =  DateFormatter.parseDateUsingFormats(stringToParse, _locale,
-                getFormatsKey(), _timeZone, true);
+                getFormatsKey(), _timeZone, _calendarDate);
 
         if (date == null) {
             throw new ParseException(Fmt.S("Couldn't parse date '%s'", stringToParse), 0);

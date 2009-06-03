@@ -93,7 +93,7 @@ Part IV will cover these kinds of apps.
 
 Where to Go from Here
 ---------------------
-The presentation of AribaWeb topics is divided into three majors chapters:
+The presentation of AribaWeb topics is divided into four majors chapters:
 
   - **[Part I: AribaWeb Core](../1_AribaWeb/AribaWeb.txt)**
   - **[Part II: Widgets](../2_Widgets/Widgets.txt)**

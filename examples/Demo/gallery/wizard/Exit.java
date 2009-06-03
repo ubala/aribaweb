@@ -1,5 +1,5 @@
-<!--
-    Copyright 1996-2008 Ariba, Inc.
+/*
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -11,31 +11,20 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
--->
 
-<!ELEMENT frame (doc?, actions?, content)>
-<!ATTLIST frame
-    label        CDATA #REQUIRED
-    delegate     CDATA #IMPLIED
-    help         CDATA #IMPLIED
-    formEncoding CDATA #IMPLIED
-    submitFormDefault CDATA #IMPLIED
->
+    $Id: //ariba/platform/ui/opensourceui/examples/Demo/gallery/wizard/Exit.java#1 $
+*/
 
-<!ELEMENT actions (doc?, action+)>
-<!ATTLIST actions
-    default CDATA #IMPLIED
->
+package gallery.wizard;
 
-<!ELEMENT action (doc?)>
-<!ATTLIST action
-    name CDATA #REQUIRED
->
+import ariba.ui.wizard.component.WizardFrameContent;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
+import ariba.ui.meta.layouts.MetaNavTabBar;
 
-<!ELEMENT content (doc?)>
-<!ATTLIST content
-    type   (jsp | aw) #IMPLIED
-    source CDATA #REQUIRED
->
-
-<!ELEMENT doc (#PCDATA)>
+public class Exit extends WizardFrameContent
+{
+    public AWResponseGenerating homeAction ()
+    {
+        return MetaNavTabBar.getState(session()).gotoHomeModule(requestContext());
+    }
+}

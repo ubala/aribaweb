@@ -1,5 +1,6 @@
 New in Version 5.0RC3 (5/29/2009)
 ---------------------------------------------
+
 - Google AppEngine compatibility (round 1)
     - Fix exceptions due to file access not allowed
     - Fix PerformanceState that was spawning a monitoring thread
@@ -11,8 +12,8 @@ New in Version 5.0RC3 (5/29/2009)
 - Misc bug fixes
     - Multiplay charts do not load (issue 39)
     - Use proper logging for MetaUI and MetaJPA (issue 48)
-         - Update log4j.properties template to enable logging configuration
-    - Fix "sticky" action categories across user sessions
+        - Update log4j.properties template to enable logging configuration
+        - Fix "sticky" action categories across user sessions
     - Fix modular visibility logic
     - Disable cancel button on MetaUI modal panel until we get proper nested session working
 
@@ -20,21 +21,22 @@ New in Version 5.0RC3 (5/29/2009)
 
 New in Version 5.0RC3 - PREVIEW 4 (4/20/2009)
 ---------------------------------------------
+
 - MetaUI Fixes
     - MetaNavTabBar
         - Fix NPE when on tab click if more meta rules added during previous operation
         - Fix NPE when app has no (visible) nav tabs
 
     - GlobalActions not always showing up in TOC MetaActionLists
-        - Added showGlobal binding, and used it in the basic MetaUI layout
-
+            - Added showGlobal binding, and used it in the basic MetaUI layout
     - AppCore
         - Fix ClassCastException on pages with multiple classes in scope on the tab
 
     - Fix extra NavModuleTabs not showing up when @SupercededSuperclass used on User
-
+    
 New in Version 5.0RC3 - PREVIEW 3 (4/8/2009)
 ---------------------------------------------
+
 - Formatter enhancements
     - AWVFormatterFactory has new FormatterProvider interface where external providers can
       register handlers to add/override formatters in the default $formatters set
