@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/meta/WizardMeta.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/meta/WizardMeta.java#3 $
 */
 
 package ariba.ui.wizard.meta;
@@ -72,6 +72,7 @@ public final class WizardMeta extends GenericMeta
     protected static final String IconAttr      = "icon";
     protected static final String FrameAttr     = "frame";
     protected static final String AllowsClickableStepsAttr = "allowsClickableSteps";
+    protected static final String ShowStepsAttr = "showSteps";
 
         // extension wizard XML elements
     protected static final String InWizardElement     = "inWizard";
@@ -217,6 +218,7 @@ public final class WizardMeta extends GenericMeta
         // cache of wizard metas, keyed by file path & locale
     private static final MultiKeyHashtable _wizards = new MultiKeyHashtable(2);
     private boolean _allowsClickableSteps;
+    private boolean _showSteps;
 
     public static WizardMeta loadWizardMeta (
         String            path,
@@ -463,6 +465,7 @@ public final class WizardMeta extends GenericMeta
         _allowsClickableSteps = booleanAttrFromElement(element,
                                                        AllowsClickableStepsAttr,
                                                        true);
+        _showSteps = booleanAttrFromElement(element, ShowStepsAttr, true);
     }
 
     private Element readWizardActions (Element parentElement)
@@ -589,6 +592,11 @@ public final class WizardMeta extends GenericMeta
     public boolean allowsClickableSteps ()
     {
         return _allowsClickableSteps;
+    }
+
+    public boolean showSteps ()
+    {
+        return _showSteps;
     }
 
     public Iterator actions ()

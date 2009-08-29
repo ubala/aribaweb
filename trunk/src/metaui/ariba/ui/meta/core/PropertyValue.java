@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/PropertyValue.java#7 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/PropertyValue.java#8 $
 */
 package ariba.ui.meta.core;
 
@@ -69,9 +69,9 @@ public class PropertyValue
 
         public String toString()
         {
-            return Fmt.S("(StaticDynamicWrapper) %s%s",
+            return Fmt.S("StaticDynamicWrapper (%s%s)",
                     ((_cached != null) ? _cached : _orig),
-                    ((_cached == null) ? " (unevaluated)" : ""));
+                    ((_cached == null) ? " unevaluated" : ""));
         }
 
         public int hashCode ()
@@ -99,6 +99,12 @@ public class PropertyValue
         public Object evaluate (Context context)
         {
             return _orig.evaluate(context);
+        }
+
+        public String toString()
+        {
+            return Fmt.S("StaticallyResolvableWrapper (%s)",
+                    _orig);
         }
     }
 

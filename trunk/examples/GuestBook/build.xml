@@ -2,5 +2,5 @@
 <project name="GuestBook" default="launch">
     <property environment="env"/>
     <property name="aw.home" location="${env.AW_HOME}"/>
-    <import file="${aw.home}/tools/build-widgets-app.xml"/>
+    <import file="${aw.home}/tools/build-metaui-app.xml"/>
 </project>

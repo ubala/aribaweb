@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuButton.awl#21 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuButton.awl#22 $
     </Copyright>
 
     <Overview>
@@ -43,6 +43,7 @@
                     </w:PopupMenu>
                 </t:HeadingArea>
 
+        This is where the minimize/maximize button is rendered. 
     </Overview>
 
     <Binding key="showHideColumns" direction="get" type="boolean" default="$true">
@@ -81,6 +82,9 @@
     </Binding>
 </a:Api>\
 
+<!--- Notes on Minimize/Maximize functionality:
+        This works with Datatable.js for the implementation.
+        See also AWTScrollTableWrapper for an important call to ariba.Datatable.updateScrollTable().-->
 <a:MethodInvocation invoke="$computeMenuId"/>\
 <table cellspacing="0" cellpadding="0">
     <tr>

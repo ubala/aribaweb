@@ -22,6 +22,7 @@
     preToc    CDATA #IMPLIED
     postToc   CDATA #IMPLIED
     allowsClickableSteps CDATA #IMPLIED
+    showSteps (true | false) "true"
 >
 
 <!ELEMENT actions (doc?, action+)>

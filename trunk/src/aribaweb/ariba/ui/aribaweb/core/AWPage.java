@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#128 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#129 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -701,17 +701,16 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
             session.preAppend();
         }
 
-        if (hasFormValueManager()) {
-            // we don't call formValueManager directly in order to avoid creating
-            // one unnecessarily
-            formValueManager().clear();
-        }
-
         BrowserState browserState = browserState();
 
         // If this is not a refresh request and there is a previously unwritten response,
         // then this must be a a request for a deferred response
         // (aka full page refresh). Reuse the previous response as is.
+
+        // This method gets calls twice for full page refreshes.
+        // Once to get generate the FPR redirect,
+        // and again to vent the deferred response.
+        // Any code not meant for the vending should be below this block.
         if (session != null && (session.requestType(request) == AWSession.RefreshRequest)
                 && !_requestContext.isIncrementalUpdateRequest()) {
 
@@ -725,6 +724,12 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
             }
         }
 
+        if (hasFormValueManager()) {
+            // we don't call formValueManager directly in order to avoid creating
+            // one unnecessarily
+            formValueManager().clear();
+        }
+        
         // clear out the validation context before we start real append phase
         _validationContext = null;
 

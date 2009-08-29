@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ChooserState.java#11 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ChooserState.java#12 $
 */
 
 package ariba.ui.widgets;
@@ -36,6 +36,7 @@ public class ChooserState
     private boolean _isInvalid;
     private boolean _multiSelect;
     private boolean _addMode;
+    private String _prevDisplayValue;
 
     public ChooserState ()
     {
@@ -257,6 +258,22 @@ public class ChooserState
     {
         _lastFullMatchPattern = fullMatchPattern;
     }
+    
+    /**
+        previous display value is set when the display value is rendered on 
+        the chooser. we cache the UI value to compare with the inbound
+        value later instead of the value from underlying object because business
+        logic level code could have changed the underlying object's value
+     */
+    public void setPrevDisplayValue (String val)
+    {    
+    	_prevDisplayValue = val;
+    }
+    
+    public String getPrevDisplayValue () 
+    {
+    	return _prevDisplayValue;
+    }    
 
     /**
         Default selection state

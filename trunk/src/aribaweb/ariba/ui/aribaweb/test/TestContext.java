@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,27 +12,28 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#16 $
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWConcreteServerApplication;
-import ariba.ui.aribaweb.core.AWRecordingManager;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWSession;
 import ariba.util.core.Assert;
 import ariba.util.core.Base64;
+import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.i18n.I18NUtil;
 
-import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.http.HttpSession;
 
 
 public class TestContext
@@ -46,6 +47,7 @@ public class TestContext
     private Map<String, Object> _internalContext = MapUtil.map();
     
     private Map<Object, Object> _context = MapUtil.map();
+    private List<String> _unhandledObjectList = ListUtil.list();
     private String _username;
     private TestContextDataProvider _dataProvider;
     private String _id;
@@ -54,19 +56,6 @@ public class TestContext
     private static Map<String, TestContext> _savedTestContext = MapUtil.map();
     private static Map<String, TestContextObjectFactory> _factoriesById = MapUtil.map();
     private static Map<Class, String> _factoryIdsByClass = MapUtil.map();
-
-    static
-    {
-        // register the playback monitor with AWRecordingManager
-        // here we assume if we have TestContext it means we're in the playback mode
-        AWRecordingManager.registerPlaybackMonitor(new AWRecordingManager.PlaybackMonitor() {
-            public boolean isInPlaybackMode(AWRequestContext requestContext)
-            {
-                return (getTestContext(requestContext) != null);
-            }
-        } );
-    }
-
 
     public TestContext ()
     {
@@ -118,10 +107,11 @@ public class TestContext
 
     static public boolean isTestAutomationMode (AWRequestContext requestContext)
     {
-        return AWConcreteServerApplication.IsDebuggingEnabled && 
-                (getTestContext(requestContext) != null ||
+        return AWConcreteServerApplication.IsDebuggingEnabled &&
+               (getTestContext(requestContext) != null ||
                 getSavedTestContext(requestContext) != null ||
-                !StringUtil.nullOrEmptyOrBlankString(requestContext.formValueForKey(TestAutomationMode)));
+                !StringUtil.nullOrEmptyOrBlankString(requestContext.formValueForKey(TestAutomationMode)) ||
+                requestContext._debugIsInRecordingMode() || requestContext._debugIsInPlaybackMode());
     }
     
     static public TestContext getTestContext (AWRequestContext requestContext)
@@ -174,6 +164,54 @@ public class TestContext
         _context.put(key, obj); 
     }
 
+    /**
+        If there is a TestContext associated with the AWRequestContext's AWSession, and
+        value is non-null, put the given value into it, keyed by its Class instance.
+    */
+    public static void put (AWRequestContext rc, Object value)
+    {
+        TestContext tc = getTestContext(rc);
+        if (tc != null && value != null) {
+            tc.put(value);
+        }
+    }
+
+    /**
+        If there is a TestContext associated with the AWRequestContext's AWSession, and
+        key and value are non-null, put the given key-value pair into it.
+    */
+    public static void put (AWRequestContext rc, String key, Object value)
+    {
+        TestContext tc = getTestContext(rc);
+        if (tc != null && key != null && value != null) {
+            tc.put(key, value);
+        }
+    }
+
+    /**
+        If there is a TestContext associated with the AWSession, and
+        value is non-null, put the given value into it, keyed by its Class instance.
+    */
+    public static void put (AWSession session, Object value)
+    {
+        TestContext tc = getTestContext(session);
+        if (tc != null && value != null) {
+            tc.put(value);
+        }
+    }
+
+    /**
+        If there is a TestContext associated with the AWSession, and
+        key and value are non-null, put the given key-value pair into it.
+    */
+    public static void put (AWSession session, String key, Object value)
+    {
+        TestContext tc = getTestContext(session);
+        if (tc != null && key != null && value != null) {
+            tc.put(key, value);
+        }
+    }
+
     public void setUsername (String username)
     {
         _username = username;
@@ -187,6 +225,7 @@ public class TestContext
     public void clear ()
     {
         _context = MapUtil.map();
+        _unhandledObjectList = ListUtil.list();
     }
 
     public static void registerTestContextObjectFactory (
@@ -214,10 +253,15 @@ public class TestContext
         return _factoriesById.get(id);
     }
 
-    String factoryIdForClass (Class c)
+    String factoryIdForClass (Class clazz)
     {
-        // TODO: should return factory of superclass?
-        return _factoryIdsByClass.get(c);
+        for (Class c = clazz; c != null; c = c.getSuperclass()) {
+            String id = _factoryIdsByClass.get(c);
+            if (id != null) {
+                return id;
+            }
+        }
+        return null;
     }
 
     private static final String Pipe = "|";
@@ -226,6 +270,16 @@ public class TestContext
     public String getSuiteData ()
     {
         StringBuffer buf = new StringBuffer();
+
+        // include factoryId and objId pair from _unhandledObjectList first to
+        // ensure the correct order when we reconstitute the objects
+        for (String encodedPairString : _unhandledObjectList) {
+            if (buf.length() > 0) {
+                buf.append(SemiColon);
+            }
+            buf.append(encodedPairString);
+        }
+
         for (Object key : keys()) {
             Class c = (Class)key;
             String factoryId = factoryIdForClass(c);
@@ -233,16 +287,18 @@ public class TestContext
                 TestContextObjectFactory f = factoryForId(factoryId);
                 Object obj = get(c);
                 String objId = f.getSharedID(obj);
-                if (buf.length() > 0) {
-                    buf.append(SemiColon);
-                }
-                try {
-                    buf.append(URLEncoder.encode(factoryId, I18NUtil.EncodingUTF_8));
-                    buf.append(Pipe);
-                    buf.append(URLEncoder.encode(objId, I18NUtil.EncodingUTF_8));
-                }
-                catch (UnsupportedEncodingException e) {
-                    Assert.that(false, "UTF-8 must be supported");
+                if (objId != null) {
+                    if (buf.length() > 0) {
+                        buf.append(SemiColon);
+                    }
+                    try {
+                        buf.append(URLEncoder.encode(factoryId, I18NUtil.EncodingUTF_8));
+                        buf.append(Pipe);
+                        buf.append(URLEncoder.encode(objId, I18NUtil.EncodingUTF_8));
+                    }
+                    catch (UnsupportedEncodingException e) {
+                        Assert.that(false, "UTF-8 must be supported");
+                    }
                 }
             }
         }
@@ -278,13 +334,24 @@ public class TestContext
                     TestContextObjectFactory f = factoryForId(factoryId);
                     Assert.assertNonFatal(f != null,
                                           "No factory found for ID '%s', object '%s'", factoryId, objId);
+                    boolean handled = false;
                     if (f != null) {
                         Object obj = f.reconstituteObject(requestContext, objId);
                         Assert.assertNonFatal(obj != null,
                                               "Failed to reconstitute object with factory '%s', object '%s'", factoryId, objId);
                         if (obj != null) {
                             put(obj);
+                            handled = true;
                         }
+                    }
+
+                    if (!handled) {
+                        // if we're not able to reconstitute the oject, put it
+                        // into _unhandledObjectList. It will be included
+                        // in the query string and passed along when the API
+                        // getSuiteData() is called. Note that we need to use a
+                        // list here since two classes can refer to the same factory.
+                        _unhandledObjectList.add(pair);
                     }
                 }
                 catch (UnsupportedEncodingException e) {

@@ -1,5 +1,6 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2009 Ariba, Inc.
+    All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#28 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#31 $
 */
 
 package ariba.util.core;
@@ -306,6 +307,7 @@ public class PerformanceState
         protected boolean toBeContinued;
 
         protected String realm;
+        protected String realmType;
         protected String sessionID;
         protected String ipAddress;
         protected String user;
@@ -320,6 +322,9 @@ public class PerformanceState
         protected String appInfo;
         protected String appDimension1;
         protected String appDimension2;
+        protected String referer;
+        protected String acceptLanguage;
+        protected String userAgent;
 
         public PerformanceCheck getPerformanceCheck ()
         {
@@ -368,6 +373,16 @@ public class PerformanceState
         public String getSessionID ()
         {
             return sessionID;
+        }
+        
+        public String getRealmType ()
+        { 
+            return realmType; 
+        }
+        
+        public void setRealmType (String realmType)
+        { 
+            this.realmType = realmType; 
         }
 
         public void setSessionID (String sessionID)
@@ -529,6 +544,36 @@ public class PerformanceState
             this.appDimension2 = appDimension2;
         }
 
+        public String getReferer ()
+        {
+            return referer;
+        }
+
+        public void setReferer (String url)
+        {
+            this.referer = url;
+        }
+
+        public String getAcceptLanguage ()
+        {
+            return acceptLanguage;
+        }
+
+        public void setAcceptLanguage (String languages)
+        {
+            this.acceptLanguage = languages;
+        }
+
+        public String getUserAgent ()
+        {
+            return userAgent;
+        }
+
+        public void setUserAgent (String agent)
+        {
+            this.userAgent = agent;
+        }
+
         public String toString ()
         {
             Map m = MapUtil.map(this);
@@ -559,6 +604,15 @@ public class PerformanceState
             if (appInfo != null) {
                 m.put("appInfo", appInfo);
             }
+            if (referer != null) {
+                m.put("referer", referer);
+            }
+            if (acceptLanguage != null) {
+                m.put("acceptLanguage", acceptLanguage);
+            }
+            if (userAgent != null) {
+                m.put("userAgent", userAgent);
+            }
             return m.toString();
         }
     }
@@ -576,10 +630,10 @@ public class PerformanceState
         return NodeName;
     }
 
-    protected static final String FileHeader = "Date, Realm, NodeName, SessionID, "
-                    + "User, SourcePage, SourceArea, DestPage, DestArea, "
+    protected static final String FileHeader = "Date, Realm, RealmType, NodeName, "
+                    + "SessionID, User, SourcePage, SourceArea, DestPage, DestArea, "
                     + "Type, Status, "
-                    + "AppMetricName, AppMetric, AppDimension1, AppDimension2, AppInfo, ";
+                    + "AppMetricName, AppMetric, AppDimension1, AppDimension2, AppInfo, Referer, AcceptLanguages, UserAgent, ";
 
     protected static PerformanceStateCore[] _LogMetrics = null;
 
@@ -637,13 +691,13 @@ public class PerformanceState
         // to the file.
         FormatBuffer buf = new FormatBuffer(200);
 
-        buf.append(Date.getNow().toString());
-
-        buf.append(sep);
+        buf.append(Date.getNow().toString()); buf.append(sep);
 
         buf.append(stats.getRealm()); buf.append(sep);
+        buf.append(stats.getRealmType()); buf.append(sep);
         buf.append(PerformanceState.getNodeName()); buf.append(sep);
-        buf.append(stats.getSessionID()); buf.append(":"); buf.append(stats.getIPAddress()); buf.append(sep);
+        buf.append(stats.getSessionID()); buf.append(":");
+        buf.append(stats.getIPAddress()); buf.append(sep);
         buf.append(stats.getUser()); buf.append(sep);
         buf.append(stats.getSourcePage());buf.append(sep);
         buf.append(stats.getSourceArea());buf.append(sep);
@@ -671,6 +725,27 @@ public class PerformanceState
         buf.append(stats.getAppDimension1()); buf.append(sep);
         buf.append(stats.getAppDimension2()); buf.append(sep);
         buf.append(stats.getAppInfo()); buf.append(sep);
+
+        //add HTTP referer url
+        buf.append(stats.getReferer()); buf.append(sep);
+
+        // add HTTP accept_language
+        if (!StringUtil.nullOrEmptyString(stats.getAcceptLanguage())) {
+            buf.append("\"" + stats.getAcceptLanguage() + "\"");
+        }
+        else {
+            buf.append("");
+        }
+        buf.append(sep);
+
+        // add HTTP user_agent
+        if (!StringUtil.nullOrEmptyString(stats.getUserAgent())) {
+            buf.append("\"" + stats.getUserAgent() + "\"");
+        }
+        else {
+            buf.append("");
+        }
+        buf.append(sep);
 
         PerformanceStateCore[] logMetrics = logMetrics();
         int len = logMetrics.length;

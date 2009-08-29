@@ -1,5 +1,6 @@
-<w:ModalPageWrapper title="Edit Post">
-    Name: <a:TextField value="$post.userName"/><br/>
-    <w:RichTextArea value="post.comment"/>
+<w:ModalPageWrapper title="$title">
+    <m:Context object="$post" operation="$operation" layout="Inspect">
+        <m:IncludeComponent/>
+    </m:Context>
 </w:ModalPageWrapper>
         

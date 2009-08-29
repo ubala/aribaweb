@@ -247,3 +247,4 @@
 9161, "Received signal {0}", 0-signal
 9316, "Caught exception while updating the {0} metrics: {1}", 0-name 1-exception
 9891, "Exception occurred while batch deleting persisted tokens: {1} {2}", 0-baseids 1-exception stack
+10280, "Generated string exceeded max length of {0}", 0-max length

@@ -307,6 +307,17 @@ ariba.Handlers = function() {
             return this.virtualFormKeyPress(spanObject, mevent);
         },
 
+        /**
+         * This is a front for Request.senderClicked().
+         * @see senderClicked
+         * @param tagObject
+         * @param formId
+         * @param windowName
+         * @param actionName
+         * @param mevent
+         * @param addValue
+         * @param windowAttributes
+         */
         tagOnClick : function (tagObject, formId, windowName, actionName, mevent, addValue, windowAttributes)
         {
             return Request.senderClicked(tagObject.id, formId, windowName, actionName, mevent, addValue, tagObject.value, windowAttributes);

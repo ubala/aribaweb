@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#58 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#59 $
 */
 package ariba.ui.meta.core;
 
@@ -299,7 +299,9 @@ public class UIMeta extends ObjectMeta
     protected void _loadRuleFile (AWResource resource)
     {
         try {
-            _loadRules(resource.name(), resource.inputStream(), (resource instanceof AWFileResource));
+            String resourceName = resource.name();
+            boolean editable = resourceName.endsWith("rules.oss");
+            _loadRules(resource.name(), resource.inputStream(), editable);
         } finally {
             // Need to set *any* object on resource to get it's hasChanged() timestamp set
             resource.setObject(Boolean.TRUE);

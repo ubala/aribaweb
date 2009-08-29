@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.awl#24 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.awl#25 $
     </Copyright>
 
     <Overview>
@@ -67,6 +67,20 @@
             </w:PopupMenuItem>
         </a:If>\
 
+	<a:If ifTrue="$table.pivotState.showingRowAttributes">\
+             <w:PopupMenuItem action="$table.pivotState.expandAllDetailAttributes">\
+                 <a:Local key="a016">\
+                     Expand All Detail Rows\
+                 </a:Local>\
+             </w:PopupMenuItem>
+             <w:PopupMenuItem action="$table.pivotState.collapseAllDetailAttributes">\
+                 <a:Local key="a017">\
+                     Collapse All Detail Rows\
+                 </a:Local>\
+             </w:PopupMenuItem>
+	</a:If>\
+
+
         <a:If ifTrue="$^showConfigureLayout:$true">\
             <w:PopupMenuItem action="$table.pivotState.configurePivotLayout">\
                 <a:Local key="a015">\
@@ -84,6 +98,7 @@
         </w:PopupMenuHeading>
         <!---  Put pivot columns here -->
         <a:For list="$table.pivotState.optionalAttributeColumns" item="$table.currentColumn">\
+            <a:MethodInvocation invoke="$prepare"/>\
             <w:PopupMenuItem action="$table.pivotState.pivotToggleCurrentColumnVisibility" showCheck="$table.pivotState.isCurrentColumnDisplayed">\
                 <w:TruncateString value="$currentColumnLabel" size="$=ariba.ui.table.AWTDataTable.ColumnLabelMenuMaxSize"/>\
             </w:PopupMenuItem>
@@ -98,6 +113,7 @@
         </w:PopupMenuHeading>
         <a:For list="$table.optionalColumns" item="$table.currentColumn" count="$optionalColumnsCount">\
             <w:PopupMenuItem action="$table.toggleCurrentColumnVisibility" showCheck="$table.isCurrentColumnDisplayed" disabled="$disableHideColumn">\
+                <a:MethodInvocation invoke="$prepare"/>\
                 <w:TruncateString value="$currentColumnLabel" size="$=ariba.ui.table.AWTDataTable.ColumnLabelMenuMaxSize"/>\
             </w:PopupMenuItem>
         </a:For>
@@ -138,6 +154,7 @@
                 </a:Local>\
             </w:PopupMenuHeading>
             <a:For list="$table.dataColumns" item="$table.currentColumn" namePrefix="$currentColumnLabel">
+                <a:MethodInvocation invoke="$prepare"/>\
                 <a:If ifTrue="$isCurrentColumnGroupable">
                     <w:PopupMenuItem action="$table.groupByColumnClicked" showBullet="$table.groupingByCurrentColumn">\
                         <w:TruncateString value="$currentColumnLabel" size="$=ariba.ui.table.AWTDataTable.ColumnLabelMenuMaxSize"/>\

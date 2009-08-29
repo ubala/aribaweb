@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationError.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationError.java#5 $
     Responsible: jimh
 */
 package ariba.util.test;
@@ -70,5 +70,30 @@ public class TestValidationError {
             return _newValue.getValue().toString();
         }
         return "MISSING PARAMETER";
+    }
+
+    public boolean isObjectList ()
+    {
+        if ((_newValue != null && _newValue.isObjectList()) ||
+             _oldValue != null && _oldValue.isObjectList()) {
+            return true;   
+        }
+        return false;
+    }
+
+    public TestValidationParameterList getOldList ()
+    {
+        if (_oldValue != null && _oldValue.isList()) {
+            return (TestValidationParameterList)_oldValue.getValue();
+        }
+        return null;
+    }
+
+    public TestValidationParameterList getNewList ()
+    {
+        if (_newValue != null && _newValue.isList()) {
+            return (TestValidationParameterList)_newValue.getValue();
+        }
+        return null;
     }
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/core/Wizard.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/core/Wizard.java#4 $
 */
 
 package ariba.ui.wizard.core;
@@ -970,6 +970,11 @@ public class Wizard implements WizardStepsParent
     public boolean allowsClickableSteps ()
     {
         return meta().allowsClickableSteps();
+    }
+
+    public boolean showSteps ()
+    {
+        return meta().showSteps();
     }
 
     public String getName ()

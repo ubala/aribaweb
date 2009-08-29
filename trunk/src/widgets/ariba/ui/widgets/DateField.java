@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.java#22 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.java#23 $
 */
 
 package ariba.ui.widgets;
 
+import java.util.Date;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWEditableRegion;
 import ariba.ui.aribaweb.core.AWRequestContext;
@@ -40,7 +41,7 @@ public class DateField extends AWComponent
     public boolean _showCalendar;
     private String _exampleDate;
 
-
+    
     /**
         Convenience setter method to assist DateField debugging. (Otherwise it
         seems to be impossible to trap the sets of this field.)
@@ -85,6 +86,9 @@ public class DateField extends AWComponent
     public void applyValues(AWRequestContext requestContext, AWComponent component)
     {
         super.applyValues(requestContext, component);
+        if (_linkId != null && _linkId.equals(requestContext.requestSenderId())) {
+            _date = Calendar.computeCalendarDate(requestContext, dateFactory());
+        }
         setValueForBinding(_date, BindingNames.value);
     }
 
@@ -93,6 +97,32 @@ public class DateField extends AWComponent
         _date = valueForBinding(BindingNames.value);
         super.renderResponse(requestContext, component);
         _showCalendar = false;
+    }
+
+    public int selectedYear ()
+    {
+        Date selectedDate = selectedDate();
+        return dateFactory().getYear(selectedDate, clientTimeZone(), preferredLocale());
+    }
+
+    public int selectedMonth ()
+    {
+        Date selectedDate = selectedDate();
+        return dateFactory().getMonth(selectedDate, clientTimeZone(), preferredLocale());
+    }
+
+    public int selectedDayOfMonth ()
+    {
+        Date selectedDate = selectedDate();
+        return dateFactory().getDayOfMonth(selectedDate, clientTimeZone(), preferredLocale());
+    }
+
+    private Date selectedDate ()
+    {
+        if (_date == null) {
+            _date = dateFactory().createDate();
+        }
+        return (Date)_date;
     }
 
     public AWFormatter formatter ()

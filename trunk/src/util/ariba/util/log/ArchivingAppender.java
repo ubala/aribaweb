@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/ArchivingAppender.java#9 $
+    $Id: //ariba/platform/util/core/ariba/util/log/ArchivingAppender.java#10 $
 */
 
 package ariba.util.log;
@@ -97,7 +97,7 @@ public class ArchivingAppender extends FileAppender
     /**
         @aribaapi private
     */
-    private ConstrainedDirectory archiveDirectory;
+    protected ConstrainedDirectory archiveDirectory;
 
     /**
         @aribaapi private
@@ -284,7 +284,7 @@ public class ArchivingAppender extends FileAppender
         @return a LogFile that can be written to.
         @aribaapi private
     */
-    private LogFile createLogFile (String fileName)
+    protected LogFile createLogFile (String fileName)
     {
         File rootDirectory = this.directory;
 

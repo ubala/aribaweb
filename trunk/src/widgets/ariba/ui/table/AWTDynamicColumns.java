@@ -12,12 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDynamicColumns.java#24 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDynamicColumns.java#25 $
 */
 
 package ariba.ui.table;
 
 import ariba.ui.aribaweb.core.AWBinding;
+import ariba.ui.aribaweb.core.AWBindingNames;
+import ariba.ui.aribaweb.util.AWUtil;
 import java.util.List;
 import java.util.Map;
 
@@ -112,6 +114,7 @@ public final class AWTDynamicColumns extends AWTDataTable.Column
             return;
         }
 
+
         // iterate through column list, pushing item, and pulling data to initialize our column
         for (int i=0, c=list.size(); i<c; i++) {
             // push item
@@ -119,7 +122,6 @@ public final class AWTDynamicColumns extends AWTDataTable.Column
             table.setValueForBinding(item, _itemBinding);
 
             String key =  ((String)((_keyBinding != null) ? table.valueForBinding(_keyBinding): null));
-            String label = ((String)((_labelBinding != null) ? table.valueForBinding(_labelBinding): key));
 
             // see if an old copy can be recovered from in purgatory
             DynamicColumn col = (DynamicColumn)table.purgatoryMatch(key);
@@ -127,7 +129,9 @@ public final class AWTDynamicColumns extends AWTDataTable.Column
             if (col == null) {
                 col = new DynamicColumn();
                 col.setContentElement(this.contentElement());
-                col.init(key, label, null, null, null);
+                col.init("AWTColumn", AWUtil.map(AWBindingNames.key,
+                    AWBinding.bindingWithNameAndConstant(AWBindingNames.key, key),
+                    AWBindingNames.label, _labelBinding));
                 col._item = item;
                 col._parentColumn = this;
                 col._styleBinding = _styleBinding;

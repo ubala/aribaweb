@@ -22,6 +22,8 @@
 "AWTOptionsMenuItems",a013,"Pivot Table Layout","Pivot Table Layout",""
 "AWTOptionsMenuItems",a014,"Show Detail Rows","Show Detail Rows",""
 "AWTOptionsMenuItems",a015,"Configure Layout...","Configure Layout...",""
+"AWTOptionsMenuItems",a016,"Expand All Detail Rows","Expand All Detail Rows",""
+"AWTOptionsMenuItems",a017,"Collapse All Detail Rows","Collapse All Detail Rows",""
 "AWTPivotConfigurationPanel",a001,"Edit Table Layout","Edit Table Layout",""
 "AWTPivotConfigurationPanel",a002,"Column Fields","Column Fields",""
 "AWTPivotConfigurationPanel",a003,"Row Fields","Row Fields",""

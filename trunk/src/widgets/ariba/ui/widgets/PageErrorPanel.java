@@ -1,4 +1,3 @@
-//ariba/sandbox/af/resh/platform/ui/widgets/ariba/ui/widgets/PageErrorPanel.java#13 - edit change 910309 (ktext)
 /*
     Copyright 1996-2008 Ariba, Inc.
 
@@ -13,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageErrorPanel.java#29 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageErrorPanel.java#30 $
 */
 
 package ariba.ui.widgets;

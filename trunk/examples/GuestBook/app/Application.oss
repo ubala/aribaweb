@@ -1,0 +1,70 @@
+@module=Home {
+    @layout=Hint#Hint {
+        bindings:{
+            value:"Welcome!";
+        }
+    }
+
+    @layout=HelloNorthAmerica#pad8 {
+        after:zToc;
+        component:MetaList;
+        bindings:{
+            list:${app.Post.postsForContinent(app.Continent.NorthAmerica)}
+        }
+    }
+    @layout=HelloSouthAmerica#pad8 {
+        after:HelloNorthAmerica;
+        component:MetaList;
+        bindings:{
+            list:${app.Post.postsForContinent(app.Continent.SouthAmerica)}
+        }
+    }
+    @layout=HelloEurope#pad8 {
+        after:zLeft;
+        component:MetaList;
+        bindings:{
+            list:${app.Post.postsForContinent(app.Continent.Europe)}
+        }
+    }
+    @layout=HelloAfrica#pad8 {
+        after:HelloEurope;
+        component:MetaList;
+        bindings:{
+            list:${app.Post.postsForContinent(app.Continent.Africa)}
+        }
+    }
+    @layout=HelloAsia#pad8 {
+        after:zRight;
+        component:MetaList;
+        bindings:{
+            list:${app.Post.postsForContinent(app.Continent.Asia)}
+        }
+    }
+    @layout=HelloAustralia#pad8 {
+        after:HelloAsia;
+        component:MetaList;
+        bindings:{
+            list:${app.Post.postsForContinent(app.Continent.Australia)}
+        }
+    }
+    @layout=HelloAntarctica#pad8 {
+        after:zBottom;
+        component:MetaList;
+        bindings:{
+            list:${app.Post.postsForContinent(app.Continent.Antarctica)}
+        }
+    }
+    
+}
+
+module=app.Post {
+    homePage:Main;
+}
+
+@actionCategory=Create {
+    after:zNav;
+
+    @action=Post {
+        actionResults:${requestContext.pageWithName("Main")};
+    }
+}

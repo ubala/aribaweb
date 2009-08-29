@@ -1,1 +1,1 @@
-<img elementId="$elementId" src="$url" border="$^border:0" otherBindings="$otherBindingsValues" invokeAction="$invokeAction"/>\
+<img elementId="$elementId" src="$url" border="$^border:0" otherBindings="$otherBindingsValues" invokeAction="$invokeAction" width="$^width" height="$^height"/>\

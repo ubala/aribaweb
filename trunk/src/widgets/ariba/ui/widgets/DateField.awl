@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#32 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#33 $
     </Copyright>
 
     <Overview>
@@ -90,14 +90,20 @@
            class="awmenuLink"
            elementId="$linkId"
            id="$linkId"
-           awmenuId="$menuId"
+           awmenuId="calendar_menu"
            onClick="return ariba.Calendar.dateFieldOnClick(this, event)">\
             <a:Image align="absmiddle" class="DTCh" filename="widg/calendar.gif" alt="$[a001]Select a date from the calendar"/>\
         </a>\
+        <a:RefreshRegion>\
+           <a:ClientSideScript isSingleton="$false">
+               new ariba.Calendar.Control('$linkId', new Date($selectedYear, $selectedMonth, $selectedDayOfMonth), '$^enabledCalendarDays', true, '$dateTextFieldId');
+           </a:ClientSideScript>\
+        </a:RefreshRegion>\
     <a:Else/>\
         <a:Image align="absmiddle" class="DTCh" filename="widg/calendar.gif" alt="$[a002]Calendar is disabled"/>\
     </a:If>\
-<w:PopupMenu menuId="$menuId">
+<a:Singleton>\
+<w:PopupMenu menuId="calendar_menu">
     <a:RefreshRegion>
         <w:Calendar selection="$date" action="$calendarAction" showYearNavigation="$^showYearNavigation"
                   dateFactory="$dateFactory" bodyBehavior="DFB" enabledCalendarDays="$^enabledCalendarDays"/>
@@ -108,4 +114,5 @@
         </a:If>
     </a:RefreshRegion>
 </w:PopupMenu>\
+</a:Singleton>\
 </nobr>

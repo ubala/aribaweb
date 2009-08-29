@@ -3,6 +3,9 @@
     <title>$title</title>
     <meta http-equiv="Pragma" content="no-cache"/>
     <meta http-equiv="Expires" content="-1"/>
+    <a:If ifTrue="$isDebuggingMode">\
+        <meta name="AribaPage" content="true"/>
+    </a:If>\
 </head>
 <body>
     <!--- Put special marker around form so it's parsed out by XMLHTTPUpdateSource -->\

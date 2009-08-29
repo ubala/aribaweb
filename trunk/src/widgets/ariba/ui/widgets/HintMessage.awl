@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.awl#24 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.awl#25 $
     </Copyright>
 
     <Overview>
@@ -41,6 +41,11 @@
         If you do not provide this binding, its value will be determine by
         looking at WidgetsDelegate.hintMessagesVisible();
     </Binding>
+
+    <Binding key="isExpanded" direction="get" type="boolean" required="$false">
+        True if hint box should be expanded to show all the content.
+    </Binding>
+
 
     <NamedContent name="LowerLeft" required="$false">
         TBD
@@ -74,7 +79,7 @@
             </td>
 
             <td class="hint" colspan="3">
-                <div class="hintBox" id="$elementId" elementId="$elementId">
+                <div class="$hintBoxClass" id="$elementId" elementId="$elementId">
                     <span class="hintExpand">\
                         <a href="javascript:void(0);" style="text-decoration:none;padding:right:1px"
                             bh="HME">

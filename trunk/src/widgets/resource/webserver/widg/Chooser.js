@@ -25,12 +25,26 @@ ariba.Chooser = function() {
         {
             var chooserInfo = new Object();
             AWChooserInfo[chooserId] = chooserInfo;
-            var wrapper = Dom.getElementById(chooserId);
+            chooserInfo.chooserId = chooserId;
+            chooserInfo.isInvalid = isInvalid;
+            chooserInfo.searchPattern = '';
+            chooserInfo.skipBlur = false;
+            chooserInfo.multiSelect = multiSelect;
+            chooserInfo.textTimeoutId = null;
+            chooserInfo.keyDownTimeoutId = null;
+
+            chooserInfo.initialized = false;
+        },
+
+        fullInit: function(chooserInfo)
+        {
+            var wrapper = Dom.getElementById(chooserInfo.chooserId);
             chooserInfo.wrapper = wrapper;
             chooserInfo.noSelectionValue = wrapper.getAttribute('_ns');
             chooserInfo.menuPositionObj = Dom.findChild(wrapper, "TR", false);
             chooserInfo.textField = Dom.findChild(wrapper, "INPUT", false);
             chooserInfo.initValue = chooserInfo.textField.value;
+
             chooserInfo.modeLink = Dom.findChildUsingPredicate(wrapper, function (e) {
                 return e.tagName == "IMG" && Dom.hasClass(e, "chModeLink");
             });
@@ -54,23 +68,15 @@ ariba.Chooser = function() {
             chooserInfo.matchesContainer = Dom.findChildUsingPredicate(wrapper, function (e) {
                 return e.tagName == "SPAN" && Dom.hasClass(e, "chMatches");
             });
-            chooserInfo.searchPattern = '';
-            chooserInfo.validSelection = this.hasSelection(chooserInfo) && !isInvalid;
+
+            chooserInfo.validSelection = this.hasSelection(chooserInfo) && !chooserInfo.isInvalid;
             chooserInfo.fullMatchCheckbox = Dom.findChildUsingPredicate(wrapper, function (e) {
                 return e.tagName == "INPUT" && Dom.hasClass(e, "chfullMatch");
             });
 
-            chooserInfo.isInvalid = isInvalid;
-            if (isInvalid) {
-                Dom.addClass(chooserInfo.textField, 'chInvalidSelection');
-            }
-            else {
-                this.checkChooserText(chooserInfo);
-            }
-            chooserInfo.skipBlur = false;
             this.chooserPickListMode(chooserInfo);
-            chooserInfo.multiSelect = multiSelect;
-            if (multiSelect) {
+
+            if (chooserInfo.multiSelect) {
                 chooserInfo.multiSelectTextRegion = Dom.findChildUsingPredicate(wrapper, function (e) {
                     return e.tagName == "TD" && Dom.hasClass(e, "chMultiSelected");
                 });
@@ -110,9 +116,7 @@ ariba.Chooser = function() {
                 chooserInfo.maxRecentSelection = parseInt(wrapper.getAttribute('_mrs'));
                 this.chooserAddMode(chooserInfo);
             }
-
-            chooserInfo.textTimeoutId = null;
-            chooserInfo.keyDownTimeoutId = null;
+            chooserInfo.initialized = true;
         },
 
         hasSelection : function (chooserInfo)
@@ -243,7 +247,7 @@ ariba.Chooser = function() {
             }
 
             if (chooserInfo.validSelection) {
-                Dom.removeClass(chooserInfo.textField, 'chNoSelection')
+                Dom.removeClass(chooserInfo.textField, 'chNoSelection');
                 Dom.addClass(chooserInfo.textField, 'chValidSelection');
             }
 
@@ -375,6 +379,9 @@ ariba.Chooser = function() {
             if (!chooserInfo) {
                 return;
             }
+            if (!chooserInfo.initialized) {
+                this.fullInit(chooserInfo);
+            }
             this.cancelChooserBlurTimeout(chooserInfo);
             var sourceElm = Event.eventSourceElement(evt);
             Debug.log('focus ' + sourceElm.tagName + ' ' + sourceElm.id + ' ' + elm.tagName, 5);
@@ -469,6 +476,9 @@ ariba.Chooser = function() {
         chooserClick : function (elm, evt)
         {
             var chooserInfo = this.getChooserInfo(elm);
+            if (!chooserInfo.initialized) {
+                this.fullInit(chooserInfo);
+            }
             var sourceElm = Event.eventSourceElement(evt);
             this.cancelChooserBlurTimeout(chooserInfo);
             this.cancelChooserFetchTimeout(chooserInfo);

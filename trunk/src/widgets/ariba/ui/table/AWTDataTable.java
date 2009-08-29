@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#192 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#195 $
 */
 
 package ariba.ui.table;
@@ -333,9 +333,21 @@ public final class AWTDataTable extends AWComponent
         return (AWTDataTable)component.env().peek(EnvKey);
     }
 
-    /** Instance Variables */
+    /*******************************************************************************
+     * Instance Variables
+     *******************************************************************************/
+
+    /**
+     * This is where we store our row data.
+     * @see #initializeDisplayGroupObjects
+     * @see #checkListBinding
+     */
     protected AWTDisplayGroup _displayGroup;
-    private AWComponentReference _processedReference;  // stored to check for rapid turnaround changes
+
+    /**
+     * This is stored to check for rapid turnaround changes.
+     */
+    private AWComponentReference _processedReference;
     private List _allColumns;
     private boolean _visibilityArray[];
     protected List _displayedColumns;
@@ -365,9 +377,15 @@ public final class AWTDataTable extends AWComponent
     private String  _style;
     private String _tableClass;
     private boolean _enableScrolling;
-    public int _scrollTopIndex = -1;  // used to buffer changes in scroll offset until renderResponse
 
-    // rendering scratch state
+    /**
+     * This is used to buffer changes in scroll offset until renderResponse.
+     */
+    public int _scrollTopIndex = -1;
+
+    /**
+     * This is the rendering scratch state.
+     */
     private boolean _rowToggleState;
 
     // 0 = none, 1 = current page, 2 = all rows
@@ -545,7 +563,7 @@ public final class AWTDataTable extends AWComponent
         return null;
     }
 
-    private void resetScrollTop ()
+    void resetScrollTop ()
     {
         _scrollTopIndex = 0;
         displayGroup().setScrollTopIndex(_scrollTopIndex);
@@ -565,6 +583,8 @@ public final class AWTDataTable extends AWComponent
         else if (_scrollTopIndex != displayGroup().scrollTopIndex()) {
             // update the batch only if it's a scroll fault.
             _scrollTopIndex = displayGroup().setScrollTopIndex(_scrollTopIndex, _isScrollFaultAction);
+        } else if (_isScrollFaultAction) {
+            displayGroup().centerBatchOnRow(_scrollTopIndex);
         }
         _isScrollFaultAction = false;
     }
@@ -865,7 +885,7 @@ public final class AWTDataTable extends AWComponent
         initializeDataSource();
 
         checkDetailExpandoEnabled();
-        
+
         // Apply any saved table configuration
         boolean didHaveConfig = processTableConfig();
 
@@ -875,7 +895,7 @@ public final class AWTDataTable extends AWComponent
         if (_allColumns.size() == 0) {
             columns().add(BlankColumn);
         }
-        
+
         // take care of the initialization of the display group, as needed
         if (setupDisplayGroup) {
             // we need to set the batch size even when the displayGroup already exists
@@ -981,6 +1001,7 @@ public final class AWTDataTable extends AWComponent
         Iterator iter = parentCols.iterator();
         while (iter.hasNext()) {
             Column c = (Column)iter.next();
+            c.prepare(_parentTable);
             Column matchingCol = findAndRemoveColumnWithLabel(ourCols, c.label(_parentTable));
             if (matchingCol == null) {
                 matchingCol = BlankColumn;
@@ -1204,7 +1225,7 @@ public final class AWTDataTable extends AWComponent
     }
 
     protected boolean _wasPrimaryRow;
-    
+
     public boolean activateDetailColumn (boolean isTop)
     {
         if ((_detailColumn != null) && (((DetailColumn)_detailColumn).renderBeforeRow(this) == isTop)
@@ -1568,7 +1589,7 @@ public final class AWTDataTable extends AWComponent
 
     public boolean showBatchNavRow ()
     {
-        return showNavigationBar() || showOptionsMenu();    
+        return showNavigationBar() || showOptionsMenu();
     }
 
     public List displayedColumns ()
@@ -2103,6 +2124,9 @@ public final class AWTDataTable extends AWComponent
         }
     }
 
+    /**
+     * @see AWTDataSource
+     */
     private void initializeDisplayGroupObjects ()
     {
         checkListChanges();
@@ -2323,7 +2347,7 @@ public final class AWTDataTable extends AWComponent
     {
         return displayedColumns().size() > 1;
     }
-    
+
     public boolean groupingByCurrentColumn ()
     {
         return _currentColumn == _groupByColumn;
@@ -2542,7 +2566,7 @@ public final class AWTDataTable extends AWComponent
             config.put(TableBodyExpansionDefaultConfigKey,
                     Boolean.toString(_tableBodyExpanded));
         }
-        
+
         if (_pivotState != null) _pivotState.writeToTableConfig(config);
 
         return config;
@@ -2635,7 +2659,7 @@ public final class AWTDataTable extends AWComponent
                 String tableBodyExpanded = (String)config.get(TableBodyExpansionDefaultConfigKey);
                 if (!StringUtil.nullOrEmptyOrBlankString(tableBodyExpanded)) {
                     _tableBodyExpanded =
-                        Boolean.valueOf(outlineExpansionDefaultString).booleanValue();   
+                        Boolean.valueOf(outlineExpansionDefaultString).booleanValue();
                 }
             }
             return true;
@@ -2718,7 +2742,7 @@ public final class AWTDataTable extends AWComponent
         return result;
     }
 
-    public boolean _renderingHeader = false;    
+    public boolean _renderingHeader = false;
     /* Called repeatedly when rendering data row to see if to render again (for pivot row attribute rows) */
     protected boolean _didRenderCurrentRow = false;
     protected boolean _renderingPrimaryRow = false;
@@ -2727,7 +2751,7 @@ public final class AWTDataTable extends AWComponent
         if (!_didRenderCurrentRow) {
             _didRenderCurrentRow = true;
             _renderingPrimaryRow = true;
-            if (_pivotState != null) return _pivotState.preparePrimaryRow(this);            
+            if (_pivotState != null) return _pivotState.preparePrimaryRow(this);
             return Boolean.TRUE;
         }
         _renderingPrimaryRow = false;
@@ -2797,7 +2821,7 @@ public final class AWTDataTable extends AWComponent
         return (_pivotState != null)  && _pivotState.columnEdgeLevels() > 0;
     }
 
-    
+
     /*
         ErrorHandler support:  data table assist in navigating to display item (row)
         with error

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/WizardNavigator.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/WizardNavigator.java#3 $
 */
 
 package ariba.ui.wizard.component;
@@ -143,7 +143,11 @@ public final class WizardNavigator extends AWComponent
     {
         boolean isDialogFrame = _frame.isDialogFrame();
         boolean hasMultiSteps = hasMultiSteps();
-        return !isDialogFrame && hasMultiSteps && !requestContext().isPrintMode();
+        boolean showSteps = _wizard.showSteps();
+        return !isDialogFrame
+                && hasMultiSteps
+                && !requestContext().isPrintMode()
+                && showSteps;
     }
 
     public boolean hasMultiSteps ()

@@ -170,7 +170,11 @@ function createRTA (id)
         function deferredGenerate () {
             editor.generate();
             editor.whenDocReady(postRTALoad);
+            // When it's done the doc can be ready
+            editor.whenDocReady(ariba.Event.notifyDocReady.bind(ariba.Event));
         };
+        // Delay the doc ready until Xinha is done loading
+        ariba.Event.docReadyIncrementNesting();
         ariba.Event.eventEnqueue(deferredGenerate, null, true);
     }
     else {

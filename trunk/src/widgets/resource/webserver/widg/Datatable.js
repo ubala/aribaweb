@@ -161,7 +161,8 @@ ariba.Datatable = function() {
                 // set up maximize control  -- (performance: restrict scope of search to header if possible)
                 // If this is legacy usage (i.e. Sourcing) then tableHeaderId==null and we need to search whole wrapperTable,
                 // otherwise '' means no search, and an id means search that table
-                var searchElement = ((tableHeaderId == null) ? wrapperTable
+                var isLegacy = (tableHeaderId == null);
+                var searchElement = (isLegacy ? wrapperTable
                         : ((tableHeaderId.length) ? Dom.getElementById(tableHeaderId) : null));
                 // Debug.log("tableHeaderId: " + ((tableHeaderId == null) ? "*NULL*" : ("'" + tableHeaderId + "'")) + " --> " + searchElement);
                 if (searchElement) {
@@ -182,7 +183,22 @@ ariba.Datatable = function() {
             this.registerPostLoad();
         },
 
-        // called on init, and on change to parameters
+        /**
+         * This is called on init, and on change to parameters.
+         * @param id
+         * @param isDraggable
+         * @param isMaximizedId
+         * @param topCount
+         * @param bottomCount
+         * @param topIndexId This is the same as the topIndex in AWTDisplayGroup.
+         * @param topOffsetId
+         * @param scrollFaultActionId
+         * @param rowIdToForceVisible
+         * @param updateSelectAllActionId
+         *
+         * @see ariba.ui.table.AWTDataTable
+         * @see ariba.ui.table.AWTDisplayGroup
+         */
         updateScrollTable : function(id, isDraggable, isMaximizedId,
                                       topCount, bottomCount, topIndexId, topOffsetId, scrollFaultActionId,
                                       rowIdToForceVisible, updateSelectAllActionId)
@@ -1765,7 +1781,6 @@ ariba.Datatable = function() {
 
                 if (tableInfo) {
                     if (tableInfo.lastSelectedRow) {
-                        tableInfo.lastSelectedRow.checked = false;
                         this.updateRowSelectColor(tableInfo.lastSelectedRow, false);
                     }
                     tableInfo.lastSelectedRow = row;

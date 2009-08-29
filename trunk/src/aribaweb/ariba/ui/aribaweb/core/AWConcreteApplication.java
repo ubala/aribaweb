@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#121 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#122 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -39,6 +39,7 @@ import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.HTML;
 import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
+import ariba.util.core.NamedValue;
 import ariba.util.core.PerformanceState;
 import ariba.util.core.StringUtil;
 import ariba.util.core.SystemUtil;
@@ -930,7 +931,7 @@ abstract public class AWConcreteApplication
     public boolean canShutdown ()
     {
         AWMonitorStats monitorStats = monitorStats();
-        int activeSessionCount = monitorStats.activeSessionCount();
+        int activeSessionCount = getUISessionCount();
         Log.aribaweb_shutdown.debug("Shutdown pending -- active sessions: %s",
                                     activeSessionCount);
         if (activeSessionCount > 0) {
@@ -948,6 +949,22 @@ abstract public class AWConcreteApplication
             return false;
         }
         return true;
+    }
+
+    public int getUISessionCount ()
+    {
+        if (_sessionMonitor == null) {
+            monitorStats().activeSessionCount();
+        }
+        return _sessionMonitor.sessionCount();
+    }
+
+    public List<NamedValue> getUISessionCountBuckets ()
+    {
+        if (_sessionMonitor == null) {
+            monitorStats().activeSessionCountBuckets();
+        }
+        return _sessionMonitor.sessionCountBuckets();
     }
 
     public void cancelShutdown ()
@@ -1524,6 +1541,35 @@ abstract public class AWConcreteApplication
         AWSessionMonitor (AWConcreteApplication application)
         {
             _application = application;
+        }
+
+        public int sessionCount ()
+        {
+            return _sessionList.size();
+        }
+
+        public List<NamedValue> sessionCountBuckets ()
+        {
+            Map<String, Integer> buckets = MapUtil.map();
+            for (int i = _sessionList.size() - 1; i >= 0; i--) {
+                Object b = ((AWSession)_sessionList.get(i)).monitorBucket();
+                String bucket = b == null ? "null" : b.toString();
+                Integer count = null;
+                if ((count = buckets.get(bucket)) != null) {
+                    count = count + 1;
+                }
+                else {
+                    count = new Integer(1);
+                }
+                buckets.put(bucket, count);
+            }
+
+            List<NamedValue> ret = ListUtil.list();
+            for (String bucket : buckets.keySet()) {
+                NamedValue nv = new NamedValue(bucket, buckets.get(bucket));
+                ret.add(nv);
+            }
+            return ret;
         }
 
         public void run ()

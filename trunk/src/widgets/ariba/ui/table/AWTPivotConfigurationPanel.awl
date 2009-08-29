@@ -11,6 +11,7 @@
                      tagName="td" isHoriz="$true" class="pField"
                      dropTypes="$PivotListColumnField"
                      type="$currentItemType" label="$[a002]Column Fields">\
+            <a:MethodInvocation invoke="$prepare"/>\
             <span class="$itemClass"><w:TruncateString value="$currentItemLabel"
                   size="$=ariba.ui.table.AWTDataTable.ColumnLabelMenuMaxSize"/></span>\
         </t:DragList>
@@ -20,6 +21,7 @@
         <t:DragList  list="$currentList" item="$currentItem" dragAction="$dragField" dropAction="$dropField"
                       dropTypes="$PivotListRowField"
                       tagName="td" rowspan="2" class="pField" type="$currentItemType" label="$[a003]Row Fields">\
+            <a:MethodInvocation invoke="$prepare"/>\
             <span class="$itemClass"><w:TruncateString value="$currentItemLabel"
                   size="$=ariba.ui.table.AWTDataTable.ColumnLabelMenuMaxSize"/></span>\
         </t:DragList>
@@ -27,6 +29,7 @@
         <t:DragList  list="$currentList" item="$currentItem" dragAction="$dragField" dropAction="$dropField"
                       dropTypes="$PivotListColumnAttribute"
                       tagName="td" isHoriz="$true" class="pAttr" type="$currentItemType" label="$[a004]Column Attributes">\
+            <a:MethodInvocation invoke="$prepare"/>\
             <span class="$itemClass"><w:TruncateString value="$currentItemLabel"
                   size="$=ariba.ui.table.AWTDataTable.ColumnLabelMenuMaxSize"/></span>\
         </t:DragList>
@@ -36,6 +39,7 @@
         <t:DragList  list="$currentList" item="$currentItem" dragAction="$dragField" dropAction="$dropField"
                       dropTypes="$PivotListDetailAttribute"
                       tagName="td" class="pAttr" type="$currentItemType" label="$[a005]Detail Attributes">\
+            <a:MethodInvocation invoke="$prepare"/>\
             <span class="$itemClass"><w:TruncateString value="$currentItemLabel"
                   size="$=ariba.ui.table.AWTDataTable.ColumnLabelMenuMaxSize"/></span>\
         </t:DragList>
@@ -50,6 +54,7 @@
         <t:DragList  list="$currentList" item="$currentItem" dragAction="$dragField" dropAction="$dropField"
                       dropTypes="$PivotListHiddenAttribute"
                       tagName="td" class="pAttrUnused" type="Attr" label="$[a006]Hidden Attributes">\
+            <a:MethodInvocation invoke="$prepare"/>\
             <span class="$itemClass"><w:TruncateString value="$currentItemLabel"
                   size="$=ariba.ui.table.AWTDataTable.ColumnLabelMenuMaxSize"/></span>\
         </t:DragList>

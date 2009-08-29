@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Initialization.java#12 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Initialization.java#13 $
 */
 package ariba.ui.meta.core;
 
@@ -39,6 +39,11 @@ import java.util.Arrays;
 public class Initialization
 {
     private static boolean _DidInit = false;
+
+    public static void preInit ()
+    {
+        UIMeta.getInstance();
+    }
 
     public static void init ()
     {
@@ -85,9 +90,6 @@ public class Initialization
             // ariba.ui.meta.core.Log.meta.setLevel(ariba.util.log.Log.DebugLevel);
             // ariba.ui.meta.core.Log.meta_detail.setLevel(ariba.util.log.Log.DebugLevel);
             // ariba.ui.meta.core.Log.meta_context.setLevel(ariba.util.log.Log.DebugLevel);
-
-            // force init
-            UIMeta.getInstance();
 
             application.registerDidInitCallback(new AWConcreteApplication.DidInitCallback() {
                 public void applicationDidInit (AWConcreteApplication application) {

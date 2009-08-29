@@ -949,6 +949,20 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
         }
     }
 
+	public void expandAllDetailAttributes ()
+	{
+		Collection<PivotGroup> groups = _dataTable._displayGroup.groupingValueState().values();
+		for (PivotGroup g: groups) {
+			_detailAttributesExpanded.put(g, true);
+		}
+	}
+
+	public void collapseAllDetailAttributes ()
+	{
+		_detailAttributesExpanded.clear();   
+	}
+
+
     class LVal { public Object val; }
 
     String primaryAttributeColumnLabel (LVal colLVal)

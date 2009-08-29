@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#8 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.Locale;
 import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Because applyValues is overridden and super.applyValues is NOT
@@ -173,14 +174,18 @@ public final class AWFileUploadInternals extends AWComponent
         String fileName = AWUtil.lastComponent(urlString, '/');
         try {
             URL url = new URL(urlString);
-            byte[] bytes = AWUtil.getBytes(url.openStream());
+            URLConnection conn = url.openConnection();
+            byte[] bytes = AWUtil.getBytes(conn.getInputStream());
+            String contentType = conn.getContentType();
+            if(contentType == null) {
+                contentType = MIME.ContentTypeApplicationOctetStream;
+            }
             String uploadDirPath = AWMimeReader.fileUploadDirectory();
             if (uploadDirPath != null) {
                 File uploadDirectory = new File(uploadDirPath);
                 File uploadFile = File.createTempFile("awupload", ".tmp", uploadDirectory);
                 AWUtil.writeToFile(bytes, uploadFile);
-                return new AWFileData(fileName, uploadFile, MIME.ContentTypeApplicationOctetStream, false, bytes.length,
-                                      false);
+                return new AWFileData(fileName, uploadFile, contentType, false, bytes.length, false);
             }
             return new AWFileData(fileName, bytes);
         } catch (IOException e) {

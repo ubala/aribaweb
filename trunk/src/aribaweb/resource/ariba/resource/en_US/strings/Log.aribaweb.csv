@@ -7,3 +7,4 @@
 9527,"Trying to unregister an error navigation handler that hasn't been registered: {0}", 0-handler
 9535,"Expected the old error to be an AWErrorInfo but it is not. {0}", 0-the unexpected object
 9570,"Trying to unregister a full-validation handler that hasn't been registered: {0}", 0-handler
+10289,"RealmProfile does not exists for realm : {0}", 0-realmId
