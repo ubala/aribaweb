@@ -2,20 +2,10 @@
     <w:FourZoneLayout>
         <a:Content name="left">
             <h1>Welcome!</h1>
-            <w:FormTable showErrorFlags="$true" omitLabelPadding="$true">
-                <w:FormRow label="Name" required="$true">
-                    <a:TextField value="$newPost.userName" formatter="$formatters.requiredString"/>
-                </w:FormRow>
-                <w:FormRow label="Birthday">
-                    <w:DateField value="$newPost.birthday"/>
-                </w:FormRow>
-                <w:FormRow label="Comment">
-                    <w:RichTextArea value="$newPost.comment"/>
-                </w:FormRow>
-                <w:FormRow>
-                    <a:SubmitButton action="$add"/>
-                </w:FormRow>
-            </w:FormTable>
+            <m:Context object="$newPost" operation="create" layout="Inspect">
+                <m:IncludeComponent/>
+            </m:Context>
+            <a:SubmitButton action="$add"/>
         </a:Content>
         <a:Content name="right">
             <h1>Past Comments</h1>
@@ -26,27 +16,18 @@
                         $currentPost.userName
                         (<a:String value="$currentPost.birthday" formatter="$formatters.shortDate"/>)
                         said:
-                        [<a:Hyperlink action='${pageWithName("EditPost",[post:currentPost, clientPanel:true])}'>edit</a:Hyperlink>], 
-                        [<a:Hyperlink action="$deleteCurrent">delete</a:Hyperlink>]<br/>
+                        [<m:Context object="$currentPost" layout="Links">
+                            <m:IncludeComponent/>
+                        </m:Context>]\
+                        <br/>
                         <a:String escapeUnsafeHtml="$true" value="$currentPost.comment"/><br/>
                         <x:RatingBar value="$currentPost.rating"/>
                     </a:For>
                 </w:Tab>
-                <w:Tab label="Table">
-                    <t:DataTable title="Posts" showOptionsMenu="$true"
-                                 list="$posts" item="$currentPost">
-                        <t:Column key="userName"/>
-                        <t:Column key="birthday" formatter="$formatters.shortDate"/>
-                        <t:Column label="Rating">
-                            <x:RatingBar value="$currentPost.rating"/>
-                        </t:Column>
-                        <t:Column>
-                            <w:TextButton action="$deleteCurrent">Delete</w:TextButton>
-                        </t:Column>
-                        <t:RowDetail style="padding-left:20px">\
-                            <a:String escapeUnsafeHtml="$true" value="$currentPost.comment"/>
-                        </t:RowDetail>
-                    </t:DataTable>
+                <w:Tab label="Table">       
+                    <m:Context class="app.Post" displayGroup="$displayGroup" layout="Table">
+                        <m:IncludeComponent/>                                  
+                    </m:Context>                                               
                 </w:Tab>
             </w:TabSet>
         </a:Content>

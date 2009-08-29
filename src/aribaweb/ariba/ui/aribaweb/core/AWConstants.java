@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConstants.java#23 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConstants.java#24 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -25,7 +25,8 @@ abstract public class AWConstants extends AWBaseObject
     public static final AWEncodedString Ampersand = AWEncodedString.sharedEncodedString("&");
     public static final AWEncodedString Zero = AWEncodedString.sharedEncodedString("0");
     public static final AWEncodedString OnClick = AWEncodedString.sharedEncodedString("xclick");
-    public static final AWEncodedString OnChange = AWEncodedString.sharedEncodedString("xchange");
+    // See commment about onchange to the calls to AWGenericElement.registerBindingTranslation
+    public static final AWEncodedString OnChange = AWEncodedString.sharedEncodedString("onchange");
     public static final AWEncodedString OnKeyPress = AWEncodedString.sharedEncodedString("xkeypress");
     public static final AWEncodedString OnKeyDown = AWEncodedString.sharedEncodedString("xkeydown");
     public static final AWEncodedString OnMouseUp = AWEncodedString.sharedEncodedString("xmouseup");

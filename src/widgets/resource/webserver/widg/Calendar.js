@@ -68,15 +68,31 @@ ariba.Calendar = function() {
 
     var Calendar = {
 
-        Control : function (tableId, selectedDate, enabledDays)
+        Control : function (containerId, selectedDate, enabledDays, reuse, dateTextFieldId)
         {
             this.getTable = function ()
             {
-                return Dom.getElementById(this._tableId);
+                if(!this._reuse) {
+                    return Dom.getElementById(this._containerId);
+                }
+                else if(!this._calTable) {
+                    var menu = Dom.getElementById("calendar_menu");
+                    this._calTable = Dom.findChild(menu,"TABLE",false);
+                }
+                return this._calTable;
             }
 
-            this._tableId = tableId;
-            this.getTable()._awcalendar = this;
+            this._reuse = reuse;
+            this._dateTextFieldId = dateTextFieldId;
+            this._containerId = containerId;
+            if(reuse){
+                var link = Dom.getElementById(this._containerId);
+                link._awcalendar = this;
+            }
+            else {
+                this.getTable()._awcalendar = this;
+            }
+
             this._calendarDate = null;
             this._selectedDate = selectedDate;
 
@@ -224,6 +240,7 @@ ariba.Calendar = function() {
             this.renderCalendar = function (date)
             {
                 this.setCalendarDate(date);
+                this.getTable()._awcalendar = this;
                 this.renderMonthYear();
                 this.renderDayNames();
                 this.renderDays();
@@ -242,7 +259,9 @@ ariba.Calendar = function() {
             /////////////
             // Init
             //////////////
-            this.renderCalendar(this._selectedDate);
+            if(!this._reuse) {
+                this.renderCalendar(this._selectedDate);
+            }
         },
 
         calMouseOver : function (mevent)
@@ -275,6 +294,9 @@ ariba.Calendar = function() {
                 var calendar = table._awcalendar;
                 var date = calendar._calendarDate;
                 var senderId = table.id;
+                if(table._awcalendar._reuse) {
+                    senderId = table._awcalendar._containerId;
+                }
                 var formId = Dom.lookupFormId(table);
                 var formObject = Dom.getElementById(formId);
                 if (formObject != null) {
@@ -371,6 +393,10 @@ ariba.Calendar = function() {
             var textfieldObj = Dom.findChild(nobrObj, "INPUT", false);
             var dateFieldChanged = textfieldObj.getAttribute("awdidChange");
             var menuId = linkObj.getAttribute("awmenuId");
+            var menu = Dom.getElementById(menuId);
+            if(linkObj._awcalendar) {
+                linkObj._awcalendar.renderCalendar(linkObj._awcalendar._selectedDate);
+            }
             Menu.menuLinkOnClick(linkObj, menuId, null, mevent);
             if (dateFieldChanged == "1") {
                 var formId = textfieldObj.form.id;
@@ -394,10 +420,8 @@ ariba.Calendar = function() {
         {
             var srcElement = Event.eventSourceElement(evt);
             var srcElementInnerText = Dom.getInnerText(srcElement);
-            var menu = Dom.findParentUsingPredicate(srcElement, function (e) {
-                return e.className == "awmenu";
-            });
-            var textfieldObj = Dom.getElementById('DF' + menu.id);
+            var table = Dom.findParent(srcElement, "TABLE", false);
+            var textfieldObj = Dom.getElementById( table._awcalendar._dateTextFieldId);
             if (srcElement.tagName == "A" && srcElementInnerText != "") {
                 // clear out the date field text in case it is an invalid value
                 textfieldObj.value = '';

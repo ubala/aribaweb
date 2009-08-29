@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#11 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#12 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -32,6 +32,7 @@ import ariba.util.test.TestStager;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.AnnotatedElement;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
@@ -49,7 +50,7 @@ public class TestLinkHolder implements SemanticKeyProvider
     String _displayName;
     String _secondaryName;
     String _linkText;
-    
+
     String _firstLevelCategory;
     String _secondLevelCategory;
 
@@ -109,12 +110,12 @@ public class TestLinkHolder implements SemanticKeyProvider
     {
         return _type;
     }
-    
+
     public String getKey (Object receiver, AWComponent component)
     {
         return _displayName;
     }
-    
+
     private String computeSecondaryName ()
     {
         String name = null;
@@ -233,7 +234,7 @@ public class TestLinkHolder implements SemanticKeyProvider
         if (active) {
             active = checkTestLinkParams(testContext);
         }
-        return active;    
+        return active;
     }
 
     public List<Class> getRequiredContextItems (AWRequestContext requestContext)
@@ -289,10 +290,10 @@ public class TestLinkHolder implements SemanticKeyProvider
         return canInvoke;
     }
 
-    private boolean isInternalParameter (Class parameter)
+    protected static boolean isInternalParameter (Class parameter)
     {
         if (parameter == AWRequestContext.class ||
-                parameter == TestContext.class || 
+                parameter == TestContext.class ||
                 StagerArgs.class.isAssignableFrom(parameter)) {
             return true;
         }
@@ -300,6 +301,7 @@ public class TestLinkHolder implements SemanticKeyProvider
             return false;
         }
     }
+
     /*
        Check to see if all of the methods that are annotated with TestLinkParam
        can be invoked with the current state of the TestContext.
@@ -376,6 +378,17 @@ public class TestLinkHolder implements SemanticKeyProvider
             }
         }
         return allInternal;
+    }
+
+    protected static Class[] filterInternalParameters (Class[] parameters)
+    {
+        List<Class> list = new ArrayList<Class>();
+        for (Class param : parameters) {
+            if (!isInternalParameter(param)) {
+                list.add(param);
+            }
+        }
+        return (Class[])list.toArray(new Class[list.size()]);
     }
 
     private boolean useAnnotationType (AWRequestContext requestContext, Method method)

@@ -5,9 +5,9 @@
         <a:For list="$itemsToDisplay" item="$item">
         <$item.name>$item.value</$item.name>
         </a:For>
-        <sessions>$monitorStats.activeSessionCount</sessions>
-        <a:For list="$monitorStats.activeSessionCountBuckets" item="$item">
-            <sessionsForBucket$item.name>$item.value<sessionsForBucket$item.name>
+        <sessions>$activeSessionCount</sessions>
+        <a:For list="$activeSessionCountBuckets" item="$item">
+            <sessionsForBucket$item.name>$item.value</sessionsForBucket$item.name>
         </a:For>
         <state>\
             <a:If ifTrue="$monitorStats.isInShutdownWarningPeriod">\

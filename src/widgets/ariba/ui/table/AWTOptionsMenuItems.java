@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.java#16 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.java#17 $
 */
 package ariba.ui.table;
 
@@ -59,6 +59,7 @@ public final class AWTOptionsMenuItems extends AWComponent
     public void collapseAll ()
     {
         _table.outlineState().collapseAll();
+        _table.resetScrollTop();
         _table.pushTableConfig();
     }
 
@@ -95,6 +96,11 @@ public final class AWTOptionsMenuItems extends AWComponent
         AWTDisplayGroup displayGroup = _table.displayGroup();
         displayGroup.setGroupingExpansionDefault(AWTDisplayGroup.GroupingDefaultAllOpen);
         displayGroup.updateDisplayedObjects();
+    }
+
+    public void prepare ()
+    {
+        table()._currentColumn.prepare(_table);
     }
 
     public String currentColumnLabel ()

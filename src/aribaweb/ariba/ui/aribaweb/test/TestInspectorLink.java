@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestInspectorLink.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestInspectorLink.java#9 $
 */
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWRequestContext;
+import ariba.ui.aribaweb.util.Log;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.FastStringBuffer;
 import ariba.util.core.StringUtil;
@@ -40,7 +41,7 @@ public class TestInspectorLink
             "Validation Failed: could not load the validator specified in the " +
             "test script (this is often caused by renaming/moving classes or " +
             "methods consult an application developer for help";
-    
+
     // this is used to store the descriptionof the AML Group or for Network the
     // EOF Equivalent.
     private String _appSpecificValidatorName;
@@ -64,9 +65,16 @@ public class TestInspectorLink
         _annotatedItem = annotatedItem;
         _type = type;
 
+        Log.aribaweb.debug(Fmt.S("TestInspectorLink: Invalid supertype class '%s'. " +
+                "; classname: %s; name: %s; superType: %s; description: %s; annotatedItem: %s; type: %s.",new Object[]{
+                testInspector.superType(), testInspector.classname(), testInspector.name(), testInspector.superType(),
+                testInspector.description(), ((annotatedItem != null)?annotatedItem.toString():"null"),
+                type}));
+
         if (_annotatedItem.getClass() == Method.class) {
             Method method = (Method)_annotatedItem;
             Class[] types = method.getParameterTypes();
+            types = TestLinkHolder.filterInternalParameters(types);
             if (types.length == 1) {
                 Class paramClass = types[0];
                 Class typeClass = !StringUtil.nullOrEmptyOrBlankString(_type) ?
@@ -96,7 +104,12 @@ public class TestInspectorLink
                 _objectClass = method.getDeclaringClass();
             }
             else {
-                _objectClass = types[0];
+                for (Class type: types) {
+                    if (!TestLinkHolder.isInternalParameter(type)) {
+                        _objectClass = type;
+                        break;
+                    }
+                }
             }
         }
     }
@@ -172,10 +185,8 @@ public class TestInspectorLink
             }
             if (objectClassName == null) {
                 _objectClass = annotatedClass;
-                try {
-                    _annotatedItem = annotatedClass.getMethod(annotatedMethodName);
-                }
-                catch (NoSuchMethodException noMethod) {
+                _annotatedItem = getBestMethod (annotatedClass, annotatedMethodName, null);
+                if (_annotatedItem == null) {
                     throw new ValidatorLoadException (
                         constructNonAppSpecificError(annotatedClassName,
                                 annotatedMethodName, annotatedClassName,
@@ -223,45 +234,48 @@ public class TestInspectorLink
     private Method getBestMethod (Class annotatedClass, String methodName,
                                   Class argumentClass)
     {
-        Method method = null;
-        boolean methodFound = false;
         Class currentArgumentClass = argumentClass;
-        while (!methodFound) {
-            try {
-                if (currentArgumentClass != null) {
-                    method = annotatedClass.getMethod(methodName, currentArgumentClass);
+        Method method = getMethodWithInternalParams(methodName, annotatedClass, currentArgumentClass);
+        while (method == null && currentArgumentClass != null) {
+            method = getMethodWithInternalParams(methodName, annotatedClass, currentArgumentClass);
+            currentArgumentClass = currentArgumentClass.getSuperclass();
+        }
+
+        if (method == null && argumentClass != null) {
+            // lets search the interfaces then.
+            currentArgumentClass = argumentClass;
+            while (method == null && currentArgumentClass != null) {
+                Class[] interfaces = currentArgumentClass.getInterfaces();
+                for (int i = 0; i < interfaces.length; i++) {
+                    method = getMethodWithInternalParams(methodName, annotatedClass, interfaces[i]);
+                    if (method != null) {
+                        break;
+                    }
                 }
-                methodFound = true;
-            }
-            catch (NoSuchMethodException noMethod) {
                 currentArgumentClass = currentArgumentClass.getSuperclass();
             }
         }
+        return method;
+    }
 
-        if (method == null) {
-            // lets search the interfaces then.
-            methodFound = false;
-            currentArgumentClass = argumentClass;
-            while (!methodFound) {
-                if (currentArgumentClass != null) {
-                    Class[] interfaces = currentArgumentClass.getInterfaces();
-                    for (int i = 0; i < interfaces.length; i++) {
-                        try {
-                            method = annotatedClass.getMethod(methodName, interfaces[i]);
-                            methodFound = true;
-                            break;
-                        }
-                        catch (NoSuchMethodException noMethod) {
-                            // do nothing.
-                        }
+    private Method getMethodWithInternalParams(String methodName, Class annotatedClass, Class argumentClass) {
+        Method method = null;
+        Method[] methods = annotatedClass.getMethods();
+        for (Method m : methods) {
+            //If the method name matches, check for the parameters
+            if (m.getName().equals(methodName)) {
+                Class[] methodParams = TestLinkHolder.filterInternalParameters(m.getParameterTypes());
+                if (argumentClass != null) {
+                    if (methodParams.length == 1 &&
+                        methodParams[0].equals(argumentClass)) {
+                        method = m;
+                        break;
                     }
-                    if (!methodFound) {
-                        currentArgumentClass = currentArgumentClass.getSuperclass();
+                } else {
+                    if (methodParams.length == 0) {
+                        method = m;
+                        break;
                     }
-                }
-                else {
-                    // we failed, but will just return null.
-                    methodFound = true;
                 }
             }
         }
@@ -294,6 +308,7 @@ public class TestInspectorLink
             }
             if (valid) {
                 Class[] types = method.getParameterTypes();
+                types = TestLinkHolder.filterInternalParameters(types);
                 if (types.length > 1) {
                     valid = false;
                 }
@@ -382,7 +397,7 @@ public class TestInspectorLink
                             requestContext, testContext, method, obj, objToValidate);
             }
         }
-            
+
         return result;
     }
 
@@ -419,7 +434,7 @@ public class TestInspectorLink
             }
             else {
                 encoded.append(",");
-                encoded.append("null");                
+                encoded.append("null");
             }
 
         }
@@ -474,7 +489,7 @@ public class TestInspectorLink
     private static final String[] USELESS_STRINGS = {
             "validate",
             "validation",
-            "inspect"      
+            "inspect"
     };
 
     private static String removeUselessLeadingStrings (String string)

@@ -25,3 +25,5 @@ echo Starting up demo app...
 :end
 @rem End local scope for the variables with windows NT shell
 if "%OS%"=="Windows_NT" endlocal
+@rem If we have any error messages, we want to keep the command window open long enough to display them
+pause

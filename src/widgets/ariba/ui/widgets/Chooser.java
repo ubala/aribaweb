@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#28 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#29 $
 */
 
 
@@ -193,13 +193,38 @@ public class Chooser extends AWComponent
         if (displayValue == null) {
             displayValue = noSelectionString();
         }
+        
+        _chooserState.setPrevDisplayValue(displayValue);
         return displayValue;
     }
 
+    /**
+        we only do a match if the incoming strings differs from the previous
+        value - if the underlying selected object has changed we don't rematch
+     */
     public void setDisplayValue (String displayValue)
     {
-        if (!noSelectionString().equals(displayValue)) {
-            String previouslyDisplayed = displayObjectString();
+        String previouslyDisplayed = _chooserState.getPrevDisplayValue();
+        String noSelectionString = noSelectionString();
+        
+        boolean valueChanged = !noSelectionString.equals(displayValue);
+        //We don't process the request if the user has not entered any value
+        if (valueChanged) {
+            //There are cases where the form would get submitted exactly when the 
+            //chooser gets focus. In which case, display value will be an empty string
+            //and we don't need to process this request.
+
+            //But we still need to ensure the previous value was a no selection string
+            //to avoid loosing user delete action i.e.  if the chooser already had a
+            //value and the user deletes it.
+            if (noSelectionString.equals(previouslyDisplayed)
+                && StringUtil.nullOrEmptyString(displayValue))
+            {
+                valueChanged = false;
+            }
+        }
+
+        if (valueChanged) {
             boolean hasChanged = (previouslyDisplayed == null ||
                                   !previouslyDisplayed.equals(displayValue));
             _chooserState.hasChanged(hasChanged);
@@ -604,6 +629,19 @@ public class Chooser extends AWComponent
 
     public String cssClass ()
     {
-        return (valueForBinding(ariba.ui.aribaweb.html.BindingNames.size) == null) ? "chText chTW" : "chText";
+        String ret = "chText ";
+        if (valueForBinding(ariba.ui.aribaweb.html.BindingNames.size) == null) {
+            ret = "chText chTW ";
+        }
+        if (chooserState().isInvalid()) {
+            ret += "chInvalidSelection";
+        }
+        else if (noSelectionString().equals(displayValue())) {
+            ret += "chNoSelection";
+        }
+        else {
+            ret += "chValidSelection";
+        }
+        return ret;
     }
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2006-2008 Ariba, Inc.
+    Copyright (c) 2006-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#19 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#21 $
 */
 
 package ariba.util.shutdown;
@@ -30,7 +30,6 @@ import ariba.util.log.LogManager;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 /**
  * The ShutdownManager is responsible for executing shutdown requests
  * as graceful as possible.
@@ -148,7 +147,6 @@ public class ShutdownManager
     private Thread asyncShutdownThread;
     private static final long CancelledShutdownJoinLimit = 30 * Date.MillisPerSecond;
 
-    private static final int ShutdownMaxRandomDelayPeriod = 5*(int)Date.SecondsPerMinute;
 
     /**
      * Returns the instance of the ShutdownManager
@@ -223,6 +221,25 @@ public class ShutdownManager
     public static void forceShutdown (int exitCode)
     {
         get().shutdownNow(exitCode, true);
+    }
+    
+    /**
+     * Shutdowns a node so that it can restarted after a transient
+     * startup error.  For Ops instances, a normal exit is used,
+     * so Ops is not paged.
+     * Caller must log an error message before calling this method.
+     * @aribaapi private
+     */
+    public static void restartAfterStartupError ()
+    {
+        if (get()._printExtraMessages) {
+            // For Ops Service, do a shutdown that prints the special
+            // message that restarts the node without a page.  
+            get().shutdownNow(ShutdownManager.NormalExitNoRestart, true);
+        }
+        else {
+            get().shutdownNow(ShutdownManager.FatalExitRestart, true);
+        } 
     }
 
     private ExitHook _exitHook;
@@ -792,27 +809,6 @@ public class ShutdownManager
             Log.shutdown.info(9264);
             _shutdownScheduledTime = System.currentTimeMillis() + _delayRunnerTimeout;
 
-            // A random delay of 5 minutes will ensure that the nodes
-            // in the cluster does not go down rapidly particularly
-            // during rolling restart.
-            try {
-                Random delay = new Random();
-                long delayInMillis =
-                delay.nextInt((int)ShutdownMaxRandomDelayPeriod)*1000;
-                if(delayInMillis == 0) {
-                   delayInMillis = 30000;
-                }
-
-                synchronized (this) {
-                  Log.shutdown.info(
-                      "Shutdown pending for (" + delayInMillis + ")" );
-                  wait(delayInMillis);
-                }
-
-	        }
-            catch (InterruptedException ex) {
-
-            }
 
             for (Iterator i = _delayers.iterator(); i.hasNext();) {
                 ShutdownDelayer delayer = (ShutdownDelayer)i.next();
@@ -880,7 +876,6 @@ public class ShutdownManager
                     Log.shutdown.warning(
                         9258, millisToMinutes(_delayRunnerTimeout));
                 }
-
                 // Continue with immediate shutdown.
                 shutdownNow(_exitCode, false);
             }

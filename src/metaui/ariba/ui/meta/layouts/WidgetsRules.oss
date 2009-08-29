@@ -354,8 +354,9 @@ action {
 
 layout {
     zones: [zMain];
-    @trait=ActionMenu { visible:true; component:MetaActionList bindings:{renderAsMenu:true} elementClass:flR }
-    @trait=ActionButtons { visible:true; component:MetaActionList bindings:{renderAsButtons:true} elementClass:flR }
+    @trait=ActionMenu { visible:true; component:MetaActionList; bindings:{renderAsMenu:true}; elementClass:flR }
+    @trait=ActionButtons { visible:true; component:MetaActionList; bindings:{renderAsButtons:true}; elementClass:flR }
+    @trait=ActionLinks { visible:true; component:MetaActionList; bindings:{renderAsLinks:true}; elementClass:flR }
     @trait=InstanceActionButtons { visible:true; component:MetaActionList
                 bindings:{renderAsButtons:true;filterActions:instance} elementClass:flR }
     @trait=StaticActionButtons { visible:true; component:MetaActionList
@@ -410,6 +411,7 @@ layout {
 @traitGroup=ActionGrouping {
     @trait=ActionMenu;
     @trait=ActionButtons;
+    @trait=ActionLinks;
     @trait=InstanceActionButtons;
     @trait=StaticActionButtons;
 }
@@ -453,6 +455,7 @@ layout=InspectStack {
 
 layout=ButtonArea { trait:StaticActionButtons }
 layout=SelectionButtonArea { trait:InstanceActionButtons }
+layout=Links { trait:ActionLinks }
 
 /* Support @Trait("labelField") to identity label field */
 layout=LabelField field {
@@ -472,6 +475,12 @@ layout=(Table, DetailTable) class {
     }
 }
 
+layout=ListItem class {
+    component:AWString;
+    bindings:{
+        value:${properties.objectTitle};
+    }
+}
 /*
 layout=DetailTable class {
     label:$${ariba.ui.meta.core.UIMeta.defaultLabelForIdentifier(field)};

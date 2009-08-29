@@ -11,6 +11,7 @@ ariba.Event = function() {
     var Util = ariba.Util;
     var Debug = ariba.Debug;
     var Dom = ariba.Dom;
+    var Request = ariba.Request;
 
     // private vars
 
@@ -62,6 +63,9 @@ ariba.Event = function() {
     var AWWindowOnScrollTimeout = null;
     var AWOrigDocumentOnMouseDown = window.document.onmousedown;
 
+    // for the final doc ready check
+    var _docReadyLockCount = 0;
+
 
     var Event = {
         // All registered behaviors
@@ -110,6 +114,11 @@ ariba.Event = function() {
             _ScriptLockCount++;
         },
 
+        docReadyIncrementNesting : function ()
+        {
+            _docReadyLockCount++;
+        },
+
         // called from main window during incremental update (AWRefreshRegion and AWLazyDiv)
         // expectation is that all content to be run is copied over to the main window
         // before this is run
@@ -133,17 +142,22 @@ ariba.Event = function() {
 
                     //debug("evaluating: " + Debug.getMethodName(AWDomCompleteCallbackList[i]));
 
-                    //try {
+                    try {
                         if (AWDomCompleteCallbackListArgs[i]) {
                             AWDomCompleteCallbackList[i].apply(this, AWDomCompleteCallbackListArgs[i]);
                         }
                         else {
                             AWDomCompleteCallbackList[i]();
                         }
-                    //}
-                    //catch (e) {
-                    //    alert("refreshComplete: Exception evaluating: " + AWDomCompleteCallbackList[i].toString() + ": " + e.description);
-                    //}
+                    }
+                    catch (e) {
+                        var msg = "refreshComplete: Exception evaluating: "
+                                + AWDomCompleteCallbackList[i].toString() + ": " + e;
+                        Debug.log(msg);
+                        if (Request.AWDebugEnabled) {
+                            alert(msg);
+                        }
+                    }
 
                 // If we locked durring this function, then discard all items that we've run and bail out
                     if (_ScriptLockCount) {
@@ -192,6 +206,22 @@ ariba.Event = function() {
             //debug("action pending: false");
             //document.body.style.cursor = "default";
             this.eventUnlock();
+
+            return this.notifyDocReady();
+        },
+
+        notifyDocReady : function ()
+        {
+            if (_docReadyLockCount > 0) {
+                Debug.log("waitForDocReady() -- deferred (" + _docReadyLockCount + ")");
+                _docReadyLockCount--;
+
+                return false;
+            }
+
+            Debug.log("waitForDocReady() -- executing...");
+            this.invokeRegisteredHandlers("onDocReady");
+            Debug.log("waitForDocReady() -- done...");
 
             return true;
         },

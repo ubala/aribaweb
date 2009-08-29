@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTPivotConfigurationPanel.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTPivotConfigurationPanel.java#6 $
 */
 package ariba.ui.table;
 
@@ -68,6 +68,11 @@ public class AWTPivotConfigurationPanel extends AWComponent
     {
         _currentListNumber = Integer.parseInt(num);
         _currentList = (List)_lists[_currentListNumber];
+    }
+
+    public void prepare ()
+    {
+        ((AWTDataTable.Column)_currentItem).prepare(_pivotState.table());
     }
 
     public String currentItemLabel ()

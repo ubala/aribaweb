@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.java#15 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.java#16 $
 */
 
 package ariba.ui.widgets;
@@ -87,6 +87,16 @@ public final class HintMessage extends AWComponent
     {
         return StringUtil.strcat(OpenHelpWindow, resolveUrl(_screenDetailsUrl), CloseFunction);
     }
+
+    /**
+     * This returns the css class for the hint box.
+     * @return
+     */
+    public String hintBoxClass ()
+    {
+        return booleanValueForBinding("isExpanded") ? "hintBoxOpen" : "hintBox";
+    }
+
 
     private String resolveUrl (String url)
     {

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#27 $
+    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#28 $
 */
 
 package ariba.util.core;
@@ -812,6 +812,12 @@ public class HTML
             }
         }
         return -1;
+    }
+
+    private static Pattern linebreaksToBr = Pattern.compile("\\r?\\n");
+    public static String linebreaksToBRTags (String input)
+    {
+        return linebreaksToBr.matcher(input).replaceAll("<br />");
     }
 
     public static void main (String[] args)

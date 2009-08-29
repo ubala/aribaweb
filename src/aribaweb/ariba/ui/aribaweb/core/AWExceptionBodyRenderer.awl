@@ -61,6 +61,9 @@
             <a:String value="$stackTrace" escapeHtml="$true"/>\
         </textarea>
     </form>
+    <a:If ifTrue="$hasTestExceptionInfoComponent">
+        <a:IncludeComponent awcomponentName="$testExceptionInfoComponent" exception="$exception" stackTrace="$stackTrace"/>
+    </a:If>
 </a:If>
 <div class="$^wrapperClass:boxWrapper">
     <table class="ex">

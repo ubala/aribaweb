@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.awl#21 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.awl#22 $
     </Copyright>
 
     <Overview>
@@ -119,7 +119,8 @@
         <a:If ifTrue="$hasCollapsed">\
             <a:GenericContainer tagName="A" tabindex="99" href="#"
                 class="awmenuCell cellO" bh="PMIO"
-                title="$[a001]Show all menu items">\
+                title="$[a001]Show all menu items"
+                awname="PopupMenu:Expand">\
                 <a:Image filename="doubleDownArrow.gif"/>
             </a:GenericContainer>\
         </a:If>\

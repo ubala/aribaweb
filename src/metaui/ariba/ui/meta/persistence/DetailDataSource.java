@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/DetailDataSource.java#6 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/DetailDataSource.java#7 $
 */
 package ariba.ui.meta.persistence;
 
@@ -95,8 +95,13 @@ public class DetailDataSource extends AWTDataSource
         if (_parentObject == null) return null;
         ObjectContext ctx = ObjectContext.get();
         Object instance = ctx.create(detailClassName());
-        Object parent = ctx.merge(_parentObject);
-        RelationshipField.addTo(parent, _detailFieldPath, instance);
+        /**
+            _parentObject is transient if not saved,
+            so Hibernate will db insert it resulting in double insert when the detail object save
+            Object parent = ctx.merge(_parentObject);
+            Comment out for now until nested session is implemented
+        */
+        RelationshipField.addTo(_parentObject, _detailFieldPath, instance);
         return instance;
     }
 
@@ -104,7 +109,12 @@ public class DetailDataSource extends AWTDataSource
     {
         if (_parentObject == null) return;
         ObjectContext ctx = ObjectContext.get();
-        Object parent = ctx.merge(_parentObject);
-        RelationshipField.removeFrom(parent, _detailFieldPath, object);
+        /**
+            _parentObject is transient if not saved,
+            so Hibernate will db insert it resulting in double insert when the detail object save
+            Object parent = ctx.merge(_parentObject);
+            Comment out for now until nested session is implemented
+        */
+        RelationshipField.removeFrom(_parentObject, _detailFieldPath, object);
     }
 }

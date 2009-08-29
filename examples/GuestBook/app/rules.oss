@@ -1,0 +1,34 @@
+class=app.Post field=rating {
+    component:RatingBar;
+}
+
+class=app.Post @action=Delete {
+    trait:instance;
+    actionResults:${
+        requestContext.pageComponent().delete(object);
+        null}
+}
+
+class=app.Post @action=Edit {
+    trait:instance;
+    actionResults:${
+        requestContext.pageWithName("EditPost",
+            [post:object,
+             clientPanel:true])}
+}
+
+layout=ListItem class=app.Post {
+    component:AWHyperlink;
+    bindings:{
+        awcontent:${properties.objectTitle};
+        action:${requestContext.pageWithName("EditPost",
+            [post:object,
+             clientPanel:true,
+             operation:"view"])};
+    }
+    wrapperComponent:AWGenericContainer;
+    wrapperBindings: { tagName:h4; }    
+}
+
+/*!--- Editor Generated Rules -- Content below this line will be overwritten ---*/
+

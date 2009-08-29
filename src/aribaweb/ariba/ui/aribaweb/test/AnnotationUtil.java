@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#10 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -166,8 +166,9 @@ public class AnnotationUtil
         Object obj;
         try {
             if (AWComponent.class.isAssignableFrom(c)) {
-                String name = ClassUtil.stripPackageFromClassName(c.getName());
-                obj = requestContext.pageWithName(name);
+                // Do not strip the class path, it does no harm, and may disambiguate
+                // situations, for example with MassEditTesting.java in collaborate.
+                obj = requestContext.pageWithName(c.getName());
             }
             else {
                 obj = c.newInstance();

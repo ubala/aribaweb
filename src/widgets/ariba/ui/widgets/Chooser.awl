@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#26 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#27 $
     </Copyright>
 
     <Overview>
@@ -179,7 +179,7 @@
             <a:ClientSideScript isSingleton="$false">\
                 ariba.Chooser.initChooser('$chooserId', $chooserState.multiSelect, $chooserState.focus, $chooserState.isInvalid);
             </a:ClientSideScript>\
-            <a:Checkbox class="chfullMatch hide" value="$fullMatchValue"></a:Checkbox>
+            <a:Checkbox class="chfullMatch hide" value="$fullMatchValue"></a:Checkbox>\
         </a:RefreshRegion>\
     </a:If>
 </span>

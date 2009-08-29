@@ -1,0 +1,5 @@
+<a:For list="$^list" item="$item">\
+    <m:Context object="$item" scopeKey="class" layout="ListItem">\
+        <m:IncludeComponent/>\
+    </m:Context>\
+</a:For>\

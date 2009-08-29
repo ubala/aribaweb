@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.awl#11 $
+        $Id: //ariba/platform/ui/metaui/ariba/ui/meta/layouts/MetaActionList.awl#12 $
     </Copyright>
 
     <Overview>
@@ -34,6 +34,10 @@
 
     <Binding key="renderAsButtons" direction="get" type="boolean" default="$false">
         Should render as set of TextButtons
+    </Binding>
+
+    <Binding key="renderAsLinks" direction="get" type="boolean" default="$false">
+        Should render as set of AWHyperlinks
     </Binding>
 
     <Binding key="menuButtonLabel" direction="get" type="String" default="Actions">
@@ -85,7 +89,19 @@
             <a:IncludeContent name="menuLabel"  required="$false"/>\
         </w:PopupMenuLink>\
         <a:IncludeBlock name="Menu"><a:IncludeContent name="menuItems" required="$false"/></a:IncludeBlock>
-    <a:Else/>\
+    <a:Else ifTrue="$^renderAsLinks"/>\
+        <a:For list="$actionCategories" item="$actionCategory">\
+            <a:If ifTrue="$actions">\                
+                <m:Context actionCategory="$actionCategory.name">\
+                    <a:For list="$actions" item="$action">\
+                        <m:Context action="$action.name">\
+                            <a:Hyperlink action="$actionClicked">$metaContext.properties.label</a:Hyperlink>
+                        </m:Context>
+                    </a:For>
+                </m:Context>
+            </a:If>
+        </a:For>
+    <a:Else/>
         <w:BucketsTOC>
             <a:For list="$actionCategories" item="$actionCategory">\
                 <a:If ifTrue="$actions">\

@@ -1,3 +1,22 @@
+New in Version 5.0GA - PREVIEW 2 (8/27/2009)
+---------------------------------------------
+- MetaUI tutorial completed
+- Fix duplicate objects on create.
+- Add convenient pageWithName with args method to AWRequestContext
+- Fix MetaUI initialization to allow annotation listeners to register correctly in the pre init phase even without MetaUI-JPA dependency.
+- Fix issue where rules.oss is not loaded in non-debug mode.
+- Add renderAsLinks option to MetaActionList exposed as the trait ActionLinks.
+- Add pause in start.bat
+- AWBrowser onchange bug fix
+
+New in Version 5.0GA - PREVIEW 1 (6/02/2009)
+---------------------------------------------
+
+- Adding Wizard example
+    - Clean up wizard for working open source example
+- Widgets: Adding formatters for formatting absolute dates
+- Site generation fixes on Windows
+
 New in Version 5.0RC3 (5/29/2009)
 ---------------------------------------------
 
@@ -28,7 +47,7 @@ New in Version 5.0RC3 - PREVIEW 4 (4/20/2009)
         - Fix NPE when app has no (visible) nav tabs
 
     - GlobalActions not always showing up in TOC MetaActionLists
-            - Added showGlobal binding, and used it in the basic MetaUI layout
+            - Added showGlobal binding, and used it in the basic MetaUI layout                                                      
     - AppCore
         - Fix ClassCastException on pages with multiple classes in scope on the tab
 

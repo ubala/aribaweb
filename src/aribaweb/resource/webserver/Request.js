@@ -21,7 +21,7 @@ ariba.Request = function() {
     
     // register a form value for submission -- allows submission of form values for
     // elements that are not in the current form.
-    var AWFormValueList;
+    var AWRequestValueList;
     var AWRefreshCompleteTimeout;
     var AWDocumentLoadTimeout;
     var AWRefreshCount = 0;
@@ -338,7 +338,7 @@ ariba.Request = function() {
                 Event.invokeRegisteredHandlers("onsubmit");
                 this.addAWFormFields(formObject);
 
-                if (target) {
+                if (target && target != "_self") {
                     //debug("<--- start target post");
                     Dom.removeFormField(formObject, 'awii');
                     if (target == '_blank') {
@@ -478,12 +478,12 @@ ariba.Request = function() {
             return arr.join("&");
         },
 
-        addFormValueForSubmit : function (key, value)
+        addRequestValue : function (key, value)
         {
-            if (!AWFormValueList) {
-                AWFormValueList = new Object();
+            if (!AWRequestValueList) {
+                AWRequestValueList = new Object();
             }
-            AWFormValueList[key] = value;
+            AWRequestValueList[key] = value;
         },
 
         addAWFormFields : function (formObject)
@@ -492,9 +492,9 @@ ariba.Request = function() {
             Dom.addFormField(formObject, 'awst', Dom.getPageScrollTop());
             Dom.addFormField(formObject, 'awsl', Dom.getPageScrollLeft());
             Dom.addFormField(formObject, 'awssk', this.AWSessionSecureId);
-            if (AWFormValueList) {
-                for (var key in AWFormValueList) {
-                    Dom.addFormField(formObject, key, AWFormValueList[key]);
+            if (AWRequestValueList) {
+                for (var key in AWRequestValueList) {
+                    Dom.addFormField(formObject, key, AWRequestValueList[key]);
                 }
             }
         },
@@ -506,12 +506,12 @@ ariba.Request = function() {
             Dom.removeFormField(formObject, 'awst');
             Dom.removeFormField(formObject, 'awsl');
             Dom.removeFormField(formObject, 'awssk');
-            if (AWFormValueList) {
-                for (var key in AWFormValueList) {
-                    Dom.removeFormField(formObject, AWFormValueList[key])
+            if (AWRequestValueList) {
+                for (var key in AWRequestValueList) {
+                    Dom.removeFormField(formObject, AWRequestValueList[key])
                 }
             }
-            AWFormValueList = null;
+            AWRequestValueList = null;
         },
 
         handleFileUploadError : function (e)
@@ -628,11 +628,29 @@ ariba.Request = function() {
             this.getContent(this.formatUrl(senderId));
         },
 
+        addAWQueryValues : function (url)
+        {
+            var newUrl = url;
+            if (AWRequestValueList) {
+                for (var key in AWRequestValueList) {
+                    newUrl = this.appendQueryValue(newUrl, key, AWRequestValueList[key]);
+                }
+            }
+
+            return newUrl;
+        },
+
+        removeAWQueryValues : function ()
+        {
+            AWRequestValueList = null;
+        },
+
         // initiate content retrieval
         getContent : function (url, forceIFrame)
         {
             // Debug.log("--- awGetContent --> " + url + "  [windowName:" + window.name + ", this.AWReqUrl:" + AWReqUrl + "]");
             this.prepareForRequest();
+            url = this.addAWQueryValues(url);
             if (this.UseXmlHttpRequests && !forceIFrame) {
                 Debug.log("<--- Incremental get: XMLHTTP");
                 url = this.appendQueryValue(url, "awii", "xmlhttp");
@@ -648,6 +666,7 @@ ariba.Request = function() {
                 url = this.appendQueryValue(url, "awii", iframe.name);
                 iframe.src = this.appendFrameName(url);
             }
+            this.removeAWQueryValues();
         },
 
         __retryRequest : function (senderId)

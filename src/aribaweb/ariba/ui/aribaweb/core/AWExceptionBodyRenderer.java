@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWExceptionBodyRenderer.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWExceptionBodyRenderer.java#10 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -30,7 +30,7 @@ import java.util.List;
 
 public class AWExceptionBodyRenderer extends AWComponent
 {
-    private Throwable _exception;
+    public Throwable _exception;
     public String _stackTrace;
     public List<AWGenericException.ParsedException> _parseList;
     ParsedException _parsedException;
@@ -38,6 +38,7 @@ public class AWExceptionBodyRenderer extends AWComponent
     public int _frameIndex;
     public String _exType, _exTitle;
     String _lastMessage, _lastTitle;
+    private static String _testExceptionInfoComponent;
     static Pattern _ExceptionTypePattern = Pattern.compile("^([\\w\\.]+)\\:\\s*(.*)");
     static Pattern _ParenthesizedPattern = Pattern.compile("\\((.+?)\\)");
     static Pattern _HeadingPattern = Pattern.compile("(?m)^-- ([\\w\\s]+\\:)");
@@ -144,5 +145,21 @@ public class AWExceptionBodyRenderer extends AWComponent
     public String wrappedMethodString ()
     {
         return StringUtil.wrap(_currentFrameInfo.method, "<br/>", 60);
+    }
+
+    // a hidden component from which the test framework can extract the exception information
+    public static void registerTestExceptionInfoComponent (String componentName)
+    {
+        _testExceptionInfoComponent = componentName;
+    }
+
+    public boolean hasTestExceptionInfoComponent ()
+    {
+        return _testExceptionInfoComponent != null;
+    }
+
+    public String testExceptionInfoComponent ()
+    {
+        return _testExceptionInfoComponent;
     }
 }

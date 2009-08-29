@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletRequest.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletRequest.java#4 $
 */
 
 package ariba.ui.servletadaptor;
@@ -68,6 +68,11 @@ public class AWServletRequest extends AWBaseRequest
         super.init();
     }
 
+    /**
+     * This returns the HTTP header information or null if it is not present.
+     * @param requestHeaderKey
+     * @return This returns the header information or null.
+     */
     public String headerForKey (String requestHeaderKey)
     {
         return _servletRequest.getHeader(requestHeaderKey);

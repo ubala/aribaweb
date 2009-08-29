@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationParameterList.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationParameterList.java#3 $
 */
 package ariba.util.test;
 
@@ -20,7 +20,6 @@ import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
 import ariba.util.core.Fmt;
 import ariba.util.core.SetUtil;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +27,14 @@ import java.util.Set;
 
 public class TestValidationParameterList implements Iterable {
     private List<TestValidationParameter> _list;
+
+    // The variables below are used by AW to display the list of objects.
+    private List<String> _listOfKeys;
+    public String _currentKey;
+    private Map<String,String> _mapOfNamesForKeys;
+    private List<Map<String,TestValidationParameter>> _listOfMapsForEachParam;
+    public Map<String,TestValidationParameter> _currentParameterMap;
+
 
     private TestValidationParameterList ()
     {
@@ -88,18 +95,32 @@ public class TestValidationParameterList implements Iterable {
             if (!parameter.isList()) {
                 flattenedList.add(parameter);
             }
+            else if (parameter.isObjectList()) {
+                flattenedList.add(parameter);
+            }
             else {
                 TestValidationParameter[] nestedList =
                     ((TestValidationParameterList)parameter.getValue()).
                             createFlatValidationParameterList();
                 for (int j = 0; j < nestedList.length; j++) {
                     TestValidationParameter currentParam = nestedList[j];
-                    TestValidationParameter newParameter =
+                    if (!currentParam.isList()) {
+                        TestValidationParameter newParameter =
                             new TestValidationParameter(
                                     parameter.getName() + "::" + currentParam.getName(),
-                                    currentParam.getKey(),
-                                    currentParam.getValue().toString());
-                    flattenedList.add(newParameter);
+                                    parameter.getKey() + "::" + currentParam.getKey(),
+                                    (String)currentParam.getValue());
+                        flattenedList.add(newParameter);
+                    }
+                    else {
+                        // the paramter contains a list.  Stange since it is a flattened list.
+                        TestValidationParameter newParameter =
+                            new TestValidationParameter(
+                                parameter.getName() + "::" + currentParam.getName(),
+                                parameter.getKey() + "::" + currentParam.getKey(),
+                                (TestValidationParameterList)currentParam.getValue());
+                        flattenedList.add(newParameter);                        
+                    }
                 }
             }
         }
@@ -117,6 +138,16 @@ public class TestValidationParameterList implements Iterable {
         return _list.iterator();
     }
 
+    public int size ()
+    {
+        return _list.size();
+    }
+
+    public TestValidationParameter getParameter (int i)
+    {
+        return _list.get(i);
+    }
+
     /**
          * Validates that all of the keys are unique including keys within nested lists.
          * Note that the nested lists keys can collide with keys in the parent or other lists,
@@ -132,8 +163,10 @@ public class TestValidationParameterList implements Iterable {
             List<TestValidationParameter> list)
     {
         TestValidationParameterList newList = TestValidationParameterList.createList();
-        for (int i = 0; i < list.size(); i++) {
-            newList.add(list.get(i));
+        if (list != null) {
+            for (int i = 0; i < list.size(); i++) {
+                newList.add(list.get(i));
+            }
         }
         return newList;
     }
@@ -179,4 +212,96 @@ public class TestValidationParameterList implements Iterable {
         }
         return problemKeys;
     }
+
+    public List<String> listOfKeys ()
+    {
+        if (_listOfKeys == null) {
+            initTableData();
+        }
+        return _listOfKeys;
+    }
+
+    public List<Map<String,TestValidationParameter>> listOfParameterMaps ()
+    {
+        if (_listOfMapsForEachParam == null) {
+            initTableData();
+        }
+        return _listOfMapsForEachParam;
+    }
+
+    public String nameForCurrentKey ()
+    {
+        return _mapOfNamesForKeys.get(_currentKey);
+    }
+
+    public String valueForCurrentMapAndKey ()
+    {
+        Object value = _currentParameterMap.get(_currentKey).getValue();
+        if (value == null) {
+            return null;
+        }
+        else {
+            return value.toString();
+        }
+    }
+
+    public boolean highlightCurrentValue ()
+    {
+        TestValidationParameter value = _currentParameterMap.get(_currentKey);
+        return value.errorValue();
+    }
+
+    /**
+     * This is primarily used when this list was produced by constructing a TestValidationParameter
+     * on a list of object using the same validator.  In this case each parameter will itself contain a list with essenitally the same keys.
+     * The data structures here help produce a table of these values for simpler display.
+     */
+    private void initTableData ()
+    {
+        _listOfKeys = ListUtil.list();
+        _mapOfNamesForKeys = MapUtil.map();
+        _listOfMapsForEachParam = ListUtil.list();
+
+        for (int i = 0; i < _list.size(); i++) {
+            TestValidationParameter paramFromList = _list.get(i);
+            if (paramFromList != null && paramFromList.isList()) {
+                TestValidationParameterList valueFromSubParam =
+                        (TestValidationParameterList)paramFromList.getValue();
+                TestValidationParameter[] listFromSubParameter =
+                        valueFromSubParam.createFlatValidationParameterList();
+                for (int j = 0; j < listFromSubParameter.length; j++)  {
+                    TestValidationParameter paramFromListItem = listFromSubParameter[j];
+                    if (!_mapOfNamesForKeys.containsKey(paramFromListItem.getKey())) {
+                         // key was not already in list add it.
+                        _listOfKeys.add(paramFromListItem.getKey());
+                        _mapOfNamesForKeys.put(paramFromListItem.getKey(),
+                                paramFromListItem.getName());
+                    }
+                }
+                _listOfMapsForEachParam.add(mapOfKeyParameters(listFromSubParameter));
+            }
+            else {
+                // the list contained a simple native data type.  We'll use a key of "Simple Values".
+                if (!_mapOfNamesForKeys.containsKey("Simple Values")) {
+                     _mapOfNamesForKeys.put("Simple Values","Simple Values");
+                    _listOfKeys.add("Simple Values");
+                }
+                Map<String,TestValidationParameter> simpleMapOfTheValue = MapUtil.map();
+                simpleMapOfTheValue.put("Simple Values", paramFromList);
+                _listOfMapsForEachParam.add(simpleMapOfTheValue);
+            }
+        }
+    }
+
+    private Map<String, TestValidationParameter> mapOfKeyParameters (
+            TestValidationParameter[] parameters)
+    {
+        Map<String, TestValidationParameter> map = MapUtil.map();
+        for (int i = 0; i < parameters.length; i++) {
+            TestValidationParameter param = parameters[i];
+            map.put(param.getKey(), param);
+        }
+        return map;
+    }
+
 }

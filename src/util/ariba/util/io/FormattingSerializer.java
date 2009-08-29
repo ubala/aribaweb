@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/io/FormattingSerializer.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/io/FormattingSerializer.java#9 $
 */
 
 package ariba.util.io;
@@ -537,6 +537,48 @@ public class FormattingSerializer extends Serializer
             try {
                 serializer.writeObject(anObject);
                 serializer.flush();
+            }
+            catch (IOException e) {
+            }
+
+
+            result = memory.toString();
+            try {
+                serializer.close();
+                memory.close();
+            }
+            catch (IOException e) {
+            }
+            memory = null;
+            serializer = null;
+        }
+        return result;
+    }
+
+    /**
+        Convenience method for generating <b>anObject</b>'s ASCII serialization.
+        This version will truncate the serialized object to about the maxLength.
+        It will also add a warning message when truncation occurs.
+        Returns <b>null</b> on empty input.
+    */
+    public static String serializeObject (Object anObject, int length)
+    {
+        String result = null;
+        if (anObject == null) {
+            result = null;
+        }
+        else {
+            StringWriter memory = new TruncatingStringWriter(length);
+            FormattingSerializer serializer = new FormattingSerializer(memory);
+
+            try {
+                serializer.writeObject(anObject);
+                serializer.flush();
+            }
+            catch (TruncationException te) {
+                // Truncation has occurred due to our size limit
+                // The string already contains a warning that this happened.
+                // Just ignore and continue.
             }
             catch (IOException e) {
             }

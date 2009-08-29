@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseMonitorStatsPage.java#11 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseMonitorStatsPage.java#12 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -63,6 +63,16 @@ public class AWBaseMonitorStatsPage extends AWComponent implements AWMonitorStat
     public boolean isStateless ()
     {
         return false;
+    }
+
+    public int activeSessionCount()
+    {
+        return ((AWConcreteApplication)AWConcreteApplication.sharedInstance()).getUISessionCount();
+    }
+
+    public List<NamedValue> activeSessionCountBuckets ()
+    {
+        return ((AWConcreteApplication)AWConcreteApplication.sharedInstance()).getUISessionCountBuckets();
     }
 
     public List getItemsToDisplay ()

@@ -344,17 +344,20 @@ ariba.Input = function() {
                         Debug.log("Focusing on element id: " + AWActiveElementId);
                         var activeElementId = AWActiveElementId;
                         function checkFocus () {
-                            // no active element, refocus
-                            if (!Dom.getActiveElementId()) {
-                                Debug.log("Refocusing on element id: " + activeElementId);
-                                if (activeElement.focus) {
-                                    activeElement.focus();
-                                    activeElement.focus();
-                                    if (activeElement.select) {
-                                        activeElement.select();
+                            try {
+                                // no active element, refocus
+                                if (!Dom.getActiveElementId()) {
+                                    Debug.log("Refocusing on element id: " + activeElementId);
+                                    if (activeElement.focus) {
+                                        activeElement.focus();
+                                        activeElement.focus();
+                                        if (activeElement.select) {
+                                            activeElement.select();
+                                        }
                                     }
                                 }
                             }
+                            catch (fe) {}
                         }
                         setTimeout(checkFocus, 1000);
                         if (activeElement.focus) {
@@ -423,7 +426,7 @@ ariba.Input = function() {
                 });
             for (var i = 0, c = inputs.length; i < c; i++) {
                 var element = inputs[i];
-                if (( ((element.type == "text" || element.type == "password" || element.type == "file") &&
+                if (( ((element.type == "text" || element.type == "password") &&
                        element.getAttribute('awautoselect') != "0" ) ||
                       element.nodeName == "TEXTAREA" || element.nodeName == "A"
                         ) &&

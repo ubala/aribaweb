@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MIME.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MIME.java#9 $
 */
 
 package ariba.util.core;
@@ -96,6 +96,7 @@ public final class MIME
     public static final String ContentTypeImageJPEG =
         "image/jpeg";
     public static final String ContentTypeZip = "application/zip";
+    public static final String ContentTypePDF = "application/pdf";
 
         // used with ContentTypeMultipartMixed
     public static final String ParameterBoundary = "boundary";

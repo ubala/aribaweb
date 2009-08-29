@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationParameter.java#6 $
+    $Id: //ariba/platform/util/core/ariba/util/test/TestValidationParameter.java#7 $
 */
 package ariba.util.test;
 
@@ -47,6 +47,10 @@ public class TestValidationParameter {
     private String _name;
     private Object _value;
     private String _key;
+    private String _validatorToUseForLists;
+    private boolean _isObjectList = false;
+    private boolean _validateOrder;
+    private boolean _isErrorValue = false;
 
     /**
      * Note that when using this constructor the key for this
@@ -97,6 +101,24 @@ public class TestValidationParameter {
         this(name, name, value);
     }
 
+    public TestValidationParameter (String name, List objects,
+                                    String validatorToUseOnObjects, boolean validateOrder)
+    {
+        this(name, name, objects, validatorToUseOnObjects, validateOrder);
+    }
+
+    public TestValidationParameter (String name, String key, List objects,
+                                    String validatorToUseOnObjects, boolean validateOrder)
+    {
+        _name = name;
+        _key = key;
+        _value = objects;
+        _validatorToUseForLists = validatorToUseOnObjects;
+        _validateOrder = validateOrder;
+        _isObjectList = true;
+    }
+
+
     public TestValidationParameter (String name, String key,
                                     List<TestValidationParameter> value)
     {
@@ -125,5 +147,59 @@ public class TestValidationParameter {
     public boolean isList ()
     {
         return _value instanceof TestValidationParameterList;
+    }
+
+    public boolean isObjectList ()
+    {
+        return _isObjectList;
+    }
+
+    public boolean isValidateOrder ()
+    {
+        return _validateOrder;
+    }
+
+    public String theValidatorToUseForLists ()
+    {
+        return _validatorToUseForLists;
+    }
+
+    public void explodeNestedList (List<TestValidationParameter> newListOfValues)
+    {
+        TestValidationParameterList list =
+            TestValidationParameterList.createFromListOfParameters(newListOfValues);
+                _value = list;
+    }
+
+    public void validateTheOrderOfTheList (boolean validateOrder)
+    {
+        _validateOrder = validateOrder;
+    }
+
+    public void objectList (boolean representsObjectList)
+    {
+        _isObjectList = representsObjectList;
+    }
+
+    /**
+     * Used by validation code to teel the display if this value was "interesting" from
+     * an error reporting perspective.
+     * @return true if this paramter was involved in producing an error.
+     */
+    public boolean errorValue ()
+    {
+        return _isErrorValue;
+    }
+
+    public void setErrorValue (boolean isError)
+    {
+        _isErrorValue = isError;
+        if (isList()) {
+            TestValidationParameterList list = (TestValidationParameterList)_value;
+            for (int i = 0; i < list.size(); i++) {
+                TestValidationParameter param = list.getParameter(i);
+                param.setErrorValue(isError);
+            }
+        }
     }
 }

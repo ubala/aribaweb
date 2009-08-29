@@ -16,3 +16,4 @@
 9678, "Cancelled asynchronous shutdown thread did not finish",
 9831, "Auto Recycle checks complete. Starting auto Recycle",
 9855, "Exception when sending notification about node status change: {0}", 0-stack trace
+10239, "Delaying shutdown of coordinator node by {0} minutes or until the kill signal is received.", 0-wait timeout

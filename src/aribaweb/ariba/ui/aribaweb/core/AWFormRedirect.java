@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#14 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#16 $
 */
 
 package ariba.ui.aribaweb.core;
 
+import ariba.ui.aribaweb.test.TestContext;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
@@ -195,5 +196,10 @@ public class AWFormRedirect extends AWComponent
             }
         }
         return target;
+    }
+
+    public boolean isDebuggingMode()
+    {
+        return AWConcreteServerApplication.IsDebuggingEnabled;
     }
 }

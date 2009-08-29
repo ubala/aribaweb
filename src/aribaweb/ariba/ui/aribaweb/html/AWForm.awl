@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.awl#28 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.awl#29 $
     </Copyright>
 
     <Overview>
@@ -94,7 +94,7 @@
 
     <a:RefreshRegion>
         <input type="hidden" name="$=ariba.ui.aribaweb.core.AWComponentActionRequestHandler.FormSenderKey" value="$formElementId"/>\
-        <input type="hidden" name="awfa" elementId="$hiddenFieldElementId" value="$hiddenFieldElementId" invokeAction="$^action" isSender="$isFormSender"/>\
+        <input type="hidden" name="awfa" awname="" elementId="$hiddenFieldElementId" value="$hiddenFieldElementId" invokeAction="$^action" isSender="$isFormSender"/>\
         <input type="hidden" name="$=ariba.ui.aribaweb.core.AWComponentActionRequestHandler.FormComponentIdKey" value="true"/>\
         <a:If ifFalse="$=ariba.ui.aribaweb.core.AWConcreteApplication.IsCookieSessionTrackingEnabled">\
             <input type="hidden" name="$=ariba.ui.aribaweb.core.AWRequestContext.SessionIdKey" value="$httpSession.getId"/>\

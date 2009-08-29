@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#12 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/persistence/ObjectContext.java#13 $
 */
 package ariba.ui.meta.persistence;
 
@@ -33,6 +33,8 @@ public abstract class ObjectContext
     ObjectContext _parentContext;
     ContextGroup _contextGroup;
     Map _userMap;
+    private static Map<String, EntityQueryFilterProvider> _queryFiltersMap =
+    	new HashMap<String, EntityQueryFilterProvider>();
 
     protected abstract void persist(Object o);
 
@@ -84,7 +86,7 @@ public abstract class ObjectContext
         if (_userMap == null) _userMap = new HashMap();
         return _userMap;
     }
-    
+
     public abstract <T> T merge(T t);
 
     public abstract void remove(Object o);
@@ -111,7 +113,22 @@ public abstract class ObjectContext
 
     public List executeQuery (QuerySpecification spec)
     {
-        return processorForQuery(spec).executeQuery(this, spec);
+        Predicate originalPredicate = spec.getPredicate();
+        try {
+            EntityQueryFilterProvider queryFilter = _queryFiltersMap.get(spec
+                .getEntityName());
+            if (queryFilter != null) {
+                Predicate p = queryFilter.replacementPredicateForQuery(spec);
+                if (p != null) {
+                    spec.setPredicate(p);
+                }
+            }
+            return processorForQuery(spec).executeQuery(this, spec);
+        }
+        finally {
+            // Reset the original predicate
+            spec.setPredicate(originalPredicate);
+        }
     }
 
     public abstract List executeNamedQuery (java.lang.String s, Map <String, Object> params);
@@ -128,6 +145,18 @@ public abstract class ObjectContext
     public TypeProvider typeProvider (String entityName)
     {
         return new TypeProvider(UIMeta.getInstance(), entityName);
+    }
+
+    /*
+     * Visibility related
+     */
+    public static void registerQueryFilterProviderForEntityClass(String entityClass,
+    		EntityQueryFilterProvider filter) {
+    	_queryFiltersMap.put(entityClass, filter);
+    }
+
+    public static void unregisterQueryFilterProviderForEntityClass(String entityClass) {
+    	_queryFiltersMap.remove(entityClass);
     }
 
     /*
@@ -316,4 +345,18 @@ public abstract class ObjectContext
             }
         }
     }
+
+    /**
+     * Implement this interface if you want to add additional filtering on
+     * queries linked to an entity.
+     * <p>
+     * The implemented class should be registered on the ObjectContext using
+     * {@link ObjectContext#registerQueryFilterProviderForEntityClass(String, EntityQueryFilterProvider)}
+     */
+    public interface EntityQueryFilterProvider {
+
+        public Predicate replacementPredicateForQuery(QuerySpecification qs);
+
+    }
+
 }

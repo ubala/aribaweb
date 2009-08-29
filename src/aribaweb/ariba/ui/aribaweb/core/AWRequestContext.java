@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#134 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#136 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -37,6 +37,7 @@ import ariba.util.core.SystemUtil;
 import ariba.util.core.ThreadDebugKey;
 import ariba.util.core.ThreadDebugState;
 import ariba.util.core.WrapperRuntimeException;
+import ariba.util.fieldvalue.FieldValue;
 
 import javax.servlet.http.HttpSession;
 import java.net.InetAddress;
@@ -69,6 +70,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     private static final ThreadDebugKey RequestContextID =
         new ThreadDebugKey("RequestContext");
     public static final String RefreshRequestKey = "awrr";
+    public static final String RecordingModeKey = "awrm";
     public static boolean UseXmlHttpRequests = false;
 
     private AWApplication _application;
@@ -252,6 +254,17 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     public AWComponent pageWithName (String pageName)
     {
         return _application.createPageWithName(pageName, this);
+    }
+
+    public AWComponent pageWithName (String pageName, Map<String, Object>assignments)
+    {
+        AWComponent page = pageWithName(pageName);
+        if (!MapUtil.nullOrEmptyMap(assignments)) {
+            for (Map.Entry<String, Object>e : assignments.entrySet()) {
+                FieldValue.setFieldValue(page, e.getKey(), e.getValue());
+            }
+        }
+        return page;
     }
 
     public void setRequestPage (AWPage page)
@@ -1558,7 +1571,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         // do lazy initialization here
         if (_debugIsInRecordingMode == null) {
             _debugIsInRecordingMode = (_request != null) ?
-                AWRecordingManager.isInRecordingMode(_request) : Boolean.FALSE;
+                AWRecordingManager.isInRecordingMode(this) : Boolean.FALSE;
         }
 
         return _debugIsInRecordingMode;

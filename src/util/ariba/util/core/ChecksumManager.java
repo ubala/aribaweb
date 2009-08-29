@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ChecksumManager.java#11 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ChecksumManager.java#12 $
 */
 
 package ariba.util.core;
@@ -123,7 +123,7 @@ public class ChecksumManager
 
     private GrowOnlyHashtable checksums;
 
-    private ChecksumManager ()
+    public ChecksumManager ()
     {
         checksums = new GrowOnlyHashtable();
     }

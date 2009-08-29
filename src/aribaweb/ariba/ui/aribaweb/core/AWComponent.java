@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#117 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#118 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1413,13 +1413,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
 
     public AWComponent pageWithName (String pageName, Map<String, Object>assignments)
     {
-        AWComponent page = pageWithName(pageName);
-        if (!MapUtil.nullOrEmptyMap(assignments)) {
-            for (Map.Entry<String, Object>e : assignments.entrySet()) {
-                FieldValue.setFieldValue(page, e.getKey(), e.getValue());
-            }
-        }
-        return page;
+        return _page.requestContext().pageWithName(pageName, assignments);
     }
 
     public <T> T pageWithClass (Class<T> tClass)

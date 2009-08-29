@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Calendar.java#13 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Calendar.java#14 $
 */
 
 package ariba.ui.widgets;
@@ -100,7 +100,7 @@ public class Calendar extends AWComponent
         _dateFactory = null;
     }
 
-    private static Date computeCalendarDate (AWRequestContext requestContext, AWDateFactory dateFactory)
+    static Date computeCalendarDate (AWRequestContext requestContext, AWDateFactory dateFactory)
     {
         AWRequest request = requestContext.request();
         AWSession session = requestContext.session();

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#83 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#84 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -24,6 +24,8 @@ import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
 import ariba.util.core.PerformanceState;
 import ariba.util.core.Fmt;
+import ariba.util.core.HTTP;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Iterator;
@@ -778,7 +780,7 @@ public class AWSession extends AWBaseObject
         _notifications = ListUtil.list();
         _sessionSecureId = initSessionSecureId();
         this.init();
-        initEnvironmentStack();        
+        initEnvironmentStack();
         awake();
 
         Log.aribaweb_session.debug(
@@ -1404,11 +1406,31 @@ public class AWSession extends AWBaseObject
             }
 
             if (PerformanceState.threadStateEnabled()) {
-                PerformanceState.getThisThreadHashtable().setSessionID(sessionId());
+
+                PerformanceState.Stats stats = PerformanceState.getThisThreadHashtable();
+
+                stats.setSessionID(sessionId());
+
                 InetAddress addr = remoteIPAddress();
                 if (addr != null) {
-                    PerformanceState.getThisThreadHashtable().setIPAddress(addr.getHostAddress());
+                    stats.setIPAddress(addr.getHostAddress());
                 }
+
+                String referer = request.headerForKey(HTTP.HeaderReferer);
+                if (referer != null) {
+                    stats.setReferer(referer);
+                }
+
+                String acceptLanguage = request.headerForKey(HTTP.HeaderAcceptLanguage);
+                if (acceptLanguage != null) {
+                    stats.setAcceptLanguage(acceptLanguage);
+                }
+
+                String userAgent = request.headerForKey(HTTP.HeaderUserAgent);
+                if (userAgent != null) {
+                    stats.setUserAgent(userAgent);
+                }
+
                 PerformanceState.DispatchTimer.start();
             }
 
@@ -1437,7 +1459,7 @@ public class AWSession extends AWBaseObject
 
                 if (_updateLatestPerformanceStats) {
                     // save this for later lookup (by AWPerfPane)
-                    _performanceStateHashtable = 
+                    _performanceStateHashtable =
                         PerformanceState.getThisThreadHashtable();
                 }
             }
@@ -1445,7 +1467,7 @@ public class AWSession extends AWBaseObject
             if (_LifecycleListeners != null) {
                 for (LifecycleListener l : _LifecycleListeners) l.sessionWillSleep(this);
             }
-            
+
             sleep();
             setHttpSession(null);
             _requestContext = null;
@@ -1464,13 +1486,13 @@ public class AWSession extends AWBaseObject
     {
         return null;
     }
-    
+
     /**
      * This call prevents that the last perf stats will be replaced
-     * by the current one in the sleep phase. 
-     * 
+     * by the current one in the sleep phase.
+     *
      * @aribaapi private
-     */ 
+     */
     public void dontReplaceLastPerformanceStats ()
     {
         _updateLatestPerformanceStats = false;

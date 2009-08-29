@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#73 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#75 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -364,6 +364,11 @@ abstract public class AWBaseRequest extends AWBaseObject
         return newHashtable;
     }
 
+    /**
+     * Returns the HTTP User-Agent field or null if one does not exist.
+     * See also RFC2616, section 14.43.
+     * @return Returns the User-Agent or null.
+     */
     public String userAgent ()
     {
         return headerForKey("user-agent");
@@ -962,7 +967,7 @@ abstract public class AWBaseRequest extends AWBaseObject
 
     public InputStream contentStream ()
     {
-        if (AWRecordingManager.isInRecordingMode(this) || _content != null) {
+        if (_content != null) {
             return new ByteArrayInputStream(content());
         }
         else {

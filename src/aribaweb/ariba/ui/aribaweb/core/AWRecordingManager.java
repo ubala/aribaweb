@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRecordingManager.java#41 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRecordingManager.java#43 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -35,6 +35,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 import ariba.ui.aribaweb.util.Log;
+
+import javax.servlet.http.HttpServletRequest;
+
 
 public class AWRecordingManager extends AWBaseObject
 {
@@ -80,7 +83,7 @@ public class AWRecordingManager extends AWBaseObject
 
     protected final static Map _recordingInstances = MapUtil.map();
     private static boolean _inPlaybackModeGlobal = false;
-    protected static PlaybackMonitor _playbackMonitor;
+    protected static RecordingMonitor _recordingMonitor;
 
     protected File _recordingDirectory;
     protected int  _requestCount;
@@ -114,8 +117,22 @@ public class AWRecordingManager extends AWBaseObject
     /*----------------------------------------------------------------
         public static methods
     ---------------------------------------------------------------*/
-    public static boolean isInRecordingMode (AWRequest request)
+    public static boolean isInRecordingMode (AWRequestContext requestContext)
     {
+        if (requestContext == null) {
+            return false;
+        }
+
+        AWRequest request = requestContext.request();
+        if (request == null) {
+            return false;
+        }
+
+        // if there is a registered recording monitor, check its recording mode
+        if (_recordingMonitor != null) {
+            return _recordingMonitor.isInRecordingMode(requestContext);
+        }
+
         return instance(request) != null;
     }
 
@@ -393,9 +410,9 @@ public class AWRecordingManager extends AWBaseObject
         response.addCookie(cookie);
     }
 
-    public static void registerPlaybackMonitor (PlaybackMonitor playbackMonitor)
+    public static void registerRecordingMonitor (RecordingMonitor recordingMonitor)
     {
-        _playbackMonitor = playbackMonitor;
+        _recordingMonitor = recordingMonitor;
     }
 
     public static boolean isInPlaybackMode (AWRequestContext requestContext)
@@ -413,9 +430,9 @@ public class AWRecordingManager extends AWBaseObject
             return true;
         }
 
-        // if there is a registered playback monitor, check its playback mode
-        if (_playbackMonitor != null) {
-            return _playbackMonitor.isInPlaybackMode(requestContext);
+        // if there is a registered recording monitor, check its playback mode
+        if (_recordingMonitor != null) {
+            return _recordingMonitor.isInPlaybackMode(requestContext);
         }
 
         if (request.headerForKey(HeaderPlayBackMode) != null) {
@@ -656,9 +673,46 @@ public class AWRecordingManager extends AWBaseObject
         return semanticKey;
     }
 
-    public interface PlaybackMonitor
+    // note that this API is used for Selenium tests only.
+    // See NodeRedirectServlet.doRedirection() for the usage. 
+    public static boolean isInRecordingOrPlaybackMode(HttpServletRequest request)
     {
-        public boolean isInPlaybackMode(AWRequestContext requestContext);
+        if (request == null) {
+            return false;
+        }
+
+        // if there is a registered recording monitor, check its mode
+        if (_recordingMonitor != null) {
+            String mode = request.getParameter(AWRequestContext.RecordingModeKey);
+            return _recordingMonitor.isInRecordingMode(mode) || _recordingMonitor.isInPlaybackMode(mode);
+        }
+
+        return false;
+    }
+
+    public static class RecordingMonitor
+    {
+        public boolean isInRecordingMode (AWRequestContext requestContext)
+        {
+            String mode = requestContext.request().formValueForKey(AWRequestContext.RecordingModeKey);
+            return isInRecordingMode(mode);
+        }
+
+        public boolean isInPlaybackMode (AWRequestContext requestContext)
+        {
+            String mode = requestContext.request().formValueForKey(AWRequestContext.RecordingModeKey);
+            return isInPlaybackMode(mode);
+        }
+
+        public boolean isInRecordingMode (String mode)
+        {
+            return CookieRecordingMode.equals(mode);
+        }
+
+        public boolean isInPlaybackMode (String mode)
+        {
+            return CookiePlaybackMode.equals(mode);
+        }
     }
 }
 
