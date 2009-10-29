@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#16 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#17 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -26,7 +26,6 @@ import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.i18n.I18NUtil;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -113,8 +112,23 @@ public class TestContext
                 !StringUtil.nullOrEmptyOrBlankString(requestContext.formValueForKey(TestAutomationMode)) ||
                 requestContext._debugIsInRecordingMode() || requestContext._debugIsInPlaybackMode());
     }
-    
+
+    /**
+        Returns TestContext for given AWRequestContext's AWSession, or null if there is no
+        session or if there is no TestContext in the session.  requestContext cannot be
+        null.
+    */
     static public TestContext getTestContext (AWRequestContext requestContext)
+    {
+        return getTestContext(getSession(requestContext));
+    }
+
+    /**
+        Returns AWSession for given AWRequestContext, or null if it doesn't have one,
+        without attempting to checkout the session and without blocking.  requestContext
+        cannot be null.
+    */
+    static public AWSession getSession (AWRequestContext requestContext)
     {
         // Don't call requestContext.session(false) here; that will attempt to checkout the session
         // which could block if the session is in use by another thread, e.g., if this is a progressCheck request.
@@ -123,14 +137,16 @@ public class TestContext
         // cookie anyway since it seems impossible to suppress that...
         HttpSession httpSession = requestContext.existingHttpSession();
         if (httpSession != null) {
-            AWSession session = AWSession.session(httpSession);
-            if (session != null) {
-                return getTestContext(session);
-            }
+            return AWSession.session(httpSession);
         }
         return null;
     }
 
+    /**
+        Returns TestContext for given AWSession, or null if there is no TestContext or if
+        AWSession is null.  The TestContext is stored in the session's dictionary under
+        the key "uiTestContext".
+    */
     static public TestContext getTestContext (AWSession session)
     {
         return session != null ? (TestContext)session.dict().get(TestContext.Name) : null;
@@ -269,7 +285,7 @@ public class TestContext
 
     public String getSuiteData ()
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 
         // include factoryId and objId pair from _unhandledObjectList first to
         // ensure the correct order when we reconstitute the objects

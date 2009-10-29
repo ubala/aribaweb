@@ -35,7 +35,11 @@
                                          submitForm="$true"
                                          class="hoverLink"
                                          title="$expandoCollapsoToolTip">\
-                                <a:String value="$^title"/>\
+                                <a:If ifTrue="$hasTitleMaxLength">\
+                                    <w:TruncateString value="$^title" size="$^titleMaxLength" />
+                                <a:Else/>
+                                    <a:String value="$^title"/>\
+                                </a:If>
                             </a:Hyperlink>\
                         </td>\
                         <td nowrap="true" align="right">\

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/Formatter.java#15 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/Formatter.java#16 $
 */
 
 package ariba.util.formatter;
@@ -409,7 +409,15 @@ abstract public class Formatter implements StringParser, Compare
                                                      int offset)
     {
         ResourceService rs = ResourceService.getService();
-        String msg = Fmt.Sil(rs.getLocale(), UtilStringTable, errorKey, argument);
+        return makeParseException(errorKey, argument, offset, rs.getLocale());
+    }
+
+    public static ParseException makeParseException (String errorKey,
+                                                     String argument,
+                                                     int offset,
+                                                     Locale locale)
+    {
+        String msg = Fmt.Sil(locale, UtilStringTable, errorKey, argument);
         return new ParseException(msg, offset);
     }
 

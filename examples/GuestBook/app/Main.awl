@@ -2,6 +2,9 @@
     <w:FourZoneLayout>
         <a:Content name="left">
             <h1>Welcome!</h1>
+            <div style="float:right">
+                <a:Hyperlink action="$guideAction">Guide Me</a:Hyperlink>
+            </div>
             <m:Context object="$newPost" operation="create" layout="Inspect">
                 <m:IncludeComponent/>
             </m:Context>

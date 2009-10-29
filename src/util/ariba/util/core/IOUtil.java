@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#21 $
+    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#23 $
 */
 
 
@@ -1383,6 +1383,53 @@ public final class IOUtil
     throws IOException
     {
         return readFirstLine(file, Charset.forName(I18NUtil.EncodingUTF_8));
+    }
+
+    /**
+        Reads the entire contents from <code>file</code> using the specified
+        <code>charset</code> to convert the bytes from the file into characters. <p/>
+
+        @param file the file to read from
+        @param charset the encoding to be used when reading the file
+        @return the entire file content
+        @aribaapi ariba
+     */
+    public static String readFileContent (File file, Charset charset)
+    throws IOException
+    {
+        if (!file.canRead()) {
+            return null;
+        }
+        InputStream is = null;
+        try {
+            is = new BufferedInputStream(new FileInputStream(file));
+            Reader reader = new InputStreamReader(is, charset);
+            LineNumberReader lineNumberReader = new LineNumberReader(reader);
+            FastStringBuffer buffer = new FastStringBuffer();
+
+            String line = null;
+            while ((line = lineNumberReader.readLine()) != null) {
+                buffer.append(line);
+                buffer.append("\n");
+            }
+
+            return buffer.toString();
+        }
+        finally {
+            close(is);
+        }
+    }
+
+    /**
+    Reads the first line from <code>file</code> assuming UTF-8. <p/>
+    @param file the file to read from
+    @return the first line
+    @aribaapi ariba
+     */
+    public static String readFileContent (File file)
+    throws IOException
+    {
+        return readFileContent(file, Charset.forName(I18NUtil.EncodingUTF_8));
     }
 
     /**

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#16 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#17 $
 */
 
 package ariba.ui.servletadaptor;

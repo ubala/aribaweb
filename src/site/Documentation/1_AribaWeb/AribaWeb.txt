@@ -197,7 +197,7 @@ Note how we're using a "field path" ("$newPost.userName") to bind to the propert
 
 Actions
 -------
-Now, how to we add a post to our post list?  We write a simple action method:
+Now, how do we add a post to our post list?  We write a simple action method:
 
             public void add () {
                 _posts.add(_newPost);
@@ -349,7 +349,7 @@ Let's replace our "#" and "_" characters with images of a hollow and filled in s
 
 ![Rating Stars files](Rating-Stars.jpg)
 ![GuestBook with Rating Stars](GuestBook-3.gif)
-We then add our .jpg resource files.  We can add them right to our app/ directory along with our source files.  That's right, the don't need to be scattered to the far reaches of the directory tree -- you can maintain locality with the component that uses them (a sort of encapsulation) and the AW build system
+We then add our image resource files.  We can add them right to our app/ directory along with our source files.  That's right, they don't need to be scattered to the far reaches of the directory tree -- you can maintain locality with the component that uses them (a sort of encapsulation) and the AW build system
 will ensure that they end up in the right place to get served up at runtime.
 
 The resolution at runtime is done for us courtesy of the [AWResourceManager]#api.  The AWResourceManager

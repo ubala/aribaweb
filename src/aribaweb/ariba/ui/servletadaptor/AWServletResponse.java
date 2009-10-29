@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletResponse.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletResponse.java#5 $
 */
 
 package ariba.ui.servletadaptor;
@@ -78,6 +78,15 @@ public class AWServletResponse extends AWBaseResponse
     public void setStatus (int status)
     {
         _status = status;
+    }
+
+    /**
+     * This will return a HTTP code, or -1 for an uninitialized value.
+     * @return
+     */
+    public int getStatus ()
+    {
+        return _status;
     }
 
     //////////////////

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#32 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#33 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -250,10 +250,11 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
         // (see AWDirectActionRequestHandler.handleRequest).
 
         // remember it's a self redirect (to be continued)
+        /*  Todo: add another flag to flush on toBeContinued
         if (PerformanceState.threadStateEnabled() && _isSelfRedirect) {
             PerformanceState.getThisThreadHashtable().setToBeContinued(true);
         }
-
+        */
         if (requestContext.isHistoryRequest() &&
             requestContext.historyAction() == AWSession.BacktrackRequest) {
             AWResponse response = requestContext.response();

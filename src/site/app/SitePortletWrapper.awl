@@ -1,4 +1,5 @@
 <div class="$^portletClass">
+    <a name="s"></a> 
     <div class="${valueForBinding('portletClass') + 'Top'}"><h2>$^title</h2></div>
     <div class="${valueForBinding('portletClass') + 'Body'}"><a:IncludeContent/></div>
     <div class="${valueForBinding('portletClass') + 'Btm'}"></div>

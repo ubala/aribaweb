@@ -2,7 +2,7 @@ Part II. Widgets Applications
 =============================
 
 ![AribaWeb Stack: AW and Widgets App](stack-AW_Widgets.jpg)
-Is the section we'll introduce the Widgets framework, and enhance our GuestBook application from Part I using some key Widgets components:
+In this section we'll introduce the Widgets framework, and enhance our GuestBook application from Part I using some key Widgets components:
 
   - [BasicPageWrapper]#
   - [Component Inspector]#
@@ -182,7 +182,7 @@ If we wanted to provide other more global validation (perhaps checking if a user
 times) we could perform such a check in our add() action just prior to the `checkErrorsAndEnableDisplay()`
 check, calling `errorManager().recordValidationError(...) with any errors we find.
 
-(Note: MetaUI -- which we cover in the next chapter -- provides a more declarative was to associate 
+(Note: MetaUI -- which we cover in the next chapter -- provides a more declarative way to associate 
 validators with fields and generate the required UI automatically).
 
 Rich Text

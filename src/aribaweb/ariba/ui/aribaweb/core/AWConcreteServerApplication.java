@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#65 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#66 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -152,6 +152,9 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
 
         // ResponseSizeCounter
         ClassUtil.classTouch(AWBaseResponse.class.getName());
+
+        // ElemendIdInstantiationsCounter
+        ClassUtil.classTouch(AWElementIdPath.class.getName());
 
         // Keys for fieldValue access
         ClassUtil.classTouch(AWSelfAccess.class.getName());

@@ -15,6 +15,10 @@ The **[AribaWeb Group](http://groups.google.com/group/aribaweb)** on Google Grou
 is a great place to ask for help or make suggestions for future framework features.
 Add yourself to the mailing list to stay plugged in.
 
+AribaWeb on Twitter
+======================
+**[Follow AribaWeb on Twitter](http://twitter.com/AribaWeb)** and see what's cooking in the
+AribaWeb kitchen.  Get mini-updates as they happen.
 
 The AW Issue Tracker
 ====================

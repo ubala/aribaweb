@@ -1,8 +1,8 @@
 /*
-    Copyright (c) 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-20089 Ariba, Inc.
     All rights reserved. Patents pending.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#26 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#27 $
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -241,7 +241,7 @@ public final class MapUtil
     /**
         Returns whether all list elements are strings
     */
-    private static boolean allElementsAreStrings (List<?> v)
+    public static boolean allElementsAreStrings (List<?> v)
     {
         for (int i = v.size()-1; i >= 0; i--) {
             if (!(v.get(i) instanceof String)) {

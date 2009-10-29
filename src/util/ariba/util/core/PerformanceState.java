@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#31 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#32 $
 */
 
 package ariba.util.core;
@@ -96,6 +96,25 @@ public class PerformanceState
             long duration = (checker._errorRuntimeMillis > 0) ? checker._errorRuntimeMillis : 30000;
             stats._deadline = stats._startTime + duration;
             WatcherDaemon.add(ThreadDebugState.getThisThreadHashtable(), Thread.currentThread());
+        }
+    }
+
+    private static final long DefaultErrorRuntimeMillis = -1;
+
+    public static void restoreDefaultErrorRuntimeMillis ()
+    {
+        updateErrorRuntimeMillis(DefaultErrorRuntimeMillis);
+    }
+
+    public static void updateErrorRuntimeMillis (long duration)
+    {
+        if (threadStateEnabled()) {
+            Stats stats = getThisThreadHashtable();
+            if (duration == DefaultErrorRuntimeMillis) {
+                duration = stats._performanceCheck._errorRuntimeMillis;
+            }
+            stats._deadline = stats._startTime + duration;
+            WatcherDaemon.update(ThreadDebugState.getThisThreadHashtable(), Thread.currentThread());
         }
     }
 
@@ -834,6 +853,14 @@ public class PerformanceState
         {
             synchronized(WatcherDaemon.class) {
                 _WatchedStates.remove(state);
+            }
+        }
+
+        static void update (ThreadDebugState.StateMap state, Thread thread)
+        {
+            synchronized(WatcherDaemon.class) {
+                _WatchedStates.remove(state);
+                _WatchedStates.put(state, thread);                
             }
         }
 

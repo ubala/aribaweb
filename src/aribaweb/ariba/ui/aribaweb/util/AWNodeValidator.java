@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNodeValidator.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNodeValidator.java#9 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -22,7 +22,7 @@ import ariba.ui.aribaweb.core.AWFormRedirect;
 import ariba.ui.aribaweb.core.AWDirectActionUrl;
 import ariba.ui.aribaweb.core.AWRedirect;
 import ariba.util.core.FastStringBuffer;
-import ariba.util.core.StringUtil;
+import ariba.util.core.HTML;
 import java.util.Iterator;
 
 /**
@@ -248,9 +248,11 @@ public abstract class AWNodeValidator
                 url.append(QueryDelimiter);
             }
         }
-        url.append(name);
+        String safeName = AWUtil.encodeString(name);
+        url.append(safeName);
         url.append(Equals);
-        url.append(AWUtil.encodeString(value));
+        String safeValue = AWUtil.encodeString(value);
+        url.append(safeValue);
     }
 
     /**
@@ -285,7 +287,16 @@ public abstract class AWNodeValidator
         Iterator keys = requestContext.formValues().keySet().iterator();
         while (keys.hasNext()) {
             String key = (String)keys.next();
-            formRedirect.addFormValue(key,requestContext.formValueForKey(key));
+            String safeParamName = HTML.escape(key);
+            if (key.equals(safeParamName)) {
+                // only add safe params
+                String formValue = requestContext.formValueForKey(key);
+                formValue = AWUtil.attributeEscape(formValue);
+                formRedirect.addFormValue(key, formValue);
+            }
+            else {
+                Log.aribaweb.warning(10347, key);                
+            }
         }
     }
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#53 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#54 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -2158,6 +2158,19 @@ public final class AWUtil extends AWBaseObject
         return out.toString();
     }
 
+    public static String attributeEscape (String string)
+    {
+        return StringUtil.replaceCharByString(string, '"', AWUtil.QuoteString);
+    }
+
+    /* Pattern to filter out all unsafe chars in HTTP response header */
+    private static Pattern UnsafeHeaderPattern = Pattern.compile("\\r|\\n|%0(D|d|A|a)");
+
+    public static String filterUnsafeHeader (String url)
+    {
+        return UnsafeHeaderPattern.matcher(url).replaceAll("");
+    }
+    
     public static AWStringKeyHashtable parseQueryString (String queryString)
     {
         AWStringKeyHashtable queryStringValues = new AWStringKeyHashtable();

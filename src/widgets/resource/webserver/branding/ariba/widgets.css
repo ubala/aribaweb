@@ -1913,12 +1913,15 @@ table.tableBody {
     empty-cells:show;
 }
 
-td.tableHeader {
+.tableHeader {
     background-image:url("cssBoxHeaderFill.gif");
     background-position:bottom left;
     background-repeat:repeat-x;
     background-color:#F6F6F6;
     width:100%;
+}
+
+td.tableHeader {
     padding-bottom:2px;
 }
 

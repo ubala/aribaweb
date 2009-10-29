@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#59 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/UIMeta.java#60 $
 */
 package ariba.ui.meta.core;
 
@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class UIMeta extends ObjectMeta
 {
@@ -251,6 +252,8 @@ public class UIMeta extends ObjectMeta
     public static class UIContext extends ObjectMetaContext
     {
         AWRequestContext _requestContext;
+        AWResourceManager _resourceManager;
+        TimeZone _timeZone;
 
         public UIContext(UIMeta meta)
         {
@@ -265,11 +268,45 @@ public class UIMeta extends ObjectMeta
         public void setRequestContext (AWRequestContext requestContext)
         {
             _requestContext = requestContext;
+            _resourceManager = null;
+            _timeZone = null;
         }
 
         public AWComponent getComponent ()
         {
             return _requestContext.getCurrentComponent();
+        }
+
+        public AWResourceManager resourceManager ()
+        {
+            if (_resourceManager == null) {
+                HttpSession existingHttpSession = (_requestContext != null) ? _requestContext.existingHttpSession() : null;
+                if (existingHttpSession != null) {
+                    _resourceManager = AWSession.session(existingHttpSession).resourceManager();
+                }
+                if (_resourceManager == null) {
+                    _resourceManager = AWConcreteApplication.SharedInstance.resourceManager(Locale.US);
+                }
+            }
+            return _resourceManager;
+        }
+
+        public Locale locale ()
+        {
+            return resourceManager().locale();
+        }
+
+        public TimeZone timezone () {
+            if (_timeZone == null) {
+                HttpSession existingHttpSession = (_requestContext != null) ? _requestContext.existingHttpSession() : null;
+                if (existingHttpSession != null) {
+                    _timeZone = AWSession.session(existingHttpSession).clientTimeZone();
+                }
+                if (_timeZone == null) {
+                    _timeZone = TimeZone.getDefault();
+                }
+            }
+            return _timeZone;            
         }
 
         public UIMeta uiMeta ()
@@ -957,11 +994,7 @@ public class UIMeta extends ObjectMeta
         {
             AWResourceManager resourceManager = null;
             if (context instanceof UIContext) {
-                AWRequestContext requestContext = ((UIContext)context).requestContext();
-                HttpSession existingHttpSession = (requestContext != null) ? requestContext.existingHttpSession() : null;
-                if (existingHttpSession != null) {
-                    resourceManager = AWSession.session(existingHttpSession).resourceManager();
-                }
+                resourceManager = ((UIContext)context).resourceManager();
             }
             return (resourceManager != null) ? resourceManager
                     : AWConcreteApplication.SharedInstance.resourceManager(Locale.US);

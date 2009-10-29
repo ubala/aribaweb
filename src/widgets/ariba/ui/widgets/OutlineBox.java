@@ -12,22 +12,26 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/OutlineBox.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/OutlineBox.java#4 $
 */
 
 package ariba.ui.widgets;
 
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWBindingNames;
+import ariba.ui.aribaweb.core.AWBinding;
 import ariba.util.core.Constants;
 
 public class OutlineBox extends AWComponent
 {
 
     private Boolean _isExpanded;
+    private AWBinding _state;
+    private AWBinding _toggleAction;
 
     private static final String InitiallyExpandedBinding = "initiallyExpanded";
     private static final String ShowExpandoCollapsoBinding = "showExpandoCollapso";
-
+    private static final String TitleMaxLength = "titleMaxLength";
     private static final String CollapsoImage = "awxToggleImageTrue.gif";
     private static final String ExpandoImage = "awxToggleImageFalse.gif";
     private static final String CollapsoStyle = "padding-right:4px;";
@@ -39,10 +43,20 @@ public class OutlineBox extends AWComponent
         return false;
     }
 
+    public void init ()
+    {
+        super.init();
+        _state = bindingForName(AWBindingNames.state);
+        _toggleAction = bindingForName(AWBindingNames.action);
+    }
+
     /* Return true if we should show the body of the box as expanded, false if we should
        show it as collapsed */
     public boolean isExpanded ()
     {
+        if (_state != null) {
+            return booleanValueForBinding(_state);
+        }
         if (_isExpanded != null) {
             return _isExpanded.booleanValue();
         }
@@ -66,6 +80,10 @@ public class OutlineBox extends AWComponent
         return _isExpanded.booleanValue();
     }
 
+    public boolean hasTitleMaxLength ()
+    {
+        return hasBinding(TitleMaxLength);
+    }
 
     /* If we were passed a binding showExpandoCollapso = true, then we should display
        the expando collapso control for the box */
@@ -87,7 +105,17 @@ public class OutlineBox extends AWComponent
 
     public AWComponent toggleExpandoCollapsoAction ()
     {
-        _isExpanded = Constants.getBoolean(!isExpanded());
+        _toggleAction = bindingForName(AWBindingNames.action);
+        if (_toggleAction != null) {
+            valueForBinding(_toggleAction);
+        }
+        else if (_state != null) {
+            boolean state = booleanValueForBinding(_state);
+            setValueForBinding(!state, _state);            
+        }
+        else {
+            _isExpanded = Constants.getBoolean(!isExpanded());
+        }
         return null;
     }
 

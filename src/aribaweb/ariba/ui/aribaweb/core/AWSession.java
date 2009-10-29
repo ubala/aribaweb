@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#84 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#85 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1430,8 +1430,6 @@ public class AWSession extends AWBaseObject
                 if (userAgent != null) {
                     stats.setUserAgent(userAgent);
                 }
-
-                PerformanceState.DispatchTimer.start();
             }
 
             _lastAccessedTime = _httpSession.getLastAccessedTime();
@@ -1455,8 +1453,6 @@ public class AWSession extends AWBaseObject
     {
         if (_requestContext != null) {
             if (PerformanceState.threadStateEnabled()) {
-                PerformanceState.DispatchTimer.stop(0);
-
                 if (_updateLatestPerformanceStats) {
                     // save this for later lookup (by AWPerfPane)
                     _performanceStateHashtable =

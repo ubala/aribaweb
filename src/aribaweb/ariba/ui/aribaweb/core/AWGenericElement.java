@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericElement.java#45 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericElement.java#46 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -366,7 +366,7 @@ public final class AWGenericElement extends AWBindableElement
                     String componentPath = component.componentPath().toString();
                     String sessionId = component.httpSession().getId();
                     AWApplication application = requestContext.application();
-                    String actionLogMessage = Fmt.S("** %s: sessionId: \"%s\" componentPath: \"%s\" elementName: \"%s\" action: \"$%s\"", actionCount, sessionId, componentPath, nameString.string(), actionKeyPath);
+                    String actionLogMessage = Fmt.S("** %s: sessionId: \"%s\" componentPath: \"%s\" elementName: \"%s\" action: \"$%s\"", actionCount, sessionId, componentPath, nameString, actionKeyPath);
                     application.logActionMessage(actionLogMessage);
                     actionResults = (AWResponseGenerating)_invokeAction.value(component);
                     application.logActionMessage(Fmt.S("** %s: DONE **", actionCount));

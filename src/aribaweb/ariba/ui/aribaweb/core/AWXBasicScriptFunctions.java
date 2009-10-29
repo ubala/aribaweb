@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.java#34 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.java#35 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWEncodedString;
+import ariba.ui.aribaweb.test.TestContext;
 import ariba.util.core.StringUtil;
 import ariba.util.core.Fmt;
 
@@ -34,8 +35,9 @@ public final class AWXBasicScriptFunctions extends AWComponent
     public AWEncodedString requestHandlerUrl ()
     {
         if (_RequestHandlerUrl == null) {
+            boolean useFullURL = TestContext.isTestAutomationMode(requestContext());
             String requestHandlerUrl =
-                AWComponentActionRequestHandler.SharedInstance.requestHandlerUrl(request());
+                AWComponentActionRequestHandler.SharedInstance.requestHandlerUrl(request(), useFullURL);
             _RequestHandlerUrl = AWEncodedString.sharedEncodedString(requestHandlerUrl);
         }
         return _RequestHandlerUrl;
