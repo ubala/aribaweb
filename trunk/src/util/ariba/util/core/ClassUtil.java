@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ClassUtil.java#20 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ClassUtil.java#21 $
 */
 
 package ariba.util.core;
@@ -225,7 +225,7 @@ public final class ClassUtil
                 Log.util.debug("classForName: %s", SystemUtil.stackTrace(e));
             }
             ClassForNameCache.put(className, NoCachedClassFound);
-            return classForName(className, true);
+            return classForName(className, warning);
         }
         catch (SecurityException e) {
                 // Netscape 4.x Browser VM throws a 

@@ -7,62 +7,6 @@
         $^label
     </w:TextButton>
 </div>
-<a:Singleton>
-    \<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAAGMX3oLJ07djx78_srCuVfxTzWqljhZ9jcDunEJwsomxdtxdBcxQP9oF7nqe3CU-p4arkkQJMiLdrug">
-    \</script>
-    \<script type="text/javascript">
-
-    google.load("feeds", "1");
-
-    var _Feeds = new Array();
-
-    function registerFeed (url, name, count, showContent)
-    {
-        var feed = new Object();
-        feed.url = url;
-        feed.name = name;
-        feed.count = count;
-        feed.showContent = showContent;
-        _Feeds[_Feeds.length] = feed;
-    }
-
-    function loadFeeds ()
-    {
-       for (var i = 0; i \< _Feeds.length; i++) {
-           loadFeed(_Feeds[i]);
-       }
-    }
-
-    function loadFeed (feedInfo) {
-      var feed = new google.feeds.Feed(feedInfo.url);
-      feed.setNumEntries(feedInfo.count);
-      feed.load(function(result) {
-        if (!result.error) {
-          var container = document.getElementById(feedInfo.name + "feed");
-          container.innerHTML="";
-          var length = result.feed.entries.length;
-          for (var i = 0, c = Math.min(length, feedInfo.count); i \< c ; i++) {
-              var entry = result.feed.entries[i];
-              var h = document.createElement("h3");
-              var a = document.createElement("a");
-              a.href = entry["link"];
-              a.target = "AW" +feedInfo.name;
-              a.appendChild(document.createTextNode(entry["title"]));
-              h.appendChild(a);
-              container.appendChild(h);
-              if (feedInfo.showContent) {
-                  var ul = document.createElement("ul");
-                  ul.className="blogSnippet";
-                  ul.appendChild(document.createTextNode(entry["contentSnippet"]));
-                  container.appendChild(ul);
-              }
-           }
-        }
-      });
-    }
-
-    \</script>\
-</a:Singleton>
 \<script type="text/javascript">
     registerFeed("$^feedUrl", "$^name",
                  <a:String value="$^count:3"/>, <a:String value="$^showContent:false"/>);

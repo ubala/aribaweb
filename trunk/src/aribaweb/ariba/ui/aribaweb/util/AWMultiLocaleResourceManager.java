@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMultiLocaleResourceManager.java#53 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMultiLocaleResourceManager.java#54 $
 */
 
 package ariba.ui.aribaweb.util;
 
 import ariba.ui.aribaweb.core.AWConcreteApplication;
+import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.util.core.Assert;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.GrowOnlyHashtable;
@@ -544,6 +545,41 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
                 _classesByNameHashtable.put(shortName, DeletedMarker);
             }
         }
+    }
+
+    /**
+     * Returns a full url
+     *
+     * This method is to add webserver url prefix to the url if it is a relative url.
+     *
+     * This method is mainly used to construct a full url to pass it to scripts
+     * when the app runs in the test automation mode.
+     * If test scripts playback in the iehta mode, //C: is added to the url (relative path)
+     * as root directory, not the webserver prefix, i.e. http://localhost. Because of that,
+     * it fails to execute secure scripts in the client.
+     *
+     * @param urlString
+     * @param requestContext
+     * @return
+     */
+    public static String fullUrl (String urlString,
+                                  AWRequestContext requestContext)
+    {
+        if (!StringUtil.nullOrEmptyString(urlString) &&
+                !urlString.startsWith("http:") && !urlString.startsWith("https:")) {
+            if (!urlString.startsWith("/")) {
+                urlString = StringUtil.strcat("/", urlString);
+            }
+            boolean isSecure = requestContext.request() != null &&
+                    requestContext.request().isSecureScheme();
+            String webserverUrlPrefix = webserverUrlPrefix(isSecure);
+            if (webserverUrlPrefix.endsWith("/")) {
+                webserverUrlPrefix =
+                        webserverUrlPrefix.substring(0, webserverUrlPrefix.length() - 1);
+            }
+            return StringUtil.strcat(webserverUrlPrefix, urlString);
+        }
+        return null;
     }
 
     ////////////////

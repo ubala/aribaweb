@@ -1,13 +1,13 @@
-<h3>Latest Release: v5.0RC3 (5/2009)</h3>
+<h3>Latest Release: v5.0GA PREVIEW 2 (8/29/2009)</h3>
 <ul>
-<li>The third Release Candidate for v5.0:  GA is just around the corner!</li>
+<li>v5.0 GA is just around the corner!</li>
 <li>Fixes for a number of issues uncovered by the community</li>
-<li>Improved <i>Localization</i> support!</li>
+<li>More examples and documentations!</li>
 </ul>
 <div style="height:30px;margin-left:80px">
     <w:TextButton buttonWrapperStyle="LeftRight"
                   buttonClass="siteBtn"
-                  action='${ariba.ui.aribaweb.core.AWRedirect.getRedirect(requestContext,"http://sourceforge.net/project/showfiles.php?group_id=227584&package_id=275548")}'>
-        Download v5.0RC3
+                  action='${ariba.ui.aribaweb.core.AWRedirect.getRedirect(requestContext,"https://sourceforge.net/projects/aribaweb/files/aribaweb/aribaweb-5.0GA/aribaweb-5.0GA.zip/download")}'>
+        Download v5.0GA
     </w:TextButton>
 </div>

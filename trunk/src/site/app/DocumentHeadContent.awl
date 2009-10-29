@@ -2,4 +2,20 @@
 <meta name="description"
 	content="AribaWeb is the Open Source component-based web application development framework for creating rich, AJAX-enabled applications with the absolute minimum of code (and no hand-coded Javascript)."/>
 <meta name="keywords" content="AribaWeb, Ajax, Open Source, Framework, Ajax framework, RIA, Java, Groovy, Web Development, JSF" />
+\<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAAGMX3oLJ07djx78_srCuVfxTzWqljhZ9jcDunEJwsomxdtxdBcxQP9oF7nqe3CU-p4arkkQJMiLdrug">
+\</script>
+\<script type="text/javascript">
+    var _Feeds = new Array();
+
+    function registerFeed (url, name, count, showContent)
+    {
+        var feed = new Object();
+        feed.url = url;
+        feed.name = name;
+        feed.count = count;
+        feed.showContent = showContent;
+        _Feeds[_Feeds.length] = feed;
+    }
+\</script>
+
         

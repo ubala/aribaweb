@@ -38,6 +38,15 @@ module {
           count:6;
        };
     }
+    layout=Tweets#NarrowPortlet {
+       label:"Recent Tweets";
+       component:TwitterContent;
+       bindings:{
+          label:"Follow AW on Twitter";
+          url:"http://twitter.com/AribaWeb";
+          name:"group";
+       };
+    }
     @layout=Footer {
        after:zBottom;
        component:FooterContent;
@@ -100,12 +109,14 @@ layout layout_trait=Markdown {
        component:ScreencastContent;
        bindings:{smallPlayer:true; twoColThumbnails:true; }
     }
-
     @layout=BlogNews {
        after:Download;
     }
-    @layout=CommunityResources#NarrowPortlet,Markdown {
+    @layout=Tweets {
        after:BlogNews;
+    }
+    @layout=CommunityResources#NarrowPortlet,Markdown {
+       after:Tweets;
        resourceName:"Community/CommunityLinks.txt";
     }
 }
@@ -181,5 +192,8 @@ layout layout_trait=Markdown {
     }
     @layout=BlogNews {
        after:GroupNews;
+    }
+    @layout=Tweets {
+       after:BlogNews;
     }
 }

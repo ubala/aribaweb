@@ -1,4 +1,6 @@
 - [FAQ](/Documentation/Frequently_Asked_Questions.txt)
 - [Discussion Group](http://groups.google.com/group/aribaweb)
+- [Community Wiki](http://groups.google.com/group/aribaweb/web)
 - [Issue Tracker](http://code.google.com/p/aribaweb/issues/list)
 - [Official Blog](http://aribaweb.blogspot.com)
+- [AribaWeb on Twitter](http://twitter.com/AribaWeb)

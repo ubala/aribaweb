@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#14 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#15 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -27,6 +27,8 @@ import ariba.util.core.Assert;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.FastStringBuffer;
 import ariba.util.core.Fmt;
+import ariba.util.core.PerformanceStateCounter;
+import ariba.util.core.PerformanceStateCore;
 
 /**
  * Maintains a cache of AWElementIdPath's.  The ElementIdPath holds all useful representations of a path to
@@ -40,6 +42,10 @@ public class AWElementIdPath extends AWBaseObject
     private static final AWElementIdPath EmptyPath;
     private static final AWElementIdPath NoOpPath;
     public static final int LevelMaxSize = (int)Character.MAX_VALUE;
+    public static PerformanceStateCounter ElemendIdInstantiationsCounter =
+            new PerformanceStateCounter("Element Id Instantiations", 220,
+                    PerformanceStateCore.LOG_COUNT);
+
     // Using chars here reduces memory usage for the path objects, but assumes we'll never exceed 65,535
     // at any level in a path.  For aw applications, this should be safe.
     // Note that _path is trimmed to proper length
@@ -126,6 +132,7 @@ public class AWElementIdPath extends AWBaseObject
         if (elementIdPath == null) {
             char[] path = (char[])elementIdGenerator.charArrayManager().trimmedArrayCopy();
             elementIdPath = new AWElementIdPath(path);
+            ElemendIdInstantiationsCounter.addCount(1);
             ElementIdPaths.put(elementIdPath, elementIdPath);
         }
         return elementIdPath;

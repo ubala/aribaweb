@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#11 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -22,12 +22,10 @@ import ariba.ui.aribaweb.core.AWDirectAction;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.util.AWGenericException;
-import ariba.util.core.ClassUtil;
 import ariba.util.test.TestPageLink;
 import ariba.util.test.TestParam;
 import ariba.util.test.TestStager;
 import ariba.util.test.TestValidator;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -103,7 +101,8 @@ public class AnnotationUtil
         return name;
     }
 
-    public static Object getObjectToInvoke (AWRequestContext requestContext, Method method)
+    public static Object getObjectToInvoke (AWRequestContext requestContext,
+                                            Method method)
     {
         Object obj = null;
         if (!Modifier.isStatic(method.getModifiers())) {
@@ -136,7 +135,7 @@ public class AnnotationUtil
                 args[i] = testContext;
             }
             else if (objectForValidation != null &&
-                    methodTypes[i].isInstance(objectForValidation)){
+                    methodTypes[i].isInstance(objectForValidation)) {
                 args[i] = objectForValidation;
             }
             else {
@@ -186,19 +185,22 @@ public class AnnotationUtil
         }
     }
 
-    public static void initializePageTestParams (AWRequestContext requestContext, AWResponseGenerating page)
+    public static void initializePageTestParams (AWRequestContext requestContext,
+                                                 AWResponseGenerating page)
     {
         TestContext testContext = TestContext.getTestContext(requestContext); 
         // loop through all of the methods with TestParam Annotation and invoke
         // the with method passing the proper needed argument to the method.
-        Map<Annotation, AnnotatedElement> annotations = TestLinkManager.instance().annotationsForClass(page.getClass().getName());
+        Map<Annotation, AnnotatedElement> annotations =
+            TestLinkManager.instance().annotationsForClass(page.getClass().getName());
         Set keys = annotations.keySet();
         for (Object key : keys) {
             Annotation annotation = (Annotation)key;
             if (TestParam.class.isAssignableFrom(annotation.annotationType())) {
                 Object ref = annotations.get(key);
                 if (ref.getClass() == Method.class) {
-                    AnnotationUtil.invokeMethod(requestContext, testContext, (Method)ref, page);
+                    AnnotationUtil.invokeMethod(requestContext, testContext,
+                                                (Method)ref, page);
                 }
             }
         }

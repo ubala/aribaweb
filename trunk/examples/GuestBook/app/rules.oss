@@ -30,5 +30,26 @@ layout=ListItem class=app.Post {
     wrapperBindings: { tagName:h4; }    
 }
 
+frame class=app.Post field {
+    after:zNone;
+}
+
+frame=infoFrame class=app.Post {
+    field=(userName,birthday,title,isPrivate,continent) {
+        after:zLeft;
+    }
+}
+
+frame=contentFrame class=app.Post {
+    field=comment {
+        after:zLeft;
+    }
+}
+
+frame=ratingFrame class=app.Post {
+    field=rating {
+        after:zLeft;
+    }
+}
 /*!--- Editor Generated Rules -- Content below this line will be overwritten ---*/
 

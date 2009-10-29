@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#122 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#123 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -853,23 +853,34 @@ abstract public class AWConcreteApplication
 
         AWResponse response = null;
 
-        if (shouldRefuseResponse(request)) {
-            response = handleRefusedResponse(request);
-        }
-        else {
-            String httpSessionId = request.sessionId();
-            if (httpSessionId != null) {
-                boolean isCheckedOut = isHttpSessionCheckedOut(httpSessionId);
-                ((AWBaseRequest)request).setIsQueued(isCheckedOut);
+        try {
+            if (PerformanceState.threadStateEnabled()) {
+                PerformanceState.DispatchTimer.start();
             }
-            response = super.dispatchRequest(request);
-            _monitorStats.incrementTotalRequestsServed();
-        }
-        if (IsResponseLoggingEnabled) {
-            logResponseMessage(response.contentString());
-        }
 
-        ((AWBaseRequest)request).dispose();
+            if (shouldRefuseResponse(request)) {
+                response = handleRefusedResponse(request);
+            }
+            else {
+                String httpSessionId = request.sessionId();
+                if (httpSessionId != null) {
+                    boolean isCheckedOut = isHttpSessionCheckedOut(httpSessionId);
+                    ((AWBaseRequest)request).setIsQueued(isCheckedOut);
+                }
+                response = super.dispatchRequest(request);
+                _monitorStats.incrementTotalRequestsServed();
+            }
+            if (IsResponseLoggingEnabled) {
+                logResponseMessage(response.contentString());
+            }
+
+            ((AWBaseRequest)request).dispose();
+        }
+        finally {
+            if (PerformanceState.threadStateEnabled()) {
+                PerformanceState.DispatchTimer.stop(0);
+            }
+        }            
         return response;
     }
 
@@ -945,6 +956,11 @@ abstract public class AWConcreteApplication
                 Log.aribaweb_shutdown.debug(
                     "Shutdown warning period begun.  Forcing shutdown in (%s millis).",
                     Constants.getLong(remainingPeriod));
+            }
+            List<NamedValue> list = getUISessionCountBuckets();
+            for (int i = 0; i < list.size(); i++) {
+                NamedValue nv = list.get(i);
+                ariba.util.log.Log.shutdown.info(10339, this.name(), nv.getName(), nv.getValue());
             }
             return false;
         }

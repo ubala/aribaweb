@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#16 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#17 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -82,10 +82,12 @@ public class AWFormRedirect extends AWComponent
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
+        /*  Todo: add another flag to flush on toBeContinued
         if (PerformanceState.threadStateEnabled()) {
             // TODO: only do this for *self* redirects?
             PerformanceState.getThisThreadHashtable().setToBeContinued(true);
         }
+        */
 
         super.renderResponse(requestContext, component);
     }

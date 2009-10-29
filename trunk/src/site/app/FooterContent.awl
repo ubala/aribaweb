@@ -14,7 +14,7 @@
     </a>
     <br/><br/>
 </center>
-<form action="http://www.google.com/cse" id="cse-search-box">
+<form onsubmit="search();ariba.Event.cancelBubble(event);return false;">
     <table cellpadding="0" cellspacing="0" class="search">
         <tr>
             <td>
@@ -26,18 +26,120 @@
                 <a:Image filename="img_gry_div.gif"/>
             </td>
             <td class="value">
-                <input type="hidden" name="cx" value="017500759798914689089:ju6n5tnoaaa" />
-                <input type="hidden" name="cof" value="FORID:10" />
-                <input type="hidden" name="ie" value="UTF-8" />
-                <input type="text" name="q" size="20" style="border-width:0px"/>
+                <input id="q" type="text" name="q" size="20" style="border-width:0px"/>
             </td>
             <td class="button">
-                <input type="image" name="sa" src="${urlForResourceNamed('icn_srch.gif')}"/>
+                <input type="image" src="${urlForResourceNamed('icn_srch.gif')}"/>
             </td>
         </tr>
     </table>
 </form>
 <a:GenericContainer tagName="script" type="text/javascript">
+    var webSearch;
+
+    google.load('search', '1');
+    function search ()
+    {
+        webSearch = new google.search.WebSearch();
+        //var crefUrl = 'http://www.aribaweb.org/search/all.xml';
+        //webSearch.setSiteRestriction({crefUrl : crefUrl});
+        webSearch.setSiteRestriction('017500759798914689089:ju6n5tnoaaa');
+        webSearch.setResultSetSize(google.search.Search.LARGE_RESULTSET);
+        webSearch.setSearchCompleteCallback(this, searchComplete, null);
+        webSearch.execute(document.getElementById('q').value);
+    }
+    var ResultTemplate = '<div class="sTitle"><a href="%unescapedUrl%">%title%</a></div>'+
+                         '<div>%content%</div>'+
+                         '<div><a href="%unescapedUrl%">%url%</a></div>';
+
+    function searchComplete ()
+    {
+        var allContent = '';
+        var results = webSearch.results;
+        for (var i=0; i\< results.length; i++) {
+            var result = results[i];
+            var content = ResultTemplate;
+            for (p in result) {
+                var regex = new RegExp('%'+p+'%', 'g');
+                content = content.replace(regex, result[p]);
+            }
+            allContent += content;
+        }
+        var cursor = webSearch.cursor;
+        var curPage = cursor.currentPageIndex; // check what page the app is on
+        var pagesDiv = document.createElement('div');
+        for (var i = 0; i \< cursor.pages.length; i++) {
+            var page = cursor.pages[i];
+            if (curPage == i) { // if we are on the curPage, then don't make a link
+                var label = document.createTextNode(' ' + page.label + ' ');
+                pagesDiv.appendChild(label);
+            } else {
+                // If we aren't on the current page, then we want a link to this page.
+                // So we create a link that calls the gotoPage() method on the searcher.
+                var link = document.createElement('a');
+                link.href = 'javascript:webSearch.gotoPage('+i+');';
+                link.innerHTML = page.label;
+                link.style.marginRight = '2px';
+                pagesDiv.appendChild(link);
+            }
+        }
+        allContent += '<div class="sPage">'+pagesDiv.innerHTML+'</div>';
+        var portletRefs = document.getElementsByName('s');
+        var firstPortletRef = portletRefs[0].parentNode;
+        var childNodes = firstPortletRef.childNodes;
+        var title = true;
+        for (var i = 0; i \< childNodes.length; i++) {
+            var childNode = childNodes[i];
+            if (childNode.tagName == 'DIV') {
+                if (title) {
+                    childNode.innerHTML = '<h2>Search Result</h2>';
+                    title = false;
+                } else {
+                    childNode.innerHTML = allContent;
+                    break;
+                }
+            }
+        }
+        location.href='#s';
+    }
+
+    google.load("feeds", "1");
+
+    function loadFeeds ()
+    {
+       for (var i = 0; i \< _Feeds.length; i++) {
+           loadFeed(_Feeds[i]);
+       }
+    }
+
+    function loadFeed (feedInfo) {
+      var feed = new google.feeds.Feed(feedInfo.url);
+      feed.setNumEntries(feedInfo.count);
+      feed.load(function(result) {
+        if (!result.error) {
+          var container = document.getElementById(feedInfo.name + "feed");
+          container.innerHTML="";
+          var length = result.feed.entries.length;
+          for (var i = 0, c = Math.min(length, feedInfo.count); i \< c ; i++) {
+              var entry = result.feed.entries[i];
+              var h = document.createElement("h3");
+              var a = document.createElement("a");
+              a.href = entry["link"];
+              a.target = "AW" +feedInfo.name;
+              a.appendChild(document.createTextNode(entry["title"]));
+              h.appendChild(a);
+              container.appendChild(h);
+              if (feedInfo.showContent) {
+                  var ul = document.createElement("ul");
+                  ul.className="blogSnippet";
+                  ul.appendChild(document.createTextNode(entry["contentSnippet"]));
+                  container.appendChild(ul);
+              }
+           }
+        }
+      });
+    }
+
     google.setOnLoadCallback(loadFeeds);
 </a:GenericContainer>
 <!--- Google analytics -->

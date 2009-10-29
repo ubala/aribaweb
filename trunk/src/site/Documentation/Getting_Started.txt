@@ -16,7 +16,7 @@ a valid installation of the Java5 or Java6 *JDK* (not just the JRE).
         > set your JAVA_HOME (e.g. on Unix: `export JAVA_HOME="d:/jdk1.5"`,
          on Windows set JAVA_HOME in your System Control Panel Advanced -> Environment Variables panel)
 
-  2. Unzip the aribweb.zip to an appropriate directory.
+  2. Unzip the aribaweb.zip to an appropriate directory.
         > **Note:** Unzip to a path without any spaces in any parent directory names. --- i.e. on Windows unzip to d:/
           rather than to your Desktop or Documents folders (both of which are in a folder called "Documents and Settings")
 

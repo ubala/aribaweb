@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.java#23 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.java#24 $
 */
 
 package ariba.ui.widgets;
@@ -32,7 +32,7 @@ import ariba.util.core.StringUtil;
 public class DateField extends AWComponent
 {
     private static final String DefaultFormatterKey = "DateField_defaultFormatter";
-    public Object _date;
+    protected Object _date;
     public AWFormatter _formatter;
     public AWDateFactory _dateFactory;
     public AWEncodedString _menuId;
@@ -50,6 +50,11 @@ public class DateField extends AWComponent
     public void setDate (Object object)
     {
         _date = object;
+    }
+
+    public Object getDate ()
+    {
+        return _date;
     }
     
     public boolean isStateless()
@@ -89,6 +94,7 @@ public class DateField extends AWComponent
         if (_linkId != null && _linkId.equals(requestContext.requestSenderId())) {
             _date = Calendar.computeCalendarDate(requestContext, dateFactory());
         }
+        // displayed in text field, after formatting
         setValueForBinding(_date, BindingNames.value);
     }
 

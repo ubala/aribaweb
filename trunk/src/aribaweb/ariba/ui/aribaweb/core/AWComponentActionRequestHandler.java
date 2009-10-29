@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#81 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#82 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -113,7 +113,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         return fullUrl ? _fullRequestHandlerUrl : _requestHandlerUrl;
     }
 
-    private String requestHandlerUrl (AWRequest request, boolean fullUrl)
+    public String requestHandlerUrl (AWRequest request, boolean fullUrl)
     {
         return requestHandlerUrlEncoded(request, fullUrl).string();
     }

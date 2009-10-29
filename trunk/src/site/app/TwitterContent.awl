@@ -1,0 +1,41 @@
+<div class="twitter">
+    <a:GenericContainer tagName="script" type="text/javascript" src="http://widgets.twimg.com/j/2/widget.js"></a:GenericContainer>
+    <a:GenericContainer tagName="script" type="text/javascript">
+    new TWTR.Widget({
+      version: 2,
+      type: 'profile',
+      rpp: 4,
+      interval: 6000,
+      width: 290,
+      height: 300,
+      theme: {
+        shell: {
+          background: '#ffffff',
+          color: '#666666'
+        },
+        tweets: {
+          background: '#ffffff',
+          color: '#666666',
+          links: '#6699ff'
+        }
+      },
+      features: {
+        scrollbar: false,
+        loop: false,
+        live: false,
+        hashtags: true,
+        timestamp: true,
+        avatars: false,
+        behavior: 'all'
+      }
+    }).render().setUser('AribaWeb').start();
+    </a:GenericContainer>
+    <div style="height:30px;margin:10px 0 0 80px">
+        <w:TextButton buttonWrapperStyle="LeftRight"
+                      buttonClass="siteBtn"
+                      action='${ariba.ui.aribaweb.core.AWRedirect.getRedirect(requestContext,stringValueForBinding("url"))}'
+                      target='${"AW" + stringValueForBinding("name")}'>
+            $^label
+        </w:TextButton>
+    </div>
+</div>

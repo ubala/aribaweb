@@ -2,8 +2,8 @@ package app;
 
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.table.AWTDisplayGroup;
-
-import java.util.ArrayList;
+import ariba.ui.wizard.core.Wizard;
+import ariba.ui.wizard.component.WizardUtil;
 import java.util.List;
 
 public class Main extends AWComponent
@@ -36,5 +36,12 @@ public class Main extends AWComponent
 
     private void updateDisplayGroup () {
         _displayGroup.setObjectArray(_posts);
+    }
+
+    public AWComponent guideAction ()
+    {
+        Wizard wizard = new Wizard
+            ("wizard/GuestBook", _newPost, resourceManager());
+        return WizardUtil.startWizard(wizard, requestContext());
     }
 }

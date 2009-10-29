@@ -62,6 +62,11 @@ ariba.Refresh = function() {
 
     var _MarkedRRs;
 
+    // For Safari missing image issue. See completeRequest and completeRefreshOnLoad
+    var _historyCurrent;
+    var _historyLength;
+    var _runCompleteRefreshOnLoad = false;
+
 
     // Incremental request completion is indicated by the refreshRequestComplete()
     // callback from the incremental update content.  In addition, there is expected to
@@ -795,20 +800,32 @@ ariba.Refresh = function() {
         // awCompleteRequest is executed inline from incremental update content as well as
         // full page refresh content.  awCompleteRequest is responsible for cleaning up
         // request complete timers and for initiating incremental update, post load scripts,
-        // and history setup.
+        // and history setup. length is the history list length, 
+        // and current is the index in the history list.
         // awWindowOnLoad is only called from full page refresh content and handles all
         // clean up / post load calls for full page refreshes.
         // NOTE: for responses with a different mime type (file download), neither
         //       awCompleteRequest nor awWindowOnLoad will be called.
         completeRequest : function (current, length, isRefreshRequest) {
-            if (!_isXMLHttpResponse && Dom.isSafari) {
-                // Todo: Conditionalize for Safari < v4
-                // defer so that we're out of the IFrame's script context when we are processing
-                // (fixes image refresh issue in Safari 3)
-                ariba.awCurrWindow.setTimeout(function() {this._completeRequest(current, length, isRefreshRequest);}.bind(this), 1);
+            if (!_isXMLHttpResponse && Dom.isSafari && isRefreshRequest) {
+                // Todo: Conditionalize for Safari
+                // defer so that the IFrame's script is finish loading when we are processing
+                // (fixes image refresh issue in Safari)
+                _historyCurrent = current;
+                _historyLength = length;
+                _runCompleteRefreshOnLoad = true;
             } else {
                 this._completeRequest(current, length, isRefreshRequest);
             }
+        },
+
+        completeRefreshOnLoad : function () {
+            if (_runCompleteRefreshOnLoad) {
+                // prevent this from running again during iframe destruction
+                _runCompleteRefreshOnLoad = false;
+                ariba.Debug.log('completeRefreshOnLoad')
+                this._completeRequest(_historyCurrent, _historyLength, true);
+            }            
         },
 
         _completeRequest : function (current, length, isRefreshRequest)

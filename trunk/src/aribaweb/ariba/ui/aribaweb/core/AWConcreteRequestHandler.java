@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteRequestHandler.java#18 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteRequestHandler.java#19 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -157,9 +157,8 @@ abstract public class AWConcreteRequestHandler extends AWBaseObject implements A
     public String fullAdaptorUrlForRequest (AWRequest request)
     {
         String adaptorUrl = null;
-        String serverPort = request.serverPort();
         AWApplication application = application();
-        if ((serverPort == null) || !(serverPort.equals(DefaultSecureHttpPort) || serverPort.equals(_alternateSecurePort))) {
+        if (!request.isSecureScheme()) {
             adaptorUrl = application.adaptorUrl();
         }
         else {

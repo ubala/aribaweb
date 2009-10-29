@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ObjectMeta.java#21 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/ObjectMeta.java#22 $
 */
 package ariba.ui.meta.core;
 
@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class ObjectMeta extends Meta
 {
@@ -186,11 +187,20 @@ public class ObjectMeta extends Meta
         public Map getFormatters ()
         {
             if (_formatters == null) {
-                _formatters = AWVFormatterFactory.formattersForLocaleTimeZone(Locale.US, DateFormatter.getDefaultTimeZone());
+                _formatters = AWVFormatterFactory.formattersForLocaleTimeZone(locale(), timezone());
             }
             return _formatters;
         }
 
+        public Locale locale ()
+        {
+            return Locale.US;
+        }
+
+        public TimeZone timezone ()
+        {
+            return DateFormatter.getDefaultTimeZone();
+        }
     }
 
     // Use a special map subsclass for our Properties

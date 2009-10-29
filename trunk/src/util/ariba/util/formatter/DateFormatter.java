@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/DateFormatter.java#28 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/DateFormatter.java#29 $
 */
 
 package ariba.util.formatter;
@@ -1784,6 +1784,8 @@ public class DateFormatter extends Formatter
                 else {
                     throw makeParseException(InvalidYearKey, 0);
                 }
+            }catch (ParseException e) {
+                throw makeParseException(CannotParseDateKey, string, 0);
             }
             catch (RuntimeException e) {
                 throw new ParseException(e.getMessage(), 0);

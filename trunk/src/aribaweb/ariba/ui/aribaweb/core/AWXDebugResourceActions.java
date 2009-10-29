@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXDebugResourceActions.java#14 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXDebugResourceActions.java#15 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -120,6 +120,12 @@ public class AWXDebugResourceActions extends AWDirectAction
 
     public static String urlForResourceInDirectory (AWRequestContext requestContext, String dir, String resourcePath)
     {
+        return urlForResourceInDirectory(requestContext, dir, resourcePath, false);
+    }
+    
+    public static String urlForResourceInDirectory (AWRequestContext requestContext, String dir, String resourcePath,
+                                                    boolean useFullURL)
+    {
         String id;
         synchronized (IdsForResourceRoots) {
             id = IdsForResourceRoots.get(dir);
@@ -139,7 +145,13 @@ public class AWXDebugResourceActions extends AWDirectAction
             }
         }
 
-        AWDirectActionUrl url = AWDirectActionUrl.checkoutUrl();
+        AWDirectActionUrl url;
+        if (useFullURL) {
+             url = AWDirectActionUrl.checkoutFullUrl(requestContext);
+        }
+        else {
+             url = AWDirectActionUrl.checkoutUrl();
+        }
 
         if (requestContext != null) {
             url.setRequestContext(requestContext);
@@ -162,6 +174,11 @@ public class AWXDebugResourceActions extends AWDirectAction
 
     public static String  urlForResourceNamed (AWRequestContext requestContext, String name)
     {
+        return urlForResourceNamed(requestContext, name, false);
+    }
+
+    public static String  urlForResourceNamed (AWRequestContext requestContext, String name, boolean useFullURL)
+    {
         Assert.that(!StringUtil.nullOrEmptyOrBlankString(name), "Unable to provide url for null/empty/blank resource");
         AWResourceManager resourceManager = resourceManager(requestContext);
         AWResource res = resourceManager.resourceNamed(name);
@@ -177,6 +194,6 @@ public class AWXDebugResourceActions extends AWDirectAction
 
         // We allow relative references within this resource dir, since it was a registered resource dir
         String resourceDir = path.substring(0, path.length() - name.length());
-        return urlForResourceInDirectory(requestContext, resourceDir, name);
+        return urlForResourceInDirectory(requestContext, resourceDir, name, useFullURL);
     }
 }

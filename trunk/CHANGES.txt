@@ -1,4 +1,14 @@
-New in Version 5.0GA - PREVIEW 2 (8/27/2009)
+New in Version 5.0GA - PREVIEW 3 (10/29/2009)
+---------------------------------------------
+- Safari 4 support
+- Upgrade Tomcat to 6.0.20
+- Add Wizard guide
+- Misc bug fixes
+    - Localized formatter fixes
+    - Fix perf log for direct actions
+    - OutlineBox enhancements: allow external toggle state and action control; allow truncated title
+
+New in Version 5.0GA - PREVIEW 2 (8/29/2009)
 ---------------------------------------------
 - MetaUI tutorial completed
 - Fix duplicate objects on create.
@@ -12,7 +22,7 @@ New in Version 5.0GA - PREVIEW 2 (8/27/2009)
 New in Version 5.0GA - PREVIEW 1 (6/02/2009)
 ---------------------------------------------
 
-- Adding Wizard example
+- Add Wizard example
     - Clean up wizard for working open source example
 - Widgets: Adding formatters for formatting absolute dates
 - Site generation fixes on Windows

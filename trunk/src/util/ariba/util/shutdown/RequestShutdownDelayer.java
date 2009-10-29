@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/RequestShutdownDelayer.java#3 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/RequestShutdownDelayer.java#4 $
 */
 
 package ariba.util.shutdown;
@@ -64,6 +64,9 @@ public class RequestShutdownDelayer implements ShutdownDelayer
             Request r = (Request)requests.get(key);
             if (r.isExpired()) {
                 toRemove.add(key);
+            }
+            else {
+                ariba.util.log.Log.shutdown.info(10338, r.name);
             }
         }
         for (Iterator it = toRemove.iterator();it.hasNext();) {
