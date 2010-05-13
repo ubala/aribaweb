@@ -22,6 +22,8 @@ Cp1252,,,,
 "AWTOptionsMenuItems",a013,"Pivot Table Layout","PivotTable-layout",""
 "AWTOptionsMenuItems",a014,"Show Detail Rows","Detailrijen weergeven",""
 "AWTOptionsMenuItems",a015,"Configure Layout...","Layout configureren...",""
+"AWTOptionsMenuItems",a016,"Expand All Detail Rows","Alle detailrijen uitvouwen",""
+"AWTOptionsMenuItems",a017,"Collapse All Detail Rows","Alle detailrijen inklappen",""
 "AWTPivotConfigurationPanel",a001,"Edit Table Layout","Tabel-layout bewerken",""
 "AWTPivotConfigurationPanel",a002,"Column Fields","Kolomvelden",""
 "AWTPivotConfigurationPanel",a003,"Row Fields","Rijvelden",""

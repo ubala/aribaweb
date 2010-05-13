@@ -1,5 +1,5 @@
 Big5,,,,
-"AribaAboutBox",a009,"&copy; 1996 - 2008 Ariba Inc. All Rights Reserved.","&copy; 1996 - 2008 Ariba Inc. 保留所有權利",""
+"AribaAboutBox",a009,"&copy; 1996 - 2009 Ariba Inc. All Rights Reserved.","&copy; 1996-2009 Ariba, Inc. 保留所有權利",""
 "AribaAboutBox",a010,"'Ariba, Inc.', 'Ariba', the Ariba, Inc. logo, and 'Ariba.com' are trademarks and/or service marks of Ariba or Others. For additional information on Ariba trademarks and service marks, please see {0}www.ariba.com/trademarks.cfm{/0}. Unless otherwise noted on the Site, all other trademarks, service marks, and logos used in this Site are the trademarks, service marks or logos of their respective owners.","「Ariba, Inc.」、「Ariba」、Ariba, Inc. 標誌和「Ariba.com」都是 Ariba 或其他公司的商標和/或服務標誌。如需其他關於 Ariba 商標和服務標誌的資訊，請造訪 {0}www.ariba.com/trademarks.cfm{/0}。除非網站上另有註明，否則此網站中使用的所有其他商標、服務標誌或標誌均屬於其各自所有者。",""
 "AribaBasicPageWrapper",a001,"Collapse the Navigation Panel","折疊導航面板",""
 "AribaBasicPageWrapper",a002,"Expand the Navigation Panel","展開導航面板",""
@@ -10,9 +10,9 @@ Big5,,,,
 "AribaBasicPageWrapper",a009,"Preferences","偏好設定",""
 "AribaContactBox",a001,"If you need help on how to use this product, click {0}Help{/0} at the top right of any product page to access documentation and tutorials.","如需有關如何使用此產品的幫助，請按一下任何產品頁面右上角的{0}「說明」{/0}，以存取相關文件和教學課程。",""
 "AribaLoginForm",a002,"System running in non-production mode","系統在非生產模式中執行",""
-"AribaLoginPageWrapper",a002,"&copy; 1996 &#150; 2008 Ariba Inc. All Rights Reserved","&copy; 1996 - 2008 Ariba Inc. 保留所有權利",""
+"AribaLoginPageWrapper",a002,"&copy; 1996 &#150; 2009 Ariba Inc. All Rights Reserved","&copy; 1996-2009 Ariba, Inc. 保留所有權利",""
 "AribaLoginPageWrapper",a003,"Support","支援",""
-"AribaLoginPageWrapper",a004,"To properly view this application IE 6, IE 7, Firefox 3+, or Safari 3.2+ with Adobe Flash Player 7+ is required.","要正確檢視此應用程式，需要 IE 6、IE 7、Firefox 3+ 或 Safari 3.2+，並安裝 Adobe Flash Player 7+。",""
+"AribaLoginPageWrapper",a004,"To properly view this application IE 6+, Firefox 3+, or Safari 3.2+ with Adobe Flash Player 7+ is required.","要正確檢視此應用程式，需要 IE 6+、Firefox 3+ 或 Safari 3.2+，並安裝 Adobe Flash Player 7+。",""
 "AribaNotificationDialog",a001,"Notification","通知",""
 "AribaShutdownWarning",1,"<p><b>Attention:</b> Routine system maintenance has occurred on this site. Your login session must be refreshed.</p><p>To refresh immediately, click <i>Refresh Session</i>. <b>Note: you will not be logged out.</b></p><p>To complete a task before refreshing, click <i>Finish Work</i>, complete your task, and then click the <i>Refresh Session</i> link on the top-right of the page.</p><p>Your session will be refreshed automatically in {0} minutes.</p>","<p><b>注意：</b>此網站正在執行例行的系統維護。您必須重新整理登入工作階段。</p><p>若要立即重新整理，請按一下<i>重新整理工作階段</i>。<b>註：此作業不會使您登出。</b></p><p>若要先完成工作再進行重新整理，請按一下<i>完成工作</i>，完成您的工作，然後按一下頁面右上角的<i>重新整理工作階段</i>連結。</p><p>您的工作階段會在 {0} 分鐘後自動重新整理。</p>",""
 "AribaShutdownWarning",2,"<p><b>Attention:</b> Routine system maintenance has occurred on this site. Your login session must be refreshed.</p><p>To refresh immediately, click <i>Return to Home</i>. <b>Note: you will not be logged out.</b></p><p>To complete a task before refreshing, click <i>Finish Work</i>, complete your task, and then click the <i>Home</i> link on the top-right of the page.</p><p>Your session will be refreshed automatically in {0} minutes.</p>","<p><b>注意：</b>此網站正在執行例行的系統維護。您必須重新整理登入工作階段。</p><p>若要立即重新整理，請按一下<i>返回首頁</i>。<b>註：此作業不會使您登出。</b> </p><p>若要先完成工作再進行重新整理，請按一下<i>完成工作</i>，完成您的工作，然後按一下頁面右上角的<i>首頁</i>連結。</p><p>您的工作階段會在 {0} 分鐘後自動重新整理。</p>",""

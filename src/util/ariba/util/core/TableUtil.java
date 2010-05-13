@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/TableUtil.java#10 $
+    $Id: //ariba/platform/util/core/ariba/util/core/TableUtil.java#12 $
 */
 
 package ariba.util.core;
@@ -194,12 +194,28 @@ public final class TableUtil
     */
     public static Object loadObject (File file)
     {
+        return loadObject(file, I18NUtil.EncodingISO8859_1);
+    }
+
+    /**
+        Load an object from a file using loadObject(Reader)
+
+        @param file the path for the file to load the object from
+        @param encoding the encoding used for file reader
+        
+        @return the deserialized object, or <b>null</b> if there was
+        an IOException.
+
+        @see #loadObject(Reader)
+        @aribaapi documented
+    */
+    public static Object loadObject (File file, String encoding)
+    {
         if (!file.exists()) {
             return null;
         }
         try {
-            return loadObject(IOUtil.bufferedReader(file,
-                                                  I18NUtil.EncodingISO8859_1));
+            return loadObject(IOUtil.bufferedReader(file, encoding));
         }
         catch (IOException e) {
             return null;
@@ -248,6 +264,7 @@ public final class TableUtil
         if (! file.exists()) {
                 // if the destination file doesn't exist, why bother
                 // with the safer way
+        	Log.util.warning(10405, file);
             return writeObject(file, object);
         }
         if (! file.canWrite()) {

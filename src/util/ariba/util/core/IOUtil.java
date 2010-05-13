@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#23 $
+    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#25 $
 */
 
 
@@ -44,6 +44,7 @@ import java.net.URL;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 
 /**
     Input/Output Utilities. These are helper functions for dealing with
@@ -78,53 +79,11 @@ public final class IOUtil
 
         @aribaapi private
     */
-    public static final class BufferHolder
+    public static final class BufferHolder extends ThreadLocalHolder<byte[]>
     {
-        private byte[] _buffer;
-        private int _recursionDepth;
-
-        public BufferHolder ()
+        public byte[] make ()
         {
-            _buffer = makeByteBuffer();
-            _recursionDepth = 0;
-        }
-
-        /**
-            Checks the byte buffer out of this holder.
-        */
-        public byte[] checkoutBuffer ()
-        {
-            byte[] result = _buffer;
-            if (result != null) {
-                // null out the buffer
-                _buffer = null;
-            }
-            else {
-                // It's very unusual that we would recuse
-                // through this method, though it's possible. If it does happen
-                // we simply allocate a new buffer to use.
-                result = makeByteBuffer();
-            }
-            _recursionDepth++;
-            return result;
-        }
-
-        /**
-            Returns the byte buffer to this holder.
-        */
-        public void returnBuffer (byte[] buffer)
-        {
-            // We return the buffer to this.
-            _buffer = buffer;
-            _recursionDepth--;
-        }
-
-        /**
-            Returns the recursion depth.
-        */
-        public int getRecursionDepth ()
-        {
-            return _recursionDepth;
+            return makeByteBuffer();
         }
     }
 
@@ -134,9 +93,10 @@ public final class IOUtil
         The idea of this
         @aribaapi private
     */
-    private static final ThreadLocal _bufferHolders = new ThreadLocal ()
+    private static final ThreadLocal<ThreadLocalHolder<byte[]>> _bufferHolders =
+        new ThreadLocal<ThreadLocalHolder<byte[]>> ()
         {
-            protected Object initialValue ()
+            protected ThreadLocalHolder<byte[]> initialValue ()
             {
                 return new BufferHolder();
             }
@@ -149,11 +109,10 @@ public final class IOUtil
         Returns the per-thread BufferHolder.
         @aribaapi private
     */
-    private static BufferHolder getBufferHolder ()
+    private static ThreadLocalHolder<byte[]> getBufferHolder ()
     {
-        return (BufferHolder)_bufferHolders.get();
+        return _bufferHolders.get();
     }
-
 
     /**
         Checks out and returns a byte buffer of size
@@ -311,9 +270,36 @@ public final class IOUtil
                                                  String      encoding)
       throws UnsupportedEncodingException
     {
+        // Some OS such as early version of IBM AIX could hang the thread if
+        // a bad encoding string is passed on to java.io.InputStreamReader
+        // Check ahead to make sure we don't pass a bad encoding 
+        if (isInvalidEncodingString(encoding)) {
+            String errorMsg = StringUtil.strcat("UnsupportedEncodingException thrown: encoding parameter : ", encoding, " is invalid.");
+            Log.util.debug(errorMsg);
+            throw new UnsupportedEncodingException(errorMsg);
+        }
         return new BufferedReader(new InputStreamReader(i, encoding)); // OK
     }
 
+    private static boolean isInvalidEncodingString (String encoding)
+    {
+        if (StringUtil.nullOrEmptyOrBlankString(encoding)) {
+            return true;
+        }
+
+        // check if it is a supported charset name in the current JVM 
+        try {
+            if (Charset.isSupported(encoding)) {
+                return false;
+            }
+        }
+        catch (IllegalCharsetNameException ex) {
+        }
+
+        return true;
+    }
+    
+    
     /**
         Opens a binary file on top of a buffered layer.
 

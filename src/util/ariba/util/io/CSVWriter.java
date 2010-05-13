@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/io/CSVWriter.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/io/CSVWriter.java#9 $
 */
 
 package ariba.util.io;
@@ -31,7 +31,7 @@ import java.util.List;
 
     @aribaapi private
 */
-public final class CSVWriter
+public class CSVWriter
 {
     private PrintWriter printWriter;
 

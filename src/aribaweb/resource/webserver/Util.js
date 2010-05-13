@@ -239,11 +239,46 @@ ariba.Util = function() {
         */
         parseInt : function (intString)
         {
-            if (intString.charAt(0) == '0') {
+            if (intString && typeof intString == 'number') {
+                return intString;
+            }
+            
+            if (intString && typeof intString == 'string' && intString.charAt(0) == '0') {
                 var index = this.indexOfNotChar(intString, 1, '0');
                 intString = intString.substring(index, intString.length);
             }
             return parseInt(intString);
+        },
+
+        incrementAttribute : function (object, attributeName)
+        {
+            // guard
+            if (!object || !attributeName) {
+                return;
+            }
+
+            var attributeValue = object.getAttribute(attributeName);
+            if (attributeValue) {
+                attributeValue = this.parseInt(attributeValue) + 1;
+            }
+            else {
+                attributeValue = 1;
+            }
+            object.setAttribute(attributeName, attributeValue);
+        },
+
+        getIntAttribute : function (object, attributeName)
+        {
+            // guard
+            if (!object || !attributeName) {
+                return 0;
+            }
+            
+            var attributeValue = object.getAttribute(attributeName);
+            if (attributeValue) {
+                return this.parseInt(attributeValue);
+            }
+            return 0;
         },
 
         ///////////////////

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/core/WizardFrame.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/core/WizardFrame.java#3 $
 */
 
 package ariba.ui.wizard.core;
@@ -43,8 +43,6 @@ public final class WizardFrame implements WizardActionTarget
         // error messages
     private final static String ErrorDelegateCreation =
         "error creating wizard delegate of type '%s'";
-    private final static String InvalidHelpUrlMsg =
-        "could not find help page '%s'";
     private static final String UnknownActionMsg =
         "unknown action '%s' in %s frame";
 
@@ -70,9 +68,6 @@ public final class WizardFrame implements WizardActionTarget
         // the list of actions to show
     private WizardAction[] _actions;
 
-        // help page URL
-    private String  _helpUrl;
-
         // dynamic state
     private boolean      _visible;
     private Map          _attributes;
@@ -97,7 +92,7 @@ public final class WizardFrame implements WizardActionTarget
     public WizardFrame (Wizard wizard, String name,
                         String label, String source)
     {
-        this(wizard, name, label, source, null, null, null, null);
+        this(wizard, name, label, source, null, null, null);
     }
 
     /**
@@ -106,7 +101,7 @@ public final class WizardFrame implements WizardActionTarget
     */
     public WizardFrame (Wizard wizard, String name,
                         String label, String source,
-                        String help,  String formEncoding,
+                        String formEncoding,
                         WizardFrameDelegate delegate,
                         String[] actionNames)
     {
@@ -119,7 +114,7 @@ public final class WizardFrame implements WizardActionTarget
         WizardFrameMeta meta = new WizardFrameMeta(
             wizard.meta(), name, label,
             source, delegateName, null,
-            help, formEncoding, actionNames);
+            formEncoding, actionNames);
         init(meta, null, wizard);
     }
 
@@ -292,42 +287,6 @@ public final class WizardFrame implements WizardActionTarget
             defaultActionName = _wizard.next.getName();
         }
         return defaultActionName;
-    }
-
-    /**
-        Returns the help page url
-        @aribaapi ariba
-    */
-    public String getHelpUrl ()
-    {
-        String help = _meta.help();
-        if (_helpUrl == null && help != null) {
-                // Support for relative anchors
-            WidgetsDelegate delegate = Widgets.getDelegate();
-            if (delegate != null) {
-                _helpUrl = help;
-            }
-            else {
-                int anchorIndex = help.lastIndexOf("#");
-                String urlPart;
-                String anchorPart;
-                if (anchorIndex != -1) {
-                    urlPart = help.substring(0, anchorIndex);
-                    anchorPart = help.substring(anchorIndex);
-                }
-                else {
-                    urlPart = help;
-                    anchorPart = null;
-                }
-
-                _helpUrl = _wizard.urlForResourceNamed(urlPart);
-                Assert.assertNonFatal(_helpUrl != null, InvalidHelpUrlMsg, help);
-                if (_helpUrl != null && anchorPart != null) {
-                    _helpUrl = StringUtil.strcat(_helpUrl, anchorPart);
-                }
-            }
-        }
-        return _helpUrl;
     }
 
     /**

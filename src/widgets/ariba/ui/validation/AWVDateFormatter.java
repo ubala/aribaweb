@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVDateFormatter.java#7 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/validation/AWVDateFormatter.java#8 $
 */
 
 package ariba.ui.validation;
@@ -46,16 +46,21 @@ public final class AWVDateFormatter extends AWFormatter
 
     public Object parseObject (String stringToParse) throws ParseException
     {
+        return parseObject(stringToParse, false);
+    }
+
+    public Object parseObject (String stringToParse, boolean calendarDate) throws ParseException
+    {
         if (StringUtil.nullOrEmptyString(stringToParse)) {
             return null;
         }
-        
+
         Object date = null;
         if (_formatString == null) {
-            date = DateFormatter.parseDate(stringToParse, _locale, _timeZone, false);
+            date = DateFormatter.parseDate(stringToParse, _locale, _timeZone, calendarDate);
         }
         else {
-            date = DateFormatter.parseDate(stringToParse, _formatString, _locale, _timeZone, false);
+            date = DateFormatter.parseDate(stringToParse, _formatString, _locale, _timeZone, calendarDate);
         }
         return date;
     }

@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,15 +12,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#32 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#35 $
 */
 
 package ariba.util.core;
 
+import ariba.util.io.DeserializationException;
+import ariba.util.io.Deserializer;
 import ariba.util.log.Log;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,8 +32,10 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.SortedMap;
 
 /**
     List Utilities. These are helper functions for dealing with
@@ -188,7 +193,7 @@ public abstract class ListUtil
         @aribaapi ariba
     */
     public static <V> List<V> subList (
-            Collection<V> values,
+            Iterable<V> values,
             int fromIndex,
             int toIndex,
             boolean createNewList)
@@ -200,9 +205,6 @@ public abstract class ListUtil
         }
         if (fromIndex < 0) {
             throw new IndexOutOfBoundsException(Fmt.S("fromIndex = %s", fromIndex));
-        }
-        if (toIndex > values.size()) {
-            throw new IndexOutOfBoundsException(Fmt.S("toIndex = %s", toIndex));
         }
         if (fromIndex > toIndex) {
             throw new IllegalArgumentException(Fmt.S("fromIndex(%s) > toIndex(%s)",
@@ -328,6 +330,30 @@ public abstract class ListUtil
         return list;
     }
 
+    /**
+        Populates the list with serialized data from the string.
+
+        @param serialized String containing serialized list data
+        @aribaapi private
+    */
+    public static void fromSerializedString (List l, String serialized)
+    {
+        StringReader reader = new StringReader(serialized);
+
+        try {
+            new Deserializer(reader).readObject(l);
+        }
+        catch (IOException e) {
+            Log.util.error(10371, e);
+        }
+        catch (DeserializationException e) {
+            Log.util.error(10371, e);
+        }
+        finally {
+            reader.close();
+        }
+    }
+
         // string table for localized strings
     private static final String StringTable = "ariba.util.core";
 
@@ -355,6 +381,43 @@ public abstract class ListUtil
         return destination;
     }
 
+    /**
+     * This method will do 2 things:
+     * 1) Copy objects which are not of type Map into a new List object.
+     * 2) Copy the contents of the Map entries into a SortedMap and then copy the 
+     *    SortedMap back into the List.
+     *    
+     * @param list
+     * @return a List with its original ordering intact and Map objects copied into a 
+     *         SortedMap.
+     */
+    public static List copyAndSortMapInList (List list)
+    {
+        List newList = ListUtil.list();
+        
+        if (ListUtil.nullOrEmptyList(list)) {
+            return list;
+        }
+        
+        for(ListIterator i = list.listIterator(); i.hasNext(); ) {
+            Object listObj = i.next();
+            if (listObj instanceof List) {
+                // Recurse if we have a List within a List
+                List l = copyAndSortMapInList((List)listObj);
+                newList.add(l);
+            }
+            else if (listObj instanceof Map) {
+                // Place the contents of the Map into a SortedMap
+                SortedMap sm = MapUtil.copyAndSortMap((Map)listObj);
+                newList.add(sm);
+            }
+            else {
+                newList.add(listObj);
+            }
+        }
+        return newList;
+    }    
+    
         //protected method used in hashtableUtil and ListUtil
     static Object copyValue (Object value)
     {
@@ -398,6 +461,22 @@ public abstract class ListUtil
     {
         for (int i=0; i<toAdd.length; ++i) {
             collection.add(toAdd[i]);
+        }
+    }
+
+    /**
+        Simple convenience method that adds the array elements in <code>toAdd</code>
+        to the <code>collection</code>. <p/>
+        @param collection the collection to add the elements to; may not be
+               <code>null</code>
+        @param toAdd the array containing the elements to add; may not be
+               <code>null</code>
+        @aribaapi ariba
+    */
+    public static <T> void addAll (Collection<? super T> collection, Iterable<T> toAdd)
+    {
+        for (T t : toAdd) {
+            collection.add(t);
         }
     }
 
@@ -1572,18 +1651,18 @@ public abstract class ListUtil
         return new WrappedListEnumeration(list);
     }
 
-	public static List diff(List change, List baseline)
-	{
-		List delta = ListUtil.list();
-		Iterator items = change.iterator();
-		while (items.hasNext()) {
-			Object item = items.next();
-			if (!baseline.contains(item)) {
-				delta.add(item);
-			}
-		}
-		return delta;
-	}
+    public static List diff(List change, List baseline)
+    {
+        List delta = ListUtil.list();
+        Iterator items = change.iterator();
+        while (items.hasNext()) {
+            Object item = items.next();
+            if (!baseline.contains(item)) {
+                delta.add(item);
+            }
+        }
+        return delta;
+    }
 }
 
 /**

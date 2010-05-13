@@ -1,0 +1,10 @@
+<w:HintMessage>
+    Please enter the name and birthday of the poster.
+    Please also enter the title, privacy, and continent of the post.
+</w:HintMessage>
+<div class="alert" emitTags="${requestContext.get('PostAlert')}">
+    <a:String value="${requestContext.get('PostAlert')}"/>
+</div>        
+<m:Context object="$context" operation="create" layout="Inspect" frame="$frame.name">
+    <m:IncludeComponent/>
+</m:Context>

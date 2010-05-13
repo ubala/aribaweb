@@ -22,6 +22,8 @@ Big5,,,,
 "AWTOptionsMenuItems",a013,"Pivot Table Layout","樞紐分析表配置",""
 "AWTOptionsMenuItems",a014,"Show Detail Rows","顯示細節列",""
 "AWTOptionsMenuItems",a015,"Configure Layout...","設定配置...",""
+"AWTOptionsMenuItems",a016,"Expand All Detail Rows","展開所有細節列",""
+"AWTOptionsMenuItems",a017,"Collapse All Detail Rows","摺疊所有細節列",""
 "AWTPivotConfigurationPanel",a001,"Edit Table Layout","編輯表配置",""
 "AWTPivotConfigurationPanel",a002,"Column Fields","欄欄位",""
 "AWTPivotConfigurationPanel",a003,"Row Fields","列欄位",""

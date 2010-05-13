@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Widgets.java#72 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Widgets.java#73 $
 */
 
 package ariba.ui.widgets;

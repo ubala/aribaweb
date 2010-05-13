@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BindingNames.java#53 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BindingNames.java#54 $
 */
 
 package ariba.ui.widgets;
@@ -69,8 +69,6 @@ public class BindingNames extends ariba.ui.aribaweb.html.BindingNames
     public static final String hasForm          = "hasForm";
     public static final String hasSubsteps      = "hasSubsteps";
     public static final String helpKey          = "helpKey";
-    public static final String helpUrl          = "helpUrl";
-    public static final String howToUrl         = "howToUrl";
     public static final String image            = "image";
     public static final String isDefault        = "isDefault";
     public static final String isNavigationBarVisible = "isNavigationBarVisible";
@@ -84,7 +82,6 @@ public class BindingNames extends ariba.ui.aribaweb.html.BindingNames
     public static final String globalNavPrefEnabled = "globalNavPrefEnabled";
     public static final String overrideGlobalCommandBar = "overrideGlobalCommandBar";
     public static final String rawForm          = "rawForm";
-    public static final String screenDetailsUrl = "screenDetailsUrl";
     public static final String selectAllUrl     = "selectAllUrl";
     public static final String selectedStep     = "selectedStep";
     public static final String searchAction     = "searchAction";

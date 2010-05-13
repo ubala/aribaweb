@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#129 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#132 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -451,6 +451,17 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
         return (_modalPanels != null) ? (AWComponent)ListUtil.lastElement(_modalPanels) : null;
     }
 
+    public String perfPageName ()
+    {
+        AWComponent pageComponent = topPanel();
+
+        if (pageComponent == null) {
+            pageComponent = pageComponent();
+        }
+
+        return pageComponent.namePath();
+    }
+
     public void addModalPanel (AWComponent panel)
     {
         if (_modalPanels == null) _modalPanels = ListUtil.list();
@@ -486,7 +497,7 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     public AWResponseGenerating invokeAction()
     {
         if (PerformanceState.threadStateEnabled()) {
-            PerformanceState.getThisThreadHashtable().setSourcePage(_pageComponent.namePath());
+            PerformanceState.getThisThreadHashtable().setSourcePage(perfPageName());
         }
         recordPageScrollingValues();
 
@@ -737,7 +748,7 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
         _currScriptList = null;
 
         if (PerformanceState.threadStateEnabled()) {
-            PerformanceState.getThisThreadHashtable().setDestinationPage(_pageComponent.namePath());
+            PerformanceState.getThisThreadHashtable().setDestinationPage(perfPageName());
         }
 
         _foregroundErrorManager = null;

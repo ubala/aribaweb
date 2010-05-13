@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/meta/WizardFrameMeta.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/meta/WizardFrameMeta.java#3 $
 */
 
 package ariba.ui.wizard.meta;
@@ -54,7 +54,6 @@ public final class WizardFrameMeta extends GenericMeta
 
         // generic wizard frame XML attributes
     private static final String DelegateAttr = "delegate";
-    private static final String HelpAttr     = "help";
     private static final String DefaultAttr  = "default";
     private static final String TypeAttr     = "type";
     private static final String SourceAttr   = "source";
@@ -115,8 +114,6 @@ public final class WizardFrameMeta extends GenericMeta
         // frame content type
     private String _type;
 
-    private String _help;
-
     private String _formEncoding;
 
     private boolean _submitFormDefault;
@@ -136,7 +133,7 @@ public final class WizardFrameMeta extends GenericMeta
     {
         this(wizard, name, label,
              source, null, null,
-             null, null, null);
+             null, null);
     }
 
     /**
@@ -145,7 +142,7 @@ public final class WizardFrameMeta extends GenericMeta
     */
     public WizardFrameMeta (WizardMeta wizard, String name, String label,
                             String source,  String delegate, String type,
-                            String help,   String formEncoding, String[] actionNames)
+                            String formEncoding, String[] actionNames)
     {
             // initialize the generic meta data
         super(name, label);
@@ -155,7 +152,6 @@ public final class WizardFrameMeta extends GenericMeta
         _delegate = delegate;
         _type = type == null ? AWType : type;
         _source = source;
-        _help = help;
         _formEncoding = formEncoding;
         _submitFormDefault = false;
 
@@ -388,7 +384,6 @@ public final class WizardFrameMeta extends GenericMeta
 
             // optional in both base & extensions
         _delegate = stringAttrFromElement(element, DelegateAttr, _delegate);
-        _help     = stringAttrFromElement(element, HelpAttr, _help);
         _formEncoding = stringAttrFromElement(element, EncodingAttr, _formEncoding);
         _submitFormDefault = booleanAttrFromElement(element, SubmitFormDefaultAttr, false);
 
@@ -435,11 +430,6 @@ public final class WizardFrameMeta extends GenericMeta
     public String defaultAction ()
     {
         return _default;
-    }
-
-    public String help ()
-    {
-        return _help;
     }
 
     public String formEncoding ()

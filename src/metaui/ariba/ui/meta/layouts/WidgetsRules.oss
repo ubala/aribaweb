@@ -232,7 +232,10 @@ field {
 
     @trait=enumeration {
         editable { component:GenericChooser; bindings:{
-                    object:${object}; key:${properties.field}; list:${properties.choices};
+                    object:${object};
+                    key:${properties.field};
+                    list:${properties.choices};
+                    type:${properties.chooserStyle};
                 }
         }
     }

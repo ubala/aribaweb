@@ -30,7 +30,7 @@ MinutesAbbrev,"분","abbreviation for minutes; "
 BooleanTrue,"예","This is used from BooleanFormatter; "
 BooleanFalse,"아니요","This is used from BooleanFormatter; "
 BooleanTrueOrFalse,"부울 값은 ""true"" 또는 ""false""여야 합니다.","error when a boolean doesn't contain true or false string"
-CannotParseDate,"문자열 ""{0}""을(를) 날짜로 분석할 수 없습니다.","error when a date cannot be parsed - 0: the date string"
+CannotParseDate,"""{0}""은(는) 유효한 날짜가 아닙니다.","error when a date cannot be parsed - 0: the date string"
 InvalidCharacterInNumber,"숫자에 유효하지 않은 문자가 있습니다.","error when there is a non-numeric character in a number"
 InvalidYear,"유효하지 않은 연","error when the year is invalid in a date"
 NoDigitsFound,"숫자 값이 필요합니다.","error when a number is required and no digits are entered"
@@ -38,3 +38,4 @@ NumberFormatError,"숫자 값의 형식이 적절하지 않습니다.","friendly error msg for 
 MaxValueExceeded,"값 ""{0}""이(가) 허용된 최대값 ""{1}""보다 큽니다.", "Error when value is greater than allowed (integer overflow)"
 MinValueExceeded,"값 ""{0}""이(가) 허용된 최소값 ""{1}""보다 작습니다.", "Error when value is less than allowed (integer underflow)"
 WholeNumberRequiredKey,"값 ""{0}""은(는) 정수여야 합니다.", "Error when integer value contains fractions"
+

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#5 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#6 $
     </Copyright>
 
     <Overview>
@@ -51,11 +51,11 @@
     <Binding key="list" type="AWOrderedList" direction="get" required="$true">
         TBD
     </Binding>
-    
+
     <Binding key="visibles" type="ariba.util.fieldvalue.OrderedList" direction="get" required="$false">
         If specified, tabs in this list will be be displayed.
-        Others will be under the "More..." menu tab.  
-    </Binding>    
+        Others will be under the "More..." menu tab.
+    </Binding>
 
     <Binding key="class" type="String" direction="get" default="$null">
         TBD
@@ -84,9 +84,16 @@
     <Binding key="submitForm" type="boolean" direction="get" default="$false">
         TBD
     </Binding>
+
+    <Binding key="omitTabSet" type="boolean" direction="get" default="$false">
+        If true, omits the tab set. Only the component content is emitted.
+    </Binding>
 </a:Api>\
 
 <a:RefreshRegion>\
+<a:If ifTrue="$^omitTabSet">
+    <a:IncludeContent/>\
+<a:Else/>
     <a:If ifFalse="$^vertical">
         <table cellspacing="0" cellpadding="0" width="100%">\
             <tr>\
@@ -142,5 +149,6 @@
                 \
             </tr>
         </table>
+    </a:If>
     </a:If>
 </a:RefreshRegion>\

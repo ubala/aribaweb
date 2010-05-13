@@ -115,6 +115,9 @@ ariba.Input = function() {
 
         showWaitAlert : function ()
         {
+            if (AWShowWaitCursorDisabled) {
+                return;
+            }
             if ((new Date()).getTime() < _disableShowUntil) return;
 
             clearTimeout(AWWaitAlertTimeoutId);

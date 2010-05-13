@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/Log.java#31 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/Log.java#32 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -56,6 +56,10 @@ public class Log extends ariba.util.log.Log
     // servlet adapter
     public static final Logger servletadaptor =
         (Logger)Logger.getLogger("servletadaptor");
+
+    // node validation
+    public static final Logger aribaweb_nodeValidate =
+        (Logger)Logger.getLogger("aribaweb.nodeValidate");
 
     // user status manager
     public static final Logger aribaweb_userstatus =

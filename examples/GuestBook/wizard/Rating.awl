@@ -1,0 +1,6 @@
+<w:HintMessage>
+    Please enter the default rating of the post.
+</w:HintMessage>
+<m:Context object="$context" operation="create" layout="Inspect" frame="$frame.name">
+    <m:IncludeComponent/>
+</m:Context>

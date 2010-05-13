@@ -994,6 +994,8 @@ public class AWTPivotState implements AWTDisplayGroup.Grouper
         _showColumnAttributeLabelOnRow = _dataTable.booleanValueForBinding(_showColumnAttributeLabelOnRowBinding);
         _useRowDetailExpansionControl = _dataTable.booleanValueForBinding(_useRowDetailExpansionControlBinding);
         primaryAttributeColumnLabel(_primaryColAttributeLVal);
+        // maybe need to clear more stale states here
+        _rowOverrideColumn = null;
         if (_useRowDetailExpansionControl) {
             _currentRowHasDetailAttributes = _prepareDetailRow(table);
             if (_currentRowHasDetailAttributes) {

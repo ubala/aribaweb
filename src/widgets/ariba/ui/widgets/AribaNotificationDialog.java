@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaNotificationDialog.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaNotificationDialog.java#6 $
 */
 
 package ariba.ui.widgets;
@@ -21,6 +21,7 @@ import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWSession;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWPage;
+import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.util.AWNotification;
 
 import java.util.List;
@@ -41,18 +42,25 @@ public class AribaNotificationDialog extends AWComponent
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
-        AWPage page = page();
-        page.setPollingInitiated(true);
-        AWSession session = session(false);
-        _hasNewNotifications = session != null ? session.hasNotification() : false;
-        if (_hasNewNotifications || !requestContext().isPollUpdateRequest()) {
-            // update notification list
-            _hasNotification = _hasNewNotifications;
-            _notifications = _hasNotification ? session().getNotifications() : null;
+        if (isNotificationEnabled()) {
+            AWPage page = page();
+            page.setPollingInitiated(true);
+            AWSession session = session(false);
+            _hasNewNotifications = session != null ? session.hasNotification() : false;
+            if (_hasNewNotifications || !requestContext().isPollUpdateRequest()) {
+                // update notification list
+                _hasNotification = _hasNewNotifications;
+                _notifications = _hasNotification ? session().getNotifications() : null;
+            }
         }
         super.renderResponse(requestContext, component);
     }
 
+    public boolean isNotificationEnabled ()
+    {
+        return ((AWConcreteApplication)application()).IsNotificationEnabled;
+    }
+    
     public boolean hasNotification ()
     {
         return _hasNotification;

@@ -1,0 +1,12 @@
+<!DOCTYPE frame SYSTEM "Frame.dtd">
+<frame label="Exit">
+  <doc>
+     This frame is the frame in the exit step.
+  </doc>
+  <content source="wizard.Exit"/>
+</frame>
+
+
+
+
+

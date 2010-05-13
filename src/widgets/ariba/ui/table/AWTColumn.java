@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTColumn.java#37 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTColumn.java#38 $
 */
 package ariba.ui.table;
 

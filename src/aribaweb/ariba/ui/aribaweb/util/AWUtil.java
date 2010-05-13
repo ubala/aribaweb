@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#54 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#57 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -74,6 +74,11 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.net.URL;
+
+import org.w3c.tidy.Tidy;
+import org.w3c.tidy.Configuration;
+import org.xhtmlrenderer.pdf.ITextRenderer;
+import com.lowagie.text.DocumentException;
 
 public final class AWUtil extends AWBaseObject
 {
@@ -2523,6 +2528,47 @@ public final class AWUtil extends AWBaseObject
     {
         return loadProperties(getResource(resourceName));
     }
+
+    /**
+     * Utility method to convert HTML input to PDF
+     * @param htmlInputStream - HTML input stream
+     * @param outputStream - PDF output stream
+     */
+
+    public static void convertHTMLToPDF (InputStream htmlInputStream,
+                                         OutputStream outputStream)
+    {
+        try
+        {
+            Tidy tidy = new Tidy();
+            tidy.setCharEncoding(Configuration.UTF8);
+            tidy.setXHTML(true);
+            tidy.setShowWarnings(false);
+
+            File dir = SystemUtil.getLocalTempDirectory();
+            File tempFile = File.createTempFile("pdf", "pdf", dir);
+            FileOutputStream temp = new FileOutputStream(tempFile);
+            
+            tidy.parse(htmlInputStream, temp);
+            temp.close();
+
+            ITextRenderer renderer = new ITextRenderer();
+            renderer.setDocument(tempFile);
+            renderer.layout();
+            renderer.createPDF(outputStream);
+
+            if(tempFile.exists()) {
+                tempFile.delete();  
+            }
+        }
+        catch (IOException exception) {
+            throw new AWGenericException(Fmt.S("Exception when using temp file : %s", SystemUtil.stackTrace(exception)));
+        }
+        catch (DocumentException e) {
+            throw new AWGenericException(Fmt.S("Failed to generate pdf content : %s", SystemUtil.stackTrace(e)));
+        }
+    }
+    
 }
 
 /////////////////////////////

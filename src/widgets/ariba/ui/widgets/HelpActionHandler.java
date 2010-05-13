@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HelpActionHandler.java#15 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HelpActionHandler.java#16 $
 */
 
 package ariba.ui.widgets;
@@ -34,6 +34,8 @@ public class HelpActionHandler extends ActionHandler
     protected static String SharedToken;
     protected static String DefaultHelpKey;
     protected static String HelpUrl;
+    protected static String HelpWindowAttributes = 
+            "scrollbars=no, status=yes, resizable=yes";
 
     private static List<String> _AllHelpAreas;
 
@@ -133,7 +135,7 @@ public class HelpActionHandler extends ActionHandler
         String area = requestContext != null ?
             (String)requestContext.get(AribaHelp.HelpArea) : "";
 
-        String windowAttribute = "scrollbars=no, status=yes, resizable=yes";
+        String windowAttribute = HelpWindowAttributes;
 
         if (StringHandler.QuickTour.equals(area)) {
             windowAttribute = "scrollbars=no, status=yes, resizable=yes, width=845, height=635";

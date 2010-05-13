@@ -30,7 +30,7 @@ MinutesAbbrev,"мин","abbreviation for minutes; "
 BooleanTrue,"Да","This is used from BooleanFormatter; "
 BooleanFalse,"Нет","This is used from BooleanFormatter; "
 BooleanTrueOrFalse,"Булевые поля могут принимать значения ""true"" или ""false"" (истина или ложь)","error when a boolean doesn't contain true or false string"
-CannotParseDate,"Строка ""{0}"" не является датой","error when a date cannot be parsed - 0: the date string"
+CannotParseDate,"Дата ""{0}"" является не допустимой","error when a date cannot be parsed - 0: the date string"
 InvalidCharacterInNumber,"Неверный символ в числе","error when there is a non-numeric character in a number"
 InvalidYear,"Неверный год","error when the year is invalid in a date"
 NoDigitsFound,"Введите числовое значение","error when a number is required and no digits are entered"
@@ -38,3 +38,4 @@ NumberFormatError,"Числовое значение имеет неверный формат.","friendly error msg
 MaxValueExceeded,"Значение ""{0}"" больше максимально допустимого значения ""{1}"".", "Error when value is greater than allowed (integer overflow)"
 MinValueExceeded,"Значение ""{0}"" меньше минимально допустимого значения ""{1}"".", "Error when value is less than allowed (integer underflow)"
 WholeNumberRequiredKey,"Значение ""{0}"" должно быть целым числом.", "Error when integer value contains fractions"
+

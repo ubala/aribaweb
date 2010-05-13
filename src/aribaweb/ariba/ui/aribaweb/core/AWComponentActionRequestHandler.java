@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#82 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#84 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -598,7 +598,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                 PerformanceState.Stats stats = PerformanceState.getThisThreadHashtable();
                 // Don't overwrite page if we're just a refresh from a continued request
                 if (stats.getSourcePage() == null) {
-                    stats.setSourcePage(perfSourcePage.pageComponent().namePath());
+                    stats.setSourcePage(perfSourcePage.perfPageName());
                     stats.setSourceArea(perfSourceArea);
                 }
             }

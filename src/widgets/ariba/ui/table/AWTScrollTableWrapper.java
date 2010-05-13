@@ -12,17 +12,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.java#25 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.java#26 $
 */
 
 package ariba.ui.table;
 
 import ariba.ui.table.BindingNames;
+import ariba.ui.aribaweb.core.AWBinding;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWRequest;
 import ariba.ui.aribaweb.core.AWBindingNames;
 import ariba.ui.aribaweb.core.AWSession;
+import ariba.util.core.Constants;
 import ariba.util.core.Fmt;
 import ariba.util.core.StringUtil;
 
@@ -34,6 +36,7 @@ public final class AWTScrollTableWrapper extends AWComponent
     public Object _tableHeaderId;
     public boolean _disableRefresh;
     public Object _topIndexId;
+    public Object _leftPosId;
     public Object _topOffsetId;
     public Object _isMaximizedId;
 
@@ -46,6 +49,7 @@ public final class AWTScrollTableWrapper extends AWComponent
     {
         _isMaximizedId = null;
         _tableId = null;
+        _leftPosId = null;
         _tableHeaderId = null;
         _disableRefresh = false;
         _topIndexId = null;
@@ -69,6 +73,20 @@ public final class AWTScrollTableWrapper extends AWComponent
     {
         // No scrolling if accessibility is on (ADA) or if thery're not on IE-Windows
         return booleanValueForBinding(BindingNames.enableScrolling) && scrollingAllowed(requestContext());
+    }
+
+    public Object leftPos ()
+    {
+        AWBinding lp = bindingForName("leftPos");
+        return lp != null ? valueForBinding(lp) : Constants.getInteger(0);
+    }
+
+    public void setLeftPos (int val)
+    {
+        AWBinding lp = bindingForName("leftPos");
+        if (lp != null) {
+            setValueForBinding(val, lp);
+        }
     }
 
     public boolean isStateless ()

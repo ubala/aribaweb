@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/UserDateFormatter.java#7 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/UserDateFormatter.java#8 $
 */
 
 package ariba.util.formatter;
@@ -538,6 +538,25 @@ public class UserDateFormatter extends DateFormatter
     /*-----------------------------------------------------------------------
         Parsing
       -----------------------------------------------------------------------*/
+
+    /**
+        Parse the given string as a <code>Date</code> in the given
+        locale and time zone.  The <code>locale</code> and
+        <code>timeZone</code> parameters must be non-null.
+
+        @param     string the string to parse
+        @param     locale the <code>Locale</code> to use for parsing
+        @param tz           the <code>TimeZone</code> to use for parsing
+        @return           a <code>Date</code> object derived from the string
+        @exception        ParseException if the string can't be parsed as a
+                          <code>Date</code> object in the given locale
+        @aribaapi documented
+    */
+    public Object parseString (String string, Locale locale, TimeZone tz) 
+        throws ParseException
+    {
+        return parseString(string, locale, tz, false);
+    }
 
     /**
         Parse the given string as a <code>Date</code> in the given

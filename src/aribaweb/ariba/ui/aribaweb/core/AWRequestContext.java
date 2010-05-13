@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#136 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#142 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -658,10 +658,11 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         _currentRequestSenderId = requestSenderId;
         _currentRequestSenderIdPath = AWElementIdPath.lookup(requestSenderId);
         if (_currentRequestSenderIdPath == null) {
-            // If the requestSenderId is invalid and no path can be found,
-            // the skipping algorithm will use this empty array and invokeAction
-            // will fail in the normal way -- no sender is found and no action is fired.
+            // If the requestSenderId is invalid and no path can be found due to cache flush,
+            // the skipping algorithm will skip every branch
+            // Disallow skipping to force a full traversal.
             _currentRequestSenderIdPath = AWElementIdPath.emptyPath();
+            _allowsSkipping = false;
         }
     }
 
@@ -941,7 +942,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     // Record perf trace info
                     if (PerformanceState.threadStateEnabled()) {
                         PerformanceState.Stats stats = PerformanceState.getThisThreadHashtable();
-                        String sourcePage = _currentPage.pageComponent().namePath();
+                        String sourcePage = _currentPage.perfPageName();
                         stats.setSourcePage(sourcePage);
                         stats.setSourceArea("poll");
                         stats.setDestinationPage(sourcePage);

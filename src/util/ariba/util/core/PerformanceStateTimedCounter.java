@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateTimedCounter.java#15 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateTimedCounter.java#16 $
 */
 
 package ariba.util.core;
@@ -146,26 +146,17 @@ public class PerformanceStateTimedCounter extends PerformanceStateCounter
     {
         protected long elapsedTime = 0;
         protected int state = STOPPED;
+            // don't double count time that is already counted in this
+            // counter
+        protected int recursionDepth = 0;
 
         protected Stopwatch stopwatch;
-
-        protected static Class stopwatchClass = null;
-
-        static {
-            stopwatchClass = LoResTimer.class;
-                // try and register the high performance timer, if available.
-            ClassUtil.classTouch("ariba.util.performance.HiResTimer");
-        }
 
         public Instance (String name)
         {
             super(name);
             stopwatch = newStopwatch();
         }
-
-            // don't double count time that is already counted in this
-            // counter
-        protected int recursionDepth = 0;
 
         public void start ()
         {
@@ -255,9 +246,17 @@ public class PerformanceStateTimedCounter extends PerformanceStateCounter
             return DoubleFormatter.getStringValue(dtime,resolution,resolution);
         }
 
-        protected static Stopwatch newStopwatch ()
+        protected Stopwatch newStopwatch ()
         {
-            return (Stopwatch)ClassUtil.newInstance(stopwatchClass);
+            /*
+                There used to be a HiResTimer; the deleted code is in
+                //ariba/platform/util/performance/ariba/util/performance/HiResTimer.java
+                along with some also-deleted native code.  This could be resurrected someday
+                but the native code portion probably supports only Solaris and not Linux.
+                Besides, this seems unnecessary since on Linux the LoResTimer gives millisecond
+                accuracy which is adequate.
+             */
+            return new LoResTimer();
         }
 
         public int resolutionLevel ()

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/AribaExprEvaluator.java#23 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/AribaExprEvaluator.java#24 $
 */
 package ariba.util.expr;
 
@@ -201,7 +201,7 @@ public class AribaExprEvaluator extends ExpressionEvaluator
             SymbolTable table = TypeChecker.check(env, rootType, fieldName,
                 expectedType, containerType, exactMatch, aExpr._exprNode, errorCollector);
             aExpr.setSymbolTable(table);
-        }
+	    }
     }
 
     /**
@@ -227,7 +227,7 @@ public class AribaExprEvaluator extends ExpressionEvaluator
             TypeChecker.verifyReturnedType(env,
                 aExpr._exprNode, expectedType, containerType, exactMatch,
                 env.getErrorCollector(), skipForObjectType);
-        }
+	    }
     }
 
     private List getErrorCollector (Environment env, List errorCollector)
@@ -391,7 +391,7 @@ public class AribaExprEvaluator extends ExpressionEvaluator
          * Get all the semantic records for this path.  The semantic records
          * contain parsed information about each element in the path.  The
          * returned is ordered based on the position of the element in the
-         * path.  A path element can be a field or a method.
+         * path.  A path element can be a field or a method.  
          * @param path
          * @return list of records
          */

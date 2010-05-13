@@ -426,16 +426,17 @@ ariba.Event = function() {
                     var sourceElm = this.eventSourceElement(evt);
                     // Fire the click event for input element that the label is for.
                     if (elm.tagName == 'LABEL' &&
-                             elm == sourceElm) {
+                        sourceElm.type != "checkbox" &&
+                        sourceElm.type != "radio") {
                         var forId = elm.htmlFor;
                         if (forId) {
                             var target = Dom.getElementById(forId);
-                            if (target) {
-
+                            if (target && !target.disabled) {
                                 // set radio button value
                                 if (target.type == 'radio') {
                                     target.checked = true;
                                     ret = false;
+                                    this.preventDefault(evt);
                                 }
                                 else if (target.type == 'checkbox') {
                                     target.checked = !target.checked;
@@ -445,11 +446,13 @@ ariba.Event = function() {
                                 else if (target.tagName == 'SELECT') {
                                     target.focus();
                                     ret = false;
+                                    this.preventDefault(evt);
                                 }
                                 handler = target.getAttribute('xclick');
                                 if (handler) {
                                     this.handleInline(handler, evt, target);
                                     ret = false;
+                                    this.preventDefault(evt);
                                 }
                             }
                         }
@@ -840,11 +843,15 @@ ariba.Event = function() {
             /////////////////////////
             // Events
             /////////////////////////
-            cancelBubble : function (mevent)
+            cancelBubble : function (mevent, allowDefault)
             {
                 if (mevent) {
                     mevent.stopPropagation();
-                    mevent.preventDefault();
+                    // should really fix all usages to call 
+                    // preventDefault separately if required
+                    if (!allowDefault) {
+                       mevent.preventDefault();
+                    }
                 // used by gl_handler
                     mevent.awCancelBubble = true;
                 }

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DocumentHead.awl#21 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DocumentHead.awl#24 $
     </Copyright>
 
     <Overview>
@@ -40,8 +40,7 @@
     </Binding>
 
     <Binding key="escapeTitle" direction="get" type="boolean" default="$true">
-        By default, this will escape out any html characters (such as angle brackets),
-        but if you specify this binding, you can control if escaping is done.
+        Depreciated.  Title will always escape unsafe HTML.        
     </Binding>
 </a:Api>\
 <head>
@@ -59,9 +58,12 @@
     </a:If>\
     <a:If ifTrue="$hasApplicationCSS">\
         <a:StyleSheet filename="application.css"/>
-    </a:If>
+    </a:If>\
+    <a:If ifTrue="$hasCustomCSS">\
+        <a:StyleSheet filename="custom.css"/>
+    </a:If>\
     <title>\
-        <a:String value="$^windowTitle" escapeHtml="$^escapeTitle:$true"/>\
+        <a:String value="$^windowTitle" escapeUnsafeHtml="$true"/>\
     </title>
     <a:IncludeContent/>
     <link rel="shortcut icon" href="$favIconUrl" type="image/x-icon"/>

@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#33 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#35 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -279,15 +279,16 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
         return false;
     }
 
-    public static void setupHeaders (AWResponse response, String urlLocation)
+    public static void setupHeaders (AWResponse response, String unsafeUrlLocation)
     {
-        response.setHeaderForKey(urlLocation, "location");
+        String safeUrlLocation = AWUtil.filterUnsafeHeader(unsafeUrlLocation);
+        response.setHeaderForKey(safeUrlLocation, "location");
         response.setContentType(AWContentType.TextHtml);
         response.setStatus(AWResponse.StatusCodes.RedirectFound);
         response.appendContent(FullPageRedirectStringStart);
-        response.appendContent(urlLocation);
+        response.appendContent(safeUrlLocation);
         response.appendContent(FullPageRedirectStringMiddle);
-        response.appendContent(urlLocation);
+        response.appendContent(safeUrlLocation);
         response.appendContent(FullPageRedirectStringFinish);        
     }
 

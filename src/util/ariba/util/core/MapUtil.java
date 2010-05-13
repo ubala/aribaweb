@@ -1,8 +1,8 @@
 /*
-    Copyright (c) 1996-20089 Ariba, Inc.
+    Copyright (c) 1996-2010 Ariba, Inc.
     All rights reserved. Patents pending.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#27 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#31 $
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -24,6 +24,12 @@ import ariba.util.io.DeserializationException;
 import ariba.util.io.Deserializer;
 import ariba.util.io.Serializer;
 import ariba.util.log.Log;
+import ariba.util.formatter.DateFormatter;
+import ariba.util.formatter.IntegerFormatter;
+import ariba.util.formatter.DoubleFormatter;
+import ariba.util.formatter.LongFormatter;
+import ariba.util.formatter.BigDecimalFormatter;
+import ariba.util.formatter.BooleanFormatter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -37,6 +43,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Collection;
+import java.math.BigDecimal;
 
 /**
     Map Utilities. These are helper functions for dealing with
@@ -164,6 +171,48 @@ public final class MapUtil
         return new TreeMap<K,V>(source);
     }
 
+    /**
+        Copies the contents of a Map into a SortedMap. If there is a Map within this Map,
+        then it will recurse to copy that Map into a SortedMap. If there is a List, then
+        ListUtil.copyAndSortMapInList is called for processing.
+        @param source the map whose mappings are to be copied into a SortedMap
+        @return new SortedMap containing the same mappings as the given Map
+        @see java.util.SortedMap
+        @see ariba.util.core.ListUtil
+        @aribaapi documented
+     */
+    public static SortedMap copyAndSortMap (Map<String,Object> source)
+    {
+        SortedMap sortedMap = MapUtil.sortedMap();
+        
+        if (MapUtil.nullOrEmptyMap(source)) {
+            return sortedMap;
+        }
+        
+        // Iterate through the source Map and copy its contents to the SortedMap.
+        for (Map.Entry<String,Object> e : source.entrySet()) {
+            // If there are maps within maps, then recurse through them and convert them
+            // into a SortedMap also.
+            String mapKey = e.getKey();
+            Object mapValue = e.getValue();
+
+            if (mapValue instanceof Map) {
+                SortedMap sm = MapUtil.copyAndSortMap((Map)mapValue);
+                sortedMap.put(mapKey, sm);
+            }
+            else if (mapValue instanceof List) {
+                // A map can contain a List which contains a Map. We need to convert these
+                // maps into sorted maps as well.
+                List list = ListUtil.copyAndSortMapInList((List)mapValue);
+                sortedMap.put(mapKey, list);
+            }
+            else {
+                sortedMap.put(mapKey, mapValue);
+            }
+        }
+        
+        return sortedMap;
+    }
 
     /**
         Returns a List containing the Map's keys. If the Map
@@ -1051,6 +1100,202 @@ public final class MapUtil
             }
         }
         return immutableMap(aMap);
+    }
+
+    /**
+     * Get a string value out of the map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the String value, or null if it isn't found for any reason
+     */
+    public static String getStringArg (Map args, String key)
+    {
+        if (args == null || key == null) {
+            return null;
+        }
+
+        Object value = args.get(key);
+        if (! (value instanceof String)) {
+            return null;
+        }
+
+        return (String)value;
+    }
+
+    /**
+     * Get a List value out of the map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the List value, or null if it isn't found for any reason
+     */
+    public static List getVectorArg (Map args, String key)
+    {
+        if (args == null || key == null) {
+            return null;
+        }
+
+        Object value = args.get(key);
+        if (! (value instanceof List)) {
+            return null;
+        }
+
+        return (List)value;
+    }
+
+    /**
+     * Get a Map value out of the exported map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the Map value, or null if it isn't found for any reason
+     */
+    public static Map getHashtableArg (Map args, String key)
+    {
+        if (args == null || key == null) {
+            return null;
+        }
+
+        Object value = args.get(key);
+        if (! (value instanceof Map)) {
+            return null;
+        }
+
+        return (Map)value;
+    }
+
+    /**
+     * Get a date value out of the exported map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the Date value, or null if it isn't found for any reason
+     */
+    public static Date getDateArg (Map args, String key)
+    {
+        if (args == null || key == null) {
+            return null;
+        }
+
+        return DateFormatter.getDateValue(args.get(key));
+    }
+
+    /**
+     * Get an int value out of the exported map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the int value, or 0 if it isn't found for any reason
+     */
+    public static int getIntArg (Map args, String key)
+    {
+        if (args == null || key == null) {
+            return 0;
+        }
+        return IntegerFormatter.getIntValue(args.get(key));
+    }
+
+      /**
+     * Get an int value out of the exported map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the int value, or null
+     */
+    public static Integer getIntArgOrNull (Map args, String key)
+    {
+        if (args == null || key == null || args.get(key) == null) {
+            return null;
+        }
+        return IntegerFormatter.getIntValue(args.get(key));
+    }
+    
+    /**
+     * Get a double value out of the exported map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the Double value, or 0 if it isn't found for any reason
+     */
+    public static Double getDoubleArg (Map args, String key)
+    {
+        if (args == null || key == null) {
+            return null;
+        }
+        return DoubleFormatter.getDoubleValue(args.get(key));
+    }
+
+    /**
+     * Get a double value out of the exported map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the Double value, or null if not present.
+     */
+    public static Double getDoubleArgOrNull (Map args, String key)
+    {
+        if (args == null || key == null || args.get(key) == null) {
+            return null;
+        }
+        return DoubleFormatter.getDoubleValue(args.get(key));
+    }
+
+    /**
+     * Get a long value out of the exported map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the Long value, or 0 if it isn't found for any reason
+     */
+    public static Long getLongArg (Map args, String key)
+    {
+        if (args == null || key == null) {
+            return null;
+        }
+        return LongFormatter.getLongValue(args.get(key));
+    }
+
+  /**
+     * Get a long value out of the exported map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the Long value, or null if it isn't found for any reason
+     */
+    public static Long getLongArgOrNull (Map args, String key)
+    {
+        if (args == null || key == null || args.get(key) == null) {
+            return null;
+        }
+        return LongFormatter.getLongValue(args.get(key));
+    }
+
+    /**
+     * Get a Big Decimal value out of the exported map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the BigDecimal value, or null if it isn't found for any reason
+     */
+    public static BigDecimal getBigDecimalArg (Map args, String key)
+    {
+        return BigDecimalFormatter.getBigDecimalValue(args.get(key));
+    }
+
+    /**
+     * Get a Boolean value out of the exported map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the Boolean value, or null if it isn't found for any reason
+     */
+    public static boolean getBooleanArg (Map args, String key)
+    {
+        if (args == null || key == null) {
+            return false;
+        }
+        return BooleanFormatter.getBooleanValue(args.get(key));
     }
 
     public interface Transformer <V,W>

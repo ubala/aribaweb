@@ -12,16 +12,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkManager.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkManager.java#9 $
 */
+
 package ariba.ui.aribaweb.test;
 
+import ariba.ui.aribaweb.core.AWConcreteServerApplication;
 import ariba.ui.aribaweb.util.AWJarWalker;
 import ariba.ui.aribaweb.util.AWUtil;
-import ariba.ui.aribaweb.core.AWConcreteServerApplication;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
+import ariba.util.test.TestDestager;
 import ariba.util.test.TestPageLink;
+import ariba.util.test.TestParam;
 import ariba.util.test.TestStager;
 import ariba.util.test.TestValidator;
 
@@ -36,15 +39,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 public class TestLinkManager
 {
     static final Class _AnnotationClasses[] = {TestPageLink.class,
-            ariba.util.test.TestStager.class};
+                                               TestStager.class,
+                                               TestDestager.class};
+
     static final Class _AnnotationValidatorClasses[] = {TestValidator.class};
 
-    static final Class _allTestAnnotationClasses[] =
-            {TestPageLink.class, TestStager.class, ariba.util.test.TestParam.class,
-             TestValidator.class};
+    static final Class _allTestAnnotationClasses[] = {TestPageLink.class,
+                                                      TestStager.class,
+                                                      TestDestager.class,
+                                                      TestParam.class,
+                                                      TestValidator.class};
     
     static TestLinkManager _instance = new TestLinkManager();
     Set<String> _classesWithAnnotations = new HashSet();
@@ -224,8 +232,9 @@ public class TestLinkManager
             for (Object key : keys) {
                 Annotation annotation = (Annotation)key;
                 if (annotation.annotationType().isAssignableFrom(TestPageLink.class) ||
-                    annotation.annotationType().isAssignableFrom(
-                            ariba.util.test.TestStager.class)) {
+                    annotation.annotationType().isAssignableFrom(TestStager.class) ||
+                    annotation.annotationType().isAssignableFrom(TestDestager.class))
+                {
                     Object annotationRef = annotations.get(annotation);
                     if (shouldExpandTestLink((Annotation)annotation)) {
                         List<TestLinkHolder> testLinks =

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Timer.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Timer.java#6 $
 */
 
 package ariba.util.core;
@@ -257,7 +257,7 @@ public class Timer implements EventProcessor
     public void processEvent ()
     {
         if (target != null) {
-            target.performCommand(command, null);
+            target.performCommand(command, data);
         }
     }
 

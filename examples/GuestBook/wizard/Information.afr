@@ -1,0 +1,7 @@
+<!DOCTYPE frame SYSTEM "Frame.dtd">
+<frame label="Information">
+  <doc>
+     This frame is the frame in the information step.
+  </doc>
+  <content source="wizard.Information"/>
+</frame>

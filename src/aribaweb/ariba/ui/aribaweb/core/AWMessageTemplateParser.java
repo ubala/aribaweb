@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWMessageTemplateParser.java#15 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWMessageTemplateParser.java#16 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -386,8 +386,8 @@ public final class AWMessageTemplateParser extends AWBaseObject implements AWTem
             logWarning(errorMessage);
             pushString("&nbsp;<font color=\"#ff0000\"><blink><b>" + errorMessage + "</b></blink></font>");
         }
-        if (!_resultingTemplate.hasElements()) {
-            // This handles case of a completely empty .awl file
+        if (!_resultingTemplate.hasElements() && StringUtil.nullOrEmptyString(_templateString)) {
+            // This handles case of a completely empty string in strings file for specific key.
             characters(" ");
         }
         finalizeCurrentString();

@@ -1,0 +1,215 @@
+Drag and Drop Framework
+=======================
+
+The drag and drop framework is a good example of how AribaWeb
+abstract away the client side logic to allow the application
+developer to focus on the business logic.
+
+We'll build on our GuestBook application as follows:
+
+  1. Make a post respond to a drag gesture
+  2. Insert a post above another after a drop gesture
+  3. Delete a post after a drop gesture
+
+In this guide, you will learn the following about drag and drop:
+
+  - [Drag Container, Drag Control]#
+  - [Drop Container]#
+  - [Drag Action]#
+  - [Drop Action]#
+  - [Other Areas to Explore]#
+
+A pre-requisite to this guide is [AribaWeb Core](../1_AribaWeb/AribaWeb.txt).
+
+Drag Container, Drag Control
+----------------------------
+We start by adding the following to Main.awl:
+
+        <a:DragContainer dragAction="$null">
+            <hr/>
+            $currentPost.userName
+            ...
+            <x:RatingBar value="$currentPost.rating"/>
+        </a:DragContainer>
+
+![Drag](Drag.gif)
+
+And with that, each post entry is now draggable.
+
+By default, [AWDragContainer]#api defines both the drag control ("draggable") region and
+the drag content region that will be displayed in the "ghost" during the drag.
+We can also define separate regions for the drag control and drag content like this:
+
+        <a:DragContainer type="post">
+            <hr/>
+            <a:DragContainer dragAction="$null"
+                             type="post"        FooterIncludes
+                             showParent="true">+</a:DragContainer>
+                $currentPost.userName
+                ...
+        </a:DragContainer>
+
+![DragControl](DragControl.gif)
+
+Now we can only drag the plus, but the whole entry will display during the drag.
+
+An [AWDragContainer]#api is considered to be only drag content if it does not have a
+drag action defined.
+
+An [AWDragContainer]#api acts as a drag control if the showParent binding is set to
+$true.  In this case, the [AWDragContainer]#api will use its parent [AWDragContainer]#api
+(next component higher in the hierarchy with the the same drag type) as its
+drag container.
+
+We can't actually drop the post anywhere yet.
+It's time to talk about drop container.
+The drag type also comes into play here...
+
+Drop Container
+--------------
+We want to be able to reorder posts by dragging one post onto another.
+Let's wrap each post with a [AWDropContainer]#api like this:
+
+        <a:DropContainer tagName="div"
+                         type="post">
+            <a:DragContainer type="post">
+                <hr/>
+                <a:DragContainer dragAction="$null"
+                                 type="post"
+                                 showParent="true">+</a:DragContainer>
+                    $currentPost.userName
+                    ...
+            </a:DragContainer>
+        </a:DropContainer>
+
+![DragDrop](DragDrop.gif)
+
+The drop container highlights when it's drop type matches the drag type
+of the container being dragged.
+
+We can style the drop hover with CSS by first specifying the dropClass binding:
+
+        <a:DropContainer tagName="div"
+                         type="post"
+                         dropClass="dropPost">
+             ...
+        </a:DropContainer>
+
+follow by the CSS class definition in application.css:
+
+        .dropPost {
+            background-color:#BD5152;
+        }
+        
+![DragDropStyled](DragDropStyled.gif)
+
+You will notice that nothing is happening when you drop a post.
+For that, we need to implement the dragAction and dropAction binding...
+
+Drag Action
+-----------
+In general, AribaWeb fires only one action per request.
+There are some cases where we fire multiple actions,
+and drag and drop is one of them.
+If you remember from the *Actions, Part II: With Context* section in the [AribaWeb Core](../1_AribaWeb/AribaWeb.txt) guide,
+action are fire with the values restored from the original render.
+
+Let's see how we can use this to our advantage.
+In Main.awl, we bind the dragAction like this:
+
+        <a:DragContainer dragAction="$dragPost"
+                         type="post"
+                         showParent="true">+</a:DragContainer>
+
+The in Main.awl, we introduced a storage variable to remember the post that was dragged:
+
+        private Post _draggedPost;
+        ...
+        public void dragPost ()
+        {
+            _draggedPost = _currentPost;
+        }
+
+Next, we just implement the drop action...
+
+Drop Action
+-----------
+We bind the dropAction like this:
+
+        <a:DropContainer tagName="div"
+                         type="post"
+                         dropClass="dropPost"
+                         dropAction="$insertPost">
+             ...
+        </a:DropContainer>
+
+and implement insertPost with this:
+
+        public AWComponent insertPost ()
+        {
+            if (_draggedPost != _currentPost) {
+                _posts.remove(_draggedPost);
+                int index = _posts.indexOf(_currentPost);
+                _posts.add(index, _draggedPost);
+            }
+            return null;
+        }
+
+![DragAction](DragAction.gif)
+![DropAction](DropAction.gif)
+
+Note that _currentPost in this action context is the post we are dropping on.
+Let's see it in action.  Drag the SouthAmerica post and drop it on the NorthAmerica post.
+The dragAction and dragAction fires, and we get the inserting.
+All this without a line of javascript!
+
+Let's wrap up this guide by adding a drag and delete functionality.
+We first define the delete drop container a "X":
+
+        <a:DropContainer tagName="div"
+                         type="post"
+                         class="trashPost"
+                         dropClass="deletePost"
+                         dropAction="$deletePost">
+            X
+        </a:DropContainer>
+
+Next, style it like this:
+
+        .trashPost {
+            font-size:20px;
+            font-weight:bold;
+            color:#ff4500;
+            width:18px;
+            padding:3px;
+        }
+
+Then, style the drop hover with this:
+
+        .deletePost {
+            background-color:#ff4500;
+            color:#FFFFFF;
+        }
+
+![DragDelete](DragDelete.gif)
+
+Note that the "X" changes styling on hover.
+The implementation is simply this:
+
+        public AWComponent deletePost ()
+        {
+            delete(_draggedPost);
+            return null;
+        }
+
+Note that we are reusing the dragPost action to keep track of the dragged post.
+
+Other Areas to Explore
+----------------------
+Some widgets build on top on this foundation:
+
+- [AWTDataTable]#api allows rows to be reordered using drag and drop.
+- [AWTPivotConfigurationPanel]#api uses drag and drop to allow pivot field configuring.
+- [FormRow]#api uses drag and drop to allow field re-layout.
+
+**[Back to Documentation](../Documentation.txt)**

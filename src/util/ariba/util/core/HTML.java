@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#28 $
+    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#37 $
 */
 
 package ariba.util.core;
@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,6 +64,8 @@ public class HTML
         // send this to us when a page is encoded in Latin1.
     private static final String ControlEuroStr = "\u0080";
     private static final char ControlEuroChar = ControlEuroStr.charAt(0);
+
+    private static final int NOT_FOUND = -1;
 
         // mapping for some common HTML character entities
     public static final char[] entityMapChars = {
@@ -111,6 +114,7 @@ public class HTML
         EuroNumericValue + ";",
         "nbsp;",
         "reg;",
+        "middot;"
     };
 
     static Map<String, String>safeHtmlCharacterMap = map (
@@ -432,18 +436,107 @@ public class HTML
     }
 
     /**
+        Wraps a source FastStringBuffer for copy, replace, and append operations.
+        Copies are lazy.  If no replace or append are called,
+        the copies do not actually happen,
+        and the source FastStringBuffer is used on toString()
+        Otherwise, a replace or append call triggers any deferred copies,
+        and a new destination FastStringBuffer is allocated and used.
+    */
+    static class LazyFastStringBuffer
+    {
+        private FastStringBuffer _srcBuffer;
+        private char[] _srcBufferChars;
+        private int _copyOffset;
+        private FastStringBuffer _destBuffer;
+
+        public LazyFastStringBuffer (FastStringBuffer srcBuffer)
+        {
+            _srcBuffer = srcBuffer;
+            _srcBufferChars = srcBuffer.getBuffer();
+            _copyOffset = 0;
+        }
+
+        /**
+            Replaces one char from the source buffer
+            with the given string at the current offset.
+            This will activate the destination buffer.
+        */
+        public void replaceChar (String str)
+        {
+            append(str);
+            _copyOffset++;
+        }
+
+        /**
+            Appends the given string.
+            This will activate the destination buffer.
+        */
+        public void append (String str)
+        {
+            activate(str.length());
+            _destBuffer.append(str);
+        }
+
+        /**
+            Copies one char from the source buffer
+            at the current offset.
+        */
+        public void copyChar ()
+        {
+            if (_destBuffer != null) {
+                _destBuffer.append(_srcBufferChars[_copyOffset]);
+            }
+            _copyOffset++;
+        }
+
+        /**
+            Copies a char range from the source buffer
+            beginning at the current offset and
+            ending at the given endOffset.
+        */
+        public void copyCharRange (int endOffset)
+        {
+            if (_destBuffer != null) {
+                _destBuffer.appendCharRange(_srcBufferChars , _copyOffset, endOffset);
+            }
+            _copyOffset = endOffset;
+        }
+
+        private void activate (int extendBy)
+        {
+            if (_destBuffer == null) {
+                _destBuffer = new FastStringBuffer(_srcBuffer.length() + extendBy);
+                _destBuffer.appendCharRange(_srcBufferChars, 0, _copyOffset);
+            }
+        }
+
+        public String toString ()
+        {
+            return _destBuffer != null ? _destBuffer.toString() : _srcBuffer.toString();
+        }
+    }
+
+    /**
        Escapes unsafe tags/attributes in the string stored in the buffer
        This is a helper function to escapeUnsafe(String).
+       This function does not fully support the HTML specification by not handling some technically valid input
+       like < /p>.
        @return the escaped string
     */
     private static String escapeUnsafe (FastStringBuffer buf)
     {
         Log.util.debug("HTML.escapeUnsafe: Got    :%s", buf);
+        if (buf == null) {
+            return "";
+        }
         // uses a list for tag matching
         ArrayList tags = new ArrayList();
-        int bufferLength = buf != null ? buf.length() : 0;
+        int bufferLength = buf.length();
         int i = -1;
+        // how many continuous space characters (not newlines)
         int spaceCount = 0;
+        LazyFastStringBuffer escapedBuf = new LazyFastStringBuffer(buf);
         while (++i < bufferLength) {
             char c = buf.charAt(i);
             boolean done = false;
@@ -454,37 +547,50 @@ public class HTML
                 try {
                     // a tag is detected
                     int offset = i + 1;
+
+                    // skip the offset over the / in a closing tag like </p>
+                    // this fails for < /p>, should be == buf.charAt(nextNonWhitespaceCharIndex)
                     boolean closingTag =
-                        offset < bufferLength && '/' == buf.charAt(offset);
+                            offset < bufferLength && '/' == buf.charAt(offset);
                     if (closingTag) {
                         ++offset;
                     }
+
                     // find the close bracket
                     int close = buf.indexOf(">", offset);
                     if (close == -1) {
                         throw new HTMLSyntaxException(
                             "HTML.escapeUnsafe: Missing '>'.");
                     }
+
+                    // find the next opening bracket
                     int nextOpen = buf.indexOf("<", offset);
                     if (nextOpen > 0 && nextOpen < close) {
                         throw new HTMLSyntaxException(
                             "HTML.escapeUnsafe: Found '<' " +
                             "between '<' and '>'.");
                     }
-                    // find the end index of the tag
+                    
+                    // find the end index of the tag, not including the attributes
                     int tagEndsAt = findTagEndIndex(buf, offset, close);
                     if ((tagEndsAt - offset) <= 0) {
                         throw new HTMLSyntaxException("HTML.escapeUnsafe: Empty tag.");
                     }
+
                     String tag = buf.substring(offset, tagEndsAt).trim();
+
+                    // skip over things like <!--+ some random comment -->
                     if (tag.matches("!--+")) {
                         String commentClose = buf.substring(close - 2, close);
                         if ("--".equals(commentClose)) {
+                            escapedBuf.copyCharRange(close+1);
                             i = close;
                             continue;
                         }
                     }
+
                     boolean selfClosed = buf.charAt(close-1) == '/';
+
                     if (closingTag) {
                         // if the tag is a closing, it must match the last open tag
                         if (tags.isEmpty() ||
@@ -496,6 +602,7 @@ public class HTML
                         }
                         tags.remove(tags.size()-1);
                     }
+                    
                     // check if the tag is safe
                     for (int j = 0; j < safeTags.length; ++j) {
                         if (tag.equalsIgnoreCase(safeTags[j])) {
@@ -503,12 +610,19 @@ public class HTML
                             offset += tag.length();
                             if (close > offset+1 && buf.charAt(offset) == ' ') {
                                 // process the attributes, if any
-                                close = processAttrs(buf, offset, close);
+                                
+                                // this can throw an exception, leading to the
+                                // initial < being HTML encoded along with the rest
+                                // of the tag, and it's closing tag
+                                processAttrs(buf, offset, close);
                                 bufferLength = buf.length();
                             }
-                            if (!selfClosed && !closingTag) {
+                            // discard <br>s
+                            if (!selfClosed && !closingTag && !tag.equals("br")) {
                                 tags.add(tag);
                             }
+                            escapedBuf.copyCharRange(close+1);
+                            // max of close or offset
                             i = close > offset ? close : offset;
                             done = true;
                             break;
@@ -520,11 +634,14 @@ public class HTML
                 }
             }
             else if (c == '&') {
+                // skip over safe HTML encoded entities (ie, "&nbsp;")
                 for (int j = 0; j < safeHTMLStrings.length; j++) {
                     String safeHTMLString = safeHTMLStrings[j];
                     if (buf.startsWith(safeHTMLString, i+1)) {
                         // skip over the nbsp
-                        i += safeHTMLString.length();
+                        int safeHTMLLength = safeHTMLString.length();
+                        escapedBuf.copyCharRange(i + safeHTMLLength + 1);
+                        i += safeHTMLLength;
                         done = true;
                         break;
                     }
@@ -533,27 +650,22 @@ public class HTML
             else if (c == ' ') {
                 // convert multiple spaces to nbsp
                 spaceCount++;
-                if (spaceCount > 1) {
-                    buf.setCharAt(i, '&');
-                    buf.insert("nbsp;", i + 1);
-                    i += 5;
-                    bufferLength += 5;
+                if (spaceCount == 1) {
+                    escapedBuf.copyChar();
                 }
+                else if (spaceCount > 1) {
+                    escapedBuf.replaceChar("&nbsp;");
+                }                
                 done = true;
             }
             else if (c == '\n') {
                 // convert newline to break
-                buf.setCharAt(i, '<');
-                buf.insert("br/>", i + 1);
-                i += 4;
-                bufferLength += 4;
+                escapedBuf.replaceChar("<br/>");
                 done = true;
             }
             if (!done) {
                 // the char has not been processed, escape it
-                int p = escapeChar(c, buf, bufferLength, i);
-                bufferLength += p-i;
-                i = p;
+                escapeChar(c, buf, escapedBuf, bufferLength, i);
             }
         }
         // Force closing open safe tags
@@ -562,17 +674,20 @@ public class HTML
             for (int n = tags.size()-1; n >= 0; --n) {
                 String tag = (String)tags.get(n);
                 if (shouldCloseTag(tag)) {
-                    buf.append("</");
-                    buf.append(tag);
-                    buf.append(">");
+                    escapedBuf.append("</");
+                    escapedBuf.append(tag);
+                    escapedBuf.append(">");
                 }
             }
         }
-        Log.util.debug("HTML.escapeUnsafe: Returns:%s", buf);
-        return bufferLength > 0 ? buf.toString() : "";
+        String result = escapedBuf.toString();
+        Log.util.debug("HTML.escapeUnsafe: Returns:%s", result);
+        return result;
     }
 
     /**
+     * This returns the index of the position right after the tag name.
+     * Example: the string "<p style=''/>" will return 2, for the space right after 'p'.
      * This is a helper function to escapeUnsafe(...).
      * @param buf
      * @param starts
@@ -596,23 +711,21 @@ public class HTML
        This is a helper function to escapeUnsafe(...).
        @return the index unchanged or the end index of the replacement string in the buffer
     */
-    private static int escapeChar (char c, FastStringBuffer buf, int bufferLength, int p)
+    private static void escapeChar (char c, FastStringBuffer buf, LazyFastStringBuffer escapedBuf, int bufferLength, int p)
     {
         int mapLength = entityMapChars.length;
+        boolean escaped = false;
         for (int j = 0; j < mapLength; j++) {
             if (c == entityMapChars[j]) {
-                String rep = entityMapStrings[j];
-                int    len = rep.length();
-                buf.setCharAt(p++, '&');
-                buf.insert(rep, p);
-                bufferLength += len;
-                buf.insert(";", p + len);
-                bufferLength++;
-                p += len;
+                String rep = '&' + entityMapStrings[j] + ';';
+                escapedBuf.replaceChar(rep);
+                escaped = true;
                 break;
             }
         }
-        return p;
+        if (!escaped) {
+            escapedBuf.copyChar();
+        }
     }
 
     /*
@@ -678,52 +791,70 @@ public class HTML
         return true;
     }
 
+
     /**
        Process the attributes portion of a safe element, which is in the range
        of [from, to] of the buffer.  This is a helper function to escapeUnsafe(...).
        @return the end index of the attribute string which may have been modified
     */
-    private static int processAttrs (FastStringBuffer buf, int from, int to)
+    private static void processAttrs (FastStringBuffer buf, int from, int to)
     {
+        // the attrs will be treated as the first space after the tag name
+        // to the closing >, ie, for "<p style=''>" the attrs will be " style=''>"
         int p = from;
         while (++p < to) {
-            char c = buf.charAt(p);
+            final char c = buf.charAt(p);
+
+            // skip over space and /
             if (c == ' ' || c == '/') {
                 continue;
             }
+            
             // index of '='
-            int eqIndex = buf.indexOf("=", p);
-            // index of 1st quote after '='
-            int dq1Index = eqIndex > p ? findIndexOfQuote(buf, eqIndex, to) : -1;
+            final int eqIndex = buf.indexOf("=", p);
+
+            // index of 1st quote after '=', "double quote 1 index"
+            final boolean foundEqIndex = eqIndex > p;
+            int dq1Index = foundEqIndex ? findIndexOfQuote(buf, eqIndex, to) : NOT_FOUND;
+
             // index of 2nd quote (has to be the same kind of the 1st) after '='
-            int dq2Index = dq1Index > eqIndex ?
-                 findIndexOfChar(buf, dq1Index+1, to, buf.charAt(dq1Index)) : -1;
+            // "double quote 2 index"
+            final boolean foundDQ1Index = dq1Index > eqIndex;
+            int dq2Index = foundDQ1Index ?
+                 findIndexOfChar(buf, dq1Index+1, to, buf.charAt(dq1Index)) : NOT_FOUND;
 
             // If the attribute is not enclosed with quotes, then parse the
             // attr value assuming the value without space.
-            boolean isQuoted = (dq1Index != -1);
+            final boolean isQuoted = (dq1Index != NOT_FOUND);
             if (!isQuoted) {
                 // find the first non-whitespace char after "=".
                 dq1Index = skipWhiteSpace(buf, eqIndex+1, to);
                 // find the end index of the token, delimitered by whitespace
                 // and xml end tag
-                dq2Index = dq1Index > eqIndex ?
-                           findEndTokenIndex(buf, dq1Index, to) : -1;
+                final boolean foundUnquotedDQ1Index = dq1Index > eqIndex;
+                dq2Index = foundUnquotedDQ1Index ?
+                           findEndTokenIndex(buf, dq1Index, to) : NOT_FOUND;
             }
+
+            // sanity check
             if (eqIndex <= p || eqIndex >= to ||
                 dq1Index <= eqIndex || dq1Index >= to ||
-                dq2Index <= dq1Index || dq2Index >= to) {
+                dq2Index <= dq1Index || dq2Index > to)
+            {
                 // cannot find the definition of an attribute
                 throw new HTMLSyntaxException(
                     Fmt.S("HTML.escapeUnsafe: Unmatched quotes found in %s",
                         buf.substring(from, to)));
             }
+
+            // we finally have enough information to figure out the attribute name and value
             String attr = buf.substring(p, eqIndex).trim();
+            // attribute value
             String value = (isQuoted ?
                             buf.substring(dq1Index+1, dq2Index).toLowerCase() :
                             buf.substring(dq1Index, dq2Index+1).toLowerCase());
             // check if the value contains any unsafe string
-            if (!isSafeAttributeValue(value)) {
+            if (!isSafeAttributeValue(attr, value)) {
                 throw new HTMLSyntaxException(
                     Fmt.S("HTML.escapeUnsafe: Attribute %s=%s is not safe.",
                         attr, value));
@@ -731,26 +862,19 @@ public class HTML
             boolean isSafe = false;
             for (int j = 0; j < safeAttrs.length; ++j) {
                 if (attr.equalsIgnoreCase(safeAttrs[j])) {
-                    // the attribtue is safe, skip it
-                    if (dq1Index > eqIndex+1) {
-                        buf.moveChars(dq1Index, eqIndex+1);
-                        to -= dq1Index - (eqIndex+1);
-                        p = dq2Index - (dq1Index - (eqIndex+1));
-                    }
-                    else {
-                        p = dq2Index;
-                    }
+                    p = dq2Index;
                     isSafe = true;
                     break;
                 }
             }
+
+            // another safety check
             if (!isSafe) {
                 throw new HTMLSyntaxException(
                     Fmt.S("HTML.escapeUnsafe: Unsafe attribute %s found.",
                         attr));
             }
         }
-        return to;
     }
 
     /**
@@ -764,7 +888,7 @@ public class HTML
             if (c == buf.charAt(p)) {
                 return p;
             }
-        return -1;
+        return NOT_FOUND;
     }
 
     /**
@@ -778,7 +902,7 @@ public class HTML
             if (!Character.isWhitespace(buf.charAt(p))) {
                 return p;
             }
-        return -1;
+        return NOT_FOUND;
     }
 
     /**
@@ -794,7 +918,7 @@ public class HTML
                 return p;
             }
         }
-        return -1;
+        return NOT_FOUND;
     }
 
     /**
@@ -804,14 +928,14 @@ public class HTML
      */
     private static int findEndTokenIndex (FastStringBuffer buf, int from, int to)
     {
-        int p = from-1;
-        while (++p <= to) {
-            char c = buf.charAt(p);
-            if (Character.isWhitespace(c) || c == '/' || c == '>') {
-                return (p > from ? p-1 : -1);
-            }
+        final String regex = "\\s+|(?:/?\\s*>)";
+        final String attributeValuePairs = buf.substring(from, to + 1);
+        final Pattern pattern = CompiledRegexCache.get(regex);
+        final Matcher matcher = pattern.matcher(attributeValuePairs);
+        if (matcher.find()) {
+            return from + matcher.start();
         }
-        return -1;
+        return NOT_FOUND;
     }
 
     private static Pattern linebreaksToBr = Pattern.compile("\\r?\\n");
@@ -849,10 +973,22 @@ public class HTML
     private static String[] safeAttrs = new String[0];
 
     private static final String[] unsafeAttrValues = {
-        "javascript",
-        "vbscript",
-        "url"
+        "javascript\\s*:",
+        "vbscript\\s*:",
+        "url\\s*\\(",
+        "expression\\s*\\("
     };
+
+    private static final List<Pattern> unsafeAttributeValuePatterns =
+        ListUtil.list(unsafeAttrValues.length);
+
+    static {
+        for (String regex : unsafeAttrValues) {
+            int patternFlags = Pattern.CASE_INSENSITIVE | Pattern.DOTALL;
+            Pattern pattern = Pattern.compile(regex, patternFlags);
+            unsafeAttributeValuePatterns.add(pattern);
+        }
+    }
 
     private static boolean safeConfigDefined = false;
 
@@ -870,12 +1006,39 @@ public class HTML
 
     public static boolean isSafeAttributeValue (String value)
     {
-        for (int i = 0; i < unsafeAttrValues.length; ++i) {
-            if (value.indexOf(unsafeAttrValues[i]) > -1) {
+        for (Pattern pattern : unsafeAttributeValuePatterns) {
+            Matcher matcher = pattern.matcher(value);
+            if (matcher.find()) {
+                // matcher.find() also changes the state of the matcher on success
+                // see matcher.reset() if the matcher object is ever reused 
                 return false;
             }
         }
         return true;
+    }
+    
+    public static boolean isSafeAttributeValue (String attribute, String value)
+    {
+        final boolean hasComments = attributeCanHaveCommentsInValue(attribute);
+        String strippedValue = value;
+        if (hasComments) {
+            String commentRegex = "/\\*.*?\\*/";
+            Pattern commentPattern = CompiledRegexCache.get(commentRegex);
+            strippedValue = commentPattern.matcher(value).replaceAll("");
+        }
+        return isSafeAttributeValue(strippedValue);
+    }
+
+    /**
+     * We expect the implementation to grow in the future.
+     *
+     * @param attribute
+     * 
+     * @return
+     */
+    private static boolean attributeCanHaveCommentsInValue (String attribute)
+    {
+        return "style".equalsIgnoreCase(attribute);
     }
 
     private static class HTMLSyntaxException extends RuntimeException
@@ -953,7 +1116,8 @@ public class HTML
     */
     public static String filterUnsafeHTML (String str)
     {
-        return Filterer.filterUnsafeHTML(str);
+        String filteredString = Filterer.filterUnsafeHTML(str);
+        return filteredString;
     }
 
     /**
@@ -965,16 +1129,30 @@ public class HTML
         return Filterer.filterCSSMargins(html);
     }
 
-    // This is used by linksOpenInNewWindow(...).
+    /**
+     * @see #linksOpenInNewWindow
+     */
     private static final Pattern linksWithoutTargetsPattern =
         createLinksWithoutTargetsPattern();
 
+    /**
+     * This will return an html string where links (a tags) without a target attribute
+     * have a target attribute inserted with a value of _blank.  This makes the tag open
+     * the link in a new window or tab, as specified in the browser's settings.
+     * @param html The HTML string to modify.
+     * @return A new HTML string where the links open in a new window or tab.
+     */
     public static String linksOpenInNewWindow (String html)
     {
         String str = "<a$1 target=\"_blank\"$2";
         return linksWithoutTargetsPattern.matcher(html).replaceAll(str);
     }
 
+    /**
+     * @see #linksOpenInNewWindow
+     * @see #linksWithoutTargetsPattern
+     * @return
+     */
     private static Pattern createLinksWithoutTargetsPattern ()
     {
         String regex;
@@ -1022,9 +1200,20 @@ public class HTML
         return RemoveTagsPattern.matcher(richText).replaceAll("");
     }
 
+    /**
+     * Very simple heuristic as to whether <code>text</code> is HTML. Not
+     * very reliable.
+     * @param text
+     * @return
+     */
+    public static boolean isProbablyHtml (String text)
+    {
+        return RemoveTagsPattern.matcher(text).find();
+    }
+
     public static String fullyConvertToPlainText (String text)
     {
-        String converted = text.replaceAll("(<br/>)|(<br>)|(</div>)","\n");
+        String converted = text.replaceAll("(<br/>)|(<br>)|(</div>)|(</[p|P]>)","\n");
         converted = converted.replaceAll(">>",">&gt;");
         converted = RemoveTagsPattern.matcher(converted).replaceAll("");
 
@@ -1047,6 +1236,24 @@ public class HTML
             result.put((K)keysAndValues[i], (V)keysAndValues[i+1]);
         }
         return result;
+    }
+
+    private abstract static class CompiledRegexCache
+    {
+        private static Pattern get(String regex)
+        {
+            if (regexCache.containsKey(regex)) {
+                return regexCache.get(regex);
+            }
+            else {
+                final int flags = Pattern.CASE_INSENSITIVE | Pattern.DOTALL;
+                final Pattern pattern = Pattern.compile(regex, flags);
+                regexCache.put(regex, pattern);
+                return pattern;
+            }
+        }
+
+        private static Map<String, Pattern> regexCache = MapUtil.map();
     }
 
     private abstract static class Filterer
@@ -1150,8 +1357,23 @@ public class HTML
             regex += "|(?:\\s+[^\\s=]+\\s*=" + stringLiteral + endOfTagRegex + ")";
             return Pattern.compile(regex, Pattern.DOTALL);
         }
+        
+        private static List<Pattern> unsafeAttributeValueInTagPatterns =
+            ListUtil.list();
 
-        public static String filterUnsafeHTML(String str)
+        private static Pattern safeTagPattern =
+            Pattern.compile(stb+"((?:(?!"+ste+").)*)"+ste, Pattern.DOTALL);
+
+        static {
+            for (String regex : unsafeAttrValues) {
+                String regexInTag = Fmt.S("(%s)%s", regex, endOfTagRegex);
+                final int flags = Pattern.DOTALL | Pattern.CASE_INSENSITIVE;
+                Pattern pattern = Pattern.compile(regexInTag, flags);
+                unsafeAttributeValueInTagPatterns.add(pattern);
+            }
+        }
+
+        public static String filterUnsafeHTML (String str)
         {
             // specially escape some equal signs(=)
             str = encodeEqualsInStringLiteral(str);
@@ -1173,14 +1395,12 @@ public class HTML
             String safeHTML = unsafeHTMLPattern.matcher(str).replaceAll(" ");
 
             // invalidate unsafe substrings in HTML attribute values
-            for (String unsafeAttrVal : unsafeAttrValues) {
-                String unsafeAttrValPattern =
-                    Fmt.S("(?i)(%s:)" + endOfTagRegex, unsafeAttrVal);
-                safeHTML = safeHTML.replaceAll(unsafeAttrValPattern, "x$1");
+            for (Pattern pattern : unsafeAttributeValueInTagPatterns) {
+                safeHTML = pattern.matcher(safeHTML).replaceAll("x$1");
             }
 
             // bring back the safe HTML
-            safeHTML = safeHTML.replaceAll(stb+"((?:(?!"+ste+").)*)"+ste, "<$1>");
+            safeHTML = safeTagPattern.matcher(safeHTML).replaceAll("<$1>");
             safeHTML = safeHTML.replaceAll("@sf@(.*?)@sf@(.*?)@sf@", "$1=$2");
             safeHTML = unencodeEqualsInStringLiteral(safeHTML);
             safeHTML = safeHTML.trim();
@@ -1199,7 +1419,8 @@ public class HTML
             return Pattern.compile(
                 // This first bit matches the initial tag and quoted attributes.
                 //        href    =     "stuff"
-                Fmt.S("\\s(%s)\\s*=(" + stringLiteral + ")" + endOfTagRegex, safeAttr));
+                Fmt.S("\\s(%s)\\s*=(" + stringLiteral + ")" + endOfTagRegex, safeAttr),
+                Pattern.DOTALL);
         }
 
         /**
@@ -1211,7 +1432,7 @@ public class HTML
          * This filters out css margins in html attribute values.
          * @aribaapi private
          */
-        public static String filterCSSMargins(String str)
+        public static String filterCSSMargins (String str)
         {
             return filterMarginsPattern.matcher(str).replaceAll(" ");
         }

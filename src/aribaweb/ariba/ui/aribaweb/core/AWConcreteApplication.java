@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#123 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#126 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -170,7 +170,7 @@ abstract public class AWConcreteApplication
         }
 
         application.awake();
-        
+
         return application;
     }
 
@@ -387,7 +387,7 @@ abstract public class AWConcreteApplication
         }
         return Thread.currentThread().getContextClassLoader().getResource(relativePath + fileName);
     }
-    
+
     private static void loadSafeHtmlConfig ()
     {
         URL safeAttrsUrl = urlForResource("resource/html/", SAFE_ATTRS_FILE);
@@ -528,7 +528,7 @@ abstract public class AWConcreteApplication
     public AWResponseGenerating mainPage (AWRequestContext requestContext)
     {
         AWResponseGenerating page = createPageWithName(mainPageName(), requestContext);
-        
+
         if (page instanceof AWResponseGenerating.ResponseSubstitution) {
             page = ((AWResponseGenerating.ResponseSubstitution)page).replacementResponse();
         }
@@ -763,7 +763,7 @@ abstract public class AWConcreteApplication
         response.appendContent("<html><body>");
         response.appendContent("<h3>Exception encountered.</h3>");
         if (IsDebuggingEnabled) {
-            response.appendContent("<pre>Debug Enabled. Showing Stack Trace:\n");        
+            response.appendContent("<pre>Debug Enabled. Showing Stack Trace:\n");
             response.appendContent(HTML.escape(SystemUtil.stackTrace(throwable)));
             response.appendContent("</pre>");
         }
@@ -856,6 +856,7 @@ abstract public class AWConcreteApplication
         try {
             if (PerformanceState.threadStateEnabled()) {
                 PerformanceState.DispatchTimer.start();
+                PerformanceState.ThreadCPUTimer.start();
             }
 
             if (shouldRefuseResponse(request)) {
@@ -879,8 +880,9 @@ abstract public class AWConcreteApplication
         finally {
             if (PerformanceState.threadStateEnabled()) {
                 PerformanceState.DispatchTimer.stop(0);
+                PerformanceState.ThreadCPUTimer.stop(0);
             }
-        }            
+        }
         return response;
     }
 
@@ -1543,7 +1545,7 @@ abstract public class AWConcreteApplication
     {
         _sessionProcessList.add(new SessionWrapper(SessionOp.Add, session));
     }
-    
+
     protected void removeSessionFromStatusTable (AWSession session)
     {
         _sessionProcessList.add(new SessionWrapper(SessionOp.Remove, session));

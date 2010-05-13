@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWRadioButton.awl#11 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWRadioButton.awl#12 $
     </Copyright>
 
     <Overview>
@@ -35,9 +35,17 @@
     <Binding key="disabled" direction="get" type="boolean" default="$false">
         TBD
     </Binding>
+
+    <Binding key="action" direction="get" type="AWResponseGenerating" default="$null">
+        Will be evaluated when the invokeAction phase detects that the hyperlink was clicked.  A value of null should be
+        returned to cycle the current page.  Note: it is recommended that you declare your return type to be either
+        AWComponent or AWResponse, unless you cannot be sure because you are deferring to another method for the action.
+    </Binding>
+
 </a:Api>\
 
 <input type="radio" name="$radioName" elementId="$elementId"
        value="$elementId" formValuesKey="$radioName" formValue="$formValue"
        checked="$isChecked" awname="$^awname" onClick="$onClickString"
-       onChange="$^onChange" disabled="$disabled" id="$^id:$env.awinputId"/>\
+       onChange="$^onChange" disabled="$disabled" id="$^id:$env.awinputId"
+       isSender="$isSender" invokeAction="$^action"/>\

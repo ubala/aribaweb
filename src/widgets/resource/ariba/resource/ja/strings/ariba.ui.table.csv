@@ -22,6 +22,8 @@ Shift_JIS,,,,
 "AWTOptionsMenuItems",a013,"Pivot Table Layout","ピボットテーブルのレイアウト",""
 "AWTOptionsMenuItems",a014,"Show Detail Rows","詳細行を表示",""
 "AWTOptionsMenuItems",a015,"Configure Layout...","レイアウトの設定...",""
+"AWTOptionsMenuItems",a016,"Expand All Detail Rows","詳細行をすべて表示",""
+"AWTOptionsMenuItems",a017,"Collapse All Detail Rows","詳細行をすべて非表示",""
 "AWTPivotConfigurationPanel",a001,"Edit Table Layout","テーブルレイアウトの編集",""
 "AWTPivotConfigurationPanel",a002,"Column Fields","列フィールド",""
 "AWTPivotConfigurationPanel",a003,"Row Fields","行フィールド",""

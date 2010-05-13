@@ -1,5 +1,7 @@
 /*
-    Copyright 1996-2009 Ariba, Inc.
+    Copyright (c) 1996-2010 Ariba, Inc.
+
+    All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +14,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#32 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#36 $
 */
 
 package ariba.util.core;
@@ -1338,6 +1340,43 @@ public final class StringUtil
     }
 
     /**
+     * Run a check on each character of the local part of an email address
+     * for allowed valid characters
+     * @param ch
+     * @return boolean
+     */ 
+     private static boolean isValidCharForEmailLocalPart (char ch)
+     {
+         return is7bitAscii(ch) &&
+             (Character.isLetterOrDigit(ch) || 
+                ch == '!' || ch == '"' || ch == '#' || ch == '`' || ch == '=' ||
+                ch == '$' || ch == '%' || ch == '&' || ch == '-' || ch == '~' ||
+                ch == '*' || ch == '+' || ch == '/' || ch == '{' || ch == '\''||
+                ch == '}' || ch == '|' || ch == '^' || ch == '_' || ch == '?' ||
+                ch == '.' );
+     }    
+     
+     /**
+      * Validate the local part of an email address per RFC-822
+      * @param string
+      * @return boolean
+      */
+     public static boolean isValidEmailLocalPart (String string)
+     {
+         if (StringUtil.nullOrEmptyString(string)) {
+             return false;
+         }
+         int length = string.length();
+         for (int i=0; i<length; ++i)
+         {
+             if (!isValidCharForEmailLocalPart(string.charAt(i))) {
+                 return false;
+             }
+         }
+         return true;
+     }   
+    
+    /**
         Splits a string up into chunks using a whitespace delimiter.
         Quoted items are treated as a single chunk.
         @param str the string to split
@@ -1645,5 +1684,75 @@ public final class StringUtil
         }
 
         return components;
+    }
+
+    /**
+     * Returns the ideal size to truncate based on the max number characters to display
+     * and the ratio from the number of bytes to the number of characters.
+     */
+    public static int calcTruncateSize (String label, int max)
+    {
+        int byteSize = label.getBytes().length;
+        /* Fix CR 1-AXYCVB: Don't get divide by zero when label is empty string. */
+        int charSize = label.length();
+        int ratio = (charSize < 1 ? 1 : byteSize / charSize);
+        int idealSize = max;
+        if (ratio > 1) {
+            idealSize /= ratio;
+        }
+        return idealSize;
+    }
+
+    /**
+     * Returns the Base26 representation of the provided integer; where 0 = a,
+     * 25 = z, 26 = ba, etc.
+     * 
+     * Right now, we don't support negative values. The reason for this is that
+     * we anticipate that if someone ever wants to use this, they would use it for
+     * generating a unique alphabetical-only string based on some incrementing 
+     * number. It's not designed to fully support base 26 as a convenience for
+     * everyone (if you want this just use Integer.toString(i, 26).) 
+     * 
+     * To get upper case letters, just toUpper() the result. 
+     *
+     * @param positive integer
+     * @return String
+     */
+    public static String convertToBase26 (long value)
+    {
+        Assert.that(value > -1, "Negative values are not supported.");
+        if (value < 26) {
+            return Character.toString((char)('a' + value));
+        }
+        FastStringBuffer buf = new FastStringBuffer();
+        do {
+            int remainder = (int)(value % 26);
+            buf.append((char)('a' + remainder));
+            value = value / 26;
+        } while (value > 0);
+        FastStringBuffer result = new FastStringBuffer(buf.length());
+
+        // now reverse the string
+        for (int i = buf.length() - 1; i >= 0; --i) {
+            result.append(buf.charAt(i));
+        }
+        return result.toString();
+    }
+
+    /**
+     * Convenience method that converts a number in base 26 (as might have been
+     * constructed by {@link #convertToBase26(long)}) back into an integer.
+     * 
+     * @param numberInBase26
+     * @return
+     */
+    public static long convertFromBase26 (String numberInBase26)
+    {
+        long result = 0;
+        for (int j = 0, length = numberInBase26.length(); j < length; ++j) {
+            char c = numberInBase26.charAt(length - j - 1);
+            result += ((long)(c - 'a')) * (long)Math.pow(26, j);
+        }
+        return result;
     }
 }

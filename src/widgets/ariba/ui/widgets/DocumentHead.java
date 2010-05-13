@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DocumentHead.java#6 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DocumentHead.java#7 $
 */
 
 package ariba.ui.widgets;
@@ -39,6 +39,11 @@ public final class DocumentHead extends PageWrapper
     public List<Widgets.StyleSheetInfo> styleSheets ()
     {
         return Widgets.styleSheets();       
+    }
+
+    public boolean hasCustomCSS ()
+    {
+        return resourceManager().resourceNamed("custom.css") != null;
     }
 
     public boolean hasApplicationCSS ()

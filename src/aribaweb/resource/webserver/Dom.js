@@ -430,14 +430,19 @@ ariba.Dom = function() {
         absoluteTop : function (element)
         {
             var absoluteTop = element.offsetTop;
-            var parentElement = element.offsetParent;
-            while (parentElement != null) {
-                absoluteTop += parentElement.offsetTop;
-                if (parentElement != this.getPageScrollElement()) {
-                    // subtract scrollTop for positioning inside of scrollable elements
-                    absoluteTop -= parentElement.scrollTop;
+            var parentElement = element.parentNode;
+            var offsetParent = element.offsetParent;
+            while (parentElement != null &&
+                offsetParent != null &&
+                parentElement != this.getPageScrollElement()) {
+                // adjust offset if parent is an offset parent
+                if (parentElement == offsetParent) {
+                    absoluteTop += parentElement.offsetTop;
+                    offsetParent = parentElement.offsetParent;
                 }
-                parentElement = parentElement.offsetParent;
+                // subtract scrollTop for positioning inside of scrollable elements
+                absoluteTop -= parentElement.scrollTop;
+                parentElement = parentElement.parentNode;
             }
             return absoluteTop;
         },
@@ -520,14 +525,19 @@ ariba.Dom = function() {
         absoluteLeft : function (element)
         {
             var absoluteLeft = element.offsetLeft;
-            var parentElement = element.offsetParent;
-            while (parentElement != null) {
-                absoluteLeft += parentElement.offsetLeft;
-                if (parentElement != this.getPageScrollElement()) {
-                    // subtract scrollLeft for positioning inside of scrollable elements
-                    absoluteLeft -= parentElement.scrollLeft;
+            var parentElement = element.parentNode;
+            var offsetParent = element.offsetParent;
+            while (parentElement != null &&
+                offsetParent != null &&
+                parentElement != this.getPageScrollElement()) {
+                // adjust offset if parent is an offset parent
+                if (parentElement == offsetParent) {
+                    absoluteLeft += parentElement.offsetLeft;
+                    offsetParent = parentElement.offsetParent;
                 }
-                parentElement = parentElement.offsetParent;
+                // subtract scrollLeft for positioning inside of scrollable elements
+                absoluteLeft -= parentElement.scrollLeft;
+                parentElement = parentElement.parentNode;
             }
             return absoluteLeft;
         },
@@ -737,8 +747,16 @@ ariba.Dom = function() {
 
         setBodyClass : function (classString) {
             // Add in browser identifier for conditional styles
-            classString += (this.IsIE ? (" IsIE" + ((this.IsIE7) ? " IsIE7" : " IsIE6"))
-                    : " IsMoz");
+            if (this.IsIE) {
+                classString += " IsIE"
+                classString += this.IsIE7 ? " IsIE7" : " IsIE6";
+            }
+            else if (this.isSafari) {
+                classString += "IsSaf";    
+            }
+            else {
+                classString += "IsMoz";
+            }
             this.addClass(document.body, classString);
         },
 

@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/io/Deserializer.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/io/Deserializer.java#6 $
 */
 
 package ariba.util.io;
@@ -127,9 +127,8 @@ public class Deserializer extends FilterReader
         The result goes *into* the passed in object as opposed to
         creating a brand new instance.
 
-        NOTE: Currently, this is only wired up for hashtables. See
-        readObjectInternal(Object instance) for the actual
-        implementation.
+        NOTE: Currently, this is only wired up for hashtables and lists.
+        See readObjectInternal(Object instance) for the actual implementation.
     */
     public void readObject (Object instance)
       throws IOException, DeserializationException
@@ -150,7 +149,9 @@ public class Deserializer extends FilterReader
         switch (token) {
             case TokenGenerator.STRING_TOKEN:
             case TokenGenerator.ARRAY_BEGIN_TOKEN:
+                return;
             case TokenGenerator.VECTOR_BEGIN_TOKEN:
+                readIntoList((List)instance);
                 return;
             case TokenGenerator.HASHTABLE_BEGIN_TOKEN:
                 readIntoMap((Map)instance);
@@ -301,6 +302,13 @@ public class Deserializer extends FilterReader
                 justAddedObject = true;
             }
         }
+    }
+
+    private final void readIntoList (List target)
+      throws IOException, DeserializationException
+    {
+        List list = readList();
+        target.addAll(list);
     }
 
     private final Object[] readArray ()

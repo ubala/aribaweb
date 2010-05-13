@@ -501,8 +501,10 @@ ariba.Util.extend(ariba.Debug, function() {
                 if (senderId) break;
                 senderId = target.id;
                 if (senderId) break;
-                senderId = target.getAttribute("for");
-                if (senderId) break;
+                if (target.getAttribute) {
+                    senderId = target.getAttribute("for");
+                    if (senderId) break;
+                }
                 target = target.parentNode;
             }
             if(senderId) {
@@ -532,7 +534,9 @@ ariba.Util.extend(ariba.Debug, function() {
                     // Setup back pointer
                     var mainWindow = window;
                     setTimeout(function() {
-                        _ComponentInspectorWin._AWXMainWindow = mainWindow;
+                        try {
+                            _ComponentInspectorWin._AWXMainWindow = mainWindow;
+                        } catch (e) {}
                     }, 2000);
 
                     // Call on main window with path debug click
@@ -601,10 +605,13 @@ ariba.Util.extend(ariba.Debug, function() {
                     var mainWindow = window;
                     setTimeout(function() {
                         // alert ("trying to set " + _ComponentInspectorWin + " to " + window);
-                        if (_ComponentInspectorWin) {
-                            _ComponentInspectorWin._AWXMainWindow = mainWindow;
-                            _ComponentInspectorWin._AWXRefreshMainActionId = refreshMainActionId;
+                        try {
+                            if (_ComponentInspectorWin) {
+                                _ComponentInspectorWin._AWXMainWindow = mainWindow;
+                                _ComponentInspectorWin._AWXRefreshMainActionId = refreshMainActionId;
+                            }
                         }
+                        catch (e) {}
                     },3000);
                 } catch (e) {
                 }

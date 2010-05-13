@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#32 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#41 $
 */
 
 package ariba.util.core;
@@ -31,7 +31,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+    
 /**
     This class maintains performance state for the current thread.
 
@@ -46,9 +48,17 @@ public class PerformanceState
     protected static String NodeName = "UnknownNode";
     private static boolean _RegistrationComplete = false;
 
+    private static final String PlanPrefix = "plan-";
+
+    private static PerfLogger perfLog = new PerfLogger(null);
+    private static PerfLogger planLog = new PerfLogger(PlanPrefix);
+
     public static PerformanceStateTimedCounter DispatchTimer =
             new PerformanceStateTimedCounter("Runtime", 1000,
                     PerformanceStateCore.LOG_TIME);
+
+    public static PerformanceStateCPUTimedCounter ThreadCPUTimer =
+            new PerformanceStateCPUTimedCounter();
 
     /**
         Must be called by app after all metrics have been registered.  At that point
@@ -345,6 +355,10 @@ public class PerformanceState
         protected String acceptLanguage;
         protected String userAgent;
 
+        protected String testShortId;
+        protected String testId;
+        protected String testLine;
+
         public PerformanceCheck getPerformanceCheck ()
         {
             return _performanceCheck;
@@ -393,15 +407,15 @@ public class PerformanceState
         {
             return sessionID;
         }
-        
+
         public String getRealmType ()
-        { 
-            return realmType; 
+        {
+            return realmType;
         }
-        
+
         public void setRealmType (String realmType)
-        { 
-            this.realmType = realmType; 
+        {
+            this.realmType = realmType;
         }
 
         public void setSessionID (String sessionID)
@@ -593,6 +607,36 @@ public class PerformanceState
             this.userAgent = agent;
         }
 
+        public String getTestId ()
+        {
+            return testId;
+        }
+
+        public String getTestShortId ()
+        {
+            return testShortId;
+        }
+
+        public void setTestShortId (String testShortId)
+        {
+            this.testShortId = testShortId;
+        }
+
+        public void setTestId (String testId)
+        {
+            this.testId = testId;
+        }
+
+        public String getTestLine ()
+        {
+            return testLine;
+        }
+
+        public void setTestLine (String testLine)
+        {
+            this.testLine = testLine;
+        }
+
         public String toString ()
         {
             Map m = MapUtil.map(this);
@@ -632,6 +676,15 @@ public class PerformanceState
             if (userAgent != null) {
                 m.put("userAgent", userAgent);
             }
+            if (testShortId != null) {
+                m.put("testShortId", testShortId);
+            }
+            if (testId != null) {
+                m.put("testId", testId);
+            }
+            if (testLine != null) {
+                m.put("testLine", testLine);
+            }
             return m.toString();
         }
     }
@@ -652,7 +705,11 @@ public class PerformanceState
     protected static final String FileHeader = "Date, Realm, RealmType, NodeName, "
                     + "SessionID, User, SourcePage, SourceArea, DestPage, DestArea, "
                     + "Type, Status, "
-                    + "AppMetricName, AppMetric, AppDimension1, AppDimension2, AppInfo, Referer, AcceptLanguages, UserAgent, ";
+                    + "AppMetricName, AppMetric, AppDimension1, AppDimension2, AppInfo, Referer, AcceptLanguages, UserAgent, TestShortId, TestId, TestLine, ";
+    protected static final String PlanFileHeader = "Date, Realm, RealmType, NodeName, "
+                    + "SessionID, User, SourcePage, SourceArea, DestPage, DestArea, "
+                    + "Type, Status, "
+                    + "AppDimension1, AppDimension2, AppInfo, TestShortId, TestId, TestLine, Query, Plan";
 
     protected static PerformanceStateCore[] _LogMetrics = null;
 
@@ -686,17 +743,22 @@ public class PerformanceState
         return _LogMetrics;
     }
 
-    public static String fileHeaderString ()
+    public static String fileHeaderString (String prefix)
     {
         FormatBuffer buf = new FormatBuffer(100);
 
-        buf.append(FileHeader);
+        if (prefix.equals(PlanPrefix)) {
+            buf.append(PlanFileHeader);
+        }
+        else {
+            buf.append(FileHeader);
 
-        PerformanceStateCore[] logMetrics = logMetrics();
-        int len = logMetrics.length;
-        for (int i = 0; i < len; i++) {
-            PerformanceStateCore metric = logMetrics[i];
-            metric.appendCSVHeaders(buf);
+            PerformanceStateCore[] logMetrics = logMetrics();
+            int len = logMetrics.length;
+            for (int i = 0; i < len; i++) {
+                PerformanceStateCore metric = logMetrics[i];
+                metric.appendCSVHeaders(buf);
+            }
         }
 
         return buf.toString();
@@ -704,8 +766,31 @@ public class PerformanceState
 
     private static final char sep = ',';
 
+    private static void csvOutput (FastStringBuffer buf, String s, boolean replaceNewline)
+    {
+        if (s == null) {
+            return;
+        }
+        buf.append('"');
+        String escaped = StringUtil.replaceCharByString(s, '"', "\"\"");
+        if (replaceNewline) {
+                escaped = escaped.replace('\n', ' ');
+        }
+        buf.append(escaped);
+        buf.append('"');
+    }
+
+
     public static void logToFile (Stats stats)
     {
+        // if the test line number is -1, do not log the stats 
+        if (!StringUtil.nullOrEmptyString(stats.getTestLine()) &&
+            stats.getTestLine().equals("-1"))
+        {
+            Log.util.info(2942, "logToFile: not logging for stager/validator");
+            return;
+        }
+
         // create a string and add it to a queue.  Another thread will write it
         // to the file.
         FormatBuffer buf = new FormatBuffer(200);
@@ -719,9 +804,9 @@ public class PerformanceState
         buf.append(stats.getIPAddress()); buf.append(sep);
         buf.append(stats.getUser()); buf.append(sep);
         buf.append(stats.getSourcePage());buf.append(sep);
-        buf.append(stats.getSourceArea());buf.append(sep);
+        csvOutput(buf, stats.getSourceArea(), false);buf.append(sep);
         buf.append(stats.getDestinationPage());buf.append(sep);
-        buf.append(stats.getDestinationArea());buf.append(sep);
+        csvOutput(buf,stats.getDestinationArea(),false);buf.append(sep);
         buf.append(stats.getType());buf.append(sep);
         buf.append(stats.getStatus());buf.append(sep);
 
@@ -741,29 +826,24 @@ public class PerformanceState
             buf.append(sep);
         }
 
-        buf.append(stats.getAppDimension1()); buf.append(sep);
-        buf.append(stats.getAppDimension2()); buf.append(sep);
-        buf.append(stats.getAppInfo()); buf.append(sep);
+        csvOutput(buf,stats.getAppDimension1(),false); buf.append(sep);
+        csvOutput(buf,stats.getAppDimension2(),false); buf.append(sep);
+        csvOutput(buf,stats.getAppInfo(),false); buf.append(sep);
 
         //add HTTP referer url
-        buf.append(stats.getReferer()); buf.append(sep);
+        csvOutput(buf,stats.getReferer(),false); buf.append(sep);
 
         // add HTTP accept_language
-        if (!StringUtil.nullOrEmptyString(stats.getAcceptLanguage())) {
-            buf.append("\"" + stats.getAcceptLanguage() + "\"");
-        }
-        else {
-            buf.append("");
-        }
-        buf.append(sep);
+        csvOutput(buf,stats.getAcceptLanguage(),false); buf.append(sep);
 
         // add HTTP user_agent
-        if (!StringUtil.nullOrEmptyString(stats.getUserAgent())) {
-            buf.append("\"" + stats.getUserAgent() + "\"");
-        }
-        else {
-            buf.append("");
-        }
+        csvOutput(buf,stats.getUserAgent(),false); buf.append(sep);
+
+        csvOutput(buf, stats.getTestShortId(), false);
+        buf.append(sep);
+        csvOutput(buf, stats.getTestId(), false);
+        buf.append(sep);
+        csvOutput(buf, stats.getTestLine(), false);
         buf.append(sep);
 
         PerformanceStateCore[] logMetrics = logMetrics();
@@ -774,11 +854,68 @@ public class PerformanceState
         }
 
         // Log.perf_log.debug("%s", buf);
-        PerfLogger.getQueue().sendEvent(buf.toString()); // OK
+        perfLog.sendEvent(buf.toString()); // OK
     }
+
+    public static void logPlanFile (String query, String plan)
+    {
+        if (!threadStateEnabled() || !isLoggingEnabled()) {
+            return;
+        }
+
+        Stats stats = (Stats)state.get();
+        if (stats == null) {
+            stats = new Stats();
+        }
+
+        // if the test line number is -1, do not log the stats 
+        if (StringUtil.nullOrEmptyString(stats.getTestLine()) ||
+            stats.getTestLine().equals("-1"))
+        {
+            Log.util.info(2942, "logPlanFile: missing automation test line");
+            return;
+        }
+
+        // create a string and add it to a queue.  Another thread will write it
+        // to the file.
+        FormatBuffer buf = new FormatBuffer(200);
+
+        buf.append(Date.getNow().toString()); buf.append(sep);
+
+        buf.append(stats.getRealm()); buf.append(sep);
+        buf.append(stats.getRealmType()); buf.append(sep);
+        buf.append(PerformanceState.getNodeName()); buf.append(sep);
+        buf.append(ThreadNameAbbreviation.getName()); buf.append(":");
+        buf.append(stats.getSessionID()); buf.append(":");
+        buf.append(stats.getIPAddress()); buf.append(sep);
+        buf.append(stats.getUser()); buf.append(sep);
+        buf.append(stats.getSourcePage());buf.append(sep);
+        buf.append(stats.getSourceArea());buf.append(sep);
+        buf.append(stats.getDestinationPage());buf.append(sep);
+        buf.append(stats.getDestinationArea());buf.append(sep);
+        buf.append(stats.getType());buf.append(sep);
+        buf.append(stats.getStatus());buf.append(sep);
+        buf.append(stats.getAppDimension1()); buf.append(sep);
+        buf.append(stats.getAppDimension2()); buf.append(sep);
+        buf.append(stats.getAppInfo()); buf.append(sep);
+        csvOutput(buf, stats.getTestShortId(), false);
+        buf.append(sep);
+        csvOutput(buf, stats.getTestId(), false);
+        buf.append(sep);
+        csvOutput(buf, stats.getTestLine(), false);
+        buf.append(sep);
+        csvOutput(buf, query, true);
+        buf.append(sep);
+        csvOutput(buf, plan, true);
+
+        // Log.perf_log.debug("%s", buf);
+        planLog.sendEvent(buf.toString()); // OK
+    }
+
     public static void archiveLogFile()
     {
-        PerfLogger.getQueue().setArchiveFlag(true);
+        perfLog.setArchiveFlag(true);
+        planLog.setArchiveFlag(true);
     }
 
     /**
@@ -860,7 +997,7 @@ public class PerformanceState
         {
             synchronized(WatcherDaemon.class) {
                 _WatchedStates.remove(state);
-                _WatchedStates.put(state, thread);                
+                _WatchedStates.put(state, thread);
             }
         }
 
@@ -981,30 +1118,21 @@ final class PerfLogger implements Runnable
     private ThreadedQueue _queue;
     private PrintWriter _out;
 
-    private static PerfLogger instance;
-
-    public final static String NamePrefix = "perf-";
+    public String NamePrefix = "perf-";
     private String _namePrefix = null;
 
     public final static String _suffix = "csv";
     private boolean _archiveFlag = false;
 
-    public static PerfLogger getQueue ()
+    public PerfLogger (String prefix)
     {
-        synchronized(PerfLogger.class) {
-            if (instance == null) {
-                instance = new PerfLogger();
-                Thread t = new Thread(instance, "Perf_Log_Trace");
-                t.setDaemon(true);
-                t.start();
-            }
-            return instance;
+        if (prefix != null) {
+            NamePrefix = prefix;
         }
-    }
-
-    public PerfLogger ()
-    {
         _queue = new ThreadedQueue();
+        Thread t = new Thread(this, "Perf_Log_Trace"+NamePrefix);
+        t.setDaemon(true);
+        t.start();
     }
 
     public OutputStream createLogStream (String  prefix)
@@ -1058,7 +1186,7 @@ final class PerfLogger implements Runnable
             _out.close();
         }
         _out = new PrintWriter(createLogStream(namePrefix()));
-        _out.println(PerformanceState.fileHeaderString());
+        _out.println(PerformanceState.fileHeaderString(NamePrefix));
         setArchiveFlag(false);
     }
 

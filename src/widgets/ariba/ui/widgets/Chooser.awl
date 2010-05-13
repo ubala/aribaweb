@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#27 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#30 $
     </Copyright>
 
     <Overview>
@@ -21,23 +21,25 @@
     </Overview>
 
     <Binding key="selections" type="AWOrderedList" direction="get">
-        TBD
+        Short list of available selections.
     </Binding>
 
     <Binding key="selectionSource" type="ChooserSelectionSource" direction="get">
-        TBD
+        Interface responsible for returning matches given a pattern.
+        See ChooserSelectionSource.
     </Binding>
 
     <Binding key="state" type="ChooserState" direction="both">
-        TBD
+        The object holding all the UI state including the current selected objects.
+        See ChooserState and ChooserSelectionState.
     </Binding>
 
     <Binding key="noSelectionString" type="String" direction="get" required="$false">
         TBD
     </Binding>
 
-    <Binding key="formatter" type="Formatter" direction="get" required="$false">
-        TBD
+    <Binding key="formatter" type="AWFormatting" direction="get" required="$false">
+        Formatter used to format each selection and selected object for display.
     </Binding>
 
     <Binding key="disabled" type="boolean" direction="get" required="$false">
@@ -177,7 +179,7 @@
                 </w:PopupMenuItem>
             </w:PopupMenu>\
             <a:ClientSideScript isSingleton="$false">\
-                ariba.Chooser.initChooser('$chooserId', $chooserState.multiSelect, $chooserState.focus, $chooserState.isInvalid);
+                ariba.Chooser.initChooser('$chooserId', $chooserState.multiSelect, $chooserState.focus, $chooserState.isInvalid, $itemCountChanged);
             </a:ClientSideScript>\
             <a:Checkbox class="chfullMatch hide" value="$fullMatchValue"></a:Checkbox>\
         </a:RefreshRegion>\

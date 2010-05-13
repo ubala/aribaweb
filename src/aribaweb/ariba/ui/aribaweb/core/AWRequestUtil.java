@@ -12,12 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestUtil.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestUtil.java#3 $
 */
 package ariba.ui.aribaweb.core;
 
 import ariba.util.core.FastStringBuffer;
 import ariba.util.core.MapUtil;
+import ariba.util.core.Constants;
+import ariba.util.core.StringUtil;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWGenericException;
 
@@ -80,6 +82,39 @@ public class AWRequestUtil
         else {
             redirect.addFormValue(name,value);
         }
+    }
+
+    /**
+        Adds the given <code>requestHandlerKey</code> to the given <code>url</code>
+        and returns the result.  If the given <code>url</code> is <code>null</code>
+        or empty or blank, <code>url</code> is simply returned.
+     */
+    private static String addRequestHandlerKey (String url, String key)
+    {
+        if (!StringUtil.nullOrEmptyOrBlankString(url)) {
+            int qIndex = url.indexOf(BeginQueryChar);
+            String urlMinusQueryString = (qIndex != -1)? url.substring(0, qIndex): url;
+            FastStringBuffer buffer = new FastStringBuffer(urlMinusQueryString);
+            if (!urlMinusQueryString.endsWith(HTTP_DELIMITERSTRING)) {
+                buffer.append(HTTP_DELIMITERSTRING);
+            }
+            buffer.append(key);
+            if (qIndex != -1) {
+                String queryString = url.substring(qIndex, url.length());
+                buffer.append(queryString);
+            }
+            return buffer.toString();
+        }
+        return url;
+    }
+
+    /**
+        Adds the {@link AWConcreteApplication#DirectActionRequestHandlerKey} to
+        the given <code>url</code> and returns the result.
+     */
+    public static String addDirectActionRequestHandlerKey (String url)
+    {
+        return addRequestHandlerKey(url, AWConcreteApplication.DirectActionRequestHandlerKey);
     }
 
     public static Map parseParameters (String url)

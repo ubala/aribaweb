@@ -1,0 +1,6 @@
+<w:HintMessage>
+    Please confirm the post information.
+</w:HintMessage>
+<m:Context object="$context" operation="view" layout="Inspect">
+    <m:IncludeComponent/>
+</m:Context>

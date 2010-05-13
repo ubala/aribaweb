@@ -1,10 +1,10 @@
-<a:For count="$^value" index="$idx">\
-	<a:ActiveImage action="$click" filename="app/star-full.gif"/>\
-</a:For>\
-<a:For start="$^value" count='5' index="$idx">\
-	<a:ActiveImage action="$click" filename="app/star-outline.gif"/>\
-</a:For>\
 
+    <a:For count="$^value" index="$idx">\
+        <a:ActiveImage action="$click" filename="app/star-full.gif"/>\
+    </a:For>\
+    <a:For start="$^value" count='5' index="$idx">\
+        <a:ActiveImage action="$click" filename="app/star-outline.gif"/>\
+    </a:For>\
 <groovy>
   def idx;
   void click () { setValueForBinding(idx+1, "value"); }

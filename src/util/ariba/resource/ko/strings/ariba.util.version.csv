@@ -1,5 +1,5 @@
 KS_C_5601-1987,,
-copyright, "Copyright (c) 1996-2008 Ariba, Inc. All rights reserved. Æ¯Çã Ãâ¿ø Áß.",
+copyright, "Copyright (c) 1996-2009 Ariba, Inc. All rights reserved. Æ¯Çã Ãâ¿ø Áß.",
 versionWithSvPackWithDateWithPatchWithLangPack, "{0}.{1}.{2} ¼­ºñ½º ÆÑ {5} ¾ð¾î ÆÑ {6}(ºôµå {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
 versionWithSvPackNoDateWithPatchWithLangPack, "{0}.{1}.{2} ¼­ºñ½º ÆÑ {5} ¾ð¾î ÆÑ {6}(ºôµå {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
 versionWithSvPackWithDateNoPatchWithLangPack, "{0}.{1} ¼­ºñ½º ÆÑ {5} ¾ð¾î ÆÑ {6}(ºôµå {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack

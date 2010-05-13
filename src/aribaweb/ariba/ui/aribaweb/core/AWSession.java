@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#85 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#89 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -593,6 +593,10 @@ public class AWSession extends AWBaseObject
     public String _backTrackURL;
     public String _forwardTrackURL;
 
+    private String _testShortId;
+    private String _testId;
+    private String _testLine;
+
     // ** Thread Safety Considerations: sessions are never shared by multiple threads -- no locking required.
 
     public void dispose ()
@@ -608,6 +612,9 @@ public class AWSession extends AWBaseObject
         _isEnhancedAccessibility = false;
         _remoteHostAddress = null;
         _trackingCookie = null;
+        _testId = null;
+        _testShortId = null;
+        _testLine = null;
 
         Object disposeTarget = _requestContext;
         _requestContext = null;
@@ -711,6 +718,18 @@ public class AWSession extends AWBaseObject
     public String sessionId ()
     {
         return _sessionId;
+    }
+
+    /**
+        The AWSession id should have been assigned during initialization.
+        For cases where a new httpSession Id is created for the same httpSession, we want to be able to sync that new id
+        for AWSession.
+
+        Currently this httpSessionId reset is only supported in WO Framework.
+    */
+    public void setSessionId (String newSessionId)
+    {
+        _sessionId = newSessionId;
     }
 
     public String sessionSecureId ()
@@ -1430,6 +1449,25 @@ public class AWSession extends AWBaseObject
                 if (userAgent != null) {
                     stats.setUserAgent(userAgent);
                 }
+
+                String seleniumShortId = request.formValueForKey("testShortId");
+                String seleniumId = request.formValueForKey("testId");
+                String seleniumLineId = request.formValueForKey("testLineNb");
+
+                if (seleniumShortId != null) {
+                    _testShortId = seleniumShortId;
+                }
+                if (seleniumId != null) {
+                    _testId = seleniumId;
+                }
+                if (seleniumLineId != null) {
+                    _testLine = seleniumLineId;
+                }
+
+                stats.setTestShortId(_testShortId);
+                stats.setTestId(_testId);
+                stats.setTestLine(_testLine);
+
             }
 
             _lastAccessedTime = _httpSession.getLastAccessedTime();

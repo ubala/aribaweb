@@ -1,0 +1,2 @@
+10428, "Total time taken for mapRealmToCommunity Direct Action is {0} in milliseconds.", 0-Time taken for mapRealmToCommunityAction
+10429, "Total time for mapRealmOrANIDToCommunity() is {0} in milliseconds. Individual community level time taken in milliseconds {1}", 0-Total Time,1-Community level time

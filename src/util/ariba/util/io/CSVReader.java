@@ -1,6 +1,7 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
-
+    Copyright 1996-2010 Ariba, Inc.
+    All rights reserved. Patents pending.
+    
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -12,7 +13,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/io/CSVReader.java#25 $
+
+
+    $Id: //ariba/platform/util/core/ariba/util/io/CSVReader.java#26 $
 */
 
 package ariba.util.io;
@@ -31,10 +34,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.LineNumberReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.MalformedInputException;
 import java.util.List;
 
@@ -329,8 +335,21 @@ public final class CSVReader
         byte buf[] = new byte[2048];
         int len = inputStream.read(buf, 0, 2048);
         inputStream.reset();
-        ByteArrayInputStream bais = new ByteArrayInputStream(buf, 0, len);
-        encoding = IOUtil.readLine(bais);
+        ByteArrayInputStream bais = new ByteArrayInputStream(buf,0, len);
+
+        //check for unicode marker
+        ByteBuffer bb = java.nio.ByteBuffer.wrap(buf);
+        CharBuffer cb = bb.asCharBuffer();
+        char marker = cb.get(0);
+        
+        if (marker == 0xfffe || marker == 0xfeff) {
+            Reader reader = IOUtil.bufferedReader(bais, "UTF-16");
+            LineNumberReader line = new LineNumberReader(reader);
+            encoding = line.readLine();
+        }
+        else {
+            encoding =  IOUtil.readLine(bais);
+        }
 
         if (encoding == null) {
                 //The file is completely empty

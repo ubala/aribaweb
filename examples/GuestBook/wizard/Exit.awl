@@ -1,0 +1,16 @@
+<w:HintMessage>
+    Are you sure you want to exit?
+</w:HintMessage>
+<ul>
+    <li>
+        Yes, <w:WizardAction name="save">save and exit</w:WizardAction> $context.title
+    </li>
+
+    <li>
+        Yes, <w:WizardAction name="delete">delete and exit</w:WizardAction> $context.title
+    </li>
+
+    <li>
+        No, <w:WizardAction name="ok">continue editing</w:WizardAction> working on $context.title
+    </li>
+</ul>

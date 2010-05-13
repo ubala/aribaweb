@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletResponse.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletResponse.java#8 $
 */
 
 package ariba.ui.servletadaptor;
@@ -126,8 +126,11 @@ public class AWServletResponse extends AWBaseResponse
             }
         }
         if (!browserCachingEnabled()) {
-            servletResponse.setHeader("cache-control", "no-cache");
+            // Need all cache-control items for security reasons
+            servletResponse.setHeader("cache-control", 
+                "no-store, no-cache, must-revalidate, private");
             servletResponse.setHeader("pragma", "no-cache");
+            servletResponse.setHeader("expires", "-1");
         }
         if (_cookies != null) {
             for (int i=0,length=_cookies.size(); i<length; i++) {

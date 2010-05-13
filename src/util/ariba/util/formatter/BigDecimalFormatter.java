@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/BigDecimalFormatter.java#14 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/BigDecimalFormatter.java#19 $
 */
 
 package ariba.util.formatter;
@@ -55,10 +55,46 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
 
     private static final char CanadianEnglishGroupSeparator = ',';
 
+    final static int NOT_FOUND = -1;
+
     // error messages
     private static final String InvalidCharacterInNumberKey = "InvalidCharacterInNumber";
     private static final String NoDigitsFoundKey = "NoDigitsFound";
     private static final String NumberFormatErrorKey = "NumberFormatError";
+
+    /*-----------------------------------------------------------------------
+        Nested class
+      -----------------------------------------------------------------------*/
+
+    /**
+     * If a parse fails ONLY because strict behavior is specified this is used.
+     *
+     * Non-strict is basically compatibility mode to avoid causing parse errors
+     * in far away parts of the system (specifically importing Viking (AKA 8.2.2) xls data
+     * caused problems in the past).
+     *
+     * We also need to differentiate between a regular ParseException and
+     * a StrictParseException in order to preserve the old behavior in other
+     * parts of the system.
+     */
+    public static class StrictParseException extends ParseException
+    {
+        public StrictParseException (String s, int errorOffset)
+        {
+            super(s, errorOffset);
+        }
+
+        public static StrictParseException make (int offset)
+        {
+            String msg = Formatter.makeParseExceptionMessage("StrictValidationError");
+            return new StrictParseException(msg, offset);
+        }
+
+        public static boolean isStrict (ParseException ex)
+        {
+            return ex instanceof StrictParseException;
+        }
+    }
 
     /*-----------------------------------------------------------------------
         Fields
@@ -335,6 +371,40 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
         String pattern)
       throws ParseException
     {
+        return parseBigDecimal(string, locale, pattern, false);
+    }
+
+
+    /**
+        Parses this <code>string</code> as a BigDecimal in this
+        <code>locale</code>.
+
+        First converts the number string into a "canonical" number string
+        which is acceptable to the BigDecimal(string) constructor.  It then
+        calls this constructor and returns a new BigDecimal.
+
+        If the parse cannot be performed successfully, the parser throws
+        a <code>ParseException</code>.
+
+        @param string  The string to parse.
+        @param locale  The locale to use to get localized number and currency
+                       symbols such as the decimal separator.
+        @param pattern The DecimalFormat pattern to use for parsing     
+        @param strict If we should be lenient in what we accept, or throw an exception
+            on a bad string.
+
+        @return Returns the <code>BigDecimal</code> corresponding to the
+                <code>string</code> parameter.
+        @aribaapi documented
+        @see java.text.DecimalFormat
+    */
+    public static BigDecimal parseBigDecimal (
+        String string,
+        Locale locale,
+        String pattern,
+        boolean strict)
+      throws ParseException
+    {
         Assert.that(locale != null, "invalid null Locale");
         DecimalFormat fmt = null;
         try
@@ -342,7 +412,7 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
             fmt = acquireDecimalFormat(locale, pattern);
             string = LocaleSupport.normalizeNumber(string, locale);
 
-            DecimalParseInfo info = parseBigDecimal(string, fmt);
+            DecimalParseInfo info = parseBigDecimal(string, fmt, strict);
             return info.number;
         }
         finally
@@ -407,8 +477,53 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
     public static DecimalParseInfo parseBigDecimal (String string, DecimalFormat fmt)
       throws ParseException
     {
+        return parseBigDecimal (string, fmt, false);
+    }
+
+
+    /**
+        Parse the <code>string</code> parameter and return a
+        <code>DecimalParseInfo</code> that returns information gleaned
+        from parse such as the <code>BigDecimal</code> number
+        corresponding to the string, the number of decimal places,
+        etc.
+
+        If the parse cannot be performed successfully, the parser throws
+        a <code>ParseException</code>.
+
+        @param string The string to parse.
+        @param fmt The <code>DecimalFormat</code> to use for fetching localized
+                   symbols.        
+        @param strict If we should be lenient in what we accept, or throw an exception
+            on a bad string.
+
+        @return Returns the <code>BigDecimal</code> corresponding to the
+                <code>string</code> parameter.
+        @aribaapi documented
+    */
+    public static DecimalParseInfo parseBigDecimal (String string,
+                                                    DecimalFormat fmt,
+                                                    boolean strict)
+      throws ParseException
+    {
+        /*
+         * In general we loop through the input string and fill some intermediate
+         * buffers with the results.  Then we convert the buffers to other types
+         * and pass these to a DecimalParseInfo constructor.
+         */
+
+        /* House keeping setup */
+
+            // temporarily disable strict to allow build to complete
+            // --mgower 04/05/2010
+        strict = false;
+
+            // eg if "10-" is a valid string, ignoreNegativePrefix will be set to true
         boolean ignoreNegativePrefix = false;
+            // eg if "-10" is a valid string, ignoreNegativeSuffix will be set to true
+            // if "(10)" is a valid string, neither will be ignored
         boolean ignoreNegativeSuffix = false;
+
         DecimalFormatSymbols symbols = fmt.getDecimalFormatSymbols();
 
             // Initialize the parsing result buffers
@@ -416,43 +531,69 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
         FastStringBuffer prefix = new FastStringBuffer();
         FastStringBuffer suffix = new FastStringBuffer();
 
-            // Extract localized characters for parsing numbers
+        // Extract localized characters for parsing numbers
+            // For the string "1,234.56" '.' is the decimal separator.
         char decimalSep = symbols.getDecimalSeparator();
+            //For the string "1,234.56" ',' is the grouping separator.
         char groupSep   = symbols.getGroupingSeparator();
+            // The negativePrefix will typically be ( or -, as in (100) or -100.
         String negativePrefix = fmt.getNegativePrefix();
+            // The negative suffix will typically be ) or '', as in (100) or -100.
+            // Something like 100- is allowed in some locals as well though.
         String negativeSuffix = fmt.getNegativeSuffix();
         int length = string.length();
+
         Log.util.debug("parseBigDecimal: string = %s, neg prefix = %s, neg suffix = %s",
                        string, negativePrefix, negativeSuffix);
+
+        // housekeeping for negative signs
+            // if no negative prefix
         if (StringUtil.nullOrEmptyOrBlankString(negativePrefix)) {
+            // and negative suffix
             if (!StringUtil.nullOrEmptyOrBlankString(negativeSuffix)) {
                 ignoreNegativePrefix = true;
             }
             else {
-                    // so we don't have the (optional) negative pattern, core java doc says
-                    // use '-' as prefix.
+                    // We have no negative prefix or suffix,
+                    // so we don't have the (optional) negative pattern at all.
+                    // The core java doc says to use '-' as prefix.
                 negativePrefix = CanonicalNegativePrefix;
                 ignoreNegativeSuffix = true;
             }
         }
+            // we have a negative prefix and no negative suffix
         else if (StringUtil.nullOrEmptyOrBlankString(negativeSuffix)) {
             ignoreNegativeSuffix = true;
         }
-            // Walk through the string and replace any localized punctuation
-            // characters with canonical ones
+
         boolean negPrefixFound = false;
         boolean negSuffixFound = false;
+            // eg if "((100))" is negative, the first ')' would have negativeSuffixIndex 0
+            // and the second ')' would have negativeSuffixIndex 1
+        int negativeSuffixIndex = NOT_FOUND;
+            // if we've found any digits (decimal or integer) anywhere ever in the loop
         boolean foundDigits = false;
+            // count of the decimal digits, ie 1.23 would have 2 at the end of the loop
         int decimalDigits  = 0;
+            // count of the integer digits, ie 1.23 would have 1 at the end of the loop
         int integerDigits  = 0;
-        int decimalLocation = -1;
+            // index of the decimal point, ie 1.23 would have decimal location 1
+        int decimalLocation = NOT_FOUND;
+
+        /*
+        * Read through input string, character by character.
+        * This will fill the buffers and replace any localized punctuation
+        * characters with canonical ones
+        */
         for (int i = 0; i < length; i++) {
             char curChar = string.charAt(i);
             char nextChar = i < length-1 ? string.charAt(i+1) : ' ';
 
-                // Are we on the negative prefix?  If so, skip it
+                // Are we on the format's negative prefix?  If so, skip it
+                // We check for the canonical negative prefix below
             if (!negPrefixFound && !foundDigits && negativePrefix.length() > 0 &&
-                string.indexOf(negativePrefix, i) == i) {
+                string.indexOf(negativePrefix, i) == i)
+            {
                 Log.util.debug("found neg prefix at %s", i);
                 negPrefixFound = true;
                 i += negativePrefix.length()-1;
@@ -460,7 +601,8 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
                 // Are we on the negative suffix?  If so, skip it
             else if (!negSuffixFound && foundDigits &&
                      negativeSuffix.length() > 0 &&
-                     string.indexOf(negativeSuffix, i) == i) {
+                     string.indexOf(negativeSuffix, i) == i)
+            {
                 negSuffixFound = true;
                 Log.util.debug("found neg suffix at %s", i);
                 i += negativeSuffix.length()-1;
@@ -471,7 +613,8 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
                 // decimal separators after the current one.
             else if (decimalSep == curChar &&
                      (foundDigits || Character.isDigit(nextChar) &&
-                     string.lastIndexOf(decimalSep) == i)) {
+                     string.lastIndexOf(decimalSep) == i))
+            {
 
                     // Replace with the canonical decimal separator for the
                     // BigDecimal constructor.
@@ -479,12 +622,12 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
                 decimalLocation = i;
             }
 
-                // We're in the number prefix or in white space
+                // We're in the group separator (canonical ',')  or in white space
             else if (Character.isWhitespace(curChar) ||
                      Character.isSpaceChar(curChar)  ||
                      groupSep == curChar)
             {
-                    // ignore these characters
+                    // ignore these characters, no state changes at all
             }
 
                 // We're either in the number itself
@@ -520,7 +663,8 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
 
                 number.append(curChar);
                 foundDigits = true;
-                if (decimalLocation > -1) {
+                if (decimalLocation > NOT_FOUND) {
+                    // decimal place has been found
                     decimalDigits++;
                 }
                 else {
@@ -528,17 +672,48 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
                 }
             }
 
-                // We're on a number prefix character
-            else if (!foundDigits) {
+                // We're on the canonical negative prefix character ('-').
+                // We check for the formatter's negative prefix character above.
+            else if (!foundDigits &&
+                (!strict || CanonicalNegativePrefix.equals(Character.toString(curChar))))
+            {
                 prefix.append(curChar);
+                // negPrefixFound is needed for accepting -150 as negative
+                // when the format is (150), not changing to avoid risk of B/C break
+                // -mgower 03/30/2010
             }
 
                 // We're on a number suffix character
-            else {
+                // A different check for a suffix is above.
+            else if (
+                isNegativeSuffix(curChar, negativeSuffix, negativeSuffixIndex, strict))
+            {
+                if (strict && suffix.length() == negativeSuffix.length()) {
+                    // we found too many suffix characters, ie (100))
+                    throw StrictParseException.make(i);
+                }
                 suffix.append(curChar);
-            }
-        }
+                    // increment or set the negativeSuffixIndex
+                if (negativeSuffixIndex == NOT_FOUND) {
+                    negativeSuffixIndex = 0;
+                }
+                else {
+                    negativeSuffixIndex++;
+                }
 
+                // we found the negative suffix but we aren't flipping the negSuffixFound
+                // flag to avoid the risk of B/C break, -mgower 3/30/2010
+            }
+
+                // Invalid input with strict flag on
+            else {
+                throw StrictParseException.make(i);
+            }
+        } // end input string loop
+
+        /* Convert the buffer data to the format for DecimalParseInfo's constructor */
+
+        // make number buffer negative based on housekeeping data
             // If we did not find the negative prefix or suffix because
             // they are not supposed to be there in the first place
             // ignoreNegativePrefix or ignoreNegativeSuffix will tell
@@ -558,9 +733,12 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
             number.insert(CanonicalMinusSign, 0);
         }
 
+        // sanity check
         if (number.length() == 0) {
             throw makeParseException(NoDigitsFoundKey, 0);
         }
+
+        // convert number buffer to big decimal
         String numberString = number.toString();
         BigDecimal amount = Constants.ZeroBigDecimal;
         try {
@@ -570,6 +748,7 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
             throw makeParseException(NumberFormatErrorKey, 0);
         }
 
+        // convert other buffers to strings
         String prefixString = prefix.toString();
         if (StringUtil.nullOrEmptyOrBlankString(prefixString)) {
             prefixString = null;
@@ -578,8 +757,36 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
         if (StringUtil.nullOrEmptyOrBlankString(suffixString)) {
             suffixString = null;
         }
+
+        /* Use converted housekeeping data */  
+
         return new DecimalParseInfo(integerDigits, decimalDigits, decimalLocation,
                                     prefixString, suffixString, amount);
+    }
+
+    private static boolean isNegativeSuffix (
+        char curChar, String negativeSuffix, int negativeSuffixIndex, boolean strict)
+    {
+        if (!strict) {
+            // if not strict then just assume it's a negative suffix for b/c
+            return true;
+        }
+        else if (StringUtil.nullOrEmptyOrBlankString(negativeSuffix)) {
+            // if there is no negative suffix then we can't be there
+            return false;
+        }
+
+        boolean firstNegativeSuffixChar =
+            negativeSuffixIndex == NOT_FOUND && negativeSuffix.charAt(0) == curChar;
+        if (firstNegativeSuffixChar) {
+            return true;
+        }
+
+        boolean otherNegativeSuffixChar =
+            negativeSuffixIndex != NOT_FOUND
+            && negativeSuffixIndex < negativeSuffix.length()
+            && negativeSuffix.charAt(negativeSuffixIndex) == curChar;
+        return otherNegativeSuffixChar;
     }
 
     /**

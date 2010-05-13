@@ -63,7 +63,9 @@ public interface NumericTypes
       /** Type tag meaning java.math.BigDecimal. */
     public int BIGDEC  = 9;
       /** Type tag meaning something other than a number. */
-    public int NONNUMERIC = 10;
+    public int CUSTOMNUMERICTYPE = 10;
+      /** Type tag meaning something other than a number. */
+    public int NONNUMERIC = 11;
 
       /**
        * The smallest type tag that represents reals as opposed to integers.  You can see

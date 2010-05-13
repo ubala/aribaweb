@@ -15,6 +15,11 @@
 <h3>Guides</h3>
 
   - [Wizard](Wizard/Wizard.txt)
+  - [Drag and Drop](DragDrop/DragAndDrop.txt)
+  - [Cycles and Scopes](CycleScope/CyclesAndScopes.txt)
+  - [Direct Action](DirectAction/DirectAction.txt)
+  - [Auto Ajax](AutoAjax/AutoAjax.txt)
+  - [Chooser](Chooser/Chooser.txt)
 
 <h3>Reference</h3>
 

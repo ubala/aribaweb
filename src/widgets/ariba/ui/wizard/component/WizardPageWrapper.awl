@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/WizardPageWrapper.awl#3 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/wizard/component/WizardPageWrapper.awl#4 $
     </Copyright>
 
     <Overview>
@@ -32,7 +32,7 @@
 <w:BasicPageWrapper commands="$frame.wizard.commandBar" hasForm="$true"
     formEncodingType="$frame.formEncoding"
     submitFormDefault="$frame.submitFormDefault"
-    helpUrl="$frame.helpUrl" debugTitle="$^debugTitle">\
+    debugTitle="$^debugTitle">\
     <w:WizardNavigator frame="$frame">\
        <a:IncludeContent/>\
    </w:WizardNavigator>\

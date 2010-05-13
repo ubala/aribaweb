@@ -1,5 +1,30 @@
+New in Version 5.0GA - PREVIEW 4 (05/11/2010)
+---------------------------------------------
+
+- Add HTML to PDF generation utility method
+- Add action support to AWRadioButton
+- Add validate binding to Confirmation
+- Add chooserStyle property to enumeration
+- Fix Safari 4 issues
+- Add guides
+    - Drag and Drop
+    - Cycles and Scopes
+    - Direct Action
+    - Auto Ajax
+    - Chooser
+- Security fixes
+    - Cache-control vulnerability
+    - XSS fixes
+- Performance fix
+    - element id cache flushing
+- Misc bug fixes
+    - Fix NPE and panel sizing for Chooser
+    - Fix stale state in Pivot Table 
+    - Fix scrolling issue caused by AribaToc
+
 New in Version 5.0GA - PREVIEW 3 (10/29/2009)
 ---------------------------------------------
+
 - Safari 4 support
 - Upgrade Tomcat to 6.0.20
 - Add Wizard guide
@@ -10,6 +35,7 @@ New in Version 5.0GA - PREVIEW 3 (10/29/2009)
 
 New in Version 5.0GA - PREVIEW 2 (8/29/2009)
 ---------------------------------------------
+
 - MetaUI tutorial completed
 - Fix duplicate objects on create.
 - Add convenient pageWithName with args method to AWRequestContext

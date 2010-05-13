@@ -53,6 +53,7 @@ ariba.Datatable = function() {
     var _awtSelectStart = false;
     var _awtMouseDragIndicator;
     var AWNullValue = new Object();
+    var _numTablesKey = "numTables";
 
     // externally defined function to avoid circular reference
     // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/IETechCol/dnwebgen/ie_leak_patterns.asp
@@ -89,7 +90,12 @@ ariba.Datatable = function() {
                     : Dom.findParentUsingPredicate(tableInfo.flexContainer, function (e) {
                 return Dom.hasClass(e, "panelContainer");
             });
-            if (!tableInfo.positioningParent) tableInfo.positioningParent = Dom.positioningParent(tableInfo.flexContainer);
+            if (!tableInfo.positioningParent) {
+                tableInfo.positioningParent = Dom.positioningParent(tableInfo.flexContainer);
+            }
+            else {
+                Util.incrementAttribute(tableInfo.positioningParent, _numTablesKey);
+            }
 
             tableInfo.bodyHt = 0;
         },
@@ -200,7 +206,8 @@ ariba.Datatable = function() {
          * @see ariba.ui.table.AWTDisplayGroup
          */
         updateScrollTable : function(id, isDraggable, isMaximizedId,
-                                      topCount, bottomCount, topIndexId, topOffsetId, scrollFaultActionId,
+                                      topCount, bottomCount, topIndexId, topOffsetId, 
+                                      leftPosId, scrollFaultActionId,
                                       rowIdToForceVisible, updateSelectAllActionId)
         {
             var tableInfo = this.infoForTable(id);
@@ -217,6 +224,7 @@ ariba.Datatable = function() {
                 tableInfo.bottomCount = parseInt(bottomCount);
                 tableInfo.topIndexId = topIndexId;
                 tableInfo.topOffsetId = topOffsetId;
+                tableInfo.leftPosId =leftPosId;
                 tableInfo.scrollFaultActionId = scrollFaultActionId;
                 tableInfo.repositionScroll = true;
             }
@@ -416,6 +424,16 @@ ariba.Datatable = function() {
 
                 tableInfo.bodyTable.tBodies[0].insertBefore(newBodyRow, tableInfo.bodyTable.rows[0]);
 
+                //When the response comes in, the table content gets inserted first into
+                //the body table. This can be smaller than the previous view causing the
+                //the table body to shrink and the horizontal scroll to shift right.
+                //We restore the original width by inserting a dummy row with the same
+                //width as the previous view(above). Now we restore the horizontal 
+                //scroll to the same position as the previous view. 
+                var leftPos = Dom.elementIntValue(tableInfo.leftPosId);
+                if (leftPos > 0) {
+                    tableInfo.body.scrollLeft = leftPos;
+                }
                 // Debug.log("Initial Scroll Pos: " + tableInfo.body.scrollLeft + ", " + tableInfo.body.scrollTop + "!!");
 
                 // Scroll sync between body and header
@@ -512,7 +530,7 @@ ariba.Datatable = function() {
                     // the old size and the new size
                     headCell.style.paddingRight = newWd + "px";
                 }
-                headCells[headCells.length-1].style.width = "100%";
+                headCells[headCells.length-1].style.paddingRight = "100px";
             } else {
                 tableInfo.headTable.style.width = "100%";
             }
@@ -546,16 +564,25 @@ ariba.Datatable = function() {
 
         checkWidthStrut : function (tableInfo, positioningParent, desiredWidth)
         {
-            if (positioningParent != Dom.documentElement()) {
-                var panelWidth = Widgets.panelMaxWidth(positioningParent, tableInfo.wrapperTable);
-                if (this.avgRowHeight(tableInfo) > 35) desiredWidth *= 1.3;
-                var pad = (Dom.absoluteLeft(tableInfo.bodyTable) - Dom.absoluteLeft(tableInfo.wrapperTable)) * 2;
-                desiredWidth = Math.min(desiredWidth + pad, panelWidth);
+            // dialog boxes only
+            if (positioningParent == Dom.documentElement()) {
+                return;
+            }
+            var panelWidth = Widgets.panelMaxWidth(positioningParent, tableInfo.wrapperTable);
+            var isOnlyTable = Util.getIntAttribute(positioningParent, _numTablesKey) <= 1;
+            var tallRows = this.avgRowHeight(tableInfo) > 35;
+            if (tallRows && isOnlyTable) {
+                desiredWidth *= 1.3;
+            }
+            var pad = (Dom.absoluteLeft(tableInfo.bodyTable) - Dom.absoluteLeft(tableInfo.wrapperTable)) * 2;
+            desiredWidth = Math.min(desiredWidth + pad, panelWidth);
 
-                var strut = tableInfo.wrapperTable.parentNode.nextSibling;
-                var curWd = parseInt(strut.style.width) || 0;
-                // 1-8OEJFK - Temp fix.  Should clean up stale relocatable div instead
-                if (desiredWidth > 0 && curWd != desiredWidth) strut.style.width = desiredWidth + "px";
+            var awtstrut = tableInfo.wrapperTable.parentNode.nextSibling;
+            var currentWidth = parseInt(awtstrut.style.width) || 0;
+
+            // Temp fix.  Should clean up stale relocatable div instead
+            if (desiredWidth > 0 && currentWidth != desiredWidth) {
+                awtstrut.style.width = desiredWidth + "px";
             }
         },
 
@@ -1164,7 +1191,9 @@ ariba.Datatable = function() {
             // always push offset data, so the scroll pos is preserved if the user leaves this page and comes back
             Dom.setElementValue(tableInfo.topIndexId, faultData[AWTFaultIndex_TopRow]);
             Dom.setElementValue(tableInfo.topOffsetId, faultData[AWTFaultIndex_TopOffset]);
-            
+
+            Dom.setElementValue(tableInfo.leftPosId, tableInfo.body.scrollLeft);
+
             if (faultData[AWTFaultIndex_Position] != 0) {
                 if (_AWTPendingScroll) {
                     // Debug.log("<font color='red'>RACE CONDITION</font>");
