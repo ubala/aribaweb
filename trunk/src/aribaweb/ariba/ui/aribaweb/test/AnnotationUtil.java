@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#11 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/AnnotationUtil.java#12 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -22,17 +22,20 @@ import ariba.ui.aribaweb.core.AWDirectAction;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.util.test.TestDestager;
 import ariba.util.test.TestPageLink;
 import ariba.util.test.TestParam;
 import ariba.util.test.TestStager;
 import ariba.util.test.TestValidator;
+
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.AnnotatedElement;
 import java.util.Map;
 import java.util.Set;
+
 
 public class AnnotationUtil
 {
@@ -45,6 +48,10 @@ public class AnnotationUtil
         }
         else if (TestStager.class.isAssignableFrom(annotation.annotationType())) {
             TestStager testLink = (TestStager)annotation;
+            typeList = testLink.typeList();
+        }
+        else if (TestDestager.class.isAssignableFrom(annotation.annotationType())) {
+            TestDestager testLink = (TestDestager)annotation;
             typeList = testLink.typeList();
         }
         else if (TestValidator.class.isAssignableFrom(annotation.annotationType())) {
@@ -65,6 +72,10 @@ public class AnnotationUtil
             TestStager testLink = (TestStager)annotation;
             superType = testLink.superType();
         }
+        else if (TestDestager.class.isAssignableFrom(annotation.annotationType())) {
+            TestDestager testLink = (TestDestager)annotation;
+            superType = testLink.superType();
+        }
         else if (TestValidator.class.isAssignableFrom(annotation.annotationType())) {
             TestValidator testValidator = (TestValidator)annotation;
             superType = testValidator.superType();
@@ -83,6 +94,10 @@ public class AnnotationUtil
             TestStager testLink = (TestStager)annotation;
             name = testLink.name();
         }
+        else if (TestDestager.class.isAssignableFrom(annotation.annotationType())) {
+            TestDestager testLink = (TestDestager)annotation;
+            name = testLink.name();
+        }
         return name;
     }
 
@@ -96,6 +111,10 @@ public class AnnotationUtil
         }
         else if (TestStager.class.isAssignableFrom(annotation.annotationType())) {
             TestStager testLink = (TestStager)annotation;
+            name = testLink.description();
+        }
+        else if (TestDestager.class.isAssignableFrom(annotation.annotationType())) {
+            TestDestager testLink = (TestDestager)annotation;
             name = testLink.description();
         }
         return name;

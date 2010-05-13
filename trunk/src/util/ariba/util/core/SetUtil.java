@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/SetUtil.java#12 $
+    $Id: //ariba/platform/util/core/ariba/util/core/SetUtil.java#13 $
 */
 
 package ariba.util.core;
@@ -26,6 +26,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.AbstractSet;
 import java.util.NoSuchElementException;
+import java.util.Collection;
 
 /**
     Set Utilities. These are helper functions for dealing with
@@ -106,7 +107,8 @@ public final class SetUtil
 
 
     /**
-        Creates new Set with the same contents as the given Set. <p/>
+        Creates new Set with the same contents as unique elements in the given Collection.
+        <p/>
 
         Given that <code>setOfX</code> is a <code>Set&lt;X></code>,
         <code>setOfY</code> is a <code>Set&lt;Y></code> (and that <code>Y</code>
@@ -122,12 +124,12 @@ public final class SetUtil
         <li><code>Set raw = SetUtil.set(setOfX)</code>
         </ul>
 
-        @param source source set
+        @param source source collection
         @return new Set with same contents as <code>source</code>
         @exception NullPointerException  if the specified Set is null.
         @aribaapi ariba
     */
-    public static <T> Set<T> set (Set<? extends T> source)
+    public static <T> Set<T> set (Collection<? extends T> source)
     {
         return new HashSet<T>(source);
     }
@@ -139,7 +141,7 @@ public final class SetUtil
         method.) <p>
 
         If you just want a <code>java.util.Set</code>, then you're better off using
-        {@link #set(java.util.Set)}, since it's guaranteed to work and is probably
+        {@link #set(java.util.Collection)}, since it's guaranteed to work and is probably
         just as fast on small sets. <p>
 
         @param set the <code>Set</code> to clone

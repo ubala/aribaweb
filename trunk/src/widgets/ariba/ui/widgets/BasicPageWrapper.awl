@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#100 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#101 $
     </Copyright>
 
     <Overview>
@@ -142,10 +142,6 @@
         would have been rendered.  By default, this turned off, however, if the "isPrintMode" flag
         is enabled on the requestContext, then the wrapper frame is omitted regardless of the
         setting of this flag.
-    </Binding>
-
-    <Binding key="helpUrl" direction="get" type="String" required="$false">
-        Deprecated.  No longer used, use helpKey.
     </Binding>
 
     <Binding key="helpKey" direction="get" type="String" required="$false">

@@ -1,0 +1,275 @@
+AribaWeb Cycles And Scopes
+==========================
+
+A key concept to understand in AW programming is the page cycle and request response cycle,
+and where UI states can stored and accessed in various scopes.
+
+We'll build on our GuestBook application as follows:
+
+  1. Add an one time message on an action
+  2. Make tab selection sticky under the Post module  
+  3. Change the application name in the URL  
+
+In this guide, you will learn the following concepts:
+
+  - [Page Cycle]#
+  - [Request Response Cycle]#
+  - [Page Scope]#
+  - [Request Response Scope]#
+  - [Session Scope]#
+  - [Application Scope]#
+
+A pre-requisite to this guide is [AribaWeb Core](../1_AribaWeb/AribaWeb.txt),
+and [Wizard](../Wizard/Wizard.txt) is optionally needed for the example.
+
+Page Cycle
+----------
+
+To understand the page cycle,
+we first need to learn about the three phases of AribaWeb:
+
+- renderResponse
+- takeValues
+- invokeAction
+
+Let's look at the phases in context:
+
+We hit an AribaWeb application's URL, and a page with a form is displayed to the client.
+
+Page A is created, and the page cycle begins with the renderResponse phase on this page.
+Conceptually,
+
+        renderResponse is the phase where AW pulls values from states
+           in page A to generate the response content.
+
+Next, we fill in the form and hit the submit button, and a different page is then displayed.
+The page cycle ends with the takeValues and invokeAction on the original page A.
+Conceptually,
+
+        takeValues is the phase where AW pushes the values from
+          the request into states in page A.
+        
+        invokAction is the phase where AW invoke the method on the page A
+          representated by the submit button.
+
+The method then create outgoing page B,
+and the page cycle repeats with the renderResponse phase on this page.
+
+From a page cycle perspective, the three phases are always in this
+order:
+
+        renderResponse -> takeValues -> invokeAction
+
+In each phase, the component tree is traversed.
+
+A gotcha is this is that states that affects the structure of the page cannot change
+between renderResponse to the beginning of invokeAction.
+Otherwise, values from the request might not get pushed or the action might not get fired.
+State affecting the page structure should only be changed druing invokeAction.
+
+Boolean bindings to [AWIf]#api and the list binding to [AWFor]#api are two
+examples that affects the page structure.
+
+Request Response Cycle
+----------------------
+The request response cycle is another way to look at the three phases.
+It follows the typical client server model.
+
+From a request response cycle perspective, the three phases are in this order:
+
+        takeValues -> invokeAction -> renderResponse
+
+where takeValues and invokeAction do not always happen (ie, the first
+request or when no form values are present)
+
+Here's a diagram showing the overlap between the page cycle and
+request response cycle:
+
+        |---------- page A ----------|---------- page B ---------|
+
+        -> render -> take -> invoke -> render -> take -> invoke -> render
+
+                  |--- request response A ----|--- request reponse B ----|
+
+Page Scope
+----------
+
+States can be placed in various scopes that affects their accesses and lifecycles.
+
+States that live across request response cycles can be stored on the page.
+This means that states used in the renderResponse phase is accessible in the next takeValues
+and invokeAction phase.
+
+In Main.java, _newPost is the state we used to render the form during renderResponse.
+It is also the state used when AW pushes the form values during takeValues.
+It is also the state used when we call the add action during invokeAction.
+
+States stored in page components (ie, Main.java) and in stateful subcomponents
+are effectively stored on the page,
+and are in page scope (we will dive into stateful and stateless in another guide).
+
+An instance of [AWPage]#api represents the page scope.
+It holds the page component and its stateful subcomponents, and manages the page cycle.
+
+Let's take a look at this in action.  Navigate to our Past Comments in table view,
+and select the first post.  You should see the post highlighted like this:
+
+![PageScope](PageScope.gif)
+
+Now click on the Home tab, then hit F5 in your browser to
+make sure we are cheating by keeping state on the client side.
+Now hit the back button in your browser.
+You will notice that the table tab is still selected,
+and the first post is still highlighted!
+
+AribaWeb actually keeps a list of pages for history management.
+When we backtrack, we make the previous page the current page.
+
+States on the page are in scope if it is the current page.
+It is out of scope if it is not, but states on that page are not lost!
+
+Now click on the Home module again, but this time click on the Post module.
+You will notice that nothing is hightlighted.
+This is because we just created a new page with fresh states.
+If you hit the back button twice, you see the hightlight from the previous Post page again.
+
+The end of the lifecycle of a page and its associate states occurs when the page history cache is full,
+and the oldest page gets removed.
+
+Request Response Scope
+----------------------
+States that live across page cycles can be stored on the request context.
+This means that states used in the takeValues and invokeAction phase
+on the original page is accessible in the next renderResponse phase on the outgoing page.
+
+Let's try to display an one time message in the first wizard page when we click on the "Guide Me" link
+from the [Wizard](../Wizard/Wizard.txt) guide.
+
+Add this to the guideAction in Main.java:
+
+        public AWComponent guideAction () {
+            requestContext().put("PostAlert", "This is Post #" +
+                                 _posts.size());
+            ...
+        }
+
+Then in Information.awl, add this:
+
+        ...
+        </w:HintMessage>
+        <div class="alert" emitTags="${requestContext.get('PostAlert')}">
+            <a:String value="${requestContext.get('PostAlert')}"/>
+        </div>
+        ...
+
+Finally, define the styling in application.css:
+
+        .alert {
+            background-color:#FFEFB5;
+            padding:5px;
+            display:inline-block;
+        }
+
+![RequestResponseScope](RequestResponseScope.gif)
+
+Click on the "Guide Me" link, and notice the message.
+
+An instance of [AWRequestContext]#api represents the request response scope.
+It holds the request and response object the request page and response page,
+and manages the request response cycle.
+In each phase, the components in the pages can access the request and response object through the request context.
+
+Now hit F5, and notice that the message is gone.
+The lifecycle of the request context ends at the end of renderResponse,
+and all states stored in it are gone.
+
+Now what if we want store state that lives across page cycles and request response cycles?
+It's time to take a look at session scope...
+
+Session Scope
+-------------
+Let's add stickiness to the selected tab under the Post module.
+
+In Main.awl, simply this binding:
+
+        <w:TabSet index="$session.dict.postTabIndex:0">
+
+Now click on the Post module and select the Table tab.
+Next click on the Home module, and then click on the Post module again.
+Notice that the table tab is still the selected tab
+even though we are looking at a new page object.
+
+An instance of [AWSession]#api repesents the session scope.
+It holds session scoped states like locale and timezone.
+It also holds and manages the page history.
+
+The lifecycle of the session ends once it gets terminated explicitly,
+or if it times out.
+
+We used the state map in the session,
+but it is also possible to define concrete states with subclasses of [AWSession]#api.
+Let's specify our custom Session class in the app package:
+
+        package app;
+
+        import ariba.ui.aribaweb.core.AWSession;
+
+        public class Session extends AWSession
+        {
+            private int _postTabIndex;
+
+            public int postTabIndex () {
+                return _postTabIndex;
+            }
+
+            public void setPostTabIndex (int postTabIndex) {
+                _postTabIndex = postTabIndex;
+            }
+        }
+
+The app.Session class is automatically used if presented.
+
+Finally, replace the index binding in Main.awl with this:
+
+        <w:TabSet index="$session.postTabIndex">
+
+You can imagine putting other states like authenication status in the session.
+
+Application Scope
+-----------------
+An instance of [AWConcreteApplication]#api represents the application scope.
+Global application states and initializations can be placed here.
+(Alternatively, an initializer class can be specified in your
+aribaweb.properties file that references a static java method.)
+
+Application state can be accessed by calling the application method in [AWComponent]#api.
+For example, we can call this method to get the name of the application:
+
+        application().name();
+
+Let's create our own Application class by subclassing [AWServletApplication]#api
+
+        package app;
+
+        public class Application extends AWServletApplication
+
+        public String name () {
+            return "Main";
+        }
+
+The app.Application class is automatically used if presented.
+
+Then, add this in the application build.xml:
+
+        <property name="app.name" value="Main"/>
+
+(You can also replace "AribaWeb" with "Main" in
+CATALINA_BASE/webapps/GuestBook/WEB-INF/web.xml directly)
+
+We can now access our application with URL:
+
+        http://localhost:8150/GuestBook/Main
+
+Check out [AWConcreteApplication]#api to see other global states that can be overrided.
+
+**[Back to Documentation](../Documentation.txt)**

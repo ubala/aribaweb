@@ -13,11 +13,11 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.awl#5 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/GenericChooser.awl#6 $
     </Copyright>
 
     <Overview>
-        Renders some form of chooser control (Popop, Radio Buttons, Checkboxes, Chooser).
+        Renders some form of chooser control (Popup, Radio Buttons, Checkboxes, Chooser).
         The type of chooser may be determined dynamically based on the number of items
         in the choice list, or can be specified explicitly via the "type" binding.
     </Overview>

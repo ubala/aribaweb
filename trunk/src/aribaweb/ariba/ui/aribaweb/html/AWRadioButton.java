@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWRadioButton.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWRadioButton.java#14 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -68,6 +68,11 @@ public final class AWRadioButton extends AWComponent
             // the awradioValue will be popped by the AWRadioButtonEnvironment.
             env().push(AWRadioButtonEnvironment.RadioValueKey, _value);
         }
+    }
+
+    public boolean isSender ()
+    {
+        return _elementId.equals(requestContext().requestSenderId());    
     }
 
     public String isChecked ()

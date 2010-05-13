@@ -30,7 +30,7 @@ MinutesAbbrev,"min","abbreviation for minutes; "
 BooleanTrue,"Ja","This is used from BooleanFormatter; "
 BooleanFalse,"Nee","This is used from BooleanFormatter; "
 BooleanTrueOrFalse,"Boole-variabelen moeten ""waar"" of ""onwaar"" zijn","error when a boolean doesn't contain true or false string"
-CannotParseDate,"Kan de string ""{0}"" niet parseren als datum","error when a date cannot be parsed - 0: the date string"
+CannotParseDate,"""{0}"" is geen geldige datum","error when a date cannot be parsed - 0: the date string"
 InvalidCharacterInNumber,"Ongeldig teken in getal","error when there is a non-numeric character in a number"
 InvalidYear,"Ongeldig jaar","error when the year is invalid in a date"
 NoDigitsFound,"Numerieke waarde verplicht","error when a number is required and no digits are entered"
@@ -38,3 +38,4 @@ NumberFormatError,"De numerieke waarde staat niet in de juiste opmaak.","friendl
 MaxValueExceeded,"Waarde ""{0}"" is groter dan de maximaal toegestane waarde ""{1}"".", "Error when value is greater than allowed (integer overflow)"
 MinValueExceeded,"Waarde ""{0}"" is kleiner dan de minimaal toegestane waarde ""{1}"".", "Error when value is less than allowed (integer underflow)"
 WholeNumberRequiredKey,"Waarde ""{0}"" moet een geheel getal zijn.", "Error when integer value contains fractions"
+

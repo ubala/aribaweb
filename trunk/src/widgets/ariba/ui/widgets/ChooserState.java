@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ChooserState.java#12 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ChooserState.java#13 $
 */
 
 package ariba.ui.widgets;
@@ -31,6 +31,7 @@ public class ChooserState
     private List _matches;
     private List _recentSelectedObjects;
     private int _recentSelectedDisplayed;
+    private int _lastDisplayedCount = -1;
     private boolean _focus;
     private boolean _render;
     private boolean _isInvalid;
@@ -46,6 +47,16 @@ public class ChooserState
     public ChooserState (ChooserSelectionState selectionState)
     {
         _selectionState = selectionState;
+    }
+
+    public void setLastDisplayedCount (int val)
+    {
+        _lastDisplayedCount = val;
+    }
+
+    public int lastDisplayedCount ()
+    {
+        return _lastDisplayedCount;
     }
 
     public void setCurrentItem (Object item)

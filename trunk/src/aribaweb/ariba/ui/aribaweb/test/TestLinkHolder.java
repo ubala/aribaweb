@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#12 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#14 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -22,20 +22,22 @@ import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.util.SemanticKeyProvider;
 import ariba.util.core.ClassUtil;
+import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
 import ariba.util.core.StringUtil;
-import ariba.util.core.ListUtil;
 import ariba.util.test.StagerArgs;
+import ariba.util.test.TestDestager;
 import ariba.util.test.TestPageLink;
 import ariba.util.test.TestParam;
 import ariba.util.test.TestStager;
+
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
 import java.util.List;
+import java.util.Map;
+
 
 public class TestLinkHolder implements SemanticKeyProvider
 {
@@ -113,6 +115,23 @@ public class TestLinkHolder implements SemanticKeyProvider
 
     public String getKey (Object receiver, AWComponent component)
     {
+        // notw: temp code to be consistent with the AW name convention
+        // change this during the migration work
+        if (isTestTearDownStager()) {
+            if (hasDynamicArgument()) {
+                return StringUtil.strcat(
+                    LinkType.Param_Destager.toString(), "_",
+                    _secondLevelCategory, "_",
+                    _displayName);
+            }
+            else {
+                return StringUtil.strcat(
+                    LinkType.Destager.toString(), "_",
+                    _secondLevelCategory, "_",
+                    _displayName);
+            }
+        }
+
         return _displayName;
     }
 
@@ -201,6 +220,11 @@ public class TestLinkHolder implements SemanticKeyProvider
     public boolean isTestStager ()
     {
         return TestStager.class.isAssignableFrom(_annotation.annotationType());
+    }
+
+    public boolean isTestTearDownStager ()
+    {
+        return TestDestager.class.isAssignableFrom(_annotation.annotationType());
     }
 
     public boolean isTestLinkParam ()
@@ -416,7 +440,7 @@ public class TestLinkHolder implements SemanticKeyProvider
         if (isTestLink()) {
             page = testLinkClick(requestContext);
         }
-        else if (isTestStager()) {
+        else if (isTestStager() || isTestTearDownStager()) {
             page = testStagerClick(requestContext);
         }
         return page;
@@ -428,22 +452,30 @@ public class TestLinkHolder implements SemanticKeyProvider
 
         TestContext testContext = TestContext.getTestContext(requestContext);
         TestSessionSetup testSessionSetup = TestLinkManager.instance().getTestSessionSetup();
-        TestStager annotation = (TestStager)_annotation;
 
         if (_annotatedItem.getClass() == Method.class) {
             Method m = (Method) _annotatedItem;
             Object obj = AnnotationUtil.getObjectToInvoke(requestContext, m);
             Object sessionState = testSessionSetup.getSessionState();
             try {
-                Object res = AnnotationUtil.invokeMethod(requestContext, testContext, m, obj);
+                Log.aribaweb_test.debug("[TestLinkHolder] Starting stager call %s " +
+                		"on object %s with TestContext %s.", m.toGenericString(), obj,
+                		testContext.toString());
+                Object res = AnnotationUtil.invokeMethod(requestContext,
+                                                         testContext,
+                                                         m,
+                                                         obj);
                 if (res != null) {
                     testContext.put(res);
                 }
             }
             finally {
                 testSessionSetup.restoreSessionStateIfNeeded(sessionState);
+                Log.aribaweb_test.debug("[TestLinkHolder] Finished stager call %s on " +
+                                        "object %s with TestContext %s.",
+                                        m.toGenericString(), obj,
+                                        testContext.toString());
             }
-//            }
         }
         return page;
     }
@@ -484,6 +516,14 @@ public class TestLinkHolder implements SemanticKeyProvider
                 AnnotationUtil.initializePageTestParams(requestContext, page);
             }
         }
+
+        Log.aribaweb_test.debug("[TestLinkHolder] Returning page %s " +
+                "with TestContext %s.", page, testContext.toString());
         return page;
+    }
+
+    public static enum LinkType
+    {
+        PageLink, Stager, Destager, Param_Destager
     }
 }

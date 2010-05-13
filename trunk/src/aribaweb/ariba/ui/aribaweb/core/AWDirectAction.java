@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#59 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#61 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -372,7 +372,7 @@ abstract public class AWDirectAction extends AWBaseObject
         if (!isValidResourceFilename(filename)) {
             response.appendContent("Invalid request: " + HTML.escape(filename));
             return response;
-        }             
+        }
 
         //
         // set the content type
@@ -532,6 +532,12 @@ abstract public class AWDirectAction extends AWBaseObject
         if (PerformanceState.threadStateEnabled()) {
             ((PerformanceState.getThisThreadHashtable())).setSourcePage(this.getClass().getName());
             ((PerformanceState.getThisThreadHashtable())).setSourceArea(actionName);
+            String seleniumShortId = request().formValueForKey("testShortId");
+            String seleniumId = request().formValueForKey("testId");
+            String seleniumLineId = request().formValueForKey("testLineNb");
+            ((PerformanceState.getThisThreadHashtable())).setTestShortId(seleniumShortId);
+            ((PerformanceState.getThisThreadHashtable())).setTestId(seleniumId);
+            ((PerformanceState.getThisThreadHashtable())).setTestLine(seleniumLineId);
         }
 
         String actionMethodName = actionMethodName(actionName);
@@ -556,7 +562,7 @@ abstract public class AWDirectAction extends AWBaseObject
         AWRequestContext requestContext = requestContext();
         if (benc.isEncrypted(requestContext)) {
                 // this will be an internal redirect
-            return AWRedirect.getRedirect(requestContext, 
+            return AWRedirect.getRedirect(requestContext,
                 benc.getDecryptedUrl(requestContext));
         }
         return bm.getComponent(requestContext);

@@ -30,7 +30,7 @@ MinutesAbbrev,"mn","abbreviation for minutes; "
 BooleanTrue,"Oui","This is used from BooleanFormatter; "
 BooleanFalse,"Non","This is used from BooleanFormatter; "
 BooleanTrueOrFalse,"Les éléments booléens doivent avoir la valeur Vrai ou Faux.","error when a boolean doesn't contain true or false string"
-CannotParseDate,"Impossible d''analyser la chaîne ""{0}"" en tant que date","error when a date cannot be parsed - 0: the date string"
+CannotParseDate,"""{0}"" n''est pas une date valide.","error when a date cannot be parsed - 0: the date string"
 InvalidCharacterInNumber,"Caractère non valide dans un nombre","error when there is a non-numeric character in a number"
 InvalidYear,"Année non valide","error when the year is invalid in a date"
 NoDigitsFound,"Valeur numérique obligatoire","error when a number is required and no digits are entered"
@@ -38,3 +38,4 @@ NumberFormatError,"Le format de la valeur numérique n''est pas approprié.","frie
 MaxValueExceeded,"La valeur ""{0}"" est supérieure à la valeur maximum autorisée ""{1}"".", "Error when value is greater than allowed (integer overflow)"
 MinValueExceeded,"La valeur ""{0}"" est inférieure à la valeur minimum autorisée ""{1}"".", "Error when value is less than allowed (integer underflow)"
 WholeNumberRequiredKey,"La valeur ""{0}"" doit être un nombre entier.", "Error when integer value contains fractions"
+

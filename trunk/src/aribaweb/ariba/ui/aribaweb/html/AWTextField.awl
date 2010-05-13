@@ -1,6 +1,6 @@
 <a:Api>
     <Copyright>
-        Copyright 1996-2008 Ariba, Inc.
+        Copyright 1996-2010 Ariba, Inc.
 
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#33 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#35 $
     </Copyright>
 
     <Overview>
@@ -29,6 +29,11 @@
         the value is used to put the user's input back into the source object (after the optional formatter parses the
         input String into the appropriate object class).  Note that, if the user dowsn't type anything into a blank field,
         this will put an empty string into the destination and not $null.
+    </Binding>
+
+    <Binding key="editable" type="boolean" direction="get" required="$false">
+        Indicates whether the value is editable.  If the binding is not supplied,
+        a value is taken from the page environment.
     </Binding>
 
     <Binding key="formatter" type="AWFormatting" default="$null" direction="get">

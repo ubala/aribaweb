@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.awl#67 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.awl#68 $
     </Copyright>
 
     <Overview>
@@ -49,6 +49,10 @@
     </Binding>
 
     <Binding key="topIndex" direction="get" type="int" required="$true">
+        TBD
+    </Binding>
+    
+    <Binding key="leftPos" direction="get" type="int" required="$false" default="0">
         TBD
     </Binding>
 
@@ -222,11 +226,14 @@
                             <a:SetValue topIndexId="$requestContext.nextElementId"/>
                             <a:TextField id="$topIndexId" value="$^topIndex" formatter="$formatters.integer" autoselect="$false"/>
 
+                            <a:SetValue leftPosId="$requestContext.nextElementId"/>
+                            <a:TextField id="$leftPosId" value="$leftPos" formatter="$formatters.integer" autoselect="$false"/>
+
                             <a:SetValue topOffsetId="$requestContext.nextElementId"/>
                             <a:TextField id="$topOffsetId" value="$^topOffset" formatter="$formatters.integer" autoselect="$false"/>
                             <a:ClientSideScript executeOnIncrementalUpdate="$true" isSingleton="$false">
                                 ariba.Datatable.updateScrollTable("$tableId", <a:String value="$^isDragDropEnabled:false"/>, "$isMaximizedId" ,
-                                        "$^topCount", "$^bottomCount", "$topIndexId", "$topOffsetId", "<a:ActionId action="$^scrollFaultAction"/>",
+                                        "$^topCount", "$^bottomCount", "$topIndexId", "$leftPosId", "$topOffsetId", "<a:ActionId action="$^scrollFaultAction"/>",
                                         "<a:String value="$^elementIdForVisibleRow"/>", "<a:ActionId action="$^updateSelectAllAction"/>", <a:String value="$^rowCount:0"/>);
                             </a:ClientSideScript>
                         </a:RefreshRegion>\

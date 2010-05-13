@@ -1,0 +1,8 @@
+<a:If ifTrue="$showEarlyAccessBanner">
+    <a:RefreshRegion class="rr earlyAccessBar">\
+        You are in the <span>Early Access Environment</span>\
+        <a:ClientSideScript>
+            ariba.Dom.addClass(document.body, "earlyAccess");
+        </a:ClientSideScript>
+    </a:RefreshRegion>\
+</a:If>

@@ -2,30 +2,52 @@
     <w:FourZoneLayout>
         <a:Content name="left">
             <h1>Welcome!</h1>
-            <div style="float:right">
+            <div class="flR">
                 <a:Hyperlink action="$guideAction">Guide Me</a:Hyperlink>
             </div>
-            <m:Context object="$newPost" operation="create" layout="Inspect">
+            <m:Context object="$newPost" operation="create" layout="Inspect"
+                       chooserState="$chooserState"
+                       chooserSelectionSource="$chooserSelectionSource"
+                       chooserSelections="$continentSelections">
                 <m:IncludeComponent/>
             </m:Context>
             <a:SubmitButton action="$add"/>
         </a:Content>
         <a:Content name="right">
             <h1>Past Comments</h1>
-            <w:TabSet>
+            <a class="flR" href="$exportURL">Export XML</a>
+            <a:Hyperlink class="postsAction flR" action="$confirmDeleteAll">Delete All</a:Hyperlink>
+            <w:TabSet index="$session.postTabIndex">
                 <w:Tab label="List">
                     <a:For list="$posts" item="$currentPost">
-                        <hr/>
-                        $currentPost.userName
-                        (<a:String value="$currentPost.birthday" formatter="$formatters.shortDate"/>)
-                        said:
-                        [<m:Context object="$currentPost" layout="Links">
-                            <m:IncludeComponent/>
-                        </m:Context>]\
-                        <br/>
-                        <a:String escapeUnsafeHtml="$true" value="$currentPost.comment"/><br/>
-                        <x:RatingBar value="$currentPost.rating"/>
+                        <a:DropContainer tagName="div"
+                                         type="post"
+                                         dropClass="dropPost"
+                                         dropAction="$insertPost">
+                            <a:DragContainer type="post">
+                                <hr/>
+                                <a:DragContainer dragAction="$dragPost"
+                                                 type="post"
+                                                 showParent="true">+</a:DragContainer>
+                                $currentPost.userName
+                                (<a:String value="$currentPost.birthday" formatter="$formatters.shortDate"/>)
+                                said:
+                                [<m:Context object="$currentPost" layout="Links">
+                                    <m:IncludeComponent/>
+                                </m:Context>]\
+                                <br/>
+                                <a:String escapeUnsafeHtml="$true" value="$currentPost.comment"/><br/>
+                                <x:RatingBar value="$currentPost.rating"/>
+                            </a:DragContainer>
+                        </a:DropContainer>
                     </a:For>
+                    <a:DropContainer tagName="div"
+                                     type="post"
+                                     class="trashPost"
+                                     dropClass="deletePost"
+                                     dropAction="$deletePost">
+                        X
+                    </a:DropContainer>
                 </w:Tab>
                 <w:Tab label="Table">       
                     <m:Context class="app.Post" displayGroup="$displayGroup" layout="Table">
@@ -35,4 +57,11 @@
             </w:TabSet>
         </a:Content>
     </w:FourZoneLayout>
+    <a:SetValue deleteAllConfId="$requestContext.nextElementId"/>\
+    <w:Confirmation id="$deleteAllConfId" okAction="$deleteAllAction">\
+        <a:Content name="header">Confirm Deletion</a:Content>\
+        <a:Content name="content">
+            Continue to delete all posts?
+        </a:Content>\
+    </w:Confirmation>\
 </w:BasicPageWrapper>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/ZipArchivingAppender.java#1 $
+    $Id: //ariba/platform/util/core/ariba/util/log/ZipArchivingAppender.java#2 $
 */
 
 
@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.zip.ZipEntry; 
 import java.util.zip.ZipOutputStream;
 import org.apache.log4j.helpers.LogLog;
-
 
 /**
    This class extends ariba.util.log.ArhivingAppender to provide
@@ -98,7 +97,7 @@ public class ZipArchivingAppender extends ArchivingAppender {
                     archiveFileName + ": " + iex.getMessage());
           }
         }
-
+        saveToFile.delete();
         
                     
     }

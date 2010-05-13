@@ -216,7 +216,8 @@
         <property name="servlet.class" value="ariba.ui.servletadaptor.AWDispatcherServlet"/>
         <property name="servlet.port" value="8080"/>
         <property name="jpda.address" value="8000"/>
-        <property name="app.url" value="http://localhost:${servlet.port}/${servlet.name}/AribaWeb"/>
+        <property name="app.name" value="AribaWeb"/>
+        <property name="app.url" value="http://localhost:${servlet.port}/${servlet.name}/${app.name}"/>
 
         <!-- Need to build this even if we won't use it or the compiler will complain... -->
         <mkdir dir="${src.derived.dir}"/>
@@ -231,6 +232,9 @@
         <include name="bcel.jar"/>
         <include name="activation.jar"/>
         <include name="markdownj.jar"/>
+        <include name="core-renderer.jar"/>
+        <include name="iText-2.0.8.jar"/>
+        <include name="tidy.jar"/>
     </fileset>
 
     <fileset id="build.deps2" dir="${lib2.dir}">
@@ -292,6 +296,9 @@
             <include name="jakarta-oro.jar"/>
             <include name="asm.jar"/>
             <include name="bcel.jar"/>
+            <include name="core-renderer.jar"/>
+            <include name="iText-2.0.8.jar"/>
+            <include name="tidy.jar"/>            
         </fileset>
         <fileset dir="${ariba.jars.dir}">
             <include name="ariba.util.jar"/>
@@ -338,6 +345,9 @@
             <include name="asm.jar"/>
             <include name="bcel.jar"/>
             <include name="markdownj.jar"/>
+            <include name="core-renderer.jar"/>
+            <include name="iText-2.0.8.jar"/>
+            <include name="tidy.jar"/>
         </fileset>
         <fileset dir="${ariba.jars.dir}">
             <include name="ariba.util.jar"/>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#19 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -44,14 +44,14 @@ public class TestContext
     public static final String ReturnUrlParam = "returnUrl";
 
     private Map<String, Object> _internalContext = MapUtil.map();
-    
+
     private Map<Object, Object> _context = MapUtil.map();
     private List<String> _unhandledObjectList = ListUtil.list();
     private String _username;
     private TestContextDataProvider _dataProvider;
     private String _id;
     private String[] _returnUrl;
-    
+
     private static Map<String, TestContext> _savedTestContext = MapUtil.map();
     private static Map<String, TestContextObjectFactory> _factoriesById = MapUtil.map();
     private static Map<Class, String> _factoryIdsByClass = MapUtil.map();
@@ -65,7 +65,7 @@ public class TestContext
     {
         return _id;
     }
-    
+
     public static TestContext getSavedTestContext (AWRequestContext requestContext)
     {
         TestContext tc = null;
@@ -113,6 +113,16 @@ public class TestContext
                 requestContext._debugIsInRecordingMode() || requestContext._debugIsInPlaybackMode());
     }
 
+    static public TestContext getTestContext ()
+    {
+        TestContext tc = null;
+        AWRequestContext rc = AWRequestContext._requestContext();
+        if (rc != null) {
+           tc =getTestContext(rc);
+        }
+        return tc;
+    }
+
     /**
         Returns TestContext for given AWRequestContext's AWSession, or null if there is no
         session or if there is no TestContext in the session.  requestContext cannot be
@@ -156,7 +166,7 @@ public class TestContext
     {
         return _context.keySet();
     }
-    
+
     public Object get (Class type)
     {
         Object obj = _context.get(type);
@@ -168,16 +178,16 @@ public class TestContext
 
     public void put (Object object)
     {
-        put(object.getClass(), object); 
+        put(object.getClass(), object);
     }
-    
+
     public void put (Object key, Object value)
     {
         Object obj = value;
         if (_dataProvider != null) {
             obj = _dataProvider.resolveForPut(this, obj);
         }
-        _context.put(key, obj); 
+        _context.put(key, obj);
     }
 
     /**
@@ -255,7 +265,7 @@ public class TestContext
         Assert.that(!StringUtil.nullOrEmptyOrBlankString(factoryId),
                     "factoryId cannot be null or blank or empty");
 
-        Assert.that(_factoriesById.get(factoryId) == null, 
+        Assert.that(_factoriesById.get(factoryId) == null,
                     "Cannot reregister factory ID %s", factoryId);
         _factoriesById.put(factoryId, factory);
 
@@ -403,5 +413,19 @@ public class TestContext
     public String getReturnUrl ()
     {
         return _returnUrl != null ? _returnUrl[1] : null;
+    }
+
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        buffer.append(super.toString()).append(": ");
+        buffer.append("Username: ").append(_username).append(";");
+        buffer.append("Context: ");
+        buffer.append((_context != null)?MapUtil.toSerializedString(_context):"null");
+        buffer.append(";");
+        buffer.append("InternalContext: ");
+        buffer.append((_internalContext != null)?
+            MapUtil.toSerializedString(_internalContext):"null");
+        buffer.append(";");
+        return buffer.toString();
     }
 }

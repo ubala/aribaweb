@@ -22,6 +22,8 @@ Cp1252,,,,
 "AWTOptionsMenuItems",a013,"Pivot Table Layout","Layout der Pivot-Tabelle",""
 "AWTOptionsMenuItems",a014,"Show Detail Rows","Detailzeilen anzeigen",""
 "AWTOptionsMenuItems",a015,"Configure Layout...","Layout konfigurieren...",""
+"AWTOptionsMenuItems",a016,"Expand All Detail Rows","Alle Detailzeilen anzeigen",""
+"AWTOptionsMenuItems",a017,"Collapse All Detail Rows","Alle Detailzeilen ausblenden",""
 "AWTPivotConfigurationPanel",a001,"Edit Table Layout","Tabellen-Layout bearbeiten",""
 "AWTPivotConfigurationPanel",a002,"Column Fields","Spaltenfelder",""
 "AWTPivotConfigurationPanel",a003,"Row Fields","Zeilenfelder",""

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#43 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#46 $
     </Copyright>
 
     <Overview>
@@ -101,7 +101,7 @@
                         null,\
                     </a:If>\
                     <a:If notEqualNull="$requestContext.frameName">\
-                        "$requestContext.frameName",\
+                        '<a:JavascriptString value="$requestContext.frameName"/>',\
                     <a:Else/>
                         null,\
                     </a:If>\

@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ResourceService.java#57 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ResourceService.java#59 $
 */
 
 package ariba.util.core;
@@ -27,6 +27,7 @@ import ariba.util.log.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
@@ -34,6 +35,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Collection;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1736,7 +1739,7 @@ public class ResourceService
     
     private static void loadStringsIntoTable (URL stringBaseURL,
                                               Gridtable stringTables,
-                                              List/*<Locale>*/ searchLocales,
+                                              List<Locale> searchLocales,
                                               String path,
                                               boolean displayWarning,
                                               StringTableProcessor processor,
@@ -1750,7 +1753,7 @@ public class ResourceService
             directory then in the config directory (whose entries take precedence).
         */
         for (int i = 0; i < searchLocales.size(); i++) {
-            Locale searchLocale = (Locale)searchLocales.get(i);
+            Locale searchLocale = searchLocales.get(i);
 
             Map thisLocaleStrings = null;
             Map twinMap;
@@ -1796,6 +1799,68 @@ public class ResourceService
         }
     }
 
+    /**
+        Is an enumerated type representing the locations where string resources may
+        be found under the string resource base URL.
+
+        @aribaapi ariba
+    */
+    public static enum ResourceLocation {
+        internal,
+        ariba,
+        config
+    }
+
+    private static String getRelativePathToStringResources (ResourceLocation location, Locale locale)
+    {
+        return Fmt.S("%s/%s/%s/%s", location, ResourceRoot, locale, StringsDirectory);
+    }
+
+    private static final Pattern StringTablePattern = Pattern.compile("(.*)\\.csv");
+
+    /**
+        @aribaapi ariba
+    */
+    protected void collectStringTableNames (Locale locale, Collection<String> collector)
+    {
+        if (!"file".equals(stringBaseURL.getProtocol())) {
+            Assert.that(false, "not supported for non-file base-URLs");
+        }
+        File baseFile = new File(stringBaseURL.getFile());
+        for (ResourceLocation location : ResourceLocation.values()) {
+            File dir = new File(baseFile, getRelativePathToStringResources(location, locale));
+            String[] fileNames = dir.list();
+            if (fileNames != null) {
+                Matcher matcher = StringTablePattern.matcher("");
+                for (String fileName : fileNames) {
+                    if (matcher.reset(fileName).matches()) {
+                        collector.add(matcher.group(1));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+        Returns the set of all string table names that exist and may contain
+        resources for the specified locale. <p/>
+
+        @aribaapi ariba
+    */
+    public Set<String> getAllStringTableNames (Locale locale)
+    {
+        List<Locale> locales = getSearchDirs(locale, true);
+        Set<String> result = SetUtil.set();
+        Set<Locale> processed = SetUtil.set();
+        for (Locale loc : locales) {
+            if (!processed.contains(loc)) {
+                collectStringTableNames(loc, result);
+                processed.add(loc);
+            }
+        }
+        return result;
+    }
+
     protected static Map getStringsForLocale (URL stringBaseURL,
                                               Locale searchLocale,
                                               String path,
@@ -1806,14 +1871,13 @@ public class ResourceService
         // if no strings have been loaded for this level,
         // load them and merge them
 
+        String baseUrl = stringWithTrailingSlash(stringBaseURL);
         // load from internal resource first so that it will
         // be overriden by the production strings if any
-        String urlPath = Fmt.S("%s%s/%s/%s/%s/%s",
-                               stringWithTrailingSlash(stringBaseURL),
-                               "internal",
-                               ResourceRoot,
-                               searchLocale,
-                               StringsDirectory,
+        String urlPath = Fmt.S("%s%s/%s",
+                               baseUrl,
+                               getRelativePathToStringResources(ResourceLocation.internal,
+                                                                searchLocale),
                                path);
 
         Map internalStrings =
@@ -1821,12 +1885,9 @@ public class ResourceService
         processor.mergeStringTables(allStrings, internalStrings);
 
             // <baseURL>/ariba: "ariba" is hard-coded intentionally
-        urlPath = Fmt.S("%s%s/%s/%s/%s/%s",
-                        stringWithTrailingSlash(stringBaseURL),
-                        "ariba",
-                        ResourceRoot,
-                        searchLocale,
-                        StringsDirectory,
+        urlPath = Fmt.S("%s%s/%s",
+                        baseUrl,
+                        getRelativePathToStringResources(ResourceLocation.ariba, searchLocale),
                         path);
 
         Map systemStrings =
@@ -1850,12 +1911,9 @@ public class ResourceService
         // take precedence over the strings found in the
         // system directory
         // "config" is hard-coded intentionally
-        urlPath = Fmt.S("%s%s/%s/%s/%s/%s",
-                        stringWithTrailingSlash(stringBaseURL),
-                        "config",
-                        ResourceRoot,
-                        searchLocale,
-                        StringsDirectory,
+        urlPath = Fmt.S("%s%s/%s",
+                        baseUrl,
+                        getRelativePathToStringResources(ResourceLocation.config, searchLocale),
                         path);
 
         Map configStrings =
@@ -2236,6 +2294,8 @@ public class ResourceService
 
     /**
         Returns a localized image path in the specified locale.
+        The path is relative to the resource URL - meaning there is no leading slash
+        in the return value.
 
         @param path path
         @param locale
@@ -2249,6 +2309,8 @@ public class ResourceService
         if (localizedPath == null) {
             localizedPath = Fmt.S("%s/%s", defaultImagesRoot, path);
         }
+
+        localizedPath = stringWithoutLeadingSlash(localizedPath);
 
         return localizedPath;
     }
@@ -2317,11 +2379,11 @@ public class ResourceService
         @return list of directories to search for locale
         @aribaapi ariba
     */
-    protected List getSearchDirsWithGivenDefault (Locale givenLocale,
+    protected List<Locale> getSearchDirsWithGivenDefault (Locale givenLocale,
                                                   Locale givenDefaultLocale,
                                                   boolean defaulting)
     {
-        List searchDirs = ListUtil.list();
+        List<Locale> searchDirs = ListUtil.list();
         if (defaulting) {
                 // 1) locale of last resort and its relaxed brother
             searchDirs.add(LocaleOfLastResort);
@@ -2347,7 +2409,7 @@ public class ResourceService
         @return list of directories to search for locale
         @aribaapi ariba
     */
-    public List getSearchDirs (Locale givenLocale, boolean defaulting)
+    public List<Locale> getSearchDirs (Locale givenLocale, boolean defaulting)
     {
         return getSearchDirsWithGivenDefault(givenLocale,
                                              defaultLocale,

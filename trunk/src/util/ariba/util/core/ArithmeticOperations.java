@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ArithmeticOperations.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ArithmeticOperations.java#5 $
 */
 
 package ariba.util.core;
@@ -72,4 +72,6 @@ public abstract class ArithmeticOperations extends ClassExtension
     public abstract Class divisionReturnType (Class objType1, Class objType2);
     
     public abstract boolean canCastFrom (Class fromClass);
+
+    public abstract int compare (Object obj1, Object obj2);
 }

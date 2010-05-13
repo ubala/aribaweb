@@ -22,6 +22,8 @@ Cp1252,,,,
 "AWTOptionsMenuItems",a013,"Pivot Table Layout","Disposition du tableau croisé dynamique",""
 "AWTOptionsMenuItems",a014,"Show Detail Rows","Afficher les lignes de détail",""
 "AWTOptionsMenuItems",a015,"Configure Layout...","Configurer la disposition...",""
+"AWTOptionsMenuItems",a016,"Expand All Detail Rows","Développer toutes les lignes de détail",""
+"AWTOptionsMenuItems",a017,"Collapse All Detail Rows","Réduire toutes les lignes de détail",""
 "AWTPivotConfigurationPanel",a001,"Edit Table Layout","Modifier la disposition du tableau",""
 "AWTPivotConfigurationPanel",a002,"Column Fields","Champs de colonne",""
 "AWTPivotConfigurationPanel",a003,"Row Fields","Champs de ligne",""

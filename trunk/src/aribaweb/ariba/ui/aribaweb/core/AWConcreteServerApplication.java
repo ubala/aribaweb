@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#66 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#67 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -141,8 +141,12 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         if (isDebuggingEnabled()) {
             ariba.ui.aribaweb.util.Log.perf_log.setLevel(ariba.util.log.Log.DebugLevel);
             ariba.ui.aribaweb.util.Log.perf_log_detail.setLevel(ariba.util.log.Log.DebugLevel);
-            // if there's not logs directory, then turn off perf logging by default (for non-Ariba installs)
-            if (!(new File("logs")).exists()) {
+            // Turn off perf logging by default for OSAW; otherwise it
+            // would default to logging in "./logs" which is
+            // undesireable.  TODO figure out how an OSAW app can have
+            // a suitable default for
+            // ariba.util.log.LogManager.getDirectoryName()
+            if (IsJarApplication) {
                 ariba.ui.aribaweb.util.Log.perf_log_trace.setLevel(ariba.util.log.Log.ErrorLevel);
             }
         }

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.awl#25 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.awl#26 $
     </Copyright>
 
     <Overview>
@@ -25,14 +25,6 @@
     </Binding>
 
     <Binding key="showTopLine" direction="get" type="boolean" default="$false">
-        TBD
-    </Binding>
-
-    <Binding key="howToUrl" direction="get" type="String" required="$false">
-        TBD
-    </Binding>
-
-    <Binding key="screenDetailsUrl" direction="get" type="boolean" required="$false">
         TBD
     </Binding>
 
@@ -123,22 +115,7 @@
                     </a:If>\
                 </td>
                 <td class="hint" width="49%" align="$languageRight">\
-                    <a:If notEqualNull="$howToUrl">\
-                        <a onClick="$onClickHowTo" href="javascript:void(0);">\
-                            <a:Local key="a002">\
-                                How to\
-                            </a:Local>\
-                        </a>\
-                    </a:If>\
                     &nbsp;\
-                    <a:If notEqualNull="$screenDetailsUrl">\
-                        &nbsp;&nbsp;&nbsp;\
-                        <a onClick="$onClickScreenDetails" href="javascript:void(0);">\
-                            <a:Local key="a003">\
-                                Screen Details\
-                            </a:Local>\
-                        </a>\
-                    </a:If>\
                 </td>
                 <td width="1px" class="hint">\
                     &nbsp;\

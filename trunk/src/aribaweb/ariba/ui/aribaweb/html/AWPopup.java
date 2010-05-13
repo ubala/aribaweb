@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#54 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#55 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -46,7 +46,7 @@ public class AWPopup extends AWComponent
         BindingNames.selection, BindingNames.noSelectionString,
         BindingNames.onChange, BindingNames.isRefresh, BindingNames.action,
         BindingNames.disabled, AWPopup.DelayTakeValues,
-        BindingNames.name, BindingNames.size
+        BindingNames.name, BindingNames.size, BindingNames.editable
         // is size not used?
     };
 
@@ -306,5 +306,14 @@ public class AWPopup extends AWComponent
     public Object popupId ()
     {
         return AWInputId.getAWInputId(requestContext());
+    }
+
+    public boolean isEditable ()
+    {
+        boolean editable = true;
+        if (hasBinding(BindingNames.editable)) {
+            editable = booleanValueForBinding(BindingNames.editable);
+        }
+        return editable && !requestContext().isPrintMode();
     }
 }

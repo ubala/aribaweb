@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#29 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#33 $
 */
 
 
@@ -33,8 +33,6 @@ import ariba.util.core.HTML;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.formatter.Formatter;
-
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
@@ -78,7 +76,7 @@ public class Chooser extends AWComponent
     protected void awake ()
     {
         _chooserState = (ChooserState)valueForBinding(BindingNames.state);
-        _formatter = (Formatter)valueForBinding(BindingNames.formatter);
+        _formatter = valueForBinding(BindingNames.formatter);
         _disabled = booleanValueForBinding(BindingNames.disabled) ||
             AWEditableRegion.disabled(requestContext());
         _allowFullMatchOnInput = booleanValueForBinding(allowFullMatchOnInput);
@@ -452,6 +450,29 @@ public class Chooser extends AWComponent
         }
     }
 
+    /**
+       The size of multi-select choosers can change based on user selections.
+       When the chooser is embedded inside a table, the table's size is dependent
+       on the size of the chooser and it needs to be notified when there is a 
+       change.
+       
+       We track changes by capturing the size of the selected objects on each request.
+     */
+    public boolean itemCountChanged ()
+    {
+        int lastItemCount = _chooserState.lastDisplayedCount();
+        int currItemCount = _chooserState.recentSelectedDisplayed();
+        boolean ret = false;
+
+        // On first render item count in chooser state is set to -1
+        if (lastItemCount != currItemCount && lastItemCount != -1) {
+            ret = true;
+        }
+        _chooserState.setLastDisplayedCount(currItemCount);
+
+        return ret;
+    }
+
     public void setRemoveValue (boolean removeValue)
     {
         if (removeValue) {
@@ -597,9 +618,8 @@ public class Chooser extends AWComponent
             maxLength = maxLength > 0 ? maxLength : MaxLength;
             List matches = selectionSource.match(pattern, maxLength);
             _chooserState.setMatches(matches);
-            if (selections != null) {
-                for (Iterator iterator = selections.iterator(); iterator.hasNext();) {
-                    Object o = iterator.next();
+            if (selections != null && matches != null) {
+                for (Object o : selections) {
                     matches.remove(o);
                 }
             }

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.awl#25 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.awl#26 $
     </Copyright>
 
     <Overview>
@@ -80,8 +80,12 @@
         Not supported?
     </Binding>
 
+    <Binding key="editable" type="Boolean" default="$true" direction="get">
+        When value is false, this popup menu would be readonly like in print mode. Otherwise, it's editable.
+    </Binding>
+
 </a:Api>\
-<a:If ifFalse="$requestContext.isPrintMode">\
+<a:If ifTrue="$isEditable">\
     <x:BasicScriptFunctions/>\
     <!--- Todo: switch to behaviors -->
     <!--- Todo: switch to behaviors -->

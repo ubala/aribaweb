@@ -12,21 +12,23 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestUnit.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestUnit.java#6 $
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.util.core.ClassUtil;
 import ariba.util.core.ListUtil;
-import ariba.util.core.StringUtil;
 
-import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+
 
 public class TestUnit
 {
+    private static TestLinkHolderComparator _comparator = new TestLinkHolderComparator();
+
     private String _name;
     private String _mainName;
     private String _secondName;
@@ -37,9 +39,11 @@ public class TestUnit
     private List<TestLinkHolder> _noUiNoParamLinks = ListUtil.list();
 
     private List<TestLinkHolder> _stagers = ListUtil.list();
+    private List<TestLinkHolder> _tearDownStagers = ListUtil.list();
     private List<TestLinkHolder> _pageAccessLinks = ListUtil.list();
 
     private boolean _displayTestContextValue = false;
+
 
     public TestUnit(String name, List<TestLinkHolder> links)
     {
@@ -64,7 +68,12 @@ public class TestUnit
                 else {
                     _noUiNoParamLinks.add(link);
                 }
-                _stagers.add(link);
+                if (link.isTestStager()) {
+                    _stagers.add(link);
+                }
+                else if (link.isTestTearDownStager()) {
+                    _tearDownStagers.add(link);
+                }
             }
         }
         if (links.size() > 0) {
@@ -118,11 +127,15 @@ public class TestUnit
         return _stagers;
     }
 
+    public List tearDownStagers ()
+    {
+        return _tearDownStagers;
+    }
+
     public List pageAccessLinks ()
     {
         return _pageAccessLinks;
     }
-    
 
     public boolean hasUiParamLinks ()
     {
@@ -149,6 +162,11 @@ public class TestUnit
         return _stagers.size() > 0;
     }
 
+    public boolean hasTearDownStagers ()
+    {
+        return _tearDownStagers.size() > 0;
+    }
+
     public boolean hasPageAccessLinks ()
     {
         return _pageAccessLinks.size() > 0;
@@ -162,24 +180,20 @@ public class TestUnit
         sort(_noUiNoParamLinks);
         sort(_pageAccessLinks);
         sort(_stagers);
-
+        sort(_tearDownStagers);
     }
     
-    private void sort (List<TestLinkHolder> list)
+    private static void sort (List<TestLinkHolder> list)
     {
-        Collections.sort(list,
-                 new Comparator() {
-                     public int compare (Object object1, Object object2)
-                     {
-                         TestLinkHolder c1 = (TestLinkHolder)object1;
-                         TestLinkHolder c2 = (TestLinkHolder)object2;
-                         return c1.getDisplayName().toLowerCase().compareTo(
-                                 c2.getDisplayName().toLowerCase());
-                     }
-                     public boolean equals (Object o1, Object o2)
-                     {
-                         return compare(o1, o2) == 0;
-                     }
-                 });
+        Collections.sort(list, _comparator);
+    }
+
+    private static class TestLinkHolderComparator implements Comparator<TestLinkHolder>
+    {
+        public int compare (TestLinkHolder t1, TestLinkHolder t2)
+        {
+            return t1.getDisplayName().toLowerCase().compareTo(
+                t2.getDisplayName().toLowerCase());
+        }
     }
 }

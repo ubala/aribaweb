@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SearchBox.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SearchBox.java#4 $
 */
 
 package ariba.ui.widgets;
@@ -40,5 +40,16 @@ public class SearchBox extends AWComponent
     {
         boolean hasTemplate = hasSubTemplateNamed("footerLeftArea") || hasSubTemplateNamed("footerRightArea");
         return hasTemplate && !booleanValueForBinding("hideFooterArea");
+    }
+
+    /**
+        Ideally, action scope should support action like what form does.  However, in order to
+        support that, the way Handlers.js retrieve the action would need to be modified since
+        it looks for the action in the container form.  For now, it looks for the default
+        button in the container form.
+     */
+    public String behaviorName ()
+    {
+        return booleanValueForBinding("omitForm")? "AS": null;
     }
 }

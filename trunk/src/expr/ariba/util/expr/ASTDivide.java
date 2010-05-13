@@ -56,15 +56,15 @@ class ASTDivide extends ExpressionNode
             v1Info = getTypeInfo();
         }
         return ExprOps.divide(
-                v1,
-                v2,
-                v1Info != null? v1Info.getName(): null);
+        		v1, 
+        		v2, 
+        		v1Info != null? v1Info.getName(): null);
     }
 
     public String getExpressionOperator(int index)
     {
         return "/";
-    }
+    }    
 
     public int getExpressionType ()
     {

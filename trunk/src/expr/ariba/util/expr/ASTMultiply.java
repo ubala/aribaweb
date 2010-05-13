@@ -58,14 +58,14 @@ class ASTMultiply extends ExpressionNode
         if (resultInfo == null || resultInfo instanceof NullTypeInfo) {
             resultInfo = getTypeInfo();
         }
-        String resultType = resultInfo != null? resultInfo.getName(): null;
+        String resultType = resultInfo != null? resultInfo.getName(): null; 
         for ( int i=1; i < children.length; ++i ) {
-            TypeInfo info = children[i].getTypeInfo();
+        	TypeInfo info = children[i].getTypeInfo();
             result = ExprOps.multiply(
-                    result,
-                    children[i].getValue(context, source),
-                    resultType,
-                    info != null? info.getName(): null);
+            		result, 
+            		children[i].getValue(context, source),
+            		resultType,
+            	    info != null? info.getName(): null);
             resultType = result != null? result.getClass().getName(): null;
         }
         return result;
@@ -74,7 +74,7 @@ class ASTMultiply extends ExpressionNode
     public String getExpressionOperator(int index)
     {
         return "*";
-    }
+    }    
 
     public int getExpressionType ()
     {

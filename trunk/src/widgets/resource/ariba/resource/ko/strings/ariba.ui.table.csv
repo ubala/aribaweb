@@ -22,6 +22,8 @@ KS_C_5601-1987,,,,
 "AWTOptionsMenuItems",a013,"Pivot Table Layout","피벗 테이블 레이아웃",""
 "AWTOptionsMenuItems",a014,"Show Detail Rows","정보 행 표시",""
 "AWTOptionsMenuItems",a015,"Configure Layout...","레이아웃 구성...",""
+"AWTOptionsMenuItems",a016,"Expand All Detail Rows","모든 정보 행 확장",""
+"AWTOptionsMenuItems",a017,"Collapse All Detail Rows","모든 정보 행 축소",""
 "AWTPivotConfigurationPanel",a001,"Edit Table Layout","테이블 레이아웃 편집",""
 "AWTPivotConfigurationPanel",a002,"Column Fields","열 필드",""
 "AWTPivotConfigurationPanel",a003,"Row Fields","행 필드",""

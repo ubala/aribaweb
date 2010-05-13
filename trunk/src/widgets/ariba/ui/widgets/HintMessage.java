@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.java#16 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HintMessage.java#17 $
 */
 
 package ariba.ui.widgets;
@@ -30,8 +30,6 @@ public final class HintMessage extends AWComponent
     public boolean _isVisible;
     public boolean _showFooterMessage;
     public boolean _showTopLine;
-    public String _howToUrl;
-    public String _screenDetailsUrl;
     public AWEncodedString _elementId;
 
     protected void awake ()
@@ -40,8 +38,6 @@ public final class HintMessage extends AWComponent
         if (_isVisible) {
             _showFooterMessage = booleanValueForBinding(BindingNames.showFooterMessage);
             _showTopLine = booleanValueForBinding(BindingNames.showTopLine);
-            _howToUrl = stringValueForBinding(BindingNames.howToUrl);
-            _screenDetailsUrl = stringValueForBinding(BindingNames.screenDetailsUrl);
         }
     }
 
@@ -50,8 +46,6 @@ public final class HintMessage extends AWComponent
         _isVisible = false;
         _showFooterMessage = false;
         _showTopLine = false;
-        _howToUrl = null;
-        _screenDetailsUrl = null;
         _elementId = null;
     }
 
@@ -75,17 +69,7 @@ public final class HintMessage extends AWComponent
 
     public boolean hasFooterText ()
     {
-        return _showFooterMessage || _howToUrl != null || _screenDetailsUrl != null;
-    }
-
-    public String onClickHowTo ()
-    {
-        return StringUtil.strcat(OpenHelpWindow, resolveUrl(_howToUrl), CloseFunction);
-    }
-
-    public String onClickScreenDetails ()
-    {
-        return StringUtil.strcat(OpenHelpWindow, resolveUrl(_screenDetailsUrl), CloseFunction);
+        return _showFooterMessage;
     }
 
     /**

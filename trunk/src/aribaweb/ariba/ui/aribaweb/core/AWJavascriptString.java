@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWJavascriptString.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWJavascriptString.java#7 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -22,7 +22,6 @@ import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.core.Fmt;
-
 import java.util.Map;
 
 /**
@@ -44,7 +43,14 @@ final public class AWJavascriptString extends AWPrimitiveString
     // pattern : TagsPattern = Pattern.compile("<[^<]*>", Pattern.MULTILINE);
     // Now we added a check for "<" instead of the complete tag for simplicity.
 
-    private final static String[] BadChars= {"\"", "%22", "'", "%27", "<", "%3C"};
+    private final static String[] BadChars= {
+        // in "string", "url encoded string" format
+        "\"", "%22",
+        "'", "%27",
+        "<", "%3C",
+        "(", "%28",
+        ")", "%29"
+    };
 
     private AWBinding _escape;
 
@@ -91,7 +97,7 @@ final public class AWJavascriptString extends AWPrimitiveString
         for (int i=0; i<BadChars.length; i++) {
             if (stringValue.indexOf(BadChars[i]) != -1) {
                 throw new AWGenericException(
-                    Fmt.S("Illegal character '%s' included in javascript: %s",
+                    Fmt.S("Illegal character or string '%s' included in javascript: %s",
                         BadChars[i], stringValue));
             }
         }

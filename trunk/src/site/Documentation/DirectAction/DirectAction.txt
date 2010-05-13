@@ -1,0 +1,245 @@
+Direct Action
+=============
+
+We have been dealing with component actions up to now.
+Component actions are stateful and are tied closely with page cycles.
+No state is encoded in the URL.
+However, there are times where you need direct access
+to application functionality based on the URL
+(special application landing pages, web API's, etc).
+The AribaWeb direct actions are created for these purposes.
+They are essentially servlet request handlers with access to the AW environment.
+
+We'll build on our GuestBook application as follows:
+
+  1. Allow XML export to the list of posts
+  2. Add export link
+  3. Enhance the export API to return one post with a parameter
+
+In this guide, you will learn the following:
+
+  - [Direct Action Class]#
+  - [Direct Action Method]#
+  - [Direct Action URL]#
+  - [Response Generation]#
+  - [Request Parameters]#
+
+A pre-requisite to this guide is [Cycles And Scopes](../CycleScope/CyclesAndScopes.txt),
+
+Direct Action Class
+-------------------
+Creating a custom direct action class ais like creating a custom session class.
+We start by creating the DirectAction class
+in the app package by subclassing [AWDirectAction]#api:
+
+        package app;
+
+        import ariba.ui.aribaweb.core.AWDirectAction;
+
+        public class DirectAction extends AWDirectAction
+        {
+        }
+
+The app.DirectAction class is automatically used if presented.
+
+Direct Action Method
+--------------------
+Next we add a direct action method with "Action" as the suffix:
+
+        import ariba.ui.aribaweb.core.AWResponseGenerating;
+        import ariba.ui.aribaweb.core.AWResponse;
+        ...
+        public AWResponseGenerating postsAction () {
+            AWResponse response = application().createResponse(request());
+            response.appendContent("Hello World!");
+            return response;
+        }
+
+Hitting the following URL and see the message appear:
+ 
+        http://localhost:8150/GuestBook/Main/ad/posts
+
+![Hello](Hello.gif)
+
+You can tell it is a direct action by the "ad" path.
+A component action will have the "aw" path instead.
+The action will be exposed in the URL without the "Action" suffix.
+So how do we programmatically construct this URL?
+
+Direct Action URL
+-----------------
+We can use API's in [AWDirectActionUrl]#api to construct direct action URL's.
+Let's add a native hyperlink to the direct action.
+
+In DirectAction.java, add this string constant:
+
+        public static final String PostsAction = "posts";
+
+Next, add this link to Main.awl:
+
+        <h1>Past Comments</h1>
+        <a class="flR" href ="$exportURL">Export XML</a>
+
+Then, define exportURL in Main.java like this:
+
+        import ariba.ui.aribaweb.core.AWDirectActionUrl;
+        ...
+        public String exportURL () {
+            AWDirectActionUrl url =
+                AWDirectActionUrl.checkoutFullUrl(requestContext());
+            url.setDirectActionName(DirectAction.PostsAction);
+            return url.finishUrl();
+        }
+
+![ExportLink](ExportLink.gif)
+
+Click on the link and see that we got the same URL.
+
+The URL scheme is actually this:
+
+    http://<host>/<servletName>/<appName>/ad/<actionName>/<className>
+
+If className is not specified, then it is either DirectAction or [AWDirectAction]#api.
+If actionName is not specified, then it is defaultAction.
+
+When we hit the application's front door,
+we are in fact calling the defaultAction in [AWDirectAction]#api.
+You can override this method to control the front page display.
+
+Response Generation
+-------------------
+We can use the power of AribaWeb components to generate more than just UI pages.
+It can used to genearate emails, csv, XML, JSON, etc.
+
+Let's replace our simple message with some real content in XML format.
+First, create PostContent.awl with this:
+
+        <?xml version="1.0" encoding="UTF-8"?>
+        <posts>
+            <a:For list="$posts" item="$currPost">
+                <post>
+                    <userName>$currPost.userName</userName>
+                    <title>$currPost.title</title>
+                    <comment>$currPost.comment</comment>
+                </post>
+            </a:For>
+        </posts>
+
+Next, create the corresponding PostContent.java with this:
+
+        package app;
+
+        import ariba.ui.aribaweb.core.AWComponent;
+
+        import java.util.List;
+
+        public class PostContent extends AWComponent
+        {
+            private List _posts;
+            public Post _currPost;
+
+            public boolean shouldCachePage () {
+                return false;
+            }
+
+            protected boolean shouldValidateSession () {
+                return false;
+            }
+
+            public void setPosts (List posts) {
+                _posts = posts;
+            }
+
+            public List posts () {
+                return _posts;
+            }
+        }
+
+We need to override shouldCachePage and shouldValidSession to
+flag that we are doing content generation instead of creating a stateful page.
+
+We need to specify the response content type as text/xml,
+so let's add this in DirectAction.java:
+
+        import ariba.ui.aribaweb.util.AWContentType;
+        ...
+            AWResponse response = application().createResponse(request());
+            response.setContentType(AWContentType.TextXml);
+
+Next, we create the page and initialize it with the list of posts:
+
+        import java.util.List;
+        ...        
+            List posts = Post.Posts;
+            PostContent postContent =
+                (PostContent)pageWithName(PostContent.class.getName());
+            postContent.setPosts(posts);
+
+Then, we call generateResponse to generate the actual content:
+
+        postContent.generateResponse(response, requestContext());
+        return response;
+
+Let's also check that the request method is a "GET":
+
+        ...
+        AWRequest request = request();
+        ...
+        if ("GET".equals(request.method())) {
+            ...
+        }
+        return response;
+
+![Posts](Posts.gif)
+
+Hit the url in the browser, and it should format the
+XML nicely since we provided the right content type. 
+
+You see how we get headers from an instance of [AWRequest]#api,
+and set header and content to an instance of [AWResponse]#api as you would expect.
+The request object has other information we can use.
+Let's enhance our direct action by return
+a specific post given the index in the query string... 
+
+Request Parameters
+------------------
+We get request parameters from the request with requestValueForKey like this:
+
+        import ariba.util.core.ListUtil;
+        ...
+            String pi = request.formValueForKey("pi");
+            List posts = Post.Posts;
+            if (pi != null) {
+                int postIndex = Integer.parseInt(pi);
+                posts = ListUtil.list(Post.Posts.get(postIndex));
+            }
+            PostContent postContent =
+                (PostContent)pageWithName(PostContent.class.getName());
+            ...
+
+We can some exception handling if the request method is not a "GET"
+by setting the status header:
+
+        import ariba.util.core.HTTP;
+        ...
+            if ("GET".equals(request.method())) {
+                ...
+            } else {
+                response.setStatus(HTTP.CodeNotImplemented);
+                response.appendContent("<Status>Not Implemented</Status>");
+            }
+
+Finally, let's hit this url:
+
+        http://localhost:8150/GuestBook/Main/ad/posts?pi=1
+
+![Post](Post.gif)
+
+Keep in mind that direct actions are public by default.
+You would want to protect it in some ways when appropiate.
+You can restrict by request by checking password in the request.
+You can restrict by IP by implementing isValidRemoteHost in [AWDirectAction]#api
+You can restrict by session by implementing session validation (see [AWSessionValidator]#api
+and initSessionValidator in the Demo Application class). 
+
+**[Back to Documentation](../Documentation.txt)**

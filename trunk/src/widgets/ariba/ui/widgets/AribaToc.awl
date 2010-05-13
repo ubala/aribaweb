@@ -31,5 +31,14 @@
         </a:If>
     </a:If>
     </div>
+<a:Else/>
+    <!--- IE defect: This content is embedded in a td that spans the full page.
+         On incremental update when the page size reduces, IE does not recalculate the 
+         height of this td as it is empty. This causes the page height to remain unchanged
+         from the previous page. This retains the scroll bar, allowing the user to scroll 
+         into an empty area. 
+         Putting an empty div with the width as 1px forces IE to recalculate the height
+         of this td. --->\
+    <div style="width:1px;"/>\
 </a:If>
 <a:PhaseInvocation append="$requestContext.disableComponentPathDebugging"/>\

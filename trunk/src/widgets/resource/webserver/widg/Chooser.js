@@ -21,7 +21,7 @@ ariba.Chooser = function() {
 
     var Chooser = {
 
-        initChooser : function (chooserId, multiSelect, focus, isInvalid)
+        initChooser : function (chooserId, multiSelect, focus, isInvalid, itemCountChanged)
         {
             var chooserInfo = new Object();
             AWChooserInfo[chooserId] = chooserInfo;
@@ -34,6 +34,10 @@ ariba.Chooser = function() {
             chooserInfo.keyDownTimeoutId = null;
 
             chooserInfo.initialized = false;
+
+            if(itemCountChanged) {
+                Event.forceOnWindowResize();
+            }
         },
 
         fullInit: function(chooserInfo)
@@ -68,7 +72,6 @@ ariba.Chooser = function() {
             chooserInfo.matchesContainer = Dom.findChildUsingPredicate(wrapper, function (e) {
                 return e.tagName == "SPAN" && Dom.hasClass(e, "chMatches");
             });
-
             chooserInfo.validSelection = this.hasSelection(chooserInfo) && !chooserInfo.isInvalid;
             chooserInfo.fullMatchCheckbox = Dom.findChildUsingPredicate(wrapper, function (e) {
                 return e.tagName == "INPUT" && Dom.hasClass(e, "chfullMatch");

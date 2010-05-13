@@ -13,49 +13,51 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaNotificationDialog.awl#11 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaNotificationDialog.awl#12 $
     </Copyright>
 
     <Overview>
         TBD
     </Overview>
 </a:Api>\
-<a:RefreshRegion alwaysRender="$hasNewNotifications">
-<a:If ifTrue="$hasNotification">
-    <w:DialogBox id="AWNotificationDiv" class="notificationBox" wrapperClass="dialogWrapper notification"
-         style="display:none;"
-         bh="ND">
-        <h1>
-            <span onclick="ariba.Widgets.closeNotification()">
-                <a href="javascript:void(0)" class="close"> </a>
-            </span>
-            <a:Local key="a001"> \
-                Notification
-            </a:Local> ($notifications.size)
-        </h1>
-        <div>
-            <ol>
-                <a:For list="$notifications"
-                              item="$currentNotification">
-                    <li class="$currentNotificationImportanceClass">
-                        <span>$currentNotificationFrom  -</span>
-                        <span class="$currentSubjectClass">
-                        <a:Hyperlink action="$currentNotificationContext"
-                                     omitTags="$disableCurrentContextLink">
-                            $currentNotification.subject
-                        </a:Hyperlink>
-                        </span>
-                    </li>
-                </a:For>
-            </ol>
-        </div>
-    </w:DialogBox>
-</a:If>
-</a:RefreshRegion>
-<a:RefreshRegion alwaysRender="$hasNewNotifications">
-    <a:If ifTrue="$hasNewNotifications">
-        <a:ClientSideScript executeOnIncrementalUpdate="$true">
-            ariba.Event.registerUpdateCompleteCallback(ariba.Widgets.popNotification.bind(ariba.Widgets));
-        </a:ClientSideScript>
+<a:If ifTrue="$isNotificationEnabled">
+    <a:RefreshRegion alwaysRender="$hasNewNotifications">
+    <a:If ifTrue="$hasNotification">
+        <w:DialogBox id="AWNotificationDiv" class="notificationBox" wrapperClass="dialogWrapper notification"
+             style="display:none;"
+             bh="ND">
+            <h1>
+                <span onclick="ariba.Widgets.closeNotification()">
+                    <a href="javascript:void(0)" class="close"> </a>
+                </span>
+                <a:Local key="a001"> \
+                    Notification
+                </a:Local> ($notifications.size)
+            </h1>
+            <div>
+                <ol>
+                    <a:For list="$notifications"
+                                  item="$currentNotification">
+                        <li class="$currentNotificationImportanceClass">
+                            <span>$currentNotificationFrom  -</span>
+                            <span class="$currentSubjectClass">
+                            <a:Hyperlink action="$currentNotificationContext"
+                                         omitTags="$disableCurrentContextLink">
+                                $currentNotification.subject
+                            </a:Hyperlink>
+                            </span>
+                        </li>
+                    </a:For>
+                </ol>
+            </div>
+        </w:DialogBox>
     </a:If>
-</a:RefreshRegion>
+    </a:RefreshRegion>
+    <a:RefreshRegion alwaysRender="$hasNewNotifications">
+        <a:If ifTrue="$hasNewNotifications">
+            <a:ClientSideScript executeOnIncrementalUpdate="$true">
+                ariba.Event.registerUpdateCompleteCallback(ariba.Widgets.popNotification.bind(ariba.Widgets));
+            </a:ClientSideScript>
+        </a:If>
+    </a:RefreshRegion>
+</a:If>

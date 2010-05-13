@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#15 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#18 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -37,8 +37,9 @@ import ariba.util.core.PerformanceStateCore;
  */
 public class AWElementIdPath extends AWBaseObject
 {
-    private static final GrowOnlyHashtable ElementIdPaths = new GrowOnlyHashtable();
-    private static final GrowOnlyHashtable ElementIdPathsByString = new GrowOnlyHashtable();
+    private static GrowOnlyHashtable ElementIdPaths = new GrowOnlyHashtable();
+    private static GrowOnlyHashtable ElementIdPathsByString = new GrowOnlyHashtable();
+    private static int ElementIdCacheMaxSize = Integer.MAX_VALUE;
     private static final AWElementIdPath EmptyPath;
     private static final AWElementIdPath NoOpPath;
     public static final int LevelMaxSize = (int)Character.MAX_VALUE;
@@ -57,6 +58,11 @@ public class AWElementIdPath extends AWBaseObject
         AWElementIdGenerator elementIdGenerator = new AWElementIdGenerator();
         EmptyPath = AWElementIdPath.sharedInstance(elementIdGenerator);
         NoOpPath = new AWElementIdPath(new NoOpEncodedString());
+    }
+
+    public static int size ()
+    {
+        return ElementIdPaths.size();
     }
 
     protected static int computeHashcode (char[] path, int length)
@@ -124,6 +130,11 @@ public class AWElementIdPath extends AWBaseObject
         return NoOpPath;
     }
 
+    public static void setElementIdCacheMaxSize (int maxSize) 
+    {
+        ElementIdCacheMaxSize = maxSize;
+    }
+
     // This is the only way to get a new AWElementIdPath (maintains a cache of them)
     protected static AWElementIdPath sharedInstance (AWElementIdGenerator elementIdGenerator)
     {
@@ -133,6 +144,11 @@ public class AWElementIdPath extends AWBaseObject
             char[] path = (char[])elementIdGenerator.charArrayManager().trimmedArrayCopy();
             elementIdPath = new AWElementIdPath(path);
             ElemendIdInstantiationsCounter.addCount(1);
+            if (ElementIdPaths.size() > ElementIdCacheMaxSize) {
+                ElementIdPaths = new GrowOnlyHashtable();
+                ElementIdPathsByString = new GrowOnlyHashtable();
+                Log.aribawebexec_elementId.info(10547);
+            }
             ElementIdPaths.put(elementIdPath, elementIdPath);
         }
         return elementIdPath;

@@ -22,6 +22,8 @@ Cp1252,,,,
 "AWTOptionsMenuItems",a013,"Pivot Table Layout","Diseño de tabla dinámica",""
 "AWTOptionsMenuItems",a014,"Show Detail Rows","Mostrar filas de detalles",""
 "AWTOptionsMenuItems",a015,"Configure Layout...","Configurar diseño...",""
+"AWTOptionsMenuItems",a016,"Expand All Detail Rows","Expandir filas con todos los detalles",""
+"AWTOptionsMenuItems",a017,"Collapse All Detail Rows","Contraer filas con todos los detalles",""
 "AWTPivotConfigurationPanel",a001,"Edit Table Layout","Editar diseño de tabla",""
 "AWTPivotConfigurationPanel",a002,"Column Fields","Campos de columna",""
 "AWTPivotConfigurationPanel",a003,"Row Fields","Campos de fila",""

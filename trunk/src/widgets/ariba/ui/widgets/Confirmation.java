@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.java#12 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.java#13 $
 */
 
 package ariba.ui.widgets;
@@ -25,7 +25,6 @@ import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWEnvironmentStack;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
-
 import java.util.List;
 
 /**
@@ -42,6 +41,7 @@ public class Confirmation extends AWComponent
 
     private static final String OkAction     = "okAction";
     private static final String CancelAction = "cancelAction";
+    private static final String Validate     = "validate";
 
     public String _confId;
 
@@ -72,7 +72,7 @@ public class Confirmation extends AWComponent
         // (basically default LazyLoad to true)
         return isClientSideConfirmation() &&
                ( !hasBinding(LazyLoadConfirmation) ||
-                 booleanValueForBinding(LazyLoadConfirmation) );
+                 booleanValueForBinding(LazyLoadConfirmation));
     }
 
     public boolean hideConfirmation ()
@@ -82,7 +82,9 @@ public class Confirmation extends AWComponent
 
     public boolean showConfirmation ()
     {
-        if (isClientSideConfirmation()) return false;
+        if (isClientSideConfirmation()) {
+            return false;
+        }
 
         AWEncodedString confId = (AWEncodedString)env().peek(ConfirmationId);
         if (confId == null) {
@@ -108,6 +110,11 @@ public class Confirmation extends AWComponent
 
     public AWResponseGenerating okAction ()
     {
+        boolean validate = booleanValueForBinding(Validate);
+
+        if (validate && errorManager().checkErrorsAndEnableDisplay()) {
+            return null;
+        }
         hideConfirmation(requestContext());
         return (AWResponseGenerating)valueForBinding(OkAction);
     }
@@ -163,7 +170,7 @@ public class Confirmation extends AWComponent
     /*
         Nested Error Manager Support...
      */
-    public void renderResponse(AWRequestContext requestContext, AWComponent component)
+    public void renderResponse (AWRequestContext requestContext, AWComponent component)
     {
         _confId = StringUtil.strcat("conf", stringValueForBinding(BindingNames.id));
         pushErrorManager();
@@ -171,14 +178,15 @@ public class Confirmation extends AWComponent
         popErrorManager();
     }
 
-    public void applyValues(AWRequestContext requestContext, AWComponent component)
+    public void applyValues (AWRequestContext requestContext, AWComponent component)
     {
         pushErrorManager();
         super.applyValues(requestContext, component);
         popErrorManager();
     }
 
-    public AWResponseGenerating invokeAction(AWRequestContext requestContext, AWComponent component) {
+    public AWResponseGenerating invokeAction (AWRequestContext requestContext, AWComponent component)
+    {
         pushErrorManager();
         AWResponseGenerating result = super.invokeAction(requestContext, component);
         popErrorManager();

@@ -9,55 +9,55 @@
         after:zToc;
         component:MetaList;
         bindings:{
-            list:${app.Post.postsForContinent(app.Continent.NorthAmerica)}
+            list:${app.PostService.postsForContinent(app.Continent.NorthAmerica)}
         }
     }
     @layout=HelloSouthAmerica#pad8 {
         after:HelloNorthAmerica;
         component:MetaList;
         bindings:{
-            list:${app.Post.postsForContinent(app.Continent.SouthAmerica)}
+            list:${app.PostService.postsForContinent(app.Continent.SouthAmerica)}
         }
     }
     @layout=HelloEurope#pad8 {
         after:zLeft;
         component:MetaList;
         bindings:{
-            list:${app.Post.postsForContinent(app.Continent.Europe)}
+            list:${app.PostService.postsForContinent(app.Continent.Europe)}
         }
     }
     @layout=HelloAfrica#pad8 {
         after:HelloEurope;
         component:MetaList;
         bindings:{
-            list:${app.Post.postsForContinent(app.Continent.Africa)}
+            list:${app.PostService.postsForContinent(app.Continent.Africa)}
         }
     }
     @layout=HelloAsia#pad8 {
         after:zRight;
         component:MetaList;
         bindings:{
-            list:${app.Post.postsForContinent(app.Continent.Asia)}
+            list:${app.PostService.postsForContinent(app.Continent.Asia)}
         }
     }
     @layout=HelloAustralia#pad8 {
         after:HelloAsia;
         component:MetaList;
         bindings:{
-            list:${app.Post.postsForContinent(app.Continent.Australia)}
+            list:${app.PostService.postsForContinent(app.Continent.Australia)}
         }
     }
     @layout=HelloAntarctica#pad8 {
         after:zBottom;
         component:MetaList;
         bindings:{
-            list:${app.Post.postsForContinent(app.Continent.Antarctica)}
+            list:${app.PostService.postsForContinent(app.Continent.Antarctica)}
         }
     }
     
 }
 
-module=app.Post {
+module=app.PostService {
     homePage:Main;
 }
 

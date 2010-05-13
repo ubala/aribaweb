@@ -393,7 +393,7 @@ Page navigation is of critical concern in web programming, and AribaWeb has a so
 While most frameworks effectively externalize application state to the client by generating destination
 information into URLs, AribaWeb provides a more secure and powerful approach based on *server side state
 encapsulation.*  In AribaWeb *component actions transition to other pages by allocating, initializing, 
-and returning other component instances* -- the destination of links or forms is in now way predestined
+and returning other component instances* -- the destination of links or forms is in no way predestined
 by content rendered to the page (and therefore an action can use server logic to respond to any action in
 any way).
 

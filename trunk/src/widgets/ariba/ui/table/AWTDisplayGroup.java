@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#78 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#81 $
 */
 package ariba.ui.table;
 
@@ -38,7 +38,7 @@ public final class AWTDisplayGroup
      */
     protected AWTDataSource _dataSource;
     protected boolean _didInitialFetch;
-    
+
     /**
         source of truth on the selection
     */
@@ -66,9 +66,10 @@ public final class AWTDisplayGroup
 
     protected FieldPath _groupByFieldPath;
     /**
-        Boolean for each grouping key value
+        Boolean for each grouping key value.
+        Is a Map<Object, GroupingState>.
     */
-    protected Map _groupingValueState;
+    protected Map /*Object, GroupingState*/ _groupingValueState;
     protected Object _lastGroupingRow;
     protected GroupingState _lastGroupingState;
     protected AWTSortOrdering _groupBySortOrdering;
@@ -153,7 +154,7 @@ public final class AWTDisplayGroup
     }
 
     /*******************************************************************************
-     * Caching and misc methods
+     * Caching Support and misc methods
      *******************************************************************************/
 
     public void setObjectArray (List allObjects)
@@ -190,7 +191,7 @@ public final class AWTDisplayGroup
         // Use validateSelection() to attempt to preseve any compatible portions
         // of the selection...
         _validateSelection();
-        
+
         if (itemListener != null) {
             itemListener.rowsReset(_owningTable);
         }
@@ -367,9 +368,10 @@ public final class AWTDisplayGroup
     // called from OutlineState to sort / group child lists
     public List sortedMainList (List objects)
     {
-        List sorted = (_dataSource != null && _dataSource.dataSourceDoesSort())
-                ? ListUtil.collectionToList(objects)
-                : computeSortedObjects(objects);
+        boolean dataSourceSorts = _dataSource != null && _dataSource.dataSourceDoesSort();
+        List sorted = dataSourceSorts
+                      ? ListUtil.collectionToList(objects)
+                      : computeSortedObjects(objects);
         return groupObjects(sorted);
     }
 
@@ -446,7 +448,7 @@ public final class AWTDisplayGroup
     }
 
     /*******************************************************************************
-     * Grouping Methods
+     * Grouping Support
      *******************************************************************************/
 
     protected List groupObjects (List sortedObjects)
@@ -476,7 +478,7 @@ public final class AWTDisplayGroup
         Object lastValue = null;
         boolean addingFromCurrentGroup = true;
         GroupingState groupingState = null;
-        Map groupingStates = groupingValueState();
+        Map<Object, GroupingState> groupingStates = groupingValueState();
 
         // Filter all grouped objects that are not expanded
         while (e.hasNext()) {
@@ -488,15 +490,17 @@ public final class AWTDisplayGroup
 
             if (lastValue == null || hasChanged(currentValue, lastValue)) {
                 //addOrFindd grouping row keyed by current object
-                groupingState = (GroupingState)groupingStates.get(object);
+                groupingState = groupingStates.get(object);
 
                 if (groupingState == null) {
                     groupingState = new GroupingState();
                     groupingValueState().put(object, groupingState);
-                    groupingState.isExpanded =
-                        (effectiveGroupingExpansion == GroupingDefaultAllOpen) ||
-                        ((effectiveGroupingExpansion == GroupingDefaultFirstOpen) &&
-                        groupedObjects.isEmpty());
+                    boolean expandBecauseFirst =
+                        (effectiveGroupingExpansion == GroupingDefaultFirstOpen)
+                        && groupedObjects.isEmpty();
+                    boolean expandAll =
+                        effectiveGroupingExpansion == GroupingDefaultAllOpen;
+                    groupingState.isExpanded = expandAll || expandBecauseFirst;
                 }
 
                 groupingState.groupingRow = object;
@@ -545,7 +549,12 @@ public final class AWTDisplayGroup
         _lastGroupingState = null;
     }
 
-    protected Map groupingValueState ()
+    /**
+     * Lazy inits the groupingValueState as needed.
+     *
+     * @return Returns a Map<Object, GroupingState>.
+     */
+    protected Map /*Object, GroupingState*/ groupingValueState ()
     {
         if (_groupingValueState == null) {
             _groupingValueState = new EqHashtable();
@@ -668,6 +677,10 @@ public final class AWTDisplayGroup
     {
         setGroupingExpanded(_currentItem, expanded);
     }
+
+    /*******************************************************************************
+     * Detail Rows Support
+     *******************************************************************************/
 
     protected Map<Object, Boolean>_detailRowExpansions;
     protected boolean _detailRowAutoCollapse;
@@ -891,7 +904,7 @@ public final class AWTDisplayGroup
     }
 
     /****************************************************************************
-     * Item / Current Item Methods
+     * Item / Current Item Support
      ****************************************************************************/
 
     public void setCurrentItem (Object item)
@@ -920,11 +933,11 @@ public final class AWTDisplayGroup
         if (_useBatching) {
             // find the closest batch top index
             int batchIndex = (int)index / _numberOfObjectsPerBatch;
-            topIndex = batchIndex *  _numberOfObjectsPerBatch;                               
+            topIndex = batchIndex *  _numberOfObjectsPerBatch;
         }
         else {
             // try to place 40% down list, but make sure still in bounds
-             // if we get -1, the code below will fix it to 0            
+             // if we get -1, the code below will fix it to 0
             topIndex = (int)(index - (_numberOfObjectsPerBatch * 0.4));
             if (topIndex + _numberOfObjectsPerBatch > filteredObjects().size()) {
                 topIndex = filteredObjects().size() - _numberOfObjectsPerBatch;
@@ -976,6 +989,7 @@ public final class AWTDisplayGroup
         return extras;
 
     }
+    
     /** This is a useful bag for storing state associated with a row. */
     public Map currentItemExtras ()
     {
@@ -988,11 +1002,13 @@ public final class AWTDisplayGroup
      * Not -- this used to also check object-equality (by invoking the equals() method)
      * but that is inconsistent with the use of reference-equality elsewhere, and creates
      * broken behavior when multiple equals() objects are in the same table.
+     *
      * @param list
      * @param element
+     *
      * @return the index of the element in the list.  If not found, return -1.
      */
-    private int indexOf (List list, Object element)
+    private static int indexOf (List list, Object element)
     {
         int result = -1;
 
@@ -1005,7 +1021,7 @@ public final class AWTDisplayGroup
     }
 
     /***************************************************************************
-     * Selected / Selection Methods
+     * Selected / Selection Support
      ***************************************************************************/
 
     public boolean currentSelectedState ()
@@ -1101,7 +1117,11 @@ public final class AWTDisplayGroup
 
         // set _selectedObject
         _selectedObject = ListUtil.firstElement(selection);
-        if (_selectedObject != null && !listsIdentical(origSelection, _selectedObjects)) setItemToForceVisible(_selectedObject);
+        boolean selectionChanged =
+            _selectedObject != null && !listsIdentical(origSelection, _selectedObjects);
+        if (selectionChanged) {
+            setItemToForceVisible(_selectedObject);
+        }
     }
 
     /**
@@ -1167,7 +1187,7 @@ public final class AWTDisplayGroup
     }
 
     /*******************************************************************************
-     * Batching Methods
+     * Batching Support
      *******************************************************************************/
 
     /**
@@ -1410,9 +1430,9 @@ public final class AWTDisplayGroup
         return destinationArray;
     }
 
-    /**************************************************************************
-     * Sort Orderings Methods
-     **************************************************************************/
+    /*******************************************************************************
+     * Sort Orderings Support
+     *******************************************************************************/
 
     /** Sorting -- these are set interactively by the user of the table */
     public void setSortOrderings (List sortOrderings)

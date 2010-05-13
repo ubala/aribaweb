@@ -1,0 +1,15 @@
+<!DOCTYPE frame SYSTEM "Frame.dtd">
+<frame label="Summary">
+  <doc>
+     This frame is the frame in the summary step.
+  </doc>
+  <actions>
+    <action name="save"/>    
+  </actions>
+  <content source="wizard.Summary"/>
+</frame>
+
+
+
+
+

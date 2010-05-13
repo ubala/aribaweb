@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#55 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#57 $
     </Copyright>
 
     <Overview>
@@ -134,14 +134,6 @@
         TBD
     </Binding>
 
-    <Binding key="helpUrl" direction="get" type="String" required="$false">
-        TBD
-    </Binding>
-
-    <Binding key="helpKey" direction="get" type="String" required="$false">
-        TBD
-    </Binding>
-
     <Binding key="showTopButtons" direction="get" type="boolean" default="$true">
         See BasicNavigator
     </Binding>
@@ -192,8 +184,7 @@
                   toc="$^toc"
                   formEncodingType="$^formEncodingType"
                   hasForm="$^hasForm:$true"
-                  submitFormDefault="$^submitFormDefault"
-                  helpKey="$^helpKey">\
+                  submitFormDefault="$^submitFormDefault">\
 
     <a:If ifFalse="$hasBottomLeftAreaSubTemplate">
         <w:BasicNavigator showTopButtons="$^showTopButtons" showBottomButtons="$^showBottomButtons">\
@@ -331,9 +322,15 @@
 
 <a:Block name="buttons">\
     <a:If ifTrue="$^editable">\
-        <w:StepNavigatorButton action="$okClicked" hint="$^okHint:$[a001]OK Button" label="$^okTitle:$[a002]OK" isDefault="$true"/>\
-        <w:StepNavigatorButton action="$cancelClicked" hint="$^cancelHint:$[a003]Cancel Button" label="$^cancelTitle:$[a004]Cancel" submitForm="$false"/>\
+        <w:StepNavigatorButton action="$okClicked" hint="$^okHint:$[a001]OK Button"
+                               buttonClass="$^okButtonClass" style="$^okButtonWrapperStyle"
+                               label="$^okTitle:$[a002]OK" isDefault="$true"/>\
+        <w:StepNavigatorButton action="$cancelClicked" hint="$^cancelHint:$[a003]Cancel Button"
+                               buttonClass="$^okButtonClass" style="$^okButtonWrapperStyle"
+                               label="$^cancelTitle:$[a004]Cancel" submitForm="$false"/>\
     <a:Else/>\
-        <w:StepNavigatorButton action="$okClicked" hint="$^doneHint:$[a005]Done Button" label="$^doneTitle:$[a006]Done" submitForm="$^submitForm"/>\
+        <w:StepNavigatorButton action="$okClicked" hint="$^doneHint:$[a005]Done Button"
+                               buttonClass="$^okButtonClass" style="$^okButtonWrapperStyle"
+                               label="$^doneTitle:$[a006]Done" submitForm="$^submitForm"/>\
     </a:If>\
 </a:Block>

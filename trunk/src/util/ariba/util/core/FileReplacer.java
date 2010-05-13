@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/FileReplacer.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/core/FileReplacer.java#9 $
 */
 package ariba.util.core;
 
@@ -440,11 +440,17 @@ public class FileReplacer implements OutputStreamHolder
             Log.util.warning(8511, SystemUtil.stackTrace(ex));
         }
         if (_temporaryFile != null) {
-            FileUtil.deleteFile(_temporaryFile);
+            boolean isDeleted = FileUtil.deleteFile(_temporaryFile);
+            if (! isDeleted) {
+                Log.util.warning(10410, _temporaryFile);
+            }
             _temporaryFile = null;
         }
         if (_backupFile != null) {
-            FileUtil.deleteFile(_backupFile);
+        	boolean isDeleted = FileUtil.deleteFile(_backupFile);
+            if (! isDeleted) {
+                Log.util.warning(10410, _backupFile);
+            }
             _backupFile = null;
         }
     }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: $
+    $Id$
 */
 
 package ariba.util.core;
@@ -162,21 +162,21 @@ public class GrowOnlyHashtable<K,V> extends AbstractMap<K,V>
         Hashtable contains no keys, an empty array is returned.
         @return the Object array above mentioned.
     */
-    public K[] keysArray ()
+    public Object[] keysArray ()
     {
         Storage<K,V> tmpStorage = storage;
         int count = tmpStorage.count;
         K[] keys = tmpStorage.keys;
 
         if (count == 0) {
-            return (K[])emptyArray;
+            return emptyArray;
         }
 
-        K[] array = (K[])new Object[count];
+        Object[] array = new Object[count];
         int arrayCount = 0;
 
         for (int i = 0; i < keys.length && arrayCount < count; i++) {
-            K key = keys[i];
+            Object key = keys[i];
             if (key != null && key != DeletedMarker) {
                 array[arrayCount++] = key;
             }
@@ -191,22 +191,22 @@ public class GrowOnlyHashtable<K,V> extends AbstractMap<K,V>
         empty array is returned.
         @return the Object array mentioned above.
     */
-    public V[] elementsArray ()
+    public Object[] elementsArray ()
     {
         Storage<K,V> tmpStorage = storage;
         int count = tmpStorage.count;
-        V[] elements = tmpStorage.elements;
+        Object[] elements = tmpStorage.elements;
 
 
         if (count == 0) {
-            return (V[])emptyArray;
+            return emptyArray;
         }
 
-        V[] array = (V[])new Object[count];
+        Object[] array = new Object[count];
         int arrayCount = 0;
 
         for (int i = 0; i < elements.length && arrayCount < count; i++) {
-            V element = elements[i];
+            Object element = elements[i];
             if (element != null && element != DeletedMarker) {
                 array[arrayCount++] = element;
             }

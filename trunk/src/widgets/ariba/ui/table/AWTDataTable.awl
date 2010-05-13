@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#127 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#129 $
     </Copyright>
 
     <Overview>
@@ -50,8 +50,6 @@
         Scrolling is used if all the following are true:
 
         -    the developer turned it on for that table (enableScrolling="$true"
-
-        -    the browser is IE on Windows
 
         -    ADA accessibility is not enabled
 
@@ -613,7 +611,7 @@
             useRefresh="$useRefresh" isDragDropEnabled="$isDragDropEnabled" minHeight="$^minHeight" maxHeight="$^maxHeight"
             topCount="$displayGroup.scrollTopCount" bottomCount="$displayGroup.scrollBottomCount" rowCount="$displayGroup.filteredObjects.size" 
             scrollFaultAction="$scrollFaultAction"
-            topOffset="$displayGroup.scrollTopOffset" topIndex="$scrollTopIndex"
+            topOffset="$displayGroup.scrollTopOffset" topIndex="$scrollTopIndex" leftPos="$scrollLeftPos"
             isMaximized="$isMaximized" elementIdForVisibleRow="$elementIdForVisibleRow"
             disableRowSelection="$disableRowSelection" checkNbsps="$false" checkSelectionStyle="$false"
             updateSelectAllAction="$updateSelectAllAction"

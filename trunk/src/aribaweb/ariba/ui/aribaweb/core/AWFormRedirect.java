@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,12 +12,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#21 $
 */
 
 package ariba.ui.aribaweb.core;
 
-import ariba.ui.aribaweb.test.TestContext;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
@@ -171,7 +170,14 @@ public class AWFormRedirect extends AWComponent
 
     public String getFormActionUrl ()
     {
-        return _formActionUrl;
+        if (_formActionUrl == null) {
+            return null;
+        }
+        else {
+            boolean isLocal = AWDirectActionUrl.isLocalDirectActionUrl(_formActionUrl, requestContext());
+            String url = AWRedirect.decorateUrl(_formActionUrl, isLocal);
+            return url;
+        }
     }
 
     public void setDebugString (String debug)

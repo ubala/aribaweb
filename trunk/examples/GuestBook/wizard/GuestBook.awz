@@ -1,0 +1,31 @@
+<!DOCTYPE wizard SYSTEM "Wizard.dtd">
+<wizard name="CreatePost"
+        label="Create Post"
+        allowsClickableSteps="true">
+  <doc>
+    Post creation wizard. 
+  </doc>
+  <actions>
+      <action name="save" 
+              label="Save"/>
+      <action name="delete"
+              label="Delete"/>
+  </actions>
+  <steps>
+    <step name="infoStep" label="Information">
+      <frame name="infoFrame" source="Information"/>
+    </step>
+    <step name="contentStep" label="Content">
+      <frame name="contentFrame" source="Content"/>
+    </step>
+    <step name="ratingStep" label="Rating">
+      <frame name="ratingFrame" source="Rating"/>
+    </step>
+    <step name="summaryStep" label="Summary">
+      <frame name="summaryFrame" source="Summary"/>
+    </step>
+  </steps>
+  <exit>
+    <frame name="confirmExit" source="Exit"/>
+  </exit>
+</wizard>

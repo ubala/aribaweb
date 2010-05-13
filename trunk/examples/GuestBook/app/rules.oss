@@ -2,6 +2,17 @@ class=app.Post field=rating {
     component:RatingBar;
 }
 
+class=app.Post field=continent operation=create {
+    component:Chooser;
+    bindings:{
+        selections:${chooserSelections};
+        state:${chooserState};
+        selectionSource:${chooserSelectionSource};
+        searchAction:${requestContext.pageComponent().chooserSearchAction()};
+        allowFullMatchOnInput:true;
+    }
+}
+
 class=app.Post @action=Delete {
     trait:instance;
     actionResults:${

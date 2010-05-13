@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/i18n/I18NUtil.java#15 $
+    $Id: //ariba/platform/util/core/ariba/util/i18n/I18NUtil.java#16 $
 */
 
 package ariba.util.i18n;
@@ -438,7 +438,7 @@ public class I18NUtil
                 // cannot relax further
             return null;
         }
-        return getLocaleFromString(localeName);
+        return localeName == null ? null : getLocaleFromString(localeName);
     }
 
 

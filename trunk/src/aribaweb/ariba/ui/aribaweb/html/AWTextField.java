@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#51 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#54 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -22,9 +22,9 @@ import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWGenericActionTag;
 import ariba.ui.aribaweb.core.AWComponent;
-import ariba.ui.aribaweb.core.AWConstants;
 import ariba.ui.aribaweb.core.AWInputId;
 import ariba.ui.aribaweb.core.AWErrorManager;
+import ariba.ui.aribaweb.core.AWBindingNames;
 import ariba.ui.aribaweb.core.AWEditableRegion;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWFormatting;
@@ -43,6 +43,7 @@ public class AWTextField extends AWComponent
         BindingNames.id,
         BindingNames.name,
         BindingNames.value,
+        BindingNames.editable,
         BindingNames.action,
         BindingNames.formatter,
         BindingNames.emptyStringValue,
@@ -130,7 +131,8 @@ public class AWTextField extends AWComponent
         }
         Object objectValue = null;
         if (formValueString.length() == 0) {
-            AWBinding emptyStringValueBinding = bindingForName(BindingNames.emptyStringValue, true);
+            AWBinding emptyStringValueBinding =
+                bindingForName(BindingNames.emptyStringValue, true);
             if (emptyStringValueBinding != null) {
                 formValueString = (String)valueForBinding(emptyStringValueBinding);
             }
@@ -141,7 +143,8 @@ public class AWTextField extends AWComponent
             }
             else {
                 try {
-                    objectValue = AWFormatting.get(_formatter).parseObject(_formatter, formValueString);
+                    objectValue = AWFormatting.get(_formatter).
+                        parseObject(_formatter, formValueString);
                 }
                 catch (RuntimeException exception) {
                     recordValidationError(exception, errorKey(), formValueString);
@@ -213,8 +216,9 @@ public class AWTextField extends AWComponent
         // for example, why should _isRefresh disable autofocus?
 
         // if this is a refresh textfield then disable focus
-        if (_isRefresh || _disabled)
+        if (_isRefresh || _disabled) {
             return false;
+        }
 
         // if the awAllowAutoFocus environment is set to false, then return disable focus
         Boolean allowFocus = (Boolean)env().peek("awAllowAutoFocus");
@@ -243,7 +247,8 @@ public class AWTextField extends AWComponent
         if (_formatter != null || hasBinding(BindingNames.errorKey)) {
             AWErrorManager errorManager = errorManager();
             Object errorKey = errorKey();
-            Object errorObjValue = (errorKey != null) ? errorManager.errantValueForKey(errorKey) : null;
+            Object errorObjValue =
+                (errorKey != null) ? errorManager.errantValueForKey(errorKey) : null;
             if (errorObjValue instanceof String) {
                 errorValue = (String)errorObjValue;
             }
@@ -261,7 +266,7 @@ public class AWTextField extends AWComponent
         }
         String result = (errorValue == null) ? formattedString() : errorValue;
         // 1-55LMEY
-        if (result.startsWith("`")) {
+        if (result != null && result.startsWith("`")) {
             requestContext().forceFullPageRefresh();
         }
         return result;
@@ -287,9 +292,15 @@ public class AWTextField extends AWComponent
 
     public boolean isEditable ()
     {
+        Boolean editable;
+        if (hasBinding(AWBindingNames.editable)) {
+            editable = booleanValueForBinding(AWBindingNames.editable);
+        }
+        else {
+            editable = (Boolean)env().peek("editable");
+        }
         AWRequestContext requestContext = requestContext();
-        Boolean editable = (Boolean)env().peek("editable");
-        return ((editable != null) && editable.booleanValue() &&
+        return ((editable != null) && editable &&
                 !requestContext.isPrintMode() && !requestContext.isExportMode());
     }
 
@@ -298,7 +309,9 @@ public class AWTextField extends AWComponent
         String cls = stringValueForBinding(BindingNames.classBinding);
         cls = cls == null ? "" : " " + cls;
         cls = (valueForBinding(BindingNames.size) == null ?  "tf tfW" : "tf") + cls;
-        if (_disabled) cls = "tfDis " + cls;
+        if (_disabled) {
+            cls = "tfDis " + cls;
+        }
         return cls;
     }
 

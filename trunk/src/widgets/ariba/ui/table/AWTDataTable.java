@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#195 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#201 $
 */
 
 package ariba.ui.table;
@@ -58,6 +58,15 @@ import java.util.Set;
 /**
     DataTable widget
     See the AWApi section of .awl file for usage information.
+    Important Concepts:
+      Scroll Faulting / Pagination
+      Grouping
+      Filtering
+      Sorting
+      Display Group
+      Details
+      Nested Tables
+
     @aribaapi ariba
 */
 public final class AWTDataTable extends AWComponent
@@ -348,11 +357,11 @@ public final class AWTDataTable extends AWComponent
      * This is stored to check for rapid turnaround changes.
      */
     private AWComponentReference _processedReference;
-    private List _allColumns;
+    private List<Column> _allColumns;
     private boolean _visibilityArray[];
-    protected List _displayedColumns;
-    private List _dataColumns;
-    private List _optionalColumns;
+    protected List<Column> _displayedColumns;
+    private List<Column> _dataColumns;
+    private List<Column> _optionalColumns;
 
     private Column _detailColumn;
     private Column _secondDetailColumn;
@@ -377,11 +386,9 @@ public final class AWTDataTable extends AWComponent
     private String  _style;
     private String _tableClass;
     private boolean _enableScrolling;
+    public int _scrollTopIndex = -1;  // used to buffer changes in scroll offset until renderResponse
+    public int _scrollLeftPos = 0; //only used to retain horizontal scroll across requests
 
-    /**
-     * This is used to buffer changes in scroll offset until renderResponse.
-     */
-    public int _scrollTopIndex = -1;
 
     /**
      * This is the rendering scratch state.
@@ -430,7 +437,7 @@ public final class AWTDataTable extends AWComponent
     protected int _colsAfterFirstDataColumn;
     protected int _outlineColumnIndex;
     protected int _nextColumnIndentation;
-    private List/*AWTColumnManager*/ _columnManagers = null;
+    private List<AWTColumnManager> _columnManagers = null;
     // If true, the selection column is always rendered regardless of the previous value.
     private boolean _forceRenderSelectionColumn = false;
     private boolean _showSelectAll = true;
@@ -506,12 +513,13 @@ public final class AWTDataTable extends AWComponent
                 // continues to operate as a latch by pushing false to the binding
                 shouldForceColumnUpdate();
 
-                // remember this template (and flag that we're done with initialization)
-                _processedReference = componentReference();
-            } else if (shouldForceColumnUpdate() && !isExportMode() && !_isScrollFaultAction) {
-                invalidateColumns();
-                columns();  // force refresh
-            }
+            // remember this template (and flag that we're done with initialization)
+            _processedReference = componentReference();
+        }
+        else if (shouldForceColumnUpdate() && !isExportMode() && !_isScrollFaultAction) {
+            invalidateColumns();
+            columns();  // force refresh
+        }
 
             if (_didHibernate) {
                 initializeDisplayGroupObjects();
@@ -554,6 +562,10 @@ public final class AWTDataTable extends AWComponent
         }
     }
 
+    /*******************************************************************************
+     * Scroll Faulting Support
+     *******************************************************************************/
+
     public AWResponseGenerating  scrollFaultAction ()
     {
         _isScrollFaultAction = true;
@@ -594,6 +606,10 @@ public final class AWTDataTable extends AWComponent
         return ((_displayGroup.scrollTopCount() > 0) ||
                 (_displayGroup.scrollBottomCount() > 0) && !requestContext().isExportMode());
     }
+
+    /*******************************************************************************
+     * End Scroll Faulting Support
+     *******************************************************************************/
 
     private void initForChangedReference ()
     {
@@ -744,6 +760,10 @@ public final class AWTDataTable extends AWComponent
         }
     }
 
+    /*******************************************************************************
+     * Excel Export Support
+     *******************************************************************************/
+
     public AWComponent downloadToExcelAll ()
     {
         _exportState = EXPORT_ALL;
@@ -765,6 +785,10 @@ public final class AWTDataTable extends AWComponent
     {
         return _exportState != EXPORT_NONE;
     }
+
+    /*******************************************************************************
+     * End Excel Export Support
+     *******************************************************************************/
 
     public boolean isDragDropEnabled ()
     {
@@ -845,7 +869,12 @@ public final class AWTDataTable extends AWComponent
         }
     }
 
-    public List columns ()
+    /**
+     * Lazily inits the Columns.
+     *
+     * @return a reference to a List<AWTDataTable.Column>
+     */
+    public List /*Column*/ columns ()
     {
         if (_allColumns == null) {
             initializeColumns();
@@ -1059,6 +1088,10 @@ public final class AWTDataTable extends AWComponent
         }
     }
 
+    /*******************************************************************************
+     * Column Purgatory Support
+     *******************************************************************************/
+
     /*
         Support for holding over columns during forceColumnUpdate() for recovery.
         E.g. to reuse meta-data allocated columns.
@@ -1088,6 +1121,10 @@ public final class AWTDataTable extends AWComponent
     {
         _columnPurgatory = null;
     }
+
+    /*******************************************************************************
+     * End Column Purgatory Support
+     *******************************************************************************/
 
     protected Column firstSortableValueColumn ()
     {
@@ -1224,6 +1261,10 @@ public final class AWTDataTable extends AWComponent
         }
     }
 
+    /*******************************************************************************
+     * Detail Column Support
+     *******************************************************************************/
+
     protected boolean _wasPrimaryRow;
 
     public boolean activateDetailColumn (boolean isTop)
@@ -1267,6 +1308,10 @@ public final class AWTDataTable extends AWComponent
             _secondDetailColumn = c;
         }
     }
+
+    /*******************************************************************************
+     * End Detail Column Support
+     *******************************************************************************/
 
     protected void checkListChanges()
     {
@@ -1435,6 +1480,10 @@ public final class AWTDataTable extends AWComponent
         return (children != null) && (OrderedList.get(children).size(children) > 0);
     }
 
+    /*******************************************************************************
+     * Selection Support
+     *******************************************************************************/
+
     boolean _amAccumulating = false;
 
     List _selectableObjects;
@@ -1453,6 +1502,10 @@ public final class AWTDataTable extends AWComponent
     {
         _amAccumulating = false;
     }
+
+    /*******************************************************************************
+     * End Selection Support
+     *******************************************************************************/
 
     /** This is evil -- and probably doesn't work...
 
@@ -1728,6 +1781,10 @@ public final class AWTDataTable extends AWComponent
         }
     }
 
+    /*******************************************************************************
+     * Visibility Support
+     *******************************************************************************/
+
     public boolean isCurrentColumnDisplayed ()
     {
         int index = ListUtil.indexOfIdentical(columns(), _originalCurrentColumn);
@@ -1779,6 +1836,10 @@ public final class AWTDataTable extends AWComponent
             //_dataColumns = null;
         }
     }
+
+    /*******************************************************************************
+     * End Visibility Support
+     *******************************************************************************/
 
     protected void initColInfo (List columns)
     {
@@ -1847,6 +1908,10 @@ public final class AWTDataTable extends AWComponent
                     ? booleanValueForBinding(AWBindingNames.submitForm) : (requestContext().currentForm()!=null)));
     }
 
+    /*******************************************************************************
+     * Begin Selection Support
+     *******************************************************************************/
+
     public boolean submitOnSelectionChangeBindingExists ()
     {
         return hasBinding(BindingNames.submitOnSelectionChange);
@@ -1887,6 +1952,7 @@ public final class AWTDataTable extends AWComponent
                     || booleanValueForBinding(BindingNames.showSelectionControl);
     }
 
+    /** Toggle Select All / Select None */
     public AWComponent toggleColumn ()
     {
         List selectableObjects = selectableObjects();
@@ -1940,6 +2006,10 @@ public final class AWTDataTable extends AWComponent
         _forceRenderSelectionColumn = true;
         return null;
     }
+
+    /*******************************************************************************
+     * End Selection Support
+     *******************************************************************************/
 
     public boolean forceRenderRows ()
     {
@@ -2334,9 +2404,9 @@ public final class AWTDataTable extends AWComponent
         return displayGroup().detailExpansionEnabled();
     }
 
-    /*
-    ** Grouping Support
-    */
+    /*******************************************************************************
+     * Grouping Support
+     *******************************************************************************/
 
     public boolean isGroupingByEnabled ()
     {
@@ -2407,6 +2477,10 @@ public final class AWTDataTable extends AWComponent
             resetScrollTop();
         }
     }
+
+    /*******************************************************************************
+     * End Grouping Support
+     *******************************************************************************/
 
     protected Column findColumnForKey (String key) {
         List columns = columns();
@@ -2801,8 +2875,11 @@ public final class AWTDataTable extends AWComponent
         }
     }
 
+    /*******************************************************************************
+     * Pivot Support
+     *******************************************************************************/
+
     /*
-        Pivot Support:
         Pivot mode is used to render a multi-dimensional data set along
         two dimensions: rows and columns.
 
@@ -2821,9 +2898,12 @@ public final class AWTDataTable extends AWComponent
         return (_pivotState != null)  && _pivotState.columnEdgeLevels() > 0;
     }
 
-
-    /*
-        ErrorHandler support:  data table assist in navigating to display item (row)
+    /*******************************************************************************
+     * ErrorHandler Support
+     *******************************************************************************/
+    
+    /**
+        data table assist in navigating to display item (row)
         with error
      */
     public class DataTableNavigationHandler implements AWErrorHandler

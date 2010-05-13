@@ -36,6 +36,7 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import ariba.util.fieldtype.NumericTypes;
 import ariba.util.fieldtype.PrimitiveTypeProvider;
 import ariba.util.fieldtype.TypeInfo;
@@ -50,7 +51,29 @@ import ariba.util.core.StringUtil;
  * @author Drew Davidson (drew@ognl.org)
  */
 public abstract class ExprOps implements NumericTypes
-{
+{    
+    private static ConcurrentHashMap<String, String> _customNumericTypes =
+        new ConcurrentHashMap<String, String>();
+
+    /**
+        Registers the specified type as a non-built-in numeric type. <p>
+        Notes:<ul>
+        <li> This type must have an associated ArithmeticOperations class extension
+        <li> It is assumed that all built-in types are convertible to
+             this custom type. Thus any binary expression that includes a
+             custom numeric type, the custom numeric types ArithmeticOperations
+             interface will be called.
+        <li> It is assumed that the custom numeric type is *not* convertible
+             to the built-in types.
+        </ul>
+
+        @aribaapi
+    */
+    public static void registerNumericType (String typeName)
+    {
+        _customNumericTypes.put(typeName, typeName);
+    }
+    
     /**
      * Compares two objects for equality, even if it has to convert
      * one of them to the other type.  If both objects are numeric
@@ -120,6 +143,12 @@ public abstract class ExprOps implements NumericTypes
                     result = bigDecValue(v1).compareTo(bigDecValue(v2));
                     break;
 
+                case CUSTOMNUMERICTYPE:
+                    ArithmeticOperations operations = (t1 > t2) ? getArithmeticOperations(v1)
+                                                                : getArithmeticOperations(v2);
+                    result = operations.compare(v1, v2);
+                    break;
+              
                 case NONNUMERIC:
                     if ((t1 == NONNUMERIC || v1 == null) &&
                         (t2 == NONNUMERIC || v2 == null)) {
@@ -147,7 +176,7 @@ public abstract class ExprOps implements NumericTypes
                                 throw new IllegalArgumentException("invalid comparison: " + v1.getClass().getName() + " and " + v2.getClass().getName());
                             }
                         }
-                    }
+                    }                   
                     // else fall through
                 case FLOAT:
                 case DOUBLE:
@@ -389,6 +418,9 @@ public abstract class ExprOps implements NumericTypes
             if ( c == Float.class )         return FLOAT;
             if ( c == BigInteger.class )    return BIGINT;
             if ( c == BigDecimal.class )    return BIGDEC;
+            if ( _customNumericTypes.containsKey(c.getName())) {
+                return CUSTOMNUMERICTYPE;
+            }
             return NONNUMERIC;
         }
         return NULL;

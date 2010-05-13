@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#31 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#32 $
     </Copyright>
 
     <Overview>
@@ -219,6 +219,11 @@
         Determines whether or not Client Side Confirmations are lazily loaded (by default
         this is true).
     </Binding>
+
+    <Binding key="validate" direction="get" type="boolean" required="$false">
+       If true, prevents the confirmation from being closed when Ok is clicked if there
+        are validation errors (by default this is false).
+   </Binding>
 
     <NamedContent name="header" required="$false">
         Use to define content to display in header area.

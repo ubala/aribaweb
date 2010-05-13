@@ -508,7 +508,7 @@ ariba.Request = function() {
             Dom.removeFormField(formObject, 'awssk');
             if (AWRequestValueList) {
                 for (var key in AWRequestValueList) {
-                    Dom.removeFormField(formObject, AWRequestValueList[key])
+                    Dom.removeFormField(formObject, key);
                 }
             }
             AWRequestValueList = null;

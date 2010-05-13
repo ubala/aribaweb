@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ClassUtil.java#21 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ClassUtil.java#23 $
 */
 
 package ariba.util.core;
@@ -29,6 +29,14 @@ import java.lang.reflect.Method;
 */
 public final class ClassUtil
 {
+    public static String NativeInteger = "int";
+    public static String NativeBoolean = "boolean";
+    public static String NativeDouble = "double";
+    public static String NativeFloat = "float";
+    public static String NativeLong = "long";
+    public static String NativeByte = "byte";
+    public static String NativeShort = "short";
+    public static String NativeChar = "char";
 
     /* prevent people from creating this class */
     private ClassUtil ()
@@ -47,6 +55,35 @@ public final class ClassUtil
     public static void classTouch (String name)
     {
        classForName(name, Object.class, false);
+    }
+
+    public static Class classForNativeType (String typeName)
+    {
+        if (NativeInteger.equals(typeName)) {
+            return Integer.TYPE;
+        }
+        if (NativeBoolean.equals(typeName)) {
+            return Boolean.TYPE;
+        }
+        if (NativeDouble.equals(typeName)) {
+            return Double.TYPE;
+        }
+        if (NativeFloat.equals(typeName)) {
+            return Float.TYPE;
+        }
+        if (NativeLong.equals(typeName)) {
+            return Long.TYPE;
+        }
+        if (NativeByte.equals(typeName)) {
+            return Byte.TYPE;
+        }
+        if (NativeShort.equals(typeName)) {
+            return Short.TYPE;
+        }
+        if (NativeChar.equals(typeName)) {
+            return Character.TYPE;
+        }
+        return null;            
     }
 
     /**
@@ -178,6 +215,18 @@ public final class ClassUtil
             return classForNameUsingContextClassLoader(className,
                                                        supposedSuperclass,
                                                        warning);
+        }
+
+        // Check for Generics as they are irrelevant and will cause null to be returned.
+        // So we turn "java.util.List<String>" into "java.util.List"
+        int leftGenericIndex = className.indexOf('<');
+        if (leftGenericIndex > 0) {
+            if (className.charAt(className.length() - 1) == '>') {
+                className = className.substring(0, leftGenericIndex);
+            }
+            else {
+                Log.util.debug("Getting malformed Generics className: %s", className);
+            }
         }
 
         Object cachedClass = ClassForNameCache.get(className);

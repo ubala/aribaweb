@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/XMLUtil.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/XMLUtil.java#4 $
 */
 package ariba.ui.widgets;
 
@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.File;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.net.URL;
 
 
@@ -191,6 +192,20 @@ public final class XMLUtil
         }
 
         return doc;
+    }
+
+    /**
+        Creates a Document object based on the given URL
+
+        @aribaapi ariba
+    */
+    public static Document document (String content,
+                                     boolean validate,
+                                     boolean removeWhitespace,
+                                     EntityResolver resolver)
+    {
+        StringReader reader = new StringReader(content);
+        return document(new InputSource(reader), validate, removeWhitespace, resolver);
     }
 
     public static DocumentBuilder getDOMParser (boolean validating)

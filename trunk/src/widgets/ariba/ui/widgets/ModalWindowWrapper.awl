@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalWindowWrapper.awl#17 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalWindowWrapper.awl#18 $
     </Copyright>
 
     <Overview>
@@ -24,10 +24,6 @@
     </Overview>
 
     <Binding key="hasForm" direction="get" type="boolean" default="$false">
-        See BasicPageWrapper
-    </Binding>
-
-    <Binding key="helpUrl" direction="get" type="String" required="$false">
         See BasicPageWrapper
     </Binding>
 
@@ -95,7 +91,6 @@
     hasSidebarNotch="$false"
     isSidebarVisible="$false"
     hasForm="$^hasForm:$false"
-    helpUrl="$^helpUrl"
     omitWrapperFrame="$^omitWrapperFrame:$false"
     addContentMargin="$false"
     bodyClass="modalWindow"

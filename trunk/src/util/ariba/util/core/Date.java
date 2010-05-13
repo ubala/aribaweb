@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2009 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#31 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#33 $
 */
 
 package ariba.util.core;
@@ -391,6 +391,17 @@ public class Date extends java.util.Date implements Externalizable
         display as 7:30 AM, Friday July 9th 1999 in any timezone when
         using the Ariba formatters.
 
+        To be clear, a Date does not know "its current time zone", and
+        this method does not allow you to pass in the user session's
+        TimeZone.  When it says "this Date object in its current time
+        zone", you should read it as "this Date object in the SERVER's
+        time zone", which is always "America/Los_Angeles" (aka PT, PST,
+        PDT) in On Demand.  To verify this, see timezoneOffsetInMillis,
+        which calls DateFormatter getDefaultTimeZone, which returns JDK
+        TimeZone getDefault().  See updateToBeCalendarDate(TimeZone) for
+        a better alternative that can handle the user session's current
+        time zone, or any other desired time zone.
+
         @return a new <code>Date</code> object if this is not a
         calendar date object, or <code>this</code> if this object is
         already a calendar date
@@ -409,6 +420,39 @@ public class Date extends java.util.Date implements Externalizable
         return new Date(this.getTime() - offset, true);
     }
     
+    /**
+        Updates this Date to be an Ariba calendar date that represents the same day and
+        time of day universally that this Date currently represents in the given TimeZone.
+        If this Date is already a calendar date, nothing is changed. If this Date has the
+        special NullDateMillis value, we leave the value unchanged and just mark it to be
+        a calendar date.  Otherwise, we adjust the time milliseconds value from the given
+        TimeZone to GMT, and mark the updated value as a calendar date.  For example, if
+        this is the non-calendar date "7:30 AM, Friday July 9th 1999 PDT" and the TimeZone
+        "America/Los_Angeles" is passed in, then this Date will become the calendar date
+        "7:30 AM, Friday July 9th 1999 GMT", and the time value internally will have had 7
+        hours worth of milliseconds subtracted from it, since PDT is GMT-7.  The Ariba
+        DateFormatter code will display the same day and time for a calendar date,
+        regardless of the session timezone.  Usually for a calendar date the time will not
+        be displayed, but it is present internally.  Often the time is set to midnight at
+        the beginning of the desired day before being updated to be a calendar date, see
+        setTimeToMidnight(Date,TimeZone).
+        @param TimeZone if the TimeZone is null, the default host server TimeZone will be
+        used, but it is safer to pass an explicit TimeZone, since conversion to a calendar
+        date requires a contextual TimeZone for correct behavior.
+        @aribaapi private
+    */
+    public void updateToBeCalendarDate (TimeZone tz)
+    {
+        if (!calendarDate) {
+            long dateMillis = getTime();
+            if (dateMillis != NullDateMillis) {
+                long offset = timezoneOffsetInMillis(this, tz);
+                setTime(dateMillis - offset);
+            }
+            calendarDate = true;
+        }
+    }
+
     /**
      Added this helper method because ariba.util.core.Date.makeCalendarDate
     does not strip off the time before converting the date to a calendar date.
@@ -1763,8 +1807,7 @@ public class Date extends java.util.Date implements Externalizable
 
     /**
         Sets the hours, minutes, and seconds past midnight for the given
-        <code>Date</code> to zero.  The default timezone is used to determine
-        when midnight occurs.
+        <code>Date</code> to zero.
         @param date the Date object to clear the hours, minutes and
         seconds in.
         @param tz the timezone to make the calculations for.
@@ -1928,7 +1971,8 @@ public class Date extends java.util.Date implements Externalizable
 
     static boolean calendarDate (java.util.Date date)
     {
-        return (date instanceof ariba.util.core.Date) && ((ariba.util.core.Date)date).calendarDate();
+        return (date instanceof ariba.util.core.Date &&
+                ((ariba.util.core.Date)date).calendarDate());
     }
 
     private static int getCalendarField (java.util.Date date, int field)

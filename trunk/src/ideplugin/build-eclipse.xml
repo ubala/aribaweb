@@ -30,7 +30,7 @@
     <import file="${aw.home}/tools/build-module.xml"/>
 
     <property name="build.plugin.dir" value="${dist.root.dir}/ide"/>
-    <property name="dest.jar" location="${build.plugin.dir}/ariba.ideplugin.eclipse.5.0rc1.jar"/>
+    <property name="dest.jar" location="${build.plugin.dir}/ariba.ideplugin.eclipse.5.0.1.jar"/>
     <available file="lib/eclipse" property="eclipse.lib.dir" value="lib/eclipse"/>
 
     <fileset id="module.libs" dir="${eclipse.lib.dir}">
@@ -86,7 +86,7 @@
                 <attribute name="Bundle-ManifestVersion-Version" value="2"/>
                 <attribute name="Bundle-Name" value="Remote Open plugin"/>
                 <attribute name="Bundle-SymbolicName" value="ariba.ideplugin.eclipse;singleton:=true"/>
-                <attribute name="Bundle-Version" value="5.0rc1"/>
+                <attribute name="Bundle-Version" value="5.0.1"/>
                 <attribute name="Bundle-Activator" value="ariba.ideplugin.eclipse.Activator"/>
                 <attribute name="Bundle-Localization" value="plugin"/>
                 <attribute name="Require-Bundle" value="org.eclipse.ui, org.eclipse.ui.ide, org.eclipse.core.resources, org.eclipse.jface.text, org.eclipse.ui.editors, org.eclipse.core.runtime, org.eclipse.jdt.core, org.eclipse.wst.sse.ui, org.eclipse.ant.core"/>

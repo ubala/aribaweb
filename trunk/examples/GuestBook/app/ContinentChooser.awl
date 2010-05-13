@@ -1,0 +1,8 @@
+<w:ModalPageWrapper title="Select a Continent" editable="$false">
+    <a:Image filename="app/continents.gif" useMap="#ContinentMap"/>
+    <map name="ContinentMap">
+        <a:For list="$Continents" item="$currentContinent">
+            <a:Area action="$continentClicked" shape="circle" coords="$currentCoords" alt="$currentContinent.name"/>
+        </a:For>
+    </map>
+</w:ModalPageWrapper>

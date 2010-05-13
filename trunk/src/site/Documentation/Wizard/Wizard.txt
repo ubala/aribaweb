@@ -86,7 +86,7 @@ Similarly, create "Content.afr" like this:
             <content source="wizard.Content"/>
         </frame>
 
-and "Exit.afr" like this:
+And "Exit.afr" like this:
 
         <!DOCTYPE frame SYSTEM "Frame.dtd">
         <frame label="Exit">
@@ -163,13 +163,13 @@ Similarily, let's create the Context frame component with Content.awl:
             <m:IncludeComponent/>
         </m:Context>
 
-and Content.java:
+Next, in Content.java:
 
         public class Content extends WizardFrameContent
         {
         }
 
-and display only the comment field in this frame:
+Then, display only the comment field in this frame:
 
         frame=contentFrame class=app.Post {
             field=comment {
@@ -191,7 +191,7 @@ The exit frame we leave bare for now, so create Exit.awl like this:
             Are you sure you want to exit?
         </w:HintMessage>
 
-and Exit.java like this:
+And Exit.java like this:
 
         public class Exit extends WizardFrameContent
         {
@@ -238,7 +238,7 @@ So in GuestBook.awz, add this:
           <frame name="ratingFrame" source="Rating"/>
         </step>
 
-and add Rating.afr with this:
+And add Rating.afr with this:
 
         <!DOCTYPE frame SYSTEM "Frame.dtd">
         <frame label="Rating">
@@ -248,7 +248,7 @@ and add Rating.afr with this:
             <content source="wizard.Rating"/>
         </frame>
 
-then add Rating.awl with this:
+Then, add Rating.awl with this:
 
         <w:HintMessage>
             Please enter the default rating of the post.
@@ -258,7 +258,7 @@ then add Rating.awl with this:
             <m:IncludeComponent/>
         </m:Context>
 
-and add Rating.java with this:
+Next, add Rating.java with this:
 
         package wizard;
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#61 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#62 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -338,7 +338,7 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
                 // if there is a default validator, run it here
                 AWNodeValidator nv = AWNodeManager.getDefaultNodeValidator();
                 if (nv != null && !nv.isValid(requestContext)) {
-                    Log.aribaweb.debug("AWDirectActionRequestHandler: invalid node. " +
+                    Log.aribaweb_nodeValidate.debug("AWDirectActionRequestHandler: invalid node. " +
                                        "NodeValidator generating response.");
                     AWResponseGenerating handlerResults =
                         nv.handleNodeValidationException(requestContext);
@@ -353,7 +353,7 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
                     if (requestContext.httpSession(false) == null) {
                         // request.getSession(true);
                         requestContext.createHttpSession();
-                        Log.aribaweb.debug("AWDirectActionRequestHandler: create HttpSession");
+                        Log.aribaweb_session.debug("AWDirectActionRequestHandler: create HttpSession");
                     }
                     if (exception instanceof AWClearBrowserHistoryException) {
                         AWComponent actionResultsComponent = (AWComponent)handlerResults;
