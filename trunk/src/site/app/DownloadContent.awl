@@ -1,8 +1,8 @@
-<h3>Latest Release: v5.0GA PREVIEW 3 (10/29/2009)</h3>
+<h3>Latest Release: v5.0GA PREVIEW 5 (10/18/2010)</h3>
 <ul>
 <li>v5.0 GA is just around the corner!</li>
-<li>Safari 4 support</li>
-<li>More examples and documentations!</li>
+<li>Performance fixes</li>
+<li>Security fixes</li>
 </ul>
 <div style="height:30px;margin-left:80px">
     <w:TextButton buttonWrapperStyle="LeftRight"

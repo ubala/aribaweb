@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#35 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#36 $
 */
 package ariba.ui.aribaweb.core;
 

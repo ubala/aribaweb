@@ -12,13 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWWhile.java#19 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWWhile.java#20 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWSemanticKeyProvider;
 import ariba.ui.aribaweb.util.SemanticKeyProvider;
+import ariba.ui.aribaweb.util.SemanticKeyProviderUtil;
 
 import java.lang.reflect.Field;
 import java.util.Enumeration;
@@ -151,7 +152,7 @@ public final class AWWhile extends AWContainerElement
                 if (key == null) {
                     SemanticKeyProvider provider = AWSemanticKeyProvider.get(currentItem);
                     if (provider != null) {
-                        key = provider.getKey(currentItem, component);
+                        key = SemanticKeyProviderUtil.getKey(provider, currentItem, component);
                     }
                 }
                 requestContext._debugSetSemanticKeyPrefix(key);

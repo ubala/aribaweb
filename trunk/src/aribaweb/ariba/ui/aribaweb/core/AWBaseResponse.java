@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#40 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#41 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -306,18 +306,20 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
             try {
                 byte[] bytes = BodyTagOpen.bytes(_characterEncoding);
                 outputStream.write(bytes, 0, bytes.length);
+                _bytesWritten += bytes.length;
 
                 AWResponseBuffer previousRootBuffer = _previousResponse.rootBuffer();
                 rootBuffer.writeTo(writeContext, previousRootBuffer);
 
                 bytes = BodyTagClose.bytes(_characterEncoding);
                 outputStream.write(bytes, 0, bytes.length);
+                _bytesWritten += bytes.length;
             }
             catch (IOException ioexception) {
                 throw new AWGenericException(ioexception);
             }
-
         }
+        _bytesWritten += writeContext._bytesWritten;
 
         _previousResponse = null;
         if (!AWPage.DEBUG_REFRESH_REGION_TOP_LEVEL_CHANGE) {
@@ -329,7 +331,6 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
         _currentBuffer = null;
         _cookies = null;
         _bufferStack = null;
-        flushSizeStat();
     }
 
     public void flushSizeStat ()
@@ -338,6 +339,7 @@ abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
             ResponseSizeCounter.addCount(_bytesWritten);
             PageGenerationSizeCounter.addCount(_fullSize);
         }
+        _bytesWritten = 0;
         _fullSize = 0;
     }
 

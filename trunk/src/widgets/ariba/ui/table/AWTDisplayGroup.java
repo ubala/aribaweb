@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#81 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#83 $
 */
 package ariba.ui.table;
 
@@ -93,9 +93,9 @@ public final class AWTDisplayGroup
     */
     protected List _displayedObjects;
 
-    protected List _sortOrderings;
-    protected List _primarySortOrderings;
-    protected List _effectiveSortOrderings;
+    protected List<AWTSortOrdering> _sortOrderings;
+    protected List<AWTSortOrdering> _primarySortOrderings;
+    protected List<AWTSortOrdering> _effectiveSortOrderings;
     protected boolean _useBatching;
 
     /**
@@ -315,16 +315,27 @@ public final class AWTDisplayGroup
     }
 
     /** This returns the concatenation of the primarySortOrdering and sortOrderings. */
-    public List effectiveSortOrderings ()
+    public List<AWTSortOrdering> effectiveSortOrderings ()
     {
         if (_effectiveSortOrderings == null) {
             _effectiveSortOrderings = ListUtil.list();
-            if (_primarySortOrderings != null) _effectiveSortOrderings.addAll(_primarySortOrderings);
-            if (_sortOrderings != null) _effectiveSortOrderings.addAll(_sortOrderings);
+            if (_primarySortOrderings != null) {
+                _effectiveSortOrderings.addAll(_primarySortOrderings);
+            }
+            if (_sortOrderings != null) {
+                _effectiveSortOrderings.addAll(_sortOrderings);
+            }
         }
         return _effectiveSortOrderings;
     }
 
+    /**
+     *
+     * @param list of type List&lt;AWTSortOrdering&gt;
+     * @param key
+     * 
+     * @return
+     */
     static public AWTSortOrdering orderingMatchingKey (List /*AWTSortOrdering*/ list, String key)
     {
         if (list != null) {
@@ -338,8 +349,8 @@ public final class AWTDisplayGroup
 
     public List computeSortedObjects (List objects)
     {
-        List sortedObjects;
-        List orderings = effectiveSortOrderings();
+        List<Object> sortedObjects = null;
+        List<AWTSortOrdering> orderings = effectiveSortOrderings();
         if (!ListUtil.nullOrEmptyList(orderings)) {
             sortedObjects =
                 AWTSortOrdering.sortedArrayUsingKeyOrderArray(objects, orderings);
@@ -352,14 +363,19 @@ public final class AWTDisplayGroup
     }
 
     /**
-     * Will generate Null Pointer Exception if {@link #setObjectArray}() has not been called yet.
+     * @throws NullPointerException if {@link #setObjectArray}() has not been
+     *   called yet.  setObjectArray will call this though...
+     *
      * @return
      */
     public List filteredObjects ()
     {
         if (_filteredObjects == null) {
+            // NPE if _allObjects null
             _filteredObjects = sortedMainList(_allObjects);
-            if (_grouper != null) _grouper.validateFilteredList(_filteredObjects);
+            if (_grouper != null) {
+                _grouper.validateFilteredList(_filteredObjects);
+            }
             detailExpansionPrepareForObjects(_filteredObjects);
         }
         return _filteredObjects;
@@ -451,6 +467,12 @@ public final class AWTDisplayGroup
      * Grouping Support
      *******************************************************************************/
 
+    /**
+     *
+     * @param sortedObjects may not be null.
+     * 
+     * @return
+     */
     protected List groupObjects (List sortedObjects)
     {
         if (_grouper != null) {
@@ -807,9 +829,10 @@ public final class AWTDisplayGroup
     protected void _validateBatch ()
     {
         List filteredObjects = filteredObjects();
+        // Will throw NPE if filteredObjects is null.
         int count = filteredObjects.size();
 
-        // wrap-around?
+        // wrap-around, should we scroll to the bottom instead?
         if (_scrollTopIndex >= count) {
             setScrollTopIndex(0);
             return;
@@ -824,13 +847,11 @@ public final class AWTDisplayGroup
         // Since currentBatchIndex depends on batch start index,
         // and currentBatchIndex is used in some conditionals (see AWTBatchNavigatorBar.isFirstBatchDisplayed),
         // changing the batch start index will change these conditionals between phases.
-        if (!_useBatching) {
+        if (!_useBatching && (_batchStartIndex + _numberOfObjectsPerBatch > count)) {
             // size out batch to _numberOfObjectsPerBatch
             // if overflow at bottom
-            if (_batchStartIndex + _numberOfObjectsPerBatch > count) {
-                // set to bottom
-                _setBatchStartIndex(count-_numberOfObjectsPerBatch);
-            }
+            // set to bottom
+            _setBatchStartIndex(count - _numberOfObjectsPerBatch);
         }
 
         // check if none of the selection falls within the batch
@@ -849,11 +870,6 @@ public final class AWTDisplayGroup
         }
     }
 
-    /**
-     * This cleans up a lot of the internal state as a side effect.  <br />
-     * This includes the scrollTopIndex, currentBatchIndex and batchStartIndex.
-     * TODO: Move to "Batch Methods" section.
-     */
     protected boolean _areAnyInRange (List all, List targets, int start, int end)
     {
         // we won't adjust the selection if there's nothing to adjust to
@@ -1386,18 +1402,18 @@ public final class AWTDisplayGroup
 
         // set batch to some area above the start index so upward scrolling
         // doesn't always cause a fetch
+        int delta = 0;
         if (index > _scrollTopIndex) {
-            _scrollTopIndex = index;
-            if (updateBatchStartIndex) {
-                _setBatchStartIndex(index-_topBufferRowCount);
-                _validateBatch();
-            }
+            delta = _topBufferRowCount;
         }
         else if (index < _scrollTopIndex) {
             // moving up so make upper buffer bigger
+            delta = _topBufferMoveUpRowCount;
+        }
+        if (_scrollTopIndex != index) {
             _scrollTopIndex = index;
-            if (updateBatchStartIndex) {
-                _setBatchStartIndex(index-_topBufferMoveUpRowCount);
+            if (updateBatchStartIndex) {            
+                _setBatchStartIndex(index - delta);
                 _validateBatch();
             }
         }
@@ -1434,37 +1450,47 @@ public final class AWTDisplayGroup
      * Sort Orderings Support
      *******************************************************************************/
 
-    /** Sorting -- these are set interactively by the user of the table */
-    public void setSortOrderings (List sortOrderings)
+    /**
+     * Sorting -- these are set interactively by the user of the table
+     *
+     * @param sortOrderings of type List&lt;AWTSortOrdering&gt; 
+     */
+    @SuppressWarnings("unchecked")
+    public void setSortOrderings (List /*AWTSortOrdering*/ sortOrderings)
     {
-        _sortOrderings = sortOrderings;
+        _sortOrderings = (List<AWTSortOrdering>)sortOrderings;
         invalidateSortOrderings();
     }
 
-    public List sortOrderings ()
+    public List<AWTSortOrdering> sortOrderings ()
     {
         return _sortOrderings;
     }
 
     /**
-        these can be set as a baseline (unalterable by the user) pre-sort
-    */
-    public void setPrimarySortOrderings (List sortOrderings)
+     * These can be set as a baseline (unalterable by the user) pre-sort.
+     *
+     * @param sortOrderings of type List&ltAWTSortOrdering&gt;
+     */
+    @SuppressWarnings("unchecked")
+    public void setPrimarySortOrderings (List /*AWTSortOrdering*/ sortOrderings)
     {
-        _primarySortOrderings = sortOrderings;
+        _primarySortOrderings = (List<AWTSortOrdering>)sortOrderings;
         invalidateSortOrderings();
     }
 
-    public List primarySortOrderings ()
+    public List<AWTSortOrdering> primarySortOrderings ()
     {
         return _primarySortOrderings;
     }
 
+    @SuppressWarnings("unchecked")
     protected void invalidateSortOrderings ()
     {
         _effectiveSortOrderings = null;
         if (_grouper != null) {
-            _primarySortOrderings = _grouper.computeSortOrderings();
+            _primarySortOrderings =
+                (List<AWTSortOrdering>)_grouper.computeSortOrderings();
         }
         if (_outlineState != null) {
             _outlineState.invalidateSortState();

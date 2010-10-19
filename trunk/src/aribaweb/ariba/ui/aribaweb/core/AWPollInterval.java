@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPollInterval.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPollInterval.java#12 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -21,6 +21,7 @@ public class AWPollInterval extends AWComponent
 {
     public static final String AWPollSenderId = "awpoll";
     public static final String AWPollUpdateSenderId = "awpollupdate";
+    public static final int FrequentPollInterval = 20;
 
     public int getInterval ()
     {
@@ -45,5 +46,10 @@ public class AWPollInterval extends AWComponent
     public boolean getInitiatePolling ()
     {
         return page().isPollingInitiated();
+    }
+
+    public boolean pollOnError ()
+    {
+        return page().pollOnError();
     }
 }

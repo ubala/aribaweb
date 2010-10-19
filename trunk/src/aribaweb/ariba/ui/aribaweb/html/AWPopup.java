@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#55 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPopup.java#56 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -242,8 +242,11 @@ public class AWPopup extends AWComponent
                         AWPopup.class.getName(), 1, 
                         "An error has occurred while processing your request. Refresh the page and try again.", 
                         preferredLocale());
-                    recordValidationError(
-                        AWErrorManager.getErrorKeyForComponent(this),msg,"");
+                    Object errKey = AWErrorManager.getErrorKeyForComponent(this);
+                    if(errKey == null) {
+                        errKey = _elementId;
+                    }
+                    recordValidationError(errKey, msg, "");
                 }
                 else if ("".equals(formValue)) {
                     if (AWConcreteApplication.IsDebuggingEnabled) {

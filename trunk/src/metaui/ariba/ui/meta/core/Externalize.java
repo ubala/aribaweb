@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Externalize.java#4 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Externalize.java#5 $
 */
 package ariba.ui.meta.core;
 
@@ -98,7 +98,7 @@ public class Externalize
         Object visible = ctx.staticallyResolveValue(ctx.allProperties().get(UIMeta.KeyVisible));
         boolean isHidden = (visible != null) && ((visible instanceof Boolean) && !((Boolean)visible).booleanValue());
         Object rawLabel = ctx.staticallyResolveValue(ctx.allProperties().get(UIMeta.KeyLabel));
-        // System.out.println("Raw label: " + rawLabel + " - " + rawLabel.getClass());
+        // Log.meta_detail.debug("Raw label: " + rawLabel + " - " + rawLabel.getClass());
         if (!isHidden && rawLabel instanceof UIMeta.AutoLocalized) {
             // Must eval label before called packageName()!
             String label = (String)ctx.propertyForKey(UIMeta.KeyLabel);

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/ZipArchivingAppender.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/log/ZipArchivingAppender.java#4 $
 */
 
 

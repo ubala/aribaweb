@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/DecimalFormatterCommon.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/DecimalFormatterCommon.java#6 $
 */
 
 package ariba.util.formatter;
@@ -40,6 +40,13 @@ public abstract class DecimalFormatterCommon extends Formatter
         @aribaapi private
     */
     public static final String ClassName = "ariba.util.formatter.DecimalFormatterCommon";
+
+    // error messages
+    protected static final String InvalidCharacterInNumberKey = "InvalidCharacterInNumber";
+    protected static final String NoDigitsFoundKey = "NoDigitsFound";
+    protected static final String NumberFormatErrorKey = "NumberFormatError";
+
+    protected static final String CanonicalNegativePrefix = "-";
 
    
     /*-----------------------------------------------------------------------

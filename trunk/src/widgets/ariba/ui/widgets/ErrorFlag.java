@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorFlag.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorFlag.java#6 $
 */
 
 package ariba.ui.widgets;
@@ -33,7 +33,7 @@ import java.util.List;
 
 public class ErrorFlag extends AWComponent
 {
-    protected List _errorInfoList;
+    protected List<AWErrorInfo> _errorInfoList;
     private String _errorMsg;
     private Boolean _showError;
     private Boolean _showWarning;
@@ -56,7 +56,7 @@ public class ErrorFlag extends AWComponent
         if (_errorInfoList != null) {
             boolean navigable = isNavigable();
             for (int i = 0; i < _errorInfoList.size(); i++) {
-                AWErrorInfo error = (AWErrorInfo)_errorInfoList.get(i);
+                AWErrorInfo error = _errorInfoList.get(i);
                 errorManager().setErrorDisplayOrder(error, navigable);
                 if (navigable && indicatorId() != null) {
                     error.setIndicatorId(indicatorId());
@@ -96,7 +96,7 @@ public class ErrorFlag extends AWComponent
         if (_errorMsg == null) {
             if (!ListUtil.nullOrEmptyList(_errorInfoList)) {
                 if (_errorInfoList.size() == 1) {
-                    _errorMsg = ((AWErrorInfo)_errorInfoList.get(0)).getMessage();
+                    _errorMsg = (_errorInfoList.get(0)).getMessage();
                 }
                 else {
                     _errorMsg = formatErrorList(_errorInfoList);
@@ -179,7 +179,7 @@ public class ErrorFlag extends AWComponent
     {
         if (!ListUtil.nullOrEmptyList(_errorInfoList)) {
             for (int i = 0; i < _errorInfoList.size(); i++) {
-                AWErrorInfo error = (AWErrorInfo)_errorInfoList.get(i);
+                AWErrorInfo error = _errorInfoList.get(i);
                 if (error.isWarning() == isWarning) {
                     return true;
                 }

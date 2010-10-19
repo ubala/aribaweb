@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTMultiSelectColumnRenderer.java#12 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTMultiSelectColumnRenderer.java#13 $
 */
 package ariba.ui.table;
 
@@ -45,6 +45,9 @@ public final class AWTMultiSelectColumnRenderer extends AWTDataTable.ColumnRende
 
     public void setFormValue (String formValue)
     {
+        if (disabled()) {
+            return;
+        }
         boolean booleanValue = (formValue != null) && (formValue.length() != 0);
         _table.displayGroup().setCurrentSelectedState(booleanValue);
     }

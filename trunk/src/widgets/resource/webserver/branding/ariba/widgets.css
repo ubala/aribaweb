@@ -1117,11 +1117,11 @@ DIV.nowrap SELECT, DIV.nowrap INPUT, DIV.nowrap TEXTAREA {
     display:none;
     overflow-y:visible;
     overflow-x:auto;
-    z-index:203;
+    z-index:1203;
 }
 
 .bubble_body {
-    z-index:203;
+    z-index:1203;
 }
 
 .bubble_tooltip .bubble_middle {
@@ -1140,12 +1140,18 @@ DIV.nowrap SELECT, DIV.nowrap INPUT, DIV.nowrap TEXTAREA {
     background-repeat:no-repeat;
     position:relative;
     left:0px;
+    line-height:7px; 
+    height:7px; 
+    overflow:hidden;
 }
 
 .bubble_tooltip .bubble_tip_right {
     background-image: url('bubble_tip_right.gif');
     background-repeat:no-repeat;
     position:relative;
+    line-height:7px; 
+    height:7px; 
+    overflow:hidden;
 }
 
 .bubble_list {
@@ -1367,7 +1373,7 @@ b.rtop b.r4, b.rbottom b.r4 {
     left: 25%;
     top: 0px;
     width: 50%;
-    z-index:202;
+    z-index:1202;
 }
 
 .modalWindow .pageErrorPanel {
@@ -1593,7 +1599,7 @@ tr.dropArea td  { padding-bottom:3px; }
 
 .awmenu {
     position:absolute;
-    z-index:500;
+    z-index:1500;
     background-color:#FFFFFF;
     font:10px Verdana, Arial, Helvetica, sans-serif;
     padding:2px;
@@ -2806,7 +2812,7 @@ table.panel td.panel {
 
 div.panel {
     position:absolute;
-    z-index:199;
+    z-index:1199;
     overflow:visible;
     display: none;
 }
@@ -2822,7 +2828,7 @@ table.dialogWrapper {
 }
 
 .panelContainer {
-    z-index:198;
+    z-index:1198;
     position:absolute;
     width:100%;
     height:100%;
@@ -2833,7 +2839,7 @@ table.dialogWrapper {
 }
 
 .panel {
-    width:1%;                               .
+    width:1%;
 }
 
 div.dialogContentWrapper {
@@ -4335,4 +4341,7 @@ div.doc {
 
 .twoTB .rbB {
     padding:8px 5px 2px;
+}
+#pollCountDown {
+    margin:0 5px;
 }

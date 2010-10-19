@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientFooter.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientFooter.java#10 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -56,5 +56,12 @@ public final class AWRichClientFooter extends AWComponent
         return booleanValueForBinding(AWBindingNames.sessionless) ||
                requestContext().isStaticGeneration() ||
                AWRecordingManager.isInPlaybackMode(requestContext()); 
+    }
+
+    public boolean ignoreRefreshComplete ()
+    {
+        return AWConcreteServerApplication.IsDebuggingEnabled &&
+            (requestContext().isPollUpdateRequest() ||
+             requestContext().get(AWRequestContext.IgnoreRefreshCompleteKey) != null);
     }
 }

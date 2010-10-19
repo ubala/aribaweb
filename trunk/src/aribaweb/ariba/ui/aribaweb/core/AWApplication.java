@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApplication.java#34 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApplication.java#35 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -93,6 +93,8 @@ public interface AWApplication extends AWServerApplication
         AWRequestContext requestContext, Exception exception);
     public AWResponseGenerating handleSiteUnavailableException (
         AWRequestContext requestContext);
+    public AWResponseGenerating handleRemoteHostMismatchException (
+        AWRequestContext requestContext, AWRemoteHostMismatchException exception);
 
     public String applicationUrl (AWRequest request);
     public void setRefusingNewSessions (boolean refusingNewSessions);

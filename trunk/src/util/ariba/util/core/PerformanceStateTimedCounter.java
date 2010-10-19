@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateTimedCounter.java#16 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateTimedCounter.java#17 $
 */
 
 package ariba.util.core;
@@ -52,7 +52,7 @@ public class PerformanceStateTimedCounter extends PerformanceStateCounter
     */
     public void start ()
     {
-        if (!PerformanceState.threadStateEnabled()) {
+        if (!PerformanceState.threadStateEnabled() || PerformanceState.isRecordingSuspended()) {
             return;
         }
         ((Instance)instance()).start();
@@ -117,7 +117,7 @@ public class PerformanceStateTimedCounter extends PerformanceStateCounter
 
     public void stop (long quantity)
     {
-        if (!PerformanceState.threadStateEnabled()) {
+        if (!PerformanceState.threadStateEnabled() || PerformanceState.isRecordingSuspended()) {
             return;
         }
         ((Instance)instance()).stop(quantity);

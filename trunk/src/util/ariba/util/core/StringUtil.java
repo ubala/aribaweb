@@ -1,6 +1,5 @@
 /*
     Copyright (c) 1996-2010 Ariba, Inc.
-
     All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#36 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#39 $
 */
 
 package ariba.util.core;
@@ -1653,7 +1652,7 @@ public final class StringUtil
         return found != null ? new SearchResult(found, result) : null;
     }
 
-    /*
+    /**
         Parse the input <code>String</code> into two components separated by
         matching left and right parentheses. Only one pair is supported.
 
@@ -1686,19 +1685,74 @@ public final class StringUtil
         return components;
     }
 
+    private static final int MaxLengthPerWord           = 12;
+    private static final float HalfLengthMultiplier     = 0.50f;
+    private static final float CJKLengthMultiplier      = 0.65f;
+
     /**
      * Returns the ideal size to truncate based on the max number characters to display
-     * and the ratio from the number of bytes to the number of characters.
+     * by trying to fit the most words / characters before truncation.
+     *
+     * This method tries to truncate CJK characters as best as it can comparing to latin
+     * characters.  Also it specifically truncates long words, such as in German, so that
+     * they can be displayed on the browser inside a fixed with div without causing layout
+     * problems.
+     *
+     * @param label
+     * @param maxSize max ideal length before truncation
+     * @param numLines number of lines to display the label in - only used when it's > 0
+     * @return number of characters to truncate
      */
-    public static int calcTruncateSize (String label, int max)
+    public static int calcTruncateSize (String label, int maxSize, int numLines)
     {
-        int byteSize = label.getBytes().length;
+        int numBytes = 0;
+        try {
+            numBytes = label.getBytes(I18NUtil.EncodingUTF8).length;
+        }
+        catch (UnsupportedEncodingException ex) {
+            numBytes = label.getBytes().length;
+        }
         /* Fix CR 1-AXYCVB: Don't get divide by zero when label is empty string. */
-        int charSize = label.length();
-        int ratio = (charSize < 1 ? 1 : byteSize / charSize);
-        int idealSize = max;
-        if (ratio > 1) {
-            idealSize /= ratio;
+        int numChars = label.length();
+        int bytesPerChar = (numChars < 1 ? 1 : numBytes / numChars);
+
+        int idealSize = 0;
+        int halfMaxSize = Math.round(maxSize * HalfLengthMultiplier);
+        if (bytesPerChar > 1) {
+            // This is assumed to be CJK language - twice as wide as latin characters
+            // when rendered in the browser - a little more than half of maxSize should
+            // fit in the same area. [czheng 08/10/10]
+            idealSize = Math.round(maxSize * CJKLengthMultiplier);
+        }
+        else if (numLines > 0) {
+            // This part will try to fit as many words / characters as possible before
+            // truncating them. It handles long words that are 12+ characters as well.
+            int num = 0;
+            int numLine = 0;
+            for (String word : label.split("\\s+")) {
+                if (num > 0) {
+                    idealSize += num;
+                    num = 0;
+                }
+                if (word.length() >= MaxLengthPerWord) {
+                    idealSize += MaxLengthPerWord;
+                    num = word.length() - MaxLengthPerWord;
+                    numLine++;
+                }
+                else {
+                    idealSize += word.length();
+                }
+                if (idealSize > maxSize || numLine >= numLines ||
+                        word.length() > halfMaxSize) {
+                    break;
+                }
+            }
+            if (idealSize > maxSize) {
+                idealSize = maxSize;
+            }
+        }
+        else {
+            idealSize = maxSize;
         }
         return idealSize;
     }
@@ -1729,7 +1783,8 @@ public final class StringUtil
             int remainder = (int)(value % 26);
             buf.append((char)('a' + remainder));
             value = value / 26;
-        } while (value > 0);
+        }
+        while (value > 0);
         FastStringBuffer result = new FastStringBuffer(buf.length());
 
         // now reverse the string

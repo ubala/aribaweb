@@ -12,16 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/LogManager.java#29 $
+    $Id: //ariba/platform/util/core/ariba/util/log/LogManager.java#30 $
 */
 
 package ariba.util.log;
 
 import ariba.util.core.ArgumentParser;
 import ariba.util.core.ClassUtil;
-import ariba.util.core.ListUtil;
-import ariba.util.core.StringUtil;
 import ariba.util.core.FileUtil;
+import ariba.util.core.ListUtil;
+import ariba.util.core.Parameters;
+import ariba.util.core.StringUtil;
 import ariba.util.i18n.I18NUtil;
 import ariba.util.core.PerformanceState;
 import java.util.Iterator;
@@ -480,7 +481,7 @@ public class LogManager extends org.apache.log4j.LogManager
         @aribaapi ariba
         @see ArchivingAppender
     */
-    public static void archiveLogFiles ()
+    public static void archiveLogFiles (Parameters params)
     {
         Iterator appenders = ArchivingAppender.getIteratorForAppenders();
 
@@ -490,7 +491,7 @@ public class LogManager extends org.apache.log4j.LogManager
             appender.archiveLogFile();
         }
         //request perfLogger to archive itself
-        PerformanceState.archiveLogFile();
+        PerformanceState.archiveLogFile(params);
     }
 
     /**

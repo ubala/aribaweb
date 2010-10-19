@@ -12,22 +12,32 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSessionRestorationException.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRemoteHostMismatchException.java#1 $
 */
 
 package ariba.ui.aribaweb.core;
 
-public final class AWSessionRestorationException extends RuntimeException
+public final class AWRemoteHostMismatchException extends RuntimeException
 {
+    private String _sessionRemoteHost;
+    private String _remoteHost;
 
-    public AWSessionRestorationException ()
+    public AWRemoteHostMismatchException (String sessionRemoteHost,
+                                          String remoteHost)
     {
         super();
+        _sessionRemoteHost = sessionRemoteHost;
+        _remoteHost = remoteHost;
     }
 
-    public AWSessionRestorationException (String exceptionMessage)
+    public String getSessionRemoteHost ()
     {
-        super(exceptionMessage);
+        return _sessionRemoteHost;
+    }
+
+    public String getRemoteHost ()
+    {
+        return _remoteHost;    
     }
 
 }

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientFooter.awl#25 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientFooter.awl#26 $
     </Copyright>
 
     <Overview>
@@ -36,8 +36,8 @@
     <!--- if we're in the refresh iframe, then update the response id and
     initiate the refresh -->
   <a:If ifTrue="$omitHistory">
-    ariba.Refresh.completeRequest(null,null,ariba_IR);
+    ariba.Refresh.completeRequest(null,null,ariba_IR,$ignoreRefreshComplete);
   <a:Else/>
-    ariba.Refresh.completeRequest($historyPosition,$historyLength,ariba_IR);
+    ariba.Refresh.completeRequest($historyPosition,$historyLength,ariba_IR,$ignoreRefreshComplete);
   </a:If>
 </a:RefreshCompleteScript>

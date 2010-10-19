@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#129 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#130 $
     </Copyright>
 
     <Overview>
@@ -166,6 +166,7 @@
     <Binding key="batchSize" type="int" default="20" direction="get">
         Number of row per page to display in table.  Default is 20.  This batch size is only used if scrolling
         is disabled.  If scrolling is enabled, then "scroll faulting" is used instead (with a fixed batch size).
+        See also scrollBatchSize.
     </Binding>
 
     <Binding key="scrollBatchSize" type="int" default="50" direction="get">
@@ -174,6 +175,7 @@
         fault rows upon initial display.  If rows are min-height, 40 is a safe number.
         If, however, the app has "tall rows" (wrapping content, detail rows, sub-tables)
         then this can be set to significantly lower number to reduce html page size.
+        See also batchSize.
     </Binding>
 
     <Binding key="item" type="Object" required="$false" direction="set">

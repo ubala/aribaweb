@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#120 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#122 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1726,11 +1726,11 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         return urlForResourceNamed (resourceName, useFullUrl, false);
     }
 
-    public String urlForResourceNamed (String resourceName, boolean useFullUrl, boolean isVersion)
+    public String urlForResourceNamed (String resourceName, boolean useFullUrl, boolean isVersioned)
     {
         AWRequestContext requestContext = requestContext();
         boolean isSecure = useFullUrl ? requestContext.request() != null && requestContext.request().isSecureScheme() : false;
-        String url = resourceManager().urlForResourceNamed(resourceName, useFullUrl, isSecure, isVersion);
+        String url = resourceManager().urlForResourceNamed(resourceName, useFullUrl, isSecure, isVersioned);
         return url;
     }
 
@@ -1896,6 +1896,16 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         requestContext.application().validateRequest(requestContext);
     }
 
+    /**
+         Provides verification on the request before it's handled.
+                           
+         @return true by default
+     */
+    protected boolean shouldValidateRemoteHost ()
+    {
+        return true;
+    }
+    
     /**
         Method called after applyValues phase is completed.
         This method is highly dangerous.  Note that whenever this method is called no bindings

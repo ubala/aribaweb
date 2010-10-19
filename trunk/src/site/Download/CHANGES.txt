@@ -1,3 +1,39 @@
+New in Version 5.0GA - PREVIEW 5 (10/18/2010)
+---------------------------------------------
+- Web resource versioning for web cache busting
+    - Cache control can be set to a high expiration period in production environment   
+    - ResourceVersionManager interface for application versioning strategy
+
+- Improve polling recovery due to network connection
+    - Auto reconnection
+    - Warning dialog
+    - Enabled for page with frequent poll intervals        
+
+- Security fixes
+    - XSS fixes in AWFormRedirect
+    - XSS fixes in AWHiddenFormParameter
+    - Fix AWPassword to correctly specify autocomplete="off"
+    - Fix remote host exception handling.
+        - Remove setting the new IP onto the session.
+	    - Introduce an explicit AWRemoteHostMismatchException for application handling.	
+
+- Add new utilities to ListUtil, SetUtil, and FileUtil
+
+- Misc bug fixes
+    - Fix IE6 poll response cachine
+    - Fix HTML label handling
+    - Fix IE6 multiple lazy div loading
+    - Fix error manager focus and indicator scrolling
+    - Improve logging for AWSessionStatusManager
+    - Fix response size counter in PerfLog
+    - Fix race condition in AWMultiLocaleResourceManager
+    - Fix MetaUI to use standard loggers
+    - Fix HintMessage expansion on IE6
+    - Fix DateField's in multiple forms
+    - Fix multi-select Chooser Add icon display
+    - Minor fixes in DataTable
+    - Fix BigDecimalFormatter to report more parse errors
+
 New in Version 5.0GA - PREVIEW 4 (05/11/2010)
 ---------------------------------------------
 

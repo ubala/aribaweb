@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.awl#68 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTScrollTableWrapper.awl#69 $
     </Copyright>
 
     <Overview>
@@ -270,7 +270,7 @@
         <a:If ifTrue="$^showFooter:$false">
             <a:RefreshRegion tagName="tr" disabled="$disableRefresh">
                 <td>\<table width="100%" cellpadding="0" cellspacing="0"><tr>
-                    <td class="tableFooter">\
+                    <td class="tableFooter" style="text-align:left">\
                         <a:IncludeContent name="footerArea" required="$false"/>\
                     </td>\
                     <td class="tableFooter" style="padding-right:10px;text-align:right" nowrap>\

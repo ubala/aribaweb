@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#33 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#34 $
 */
 
 package ariba.util.core;

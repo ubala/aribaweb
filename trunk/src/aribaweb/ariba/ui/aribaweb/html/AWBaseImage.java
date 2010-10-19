@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBaseImage.java#23 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBaseImage.java#25 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -25,6 +25,7 @@ import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWDirectAction;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWImageInfo;
+import ariba.ui.aribaweb.util.AWNodeManager;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.Log;
 import ariba.ui.aribaweb.util.AWBrand;
@@ -106,11 +107,17 @@ abstract public class AWBaseImage extends AWComponent
                 url.setDirectActionName(AWDirectAction.AWImgActionName);
                 url.put("name", filename);
                 imageUrl = url.finishUrl();
+                if (useFullUrl) {
+                    AWNodeManager nodeManager = application.getNodeManager();
+                    if (nodeManager != null) {
+                        imageUrl = nodeManager.prepareUrlForNodeValidation(imageUrl);
+                    }
+                }
             }
             Log.aribawebResource_brand.debug("AWBaseImage: imageUrl() directConnect %s", imageUrl);
         }
         else if (component != null) {
-            imageUrl = component.urlForResourceNamed(filename, useFullUrl);
+            imageUrl = component.urlForResourceNamed(filename, useFullUrl, true);
             Log.aribawebResource_brand.debug("AWBaseImage: imageUrl() component.urlForResourceNamed %s", imageUrl);
         }
         return imageUrl;
@@ -179,14 +186,10 @@ abstract public class AWBaseImage extends AWComponent
                 }
                 else {
                     // Todo: remove MetaTemplateMode
-                    if (requestContext().isMetaTemplateMode()) {
-                        String url = urlForResourceNamed(filename);
-                        imageUrl = AWEncodedString.sharedEncodedString(url);
-                    }
-                    else {
-                        imageUrl = imageInfo.url();
-                        Log.aribawebResource_brand.debug("AWBaseImage: imageInfo.url %s", imageUrl);
-                    }
+                    boolean useFullUrl = requestContext().isMetaTemplateMode();                      
+                    String url = urlForResourceNamed(filename, useFullUrl, true);
+                    imageUrl = AWEncodedString.sharedEncodedString(url);
+                    Log.aribawebResource_brand.debug("AWBaseImage: imageInfo.url %s", imageUrl);
                 }
             }
         }

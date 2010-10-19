@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#22 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#23 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -176,6 +176,7 @@ public final class AWResponseBuffer extends AWBaseObject
         int _nestingLevel;
         boolean _didWrite;
         boolean _writeRefreshRegionBoundaryMarkers;
+        int _bytesWritten = 0;
 
         public WriteContext (OutputStream outputStream, AWCharacterEncoding characterEncoding,
                              boolean writeRefreshRegionBoundaryMarkers)
@@ -194,6 +195,7 @@ public final class AWResponseBuffer extends AWBaseObject
         {
             try {
                 _outputStream.write(bytes);
+                _bytesWritten += bytes.length;
             } catch (IOException e) {
                 throw new AWGenericException(e);
             }

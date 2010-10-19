@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2009 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#35 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#36 $
 */
 
 package ariba.util.core;
@@ -291,6 +291,17 @@ public abstract class ListUtil
     }
 
     /**
+        Returns new List with all the items in source Collection added to it. Combines
+        ListUtil.list() and List addAll(Collection). Is easier to type and remember than
+        collectionToList. Throws NullPointerException if source is null.
+        @aribaapi ariba
+    */
+    public static <T> List<T> listAddAll (Collection<T> source)
+    {
+        return collectionToList(source);
+    }
+
+    /**
         Tokenize a String with a specified separator character and
         return a list with the tokenized elements.
 
@@ -399,7 +410,7 @@ public abstract class ListUtil
             return list;
         }
         
-        for(ListIterator i = list.listIterator(); i.hasNext(); ) {
+        for (ListIterator i = list.listIterator(); i.hasNext(); ) {
             Object listObj = i.next();
             if (listObj instanceof List) {
                 // Recurse if we have a List within a List
@@ -1651,7 +1662,7 @@ public abstract class ListUtil
         return new WrappedListEnumeration(list);
     }
 
-    public static List diff(List change, List baseline)
+    public static List diff (List change, List baseline)
     {
         List delta = ListUtil.list();
         Iterator items = change.iterator();

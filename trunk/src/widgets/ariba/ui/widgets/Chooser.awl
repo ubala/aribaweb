@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#30 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#31 $
     </Copyright>
 
     <Overview>
@@ -104,9 +104,15 @@
                     </td>\
                     <a:If ifTrue="$chooserState.multiSelect">
                         <td>
-                            <a href="#" omitTags="$isDisabled" tabindex="-1">
-                                <a:Image class="chAddLink" filename="add_off.gif" awname="$chooserAddLinkSemanticKey"/>
-                            </a>
+                            <a:If ifTrue="$canAdd">
+                                <a href="#" omitTags="$isDisabled" tabindex="-1">
+                                    <a:Image class="chAddLink" filename="add_on.gif" awname="$chooserAddLinkSemanticKey"  title="$[a005]Multiple selections allowed"/>
+                                </a>
+                            <a:Else/>
+                                <a omitTags="$isDisabled" tabindex="-1">
+                                    <a:Image class="chAddLink" filename="add_off.gif" awname="$chooserAddLinkSemanticKey"  title="$[a003]Add another selection"/>
+                                </a>
+                            </a:If>
                             <a:Image class="chAddOffImg hide" filename="add_off.gif" title="$[a005]Multiple selections allowed"/>
                             <a:Image class="chAddOnImg hide" filename="add_on.gif" title="$[a003]Add another selection"/>
                             <a:Checkbox class="chAddMode hide" value="$chooserState.addMode"/>

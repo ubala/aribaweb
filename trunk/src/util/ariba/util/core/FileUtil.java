@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/FileUtil.java#21 $
+    $Id: //ariba/platform/util/core/ariba/util/core/FileUtil.java#24 $
 */
 
 package ariba.util.core;
@@ -612,8 +612,8 @@ public final class FileUtil
             }
             if (file.lastModified() < baseTime) {
                 try {
-                    if (!file.delete()) {
-                        Log.utilIO.error(8910, file);
+                    if (file.exists()) {
+                       file.delete();
                     }
                 }
                 catch (SecurityException se) {
@@ -752,6 +752,67 @@ public final class FileUtil
             }
         }
         return newestFile;
+    }
+
+
+    /**
+     * Makes a 'standard' helper file name.  by prepending the prefix, and then stripping off the
+     * directory name of the filename (if any).
+     *
+     * @param prefix
+     * @param filename
+     * @return non-null string.
+     */
+    public static String makeFileName (String prefix, String filename)
+    {
+        FastStringBuffer sb = null;
+
+        if (filename != null) {
+            String[] parts = filename.split("[/|\\\\]");
+            sb = new FastStringBuffer(prefix);
+            for (int i = 0; i < parts.length; i++) {
+                // skip over the first part of the path if there is more than 1 part
+                if ((i == 0 && parts.length == 1) || i > 0) {
+                    sb.append(parts[i]);
+                }
+            }
+        }
+        return sb == null ? null : sb.toString();
+    }
+
+    /**
+     * Returns the filename or last name in the path. Handles  both forward and backward slashes
+     *
+     * @param path
+     * @return String or null if path is null.
+     */
+    public static String parseFileName (String path)
+    {
+        String fileName = null;
+        if (path != null) {
+            String[] parts = path.split("[/|\\\\]");
+            fileName = parts[parts.length - 1];
+        }
+        return fileName;
+    }
+
+    /**
+     * Returns the extension of the given filename.  The extension is the separated from the file name
+     * by a period.
+     *
+     * @param filename
+     * @return the extension or null if filename is null or does not contain a period.
+     */
+    public static String parseFileExtension (String filename)
+    {
+        String ext = null;
+        if (filename != null) {
+            int dot = filename.lastIndexOf('.');
+            if (dot > 0 && dot < filename.length()) {
+                ext = filename.substring(dot + 1);
+            }
+        }
+        return ext;
     }
 
 }

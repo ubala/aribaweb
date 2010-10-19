@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MessageDigestUtil.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MessageDigestUtil.java#3 $
 */
 
 package ariba.util.core;
@@ -35,6 +35,8 @@ public class MessageDigestUtil
     private static final int Sha256DigestLength            = 32;
 
     private static SecureRandom _secureRandom;
+
+    public static final String InvalidDigest               = "Invalid digest";
 
     static {
         try {
@@ -149,7 +151,7 @@ public class MessageDigestUtil
         byte[] hashedMessageBytes = Base64.decodeFromString(hashedMessage);
         if (hashedMessageBytes == null ||
             hashedMessageBytes.length != saltLength + Sha256DigestLength) {
-            throw new IllegalArgumentException("Invalid digest");
+            throw new IllegalArgumentException(InvalidDigest);
         }
         String hashedCandidate = digestWithSalt(hashedMessageBytes, saltLength, iterations, candidate);
 

@@ -294,10 +294,12 @@ ariba.Calendar = function() {
                 var calendar = table._awcalendar;
                 var date = calendar._calendarDate;
                 var senderId = table.id;
+                var formObj = table;
                 if(table._awcalendar._reuse) {
                     senderId = table._awcalendar._containerId;
+                    formObj = Dom.getElementById(senderId);
                 }
-                var formId = Dom.lookupFormId(table);
+                var formId = Dom.lookupFormId(formObj);
                 var formObject = Dom.getElementById(formId);
                 if (formObject != null) {
                     var yearFormField = Dom.addFormField(formObject, AWCalendarYearKey, date.getFullYear());

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSingleLocaleResourceManager.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSingleLocaleResourceManager.java#18 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -218,9 +218,13 @@ public class AWSingleLocaleResourceManager extends AWResourceManager
                         urlForResource = StringUtil.strcat(webserverUrlPrefix, resourceUrl);
                     }
                     if (isVersioned) {
-                        String version = AWMultiLocaleResourceManager.resourceVersion();
+                        String version = AWMultiLocaleResourceManager.resourceVersion(resource.name());
                         if (!StringUtil.nullOrEmptyOrBlankString(version)) {
-                            urlForResource = StringUtil.strcat(urlForResource, "?v=", version);
+                            int indexOfLastSeparator = urlForResource.lastIndexOf('/');
+                            String resourcePrefix = urlForResource.substring(0, indexOfLastSeparator);
+                            String resourceSuffix = urlForResource.substring(indexOfLastSeparator);
+                            urlForResource = Fmt.S("%s/%s%s",
+                                    resourcePrefix, version, resourceSuffix); 
                         }
                     }
                     if (urlForResource != resourceUrl) {

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#142 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#146 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -67,11 +67,13 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     public static final String PageScrollLeftKey = "awsl";
     public static final String SessionRendevousKey = "awsr";
     public static final String IncrementalUpdateKey = "awii";
-    private static final ThreadDebugKey RequestContextID =
+    public static final ThreadDebugKey RequestContextID =
         new ThreadDebugKey("RequestContext");
     public static final String RefreshRequestKey = "awrr";
     public static final String RecordingModeKey = "awrm";
     public static boolean UseXmlHttpRequests = false;
+
+    public static final String IgnoreRefreshCompleteKey = "IgnoreRefreshComplete";
 
     private AWApplication _application;
     private AWRequest _request;
@@ -445,11 +447,20 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         if (!AWRecordingManager.isInPlaybackMode(this)) {
             checkRemoteHostAddress(_awsession, sessionId, checkRemoteHostAddress);
         }
+
+
         return httpSession;
     }
 
     private void checkRemoteHostAddress (AWSession session, String sessionId, boolean checkRemoteHostAddress)
     {
+        AWPage page = session.restoreCurrentPage();
+        if (page != null) {
+            AWComponent pageComponent = page.pageComponent();
+            if (pageComponent != null) {
+                checkRemoteHostAddress = pageComponent.shouldValidateRemoteHost();
+            }
+        }
         if (checkRemoteHostAddress) {
             InetAddress sessionRemoteIPAddress = session.remoteIPAddress();
             int remoteHostMask = AWConcreteApplication.RemoteHostMask;
@@ -460,21 +471,13 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     remoteHostsMatch = checkHostsAgainstMask(sessionRemoteIPAddress, remoteHostAddress, remoteHostMask);
                 }
                 if (!remoteHostsMatch) {
-                       // the session will be accessed when rendering the error page.
-                       // set the remotehostaddress so the same error does not get triggered.
-                    session.setRemoteHostAddress(remoteHostAddress);
                     checkInExistingHttpSession();
                     String message = Fmt.S("Unable to restore session with sessionId: '%s'.  The remote address of the current request '%s' does not match the remote address of the initial request '%s' with mask '%s'.",
                         sessionId, remoteHostAddress, sessionRemoteIPAddress.getHostAddress(), String.valueOf(remoteHostMask));
                     Log.aribaweb_session.debug(message);
-                       // the two generic exceptions below are intentional. This will be
-                       // removed and the SessionValidationException will be processed.
-                    AWSessionRestorationException sre =
-                        new AWSessionRestorationException(message);
-                    sre.setState(sre.IPChanged);
-                    sre.setOldIP(sessionRemoteIPAddress.getHostAddress());
-                    sre.setNewIP(remoteHostAddress);
-                    throw new AWGenericException(sre);
+                    String sessionRemoteHost = sessionRemoteIPAddress.getHostAddress();
+                    throw new AWRemoteHostMismatchException(sessionRemoteHost,
+                                                            remoteHostAddress);
                 }
             }
         }

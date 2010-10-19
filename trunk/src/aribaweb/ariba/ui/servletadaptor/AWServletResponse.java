@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletResponse.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletResponse.java#10 $
 */
 
 package ariba.ui.servletadaptor;
@@ -145,6 +145,7 @@ public class AWServletResponse extends AWBaseResponse
     {
         if (_bytes != null) {
             outputStream.write(_bytes);
+            _bytesWritten += _bytes.length;
         }
         else if (_filePath != null) {
             try {
@@ -160,16 +161,15 @@ public class AWServletResponse extends AWBaseResponse
             catch (IOException ioexception) {
                 throw new AWGenericException(ioexception);
             }
-            flushSizeStat();
         }
         else if (_inputStream != null) {
             _bytesWritten += AWUtil.streamCopy(_inputStream, outputStream);
             _inputStream.close();
-            flushSizeStat();
         }
         else {
             writeContent(outputStream);
         }
+        flushSizeStat();
     }
 
     private void writeContent (HttpServletResponse servletResponse)

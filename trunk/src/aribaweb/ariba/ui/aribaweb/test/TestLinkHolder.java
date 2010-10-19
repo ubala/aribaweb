@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#14 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#15 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -106,6 +106,16 @@ public class TestLinkHolder implements SemanticKeyProvider
                 _secondLevelCategory = ((Class)_annotatedItem).getName();
             }
         }
+    }
+
+    public Annotation getAnnotation ()
+    {
+        return _annotation;
+    }
+
+    public Object getAnnotatedItem ()
+    {
+        return _annotatedItem;
     }
 
     public String getType ()
@@ -434,50 +444,67 @@ public class TestLinkHolder implements SemanticKeyProvider
         return useAnnotationType;
     }
 
-    public AWResponseGenerating click (AWRequestContext requestContext)
+    public AWResponseGenerating click (AWRequestContext requestContext, AWComponent returnPage)
     {
         AWResponseGenerating page = null;
         if (isTestLink()) {
             page = testLinkClick(requestContext);
         }
         else if (isTestStager() || isTestTearDownStager()) {
-            page = testStagerClick(requestContext);
+            page = testStagerClick(requestContext, returnPage);
         }
         return page;
     }
 
-    private AWResponseGenerating testStagerClick (AWRequestContext requestContext)
+    private AWResponseGenerating testStagerClick (AWRequestContext requestContext, AWComponent returnPage)
     {
-        AWResponseGenerating page = null;
+        AWResponseGenerating page = returnPage;
+        if (_annotatedItem.getClass() == Method.class) {
+            Method m = (Method) _annotatedItem;
 
+            TestLinkClickCallback testLinkClickCallback =
+                TestLinkManager.instance().getTestLinkClickCallback();
+            if (testLinkClickCallback != null) {
+                AWResponseGenerating nextPage = testLinkClickCallback.click(
+                    requestContext, this, returnPage);
+                if (nextPage != null) {
+                    page = nextPage;
+                }
+            }
+            else {
+                testStagerClick(requestContext, m);
+            }
+        }
+
+        return page;
+    }
+
+    public static void testStagerClick (AWRequestContext requestContext, Method m)
+    {
         TestContext testContext = TestContext.getTestContext(requestContext);
         TestSessionSetup testSessionSetup = TestLinkManager.instance().getTestSessionSetup();
 
-        if (_annotatedItem.getClass() == Method.class) {
-            Method m = (Method) _annotatedItem;
-            Object obj = AnnotationUtil.getObjectToInvoke(requestContext, m);
-            Object sessionState = testSessionSetup.getSessionState();
-            try {
-                Log.aribaweb_test.debug("[TestLinkHolder] Starting stager call %s " +
-                		"on object %s with TestContext %s.", m.toGenericString(), obj,
-                		testContext.toString());
-                Object res = AnnotationUtil.invokeMethod(requestContext,
-                                                         testContext,
-                                                         m,
-                                                         obj);
-                if (res != null) {
-                    testContext.put(res);
-                }
-            }
-            finally {
-                testSessionSetup.restoreSessionStateIfNeeded(sessionState);
-                Log.aribaweb_test.debug("[TestLinkHolder] Finished stager call %s on " +
-                                        "object %s with TestContext %s.",
-                                        m.toGenericString(), obj,
-                                        testContext.toString());
+        Object obj = AnnotationUtil.getObjectToInvoke(requestContext, m);
+        Object sessionState = testSessionSetup.getSessionState();
+        try {
+            Log.aribaweb_test.debug("[TestLinkHolder] Starting stager call %s " +
+                "on object %s with TestContext %s.", m.toGenericString(), obj,
+                testContext.toString());
+            Object res = AnnotationUtil.invokeMethod(requestContext,
+                testContext,
+                m,
+                obj);
+            if (res != null) {
+                testContext.put(res);
             }
         }
-        return page;
+        finally {
+            testSessionSetup.restoreSessionStateIfNeeded(sessionState);
+            Log.aribaweb_test.debug("[TestLinkHolder] Finished stager call %s on " +
+                "object %s with TestContext %s.",
+                m.toGenericString(), obj,
+                testContext.toString());
+        }
     }
 
     private AWResponseGenerating testLinkClick (AWRequestContext requestContext)

@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHiddenFormParameter.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHiddenFormParameter.java#4 $
 */
 
 package ariba.ui.aribaweb.html;
 
+import ariba.ui.aribaweb.core.AWBindingNames;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.util.AWUtil;
 
@@ -27,11 +28,19 @@ import ariba.ui.aribaweb.util.AWUtil;
 */
 public class AWHiddenFormParameter extends AWComponent
 {
-    public static String ValueBinding = "value";
-
-    public String encodedString ()
+    public String escapedName ()
     {
-        String value = stringValueForBinding(ValueBinding);
+        return escapedValueForBinding(AWBindingNames.name);
+    }
+
+    public String escapedValue ()
+    {
+        return escapedValueForBinding(AWBindingNames.value);
+    }
+
+    private String escapedValueForBinding (String bindingName)
+    {
+        String value = stringValueForBinding(bindingName);
         if (value != null) {
             value = AWUtil.escapeHtml(value).string();
         }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorInfo.java#23 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorInfo.java#24 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -55,7 +55,7 @@ public class AWErrorInfo implements AWErrorBucket
     // track the datatable item that is associated with this error, if we know it
     AWComponent _datatable;
     Object _tableItem;
-    boolean _wasAutoScrolled;
+    boolean _wasTableAutoScrolled;
 
     // The order that errors are registered may not be the order that they
     // are rendered.  This member keeps track of the order this error is
@@ -507,6 +507,10 @@ public class AWErrorInfo implements AWErrorBucket
         _tableItem = item;
     }
 
+    /*-----------------------------------------------------------------------
+        End Implementation of AWErrorBucket
+      -----------------------------------------------------------------------*/
+
     public AWEncodedString getIndicatorId ()
     {
         return _indicatorId;
@@ -517,13 +521,14 @@ public class AWErrorInfo implements AWErrorBucket
         _indicatorId = id;
     }
 
-    public boolean getWasAutoScrolled ()
+    public boolean getWasTableAutoScrolled ()
     {
-        return _wasAutoScrolled;
+        return _wasTableAutoScrolled;
     }
 
-    public void setWasAutoScrolled (boolean scrolled)
+
+    public void setWasTableAutoScrolled (boolean scrolled)
     {
-        _wasAutoScrolled = scrolled;
+        _wasTableAutoScrolled = scrolled;
     }
 }

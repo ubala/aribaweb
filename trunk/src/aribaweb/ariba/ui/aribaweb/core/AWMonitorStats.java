@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWMonitorStats.java#16 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWMonitorStats.java#17 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -71,6 +71,20 @@ public class AWMonitorStats extends AWBaseObject
         incrementActiveSessionCount();
         incrementSessionCount(session,1);
     }
+
+    public int activeSessionCountForBucket (AWSession session)
+    {
+        Object bucket = session.monitorBucket();
+        if (bucket == null) {
+            return 0;
+        }
+        Integer count = _activeSessionCountPerBucket.get(bucket);
+        if (count == null) {
+            return 0;
+        }
+        return count;
+    }
+
 
     public synchronized void decrementActiveSessionCount ()
     {

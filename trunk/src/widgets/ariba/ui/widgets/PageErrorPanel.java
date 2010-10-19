@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageErrorPanel.java#30 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageErrorPanel.java#31 $
 */
 
 package ariba.ui.widgets;
@@ -190,6 +190,8 @@ public final class PageErrorPanel extends AWComponent
         // not have taken place.  This panel is the last component to be
         // rendered on the page.  So everything else should be rendered
         // by now - ensure auto nav takes place.
+        // This call should NOT modify server state. Assuming the error was 
+        // registered during render, the error should be visible on the same page.
         errorManager().navToErrorAsNeeded(false, null, true);
         AWErrorInfo error = errorManager().getHighLightedError();
         if (error != null && error.getDisplayOrder() == AWErrorInfo.NotDisplayed) {

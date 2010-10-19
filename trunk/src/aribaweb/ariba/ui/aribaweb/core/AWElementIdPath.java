@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#18 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#19 $
 */
 
 package ariba.ui.aribaweb.core;

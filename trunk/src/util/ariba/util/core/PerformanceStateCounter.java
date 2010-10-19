@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateCounter.java#13 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateCounter.java#14 $
 */
 
 package ariba.util.core;
@@ -60,7 +60,7 @@ public class PerformanceStateCounter extends PerformanceStateCore
     */
     public void addCount (long quantity)
     {
-        if (!PerformanceState.threadStateEnabled()) {
+        if (!PerformanceState.threadStateEnabled() || PerformanceState.isRecordingSuspended()) {
             return;
         }
         Instance operationalObj = (Instance)this.instance();
@@ -72,7 +72,7 @@ public class PerformanceStateCounter extends PerformanceStateCore
      */
     public void addCount (String type)
     {
-        if (!PerformanceState.threadStateEnabled()) {
+        if (!PerformanceState.threadStateEnabled() || PerformanceState.isRecordingSuspended()) {
             return;
         }
         Instance operationalObj = (Instance)this.instance();
@@ -81,7 +81,7 @@ public class PerformanceStateCounter extends PerformanceStateCore
 
     public void addCount (long c1, long c2)
     {
-        if (!PerformanceState.threadStateEnabled()) {
+        if (!PerformanceState.threadStateEnabled() || PerformanceState.isRecordingSuspended()) {
             return;
         }
         Instance operationalObj = (Instance)this.instance();

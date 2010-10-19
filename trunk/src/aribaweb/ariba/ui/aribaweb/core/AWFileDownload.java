@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFileDownload.java#2 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFileDownload.java#3 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -56,6 +56,9 @@ public final class AWFileDownload extends AWComponent
         AWFileDownloadStatusCheck.FileStatusHandler handler =
                 AWFileDownloadStatusCheck.createHandlerForSession(session());
         handler.setDownloadStarted();
+        if (AWConcreteServerApplication.IsDebuggingEnabled && _hasCompleteAction) {
+            requestContext.put(AWRequestContext.IgnoreRefreshCompleteKey, Boolean.TRUE);
+        }
         super.renderResponse(requestContext, component);
     }
 

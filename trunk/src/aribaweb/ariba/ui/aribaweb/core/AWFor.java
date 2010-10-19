@@ -12,13 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFor.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFor.java#6 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWSemanticKeyProvider;
 import ariba.ui.aribaweb.util.SemanticKeyProvider;
+import ariba.ui.aribaweb.util.SemanticKeyProviderUtil;
 import ariba.util.fieldvalue.OrderedList;
 
 import java.lang.reflect.Field;
@@ -300,7 +301,7 @@ public class AWFor extends AWContainerElement
                     if (item != null) {
                         SemanticKeyProvider provider = AWSemanticKeyProvider.get(item);
                         if (provider != null) {
-                            key = provider.getKey(item, component);
+                            key = SemanticKeyProviderUtil.getKey(provider, item, component);
                         }
                     }
                 }

@@ -12,7 +12,7 @@
     <a:PrimitiveString value="<!--@&@-->"/>\
     <form method="post" id="formRedirectForm" name="formRedirectForm" action="$formActionUrl" target="$target">
         <a:For list="$formValues" index="$currIndex">\
-            <input type="hidden" name="$currentName" value="$currentValue"/>
+            <a:HiddenFormParameter name="$currentName" value="$currentValue"/>
         </a:For>\
     </form>\
     <a:PrimitiveString value="<!--@&@-->"/>\

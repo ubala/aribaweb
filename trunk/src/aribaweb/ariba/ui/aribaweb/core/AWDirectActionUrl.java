@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionUrl.java#32 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionUrl.java#34 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -33,8 +33,6 @@ import javax.servlet.http.HttpSession;
 public final class AWDirectActionUrl extends AWBaseObject
 {
     // Static Variables;
-    final private static String NodeValidateIndicator = "nodeValidate";
-    final private static String Slash = "/";
 
     private static final Object Lock = new Object();
     private static String AdaptorUrl;
@@ -343,31 +341,6 @@ public final class AWDirectActionUrl extends AWBaseObject
         return urlBuffer.toString();
     }
 
-    /*
-        Take a URL and changes its format to contain a pattern that will invoke
-        the web-server
-     */
-    static public String nodeValidateFormat(String url)
-    {
-        int indexOf = url.indexOf("?");
-        if (indexOf == -1) {
-            if (url.endsWith(Slash)) {
-                url = StringUtil.strcat(
-                        url, AWDirectActionUrl.NodeValidateIndicator);
-            }
-            else {
-                url = StringUtil.strcat(
-                        url, Slash, AWDirectActionUrl.NodeValidateIndicator);
-            }
-        }
-        else {
-            String urlPart1 = url.substring(0, indexOf);
-            String urlPart2 = url.substring(indexOf);
-            url = StringUtil.strcat(
-                    urlPart1, Slash, AWDirectActionUrl.NodeValidateIndicator, urlPart2);
-        }
-        return url;
-    }
     /*  --------------
         Session rendevous
         -------------- */
@@ -1004,12 +977,24 @@ public final class AWDirectActionUrl extends AWBaseObject
     /**
      * Identify if URL is a will direct back to this same application.  (i.e. is it a candidate for internal dispatch)
      */
-    private static final String _MarkerString = "MARKER";
+    private static final String AD_Suffix = 
+        Fmt.S("/%s/", AWConcreteApplication.DirectActionRequestHandlerKey);
+
     public static boolean isLocalDirectActionUrl (String url, AWRequestContext requestContext)
     {
-        // Perf optimization opportunity: cache the computation of the prefix string?
-        String prefix = fullUrlForDirectAction (_MarkerString, requestContext);
-        int index = prefix.indexOf(_MarkerString);
-        return url.regionMatches(0, prefix, 0, index);
+        if (requestContext.isStaticGeneration()) return true;            
+        String base = AWRequestUtil.applicationBaseUrl(requestContext);
+        int baseLength = base.length();
+        if(url.startsWith(base)) {
+            return     // same as base http://s/app/Main
+                   url.equals(base)|| 
+                       // direct action http://s/app/Main/ad/actionName
+                   url.regionMatches(baseLength, AD_Suffix, 0, AD_Suffix.length()) ||
+                       // default action with query string http://s/app/Main?param=value
+                   url.charAt(baseLength) == '?' ||
+                       // default action with query string http://s/app/Main/?param=value
+                   url.regionMatches(baseLength, "/?", 0, 2);
+        }
+        return false;
     }
 }

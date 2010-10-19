@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#61 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#64 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -24,7 +24,9 @@ import ariba.ui.aribaweb.util.AWContentType;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWFileResource;
 import ariba.ui.aribaweb.util.AWMemoryStats;
+import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWMutableRefCount;
+import ariba.ui.aribaweb.util.AWNodeManager;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWResourceManager;
 import ariba.ui.aribaweb.util.Log;
@@ -56,6 +58,7 @@ abstract public class AWDirectAction extends AWBaseObject
     public static final String DefaultActionName = "default";
     public static final String AWImgActionName = "awimg";
     public static final String AWResActionName = "awres";
+    private static final int AWResActionResourceIndex = 4;
     public static final String AWResTestActionName = "test_awres";
     public static final String PingActionName = "ping";
     public static final String ProgressCheckActionName = "progressCheck";
@@ -303,10 +306,16 @@ abstract public class AWDirectAction extends AWBaseObject
 
         String resourceUrl = directActionUrl.finishUrl();
 
+        String resourceVersion = AWMultiLocaleResourceManager.resourceVersion(resourceName);
+        if (resourceVersion == null) {
+            resourceVersion = "0";
+        }
+
         resourceUrl =
             StringUtil.strcat(resourceUrl, "/",
                               brand.getName(), "/",
                               brand.getSessionVersion(requestContext), "/",
+                              resourceVersion, "/",
                               resourceName);
         return resourceUrl;
     }
@@ -354,14 +363,20 @@ abstract public class AWDirectAction extends AWBaseObject
         //
         // construct the filename
         //
-        // awres/brand/version/blah/blah/filename.jpg
+        // awres/brand/brandVersion/resourceVersion/blah/blah/filename.jpg
         String[] requestHandlerPathComponents = request.requestHandlerPath();
+        AWNodeManager nodeManager = application.getNodeManager();
+        if (nodeManager != null) {
+            requestHandlerPathComponents =
+                nodeManager.filterUrlForNodeValidation(requestHandlerPathComponents);
+        }
         String brandName = requestHandlerPathComponents[1];
-        String version = requestHandlerPathComponents[2];
-        String filename = requestHandlerPathComponents[3];
-        if (requestHandlerPathComponents.length > 4) {
+        String brandVersion = requestHandlerPathComponents[2];
+        // requestHandlerPathComponents[3] (resource version) is only used for cache busting
+        String filename = requestHandlerPathComponents[AWResActionResourceIndex];
+        if (requestHandlerPathComponents.length > AWResActionResourceIndex + 1) {
             FastStringBuffer sb = new FastStringBuffer();
-            for (int i=3; i < requestHandlerPathComponents.length -1; i++) {
+            for (int i=AWResActionResourceIndex; i < requestHandlerPathComponents.length -1; i++) {
                 sb.append(requestHandlerPathComponents[i]);
                 sb.append("/");
             }
@@ -390,7 +405,7 @@ abstract public class AWDirectAction extends AWBaseObject
         // get the right resource manager
         //
         AWResourceManager rm = application.resourceManager();
-        rm = rm.resolveBrand(brandName, version);
+        rm = rm.resolveBrand(brandName, brandVersion);
 
         AWResource resource = rm.resourceNamed(filename, true);
 
@@ -410,10 +425,8 @@ abstract public class AWDirectAction extends AWBaseObject
             String lastModified = fmt.format(new Date(resource.lastModified()));
             response.setHeaderForKey(lastModified, "Last-Modified");
 
-            if (enableBrowserCache) {
-                // 24 hours
-                response.setHeaderForKey("max-age=86400", "Cache-control");
-            }
+            // we are not specifying any cache-control header
+	    // since we are letting the web server config control this
 
             if (resource instanceof AWFileResource) {
                 AWFileResource file = (AWFileResource)resource;

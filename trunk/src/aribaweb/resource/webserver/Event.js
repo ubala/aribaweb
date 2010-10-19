@@ -11,7 +11,6 @@ ariba.Event = function() {
     var Util = ariba.Util;
     var Debug = ariba.Debug;
     var Dom = ariba.Dom;
-    var Request = ariba.Request;
 
     // private vars
 
@@ -152,9 +151,9 @@ ariba.Event = function() {
                     }
                     catch (e) {
                         var msg = "refreshComplete: Exception evaluating: "
-                                + AWDomCompleteCallbackList[i].toString() + ": " + e;
+                                + AWDomCompleteCallbackList[i].toString() + "\n\n: " + e;
                         Debug.log(msg);
-                        if (Request.AWDebugEnabled) {
+                        if (ariba.Request.AWDebugEnabled) {
                             alert(msg);
                         }
                     }
@@ -427,7 +426,9 @@ ariba.Event = function() {
                     // Fire the click event for input element that the label is for.
                     if (elm.tagName == 'LABEL' &&
                         sourceElm.type != "checkbox" &&
-                        sourceElm.type != "radio") {
+                        sourceElm.type != "radio" &&
+                        sourceElm.tagName != "SELECT" &&
+                        sourceElm.tagName != "A") {
                         var forId = elm.htmlFor;
                         if (forId) {
                             var target = Dom.getElementById(forId);
