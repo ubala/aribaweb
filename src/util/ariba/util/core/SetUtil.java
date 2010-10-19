@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2009 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/SetUtil.java#13 $
+    $Id: //ariba/platform/util/core/ariba/util/core/SetUtil.java#14 $
 */
 
 package ariba.util.core;
@@ -306,6 +306,18 @@ public final class SetUtil
         return result;
     }
 
+    /**
+        Returns new Set with all the items in source Collection added to it. Combines
+        SetUtil.list() and Set addAll(Collection). Throws NullPointerException if source
+        is null.
+        @aribaapi ariba
+    */
+    public static <T> Set<T> setAddAll (Collection<T> source)
+    {
+        Set<T> set = SetUtil.set(source.size());
+        set.addAll(source);
+        return set;
+    }
 
     // -------------------------------------------------------------------------
     // Public Methods

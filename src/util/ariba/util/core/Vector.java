@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Vector.java#24 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Vector.java#26 $
     Responsible: bluo
 */
 

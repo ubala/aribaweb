@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorIndicator.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorIndicator.java#3 $
 */
 
 package ariba.ui.widgets;
@@ -37,7 +37,7 @@ public class ErrorIndicator extends ErrorFlag
     protected AWEncodedString _indicatorId;
     public AWEncodedString _errorContentDivId;
     private Boolean _autoHideBubble;
-    private List _errorMsgs;
+    private List<String> _errorMsgs;
 
     // used in repetition binding
     public String curItem;
@@ -96,26 +96,47 @@ public class ErrorIndicator extends ErrorFlag
         return _autoHideBubble.booleanValue();
     }
 
-    public boolean autoScroll ()
+    /**
+     * This will indicate if the page should be auto-scrolled or not.
+     *
+     * Note: this is a binding.
+     *
+     * @return Returns true unless scrolling is disabled
+     *  or none of the table errors are visible in the table.
+     */
+    public boolean pageAutoScroll ()
     {
+        // trivial case, no errors
+        if (ListUtil.nullOrEmptyList(_errorInfoList)) {
+            return true;
+        }
+        // trivial case, scrolling disabled
+        else if (!errorManager().getEnablePageAutoScroll()) {
+            return false;
+        }
+
         // If the indicator is in a table, only auto scroll if
-        // the table item has been forced visible.  Otherwise,
-        // the bubble is displayed outside of the table.
-        if (!ListUtil.nullOrEmptyList(_errorInfoList)) {
-            boolean isInTable = false;
-            boolean wasAutoScrolled = false;
-            for (int i = 0; i < _errorInfoList.size(); i++) {
-                AWErrorInfo error = (AWErrorInfo)_errorInfoList.get(i);
-                if (error.getAssociatedTableItem() != null) {
-                    isInTable = true;
-                    wasAutoScrolled = wasAutoScrolled || error.getWasAutoScrolled();
-                }
-            }
-            if (isInTable && !wasAutoScrolled) {
-                Log.aribaweb_errorManager.debug("***** skipping bubble autoscroll");
-                return false;
+        // the table item has been forced visible.
+        boolean anyErrorInTable = false;
+        for (AWErrorInfo error : _errorInfoList) {
+            boolean errorInTable = error.getAssociatedTableItem() != null;
+            anyErrorInTable |= errorInTable;
+            // autoScroll if any visible error exists in a table
+            if (errorInTable && error.getWasTableAutoScrolled()) {
+                return true;
             }
         }
+
+        // we didn't return true above so no errors in the table are visible
+        // AKA if any errors exist, they are not visible
+        boolean allTableErrorsAreHidden = anyErrorInTable;
+        if (allTableErrorsAreHidden) {
+            // The bubble is displayed outside of the table and we don't scroll.
+            Log.aribaweb_errorManager.debug("***** skipping bubble autoscroll");
+            return false;
+        }
+
+        // by default, autoScroll
         return true;
     }
 
@@ -171,7 +192,7 @@ public class ErrorIndicator extends ErrorFlag
             _errorMsgs = ListUtil.list();
             if (!ListUtil.nullOrEmptyList(_errorInfoList)) {
                 for (int i = 0; i < _errorInfoList.size(); i++) {
-                    AWErrorInfo error = (AWErrorInfo)_errorInfoList.get(i);
+                    AWErrorInfo error = _errorInfoList.get(i);
                     _errorMsgs.add(error.getMessage());
                 }
             }

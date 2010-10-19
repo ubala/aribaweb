@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSessionStatusManager.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSessionStatusManager.java#7 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
 import ariba.util.core.MapUtil;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.StringUtil;
@@ -142,8 +141,19 @@ public class AWSessionStatusManager
             AWConcreteApplication.SessionWrapper sessOp = null;
             while ((sessOp = connectList.poll()) != null) {
                 if (sessOp.op == AWConcreteApplication.SessionOp.Add) {
-                    trackSessionConnect(sessOp.session);
-                    existingSessions.add(sessOp.session);
+                    try {
+                        trackSessionConnect(sessOp.session);
+                        existingSessions.add(sessOp.session);
+                    }
+                    catch (UserSessionExistsException fae) {
+                        //In development mode, always log this error.
+                        //In production, log it only if debug is enabled.
+                        if (AWConcreteApplication.IsDebuggingEnabled
+                            || Log.aribaweb_userstatus.isDebugEnabled())
+                        {
+                            Log.aribaweb_userstatus.error(fae.getMessage(), sessOp.callTrace);
+                        }
+                    }
                 }
                 else {
                     trackSessionTerminate(sessOp.session);
@@ -168,5 +178,13 @@ public class AWSessionStatusManager
 
     public void test (AWRequestContext requestContext)
     {
+    }
+
+    public static class UserSessionExistsException extends RuntimeException
+    {
+        public UserSessionExistsException (String msg)
+        {
+            super(msg);
+        }
     }
 }

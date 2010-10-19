@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletRequest.java#4 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletRequest.java#7 $
 */
 
 package ariba.ui.servletadaptor;
@@ -31,7 +31,6 @@ import ariba.util.core.Fmt;
 import ariba.util.core.HTTP;
 import java.util.Map;
 import ariba.util.core.MIME;
-
 import java.io.IOException;
 import java.io.InputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -287,7 +286,12 @@ public class AWServletRequest extends AWBaseRequest
 
     protected String initSessionId ()
     {
-        return _servletRequest.getRequestedSessionId();
+        // only return the session id if it is valid
+        String sessionId = _servletRequest.getRequestedSessionId();
+        if (!_servletRequest.isRequestedSessionIdValid()) {
+            sessionId = null;
+        }
+        return sessionId;
     }
 
     public HttpServletRequest httpServletRequest ()

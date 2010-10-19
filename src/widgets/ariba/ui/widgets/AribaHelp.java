@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaHelp.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaHelp.java#6 $
 */
 
 package ariba.ui.widgets;
@@ -23,6 +23,7 @@ import ariba.ui.aribaweb.core.AWComponent;
 public class AribaHelp extends AWComponent
 {
     public static final String HelpArea = "HelpArea";
+    public static final String AuxiliaryHelpUrl = "AuxiliaryHelpUrl";
 
     public String _currentArea;
     public List<String> _helpAreas;

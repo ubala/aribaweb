@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#84 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#85 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -855,6 +855,11 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                 if (handlerResults != null) {
                     response = handlerResults.generateResponse();
                 }
+            }
+            catch (AWRemoteHostMismatchException exception) {
+                AWResponseGenerating result =
+                    handleRemoteHostMismatchException(requestContext, exception);
+                response = result.generateResponse();
             }
         }
         catch (ExceptionInInitializerError error) {

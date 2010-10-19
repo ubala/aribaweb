@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2009 Ariba, Inc.
+    Copyright 1996-2008 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,22 +12,21 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSessionRestorationException.java#8 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PollDialog.java#1 $
 */
 
-package ariba.ui.aribaweb.core;
+package ariba.ui.widgets;
 
-public final class AWSessionRestorationException extends RuntimeException
+import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWPollInterval;
+import ariba.ui.aribaweb.core.AWSession;
+
+public class PollDialog extends AWComponent
 {
 
-    public AWSessionRestorationException ()
+    public boolean showDialog ()
     {
-        super();
-    }
-
-    public AWSessionRestorationException (String exceptionMessage)
-    {
-        super(exceptionMessage);
+        return page().pollOnError();
     }
 
 }

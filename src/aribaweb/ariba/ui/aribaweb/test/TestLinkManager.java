@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkManager.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkManager.java#10 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -63,6 +63,8 @@ public class TestLinkManager
     Map <Class, List<TestInspectorLink>> _allTestInspectorMap = new HashMap();
 
     private TestSessionSetup _testSessionSetup = null;
+    private TestLinkClickCallback _testLinkClickCallback = null;
+
 
     public static void forceClassLoad()
     {
@@ -83,6 +85,16 @@ public class TestLinkManager
     public TestSessionSetup getTestSessionSetup()
     {
         return _testSessionSetup;
+    }
+
+    public void registerTestLinkClickCallback (TestLinkClickCallback testLinkClickCallback)
+    {
+        _testLinkClickCallback = testLinkClickCallback;
+    }
+
+    public TestLinkClickCallback getTestLinkClickCallback()
+    {
+        return _testLinkClickCallback;
     }
 
     public TestLinkManager()

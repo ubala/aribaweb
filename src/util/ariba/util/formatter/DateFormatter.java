@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/DateFormatter.java#29 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/DateFormatter.java#30 $
 */
 
 package ariba.util.formatter;
@@ -974,8 +974,14 @@ public class DateFormatter extends Formatter
     */
     public static String toDateMonthYearString (Date date, Locale locale)
     {
+        return toDateMonthYearString(date, locale, getDefaultTimeZone());
+    }
+
+    public static String toDateMonthYearString (Date date, Locale locale,
+                                                TimeZone timezone)
+    {
         String pattern = lookupLocalizedFormat(DateMonthYearFormatKey, locale);
-        return getStringValue(date, pattern, locale);
+        return getStringValue(date, pattern, locale, timezone);
     }
 
     /**

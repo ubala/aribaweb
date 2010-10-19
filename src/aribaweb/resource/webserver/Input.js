@@ -88,6 +88,10 @@ ariba.Input = function() {
             this.disableInput(true);
 
             if (!AWShowWaitAlertDisabled) {
+                // clear any existing timeout if any
+                // this can happen when we are loading multiple lazy divs
+                clearTimeout(AWWaitAlertTimeoutId);
+                clearTimeout(AWWaitTimeoutId);
                 AWWaitAlertTimeoutId = setTimeout(this.showWaitAlert.bind(this), this.AWWaitAlertMillis);
                 AWWaitTimeoutId = setTimeout(this.hideWaitCursor.bind(this), this.AWWaitAlertMillis + this.AWWaitMillis);
             }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Fmt.java#13 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Fmt.java#14 $
 */
 
 package ariba.util.core;
@@ -2361,7 +2361,10 @@ public class Fmt
     public static String Si (String control, Object [] args)
     {
         try {
-            return MessageFormat.format(control, args);
+            if (control.indexOf("''") > -1 ||
+                control.indexOf("{") > -1) {
+                return MessageFormat.format(control, args);
+            }
         }
         catch (IllegalArgumentException exp) {
             FastStringBuffer buf = new FastStringBuffer();

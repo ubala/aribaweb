@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestUtil.java#3 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestUtil.java#5 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -72,7 +72,10 @@ public class AWRequestUtil
                                          String name, String value, boolean asQueryParam)
     {
         if (asQueryParam) {
-            if (url.charAt(url.length()-1) != BeginQueryChar) {
+            if (url.indexOf(BeginQueryChar) == -1) {
+                url.append(BeginQueryChar);
+            }
+            else if (url.charAt(url.length()-1) != BeginQueryChar) {
                 url.append(QueryDelimiter);
             }
             url.append(name);
@@ -147,6 +150,7 @@ public class AWRequestUtil
     {
         AWApplication application = requestContext.application();
         String baseUrl = application.adaptorUrl();
+        if (baseUrl == null) return;
         String applicationName = application.name();
         if (!baseUrl.endsWith(HTTP_DELIMITERSTRING) &&
             applicationName.indexOf(HTTP_DELIMITER) != 0) {
@@ -226,6 +230,13 @@ public class AWRequestUtil
         return _urlKeyDelimited;
     }
 
+    /**
+     * validates and returns the request URL.  The validation is checking the url for
+     * the "urlKey" - which is the <ServletContext>/<ServletName> form.
+     * If the urlKey is not found, a AWGenericException is thrown.
+     * @param requestContext
+     * @return The request url including any querystring.
+     */
     public static String getRequestUrl (AWRequestContext requestContext)
     {
         // get what the appserver believes to be the current request

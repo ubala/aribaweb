@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWMappingRepetition.java#15 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWMappingRepetition.java#16 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -20,6 +20,7 @@ package ariba.ui.aribaweb.core;
 import ariba.ui.aribaweb.util.AWMap;
 import ariba.ui.aribaweb.util.AWSemanticKeyProvider;
 import ariba.ui.aribaweb.util.SemanticKeyProvider;
+import ariba.ui.aribaweb.util.SemanticKeyProviderUtil;
 import ariba.util.core.Compare;
 import ariba.util.core.ListUtil;
 import ariba.util.core.Sort;
@@ -194,7 +195,7 @@ public final class AWMappingRepetition extends AWContainerElement
                     if (shouldRecord) {
                         SemanticKeyProvider provider = AWSemanticKeyProvider.get(currentKey);
                         if (provider != null) {
-                            String key = provider.getKey(currentKey, component);
+                            String key = SemanticKeyProviderUtil.getKey(provider, currentKey, component);
                             requestContext._debugSetSemanticKeyPrefix(key);
                         }
                         else {

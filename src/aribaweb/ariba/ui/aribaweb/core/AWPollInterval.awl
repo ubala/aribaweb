@@ -4,7 +4,8 @@
         // initiate the polling
         ariba.Request.setupPoll($initiatePolling, <a:PrimitiveString value="$interval"/>,
             '<a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWPollInterval.AWPollSenderId"/>',
-            '<a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWPollInterval.AWPollUpdateSenderId"/>');
+            '<a:PrimitiveString value="$=ariba.ui.aribaweb.core.AWPollInterval.AWPollUpdateSenderId"/>',
+            $pollOnError);
         <!--- ariba.Debug.log("AWPollInterval - AWPollEnabled: " + AWPollEnabled); -->
     </a:ClientSideScript>
     </a:If>\

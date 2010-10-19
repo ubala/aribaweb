@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestSessionSetup.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestSessionSetup.java#8 $
     Responsible: ksaleh
 */
 
@@ -56,5 +56,5 @@ public interface TestSessionSetup
     public String getCurrentTestCentralPageInfo (AWRequestContext requestContext);
     public String getRemoteRealmName ();
 
-
+    public void executeStager(Runnable stagerRunnable);
 }

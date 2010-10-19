@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1996-2009 Ariba, Inc.
+    Copyright (c) 1996-2010 Ariba, Inc.
     All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#41 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#45 $
 */
 
 package ariba.util.core;
@@ -31,8 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
     
 /**
     This class maintains performance state for the current thread.
@@ -59,6 +57,9 @@ public class PerformanceState
 
     public static PerformanceStateCPUTimedCounter ThreadCPUTimer =
             new PerformanceStateCPUTimedCounter();
+
+    private static final String ParameterLogArchivingDisabled
+        = "System.Performance.ScheduledLogArchivingDisabled";
 
     /**
         Must be called by app after all metrics have been registered.  At that point
@@ -103,9 +104,11 @@ public class PerformanceState
 
             stats._startTime = System.currentTimeMillis();
             stats._performanceCheck = checker;
-            long duration = (checker._errorRuntimeMillis > 0) ? checker._errorRuntimeMillis : 30000;
+            long duration = (checker._errorRuntimeMillis > 0 ?
+                             checker._errorRuntimeMillis : 30000);
             stats._deadline = stats._startTime + duration;
-            WatcherDaemon.add(ThreadDebugState.getThisThreadHashtable(), Thread.currentThread());
+            WatcherDaemon.add(ThreadDebugState.getThisThreadHashtable(),
+                              Thread.currentThread());
         }
     }
 
@@ -124,7 +127,8 @@ public class PerformanceState
                 duration = stats._performanceCheck._errorRuntimeMillis;
             }
             stats._deadline = stats._startTime + duration;
-            WatcherDaemon.update(ThreadDebugState.getThisThreadHashtable(), Thread.currentThread());
+            WatcherDaemon.update(ThreadDebugState.getThisThreadHashtable(),
+                                 Thread.currentThread());
         }
     }
 
@@ -300,6 +304,14 @@ public class PerformanceState
         }
     }
 
+    public static boolean isRecordingSuspended ()
+    {
+        if (threadStateEnabled()) {
+            return getThisThreadHashtable().isRecordingSuspended();
+        }
+        return false;
+    }
+
     /* Type of activity -- User request, Background task, ... */
     public static final String Type_User = "User";
     public static final String Type_Task = "Task";
@@ -334,7 +346,8 @@ public class PerformanceState
         protected long _startTime;
         protected long _deadline;
         protected boolean toBeContinued;
-
+        protected boolean recordingSuspended;
+        
         protected String realm;
         protected String realmType;
         protected String sessionID;
@@ -391,6 +404,35 @@ public class PerformanceState
         public void setToBeContinued (boolean toBeContinued)
         {
             this.toBeContinued = toBeContinued;
+        }
+
+        /**
+            Indicates whether this performance state has suspended recording changes to stats.
+        */
+        public boolean isRecordingSuspended ()
+        {
+            return recordingSuspended;
+        }
+
+        /**
+            Allows suspension of recording stats. Care should be taken to ensure that
+            any suspension is revoked by encapsulating the call in a try..finally block:
+
+            <code>
+            PerformanceState.Stats stats = PerformanceState.getThisThreadHashtable();
+            try
+            {
+               stats.setRecordingSuspended(true);
+               ...
+            }
+            finally {
+               stats.setRecordingSuspended(false);
+            }
+            </code>
+        */
+        public void setRecordingSuspended (boolean recordingSuspended)
+        {
+            this.recordingSuspended = recordingSuspended;
         }
 
         public String getRealm ()
@@ -491,6 +533,48 @@ public class PerformanceState
         public void setDestinationArea (String destinationArea)
         {
             this.destinationArea = destinationArea;
+        }
+
+        /**
+            Returns String suitable to display in perf or other logging, encoding context
+            information in (source, destination) x (Page, Area), while avoiding boring
+            repetition.
+            @aribaapi private
+        */
+        public String getDisplayPageArea ()
+        {
+            String sp = getSourcePage();
+            String sa = getSourceArea();
+            String dp = getDestinationPage();
+            String da = getDestinationArea();
+
+            if (dp == null || dp.equals(sp)) {
+                dp = sp;
+                sp = null;
+                if (da == null) {
+                    da = sa;
+                }
+                sa = null;
+            }
+            if (dp != null) {
+                StringBuilder buf = new StringBuilder();
+                appendPageAndArea(buf, dp, da);
+                if (sp != null) {
+                    buf.append(" via ");
+                    appendPageAndArea(buf, sp, sa);
+                }
+                return buf.toString();
+            }
+            return "";
+        }
+
+        private void appendPageAndArea (StringBuilder buf, String page, String area)
+        {
+            buf.append(page);
+            if (area != null) {
+                buf.append(':');
+                buf.append(area);
+            }
         }
 
         /**
@@ -705,11 +789,14 @@ public class PerformanceState
     protected static final String FileHeader = "Date, Realm, RealmType, NodeName, "
                     + "SessionID, User, SourcePage, SourceArea, DestPage, DestArea, "
                     + "Type, Status, "
-                    + "AppMetricName, AppMetric, AppDimension1, AppDimension2, AppInfo, Referer, AcceptLanguages, UserAgent, TestShortId, TestId, TestLine, ";
+                    + "AppMetricName, AppMetric, AppDimension1, AppDimension2, "
+                    + "AppInfo, Referer, AcceptLanguages, UserAgent, TestShortId, "
+                    + "TestId, TestLine, ";
     protected static final String PlanFileHeader = "Date, Realm, RealmType, NodeName, "
                     + "SessionID, User, SourcePage, SourceArea, DestPage, DestArea, "
                     + "Type, Status, "
-                    + "AppDimension1, AppDimension2, AppInfo, TestShortId, TestId, TestLine, Query, Plan";
+                    + "AppDimension1, AppDimension2, AppInfo, TestShortId, TestId, "
+                    + "TestLine, Query, Plan";
 
     protected static PerformanceStateCore[] _LogMetrics = null;
 
@@ -787,7 +874,6 @@ public class PerformanceState
         if (!StringUtil.nullOrEmptyString(stats.getTestLine()) &&
             stats.getTestLine().equals("-1"))
         {
-            Log.util.info(2942, "logToFile: not logging for stager/validator");
             return;
         }
 
@@ -803,7 +889,7 @@ public class PerformanceState
         buf.append(stats.getSessionID()); buf.append(":");
         buf.append(stats.getIPAddress()); buf.append(sep);
         buf.append(stats.getUser()); buf.append(sep);
-        buf.append(stats.getSourcePage());buf.append(sep);
+        csvOutput(buf, stats.getSourcePage(), false);buf.append(sep);
         csvOutput(buf, stats.getSourceArea(), false);buf.append(sep);
         buf.append(stats.getDestinationPage());buf.append(sep);
         csvOutput(buf,stats.getDestinationArea(),false);buf.append(sep);
@@ -872,7 +958,6 @@ public class PerformanceState
         if (StringUtil.nullOrEmptyString(stats.getTestLine()) ||
             stats.getTestLine().equals("-1"))
         {
-            Log.util.info(2942, "logPlanFile: missing automation test line");
             return;
         }
 
@@ -912,8 +997,12 @@ public class PerformanceState
         planLog.sendEvent(buf.toString()); // OK
     }
 
-    public static void archiveLogFile()
+    public static void archiveLogFile (Parameters params)
     {
+        if (params.getBooleanParameter(ParameterLogArchivingDisabled)) {
+            Log.util.info(2926, "PerfLog archiving disabled: local perflog and plan files not archived");
+            return;
+        }
         perfLog.setArchiveFlag(true);
         planLog.setArchiveFlag(true);
     }
@@ -924,7 +1013,9 @@ public class PerformanceState
      */
     static void logPerfExceptions (Stats stats)
     {
-        if (!Log.perf_log_exception.isDebugEnabled()) return;
+        if (!Log.perf_log_exception.isDebugEnabled()) {
+            return;
+        }
         PerformanceCheck checker = stats.getPerformanceCheck();
         if (checker != null) {
             int level = checker.checkAndRecord(stats, null);
@@ -970,7 +1061,8 @@ public class PerformanceState
                     Thread t = new Thread(instance, "Perf_Log_Exception_Daemon");
                     t.setDaemon(true);
                     t.start();
-                } catch (java.security.AccessControlException e) {
+                }
+                catch (java.security.AccessControlException e) {
                     // will throw in restricted environments (e.g. Google AppEngine) where thread creation
                     // is not supported.
                 }
@@ -1051,7 +1143,8 @@ public class PerformanceState
                     StackTraceElement[] stack = stackTraces.get(thread);
                     String stackString = "";
                     if (stack != null) {
-                        FastStringBuffer sb = new FastStringBuffer("Current stack for long running thread: ");
+                        FastStringBuffer sb = new FastStringBuffer(
+                            "Current stack for long running thread: ");
                         sb.append(thread.toString());
                         for (StackTraceElement line: stack) {
                             sb.append("\n\t");
@@ -1249,7 +1342,8 @@ final class PerfLogger implements Runnable
         }
         return success;
     }
-    public void setArchiveFlag(boolean flag)
+
+    public void setArchiveFlag (boolean flag)
     {
         _archiveFlag = flag;
     }

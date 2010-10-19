@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#21 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#23 $
 */
 
 package ariba.util.shutdown;
 
 import ariba.util.core.Assert;
+import ariba.util.core.ClassUtil;
 import ariba.util.core.Constants;
 import ariba.util.core.Date;
 import ariba.util.core.ListUtil;
@@ -531,8 +532,8 @@ public class ShutdownManager
             return;
         }
         _gracefulShutdownTypeRequested = type;
-        Log.shutdown.debug("Starting delayed shutdown type=%s, exitCode=%s",
-                           type, exitCode);
+        Log.shutdown.info(10573,type, exitCode);
+        
         updateNodeStatus(getNodeStatus(type));
         Assert.that(_times.get(_gracefulShutdownTypeRequested) != null,
             "no ShutdownTimes was set for shutdown type %s ",
@@ -598,8 +599,8 @@ public class ShutdownManager
                 updateNodeStatus(StatusNodeImmediate);
             }
         }
-        Log.shutdown.debug("Starting immediate shutdown exitCode=%s, nodeStatus=%s",
-                           exitCode, nodeStatus);
+        Log.shutdown.info(10575, exitCode, nodeStatus);
+        
         //Call the notifier to send out the final shutdown message.
         if ( notifier != null ) {
             notifier.execute();
@@ -624,17 +625,22 @@ public class ShutdownManager
         }
 
         if (hookRunner.isDone()) {
-            Log.shutdown.debug("HookRunner completed running all hooks.");
+            Log.shutdown.info(10576);
         }
         else {
             Log.shutdown.warning(9257, millisToMinutes(_hookRunnerTimeout));
         }
+        // if exitcode is 0 only then it will print proper message which will be 
+        //captured by KR logs to know if the restart is normal.
+        Log.shutdown.info(10580, exitCode, Boolean.valueOf(_printExtraMessages));
         if (exitCode == NormalExitNoRestart && _printExtraMessages) {
-            System.out.println(NormalShutdownString); // OK
+            SystemUtil.out().println(NormalShutdownString); // OK
         }
         try {
             LogManager.shutdown();
             SystemUtil.flushOutput();
+            //wait for 2 sec to get logs flushed before exit
+            SystemUtil.sleep(2000);
         }
         catch (Throwable e) { // OK
             // don't want to allow problem in flushOutput to
@@ -877,6 +883,7 @@ public class ShutdownManager
                         9258, millisToMinutes(_delayRunnerTimeout));
                 }
                 // Continue with immediate shutdown.
+                Log.shutdown.info(10574);
                 shutdownNow(_exitCode, false);
             }
             finished = true;
@@ -898,7 +905,7 @@ public class ShutdownManager
 
         public void run ()
         {
-            Log.shutdown.debug("Executing shutdown hooks");
+            Log.shutdown.info(10581);
             for (Iterator i = _hooks.iterator(); i.hasNext();) {
                 Thread hook = (Thread)i.next();
                 hook.start();
@@ -907,13 +914,14 @@ public class ShutdownManager
             for (Iterator i = _hooks.iterator(); i.hasNext();) {
                 Thread hook = (Thread)i.next();
                 try {
+                    Log.shutdown.info(10582,ClassUtil.getClassNameOfObject(hook));
                     hook.join();
                 }
                 catch (InterruptedException e) {
                 }
             }
             if (_lastHook != null) {
-                Log.shutdown.debug("Executing last shutdown hook");
+                Log.shutdown.info(10577);
                 _lastHook.start();
                 try {
                     _lastHook.join();
@@ -921,6 +929,7 @@ public class ShutdownManager
                 catch (InterruptedException e) {
                 }
             }
+            Log.shutdown.info(10583,ClassUtil.getClassNameOfObject(_lastHook));
             _done = true;
         }
     }

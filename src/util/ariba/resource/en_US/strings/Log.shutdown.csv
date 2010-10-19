@@ -18,11 +18,20 @@
 9855, "Exception when sending notification about node status change: {0}", 0-stack trace
 10239, "Delaying shutdown of coordinator node by {0} minutes or until the kill signal is received.", 0-wait timeout
 10334, "[ShutdownDelayer] The task {0} is running in scheduler {1}", 0-task name 1-scheduler name
-10337, "[ShutdownDelayer] The ReplicationThread is running"
+10337, "[ShutdownDelayer] The ReplicationThread is running",
 10338, "[ShutdownDelayer] The request {0} is not expired.", 0-Request name
 10339, "[{0} ShutdownDelayer] Session {1}, {2} active sessions are there.", 0-ShutdonwDelayer Name 1-Active Session Number 2-Active Session Name
-10340, "[{0} ShutdownDelayer] Delayed shutdown: work in progress, cannot shut down, usage count: {1}",0-ShutdownDelayer Name,1-Usage Count
-10353, "[BgWorkProcessor] Background Work Processor Class {0} Count is {1}", 0-BgWorkProcessor Class,1-BgWorkProcesor Count
-10354, "[ShutdownDelayer] Work is in progress"
-10355, "[ShutdownDelayer] Delayed shutdown since the publisher is in progress"
-10356, "[ShutdownDelayer] Delayed search node shutdown since the publisher is in progress"
+10340, "[{0} ShutdownDelayer] Delayed shutdown: work in progress, cannot shut down, usage count: {1}",0-ShutdownDelayer Name 1-Usage Count
+10353, "[BgWorkProcessor] Background Work Processor Class {0} Count is {1}", 0-BgWorkProcessor Class 1-BgWorkProcesor Count
+10354, "[ShutdownDelayer] Work is in progress",
+10355, "[ShutdownDelayer] Delayed shutdown since the publisher is in progress",
+10356, "[ShutdownDelayer] Delayed search node shutdown since the publisher is in progress",
+10573, "Starting delayed shutdown type={0}, exitCode= {1}", 0-type 1-exitCode
+10574, "Starting immediate shutdown..... ",
+10575, "Starting immediate shutdown exitCode = {0}, nodeStatus = {1}", 0-exitCode 1-nodeStatus
+10576, "HookRunner completed running all hooks.",
+10577, "Executing last shutdown hook.",
+10580, "ShutdownManager [shutdownNow] exitCode = {0}, printExtraMessages = {1}", 0-exitCode 1-printExtraMessages
+10581, "Executing shutdown hooks",
+10582, "Calling hook.join on hook {0}, will wait for this thread to complete",  0-hook
+10583, "Finished running last shutdown hook {0}." ,0-hook

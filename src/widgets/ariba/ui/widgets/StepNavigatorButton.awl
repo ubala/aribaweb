@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StepNavigatorButton.awl#20 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StepNavigatorButton.awl#21 $
     </Copyright>
 
     <Overview>
@@ -44,7 +44,7 @@
         See TextButton
     </Binding>
 
-    <Binding key="style" direction="get" type="String" required="$false">
+    <Binding key="buttonWrapperStyle" direction="get" type="String" required="$false">
         See TextButton
     </Binding>
 
@@ -58,7 +58,9 @@
 </a:Api>\
 \
 <td style="$env.stepNavigatorButtonStyle">\
-    <w:TextButton isBrandStyle="$true" submitForm="$^submitForm" action="$^action" title="$^hint" buttonClass="$^buttonClass:$buttonClass" style="$^style" disabled="$^disabled" name="$^name">\
+    <w:TextButton isBrandStyle="$true" submitForm="$^submitForm" action="$^action" title="$^hint"
+                  buttonClass="$^buttonClass:$buttonClass" buttonWrapperStyle="$^buttonWrapperStyle"
+                  disabled="$^disabled" name="$^name">\
         <w:StepNavigatorButtonContent value="$^label"/>\
     </w:TextButton>\
 </td>\

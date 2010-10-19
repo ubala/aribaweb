@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMultiLocaleResourceManager.java#54 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMultiLocaleResourceManager.java#56 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -47,7 +47,7 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
     public static boolean AllowScanningAllPackages = false;
     protected static String WebserverUrlPrefix = "http://localhost";
     protected static String WebserverUrlPrefixSecure = "https://localhost";
-    protected static String ResourceVersion;
+    protected static ResourceVersionManager ResourceVersionManager;
     private static int LogFailedResourceLookups = 0;
     private static final Class AWDummyClass = AWDummy.class;
     private static final Class DeletedMarker = DeletedDummy.class;
@@ -91,14 +91,17 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
         return isSecure ? WebserverUrlPrefixSecure : WebserverUrlPrefix;
     }
 
-    public static void setResourceVersion (String version)
+    public static void setResourceVersionManger (ResourceVersionManager manager)
     {
-        ResourceVersion = version;        
+        ResourceVersionManager = manager;
     }
 
-    public static String resourceVersion ()
+    public static String resourceVersion (String resourceName)
     {
-        return ResourceVersion;
+        if (ResourceVersionManager != null) {
+            return ResourceVersionManager.version(resourceName);
+        }
+        return null;
     }
 
     public static void setResourceManagerFactory (AWResourceManagerFactory resourceManagerFactory)
@@ -1085,6 +1088,25 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
             super(keyCount);
         }
 
+        /*
+         * MultiKeyHashtable uses a shared Object key array _sharedKeyList to
+         * store the keys in and do a lookup. This is not safe and in a multi-threaded 
+         * environment; a collision could occur when two operations(get/put) run in 
+         * parallel. The following wrapper methods ensure the calls are synchronized.
+         * 
+         * This will not have a performance impact because AWSingleLocaleManager is
+         * the primary cache.
+         */
+        public synchronized Object get (Object key0, Object key1)
+        {
+            return super.get(key0, key1);
+        }
+
+        public synchronized Object put (Object key0, Object key1, Object value)
+        {
+            return super.put(key0, key1, value);
+        }
+
         protected Object put (Object[] targetKeyList, Object value,
                               boolean onlyPutIfAbsent)
         {
@@ -1266,6 +1288,11 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
     public AWMultiLocaleResourceManager createBrandedResourceManager (String brandName, String version)
     {
         throw new AWGenericException("AWMultiLocaleResourceManager createBrandedResourceManager not implemented.");
+    }
+
+    public static interface ResourceVersionManager
+    {
+        public String version (String resourceName);    
     }
 }
 

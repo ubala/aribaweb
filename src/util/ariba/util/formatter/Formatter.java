@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/Formatter.java#17 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/Formatter.java#18 $
 */
 
 package ariba.util.formatter;
@@ -388,12 +388,27 @@ abstract public class Formatter implements StringParser, Compare
      *
      * @param errorKey - the key to the error message
      *
-     * @return a newly constructed ParseException
+     * @return a newly constructed localized String
      */
     public static String makeParseExceptionMessage (String errorKey)
     {
         ResourceService rs = ResourceService.getService();
         return rs.getLocalizedString(UtilStringTable, errorKey);
+    }
+
+
+    /**
+     * Convenience routine to get a localized message for a ParseException.
+     *
+     * @param errorKey - the key to the error message
+     * @param argument - an argument to the error key
+     *
+     * @return a newly constructed localized String
+     */
+    public static String makeParseExceptionMessage (String errorKey, String argument)
+    {
+        ResourceService rs = ResourceService.getService();
+        return Fmt.Sil(rs.getLocale(), UtilStringTable, errorKey, argument);
     }
 
     /**

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorIndicator.awl#4 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorIndicator.awl#5 $
     </Copyright>
 
     <Overview>
@@ -107,7 +107,7 @@
              _errorContentDivId="$errorContentDivId"
              _customContentDivId="$customContentDivId"
              _autoHideBubble="$autoHideBubble"
-             _autoScroll="$autoScroll">\
+             _autoScroll="$pageAutoScroll">\
             <a:Image class="$dict.errorImageStyle"
                      style="margin-top:2px;"
                      alt="$[a002]Error"

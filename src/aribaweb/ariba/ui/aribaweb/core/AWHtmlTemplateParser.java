@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHtmlTemplateParser.java#48 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHtmlTemplateParser.java#49 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -964,7 +964,8 @@ public class AWHtmlTemplateParser extends AWBaseObject implements AWTemplatePars
                                     openTagName, _component);
                             if(!(!Character.isUpperCase(openTagName.charAt(0)) || _useXmlEscaping)) {
                                 Assert.that(false,
-                                    "%s: Namespace-less reference to component '%s' in namespace aware package", _component, openTagName);
+                                    "%s: Namespace-less reference to component '%s' in namespace aware package. Template string: %s", 
+                                    _component, openTagName, _templateString);
                             }
                             resolvedName = openTagName;
                         }

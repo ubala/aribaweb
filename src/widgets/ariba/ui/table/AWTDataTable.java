@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#201 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#203 $
 */
 
 package ariba.ui.table;
@@ -386,8 +386,16 @@ public final class AWTDataTable extends AWComponent
     private String  _style;
     private String _tableClass;
     private boolean _enableScrolling;
-    public int _scrollTopIndex = -1;  // used to buffer changes in scroll offset until renderResponse
-    public int _scrollLeftPos = 0; //only used to retain horizontal scroll across requests
+    /**
+     * Used to buffer changes in scroll offset until renderResponse.
+     */
+    protected int _scrollTopIndex = -1;
+
+    /**
+     * Only used to retain horizontal scroll across requests.
+     * Binding.
+     */
+    public int _scrollLeftPos = 0;
 
 
     /**
@@ -449,6 +457,10 @@ public final class AWTDataTable extends AWComponent
         // System.out.println ("*** New DataTable: " + this);
     }
 
+    /*******************************************************************************
+     * Bindings (some)
+     *******************************************************************************/
+
     public int currentRowIndex ()
     {
         return _currentRowIndex;
@@ -459,6 +471,16 @@ public final class AWTDataTable extends AWComponent
         _currentRowIndex = index;
         _dynamicColspan = 0;
         _didRenderCurrentRow = false;
+    }
+
+    public int scrollTopIndex ()
+    {
+        return _scrollTopIndex;
+    }
+
+    public void setScrollTopIndex (int index)
+    {
+        _scrollTopIndex = index;
     }
 
     /////////////
@@ -513,13 +535,13 @@ public final class AWTDataTable extends AWComponent
                 // continues to operate as a latch by pushing false to the binding
                 shouldForceColumnUpdate();
 
-            // remember this template (and flag that we're done with initialization)
-            _processedReference = componentReference();
-        }
-        else if (shouldForceColumnUpdate() && !isExportMode() && !_isScrollFaultAction) {
-            invalidateColumns();
-            columns();  // force refresh
-        }
+                // remember this template (and flag that we're done with initialization)
+                _processedReference = componentReference();
+            }
+            else if (shouldForceColumnUpdate() && !isExportMode() && !_isScrollFaultAction) {
+                invalidateColumns();
+                columns();  // force refresh
+            }
 
             if (_didHibernate) {
                 initializeDisplayGroupObjects();
@@ -542,18 +564,19 @@ public final class AWTDataTable extends AWComponent
 
             int cmLen = ListUtil.getListSize(_columnManagers);
             for (int ii=0; ii<cmLen; ii++) {
-                ((AWTColumnManager)_columnManagers.get(ii)).preAppend(this);
+                _columnManagers.get(ii).preAppend(this);
             }
 
             // register error nav handler to provide default table nav support
             // We need to register with highest possible priority
-            errorManager().registerErrorHandler(new DataTableNavigationHandler(this), 1, true);
+            DataTableNavigationHandler handler = new DataTableNavigationHandler(this);
+            errorManager().registerErrorHandler(handler, 1, true);
 
             // run the append on all our contained elements
             super.renderResponse(requestContext, component);
 
             for (int ii=0; ii<cmLen; ii++) {
-                ((AWTColumnManager)_columnManagers.get(ii)).postAppend(this);
+                _columnManagers.get(ii).postAppend(this);
             }
             _forceRenderSelectionColumn = false;
         }
@@ -589,13 +612,16 @@ public final class AWTDataTable extends AWComponent
 
     private void checkScrollTop ()
     {
-        if (displayGroup().isResetScrollTop() || (_scrollTopIndex < 0)) {
+        boolean updateScrollTop =
+            displayGroup().isResetScrollTop() || (_scrollTopIndex < 0);
+        if (updateScrollTop) {
             _scrollTopIndex = displayGroup().scrollTopIndex();
         }
         else if (_scrollTopIndex != displayGroup().scrollTopIndex()) {
             // update the batch only if it's a scroll fault.
             _scrollTopIndex = displayGroup().setScrollTopIndex(_scrollTopIndex, _isScrollFaultAction);
-        } else if (_isScrollFaultAction) {
+        }
+        else if (_isScrollFaultAction) {
             displayGroup().centerBatchOnRow(_scrollTopIndex);
         }
         _isScrollFaultAction = false;
@@ -709,7 +735,7 @@ public final class AWTDataTable extends AWComponent
 
             int cmLen = ListUtil.getListSize(_columnManagers);
             for (int ii=0; ii<cmLen; ii++) {
-                ((AWTColumnManager)_columnManagers.get(ii)).preInvoke(this);
+                _columnManagers.get(ii).preInvoke(this);
             }
 
             // Todo:  for export, snapshot the element before doing this and restore it before doing renderResponse
@@ -749,7 +775,7 @@ public final class AWTDataTable extends AWComponent
             }
 
             for (int ii=0; ii<cmLen; ii++) {
-                ((AWTColumnManager)_columnManagers.get(ii)).postInvoke(this, response);
+                _columnManagers.get(ii).postInvoke(this, response);
             }
 
             _exportState = EXPORT_NONE;
@@ -805,13 +831,13 @@ public final class AWTDataTable extends AWComponent
 
             int cmLen = ListUtil.getListSize(_columnManagers);
             for (int ii=0; ii<cmLen; ii++) {
-                ((AWTColumnManager)_columnManagers.get(ii)).preTake(this);
+                _columnManagers.get(ii).preTake(this);
             }
 
             super.applyValues(requestContext, component);
 
             for (int ii=0; ii<cmLen; ii++) {
-                ((AWTColumnManager)_columnManagers.get(ii)).postTake(this);
+                _columnManagers.get(ii).postTake(this);
             }
             // Clear the force visible row element id only if request is coming from the table's form.
             // This is when we have client's scroll info, and have no more need for it.
@@ -920,7 +946,6 @@ public final class AWTDataTable extends AWComponent
 
         AWTPivotState.checkPivotLayout(this);
 
-        // Assert.that((_allColumns.size() > 0), "Table must have at least one column");
         if (_allColumns.size() == 0) {
             columns().add(BlankColumn);
         }
@@ -932,7 +957,8 @@ public final class AWTDataTable extends AWComponent
             if (_displayGroup.useBatching()) {
                 int batchSize = intValueForBinding(BindingNames.batchSize);
                 if (batchSize > 0) _displayGroup.setNumberOfObjectsPerBatch(batchSize);
-            } else {
+            }
+            else {
                 int batchSize = intValueForBinding(BindingNames.scrollBatchSize);
                 if (batchSize > 0) _displayGroup.setScrollBatchSize(batchSize);
             }
@@ -1050,8 +1076,10 @@ public final class AWTDataTable extends AWComponent
         // if we didn't create the display group and there is a cached display group
         // and there is a display group binding, then verify that the value bound in
         // and the cached value are the same
-        if (!_createdDisplayGroup && _displayGroup != null &&
-            hasBinding(BindingNames.displayGroup)) {
+        if (!_createdDisplayGroup
+            && _displayGroup != null
+            && hasBinding(BindingNames.displayGroup))
+        {
             AWTDisplayGroup currGroup = (AWTDisplayGroup)valueForBinding(BindingNames.displayGroup);
             return !_displayGroup.equals(currGroup);
         }
@@ -1228,7 +1256,9 @@ public final class AWTDataTable extends AWComponent
     /**
      * Tell the table about a column manager.<br>
      * This column manager will get callbacks in the various phase methods.
-     * @param mgr The new manager
+     *
+     * @param mgr The new manager, may be null.
+     * 
      * @aribaapi private
      */
     public void registerColumnManager (AWTColumnManager mgr)
@@ -1255,7 +1285,8 @@ public final class AWTDataTable extends AWComponent
     {
         if (_wrapperColumn == null) {
             return "AWTNullWrapper";
-        } else {
+        }
+        else {
             setCurrentColumn(_wrapperColumn);
             return _wrapperColumn.rendererComponentName();
         }
@@ -1304,7 +1335,8 @@ public final class AWTDataTable extends AWComponent
     {
         if (_detailColumn == null) {
             _detailColumn = c;
-        } else {
+        }
+        else {
             _secondDetailColumn = c;
         }
     }
@@ -1379,7 +1411,8 @@ public final class AWTDataTable extends AWComponent
                 c.prepare(this);
                 if (c.isBlank(this)) {
                     _dynamicColspan++;
-                } else {
+                }
+                else {
                     break;
                 }
             }
@@ -1435,7 +1468,8 @@ public final class AWTDataTable extends AWComponent
                 response.appendContent(StylePxPlusSemiColon);
                 response.appendContent(moreStyle);
                 response.appendContent(StyleQuote);
-            } else {
+            }
+            else {
                 response.appendContent(StylePxPlusQuote);
             }
             return null;
@@ -1765,7 +1799,8 @@ public final class AWTDataTable extends AWComponent
     {
         if (_pivotState != null) {
             return _pivotState._prepareColumnsForExport();
-        } else {
+        }
+        else {
             Object state = _displayedColumns;
             _displayedColumns = dataColumns();
             return state;
@@ -1776,7 +1811,8 @@ public final class AWTDataTable extends AWComponent
     {
         if (_pivotState != null) {
             _pivotState._restoreColumnsAfterExport(state);
-        } else {
+        }
+        else {
             _displayedColumns = (List)state;
         }
     }
@@ -2059,7 +2095,8 @@ public final class AWTDataTable extends AWComponent
     {
         if (useNewLook()) {
             return "btnRowCornerBottomModern.gif";
-        } else {
+        }
+        else {
             return (_isTopBar) ? "btnRowCornerTop.gif" : "btnRowCornerBottom.gif";
         }
     }
@@ -2156,22 +2193,29 @@ public final class AWTDataTable extends AWComponent
             String initialSortKey = (String)valueForBinding(BindingNames.initialSortKey);
             if (initialSortKey != null && initialSortKey.equals("")) {
                 // explicit "no sort"
-                _displayGroup.setSortOrderings(ListUtil.list());
-            } else {
+                _displayGroup.setSortOrderings(ListUtil.<AWTSortOrdering>list());
+            } 
+            else {
                 String initialSortDirection = stringValueForBinding(BindingNames.initialSortDirection);
                 Column initialSortColumn = null;
                 AWTSortOrdering initialSortOrdering = null;
                     // by default, sort by first key
-                initialSortColumn = (initialSortKey != null) ? findColumnForKey(initialSortKey) : firstSortableValueColumn();
+                initialSortColumn = (initialSortKey != null)
+                                    ? findColumnForKey(initialSortKey)
+                                    : firstSortableValueColumn();
                 if (initialSortColumn != null) {
                     initialSortColumn.prepare(this);
                     initialSortOrdering = initialSortColumn.createSortOrdering(this);
-                    if (initialSortOrdering != null && initialSortDirection != null) initialSortOrdering.setSelector(sortDirectionForString(initialSortDirection));
-                } else if (initialSortKey != null) {
+                    if (initialSortOrdering != null && initialSortDirection != null) {
+                        initialSortOrdering.setSelector(sortDirectionForString(initialSortDirection));
+                    }
+                }
+                else if (initialSortKey != null) {
                     initialSortOrdering = new AWTSortOrdering(initialSortKey, sortDirectionForString(initialSortDirection));
                 }
+
                 if (initialSortOrdering != null) {
-                    List sortOrder = ListUtil.list();
+                    List<AWTSortOrdering> sortOrder = ListUtil.list();
                     sortOrder.add(initialSortOrdering);
                     _displayGroup.setSortOrderings(sortOrder);
                 }
@@ -2264,10 +2308,12 @@ public final class AWTDataTable extends AWComponent
 
         if (customRowClass != null) {
             return StringUtil.strcat(style,StyleSeparator, customRowClass);
-        } else {
+        }
+        else {
             if (useNewLook()) {
                 return StringUtil.strcat(style,StyleSeparator,"tableRow1");
-            } else {
+            } 
+            else {
                 // old style -- alternate row colors
                 return StringUtil.strcat(style,StyleSeparator,
                                          (_rowToggleState) ? "tableRow2" : "tableRow1");
@@ -2301,7 +2347,8 @@ public final class AWTDataTable extends AWComponent
     {
         if (_tdClassBinding != null) {
             return stringValueForBinding(_tdClassBinding);
-        } else {
+        } 
+        else {
             return (_isBreakColumn) ? "tableBody columnBreak": "tableBody";
         }
     }
@@ -2311,7 +2358,8 @@ public final class AWTDataTable extends AWComponent
         if (useNewLook()) {
             // eliminate topline for first row
             return (_currentRowIndex == 0) ? "firstRow tableGroupBy" : "tableGroupBy";
-        } else {
+        }
+        else {
             // old style
             return "tableGroupBy";
         }
@@ -2429,7 +2477,8 @@ public final class AWTDataTable extends AWComponent
         _groupByColumnBinding = null;
         if (_groupByColumn == _currentColumn) {
             setGroupByColumn(null);  // toggle off
-        } else {
+        }
+        else {
             setGroupByColumn(_currentColumn);  // switch on
         }
         pushTableConfig();
@@ -2462,7 +2511,8 @@ public final class AWTDataTable extends AWComponent
                 // reset grouping
                 _displayGroup.setGroupSortOrdering(null);
                 _displayGroup.setGroupingKey(null);
-            } else {
+            }
+            else {
                 // check for override sortOrdering
                 column.prepare(this);
                 AWTSortOrdering ordering = column.createSortOrdering(this);
@@ -2470,7 +2520,8 @@ public final class AWTDataTable extends AWComponent
                 _displayGroup.setGroupingKey(key);
                 if (ordering != null){
                     _displayGroup.setGroupSortOrdering(ordering);
-                } else {
+                }
+                else {
                     _displayGroup.setGroupSortOrdering(null);
                 }
             }
@@ -2614,8 +2665,8 @@ public final class AWTDataTable extends AWComponent
         }
 
         // sort orderings
-        List sortOrderings = _displayGroup._sortOrderings;
-        List orderings = ListUtil.list();
+        List<AWTSortOrdering> sortOrderings = _displayGroup._sortOrderings;
+        List/*<AWTSortOrdering, String...>*/ orderings = ListUtil.list();
         if (sortOrderings != null) {
             Iterator iter = sortOrderings.iterator();
             while (iter.hasNext()) {
@@ -2641,7 +2692,9 @@ public final class AWTDataTable extends AWComponent
                     Boolean.toString(_tableBodyExpanded));
         }
 
-        if (_pivotState != null) _pivotState.writeToTableConfig(config);
+        if (_pivotState != null) {
+            _pivotState.writeToTableConfig(config);
+        }
 
         return config;
     }
@@ -2694,7 +2747,8 @@ public final class AWTDataTable extends AWComponent
                             AWTSortOrdering.deserialize(serializedOrdering, this);
                         if (sortOrdering != null ) {
                             Column sortedColumn = findColumnForKey(sortOrdering.key());
-                            if (sortedColumn != null) {
+                            // check to make sure the column is still declared as sortable
+                            if (sortedColumn != null && sortedColumn.isSortableColumn(this)) {
                                 sortedColumn.prepareSortOrdering(this, sortOrdering);
                                 orderings.add(sortOrdering);
                             }

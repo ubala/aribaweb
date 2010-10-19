@@ -14,7 +14,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHiddenFormParameter.awl#3 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWHiddenFormParameter.awl#4 $
     </Copyright>
 
     <Overview>
@@ -28,4 +28,4 @@
     </Binding>
 </a:Api>\
 
-<input type="hidden" name="^name" value="$encodedString"/>
+<input type="hidden" name="$escapedName" value="$escapedValue"/>

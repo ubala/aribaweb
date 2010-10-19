@@ -26,7 +26,6 @@ ariba.Widgets = function() {
     var awConfirmationRegistered = false;
 
     var AWHintIdList;
-    var AWOpeningHint = false;
 
     var AWMinNotificationTime = 5000;
     var AWMaxNotificationTime = 15000;
@@ -453,7 +452,7 @@ ariba.Widgets = function() {
             // indicate that update is complete
             //Refresh.refreshComplete();
 
-            divObject.setAttribute("awneedsLoading", "false");
+            Refresh.markDivLoadingDone(divObject);
             Input.hideWaitCursor();
             if (Input.AWAutomationTestModeEnabled) {
                 setTimeout(Request.setStatusDone.bind(this), 0);
@@ -562,15 +561,10 @@ ariba.Widgets = function() {
 
         sizeHintMessages : function ()
         {
-            if (AWOpeningHint) {
-                AWOpeningHint = false;
-                return;
-            }
-
             var i = (AWHintIdList) ? AWHintIdList.length : 0;
             while (i--) {
                 var hintMessage = Dom.getElementById(AWHintIdList[i]);
-                if (hintMessage) {
+                if (hintMessage && hintMessage.className != "hintBoxOpen") {
                     hintMessage.style.overflowY = "auto";
                     if (hintMessage.scrollHeight > hintMessage.clientHeight) {
                         //alert('show expando');
@@ -587,7 +581,6 @@ ariba.Widgets = function() {
         openHintMessage : function (element)
         {
             Debug.log("awOpenHintMessage");
-            AWOpeningHint = true;
             var div = Dom.findParentUsingPredicate(element, function(n) {
                 return (n.className == "hintBoxClosed")
             });
@@ -1011,7 +1004,7 @@ ariba.Widgets = function() {
         // position the bubble
             var newLeft = Dom.absoluteLeft(positioningObject);
             if (positionRight)  newLeft += Dom.containerOffsetSize(positioningObject)[0];
-            var newBottom = Dom.absoluteTop(positioningObject);
+            var newBottom = Dom.absoluteTop(positioningObject) - 7;
             var newTop = newBottom - bubble.offsetHeight + 9;
             if ((newLeft + bubble.offsetWidth + 2) < Dom.documentElement().clientWidth) {
                 newLeft += 3;
@@ -1323,6 +1316,47 @@ ariba.Widgets = function() {
                 Dom.positionDialogBox(AWActiveDialogDiv);
             }
         },
+
+        // used to guarantee that only one count down is scheduled
+        CountDownTimer : null,
+
+        handlePollEvents : function (pollState, pollInfo)
+        {
+
+            var pollCountDown = Dom.getElementById('pollCountDown');
+            var pollDialog = Dom.getElementById('pollDialog');
+            var pollInterval = pollCountDown.getAttribute("_in");
+
+            var timer = function () {
+                clearTimeout(this.CountDownTimer);
+                this.CountDownTimer = setTimeout(updatePollCountDown, 1000);
+            }.bind(this);
+            
+            if (Request.AWPollState == pollState) {
+                if (this.CountDownTimer) {
+                    clearTimeout(this.CountDownTimer);
+                    this.CountDownTimer = null;
+                    this.hideDialogDiv();
+                }
+            }
+            else if (Request.AWPollErrorState == pollState) {
+                if (!AWActiveDialogDiv) {
+                    pollCountDown.innerHTML = pollInterval;
+                    pollDialog.awPreCloseDialogFunc = this.enablePage.bind(this);
+                    pollDialog.awCloseDialogFunc = this.hideDialogDiv.bind(this);
+                    this.showDialogDiv(pollDialog, this.disablePage.bind(this));
+                    function updatePollCountDown () {                        
+                        var countDown = pollCountDown.innerHTML;
+                        countDown = parseInt(countDown);
+                        if (countDown > 0) {
+                            pollCountDown.innerHTML = countDown - 1;
+                            timer();
+                        }
+                    }
+                    timer();
+                }
+            }
+        },        
 
     EOF:0};
 

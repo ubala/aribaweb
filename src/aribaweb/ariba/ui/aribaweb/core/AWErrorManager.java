@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#51 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#54 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -36,6 +36,22 @@ import ariba.ui.aribaweb.util.Log;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.html.BindingNames;
 
+/**
+ * Key Concepts:
+ *  Repositories
+ *  Error Keys
+ *  Error Display
+ *  Page Error Display
+ *  Validation, Revalidation
+ *  Frozen Repositories
+ *  Navigation Handlers
+ *  Validation Handlers
+ *  Highlighted Errors
+ *  Deferring
+ *  Error Info
+ *  Selected Error
+ *  Autoscroll
+ */
 public class AWErrorManager extends AWBaseObject implements AWNavigation.Interceptor
 {
     public static final String GeneralErrorKey = "general";
@@ -44,31 +60,31 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
 
     private static final String Separator = "--------";
 
-    // only used for writing errors
+    /** only used for writing errors; these are the errors accumulated during take */
     protected ErrorRepository _newRepository;
 
-    // Only used for reading errors.
+    /** Only used for reading errors; these are the errors for rendering the page */
     private ErrorRepository _currentRepository;
 
     private Object _mostRecentErrorKey;
-    private boolean _errorDisplayEnabled;
     private boolean _enablePageErrorDisplay;
     private boolean _changesSavedSafely;
     private boolean _requiresRevalidation;
 
-    // keep track of whether we're frozen
+    /** keep track of whether we're frozen */
     private boolean _curRepositoryFrozen;
 
-    private List _prioritizedNavHandlers;
-    private List _fullValidationHandlers;
-    private Map _invokedValidationHandlers;
+    private List<PrioritizedHandler> _prioritizedNavHandlers;
+    private List<AWFullValidationHandler> _fullValidationHandlers;
+    private Map<AWFullValidationHandler, AWFullValidationHandler>
+        _invokedValidationHandlers;
     /**
         Whether or not we are current invoking the validation handlers.
     */
     private boolean _invokingValidationHandlers;
     private AWErrorInfo _curHighLightedError = null;
     private AWErrorInfo _prevHighLightedError = null;
-    private EMMultiKeyHashtable _visitedErrors =
+    private EMMultiKeyHashtable<Object[], AWErrorInfo> _visitedErrors =
         new EMMultiKeyHashtable(AWErrorInfo.NumKeys);
     private AWPage _page;
     private Integer _pendingNavOffset = null;
@@ -81,7 +97,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     private boolean _validateInAppend;
     private boolean _ignoreUnknownWarningsMode = false;
     private boolean _selectedErrorNeedAdjustment = false;
-    private boolean _autoScrollInProgress;
+    private boolean _enablePageAutoScroll = true;
+    private boolean _tableAutoScrollInProgress;
 
     // constants indicate the phase we're in
     public static int OutOfPhase = 0;
@@ -157,8 +174,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                 _newRepository.rememberTableErrors(_currentRepository);
             }
             else {
-                _newRepository.setDisplayedErrors(MapUtil.map());
-                _newRepository.setUndisplayedErrors(ListUtil.list());
+                _newRepository.setDisplayedErrors(MapUtil.<Integer, AWErrorBucket>map());
+                _newRepository.setUndisplayedErrors(ListUtil.<AWErrorBucket>list());
             }
         }
         _currentRepository = _newRepository;
@@ -172,8 +189,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     {
         // fire off full validation if handlers are registered
         for (int i = 0; i < _fullValidationHandlers.size(); i++) {
-            AWFullValidationHandler handler =
-                (AWFullValidationHandler)_fullValidationHandlers.get(i);
+            AWFullValidationHandler handler = _fullValidationHandlers.get(i);
             invokeValidationHandler(handler);
         }
     }
@@ -206,7 +222,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         _pendingNavOffset = null;
         _curErrorIsFromPreviousPage = false;
         _rerunValidationInProgress = false;
-        _autoScrollInProgress = false;
+        _tableAutoScrollInProgress = false;
         _invokedValidationHandlers = MapUtil.map();
 
         int errorSetId = (_currentRepository != null)
@@ -225,6 +241,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
 
             if (isValidationRequiredInAppend()) {
                 rerunValidation();
+                _rerunValidationInProgress = true;
             }
         }
         else if (phase == OutOfPhase && _phase == RenderPhase) { // exiting append
@@ -323,12 +340,20 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
 
     public void enableErrorDisplay (boolean enable)
     {
-        boolean callValidationHandler = (_enablePageErrorDisplay == false && enable);
-        _enablePageErrorDisplay = enable;
+        enableErrorDisplay(enable, true);
+    }
+
+    public void enableErrorDisplay (
+        boolean enablePageErrorDisplay, boolean enablePageAutoScroll)
+    {
+        boolean callValidationHandler =
+            (_enablePageErrorDisplay == false && enablePageErrorDisplay);
+        _enablePageErrorDisplay = enablePageErrorDisplay;
 
         // call the validation handlers to carry out the deferred validation
         if (callValidationHandler) {
-            Log.aribaweb_errorManager.debug("%s: Invoke deferred validation evaluation", getLogPrefix());
+            Log.aribaweb_errorManager.debug(
+                "%s: Invoke deferred validation evaluation", getLogPrefix());
             invokeValidationHandlers();
 
             // This generally takes place during invoke.  We have to catch up
@@ -338,15 +363,15 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         }
 
         // we are turning off error display - reset submit form info
-        if (!enable) {
+        if (!enablePageErrorDisplay) {
             _submitFormName = null;
-        } else {
-            setErrorNavSubmitForm(_page.requestContext());
         }
-
-        if (enable) {
+        else /*enablePageErrorDisplay*/ {
+            setErrorNavSubmitForm(_page.requestContext());
+            
             // make sure we auto scroll for the current error
-            _autoScrollInProgress = true;
+            _tableAutoScrollInProgress = true;
+            _enablePageAutoScroll = enablePageAutoScroll;
         }
     }
 
@@ -468,6 +493,10 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return false;
         }
     }
+    
+    /*-------------------------------------------------------------------------------
+     * Error getters
+     --------------------------------------------------------------------------------*/
 
     /**
          Get the recently added error for this key.
@@ -754,6 +783,10 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         return errorKeys;
     }
 
+    /*-------------------------------------------------------------------------------
+     * End Error getters
+     --------------------------------------------------------------------------------*/
+
     /**
      * Clear a single error, during append.
      * A call to this method is not allowed except during append
@@ -878,37 +911,31 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         return _changesSavedSafely;
     }
 
-    /*
-    public void clearErrors ()
-    {
-        _currentErrors.clear();
-        _currentErrorValues.clear();
-        _mostRecentErrorKey = null;
-        _errorDisplayEnabled = false;
-    }
-    */
+    /*-------------------------------------------------------------------------------
+     * Error Handler Registeration
+     --------------------------------------------------------------------------------*/
 
     public void registerErrorHandler (AWErrorHandler handler, int priority)
     {
         registerErrorHandler(handler, priority, false);
     }
 
-    public void registerErrorHandler (AWErrorHandler handler, int priority, boolean isAutoScrollHandler)
+    public void registerErrorHandler (
+        AWErrorHandler handler, int priority, boolean isTableAutoScrollHandler)
     {
-        PrioritizedHandler newHandler = new PrioritizedHandler(handler, priority, isAutoScrollHandler);
+        PrioritizedHandler newHandler =
+            new PrioritizedHandler(handler, priority, isTableAutoScrollHandler);
 
         // invoke now if invocation is pending
-        if (isAutoScrollHandler && _autoScrollInProgress) {
+        if (isTableAutoScrollHandler && _tableAutoScrollInProgress) {
             if (_curHighLightedError != null) {
                 lookupTableAssociationForError(_curHighLightedError);
-                invokeAutoScrollHandler(_curHighLightedError, newHandler);
+                invokeTableAutoScrollHandler(_curHighLightedError, newHandler);
             }
         }
 
         // insert the new handler according to priority
-        for (int i = 0; i < _prioritizedNavHandlers.size(); i++) {
-            PrioritizedHandler cur =
-                (PrioritizedHandler)_prioritizedNavHandlers.get(i);
+        for (PrioritizedHandler cur : _prioritizedNavHandlers) {
             if (priority >= cur.priority) {
                 // the list is sorted from highest to lowest priority
                 ListUtil.insertElementBefore(_prioritizedNavHandlers, newHandler, cur);
@@ -921,7 +948,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         _prioritizedNavHandlers.add(newHandler);
     }
 
-    public void unregisterErrorHandler (AWErrorHandler handler)
+    public void unregisterErrorHandler (PrioritizedHandler handler)
     {
         boolean removed =
             ListUtil.removeElementIdentical(_prioritizedNavHandlers, handler);
@@ -938,9 +965,9 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     public void registerFullValidationHandler (AWFullValidationHandler handler)
     {
         _fullValidationHandlers.add(handler);
-        invokeValidationHandler(handler);
         if (_rerunValidationInProgress) {
-            navToErrorAsNeeded(false, null, false);
+            invokeValidationHandler(handler);
+            navToErrorAsNeeded(true, null, true);
         }
     }
 
@@ -957,12 +984,16 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         _fullValidationHandlers = ListUtil.list();
     }
 
-    public List _getRegisteredValidationHandlers ()
+    public List<AWFullValidationHandler> _getRegisteredValidationHandlers ()
     {
         // This method is intended for fieldsui sanity checking and should
         // not be used for any other purpose.
         return _fullValidationHandlers;
     }
+
+    /*-------------------------------------------------------------------------------
+     * End Error Handler Registeration
+     --------------------------------------------------------------------------------*/
 
     public void rerunValidation ()
     {
@@ -972,7 +1003,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         if (_phase == RenderPhase) {
             // defer invocation until append when the handlers will be registered
             invokeValidationHandlers();
-            _rerunValidationInProgress = true;
+            navToErrorAsNeeded(false, null, true);
         }
     }
 
@@ -991,7 +1022,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         return _prevHighLightedError;
     }
 
-    public EMMultiKeyHashtable getVisitedErrors ()
+    public EMMultiKeyHashtable<Object[], AWErrorInfo> getVisitedErrors ()
     {
         return _visitedErrors;
     }
@@ -1042,8 +1073,16 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         clearAllVisitedErrors();
     }
 
+    /**
+     * This is for AWDataTable scrolling?
+     *
+     * @param onlyInAppend
+     * @param keysForPendingDisplayError
+     * @param forceCheckExistence
+     */
     public void navToErrorAsNeeded (boolean onlyInAppend,
-                                    Object keysForPendingDisplayError, boolean forceCheckExistence)
+                                    Object keysForPendingDisplayError,
+                                    boolean forceCheckExistence)
     {
         // Consider this scenario: The current error has not been set
         // (because error display mode has been off or for
@@ -1076,7 +1115,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             AWComponent pageComponent = _page.pageComponent();
             int offset = (_pendingNavOffset != null) ? _pendingNavOffset.intValue() : 1;
             _pendingNavOffset = null;
-            AWComponent retComp = navigateToError(offset, pageComponent, keysForPendingDisplayError);
+            AWComponent retComp =
+                navigateToError(offset, pageComponent, keysForPendingDisplayError);
             AWComponent navToPage = (retComp != null) ? retComp.pageComponent() : null;
             if (navToPage != null && pageComponent != null && navToPage != pageComponent) {
                 // Nav handler wants to go to error immediate, but we might be in append
@@ -1091,32 +1131,32 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                     getLogPrefix());
             }
         }
-        else {
-            // Check to see if we have a better choice than what we have
-            // selected.  We only make this adjustment if we know a nav
-            // handler is going to navigate for the undisplayed error.
-            // We cannot make this adjustment automatically as this behavior
-            // will not work for all UI.
-            if (_curHighLightedError != null &&
+        // Check to see if we have a better choice than what we have
+        // selected.  We only make this adjustment if we know a nav
+        // handler is going to navigate for the undisplayed error.
+        // We cannot make this adjustment automatically as this behavior
+        // will not work for all UI.
+        else if (_curHighLightedError != null &&
                 _currentRepository.hasSelectedUndisplayedError() &&
                 (_immediateNavHandler != null || _selectedErrorNeedAdjustment) &&
                 !_curErrorIsFromPreviousPage &&
-                keysForPendingDisplayError != null) {
-                AWErrorBucket bucket = _currentRepository.get(keysForPendingDisplayError);
-                if (bucket != null) {
-                    // this should be the first displayed error
-                    // since we only do this check once per cycle
-                    AWErrorInfo error = bucket.getFirstError(null);
-                    if (_visitedErrors.getValueForKeys(error.getKeys()) == null) {
-                        // this seems like a better choice
-                        Log.aribaweb_errorManager.debug("%s: navToErrorAsNeeded: better choice found - going to it: %s",
-                            getLogPrefix(), error);
-                        removeVisitedError(_curHighLightedError);
-                        selectCurError(error);
-                        invokeNavHandlers(error, _page.pageComponent());
-                    }
-                    _currentRepository.setHasSelectedUndisplayedError(false);
+                keysForPendingDisplayError != null)
+        {
+            AWErrorBucket bucket = _currentRepository.get(keysForPendingDisplayError);
+            if (bucket != null) {
+                // this should be the first displayed error
+                // since we only do this check once per cycle
+                AWErrorInfo error = bucket.getFirstError(null);
+                if (_visitedErrors.getValueForKeys(error.getKeys()) == null) {
+                    // this seems like a better choice
+                    Log.aribaweb_errorManager.debug(
+                        "%s: navToErrorAsNeeded: better choice found - going to it: %s",
+                        getLogPrefix(), error);
+                    removeVisitedError(_curHighLightedError);
+                    selectCurError(error);
+                    invokeNavHandlers(error, _page.pageComponent());
                 }
+                _currentRepository.setHasSelectedUndisplayedError(false);
             }
         }
 
@@ -1145,16 +1185,17 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         }
     }
 
-    private AWComponent invokeAutoScrollHandler (AWErrorInfo error, PrioritizedHandler pHandler)
+    private AWComponent invokeTableAutoScrollHandler (
+        AWErrorInfo error, PrioritizedHandler pHandler)
     {
-        if (pHandler.isAutoScrollHandler) {
+        if (pHandler.isTableAutoScrollHandler) {
             lookupTableAssociationForError(_curHighLightedError);
             if (pHandler.handler.canGoToErrorImmediately(error, _page.pageComponent())) {
                 AWComponent dstPage =
                     pHandler.handler.goToError(error, _page.pageComponent());
                 if (dstPage != null) {
-                    _autoScrollInProgress = false;
-                    error.setWasAutoScrolled(true);
+                    _tableAutoScrollInProgress = false;
+                    error.setWasTableAutoScrolled(true);
                     return dstPage;
                 }
             }
@@ -1231,6 +1272,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         // have been promoted and validation handlers have been invoked
         pushErrorMgrAndPromoteNewErrors();
 
+        // enable scrolling to the error
+        _enablePageAutoScroll = true;
         return navigateToError(1, pageComponent, null);
     }
 
@@ -1252,6 +1295,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         // have been promoted and validation handlers have been invoked
         pushErrorMgrAndPromoteNewErrors();
 
+        // enable scrolling to the error
+        _enablePageAutoScroll = true;
         return navigateToError(-1, pageComponent, null);
     }
 
@@ -1296,15 +1341,23 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         return null;
     }
 
+    public boolean getEnablePageAutoScroll ()
+    {
+        return _enablePageAutoScroll;
+    }
+
+    public void enablePageAutoScrolling ()
+    {
+        _enablePageAutoScroll = true;
+    }
+
     private AWComponent invokeNavHandlers (AWErrorInfo dstError,
                                            AWComponent pageComponent)
     {
         // find a handler to handle it
-        for (int i = 0; i < _prioritizedNavHandlers.size(); i++) {
-            PrioritizedHandler pHandler =
-                (PrioritizedHandler)_prioritizedNavHandlers.get(i);
-            if (pHandler.isAutoScrollHandler) {
-                invokeAutoScrollHandler(dstError, pHandler);
+        for (PrioritizedHandler pHandler : _prioritizedNavHandlers) {
+            if (pHandler.isTableAutoScrollHandler) {
+                invokeTableAutoScrollHandler(dstError, pHandler);
             }
             else {
                 if (pHandler.handler.canGoToErrorImmediately(dstError, pageComponent)) {
@@ -1371,8 +1424,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     {
         // We need to maintain the order errors are visited.  So we
         // need to remove an earlier visit, if exists, before adding.
-        AWErrorInfo existing = (AWErrorInfo)
-            _visitedErrors.getValueForKeys(error.getKeys());
+        AWErrorInfo existing = _visitedErrors.getValueForKeys(error.getKeys());
         if (existing != null) {
             _visitedErrors.remove(existing.getKeys());
         }
@@ -1387,16 +1439,17 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     private void clearAllVisitedErrors ()
     {
         if (_visitedErrors.size() != 0) {
-            _visitedErrors = new EMMultiKeyHashtable(AWErrorInfo.NumKeys);
+            _visitedErrors = 
+                new EMMultiKeyHashtable<Object[], AWErrorInfo>(AWErrorInfo.NumKeys);
         }
     }
 
     private void cleanupVisitedErrors ()
     {
         // remove the errors that no longer exist
-        List visitedList = _visitedErrors.elementsVector();
+        List<AWErrorInfo> visitedList = _visitedErrors.elementsVector();
         for (int i = visitedList.size() - 1; i >= 0; i--) {
-            AWErrorInfo visited = (AWErrorInfo)visitedList.get(i);
+            AWErrorInfo visited = visitedList.get(i);
             if (_currentRepository.get(visited.getKeys()) == null) {
                 _visitedErrors.remove(visited.getKeys());
                 Log.aribaweb_errorManager.debug(
@@ -1468,25 +1521,26 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     {
         if (Log.aribaweb_errorManager.isDebugEnabled()) {
             Log.aribaweb_errorManager.debug("%s: Recently visited errors:", getLogPrefix());
-            List visitedList = _visitedErrors.elementsVector();
-            for (int i = 0; i < visitedList.size(); i++) {
-                AWErrorInfo error = (AWErrorInfo)visitedList.get(i);
+
+            List<AWErrorInfo> visitedList = _visitedErrors.elementsVector();
+            for (AWErrorInfo error : visitedList) {
                 Log.aribaweb_errorManager.debug("   %s", error);
             }
+
             Log.aribaweb_errorManager.debug(
                 "%s: current=%s prev=%s", getLogPrefix(), _curHighLightedError, _prevHighLightedError);
             Log.aribaweb_errorManager.debug("%s: In the prev cycle: displayed errors:", getLogPrefix());
-            Iterator values =
+            Iterator<AWErrorBucket> values =
                 _currentRepository._orderedDisplayedErrors.values().iterator();
             while (values.hasNext()) {
-                AWErrorBucket bucket = (AWErrorBucket)values.next();
+                AWErrorBucket bucket = values.next();
                 for (int e = 0; e < bucket.size(); e++) {
                     Log.aribaweb_errorManager.debug("   %s", bucket.get(e));
                 }
             }
             Log.aribaweb_errorManager.debug("%s: In the prev cycle: undisplayed errors:", getLogPrefix());
             for (int i = 0; i < _currentRepository._orderedUndisplayedErrors.size(); i++) {
-                AWErrorBucket bucket = (AWErrorBucket)
+                AWErrorBucket bucket = 
                     _currentRepository._orderedUndisplayedErrors.get(i);
                 for (int e = 0; e < bucket.size(); e++) {
                     Log.aribaweb_errorManager.debug("   %s", bucket.get(e));
@@ -1606,9 +1660,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     private AWErrorInfo letNavHandlersSelectNextError ()
     {
         AWErrorInfo nextError = null;
-        for (int i = 0; i < _prioritizedNavHandlers.size(); i++) {
-            PrioritizedHandler pHandler =
-                (PrioritizedHandler)_prioritizedNavHandlers.get(i);
+        for (PrioritizedHandler pHandler : _prioritizedNavHandlers) {
             nextError = pHandler.handler.selectFirstError(getAllErrors());
             if (nextError != null) {
                 Log.aribaweb_errorManager.debug(
@@ -1622,9 +1674,9 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
 
     private int getFirstDisplayedErrorIndex ()
     {
-        List allErrors = _currentRepository.elements();
+        List<AWErrorBucket> allErrors = _currentRepository.elements();
         for (int i = 0; i < allErrors.size(); i++) {
-            AWErrorBucket bucket = (AWErrorBucket)allErrors.get(i);
+            AWErrorBucket bucket = allErrors.get(i);
             if (bucket.getDisplayOrder() != AWErrorInfo.NotDisplayed) {
                 return i;
             }
@@ -1706,6 +1758,9 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         }
     }
 
+    /**
+     * This holds several errors.
+     */
     public static class MultiErrorBucket implements AWErrorBucket
     {
         private List<AWErrorInfo> _errorsForSameKey;
@@ -1877,15 +1932,19 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         }
     }
 
+    /**
+     * This holds some errors (AWErrorBuckets) and provides some methods that act on them.
+     * An error repository is owned by an error manager.
+     */
     private static class ErrorRepository
     {
-        private EMMultiKeyHashtable/*<Object[],AWErrorBucket>*/ _errors;
+        private EMMultiKeyHashtable<Object[],AWErrorBucket> _errors;
         private int _displayOrderCounter = 0;
         private int _unnavigableDisplayOrderCounter = 0;
         private boolean _hasUnnavigableErrors = false;
         private int _registrationOrderCounter = 0;
-        private Map _orderedDisplayedErrors;
-        private List _orderedUndisplayedErrors;
+        private Map<Integer, AWErrorBucket> _orderedDisplayedErrors;
+        private List<AWErrorBucket> _orderedUndisplayedErrors;
         private AWErrorManager _errorManager;
         private boolean _selectedUndisplayError = false;
 
@@ -1896,17 +1955,19 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
 
         // information that indicates whether an error flag is
         // rendered inside a table.  We need this information to
-        // auto-scroll the table to the error splot.
-        private EMMultiKeyHashtable _tableAssociation =
+        // auto-scroll the table to the error spot.
+        private EMMultiKeyHashtable<Object[], AWErrorInfo> _tableAssociation =
             new EMMultiKeyHashtable(AWErrorInfo.NumKeys);
 
         // We also keep information from the last append so this
         // information is available before the current append.
-        private EMMultiKeyHashtable _previousTableAssociation = null;
+        private EMMultiKeyHashtable<Object[], AWErrorInfo> _previousTableAssociation =
+            null;
 
         public ErrorRepository (AWErrorManager errorManager)
         {
-            _errors = new EMMultiKeyHashtable(AWErrorInfo.NumKeys);
+            _errors = 
+                new EMMultiKeyHashtable<Object[],AWErrorBucket>(AWErrorInfo.NumKeys);
             _errorManager = errorManager;
         }
 
@@ -1941,20 +2002,19 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             else {
                 keys = AWErrorInfo.makeKeyArray(key);
             }
-            return (AWErrorBucket)_errors.getValueForKeys(keys);
+            return _errors.getValueForKeys(keys);
         }
 
         public AWErrorBucket get (Object[] keys)
         {
-            return (AWErrorBucket)_errors.getValueForKeys(keys);
+            return _errors.getValueForKeys(keys);
         }
 
         public List<AWErrorBucket> getErrorForKeyIndex (int keyIndex, Object key)
         {
             List<AWErrorBucket> matches = ListUtil.list();
-            List errors = _errors.elementsVector();
-            for (int i = 0; i < errors.size(); i++) {
-                AWErrorBucket bucket = (AWErrorBucket)errors.get(i);
+            List<AWErrorBucket> errors = _errors.elementsVector();
+            for (AWErrorBucket bucket : errors) {
                 if (bucket.getKeys()[keyIndex].equals(key)) {
                     matches.add(bucket);
                 }
@@ -1966,9 +2026,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                                                            int keyIndex2, Object key2)
         {
             List<AWErrorBucket> matches = ListUtil.list();
-            List errors = _errors.elementsVector();
-            for (int i = 0; i < errors.size(); i++) {
-                AWErrorBucket bucket = (AWErrorBucket)errors.get(i);
+            List<AWErrorBucket> errors = _errors.elementsVector();
+            for (AWErrorBucket bucket : errors) {
                 if (bucket.getKeys()[keyIndex1].equals(key1) &&
                     bucket.getKeys()[keyIndex2].equals(key2)) {
                     matches.add(bucket);
@@ -1982,9 +2041,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                                                            int keyIndex3, Object key3)
         {
             List<AWErrorBucket> matches = ListUtil.list();
-            List errors = _errors.elementsVector();
-            for (int i = 0; i < errors.size(); i++) {
-                AWErrorBucket bucket = (AWErrorBucket)errors.get(i);
+            List<AWErrorBucket> errors = _errors.elementsVector();
+            for (AWErrorBucket bucket : errors) {
                 if (bucket.getKeys()[keyIndex1].equals(key1) &&
                     bucket.getKeys()[keyIndex2].equals(key2) &&
                     bucket.getKeys()[keyIndex3].equals(key3)) {
@@ -1994,21 +2052,21 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return matches;
         }
 
-        public Object remove (Object key)
+        public AWErrorBucket remove (Object key)
         {
             Object[] keys =  (key instanceof Object[])
                 ? (Object[])key : AWErrorInfo.makeKeyArray(key);
             return _errors.remove(keys);
         }
 
-        public Object remove (Object[] keys)
+        public AWErrorBucket remove (Object[] keys)
         {
             return _errors.remove(keys);
         }
 
         public Object put (Object[] keys, AWErrorBucket errors)
         {
-            Object old = _errors.put(keys, errors);
+            AWErrorBucket old = _errors.put(keys, errors);
             if (old instanceof AWErrorBucket) {
                 return old;
             }
@@ -2025,9 +2083,9 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             // Todo: need to change bucket.keysEqual() to take an opaque Object
             Object[] keys = (key instanceof Object[])
                 ? (Object[])key : AWErrorInfo.makeKeyArray(key);
-            List errors = _errors.elementsVector();
+            List<AWErrorBucket> errors = _errors.elementsVector();
             for (int i = 0; i < errors.size(); i++) {
-                AWErrorBucket bucket = (AWErrorBucket)errors.get(i);
+                AWErrorBucket bucket = errors.get(i);
                 boolean match = bucket.keysEqual(keys);
                 if (match) {
                     return i;
@@ -2036,22 +2094,22 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return -1;
         }
 
-        public Map getDisplayedErrors ()
+        public Map<Integer, AWErrorBucket> getDisplayedErrors ()
         {
             return _orderedDisplayedErrors;
         }
 
-        public void setDisplayedErrors (Map list)
+        public void setDisplayedErrors (Map<Integer, AWErrorBucket> list)
         {
             _orderedDisplayedErrors = list;
         }
 
-        public List getUndisplayedErrors ()
+        public List<AWErrorBucket> getUndisplayedErrors ()
         {
             return _orderedUndisplayedErrors;
         }
 
-        public void setUndisplayedErrors (List list)
+        public void setUndisplayedErrors (List<AWErrorBucket> list)
         {
             _orderedUndisplayedErrors = list;
         }
@@ -2077,9 +2135,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             // and undisplayed errors by registration order
             _orderedDisplayedErrors = MapUtil.map();
             _orderedUndisplayedErrors = ListUtil.list();
-            List allErrorsInRegOrder = _errors.elementsVector();
-            for (int i = 0; i < allErrorsInRegOrder.size(); i++) {
-                AWErrorBucket bucket = (AWErrorBucket)allErrorsInRegOrder.get(i);
+            List<AWErrorBucket> allErrorsInRegOrder = _errors.elementsVector();
+            for (AWErrorBucket bucket : allErrorsInRegOrder) {
                 if (bucket.getDisplayOrder() != AWErrorInfo.NotDisplayed) {
                     _orderedDisplayedErrors.put(
                         Constants.getInteger(bucket.getDisplayOrder()), bucket);
@@ -2097,9 +2154,9 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                 return false;
             }
 
-            Iterator values = _orderedDisplayedErrors.values().iterator();
+            Iterator<AWErrorBucket> values = _orderedDisplayedErrors.values().iterator();
             while (values.hasNext()) {
-                AWErrorBucket bucket = (AWErrorBucket)values.next();
+                AWErrorBucket bucket = values.next();
                 for (int i = 0; i < bucket.size(); i++) {
                     AWErrorInfo error = bucket.get(i);
                     if (!error.isWarning()) {
@@ -2108,7 +2165,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                 }
             }
             for (int i = 0; i < _orderedUndisplayedErrors.size(); i++) {
-                AWErrorBucket bucket = (AWErrorBucket)_orderedUndisplayedErrors.get(i);
+                AWErrorBucket bucket = _orderedUndisplayedErrors.get(i);
                 for (int j = 0; j < bucket.size(); j++) {
                     AWErrorInfo error = bucket.get(j);
                     if (!error.isWarning()) {
@@ -2121,9 +2178,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
 
         public boolean allErrorsAreWarnings ()
         {
-            List orderedElements = elements();
-            for (int i = 0; i < orderedElements.size(); i++) {
-                AWErrorBucket bucket = (AWErrorBucket)orderedElements.get(i);
+            List<AWErrorBucket> orderedElements = elements();
+            for (AWErrorBucket bucket : orderedElements) {
                 for (int j = 0; j < bucket.size(); j++) {
                     AWErrorInfo error = bucket.get(j);
                     if (!error.isWarning()) {
@@ -2144,9 +2200,9 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             }
             Log.aribaweb_errorManager.debug("All errors in current and previous cycle are warnings.");
 
-            Iterator values = _orderedDisplayedErrors.values().iterator();
+            Iterator<AWErrorBucket> values = _orderedDisplayedErrors.values().iterator();
             while (values.hasNext()) {
-                AWErrorBucket bucket = (AWErrorBucket)values.next();
+                AWErrorBucket bucket = values.next();
                 for (int i = 0; i < bucket.size(); i++) {
                     AWErrorInfo error = bucket.get(i);
                     if (get(error.getKeys()) == null) {
@@ -2154,8 +2210,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                     }
                 }
             }
-            for (int i = 0; i < _orderedUndisplayedErrors.size(); i++) {
-                AWErrorBucket bucket = (AWErrorBucket)_orderedUndisplayedErrors.get(i);
+            for (AWErrorBucket bucket : _orderedUndisplayedErrors) {
                 for (int j = 0; j < bucket.size(); j++) {
                     AWErrorInfo error = bucket.get(j);
                     if (get(error.getKeys()) == null) {
@@ -2225,7 +2280,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                 int positioningRegOrder = positioningError.getRegistrationOrder();
                 undisplayIndex = -1;
                 for (int i = 0; i < _orderedUndisplayedErrors.size(); i++) {
-                    AWErrorBucket bucket = (AWErrorBucket)_orderedUndisplayedErrors.get(i);
+                    AWErrorBucket bucket = _orderedUndisplayedErrors.get(i);
                     if (bucket.getRegistrationOrder() == positioningRegOrder) {
                         Log.aribaweb_errorManager.debug(
                             "positioningError has regOrder %s - found match in undisplayed errors in prev cycle",
@@ -2281,7 +2336,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             // The user will end up nav'ing to the first error.  We can improve
             // this later.
             if (displayIndex != -1) {
-                AWErrorBucket oldError = (AWErrorBucket)
+                AWErrorBucket oldError = 
                     _orderedDisplayedErrors.get(Constants.getInteger(displayIndex));
                 if (oldError == null) {
                     Assert.assertNonFatal(false,
@@ -2295,7 +2350,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             else if (undisplayIndex != -1) {
                 setHasSelectedUndisplayedError(true);
                 AWErrorBucket oldError =
-                    (AWErrorBucket)_orderedUndisplayedErrors.get(undisplayIndex);
+                    _orderedUndisplayedErrors.get(undisplayIndex);
                 Log.aribaweb_errorManager.debug("positioningError -> an old undisplayed error %s", oldError);
                 return getRegistrationOrder(oldError.getKeys());
             }
@@ -2303,20 +2358,21 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return -1;
         }
 
-        private List sortUndisplayedErrorsOnUnnavigableOrder (AWErrorInfo positioningError)
+        private List<AWErrorBucket> sortUndisplayedErrorsOnUnnavigableOrder (
+            AWErrorInfo positioningError)
         {
             if (!_hasUnnavigableErrors) {
                 return _orderedUndisplayedErrors;
             }
 
-            SparseVector sortedErrors =
+            SparseVector /*AWErrorBucket*/ sortedErrors =
                 new SparseVector(_orderedUndisplayedErrors.size(), false);
             allocEmptySlots(sortedErrors, _orderedUndisplayedErrors.size());
             int bottomCounter = _orderedUndisplayedErrors.size() - 1;
-            Map unnavigableErrors = MapUtil.map();
+            Map<Integer, AWErrorBucket> unnavigableErrors = MapUtil.map();
             int highestUnnavNumber = 0;
             for (int i = _orderedUndisplayedErrors.size() - 1; i >= 0; i--) {
-                AWErrorBucket bucket = (AWErrorBucket)_orderedUndisplayedErrors.get(i);
+                AWErrorBucket bucket = _orderedUndisplayedErrors.get(i);
                 if (bucket.getUnnavigableDisplayOrder() != AWErrorInfo.NotDisplayed) {
                     // pick out the unnavigable errors
                     Integer key = Constants.getInteger(bucket.getUnnavigableDisplayOrder());
@@ -2335,7 +2391,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                 : 0;
             for (int i = start; i <= highestUnnavNumber; i++) {
                 Integer key = Constants.getInteger(i);
-                AWErrorBucket bucket = (AWErrorBucket)unnavigableErrors.get(key);
+                AWErrorBucket bucket = unnavigableErrors.get(key);
                 if (bucket != null) {
                     sortedErrors.add(topCounter, bucket);
                     topCounter++;
@@ -2343,7 +2399,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             }
             for (int i = 0; i < start; i++) {
                 Integer key = Constants.getInteger(i);
-                AWErrorBucket bucket = (AWErrorBucket)unnavigableErrors.get(key);
+                AWErrorBucket bucket = unnavigableErrors.get(key);
                 if (bucket != null) {
                     sortedErrors.add(topCounter, bucket);
                     topCounter++;
@@ -2374,14 +2430,15 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         private AWErrorBucket getDisplayedError (int displayOrder)
         {
             // try quick lookup first
-            AWErrorBucket bucket = (AWErrorBucket)
+            AWErrorBucket bucket =
                 _orderedDisplayedErrors.get(Constants.getInteger(displayOrder));
 
             // now we have to loop
             if (bucket == null) {
-                Iterator values = _orderedDisplayedErrors.values().iterator();
+                Iterator<AWErrorBucket> values =
+                    _orderedDisplayedErrors.values().iterator();
                 while (values.hasNext()) {
-                    AWErrorBucket curBucket = (AWErrorBucket)values.next();
+                    AWErrorBucket curBucket = values.next();
                     if (curBucket.getDisplayOrder() == displayOrder) {
                         return curBucket;
                     }
@@ -2404,7 +2461,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             int secondChoice = -1;
             EMMultiKeyHashtable visitedErrors = _errorManager.getVisitedErrors();
             for (int i = 0; i < _orderedUndisplayedErrors.size(); i++) {
-                AWErrorBucket bucket = (AWErrorBucket) _orderedUndisplayedErrors.get(i);
+                AWErrorBucket bucket = _orderedUndisplayedErrors.get(i);
                 if (visitedErrors.getValueForKeys(bucket.getKeys()) == null) {
                     AWErrorInfo prevError = _errorManager.getPreviousError();
                     if (prevError != null && !bucket.keysEqual(prevError.getKeys())) {
@@ -2433,7 +2490,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             // Find the last unvisited error.
             EMMultiKeyHashtable visitedErrors = _errorManager.getVisitedErrors();
             for (int i = _orderedUndisplayedErrors.size() - 1; i >= 0; i--) {
-                AWErrorBucket bucket = (AWErrorBucket) _orderedUndisplayedErrors.get(i);
+                AWErrorBucket bucket = _orderedUndisplayedErrors.get(i);
                 if (visitedErrors.getValueForKeys(bucket.getKeys()) == null) {
                     return i;
                 }
@@ -2541,7 +2598,8 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             _errorSetId++;
             Collections.sort(newErrors, new Comparator<AWErrorBucket>() {
                 public int compare (AWErrorBucket first, AWErrorBucket second) {
-                    return MathUtil.sgn(first.getRegistrationOrder(), second.getRegistrationOrder());
+                    return MathUtil.sgn(
+                        first.getRegistrationOrder(), second.getRegistrationOrder());
                 }
             });
             for (AWErrorBucket newError : newErrors) {
@@ -2579,14 +2637,13 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         }
 
         private AWErrorInfo _getTableAssociationInternal (
-            EMMultiKeyHashtable associationInfo, AWErrorInfo error)
+            EMMultiKeyHashtable<Object[], AWErrorInfo> associationInfo, AWErrorInfo error)
         {
             // Note that the keys in tableAssociationInfo is more coarse
             // then the error keys in the error objects.
 
             // try exact match first
-            AWErrorInfo assoc =
-                (AWErrorInfo)associationInfo.getValueForKeys(error.getKeys());
+            AWErrorInfo assoc = associationInfo.getValueForKeys(error.getKeys());
 
             if (assoc == null) {
                 // now try coarse match
@@ -2602,7 +2659,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                     }
 
                     // lookup
-                    assoc = (AWErrorInfo)associationInfo.getValueForKeys(tmpKeys);
+                    assoc = associationInfo.getValueForKeys(tmpKeys);
                     if (assoc != null) {
                         break;
                     }
@@ -2612,22 +2669,23 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         }
     }
 
-    private static class EMMultiKeyHashtable extends MultiKeyHashtable
+    /**
+     * Error Manager Multi Key Hashtable: keeps a list of all values for easy reference.
+     */
+    private static class EMMultiKeyHashtable<Keys, Value>
+        extends MultiKeyHashtable /*<Keys, Value>*/
     {
-        private List _allValues;
+        private List<Value> _allValues;
 
         public EMMultiKeyHashtable (int keyCount)
         {
             super(keyCount);
             _allValues = ListUtil.list();
-//            Log.aribaweb_errorManager.debug(
-//                "EMMultiKeyHashtable %s:  constructor _allValues=%s",
-//                this, Integer.toString(_allValues.size()));
         }
 
-        public Object getValueForKeys (Object[] targetKeyList)
+        public Value getValueForKeys (Object[] targetKeyList)
         {
-            return super.get(targetKeyList);
+            return (Value)super.get(targetKeyList);
         }
 
         public int indexForKeys (Object[] targetKeyList)
@@ -2635,9 +2693,9 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return super.indexForKeyList(targetKeyList);
         }
 
-        public Object put (Object[] targetKeyList, Object value)
+        public Value put (Object[] targetKeyList, Value value)
         {
-            Object ret = super.put(targetKeyList, value, false);
+            Value ret = (Value)super.put(targetKeyList, value, false);
             if (ret == null) {
                 _allValues.add(value);
             }
@@ -2648,35 +2706,36 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             return ret;
         }
 
-        public Object remove (Object[] targetKeyList)
+        public Value remove (Object[] targetKeyList)
         {
             Object value = super.get(targetKeyList);
             if (value != null) {
                 _allValues.remove(value);
             }
-            return super.remove(targetKeyList);
+            return (Value)super.remove(targetKeyList);
         }
 
-        protected List elementsVector ()
+        protected List<Value> elementsVector ()
         {
-//            Log.aribaweb_errorManager.debug(
-//                "EMMultiKeyHashtable %s: elementsVector _allValues=%s",
-//                this, Integer.toString(_allValues.size()));
             return _allValues;
         }
     }
 
+    /**
+     * This just holds some public fields.  Basically like a C struct.
+     */
     private static class PrioritizedHandler
     {
         public AWErrorHandler handler;
         public int priority;
-        public boolean isAutoScrollHandler;
+        public boolean isTableAutoScrollHandler;
 
-        public PrioritizedHandler (AWErrorHandler handler, int priority, boolean isAutoScroll)
+        public PrioritizedHandler (
+            AWErrorHandler handler, int priority, boolean isTableAutoScroll)
         {
             this.handler = handler;
             this.priority = priority;
-            this.isAutoScrollHandler = isAutoScroll;
+            this.isTableAutoScrollHandler = isTableAutoScroll;
         }
     }
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/editor/EditManager.java#20 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/editor/EditManager.java#21 $
 */
 package ariba.ui.meta.editor;
 
@@ -22,6 +22,7 @@ import ariba.ui.meta.core.Meta;
 import ariba.ui.meta.core.Context;
 import ariba.ui.meta.core.Rule;
 import ariba.ui.meta.core.ItemProperties;
+import ariba.ui.meta.core.Log;
 import ariba.ui.meta.core.PropertyValue;
 import ariba.ui.aribaweb.util.AWFileResource;
 import ariba.ui.aribaweb.util.AWUtil;
@@ -272,7 +273,7 @@ public class EditManager
         // Now place this field after its dropTarget
         Rule rule = editSet.editableRuleForContext(dragContext);
         editSet.updateRule(rule, Collections.singletonMap(UIMeta.KeyAfter, (Object)dropItem));
-        System.out.printf("Resetting predecessor of %s to %s\n", draggedItem, dropItem);
+        Log.meta.debug("Resetting predecessor of %s to %s\n", draggedItem, dropItem);
 
         if (_selectedRecord != null) {
             setSelectedRecord((Context.AssignmentRecord)dragRec);
@@ -289,7 +290,7 @@ public class EditManager
                     String name = ((ItemProperties)item).name();
                     Rule rule = editSet.ruleForContextAlternate(dragContext, name);
                     editSet.updateRule(rule, Collections.singletonMap(UIMeta.KeyAfter, (Object)newPredecessor));
-                    System.out.printf("Resetting predecessor of %s to %s\n", name, newPredecessor);
+                    Log.meta.debug("Resetting predecessor of %s to %s\n", name, newPredecessor);
                 }
             }
         }

@@ -41,6 +41,9 @@
                                     <a:String value="$^title"/>\
                                 </a:If>
                             </a:Hyperlink>\
+                            <a:If notEqualNull="$^titleTip">\
+                                <w:CueTip value="$^titleTip"/>
+                            </a:If>                            
                         </td>\
                         <td nowrap="true" align="right">\
                             <div class="flR"><a:IncludeContent required="$false" templateName="buttonArea"/></div>\

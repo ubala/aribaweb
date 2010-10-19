@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorBubble.awl#13 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ErrorBubble.awl#14 $
     </Copyright>
 
     <Overview>
@@ -50,10 +50,10 @@
             </div>
         </div>
         <div id="bubble_tip_left">
-            <div class="bubble_tip_left" style="left:0">&nbsp;</div>
+            <div class="bubble_tip_left"></div>
         </div>
         <div id="bubble_tip_right" style="display:none">
-            <div class="bubble_tip_right" style="background-position:top right">&nbsp;</div>
+            <div class="bubble_tip_right" style="background-position:top right"></div>
         </div>
      </div>
 </a:RefreshRegion>

@@ -17,6 +17,7 @@ ariba.Request = function() {
     var AWRequestInProgress = true;
     var AWSenderClickedCallbackList = null;
     var AWPollEnabled = true;
+    var AWPollOnError = false;
     var AWPollTimeoutId, AWPollSenderId, AWPollUpdateSenderId, AWPollInterval;
     
     // register a form value for submission -- allows submission of form values for
@@ -56,6 +57,9 @@ ariba.Request = function() {
         AWUpdateCompleteTime : 0,
         AWSessionSecureId : '',
         UseXmlHttpRequests : false,
+        AWPollCallback : null,
+        AWPollErrorState : "pollError",
+        AWPollState : "poll",
 
         initParams : function (/* varargs */) {
             Util.takeValues(ariba, ["Request.AWResponseId", "Request.AWSessionSecureId", "Request.AWRefreshUrl",
@@ -238,7 +242,7 @@ ariba.Request = function() {
             return urlString;
         },
 
-        setupPoll : function (enabled, intervalSecs, senderId, updateId)
+        setupPoll : function (enabled, intervalSecs, senderId, updateId, pollOnError)
         {
             AWPollEnabled = enabled;
             
@@ -251,6 +255,8 @@ ariba.Request = function() {
 
             AWPollSenderId = senderId;
             AWPollUpdateSenderId = updateId;
+            AWPollOnError = pollOnError
+            
         // kick off initial timer
             timer();
 
@@ -261,6 +267,17 @@ ariba.Request = function() {
                 }
             }
 
+            function pollNow ()
+            {
+                if (AWPollEnabled) {
+                    clearTimeout(AWPollTimeoutId)
+                    AWPollTimeoutId = setTimeout(poll.bind(Request), 0);
+                }
+            }
+
+            // make it public
+            this.pollNow = pollNow;
+
             function callback(xmlhttp)
             {
                 // somebody else might have been using the XML http request too,
@@ -269,7 +286,12 @@ ariba.Request = function() {
                 clearTimeout(AWPollTimeoutId);
                 AWPollTimeoutId = null;
                 var response = xmlhttp.responseText;
+                var status = xmlhttp.status;
                 Debug.log("poll response: " + Util.htmlEscapeValue(response));
+                Debug.log("poll status: " + status);
+
+                // always poll even if error
+                var scheduleTimer = AWPollOnError;
 
                 if (response == "<AWPoll state='update'/>") {
                     Debug.log("page changed -- go get content");
@@ -277,12 +299,19 @@ ariba.Request = function() {
                     if (!AWRequestInProgress) {
                         this.getContent(this.formatSenderUrl(AWPollUpdateSenderId));
                     }
-                    timer();
+                    scheduleTimer = true;
                 } else if (response == "<AWPoll state='nochange'/>") {
+                    scheduleTimer = true;
+                }
+                else {
+                    if (this.AWPollCallback) {
+                        this.AWPollCallback(this.AWPollErrorState);
+                    }                    
+                }
+                // check for nochange explicity, since the sesssion might have expired
+                if (scheduleTimer) {
                     timer();
                 }
-
-                // check for nochange explicity, since the sesssion might have expired
             }
 
             function poll()
@@ -290,6 +319,9 @@ ariba.Request = function() {
                 // FIXME -- should check interval since last request against interval
                 Debug.log("AWRequestInProgress: " + AWRequestInProgress + ", AWPollEnabled=" + AWPollEnabled);
                 if (!AWRequestInProgress && AWPollEnabled) {
+                    if (this.AWPollCallback) {
+                        this.AWPollCallback(this.AWPollState);
+                    }
                     var url = this.formatSenderUrl(AWPollSenderId);
                 // wrap the awLoadLazyDivCallback in an anonymous function so we can
                     // pass the additional divObject to it
@@ -303,6 +335,7 @@ ariba.Request = function() {
                     timer();
                 }
             }
+
         },
 
         submitFormObjectNamed : function (formName)
@@ -511,7 +544,6 @@ ariba.Request = function() {
                     Dom.removeFormField(formObject, key);
                 }
             }
-            AWRequestValueList = null;
         },
 
         handleFileUploadError : function (e)
@@ -640,11 +672,6 @@ ariba.Request = function() {
             return newUrl;
         },
 
-        removeAWQueryValues : function ()
-        {
-            AWRequestValueList = null;
-        },
-
         // initiate content retrieval
         getContent : function (url, forceIFrame)
         {
@@ -666,7 +693,6 @@ ariba.Request = function() {
                 url = this.appendQueryValue(url, "awii", iframe.name);
                 iframe.src = this.appendFrameName(url);
             }
-            this.removeAWQueryValues();
         },
 
         __retryRequest : function (senderId)
@@ -1203,7 +1229,7 @@ ariba.Request = function() {
         downloadContent : function (srcUrl)
         {
             var iframe = Request.createRequestIFrame("AWDownload");
-            iframe.src = srcUrl;
+            iframe.src = this.addAWQueryValues(srcUrl);
         },
 
         fileDownloadCompleteCheck : function (statusUrl, completeUrl, delay)

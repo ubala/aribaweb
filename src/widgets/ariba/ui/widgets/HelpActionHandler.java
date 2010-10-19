@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HelpActionHandler.java#16 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HelpActionHandler.java#17 $
 */
 
 package ariba.ui.widgets;
@@ -112,6 +112,11 @@ public class HelpActionHandler extends ActionHandler
         return "";
     }
 
+    protected String getAuxiliaryHelpUrl (AWRequestContext requestContext)
+    {
+        return "";
+    }
+
     public void init (AWRequestContext requestContext, String helpKey)
     {
         if (helpKey == null) {
@@ -138,13 +143,19 @@ public class HelpActionHandler extends ActionHandler
         String windowAttribute = HelpWindowAttributes;
 
         if (StringHandler.QuickTour.equals(area)) {
-            windowAttribute = "scrollbars=no, status=yes, resizable=yes, width=845, height=635";
+            windowAttribute =
+                "scrollbars=no, status=yes, resizable=yes, width=845, height=635";
         }
 
+        String helpUrl = HelpActionHandler.HelpUrl;
+        String auxiliaryUrl = getAuxiliaryHelpUrl(requestContext);
+        if (!StringUtil.nullOrEmptyString(auxiliaryUrl)) {
+            helpUrl = StringUtil.strcat(helpUrl, auxiliaryUrl);
+        }
         // need to re-insert the last %s for language, as this is substituted in
         // live during each request/response, ensuring we're using the appropriate
         // session locale
-        String[] args = { HelpActionHandler.HelpUrl, SharedToken,
+        String[] args = { helpUrl, SharedToken,
                           helpKey, userType,
                           realmName, userLang, anId,
                           featureString, area, windowAttribute};

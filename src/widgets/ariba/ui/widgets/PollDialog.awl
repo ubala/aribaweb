@@ -1,0 +1,34 @@
+<a:RefreshRegion>
+    <a:ClientSideScript>
+        <a:If ifTrue="$showDialog">
+            ariba.Request.AWPollCallback = ariba.Widgets.handlePollEvents.bind(ariba.Widgets);
+        <a:Else/>
+            ariba.Request.AWPollCallback = null;
+        </a:If>
+    </a:ClientSideScript>
+    <a:If ifTrue="$showDialog">
+        <w:DialogBox id="pollDialog" class="panel" wrapperClass="dialogWrapper dialogShadow" wrapperStyle="width:350px;" >
+            <h2 class="alertTitleBar"><a:Local key="a001">Unable to reach the Ariba service.</a:Local></h2>
+            <div style="padding:10px">
+            <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td>
+                        <a:Local key="a002">Please check your internet connection.</a:Local>
+                        <p>
+                            <a:Local key="a003">Reconnecting in</a:Local><span id="pollCountDown" _in="$page.getPollInterval"></span><a:Local key="a004">seconds.</a:Local>
+                            <a href="#" onclick="ariba.Request.pollNow();"><a:Local key="a005">Try now</a:Local></a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div style="float:right">
+                            <w:TextButton onClick="ariba.Widgets.hideDialogDiv()"><a:Local key="a006">OK</a:Local></w:TextButton>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            </div>
+        </w:DialogBox>
+    </a:If>
+</a:RefreshRegion>

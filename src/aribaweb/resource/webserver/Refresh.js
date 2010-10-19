@@ -56,6 +56,7 @@ ariba.Refresh = function() {
     var _currScript = null;
     var _pendingCompleteRequestRun = false;
     var AWRefreshScriptEnabled = true;
+    var _ignoreRefreshComplete = false;
 
     // Handler called with IE History IFrame is loaded
     var _historyHandler = function () {};
@@ -569,7 +570,7 @@ ariba.Refresh = function() {
 
         refreshComplete : function ()
         {
-            Debug.log("Refresh complete called...")
+            Debug.log("Refresh complete called...");
 
             // Refresh region marking
             if (this.AWMarkRefreshRegions) {
@@ -629,22 +630,22 @@ ariba.Refresh = function() {
             _RunningIncrementalAction = true;
             //ariba.Debug.log("RSS (register): " + funcString);
             var func = function() {      // execute all embedded scripts (ie AWClientSideScript's)
-                // try {
+                try {
                     if (isGlobalScope) {
                         var bodyString = Refresh.extractFuncBody(funcString);
+                        ariba.Debug.log("Executing AWClientSideScript ["+bodyString+"]");
                         Refresh.registerGlobalJS(bodyString);
                     } else {
                         //ariba.Debug.log("RSS (run): " + funcString);
                         eval("var f=" + funcString + "; f.call();");
                     }
                 }
-            /*
                 catch (e) {
-                    var msg = "Exception evaluating script: \n\n" + funcString + "\n -- \n" + e.description;
-                    alert(msg);
+                    e.message = "Exception evaluating script: \n\n" + funcString + "\n -- \n" + e.message;
+                    throw e;
                 }
             }
-            */
+           
             Refresh.RSF(sync, false, func);
         },
 
@@ -806,7 +807,8 @@ ariba.Refresh = function() {
         // clean up / post load calls for full page refreshes.
         // NOTE: for responses with a different mime type (file download), neither
         //       awCompleteRequest nor awWindowOnLoad will be called.
-        completeRequest : function (current, length, isRefreshRequest) {
+        completeRequest : function (current, length, isRefreshRequest, ignoreRefreshComplete) {
+            _ignoreRefreshComplete = ignoreRefreshComplete;
             if (!_isXMLHttpResponse && Dom.isSafari && isRefreshRequest) {
                 // Todo: Conditionalize for Safari
                 // defer so that the IFrame's script is finish loading when we are processing
@@ -817,6 +819,10 @@ ariba.Refresh = function() {
             } else {
                 this._completeRequest(current, length, isRefreshRequest);
             }
+        },
+
+        ignoreRefreshComplete : function () {
+            return _ignoreRefreshComplete;
         },
 
         completeRefreshOnLoad : function () {
@@ -990,7 +996,7 @@ ariba.Refresh = function() {
             // indicate that update is complete
             Refresh.refreshComplete();
 
-            divObject.setAttribute("awneedsLoading", "false");
+            this.markDivLoadingDone(divObject);
             Input.hideWaitCursor();
             Event.notifyParents(parent, "lazyCallback");
             this.postLoadLazyDiv();
@@ -1002,7 +1008,10 @@ ariba.Refresh = function() {
         loadLazyDiv : function (divObject, postLoadCallback)
         {
             if (this.divNeedsLoading(divObject)) {
-
+                // immediately mark the div as "in progress" to avoid 
+                // double loading in cases where other lazyDiv respones
+                // causes another lazy div scan.
+                this.markDivLoadingInProgress(divObject);
                 Request.prepareForRequest();
                 var divId = divObject.id;
                 var url = Request.formatSenderUrl(divId);
@@ -1029,6 +1038,16 @@ ariba.Refresh = function() {
                 return true;
             }
             return false;
+        },
+
+        markDivLoadingInProgress : function (divObject)
+        {
+            divObject.setAttribute("awneedsLoading", "inProgress");
+        },
+
+        markDivLoadingDone : function (divObject)
+        {
+            divObject.setAttribute("awneedsLoading", "false");
         },
 
         divNeedsLoading : function (divObject)

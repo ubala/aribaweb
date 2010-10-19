@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#33 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#34 $
 */
 
 
@@ -32,7 +32,6 @@ import ariba.util.core.Fmt;
 import ariba.util.core.HTML;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
-import ariba.util.formatter.Formatter;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
@@ -572,6 +571,12 @@ public class Chooser extends AWComponent
         AWRequestContext requestContext = requestContext();
         template().elementArray()[3].renderResponse(requestContext, this);
         return response;
+    }
+
+    public boolean canAdd ()
+    {
+        return !chooserState().isInvalid()
+            && !ListUtil.nullOrEmptyList(chooserState().selectedObjects());
     }
 
     private void match (boolean fullMatch)

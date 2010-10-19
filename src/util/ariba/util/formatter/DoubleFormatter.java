@@ -12,18 +12,24 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/DoubleFormatter.java#6 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/DoubleFormatter.java#7 $
 */
 
 package ariba.util.formatter;
 
 import ariba.util.core.Assert;
+import ariba.util.core.Fmt;
 import ariba.util.core.StringUtil;
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.ParsePosition;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
     <code>DoubleFormatter</code> is a subclass of <code>Formatter</code> which
@@ -45,6 +51,12 @@ public class DoubleFormatter extends DecimalFormatterCommon
     */
     public static final String ClassName = "ariba.util.formatter.DoubleFormatter";
 
+    private static final String CanonicalPattern =
+        "+#,##0.0###################;-#,##0.0###################";
+    
+    private static final String CanonicalPositivePrefix = "+";
+
+    private static final String CanonicalPercentSign = "%";
 
     /*-----------------------------------------------------------------------
         Fields
@@ -388,7 +400,24 @@ public class DoubleFormatter extends DecimalFormatterCommon
     public static double parseDouble (String string, Locale locale)
       throws ParseException
     {
-        return parseDouble(string, null, locale);
+        return parseDouble(string, locale, false);
+    }
+
+    /**
+        Tries to parse the given string as a <code>double</code> in the given
+        locale.  The <code>locale</code> parameter must be non-null.
+
+        @param     string the string to parse as a <code>double</code>
+        @param     locale the <code>Locale</code> to use for parsing
+        @return           a <code>double</code> value derived from the string
+        @exception        ParseException if the string cannot be parsed as an
+                          <code>double</code>
+        @aribaapi documented
+    */
+    public static double parseDouble (String string, Locale locale, boolean strict)
+      throws ParseException
+    {
+        return parseDouble(string, null, locale, strict);
     }
 
     /**
@@ -407,23 +436,193 @@ public class DoubleFormatter extends DecimalFormatterCommon
     public static double parseDouble (String string, String pattern, Locale locale)
       throws ParseException
     {
+        return parseDouble(string, pattern, locale, false);
+    }
+
+    /**
+        Tries to parse the given string as a <code>double</code> in the given
+        locale.  The <code>locale</code> parameter must be non-null.
+
+        @param     string the string to parse as a <code>double</code>
+        @param     pattern the DecimalFormat pattern to use for parsing
+        @param     locale the <code>Locale</code> to use for parsing
+        @return           a <code>double</code> value derived from the string
+        @exception        ParseException if the string cannot be parsed as an
+                          <code>double</code>
+        @aribaapi documented
+        @see java.text.DecimalFormat
+    */
+    public static synchronized double parseDouble (
+        String string, String pattern, Locale locale, boolean strict) 
+      throws ParseException
+    {
             // locale must be non-null
         Assert.that(locale != null, "invalid null Locale");
 
-        DecimalFormat fmt = null;
+        DecimalFormat specifiedFormat = null;
+        DecimalFormat canonicalFormat = null;
         try {
-            fmt = acquireDecimalFormat(locale, pattern);
+            specifiedFormat = acquireDecimalFormat(locale, pattern);
             Number number;
-            number = fmt.parse(string);
+            if (strict) {
+                // guard
+                assertValidGroupingSeparators(string, specifiedFormat);
+
+                // parse with passed in values
+                ParsePosition parsePosition = new ParsePosition(0);
+                number = specifiedFormat.parse(string, parsePosition);
+                int parseEndIndex = parsePosition.getIndex();
+                boolean parsedWithSpecifiedFormat =
+                    parseEndIndex == string.length() && number != null;
+
+                // parse with canonical values if previous failed
+                boolean parsedWithCanonicalFormat = false;
+                if (!parsedWithSpecifiedFormat) {
+                    canonicalFormat = acquireDecimalFormat(locale, CanonicalPattern);
+                    parsePosition.setIndex(0);
+                    number = canonicalFormat.parse(string, parsePosition);
+                    parseEndIndex = parsePosition.getIndex();
+                    parsedWithCanonicalFormat =
+                        parseEndIndex == string.length() && number != null;
+                }
+
+                // throw exception if no parse succeeded
+                boolean failedParse =
+                    !parsedWithSpecifiedFormat && !parsedWithCanonicalFormat;
+                if (failedParse) {
+                    throw new ParseException(
+                        "Parse ended before index [" + string.length() + "], " +
+                            "it parsed [" + number + "].", 
+                        parseEndIndex);
+                }
+            }
+            else {
+                number = specifiedFormat.parse(string);
+            }
+            if (number == null) {
+                throw new ParseException("Null parse for [" + string + "]", 0);
+            }
             return number.doubleValue();
         }
-        catch (NumberFormatException e) {
-            throw new ParseException(e.getMessage(), 0);
+        catch (Exception e) {
+            ParseException parseException = new ParseException("Error parsing double.", 0);
+            parseException.initCause(e);
+            throw parseException;
         }
         finally
         {
-            releaseDecimalFormat(fmt,locale, pattern);
+            releaseDecimalFormat(specifiedFormat,locale, pattern);
+            // canonicalFormat can be null
+            releaseDecimalFormat(canonicalFormat, locale, CanonicalPattern);
         }
+    }
+
+    protected static ConcurrentMap<DecimalFormat, Pattern> groupingSeparatorsPatternCache
+        = new ConcurrentHashMap();
+
+    protected static final Pattern FractionOnly = Pattern.compile("^\\D*\\.");
+
+    protected static void assertValidGroupingSeparators (
+        String inputString, DecimalFormat fmt)
+      throws ParseException
+    {
+        // guard: ensure that we're grouping
+        
+        int groupingSize = fmt.getGroupingSize();
+        String groupingSeparator =
+            String.valueOf(fmt.getDecimalFormatSymbols().getGroupingSeparator());
+        
+        boolean notGrouping =
+            !fmt.isGroupingUsed()
+            || groupingSize <= 0
+            || StringUtil.nullOrEmptyOrBlankString(groupingSeparator)
+            || FractionOnly.matcher(inputString).find();
+        if (notGrouping) {
+            // nothing to check
+            return;
+        }
+
+        // body
+        
+        Pattern groupingPattern = groupingSeparatorsPatternCache.get(fmt);
+        boolean cacheMiss = groupingPattern == null;
+
+        if (cacheMiss) {
+            groupingPattern = createGroupingSeparatorPattern(fmt);
+            groupingSeparatorsPatternCache.put(fmt, groupingPattern);
+
+        }
+
+        // verify
+        Matcher matcher = groupingPattern.matcher(inputString);
+        boolean invalidGroupingSeparators = !matcher.find() || matcher.start() != 0;
+        if (invalidGroupingSeparators) {
+            throw makeParseException(InvalidCharacterInNumberKey, 0);
+        }
+
+        // verified!  Do nothing.
+    }
+
+    protected static Pattern createGroupingSeparatorPattern (DecimalFormat fmt)
+    {
+        // create regex
+
+        // create negative prefix / positive prefix regex
+        char minusChar = fmt.getDecimalFormatSymbols().getMinusSign();
+        String localizedMinusSign = String.valueOf(minusChar);
+        // StringUtil.escapeRegEx() fails to escape -
+        if (!StringUtil.nullOrEmptyOrBlankString(localizedMinusSign)) {
+            localizedMinusSign = StringUtil.strcat("\\", localizedMinusSign);
+        }
+        String canonicalMinusSign = StringUtil.strcat("\\", CanonicalNegativePrefix);
+        // make optional negativePrefix
+        String negativePrefix = fmt.getNegativePrefix();
+        if (!StringUtil.nullOrEmptyOrBlankString(negativePrefix)) {
+            negativePrefix = StringUtil.escapeRegEx(negativePrefix);
+//            StringUtil.strcat(negativePrefix, "?");
+        }
+        String positivePrefix = fmt.getPositivePrefix();
+        String prefixes = StringUtil.strcat(
+            canonicalMinusSign, localizedMinusSign, positivePrefix, CanonicalPositivePrefix, negativePrefix);
+        String negativeSigns = Fmt.S("^\\s*[%s]?\\s*", prefixes);
+
+        // create initial ungrouped digits regex
+        int groupingSize = fmt.getGroupingSize();
+        String firstDigits = Fmt.S("\\d{1,%s}", groupingSize);
+
+        // create additional grouped digits regex
+        String groupingSeparator =
+            String.valueOf(fmt.getDecimalFormatSymbols().getGroupingSeparator());
+        String groupedDigits = Fmt.S("(?:%s\\d{%s})*", groupingSeparator, groupingSize);
+//        String finalGroupedDigits = Fmt.S("(?:%s\\D)?", groupedDigits);
+        
+        // not (digit or grouping separator) or end of string
+        String end = Fmt.S("(?:[^\\d%s]|$)", groupingSeparator);
+
+        // create final regex
+        String groupingRegex =
+            StringUtil.strcat(negativeSigns, firstDigits, groupedDigits, end);
+
+        // compile and done
+        return Pattern.compile(groupingRegex);
+    }
+
+    public static String getLocalizedPercentSign (Locale locale)
+    {
+        DecimalFormat format = null;
+        try {
+            format = acquireDecimalFormat(locale, CanonicalPattern);
+            Character ch = format.getDecimalFormatSymbols().getPercent();
+            return ch.toString();
+        }
+        finally {
+            releaseDecimalFormat(format, locale, CanonicalPattern);
+        }
+    }
+
+    public static String getCanonicalPercentSign ()
+    {
+        return CanonicalPercentSign;
     }
 
     /**

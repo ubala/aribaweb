@@ -1,6 +1,6 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
-
+    Copyright 1996-2010 Ariba, Inc.
+    
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.java#24 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.java#26 $
 */
 
 package ariba.ui.richtext;
@@ -63,7 +63,8 @@ public class RichTextArea extends AWComponent
         if (_displayValue != null) {
             /* dfinlay 3.6.09: we always filter before rendering even though we we filter
                on setting (see setDisplayValue) becuase the text might be coming from
-               another input field that didn't filter on entry (as most of our fields don't) */
+               another input field that didn't filter on entry 
+               (as most of our fields don't) */
             _displayValue = HTML.filterUnsafeHTML(_displayValue);
             _displayValue = _displayValue.replaceAll("\n", "<br/>");
         }
@@ -103,7 +104,7 @@ public class RichTextArea extends AWComponent
         safeHTML = convertEmptyPTags(safeHTML);
         safeHTML = HTML.filterMargins(safeHTML);
 
-        if (!safeHTML.equals(value)) {
+        if (value != null && !safeHTML.equals(value.trim())) {
             // this results in an error message that (should)
             // be displayed to the user and the submission
             // will fail
@@ -122,16 +123,30 @@ public class RichTextArea extends AWComponent
     // in ems -- so, we need to adjust for the size different between ems and the
     // "average character size" traditionally used by rows/cols.
 
+    /**
+     * In EM.
+     * @return
+     */
     public int rows ()
     {
         int rows = intValueForBinding("rows");
-        return Math.max(rows, 8) * 11 / 7;
+        double emsPerRow = 11.0 / 7.0;
+        int maxRows = 8;
+        double ems = Math.max(rows, maxRows) * emsPerRow;
+        return (int)ems;
     }
 
+    /**
+     * In EM.
+     * @return
+     */
     public int cols ()
     {
-        int rows = intValueForBinding("cols");
-        return Math.max(rows, 69) * 32 / 50;
+        int columns = intValueForBinding("cols");
+        double emsPerColumn = 32.0 / 50.0;
+        int maxColumns = 69;
+        double ems = Math.max(columns, maxColumns) * emsPerColumn;
+        return (int)ems;
     }
 
     public String style ()

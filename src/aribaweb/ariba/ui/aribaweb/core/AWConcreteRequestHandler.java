@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteRequestHandler.java#19 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteRequestHandler.java#20 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -105,6 +105,14 @@ abstract public class AWConcreteRequestHandler extends AWBaseObject implements A
         }
         return response;
     }
+
+    public AWResponseGenerating handleRemoteHostMismatchException (
+            AWRequestContext requestContext,
+            AWRemoteHostMismatchException exception)
+    {
+        return application().handleRemoteHostMismatchException(requestContext, exception); 
+    }
+
     //////////////////////
     // Misc
     //////////////////////

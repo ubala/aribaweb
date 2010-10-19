@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#38 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Context.java#39 $
 */
 package ariba.ui.meta.core;
 
@@ -39,7 +39,6 @@ import java.util.LinkedHashMap;
 import java.util.Collections;
 import java.util.Comparator;
 import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.OutputStreamWriter;
@@ -376,12 +375,12 @@ public class Context implements Extensible
         if (activation != null) {
             Log.meta_context.debug("Found existing activation for %s: %s", key, value);
             didSet = _applyActivation(activation, value);
-            if (Log.meta_context.isEnabledFor(Level.DEBUG)) _logContext(System.out);
+            if (Log.meta_context.isEnabledFor(Level.DEBUG)) _logContext();
         }
 
         if (didSet) {
             awakeCurrentActivation();
-            if (Log.meta_detail.isEnabledFor(Level.DEBUG)) _logContext(System.out);
+            if (Log.meta_detail.isEnabledFor(Level.DEBUG)) _logContext();
         }
     }
 
@@ -904,27 +903,14 @@ public class Context implements Extensible
     public void debug ()
     {
         // set debugger breakpoint here
-        System.out.println("******  Debug Call ******");
-
-        _logContext(System.out);
+        Log.meta_context.debug("******  Debug Call ******");
+        _logContext();
     }
 
     public String debugString ()
     {
-        StringWriter swriter = new StringWriter();
-        PrintWriter writer = new PrintWriter(swriter);
-        _logContext(writer);
-        writer.flush();
-        return swriter.toString();
-    }
-
-    void _logContext (PrintStream out)
-    {
-        _logContext(new PrintWriter(new OutputStreamWriter(out), true));
-    }
-
-    void _logContext (PrintWriter out)
-    {
+        StringWriter strWriter = new StringWriter();        
+        PrintWriter out = new PrintWriter(strWriter);
         out.println("Context:  (" + _entries.size() + " entries)");
         for (int i=0, c=_entries.size(); i<c; i++) {
             int sp = i; while (sp-- > 0) out.print("  ");
@@ -956,6 +942,13 @@ public class Context implements Extensible
             Match.MatchResult match = lastMatch();
             if (match != null) out.println("\n" + lastMatch().debugString());
         }
+        return strWriter.toString();
+    }
+
+    void _logContext ()
+    {
+        String debugString = debugString();
+        Log.meta_context.debug(debugString);
     }
 
     void _logAssignmentMap (Map<Rule.AssignmentSource, List<AWDebugTrace.Assignment>> assignmentMap, PrintWriter out)

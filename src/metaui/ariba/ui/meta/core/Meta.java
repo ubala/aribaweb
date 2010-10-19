@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#38 $
+    $Id: //ariba/platform/ui/metaui/ariba/ui/meta/core/Meta.java#39 $
 */
 package ariba.ui.meta.core;
 
@@ -36,8 +36,9 @@ import java.util.Collections;
 import java.util.concurrent.locks.ReentrantLock;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
-import java.io.PrintWriter;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 
 /**
@@ -1351,11 +1352,8 @@ public class Meta
 
     public void _logRuleStats ()
     {
-        _logRuleStats(new PrintWriter(System.out, true));
-    }
-
-    public void _logRuleStats (PrintWriter out)
-    {
+        StringWriter strWriter = new StringWriter();
+        PrintWriter out = new PrintWriter(strWriter);
         List<_KeyValueCount> counts = ListUtil.list();
         int total = 0;
         for (KeyData keyData : _keyData.values()) {
@@ -1383,6 +1381,7 @@ public class Meta
             _KeyValueCount kvc = counts.get(i);
             out.printf("     %s = %s : %d entries\n", kvc.key,  kvc.value, kvc.count);
         }
+        Log.meta_detail.debug(strWriter.toString());
     }
     
     /*

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#62 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#63 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -385,6 +385,9 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
         }
         catch (AWSiteUnavailableException e) {
             response = handleSiteUnavailableException(requestContext);
+        }
+        catch (AWRemoteHostMismatchException exception) {
+            response = handleRemoteHostMismatchException(requestContext, exception);
         }
         catch (Throwable t) {
             response = handleUncaughtException(requestContext, t);

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNodeManager.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWNodeManager.java#8 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -95,6 +95,21 @@ public abstract class AWNodeManager
      * @aribaapi private
      */
     public abstract String adaptorUrlForNode (String nodeId);
+
+    /**
+     * Formats the given URL to add node validate information.
+     * To be used for session-less requests to the given URL
+     * @param url
+     * @aribaapi private
+     */
+    public abstract String prepareUrlForNodeValidation (String url);
+
+    /**
+     * Strip node validation information from given request handler path.
+     * @param requestHandlerPath
+     * @aribaapi private
+     */
+    public abstract String[] filterUrlForNodeValidation (String[] requestHandlerPath);
 
     //
     // Static utility methods

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#126 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#128 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -804,6 +804,15 @@ abstract public class AWConcreteApplication
         return null;
     }
 
+    public AWResponseGenerating handleRemoteHostMismatchException (
+        AWRequestContext requestContext, AWRemoteHostMismatchException exception)
+    {
+        // default to handle session restoration error
+        // overrides should not trigger another remote host mismatch exception
+        // see AWComponent.shouldValidateRemoteHost()
+        return handleSessionRestorationError(requestContext);
+    }
+
     public AWResponseGenerating handleSessionValidationError (AWRequestContext requestContext, Exception exception)
     {
         AWResponseGenerating response = null;
@@ -1533,11 +1542,16 @@ abstract public class AWConcreteApplication
     {
         SessionOp op;
         AWSession session;
+        Exception callTrace;
 
         public SessionWrapper (SessionOp o, AWSession sess)
         {
             op = o;
             session = sess;
+            if(AWConcreteApplication.IsDebuggingEnabled || 
+                Log.aribaweb_userstatus.isDebugEnabled()) {
+                callTrace = new Exception();
+            }
         }
     }
 

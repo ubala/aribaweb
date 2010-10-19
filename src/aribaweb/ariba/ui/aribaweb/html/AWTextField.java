@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#54 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#55 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -212,11 +212,8 @@ public class AWTextField extends AWComponent
 
     private boolean _allowAutoFocus ()
     {
-        // todo: can this be simplified now that auto-focus is done externally?
-        // for example, why should _isRefresh disable autofocus?
-
-        // if this is a refresh textfield then disable focus
-        if (_isRefresh || _disabled) {
+        // if this is a disabled textfield then disable focus
+        if (_disabled) {
             return false;
         }
 

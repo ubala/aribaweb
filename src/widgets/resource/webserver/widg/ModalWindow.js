@@ -34,16 +34,29 @@ ariba.ModalWindow = function() {
             return name.replace('$', 'D');
         },
 
-        openModalWindow : function (elementId, tile, width, height)
+        modalWindowId : function (parentWindowId)
+        {
+            var modalWindowId = "aw" + parentWindowId;
+            if (Request.AWDebugEnabled) {
+                if (window.name == "AWDebugModalWindow") {
+                    modalWindowId = window.name + "NESTED";
+                }
+                else {
+                    modalWindowId = "AWDebugModalWindow";
+                }
+            }
+            return this.convertWindowName(modalWindowId);
+        },
+
+        openModalWindow : function (parentWindowId, tile, width, height)
         {
             if (AWModalWindowParent != null) {
                 alert('Error -- modal window already open');
             }
 
             AWModalWindowParent = new Object();
-            AWModalWindowParent.id = elementId;
-            var newWindowName = "aw" + elementId;
-            newWindowName = this.convertWindowName(newWindowName);
+            AWModalWindowParent.id = parentWindowId;
+            var newWindowName = this.modalWindowId(parentWindowId);
 
             // check the size of the parent window and current screen size
             //var screenWidth = screen.availWidth;
@@ -150,8 +163,7 @@ ariba.ModalWindow = function() {
 
         resyncModalWindow : function (elementId)
         {
-            var newWindowName = "aw" + elementId;
-            newWindowName = this.convertWindowName(newWindowName);
+            var newWindowName = this.modalWindowId(elementId);
 
             Debug.log("awResyncModalWindow: " + AWDocumentCover);
             if (!AWDocumentCover) {
@@ -177,6 +189,11 @@ ariba.ModalWindow = function() {
 
             // todo: need to signal to stick "sync up with modal window" hint on this URL
             Request.setDocumentLocation(urlString + "&awModalWindowId=" + AWModalWindowParent.id);
+        },
+
+        isModalInProgress : function ()
+        {
+            return AWModalWindowChild != null;
         },
 
         /**
@@ -275,11 +292,11 @@ ariba.ModalWindow = function() {
                 Event.cancelBubble(evt);
             },
             click :  function (elm, evt) {
-                var windowName = elm.getAttribute('_wn');
+                var parentWindowId = elm.getAttribute('_wn');
                 var tile = Dom.boolAttr(elm, '_tw');
                 var width = elm.getAttribute('_w');
                 var height = elm.getAttribute('_h');
-                return ariba.ModalWindow.openModalWindow(windowName, tile, width, height);
+                return ariba.ModalWindow.openModalWindow(parentWindowId, tile, width, height);
             }
         }
     });

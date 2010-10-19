@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/SystemUtil.java#35 $
+    $Id: //ariba/platform/util/core/ariba/util/core/SystemUtil.java#37 $
 */
 
 package ariba.util.core;
@@ -929,6 +929,111 @@ public final class SystemUtil
     public static String stackTrace ()
     {
         return stackTrace(new Exception("Stack trace"));
+    }
+
+    /**
+        Returns String stackTrace for current thread, reduced to focus on most relevant
+        stack frames for analyzing application execution. It removes the tail of the
+        stackTrace starting with the ariba.ui.servletadaptor frame, because the details of
+        servlet dispatch are boring and not helpful. It elides (replaces with ...) all
+        ariba.ui frames (except AWKeyPathBinding), because they are boring and voluminous,
+        and almost never helpful for understanding application performance. It elides the
+        details of reflexive method invokation under FieldValue_Object.getFieldValue. Etc.
+        @aribaapi private
+    */
+    public static String stackTraceCodePath ()
+    {
+        return stackTraceCodePath(stackTrace());
+    }
+
+    /**
+        Returns String stackTrace reduced to focus on most relevant stack frames for
+        analyzing application execution, given a String stackTrace. It removes the tail of
+        the stackTrace starting with the ariba.ui.servletadaptor frame, because the
+        details of servlet dispatch are boring and not helpful. It elides (replaces with
+        ...) all ariba.ui frames (except AWKeyPathBinding), because they are boring and
+        voluminous, and almost never helpful for understanding application performance. It
+        elides the details of reflexive method invokation under
+        FieldValue_Object.getFieldValue.
+        @aribaapi private
+    */
+    public static String stackTraceCodePath (String st)
+    {
+        // Discard everything through last SystemUtil.stackTrace frame
+        st = st.replaceAll(
+            "(?s)^.*\tat ariba\\.util\\.core\\.SystemUtil\\.stackTrace.*?\n", "");
+
+        // Discard everything starting with first servletadapter stack frame, boring.
+        // It is never interesting to see the internals of servlet dispatching.
+        st = st.replaceAll("(?s)at ariba\\.ui\\.servletadaptor\\..*$", "");
+
+        // Discard everything starting with first rpc.server stack frame, boring.
+        st = st.replaceAll("(?s)at ariba\\.rpc\\.server\\..*$", "");
+
+        // Discard everything starting with first ScheduledTask.run stack frame, boring.
+        st = st.replaceAll(
+            "(?s)at ariba\\.util\\.scheduler\\.ScheduledTask\\.run.*$", "");
+
+        // Discard java.lang.Thread.run frame.
+        st = st.replaceAll("\tat java\\.lang\\.Thread\\.run.*\n", "");
+
+        // Protect AWKeyPathBinding from removal, good clue of AWL binding code path.
+        st = st.replaceAll(
+            "ariba\\.ui\\.aribaweb\\.core\\.AWKeyPathBinding",
+            "ariba\\.UI\\.aribaweb\\.core\\.AWKeyPathBinding");
+
+        // Elide all other contiguous ariba.ui stack frames, only aribaweb developers can
+        // get much from them, and there are often hundreds of them.  Focus on app frames.
+        st = st.replaceAll("(?m)(^\\s+at ariba\\.ui\\..*?$)+", "\t...\n");
+
+        // Elide all fieldsui ARPPage frames, don't really help much.
+        st = st.replaceAll("\tat ariba\\.htmlui\\.fieldsui\\.ARPPage\\..*\n", "\t...\n");
+
+        // Restore protected ariba.ui... stack frames.
+        st = st.replaceAll("ariba\\.UI\\.", "ariba\\.ui\\.");
+    
+        // Elide seven stack frame block associated with reflexive method invokation under
+        // FieldValue_Object.getFieldValue.
+        st = st.replaceAll(
+            "(?m)(^\\s+at (sun\\.reflect\\.|java\\.lang\\.reflect\\..|" +
+            "ariba\\.util\\.fieldvalue\\.ReflectionMethodGetter\\.|" +
+            "ariba\\.util\\.fieldvalue\\.FieldPath\\.getFieldValue|" +
+            "ariba\\.util\\.fieldvalue\\.FieldValue_Object\\.).*?$)+",
+            "\t...\n");
+
+        // Elide all contiguous javascript frames until last one, mozilla and ariba.
+        st = st.replaceAll(
+            "(\tat org\\.mozilla\\.javascript\\..*?\n)" +
+            "(?:\tat (?:org\\.mozilla|ariba\\.util)\\.javascript\\..*?\n)+" +
+            "(\tat ariba\\.util\\.javascript\\..*?\n)", "\t...\n$2");
+
+        // ***** Final cleanups ***** 
+
+        // Keep only the first of repeated calls to the same method path, maybe
+        // interleaved with ellipsis.
+        st = st.replaceAll(
+            "(\tat .*?)\\((.*?):(\\d+)\\)\\s*\n" +
+            //1       1  (2   2 3    3  )
+            "(?:(?:\t\\.\\.\\.\\s*\n)*\\1\\(\\2:\\d+\\)\\s*\n)+",
+            //a b                   b      (          )      a
+            "$1($2:$3)\n\t...\n");
+
+        // If we put in two or more successive ellipsises, compress to one.
+        st = st.replaceAll("(\t\\.\\.\\.\\s*\n){2,}", "\t...\n");
+
+        // Get rid of dangling ellipsis at the end.
+        st = st.replaceAll("\t\\.\\.\\.\\s*\n\\s*$", "");
+
+        // Get rid of blank lines.
+        st = st.replaceAll("\n\\s*\n", "\n");
+
+        // Move ellipsis ... to the end of preceding frame line for final format.
+        st = st.replaceAll("(\\s*at .*?)\\s*\n\t\\.\\.\\.\\s*\n", "$1 ...\n");
+
+        // Put a blank line at the beginning to set off the stacktrace.
+        st = StringUtil.strcat("\n", st);
+
+        return st;
     }
 
     /**
