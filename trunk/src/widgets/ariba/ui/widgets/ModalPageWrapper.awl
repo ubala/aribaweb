@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#59 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ModalPageWrapper.awl#60 $
     </Copyright>
 
     <Overview>
@@ -303,7 +303,7 @@
                             <a:String value="$^okTitle:$[a002]OK"/></w:TextButton>\
                     </a:If>
                     <w:TextButton action="$cancelClicked" title="$^cancelHint:$[a003]Cancel Button"
-                                  buttonClass="$^cancelButtonClass" buttonWrapperStyle="$^cancelButtonWrapperStyle">\
+                                  buttonClass="$^cancelButtonClass" buttonWrapperStyle="$^cancelButtonWrapperStyle" submitForm="$false">\
                         <a:String value="$^cancelTitle:$[a004]Cancel"/></w:TextButton>\
                     <a:If ifTrue="$^okButtonRight">
                         <w:TextButton action="$okClicked" title="$^okHint:$[a001]OK Button"

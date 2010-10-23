@@ -631,6 +631,36 @@ public abstract class ExprOps implements NumericTypes
         return getNumericType(getNumericType(v1), getNumericType(v2), canBeNonNumeric);
     }
 
+    /**
+        Returns the constant from the NumericTypes interface for the given
+        <code>value></code> and <code>fieldType</code>.
+    */
+    public static int getNumericType (Object v, String type, boolean canBeNonNumeric)
+    {
+        // dlee 10/14/2010: I don't quite understand the semantic of canBeNonNumeric.
+        // Currently, getNumericTypeForName would return NONNUMERIC regardless of the
+        // value of canBeNonNumeric.  It only return NULL when the type is null.
+        // However, it still won't be set to NONNUMERIC later even if canBeNonNumeric
+        // is true since type is null.
+
+        int t = getNumericType(v);
+        if (t == NULL) {
+            t = getNumericTypeForName(type);
+        }
+
+        if (canBeNonNumeric) {
+            // if the numeric type is NULL, we need to find out if the
+            // real type of v1 is non-numeric type
+            if (t == NULL &&
+                    !StringUtil.nullOrEmptyOrBlankString(type) &&
+                    !PrimitiveTypeProvider.isNumericType(type)) {
+                t = NONNUMERIC;
+            }
+        }
+        return t;
+    }
+
+
     public static int getNumericType (
             Object v1,
             Object v2,
@@ -638,28 +668,8 @@ public abstract class ExprOps implements NumericTypes
             String type2,
             boolean canBeNonNumeric)
     {
-        int t1 = getNumericType(v1);
-        int t2 = getNumericType(v2); 
-        if (t1 == NULL) {
-            t1 = getNumericTypeForName(type1);
-        }
-        if (t2 == NULL) {
-            t2 = getNumericTypeForName(type2);
-        }
-        if (canBeNonNumeric) {
-            // if the numeric type is NULL, we need to find out if the
-            // real type of v1 is non-numeric type
-            if (t1 == NULL &&
-                !StringUtil.nullOrEmptyOrBlankString(type1) &&
-                !PrimitiveTypeProvider.isNumericType(type1)) {
-                t1 = NONNUMERIC;
-            }
-            if (t2 == NULL &&
-                !StringUtil.nullOrEmptyOrBlankString(type2) &&
-                !PrimitiveTypeProvider.isNumericType(type2)) {
-                t2 = NONNUMERIC;
-            }
-        }
+        int t1 = getNumericType(v1, type1, canBeNonNumeric);
+        int t2 = getNumericType(v2, type2, canBeNonNumeric);
         return getNumericType(t1, t2, canBeNonNumeric);
     }
 
@@ -901,7 +911,8 @@ public abstract class ExprOps implements NumericTypes
             String v1Type,
             String v2Type)
     {
-        int type = getNumericType(v1, v2, v1Type, v2Type, true);
+        boolean canBeNonNumeric = true;
+        int type = getNumericType(v1, v2, v1Type, v2Type, canBeNonNumeric);
         ArithmeticOperations ops;
         switch ( type )
         {
@@ -924,15 +935,21 @@ public abstract class ExprOps implements NumericTypes
                 }
                 return newReal(type, doubleValue(v1) * doubleValue(v2));
             case CUSTOMNUMERICTYPE:
-                int t1 = getNumericType(v1), t2 = getNumericType(v2);
+                // one of the types should be custom numeric (that is
+                // how we get here in the first place).  we need to
+                // find out which one
+                int t1 = getNumericType(v1, v1Type, canBeNonNumeric);
                 ops = getArithmeticOperations(v1Type, v2Type);
-                if (t1 > t2) {
-                    return ops.multiply(v1, bigDecValue(v2));
+                if (ops != null) {
+                    // dlee 10/14/2010: we need to revisit this when we support
+                    // more than one custom numeric types.
+                    if (t1 == CUSTOMNUMERICTYPE) {
+                        return ops.multiply(v1, bigDecValue(v2));
+                    }
+                    else {
+                        return ops.multiply(v2, bigDecValue(v1));
+                    }
                 }
-                else if (t2 > t1) {
-                    return ops.multiply(v2, bigDecValue(v1));
-                }
-                // otherwise let the default case handle it
             default :
                 return newInteger(type, longValue(v1) * longValue(v2));
         }

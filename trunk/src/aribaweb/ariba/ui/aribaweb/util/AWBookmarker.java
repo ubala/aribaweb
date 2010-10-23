@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBookmarker.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWBookmarker.java#6 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -123,6 +123,7 @@ public class AWBookmarker
 
     public AWComponent getComponent(AWRequestContext requestContext) {
         String page = requestContext.request().formValueForKey(PageName);
+        if (page == null) return null; 
         AWComponent compRet = requestContext.pageWithName(page);
         if (compRet instanceof AWProtectedBookmarkable) {
             ((AWProtectedBookmarkable)compRet).check();

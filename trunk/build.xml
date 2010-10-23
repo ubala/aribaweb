@@ -312,6 +312,9 @@
             <zipfileset dir="${src.ui.dir}/metaui-jpa"><patternset refid="src.jar.patterns"/></zipfileset>
             <zipfileset dir="${src.ui.dir}/awreload"><patternset refid="src.jar.patterns"/></zipfileset>
         </zip>
+        <zip destfile="${build.jars.dir}/ariba.appcore-src.jar">
+            <zipfileset dir="${src.samples.dir}/appcore"><patternset refid="src.jar.patterns"/></zipfileset>
+        </zip>
     </target>
 
     <target name="check-ant">

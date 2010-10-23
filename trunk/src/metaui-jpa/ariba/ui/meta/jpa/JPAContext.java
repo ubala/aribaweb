@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#8 $
+    $Id: //ariba/platform/ui/metaui-jpa/ariba/ui/meta/jpa/JPAContext.java#9 $
 */
 package ariba.ui.meta.jpa;
 
@@ -24,6 +24,7 @@ import javax.persistence.Query;
 import javax.persistence.Persistence;
 
 import ariba.ui.meta.persistence.ObjectContext;
+import ariba.ui.meta.persistence.PersistenceMeta;
 import ariba.ui.meta.persistence.QuerySpecification;
 import ariba.ui.meta.persistence.QueryGenerator;
 import ariba.ui.meta.persistence.QueryProcessor;
@@ -140,6 +141,7 @@ abstract public class JPAContext extends ObjectContext
 
     public <T> T find(java.lang.Class<T> tClass, Object primaryKey)
     {
+        tClass = PersistenceMeta.supercedingChildClass(tClass);
         return _entityManager.find(tClass, primaryKey);
     }
 

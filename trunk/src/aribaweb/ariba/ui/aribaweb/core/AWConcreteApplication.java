@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#128 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#129 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -321,7 +321,8 @@ abstract public class AWConcreteApplication
         Assert.that(AWUtil.classForName(className) != null, "Unable to load %s", className);
         // Load the safe HTML tags and attributes definition
         loadSafeHtmlConfig();
-
+		initPDFFontConfig();
+		
         ShutdownManager.addShutdownDelayer(this);
         initSessionMonitor();
     }
@@ -366,6 +367,7 @@ abstract public class AWConcreteApplication
 
     public static final String SAFE_TAGS_FILE = "HtmlSafeTags.csv";
     public static final String SAFE_ATTRS_FILE = "HtmlSafeAttributes.csv";
+	public static final String FONT_URL="ARIALUNI.TTF";
 
     /**
        load safe tags and safe attributes definitions
@@ -403,6 +405,18 @@ abstract public class AWConcreteApplication
         }
     }
 
+	 private static void initPDFFontConfig ()
+     {
+         URL unicodeFontUrl = urlForResource("resource/", FONT_URL);
+ 
+         if (unicodeFontUrl != null) {
+             AWUtil.setFontPath(unicodeFontUrl.getPath());
+         }
+         else {
+             Log.aribaweb.warn("Failed to load Arial Unicode Font");
+         }
+     }
+	
     public static AWServerApplication sharedInstance ()
     {
         return AWConcreteServerApplication.sharedInstance();

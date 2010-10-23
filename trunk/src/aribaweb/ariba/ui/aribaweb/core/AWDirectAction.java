@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#64 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#65 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -570,6 +570,7 @@ abstract public class AWDirectAction extends AWBaseObject
     }
 
     public AWResponseGenerating restoreAction () {
+        AWResponseGenerating actionResults = null;
         AWBookmarker bm = ((AWConcreteApplication)application()).getBookmarker();
         AWBookmarker.BookmarkEncrypter benc = bm.getEncrypter();
         AWRequestContext requestContext = requestContext();
@@ -578,7 +579,12 @@ abstract public class AWDirectAction extends AWBaseObject
             return AWRedirect.getRedirect(requestContext,
                 benc.getDecryptedUrl(requestContext));
         }
-        return bm.getComponent(requestContext);
+        actionResults = bm.getComponent(requestContext);
+        if (actionResults == null) {
+            String message = Fmt.S("Unable to restore page action named");
+            actionResults = application().handleMalformedRequest(request(), message);
+        }
+        return actionResults;
     }
 
     protected AWResponseGenerating handleSessionRestorationException (
