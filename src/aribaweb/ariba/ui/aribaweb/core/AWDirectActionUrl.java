@@ -982,7 +982,6 @@ public final class AWDirectActionUrl extends AWBaseObject
 
     public static boolean isLocalDirectActionUrl (String url, AWRequestContext requestContext)
     {
-        if (requestContext.isStaticGeneration()) return true;            
         String base = AWRequestUtil.applicationBaseUrl(requestContext);
         int baseLength = base.length();
         if(url.startsWith(base)) {

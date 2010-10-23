@@ -1,5 +1,6 @@
 New in Version 5.0GA - PREVIEW 5 (10/18/2010)
 ---------------------------------------------
+
 - Web resource versioning for web cache busting
     - Cache control can be set to a high expiration period in production environment   
     - ResourceVersionManager interface for application versioning strategy
