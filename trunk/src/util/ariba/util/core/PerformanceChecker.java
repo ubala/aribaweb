@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceChecker.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceChecker.java#3 $
 */
 
 package ariba.util.core;
@@ -32,6 +32,7 @@ import java.util.Map;
 public class PerformanceChecker
 {
     private final String _metricName;
+    private final boolean _isStable;
     private final boolean _checkTimer;    
     private final long[] _globalThresholds;
     private final Map/*<String, long[]>*/ _typeThresholds;
@@ -55,14 +56,25 @@ public class PerformanceChecker
     {
         this(metric.name, checkTimer, 0, 0, null);
     }
-    
+
     PerformanceChecker (String name,
                         boolean checkTimer,
                         long errorLevel,
                         long warningLevel,
                         Map typeLevels)
     {
+        this(name, false, checkTimer, 0, 0, null);
+    }
+    
+    PerformanceChecker (String name,
+                        boolean isStable,
+                        boolean checkTimer,
+                        long errorLevel,
+                        long warningLevel,
+                        Map typeLevels)
+    {
         _metricName = name.intern();
+        _isStable = isStable;
         _checkTimer = checkTimer;
         _globalThresholds = new long[] {warningLevel, errorLevel};
         if (typeLevels == null) {
@@ -101,6 +113,11 @@ public class PerformanceChecker
     {
         return _metricName;
     }
+
+    public boolean isStable ()
+    {
+        return _isStable;
+    }
     
     public long getValue (PerformanceState.Stats stats)
     {
@@ -117,7 +134,7 @@ public class PerformanceChecker
             : Long.toString(val);
     }
     
-    protected long[] getThresholds (String type)
+    public long[] getThresholds (String type)
     {
         if (type != null && _typeThresholds != null) {
             long[] levels = (long[])_typeThresholds.get(type);

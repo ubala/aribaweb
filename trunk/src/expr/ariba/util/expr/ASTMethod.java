@@ -30,7 +30,6 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
-import ariba.util.fieldtype.TypeInfo;
 import ariba.util.fieldtype.MethodInfo;
 
 /**
@@ -41,23 +40,26 @@ class ASTMethod extends SimpleNode implements Symbol
 {
     private String methodName;
 
-    public ASTMethod(int id) {
+    public ASTMethod (int id)
+    {
         super(id);
     }
 
-    public ASTMethod(ExprParser p, int id) {
+    public ASTMethod (ExprParser p, int id)
+    {
         super(p, id);
     }
 
       /** Called from parser action. */
-    void setMethodName( String methodName ) {
+    void setMethodName (String methodName )
+    {
         this.methodName = methodName;
     }
 
     /**
         Returns the method name that this node will call.
      */
-    public String getMethodName()
+    public String getMethodName ()
     {
         return methodName;
     }
@@ -69,7 +71,7 @@ class ASTMethod extends SimpleNode implements Symbol
         return toString();
     }
 
-    protected Object getValueBody( ExprContext context, Object source ) throws ExprException
+    protected Object getValueBody (ExprContext context,Object source) throws ExprException
     {
         SymbolTable table = context.getSymbolTable();
         SemanticRecord record = (table != null ?
@@ -82,52 +84,36 @@ class ASTMethod extends SimpleNode implements Symbol
         // for method invocation.
         source = ExprRuntime.convert(source);
 
-        Object value;
-        if (!isStatic) {
-            value = _getValueBody(context, source);
-        }
-        else {
-            String typeName = methodInfo.getParentType().getName();
-            Object[]    args = ExprRuntime.getObjectArrayPool().create(jjtGetNumChildren());
-            Object      root = context.getRoot();
+        Object value = null;
+        Object[]    args = ExprRuntime.getObjectArrayPool().create(jjtGetNumChildren());
+        Object      root = context.getRoot();
 
-            try {
-                for ( int i=0, icount = args.length; i < icount; ++i ) {
-                    args[i] = children[i].getValue(context, root);
+        try {
+            for ( int i=0, icount = args.length; i < icount; ++i ) {
+                args[i] = children[i].getValue(context, root);
+            }
+            context.put(ExprContext.CURRENT_METHODINFO_IN_EXECUTION,methodInfo);
+            if (isStatic) {
+                String typeName = methodInfo.getParentType().getName();
+                value = ExprRuntime.callStaticMethod(context,typeName,methodName,args);
+            }
+            else {
+                value = ExprRuntime.callMethod( context, source, methodName, null, args);
+                if (value == null) {
+                    Class clazz = ExprRuntime.getTargetClass(source);
+                    NullHandler nh = ExprRuntime.getNullHandler(clazz);
+                    value = nh.nullMethodResult(context, source, methodName, args);
                 }
-                value = ExprRuntime.callStaticMethod( context, typeName, methodName, args );
-            } finally {
-                ExprRuntime.getObjectArrayPool().recycle(args);
             }
         }
-
+        finally {
+            context.remove(ExprContext.CURRENT_METHODINFO_IN_EXECUTION);
+            ExprRuntime.getObjectArrayPool().recycle(args);
+        }
         return ExprRuntime.convert(value);
     }
 
-    protected Object _getValueBody( ExprContext context, Object source ) throws ExprException
-    {
-        Object[]    args = ExprRuntime.getObjectArrayPool().create(jjtGetNumChildren());
-
-        try {
-            Object      result,
-                        root = context.getRoot();
-
-            for ( int i = 0, icount = args.length; i < icount; ++i ) {
-                args[i] = children[i].getValue(context, root);
-            }
-            result = ExprRuntime.callMethod( context, source, methodName, null, args);
-            if (result == null) {
-                NullHandler     nh = ExprRuntime.getNullHandler(ExprRuntime.getTargetClass(source));
-
-                result = nh.nullMethodResult(context, source, methodName, args);
-            }
-            return result;
-        } finally {
-            ExprRuntime.getObjectArrayPool().recycle(args);
-        }
-    }
-
-    public String toString()
+    public String toString ()
     {
         String      result = methodName;
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#19 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWElementIdPath.java#20 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -310,6 +310,9 @@ public class AWElementIdPath extends AWBaseObject
     static String debugElementIdPathWithDelimiter (AWElementIdPath elementIdPath,
                                                    String delimiter)
     {
+        if (elementIdPath == null) {
+            return null;
+        }
         char[] path = elementIdPath.privatePath();
         FastStringBuffer sb = new FastStringBuffer();
         for (int i=0; i < path.length; i++) {

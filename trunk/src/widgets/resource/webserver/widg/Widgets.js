@@ -414,6 +414,7 @@ ariba.Widgets = function() {
                 div.setAttribute("_cfOpen", "true");
                 var f = function () {
                     this.disablePage("000");
+                    Input.coverDocument(0, 50);
                 }.bind(this);
                 // set up the preclose function
                 div.awPreCloseDialogFunc = this.enablePage.bind(this);
@@ -462,6 +463,7 @@ ariba.Widgets = function() {
         cancelConfirmation : function ()
         {
             //debug('cancel confirmation');
+            Input.uncoverDocument();
             this.hideDialogDiv();
             awConfirmationId = null;
         },
@@ -1356,7 +1358,69 @@ ariba.Widgets = function() {
                     timer();
                 }
             }
-        },        
+        },
+
+        ActiveHoverCard : null,
+        HideActiveHoverCardTimeout : null,
+
+        getHoverCard : function (hoverLink) {
+            var hoverCard = Dom.find(hoverLink, "hcard")[0];
+            // use hover card id if it has been relocated
+            if (!hoverCard) {
+                hoverCard = Dom.getElementById(hoverLink.getAttribute("hoverId"));
+            }
+            else {
+                hoverLink.setAttribute("hoverId", hoverCard.id);
+            }
+            return hoverCard;
+        },
+
+        displayHoverCard : function (hoverLink)
+        {
+            var hoverCard = this.getHoverCard(hoverLink);
+            Dom.relocateDiv(hoverCard);
+            this._hideActiveHoverCard(hoverCard);
+            
+            var newTop = Dom.absoluteTop(hoverLink) - 20;
+
+            var hoverLinkLeft = Dom.absoluteLeft(hoverLink);
+            var hoverLinkWidth = hoverLink.offsetWidth;
+            var linkLeftCenter =
+                 hoverLinkLeft + hoverLinkWidth / 2;
+            var newLeft = 0;
+            if (linkLeftCenter <= Dom.documentClientWidth() / 2) {
+                newLeft = hoverLinkLeft + hoverLinkWidth;
+            }
+            else {
+                hoverCard.style.display='';
+                newLeft = hoverLinkLeft - hoverCard.offsetWidth;
+                Dom.addClass(hoverCard, "hoverLeft");
+            }
+            Dom.setAbsolutePosition(hoverCard, newLeft, newTop);
+            Refresh.displayDiv(hoverCard);
+            this.ActiveHoverCard = hoverCard;
+        },
+
+        hideActiveHoverCard : function ()
+        {
+            this.clearHideHoverCard();
+            this.HideActiveHoverCardTimeout =
+                setTimeout(this._hideActiveHoverCard.bind(this), 200);
+        },
+
+        _hideActiveHoverCard : function (newHoverCard)
+        {
+            var hoverCard = this.ActiveHoverCard;
+            if (hoverCard && hoverCard != newHoverCard) {
+                Refresh.undisplayDiv(hoverCard);
+                Dom.removeClass(hoverCard, "hoverLeft");
+            }
+        },
+
+        clearHideHoverCard : function ()
+        {
+            clearTimeout(this.HideActiveHoverCardTimeout);
+        },
 
     EOF:0};
 
@@ -1528,7 +1592,38 @@ ariba.Widgets = function() {
             prototype : Event.behaviors.DrG,
             dragstart : Widgets.showBubble,
             dragend   : Widgets.hideBubble
-        }
+        },
+
+        // HoverCard
+        HCC : {
+            mousemove : function (hoverLink, evt) {
+                ariba.Widgets.displayHoverCard(hoverLink);
+            },
+            mouseout : function (hoverLink, evt) {
+                ariba.Widgets.hideActiveHoverCard();
+            }
+        },
+        HC : {
+            mouseover : function (hoverCard, evt) {
+                ariba.Widgets.clearHideHoverCard();
+            },
+            mouseout : function (hoverLink, evt) {
+                ariba.Widgets.hideActiveHoverCard();
+            }
+        },
+
+        // Generic Hover
+        GH : {
+            mouseover : function (category, evt) {
+                var hoverClassName = category.className + "-hover";
+                category.setAttribute("_hoverClass", hoverClassName);
+                ariba.Dom.addClass(category, hoverClassName);
+            },
+            mouseout : function (category, evt) {
+                var hoverClassName = category.getAttribute("_hoverClass");
+                ariba.Dom.removeClass(category, hoverClassName);
+            }
+        }        
     });
 
     return Widgets;

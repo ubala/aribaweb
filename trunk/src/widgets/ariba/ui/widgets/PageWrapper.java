@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageWrapper.java#27 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageWrapper.java#28 $
 */
 
 package ariba.ui.widgets;
@@ -73,6 +73,11 @@ abstract public class PageWrapper extends AWComponent implements ActionIntercept
             _helpKey = stringValueForBinding(BindingNames.helpKey);
         }
         return _helpKey;
+    }
+
+    public boolean enableHelpLink ()
+    {
+        return true;
     }
 
     public String commands ()

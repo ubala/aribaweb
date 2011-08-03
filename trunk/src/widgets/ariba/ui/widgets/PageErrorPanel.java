@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageErrorPanel.java#31 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageErrorPanel.java#32 $
 */
 
 package ariba.ui.widgets;
@@ -73,8 +73,10 @@ public final class PageErrorPanel extends AWComponent
         _foregroundErrorManager = null;
 
         // calculate once per lifecycle to keep this value stable thru append/take/invoke
-        _showingPanel = errorManager().isErrorDisplayEnabled() &&
-                        errorManager().getNumberOfErrors() > 0;
+        AWErrorManager errorManager = errorManager();
+        _showingPanel = errorManager.isErrorDisplayEnabled() &&
+                        errorManager.getNumberOfErrors() > 0 &&
+                        !errorManager.errorPanelDisabled();
         if (_showingPanel) {
             initAllowPrevious();
             initAllowNext();
@@ -84,16 +86,16 @@ public final class PageErrorPanel extends AWComponent
         if (Log.aribaweb_errorManager.isDebugEnabled()) {
             Log.aribaweb_errorManager.debug(
                 "%s: PageErrorPanel: showingPanel=%s (errorMode=%s numErrors=%s)",
-                errorManager().getLogPrefix(),
+                errorManager.getLogPrefix(),
                 ariba.util.core.Constants.getBoolean(_showingPanel),
-                ariba.util.core.Constants.getBoolean(errorManager().isErrorDisplayEnabled()),
-                Integer.toString(errorManager().getNumberOfErrors()));
+                ariba.util.core.Constants.getBoolean(errorManager.isErrorDisplayEnabled()),
+                Integer.toString(errorManager.getNumberOfErrors()));
         }
         // If we are not showing the error panel, then tell the error manager
         // to clear out any memory of the current error.  This will ensure
         // a clean slate for future error navigation.
         if (!_showingPanel) {
-            errorManager().clearHighLightedError();
+            errorManager.clearHighLightedError();
         }
 
         super.renderResponse(requestContext, component);

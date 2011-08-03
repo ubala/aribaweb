@@ -51,7 +51,31 @@ ariba.Input = function() {
         KeyCodeEscape    : 27,
         KeyCodeArrowUp   : 38,
         KeyCodeArrowDown : 40,
+        KeyCodeDelete    : 46,
 
+        isCharChange : function (event) {
+            var keyCode = event.keyCode;
+            if (keyCode == this.KeyCodeBackspace ||
+                keyCode == this.KeyCodeDelete) {
+                return true;
+            }
+            var character = null;
+            if (event.which == null) {
+                 character = String.fromCharCode(event.keyCode);    // IE
+            }
+            else if (event.which != 0 && event.charCode != 0) {
+                 character = String.fromCharCode(event.which);      // All others
+            }
+            return character != null;
+        },
+        focus : function (elm)
+        {
+            try {
+                elm.focus();
+            }
+            catch (e) {                
+            }
+        },
         keyDownEvtHandler : function (evt)
         {
             var sourceElm = Event.eventSourceElement(evt);
@@ -210,15 +234,27 @@ ariba.Input = function() {
 
         coverDocument : function (zIndex, opacity)
         {
-            var coverDiv = document.createElement('div');
-            var coverStyle = coverDiv.style;
+            var coverDiv = null;
+            var coverStyle = null;
+            if (Dom.IsIE) {
+                document.createStyleSheet().addRule("v\\: *", "behavior:url(#default#VML)");
+                !document.namespaces.rvml && document.namespaces.add("v", "urn:schemas-microsoft-com:vml");
+                coverDiv = document.createElement('<v:rect stroked="False">');
+                coverDiv.appendChild(document.createElement('<v:fill opacity="50%" color="black">'));
+                document.body.appendChild(coverDiv, document.body.firstChild);
+                coverStyle = coverDiv.style;
+            }
+            else {
+                coverDiv = document.createElement('div');
+                coverStyle = coverDiv.style;
+                coverStyle.backgroundColor = "#000000";
+                Dom.setOpacity(coverDiv, opacity);
+            }            
             coverStyle.position = "absolute";
             coverStyle.zIndex = zIndex;
             var docBody = document.body
-            coverStyle.backgroundColor = "#FFFFFF";
-            Dom.setOpacity(coverDiv, opacity);
             this.updateCoverSize(coverDiv);
-            // Need to insert at beginning (not end) otherwise on Firefox it will occlude the dialog despite z-index order            
+            // Need to insert at beginning (not end) otherwise on Firefox it will occlude the dialog despite z-index order
             docBody.appendChild(coverDiv, document.body.firstChild);
             coverDiv.style.display = "";
 
@@ -235,16 +271,18 @@ ariba.Input = function() {
             var height = Util.max(documentElement.scrollHeight, documentElement.clientHeight);
             coverStyle.top = "0px";
             coverStyle.left = "0px";
-            coverStyle.width = width + "px";
-            coverStyle.height = height + "px";
+            coverStyle.width = width -1 + "px";
+            coverStyle.height = height -1 + "px";            
         },
 
         uncoverDocument : function (element)
         {
+            element = element || AWCoverDiv;
             this.showSelects();
-            this.unregisterCoverDiv(element);
-
-            document.body.removeChild(element);
+            if (element) {
+                this.unregisterCoverDiv(element);
+                document.body.removeChild(element);
+            }
         },
 
         registerCoverDiv : function (div) {
@@ -300,6 +338,7 @@ ariba.Input = function() {
                 if (elmZ) {
                     var coverZ = Dom.effectiveStyle(Dom.positioningParent(AWCoverDiv), 'z-index');
                     Debug.log("awModallyDisabled: " + coverZ + ", " + elmZ);
+                    if (!coverZ) return false;
                     if (parseInt(elmZ) > parseInt(coverZ)) return false;
                 }
             }

@@ -14,7 +14,7 @@
 
    All Rights Reserved.
 
-   $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/SemanticKeyProviderUtil.java#1 $
+   $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/SemanticKeyProviderUtil.java#2 $
 
    Responsible: gbhatnagar
 */
@@ -35,7 +35,14 @@ public class SemanticKeyProviderUtil
                 stats.setRecordingSuspended(true);
             } 
 
-            return provider.getKey(receiver, component);
+            String key = provider.getKey(receiver, component);
+
+            Log.aribaweb_html.debug("[SemanticKey] Object: %s, " +
+                    "Provider: %s, Component: %s, Key: %s",
+                    receiver, provider.getClass().getName(), component.name(),
+                    key);
+            
+            return key;
         }
         finally
         {

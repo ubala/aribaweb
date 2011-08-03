@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#36 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#37 $
 */
 
 package ariba.util.core;
@@ -1674,6 +1674,39 @@ public abstract class ListUtil
         }
         return delta;
     }
+
+    public static int size (Collection list)
+    {
+        return list != null ? list.size() : 0;
+    }
+
+    public static <T> List<T> concatenate (List<T>... lists)
+    {
+        int size = 0;
+        boolean needNewList = false;
+        for (int i = 0; i < lists.length; i++) {
+            List<T> list = lists[i];
+            int s = size(list);
+            size =+ s;
+            if (s > 0 && i > 0) {
+                needNewList = true;
+            }
+        }
+        List<T> result;
+        if (!needNewList) {
+            result = lists.length > 0 ? lists[0] : null;
+        }
+        else {
+            result = ListUtil.list(size);
+            for (List<T> list : lists) {
+                if (list != null) {
+                    result.addAll(list);
+                }
+            }
+        }
+        return result != null ? result : ListUtil.<T>list();
+    }
+
 }
 
 /**

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MemoryOptimizedMap.java#1 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MemoryOptimizedMap.java#4 $
 */
 
 package ariba.util.core;
@@ -63,6 +63,11 @@ public abstract class MemoryOptimizedMap<K,V>
 
     public static <K,V> Map<K,V> getOptimizedMap (int size)
     {
+        return getOptimizedMap(size, false);
+    }
+
+    public static <K,V> Map<K,V> getOptimizedMap (int size, boolean growOnly)
+    {
         switch (size) {
             case 0 : return new MemoryOptimizedMap1<K,V>();
             case 1 : return new MemoryOptimizedMap1<K,V>();
@@ -73,7 +78,7 @@ public abstract class MemoryOptimizedMap<K,V>
             case 6 : return new MemoryOptimizedMap6<K,V>();
             case 7 : return new MemoryOptimizedMap7<K,V>();
             case 8 : return new MemoryOptimizedMap8<K,V>();
-            default : return MapUtil.map(size);
+            default : return growOnly ? new GrowOnlyHashtable(size) : MapUtil.map(size);
         }
     }
 
@@ -256,7 +261,7 @@ public abstract class MemoryOptimizedMap<K,V>
     public static <K,V> Map<K,V> optimize (Map<K,V> tab, boolean growOnly)
     {
         if (shouldOptimize(tab)) {
-            Map<K,V> res = getOptimizedMap(tab.size());
+            Map<K,V> res = getOptimizedMap(tab.size(), growOnly);
             res.putAll(tab);
             return res;
 
@@ -277,32 +282,32 @@ public abstract class MemoryOptimizedMap<K,V>
         if (m == null) {
             return false;
         }
-        if (m.size() > 8) {
-            return false;
-        }
         if (m instanceof MemoryOptimizedMap) {
             return ((MemoryOptimizedMap)m)._map != null ||
                    ((MemoryOptimizedMap)m).getInternalSize() != m.size();
+        }
+        if (m.size() > 8) {
+            return false;
         }
         return true;
     }
 
     public static Map deepOptimize (Map tab)
     {
-	try {
-	    return deepOptimizeInternal(tab, 0);
-	}
-	catch (IllegalArgumentException ex) {
-	    // possibly recursive map, let's leave it alone
-	    return tab;
-	}
+    try {
+        return deepOptimizeInternal(tab, 0);
+    }
+    catch (IllegalArgumentException ex) {
+        // possibly recursive map, let's leave it alone
+        return tab;
+    }
     }
 
     private static Map deepOptimizeInternal (Map tab, int level)
     {
-	if (level > 20) {
-	    throw new IllegalArgumentException();
-	}
+    if (level > 20) {
+        throw new IllegalArgumentException();
+    }
         if (shouldOptimize(tab)) {
             Map result = MemoryOptimizedMap.getOptimizedMap(tab.size());
             for (Object key : tab.keySet()) {
@@ -331,6 +336,56 @@ public abstract class MemoryOptimizedMap<K,V>
         }
     }
 
+    public String toString ()
+    {
+        FastStringBuffer fsb = new FastStringBuffer();
+        Object key;
+        fsb.append("{");
+        for (int i = 0; i < size() - 1 ; i++) {
+            key = get(i);
+            fsb.append(key + "=" + get(key) + ", ");
+        }
+        key = get(size() - 1);
+        fsb.append(key + "=" + get(key) + "}");
+        return fsb.toString();
+    }
+
+    /**
+        Returns true iff <code>this</code> is equal to <code>that</code>
+    */
+    public boolean equals (Object that)
+    {
+        if (that == this) {
+            return true;
+        }
+        // this also deals with the case where that == null
+        if (!(that instanceof Map)) {
+            return false;
+        }
+        Map other = (Map)that;
+        if (other.size() != size()) {
+            return false;
+        }
+        Object myKey;
+        for (int i = 0; i < size(); i++) {
+            myKey = get(i);
+            try {
+                if (!other.containsKey(myKey)) {
+                    return false;
+                }
+            }
+            catch (NullPointerException npe) {
+                // the other map doesn't support null keys or values, and we have a null key
+                // or value
+                return false;
+            }
+            if (!SystemUtil.equal(get(myKey), other.get(myKey))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     class Entry implements Map.Entry<K,V> {
         final K key;
         V value;
@@ -339,25 +394,30 @@ public abstract class MemoryOptimizedMap<K,V>
         /**
          * Create new entry.
          */
-        Entry(K k, V v) {
+        Entry (K k, V v)
+        {
             value = v;
             key = k;
 
         }
 
-        public K getKey() {
+        public K getKey ()
+        {
             return key;
         }
 
-        public V getValue() {
+        public V getValue ()
+        {
             return value;
         }
 
-        public V setValue(V newValue) {
+        public V setValue (V newValue)
+        {
             return put(key, newValue);
         }
 
-        public boolean equals(Object o) {
+        public boolean equals (Object o)
+        {
             if (!(o instanceof Map.Entry))
                 return false;
             Map.Entry e = (Map.Entry)o;
@@ -372,7 +432,8 @@ public abstract class MemoryOptimizedMap<K,V>
             return false;
         }
 
-        public int hashCode() {
+        public int hashCode ()
+        {
             return (key==null ? 0 : key.hashCode()) ^
                    (value==null   ? 0 : value.hashCode());
         }
@@ -389,16 +450,18 @@ public abstract class MemoryOptimizedMap<K,V>
     }
 
     private abstract class OptimizedIterator<E> implements Iterator<E> {
-        int next;	// next entry to return
-        int current;		// current slot
+        int next;    // next entry to return
+        int current;        // current slot
 
-        OptimizedIterator() {
+        OptimizedIterator ()
+        {
             next = -1;
             current = -1;
             next = nextEntry();
         }
 
-        public boolean hasNext() {
+        public boolean hasNext ()
+        {
             return next != -1;
         }
 
@@ -408,12 +471,13 @@ public abstract class MemoryOptimizedMap<K,V>
             if (next != -1) {
                 next = nextEntry();
             }
-	    if (current == -1) {
-		throw new NoSuchElementException();
-	    }
+            if (current == -1) {
+                throw new NoSuchElementException();
+            }
         }
 
-        int nextEntry() {
+        int nextEntry ()
+        {
             int sz = getInternalSize();
             int i = current+1;
             for (;i < sz && get(i) == EMPTY; i++);
@@ -425,7 +489,8 @@ public abstract class MemoryOptimizedMap<K,V>
             }
         }
 
-        public void remove() {
+        public void remove ()
+        {
             if (current == -1)
                 throw new IllegalStateException();
             set(current, EMPTY, null);
@@ -434,34 +499,41 @@ public abstract class MemoryOptimizedMap<K,V>
     }
 
     private class ValueIterator extends OptimizedIterator<V> {
-        public V next() {
+        public V next ()
+        {
             advance();
             return getValue(current);
         }
     }
 
     private class KeyIterator extends OptimizedIterator<K> {
-        public K next() {
+        public K next ()
+        {
             advance();
             return (K)get(current);
         }
     }
 
     private class EntryIterator extends OptimizedIterator<Map.Entry<K,V>> {
-        public Map.Entry<K,V> next() {
+        public Map.Entry<K,V> next ()
+        {
             advance();
             return getEntry(current);
         }
     }
 
     // Subclass overrides these to alter behavior of views' iterator() method
-    Iterator<K> newKeyIterator()   {
+    Iterator<K> newKeyIterator ()
+    {
         return new KeyIterator();
     }
-    Iterator<V> newValueIterator()   {
+    Iterator<V> newValueIterator ()
+    {
         return new ValueIterator();
     }
-    Iterator<Map.Entry<K,V>> newEntryIterator()   {
+
+    Iterator<Map.Entry<K,V>> newEntryIterator ()
+    {
         return new EntryIterator();
     }
 
@@ -481,19 +553,24 @@ public abstract class MemoryOptimizedMap<K,V>
     }
 
     private class KeySet extends AbstractSet<K> {
-        public Iterator<K> iterator() {
+        public Iterator<K> iterator ()
+        {
             return newKeyIterator();
         }
-        public int size() {
+        public int size ()
+        {
             return MemoryOptimizedMap.this.size();
         }
-        public boolean contains(Object o) {
+        public boolean contains (Object o)
+        {
             return containsKey(o);
         }
-        public boolean remove(Object o) {
+        public boolean remove (Object o)
+        {
             return MemoryOptimizedMap.this.remove(o) != null;
         }
-        public void clear() {
+        public void clear ()
+        {
             MemoryOptimizedMap.this.clear();
         }
     }
@@ -509,22 +586,27 @@ public abstract class MemoryOptimizedMap<K,V>
      *
      * @return a collection view of the values contained in this map.
      */
-    public Collection<V> values() {
+    public Collection<V> values ()
+    {
         return _map != null ? _map.values() : new Values();
     }
 
     private class Values extends AbstractCollection<V>
     {
-        public Iterator<V> iterator() {
+        public Iterator<V> iterator ()
+        {
             return newValueIterator();
         }
-        public int size() {
+        public int size ()
+        {
             return MemoryOptimizedMap.this.size();
         }
-        public boolean contains(Object o) {
+        public boolean contains (Object o)
+        {
             return containsValue(o);
         }
-        public void clear() {
+        public void clear ()
+        {
             MemoryOptimizedMap.this.clear();
         }
     }
@@ -547,19 +629,24 @@ public abstract class MemoryOptimizedMap<K,V>
     }
 
     private class EntrySet extends AbstractSet/*<Map.Entry<K,V>>*/ {
-        public Iterator/*<Map.Entry<K,V>>*/ iterator() {
+        public Iterator/*<Map.Entry<K,V>>*/ iterator ()
+        {
             return newEntryIterator();
         }
-        public boolean contains(Object o) {
+        public boolean contains (Object o)
+        {
             throw new UnsupportedOperationException();
         }
-        public boolean remove(Object o) {
+        public boolean remove (Object o)
+        {
             throw new UnsupportedOperationException();
         }
-        public int size() {
+        public int size ()
+        {
             return MemoryOptimizedMap.this.size();
         }
-        public void clear() {
+        public void clear ()
+        {
             MemoryOptimizedMap.this.clear();
         }
     }
@@ -569,21 +656,21 @@ public abstract class MemoryOptimizedMap<K,V>
      * serialize it).
      *
      * @serialData The <i>capacity</i> of the HashMap (the length of the
-     *		   bucket array) is emitted (int), followed  by the
-     *		   <i>size</i> of the HashMap (the number of key-value
-     *		   mappings), followed by the key (Object) and value (Object)
-     *		   for each key-value mapping represented by the HashMap
+     *           bucket array) is emitted (int), followed  by the
+     *           <i>size</i> of the HashMap (the number of key-value
+     *           mappings), followed by the key (Object) and value (Object)
+     *           for each key-value mapping represented by the HashMap
      *             The key-value mappings are emitted in the order that they
      *             are returned by <tt>entrySet().iterator()</tt>.
      *
      */
-    private void writeObject(java.io.ObjectOutputStream s)
+    private void writeObject (java.io.ObjectOutputStream s)
         throws IOException
     {
-    	// Write out the threshold, loadfactor, and any hidden stuff
-    	s.defaultWriteObject();
-	    // Write out number of buckets
-	    s.writeObject(_map);
+        // Write out the threshold, loadfactor, and any hidden stuff
+        s.defaultWriteObject();
+        // Write out number of buckets
+        s.writeObject(_map);
     }
 
     private static final long serialVersionUID = 362498820763181666L;
@@ -592,11 +679,11 @@ public abstract class MemoryOptimizedMap<K,V>
      * Reconstitute the <tt>HashMap</tt> instance from a stream (i.e.,
      * deserialize it).
      */
-    private void readObject(java.io.ObjectInputStream s)
+    private void readObject (java.io.ObjectInputStream s)
          throws IOException, ClassNotFoundException
     {
-	    // Read in the threshold, loadfactor, and any hidden stuff
-	    s.defaultReadObject();
+        // Read in the threshold, loadfactor, and any hidden stuff
+        s.defaultReadObject();
 
         _map = (HashMap<K,V>)s.readObject();
     }

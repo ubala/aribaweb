@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeChecker.java#31 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeChecker.java#32 $
 */
 
 package ariba.util.expr;
@@ -31,7 +31,6 @@ import ariba.util.fieldtype.MethodInfo;
 import ariba.util.fieldtype.NullTypeInfo;
 import ariba.util.fieldtype.PrimitiveTypeProvider;
 import ariba.util.fieldtype.PropertyInfo;
-import ariba.util.core.FastStringBuffer;
 import ariba.util.fieldtype.TypeInfo;
 import ariba.util.fieldtype.TypeRetriever;
 import java.util.Collection;
@@ -495,10 +494,11 @@ public class TypeChecker extends ASTNodeVisitor
                     }
 
                     // Let's checkin if this operand is compatible with the others.
-                    if (operandTypeInfo == null ||
-                        operandTypeInfo instanceof NullTypeInfo) {
-                        // first operand, nothing to compare.
+                    if (operandTypeInfo == null) {
                         operandTypeInfo = info;
+                    }
+                    else if (operandTypeInfo instanceof NullTypeInfo) {
+                        operandTypeInfo = getNullArithmeticOperationsReturnType(node, info);
                     }
                     else if (PrimitiveTypeProvider.isNumericType(operandTypeInfo) &&
                              PrimitiveTypeProvider.isNumericType(info)) {
@@ -580,14 +580,39 @@ public class TypeChecker extends ASTNodeVisitor
     private String getTypeName (TypeInfo info)
     {
         if (!PrimitiveTypeProvider.isBoxedType(info)) {
-            TypeInfo boxedTypeInfo =(TypeInfo)PrimitiveTypeProvider.getBoxedTypeInfo(info);
+            TypeInfo boxedTypeInfo = PrimitiveTypeProvider.getBoxedTypeInfo(info);
             if (boxedTypeInfo != null) {
                 return boxedTypeInfo.getName();
             }
         }
         return info.getName();
     }
-    
+
+    //Null (operator) X is usually of X's type except for non primitive
+    //types e.g. NULL/Money is double
+    //@todo dlee any better way to optmize this?
+    private TypeInfo getNullArithmeticOperationsReturnType (Node node, TypeInfo otherInfo)
+    {
+        TypeInfo result = otherInfo;
+        if (node instanceof ASTDivide) {
+            String infoType = getTypeName(otherInfo);
+            ArithmeticOperations op = ExprOps.getArithmeticOperations(infoType);
+            if (op != null) {
+                Class infoTypeClass = ClassUtil.classForName(infoType, false);
+                if (infoTypeClass != null) {
+                    Class resultClass = getArithmeticOperationsReturnTypeClass(
+                        node, op,
+                        /*Null is convertible to Any type*/ infoTypeClass,
+                        infoTypeClass);
+                    if (resultClass != null) {
+                        result = getTypeInfo(resultClass.getName());
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     private Class getArithmeticOperationsReturnTypeClass (
             Node node,
             ArithmeticOperations op,

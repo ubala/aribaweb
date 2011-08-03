@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/SetUtil.java#14 $
+    $Id: //ariba/platform/util/core/ariba/util/core/SetUtil.java#15 $
 */
 
 package ariba.util.core;
@@ -290,14 +290,14 @@ public final class SetUtil
 
         @aribaapi ariba
     */
-    public static Set/*<Object>*/ arrayToSet (
-        Object[] array,
+    public static <T> Set<T> arrayToSet (
+        T[] array,
         boolean  assertIfDuplicateElementFound
     )
     {
-        Set/*<Object>*/ result = SetUtil.set(array.length);
+        Set<T> result = SetUtil.set(array.length);
         for (int i=0; i<array.length; i++) {
-            Object e = array[i];
+            T e = array[i];
             boolean isNotDuplicate = result.add(e);
             if (assertIfDuplicateElementFound) {
                 Assert.that(isNotDuplicate, "Object %s is duplicated in array", e);

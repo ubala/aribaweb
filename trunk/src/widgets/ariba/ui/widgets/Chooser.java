@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#34 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#36 $
 */
 
 
@@ -567,8 +567,8 @@ public class Chooser extends AWComponent
         match(_allowFullMatchOnInput);
 
         AWResponse response = application().createResponse();
-        requestContext().setResponse(response);
         AWRequestContext requestContext = requestContext();
+        requestContext.setXHRRCompatibleResponse(response);        
         template().elementArray()[3].renderResponse(requestContext, this);
         return response;
     }

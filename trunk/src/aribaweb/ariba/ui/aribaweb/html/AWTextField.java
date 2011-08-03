@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#55 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#62 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -32,6 +32,8 @@ import ariba.ui.aribaweb.core.AWHighLightedErrorScope;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.Log;
+import ariba.util.core.StringUtil;
+import ariba.util.core.ArrayUtil;
 import ariba.util.formatter.FormatterHandlesNulls;
 
 // subclassed for validation
@@ -55,7 +57,9 @@ public class AWTextField extends AWComponent
         BindingNames.disabled,
         BindingNames.behavior,
         BindingNames.size,
-        BindingNames.classBinding
+        BindingNames.classBinding,
+        BindingNames.placeholder,
+        BindingNames.formValueStrings
     };
     public AWEncodedString _elementId;
     private AWEncodedString _textFieldName;
@@ -65,6 +69,8 @@ public class AWTextField extends AWComponent
     private Object _formatter;
     private boolean _formatterHandlesNulls;
     private boolean _disabled;
+    private String _placeholder;
+    private String _formatValue;
 
     private static final String EmptyString = "";
 
@@ -85,6 +91,7 @@ public class AWTextField extends AWComponent
         }
         _disabled = booleanValueForBinding(BindingNames.disabled) ||
             AWEditableRegion.disabled(requestContext());
+        _placeholder = stringValueForBinding(BindingNames.placeholder);
     }
 
     protected void sleep ()
@@ -96,6 +103,8 @@ public class AWTextField extends AWComponent
         _errorKey = null;
         _formatter = null;
         _formatterHandlesNulls = false;
+        _placeholder = null;
+        _formatValue = null;
     }
 
     public String formattedString ()
@@ -124,10 +133,19 @@ public class AWTextField extends AWComponent
         return formattedString;
     }
 
+    public String formatPlaceHolder ()
+    {
+        return _placeholder == null ? null : StringUtil.strcat(" ", _placeholder);
+    }
+
     public void setFormValue (String formValueString)
     {
         if (_disabled) {
             return;
+        }
+        if (_placeholder != null &&
+            formValueString.indexOf(_placeholder) >= 0) {
+            formValueString = "";            
         }
         Object objectValue = null;
         if (formValueString.length() == 0) {
@@ -135,7 +153,7 @@ public class AWTextField extends AWComponent
                 bindingForName(BindingNames.emptyStringValue, true);
             if (emptyStringValueBinding != null) {
                 formValueString = (String)valueForBinding(emptyStringValueBinding);
-            }
+            }            
         }
         if (formValueString != null) {
             if (_formatter == null) {
@@ -150,6 +168,16 @@ public class AWTextField extends AWComponent
                     recordValidationError(exception, errorKey(), formValueString);
                     return;
                 }
+            }
+        }
+
+        if (textFieldName() != null) {
+            // get old cached value
+            Object _oldV = page().pageComponent().dict(textFieldName().string());
+            // get the binding of rawValues and set its binding if it is not null
+            AWBinding binding = bindingForName(BindingNames.formValueStrings);
+            if (binding != null) {
+                setValueForBinding(ArrayUtil.array(_oldV, formValueString),binding);
             }
         }
         setValueForBinding(objectValue, BindingNames.value);
@@ -210,6 +238,12 @@ public class AWTextField extends AWComponent
                 encodedStringValueForBinding(BindingNames.onChange);
     }
 
+    public AWEncodedString onBlurString ()
+    {
+        return _placeholder == null ? null :
+                AWEncodedString.sharedEncodedString("ariba.Handlers.hTextBlur(this, event)");
+    }
+
     private boolean _allowAutoFocus ()
     {
         // if this is a disabled textfield then disable focus
@@ -237,36 +271,48 @@ public class AWTextField extends AWComponent
 
     public String formattedValue ()
     {
-        String errorValue = null;
+        if (_formatValue == null) {
+            String errorValue = null;
 
-        // See if we have an error value...  Need to check even for fields without formatters -- they
-        // can have (page assigned) errors too...
-        if (_formatter != null || hasBinding(BindingNames.errorKey)) {
-            AWErrorManager errorManager = errorManager();
-            Object errorKey = errorKey();
-            Object errorObjValue =
-                (errorKey != null) ? errorManager.errantValueForKey(errorKey) : null;
-            if (errorObjValue instanceof String) {
-                errorValue = (String)errorObjValue;
+            // See if we have an error value...  Need to check even for fields without formatters -- they
+            // can have (page assigned) errors too...
+            if (_formatter != null || hasBinding(BindingNames.errorKey)) {
+                AWErrorManager errorManager = errorManager();
+                Object errorKey = errorKey();
+                Object errorObjValue =
+                    (errorKey != null) ? errorManager.errantValueForKey(errorKey) : null;
+                if (errorObjValue instanceof String) {
+                    errorValue = (String)errorObjValue;
+                }
+                else if (errorObjValue != null) {
+                    try {
+                        errorValue = formatValue(errorObjValue);
+                    }
+                    catch (AWGenericException e) {
+                        errorValue = errorObjValue.toString();
+                        Log.aribaweb.debug("AWTextField: format exception caught." +
+                                           "  Using value.toString.");
+                        Log.logException(Log.aribaweb, e);
+                    }
+                }
             }
-            else if (errorObjValue != null) {
-                try {
-                    errorValue = formatValue(errorObjValue);
-                }
-                catch (AWGenericException e) {
-                    errorValue = errorObjValue.toString();
-                    Log.aribaweb.debug("AWTextField: format exception caught." +
-                                       "  Using value.toString.");
-                    Log.logException(Log.aribaweb, e);
-                }
+            _formatValue = (errorValue == null) ? formattedString() : errorValue;
+
+            if (_placeholder != null &&
+                StringUtil.nullOrEmptyString(_formatValue)) {
+                _formatValue = formatPlaceHolder();
+            }
+            
+            // 1-55LMEY
+            if (_formatValue != null && _formatValue.startsWith("`")) {
+                requestContext().forceFullPageRefresh();
             }
         }
-        String result = (errorValue == null) ? formattedString() : errorValue;
-        // 1-55LMEY
-        if (result != null && result.startsWith("`")) {
-            requestContext().forceFullPageRefresh();
+        // get the page and cache the value to the page cache
+        if (textFieldName() != null) {
+            page().pageComponent().dict(textFieldName().string(), _formatValue);
         }
-        return result;
+        return _formatValue;
     }
 
     private Object errorKey ()
@@ -308,6 +354,11 @@ public class AWTextField extends AWComponent
         cls = (valueForBinding(BindingNames.size) == null ?  "tf tfW" : "tf") + cls;
         if (_disabled) {
             cls = "tfDis " + cls;
+        }
+        if (_placeholder != null) {
+            if (formattedValue().equals(formatPlaceHolder())) {
+                cls = "ph " + cls;
+            }
         }
         return cls;
     }

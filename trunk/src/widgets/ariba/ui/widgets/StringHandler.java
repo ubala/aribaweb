@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StringHandler.java#20 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StringHandler.java#21 $
 */
 
 package ariba.ui.widgets;
@@ -40,6 +40,8 @@ public abstract class StringHandler extends BaseHandler
     public static final String Preferences = "Preferences";
     public static final String Undelegate = "Undelegate";
     public static final String ReturnToServiceManager = "ReturnToServiceManager";
+    public static final String JumpToNavigation = "JumpToNavigation";
+    public static final String JumpToContent = "JumpToContent";
 
     public static void setDefaultHandler (StringHandler handler)
     {

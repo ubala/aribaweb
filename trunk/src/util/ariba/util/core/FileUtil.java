@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2011 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/FileUtil.java#24 $
+    $Id: //ariba/platform/util/core/ariba/util/core/FileUtil.java#26 $
 */
 
 package ariba.util.core;
+
 
 import ariba.util.log.Log;
 import java.io.File;
@@ -250,12 +251,16 @@ public final class FileUtil
     {
         if (!dir.exists()) {
             if (!dir.mkdirs()) {
-                throw new IOException(Fmt.S("can't create directory %s", dir));
+                Log.util.warning(10886, dir, dir.getAbsolutePath(), SystemUtil.stackTrace());
+                String s = Fmt.S("can't create directory %s", dir.getAbsolutePath());
+                throw new IOException(s);
             }
         }
 
         if (!dir.isDirectory()) {
-            throw new IOException(Fmt.S("%s is not a directory", dir));
+            Log.util.warning(10887, dir, dir.getAbsolutePath(), SystemUtil.stackTrace());
+            String s = Fmt.S("%s is not a directory", dir.getAbsolutePath());
+            throw new IOException(s);
         }
 
         return dir;
@@ -683,6 +688,34 @@ public final class FileUtil
             Log.utilIO.debug("Null directory passed to purgeDir.");
         }
         return filesDeleted;
+    }
+
+    public static void deleteSubdirectoryIfEmpty(FileFilter purgeTempFileFilter, File dir, boolean removeSelf) {
+        // 1. if having some sub dir, run recursively for them 
+        // 2. Chk if all subdirs /files are removed , i.e if directory is empty and removeself is true, delete
+        // 3. if dir is having any file return, we should not delete dir if not empty
+        // 
+        if (dir != null) {
+            File[] files = dir.listFiles(purgeTempFileFilter);
+            if (files != null)
+            {                     
+                for (int i = 0; i < files.length; i++) {
+                    File f = files[i];
+                    if (f.isDirectory()) {
+                        deleteSubdirectoryIfEmpty(purgeTempFileFilter,f, true);
+                    }
+                }
+            }
+            files = dir.listFiles();
+            if ((files == null || files.length < 1) && removeSelf) {
+                try {
+                    dir.delete();
+                }
+                catch (SecurityException se) {
+                    Log.utilIO.error(8911, dir);
+                }           
+            }
+        }
     }
 
     /**

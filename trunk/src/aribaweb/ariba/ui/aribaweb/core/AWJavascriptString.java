@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWJavascriptString.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWJavascriptString.java#8 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -61,7 +61,7 @@ final public class AWJavascriptString extends AWPrimitiveString
         super.init(tagName, bindingsHashtable);
         _escape = (AWBinding)bindingsHashtable.remove(AWBindingNames.escape);
     }
-    
+
     protected AWEncodedString stringValueForObjectInComponent (Object objectValue,
                                                                AWComponent component)
     {
@@ -92,7 +92,7 @@ final public class AWJavascriptString extends AWPrimitiveString
     /**
          An AWGenericException is thrown if 'stringValue contains BadChars.
      */
-    private void validateStringValue (String stringValue)
+    public static void validateStringValue (String stringValue)
     {
         for (int i=0; i<BadChars.length; i++) {
             if (stringValue.indexOf(BadChars[i]) != -1) {

@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2011 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/DateFormatter.java#30 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/DateFormatter.java#31 $
 */
 
 package ariba.util.formatter;
@@ -26,6 +26,7 @@ import ariba.util.core.StringUtil;
 import ariba.util.core.MultiKeyHashtable;
 import ariba.util.core.ListUtil;
 import ariba.util.i18n.LocaleSupport;
+import ariba.util.log.Log;
 import java.text.DateFormat;
 import java.text.Format;
 import java.text.ParseException;
@@ -1606,7 +1607,7 @@ public class DateFormatter extends Formatter
                 // lookup the list of date formats to try
                 String formats = lookupLocalizedFormat(formatsKey, locale);
                 StringTokenizer st = new StringTokenizer(formats, separator);
-                List list = ListUtil.list();
+                List<String> list = ListUtil.list();
                 while (st.hasMoreTokens()) {
                     String format = st.nextToken();
                     list.add(format);
@@ -1887,9 +1888,11 @@ public class DateFormatter extends Formatter
     }
 
     /**
-        Tries to parse the given cXML date string (e.g. "1999-03-12T18:39:09-08:00")
-        as a <code>Date</code>.  Uses the cXML date pattern as the parsing template.
-
+        Tries to parse the given cXML date string (e.g. "1999-03-12T18:39:09-08:00"
+        or "1999-03-12T18:39:09.123-08:00") as a <code>Date</code>.
+        Uses the cXML date pattern as the parsing template.
+        Ignores milliseconds part of the date.
+    
         @param     string  the string to parse as a <code>Date</code>
         @return            a <code>Date</code> derived from the string
         @exception         ParseException if the string can't be parsed as a
@@ -1898,6 +1901,25 @@ public class DateFormatter extends Formatter
     */
     public static ariba.util.core.Date parseDateCXML (String string)
       throws ParseException
+    {
+        return parseDateCXMLWithMs (string, false);
+    }
+
+    /**
+        Tries to parse the given cXML date string (e.g. "1999-03-12T18:39:09-08:00"
+        or "1999-03-12T18:39:09.123-08:00") as a <code>Date</code>.
+        Uses the cXML date pattern as the parsing template.
+
+        @param     string  the string to parse as a <code>Date</code>
+        @param     addMillisecondValue  if true, milliseconds are going to be added to the result
+        @return            a <code>Date</code> derived from the string
+        @exception         ParseException if the string can't be parsed as a
+                           <code>Date</code> using the cXML GMT format pattern
+        @aribaapi documented
+    */
+    public static ariba.util.core.Date parseDateCXMLWithMs (final String string,
+                                                            final boolean addMillisecondValue)
+        throws ParseException
     {
             // Initialize our cached formatter if it hasn't been
         if (cXMLFormatter == null) {
@@ -1912,15 +1934,54 @@ public class DateFormatter extends Formatter
         }
         int offsetPos = pp.getIndex();
 
-        if (offsetPos <= 0 || (offsetPos == string.length())) {
+        int length = string.length();
+        if (offsetPos <= 0 || (offsetPos == length)) {
                 // We couldn't parse the first part or there's no offset
             throw new ParseException(
                 Fmt.S("Couldn't parse cXML date from '%s'", string), 0);
         }
 
+        // optional milliseconds: .SSS - one or more digits
+        // rounds result if there are more than 3 digits 
+        if (string.charAt(offsetPos) == '.') {
+            final int startPos = offsetPos + 1;
+            int endPos = -1;
+            for (int i = startPos; (i < length)
+                && Character.isDigit(string.charAt(i)); i++)
+            {
+                endPos = i;
+            }
+
+            if (endPos == -1) {
+                throw new ParseException(
+                    Fmt.S("Couldn't parse cXML date from '%s' - '.' without milliseconds",
+                          string), startPos);
+            }
+
+            // milliseconds are from startPos until endPos inclusively
+            offsetPos = endPos + 1;
+            if (offsetPos == length) {
+                throw new ParseException(
+                    Fmt.S("Couldn't parse cXML date from '%s' - there is no offset after milliseconds",
+                          string), endPos);
+            }
+            
+            if (addMillisecondValue) {
+                final String part = string.substring(startPos, offsetPos);
+                final int milliseconds = getMilliseconds(part);
+    
+                // add milliseconds
+                final long time = d.getTime();
+                d.setTime(time + milliseconds);
+            }
+            else {
+                Log.util.info(10843, string);
+            }
+        }
+
             // pick "[+-]HH:MM" GMT offset off the end and convert it
         int colonIdx = string.indexOf(':', offsetPos);
-        if (colonIdx != -1 && colonIdx < (string.length() - 1)) {
+        if (colonIdx != -1 && colonIdx < (length - 1)) {
             long gmtDiff;
             try {
                 int hourPart = IntegerFormatter.parseInt(
@@ -1961,6 +2022,38 @@ public class DateFormatter extends Formatter
             // No colon found in gmt offset
         throw new ParseException(
                     Fmt.S("Unable to parse date from %s", string), offsetPos);
+    }
+
+    public static int getMillisecondsTest (String s) throws ParseException
+    {
+        return getMilliseconds(s);
+    }
+
+    private static int getMilliseconds (String s) throws ParseException
+    {
+        final int len = s.length();
+        int milliseconds;
+        switch (len) {
+        case 1:
+            milliseconds = IntegerFormatter.parseInt(s + "00");
+            break;
+        case 2:
+            milliseconds = IntegerFormatter.parseInt(s + '0');
+            break;
+        case 3:
+            milliseconds = IntegerFormatter.parseInt(s);
+            break;
+        default:
+            if (len < 1) {
+                throw new RuntimeException(Fmt.S("len=%d s='%s'", len, s));
+            }
+            milliseconds = IntegerFormatter.parseInt(s.substring(0, 3));
+            if (s.charAt(3) >= '5') {
+                ++milliseconds;
+            }
+            break;
+        }
+        return milliseconds;
     }
 
     /*-- Date Values --------------------------------------------------------*/

@@ -30,8 +30,6 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
-import java.util.Map;
-
 /**
  * This interface defines methods for callinig methods in a target object.
  * Methods are broken up into static and instance methods for convenience.
@@ -50,7 +48,7 @@ public interface MethodAccessor
        * @return            result of calling the method
        * @exception MethodFailedException if there is an error calling the method
        */
-    Object callStaticMethod( Map context, Class targetClass, String methodName, Object[] args ) throws MethodFailedException;
+    Object callStaticMethod( ExprContext context, Class targetClass, String methodName, Object[] args ) throws MethodFailedException;
 
       /**
        * Calls the method named with the arguments given.
@@ -61,5 +59,5 @@ public interface MethodAccessor
        * @return            result of calling the method
        * @exception MethodFailedException if there is an error calling the method
        */
-    Object callMethod( Map context, Object target, String methodName, Object[] args ) throws MethodFailedException;
+    Object callMethod( ExprContext context, Object target, String methodName, Object[] args ) throws MethodFailedException;
 }

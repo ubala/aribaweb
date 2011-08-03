@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#133 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#135 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -79,6 +79,7 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     private boolean _hasBeenHibernated = false;
     protected boolean isBrowserMicrosoft = true;
     protected boolean isMacintosh = false;
+    private AWResponse _downloadResponse;
     private AWTemplateParser _templateParser;
     private AWEncodedString _pageScrollTop = AWConstants.Zero;
     private AWEncodedString _pageScrollLeft = AWConstants.Zero;
@@ -238,6 +239,16 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     public void setTemplateParser (AWTemplateParser templateParser)
     {
         _templateParser = templateParser;
+    }
+
+    public AWResponse downloadResponse ()
+    {
+        return _downloadResponse;
+    }
+
+    public void setDownloadResponse (AWResponse response)
+    {
+        _downloadResponse = response;
     }
 
     public void setCharacterEncoding (AWCharacterEncoding characterEncoding)
@@ -453,13 +464,18 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
 
     public String perfPageName ()
     {
-        AWComponent pageComponent = topPanel();
+       return getPerfComponent().namePath();
+    }
 
-        if (pageComponent == null) {
-            pageComponent = pageComponent();
-        }
-
-        return pageComponent.namePath();
+    /**
+     * Returns the component that should be used for performance logging.  Typically this
+     * is the topPanel() but if that is null, it falls back to the page component.
+     *
+     * @return
+     */
+    public AWComponent getPerfComponent ()
+    {
+        return (topPanel() != null) ? topPanel() : pageComponent();
     }
 
     public void addModalPanel (AWComponent panel)
@@ -747,9 +763,8 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
         // clear the curr script list before append
         _currScriptList = null;
 
-        if (PerformanceState.threadStateEnabled()) {
-            PerformanceState.getThisThreadHashtable().setDestinationPage(perfPageName());
-        }
+        getPerfComponent().setPerfDestinationInfo();
+
 
         _foregroundErrorManager = null;
         AWErrorManager.AWNewErrorManager errorManager = (AWErrorManager.AWNewErrorManager)errorManager();

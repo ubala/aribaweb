@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabSet.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabSet.java#4 $
 */
 
 package ariba.ui.widgets;
@@ -90,6 +90,13 @@ public class TabSet extends AWComponent
         Object value = encodedStringValueForBinding(binding);
         return value == null ? (Object)" - " : value;
     }
+
+    public Object currentTabSemanticKey ()
+    {
+        AWBinding binding = _currentTab.bindingForName(AWBindingNames.awname);
+        return encodedStringValueForBinding(binding);        
+    }
+
 
     public Object currentTabDropType ()
     {

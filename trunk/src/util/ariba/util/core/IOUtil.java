@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#25 $
+    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#26 $
 */
 
 
@@ -43,6 +43,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.List;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 
@@ -274,7 +275,9 @@ public final class IOUtil
         // a bad encoding string is passed on to java.io.InputStreamReader
         // Check ahead to make sure we don't pass a bad encoding 
         if (isInvalidEncodingString(encoding)) {
-            String errorMsg = StringUtil.strcat("UnsupportedEncodingException thrown: encoding parameter : ", encoding, " is invalid.");
+            String errorMsg = StringUtil.strcat(
+                "UnsupportedEncodingException thrown: encoding parameter : ",
+                encoding, " is invalid.");
             Log.util.debug(errorMsg);
             throw new UnsupportedEncodingException(errorMsg);
         }
@@ -1181,7 +1184,8 @@ public final class IOUtil
         Reader reader = null;
         FileInputStream fis = new FileInputStream(file);
         try {
-            reader = new BufferedReader(new InputStreamReader(fis, charset), 1024);
+            reader = new BufferedReader(
+                new InputStreamReader(fis, charset), 1024);
             return grep(reader, regex);
         }
         finally {
@@ -1260,7 +1264,8 @@ public final class IOUtil
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(input);
-            reader = new BufferedReader(new InputStreamReader(fis, charset), 1024);
+            reader = new BufferedReader(
+                new InputStreamReader(fis, charset), 1024);
             searchReplace(reader, writer, regexToFind, toReplace);
         }
         finally {
@@ -1305,7 +1310,8 @@ public final class IOUtil
         Writer writer = null;
         try {
             fos = new FileOutputStream(output);
-            writer = new BufferedWriter(new OutputStreamWriter(fos, charset), 1024);
+            writer = new BufferedWriter(
+                new OutputStreamWriter(fos, charset), 1024);
             searchReplace(input, writer, regexToFind, toReplace);
         }
         finally {
@@ -1344,15 +1350,46 @@ public final class IOUtil
     public static String readFirstLine (File file, Charset charset)
     throws IOException
     {
+        List<String> lines = readLines(file, charset, 1);
+        if (ListUtil.nullOrEmptyList(lines)) {
+            return null;
+        }
+        return ListUtil.firstElement(lines);
+    }
+
+    /**
+        Reads and returns the first <code>n</code> lines from <code>file</code> using
+        the specified <code>charset</code> to convert the bytes from
+        the file into characters. Use the method with care. <code>n</code> should typically be small as the lines are
+        in memory<p/>
+
+        @param file the file to read from
+        @param charset the encoding to be used when reading the file
+        @param n number of lines to read
+        @return the first line
+        @aribaapi ariba
+    */
+    public static List<String> readLines (File file, Charset charset, int n)
+      throws IOException
+    {
         if (!file.canRead()) {
             return null;
         }
         InputStream is = null;
+        List<String> result = ListUtil.list();
         try {
             is = new BufferedInputStream(new FileInputStream(file));
             Reader reader = new InputStreamReader(is, charset);
-            LineNumberReader lineNumberReader = new LineNumberReader(reader);
-            return lineNumberReader.readLine();
+            LineNumberReader lineNumberReader =
+                new LineNumberReader(reader);
+            for (int i = 0; i < n; i++) {
+                String line = lineNumberReader.readLine();
+                if (line == null) {
+                    return result;
+                }
+                result.add(line);
+            }
+            return result;
         }
         finally {
             close(is);

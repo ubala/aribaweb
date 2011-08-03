@@ -50,7 +50,8 @@ ariba.Refresh = function() {
     var _LocationCheckActive = false;
     var _currentUpdateSource = null;
     var _isXMLHttpResponse = false;
-    var _IDPat = /\s+id=["\']?(.+?)["\']?[\s>]/
+    var _IDPat = /\s+id=(.+?)[\s>]/
+    var _IDPatQuote = /\s+id=["\'](.+?)["\']/
     var _ScriptAllPat = /<script[^>]*>([\s\S]*?)<\/script>/ig;
     var _ScriptOnePat = /<script([^>]*)>([\s\S]*?)<\/script>/i;
     var _currScript = null;
@@ -326,7 +327,10 @@ ariba.Refresh = function() {
                     var tag = body.substring(0, tagEnd+1)
                     var nodeNameEnd = tag.indexOf(" ");
                     var nodeName = tag.substring(1,nodeNameEnd).toUpperCase()
-                    var m = _IDPat.exec(tag);
+                    var m = _IDPatQuote.exec(tag);
+                    if (!m) {
+                        m = _IDPat.exec(tag);
+                    }
                     if (m) {
                         var id = m[1]
                         // Debug.log("RR: " + id + " -> " + body);
@@ -542,32 +546,44 @@ ariba.Refresh = function() {
         windowOnLoad : function ()
         {
             AWWindowOnLoad = true;
-
-            if (!this.AWAllowParentFrame && top != self) {
-                var pop = true;
-                try{
-                    //If we are not the top frame, check if the top frame is
-                    //from the same host. This could be a punch out session.
-                    if(top.location.hostname == document.location.hostname ){
-                       pop = false;
-                    }
-                } 
-                catch(e) {
-                   //If the top frame is from a differant host, we are
-                   //likely to get an exception, in which case promote the
-                   //current frame to the top.
-                }
-                if(pop){
-                    top.location=self.location;
-                }
-            }
-
             AWWindowLoadStartTime = (new Date()).getTime();
 
             this.refreshComplete();
             AWWindowOnLoad = false;
         },
 
+        checkParentFrame : function (allowParentFrame)
+        {
+            // enable page if allow parent frame explicity or no parent frame
+            var enablePage = allowParentFrame || top == self;
+
+            if (!enablePage) {
+                // does not allow parent frame and has parent frame
+                var pop = true;
+                try {
+                    //If we are not the top frame, check if the top frame is
+                    //from the same host. This could be a punch out session.
+                    if (top.location.hostname == document.location.hostname ){
+                        pop = false;
+                        enablePage = true;
+                    }
+                }
+                catch (e) {
+                   //If the top frame is from a differant host, we are
+                   //likely to get an exception, in which case promote the
+                   //current frame to the top.
+                }
+                if (pop) {
+                    // this could fail, but page will stay disabled.
+                    top.location = self.location;
+                }
+            }
+            if (enablePage) {
+                document.body.style.visibility = 'visible';
+                document.body.style.display = '';
+            }
+        },
+        
         refreshComplete : function ()
         {
             Debug.log("Refresh complete called...");

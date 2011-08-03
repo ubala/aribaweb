@@ -1,6 +1,6 @@
 KS_C_5601-1987,,,,
-"AribaAboutBox",a009,"&copy; 1996 - 2010 Ariba Inc. All Rights Reserved.","&copy; 1996 - 2010 Ariba Inc. All Rights Reserved.",""
-"AribaAboutBox",a010,"'Ariba, Inc.', 'Ariba', the Ariba, Inc. logo, and 'Ariba.com' are trademarks and/or service marks of Ariba or Others. For additional information on Ariba trademarks and service marks, please see {0}www.ariba.com/trademarks.cfm{/0}. Unless otherwise noted on the Site, all other trademarks, service marks, and logos used in this Site are the trademarks, service marks or logos of their respective owners.","""Ariba, Inc."", ""Ariba"", Ariba, Inc. 로고 및 ""Ariba.com""은 Ariba의 상표 및/또는 서비스 표입니다. Ariba 상표 및 서비스 표에 대한 추가 정보는 {0}www.ariba.com/trademarks.cfm{/0}에서 확인하십시오. 사이트에서 달리 언급되는 경우를 제외하고, 이 사이트에서 사용된 기타 모든 상표, 서비스 표 및 로고는 해당 소유자의 상표, 서비스 표 또는 로고입니다.",""
+"AribaAboutBox",a009,"&copy; 1996 - 2011 Ariba Inc. All Rights Reserved.","&copy; 1996-2011 Ariba Inc. All Rights Reserved.",""
+"AribaAboutBox",a010,"'Ariba, Inc.', 'Ariba', the Ariba, Inc. logo, and 'Ariba.com' are trademarks and/or service marks of Ariba or Others. For additional information on Ariba trademarks and service marks, please see {0}www.ariba.com/legal/trademarks.cfm{/0}. Unless otherwise noted on the Site, all other trademarks, service marks, and logos used in this Site are the trademarks, service marks or logos of their respective owners.","""Ariba, Inc."", ""Ariba"", Ariba, Inc. 로고 및 ""Ariba.com""은 Ariba의 상표 및/또는 서비스 표입니다. Ariba 상표 및 서비스 표에 대한 추가 정보는 {0}www.ariba.com/legal/trademarks.cfm{/0}을 참조하십시오. 사이트에서 달리 언급되는 경우를 제외하고, 이 사이트에서 사용된 기타 모든 상표, 서비스 표 및 로고는 해당 소유자의 상표, 서비스 표 또는 로고입니다.",""
 "AribaBasicPageWrapper",a001,"Collapse the Navigation Panel","탐색 패널 축소",""
 "AribaBasicPageWrapper",a002,"Expand the Navigation Panel","탐색 패널 확장",""
 "AribaBasicPageWrapper",a005,"Home","홈",""
@@ -10,7 +10,7 @@ KS_C_5601-1987,,,,
 "AribaBasicPageWrapper",a009,"Preferences","기본설정",""
 "AribaContactBox",a001,"If you need help on how to use this product, click {0}Help{/0} at the top right of any product page to access documentation and tutorials.","이 제품의 사용 방법에 관한 도움이 필요하면 모든 제품 페이지의 맨 오른쪽 위에서 {0}도움말{/0}을 클릭하여 문서 및 자습서에 액세스하십시오.",""
 "AribaLoginForm",a002,"System running in non-production mode","시스템이 생산 이외의 모드로 실행 중입니다.",""
-"AribaLoginPageWrapper",a002,"&copy; 1996 &#150; 2010 Ariba Inc. All Rights Reserved","&copy; 1996 &#150; 2010 Ariba Inc. All Rights Reserved",""
+"AribaLoginPageWrapper",a002,"&copy; 1996 &#150; 2011 Ariba Inc. All Rights Reserved","&copy; 1996-2011 Ariba Inc. All Rights Reserved",""
 "AribaLoginPageWrapper",a003,"Support","지원",""
 "AribaLoginPageWrapper",a004,"To properly view this application IE 6+, Firefox 3.6+, or Safari 4+ with Adobe Flash Player 7+ is required.","이 응용프로그램을 올바로 보려면 IE 6 이상, Firefox 3.6 이상 또는 Safari 4 이상과 함께 Adobe Flash Player 7 이상이 필요합니다.",""
 "AribaNotificationDialog",a001,"Notification","알림",""

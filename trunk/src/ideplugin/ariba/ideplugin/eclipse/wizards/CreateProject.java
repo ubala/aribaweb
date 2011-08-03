@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/eclipse/wizards/CreateProject.java#3 $
+    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/eclipse/wizards/CreateProject.java#4 $
 */
 package ariba.ideplugin.eclipse.wizards;
 
@@ -166,9 +166,12 @@ public class CreateProject implements IRunnableWithProgress
                 }
                 if (path.endsWith(".jar") || path.endsWith(".zip")) {
                     Path src = null;
-                    if (paths.get(i).indexOf("ariba.") > -1) {
-                        src = new Path(Activator.ClasspathAWHome + "/lib/ariba.aw-all-src.jar");
+                    if (paths.get(i).indexOf("ariba.appcore") > -1) {
+                        src = new Path(Activator.ClasspathAWHome + "/lib/ariba.appcore-src.jar");
                     }
+                    else if (paths.get(i).indexOf("ariba.") > -1) {
+                        src = new Path(Activator.ClasspathAWHome + "/lib/ariba.aw-all-src.jar");
+                    }                                        
                     if (path.startsWith(Activator.ClasspathAWHome)) {
                         entries.add(JavaCore.newVariableEntry(new Path(path),src, null));
                     }

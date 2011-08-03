@@ -893,7 +893,7 @@
 
     <target name="open-url">
         <echo message="Opening ${url} in browser"/>
-        <exec executable="cmd.exe" os="Windows 2000,Windows NT,Windows XP,Windows Vista" >
+        <exec executable="cmd.exe" os="Windows 2000,Windows NT,Windows XP,Windows Vista,Windows 7" >
                 <arg line="/C start ${url}"/>
         </exec>
         <!--

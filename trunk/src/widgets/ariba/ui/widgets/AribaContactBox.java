@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaContactBox.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaContactBox.java#4 $
 */
 
 package ariba.ui.widgets;
@@ -29,4 +29,9 @@ public class AribaContactBox extends AWComponent
         return handler != null ? handler.onClick(requestContext()) : null;
     }
 
+    public boolean enableHelpLink ()
+    {
+        PageWrapper pageWrapper = PageWrapper.instance(this);
+        return pageWrapper.enableHelpLink();
+    }
 }

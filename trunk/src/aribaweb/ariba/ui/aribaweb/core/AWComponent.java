@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#122 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#123 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -34,6 +34,7 @@ import ariba.ui.aribaweb.util.AWNamespaceManager;
 import ariba.ui.aribaweb.html.AWPrivateScript;
 import ariba.util.core.Assert;
 import ariba.util.core.ClassUtil;
+import ariba.util.core.PerformanceState;
 import ariba.util.core.StringUtil;
 import ariba.util.core.Constants;
 import ariba.util.core.Fmt;
@@ -1954,6 +1955,17 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     {
         // Default is to do nothing.  Users can override,
         // but are not required to call super.
+    }
+
+    /**
+     * Sets the destination page for performance monitoring.  This method is defined to
+     * allow component subclasses to control the setting of the perf. logging fields.
+     */
+    public void setPerfDestinationInfo()
+    {
+        if (PerformanceState.threadStateEnabled()) {
+             PerformanceState.getThisThreadHashtable().setDestinationPage(namePath());
+        }
     }
 }
 

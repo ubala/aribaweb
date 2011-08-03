@@ -12,13 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/idea/GotoComponent.java#3 $
+    $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/idea/GotoComponent.java#4 $
 */
 package ariba.ideplugin.idea;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.projectRoots.ProjectRootType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
@@ -80,8 +79,7 @@ public class GotoComponent extends AnAction {
 
             // find components
             Vector components = new Vector();
-            VirtualFile[] rootDirectories = rootManager.
-                                            getRootFiles(ProjectRootType.SOURCE);
+            VirtualFile[] rootDirectories = rootManager.getContentSourceRoots();
             for (int index = 0; index < rootDirectories.length; index ++) {
                 findJavaFileWithName(javaFileName, awlFileName,
                                     rootDirectories[index], components);

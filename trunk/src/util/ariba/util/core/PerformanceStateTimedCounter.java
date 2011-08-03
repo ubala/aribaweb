@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateTimedCounter.java#17 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceStateTimedCounter.java#19 $
 */
 
 package ariba.util.core;
@@ -83,44 +83,44 @@ public class PerformanceStateTimedCounter extends PerformanceStateCounter
     /**
         Stop the timer.
     */
-    public void stop ()
+    public long stop ()
     {
-        stop(1);
+        return stop(1);
     }
 
     /**
         Stop the timer and record a quantity of items
     */
-    public void stop (long quantity, long count2Inc, String type)
-    {
-        if (!PerformanceState.threadStateEnabled()) {
-            return;
-        }
-        ((Instance)instance()).stop(quantity, count2Inc, type);
-    }
-
-    public void stop (long quantity, long count2Inc)
-    {
-        if (!PerformanceState.threadStateEnabled()) {
-            return;
-        }
-        ((Instance)instance()).stop(quantity, count2Inc);
-    }
-
-    public void stop (long quantity, String type)
-    {
-        if (!PerformanceState.threadStateEnabled()) {
-            return;
-        }
-        ((Instance)instance()).stop(quantity, type);
-    }
-
-    public void stop (long quantity)
+    public long stop (long quantity, long count2Inc, String type)
     {
         if (!PerformanceState.threadStateEnabled() || PerformanceState.isRecordingSuspended()) {
-            return;
+            return 0l;
         }
-        ((Instance)instance()).stop(quantity);
+        return ((Instance)instance()).stop(quantity, count2Inc, type);
+    }
+
+    public long stop (long quantity, long count2Inc)
+    {
+        if (!PerformanceState.threadStateEnabled() || PerformanceState.isRecordingSuspended()) {
+            return 0l;
+        }
+        return ((Instance)instance()).stop(quantity, count2Inc);
+    }
+
+    public long stop (long quantity, String type)
+    {
+        if (!PerformanceState.threadStateEnabled() || PerformanceState.isRecordingSuspended()) {
+            return 0l;
+        }
+        return ((Instance)instance()).stop(quantity, type);
+    }
+
+    public long stop (long quantity)
+    {
+        if (!PerformanceState.threadStateEnabled() || PerformanceState.isRecordingSuspended()) {
+            return 0l;
+        }
+        return ((Instance)instance()).stop(quantity);
     }
 
 
@@ -175,31 +175,34 @@ public class PerformanceStateTimedCounter extends PerformanceStateCounter
         /**
             Stop the timer and record a quantity of items
         */
-        public void stop (long quantity, long count2Inc, String type)
+        public long stop (long quantity, long count2Inc, String type)
         {
             addCount(quantity, count2Inc, type);
             recursionDepth--;
                 // you are only ready to add the completed time when the
                 // highest level nested timer is finished
+            long elapsed = 0l;
             if (recursionDepth == 0) {
-                addTime(stopwatch.stop());
+            	elapsed = stopwatch.stop(); 
+                addTime(elapsed);
                 state = STOPPED;
             }
+            return elapsed;
         }
 
-        public void stop (long quantity, long count2Inc)
+        public long stop (long quantity, long count2Inc)
         {
-            stop(quantity, count2Inc, null);
+            return stop(quantity, count2Inc, null);
         }
 
-        public void stop (long quantity, String type)
+        public long stop (long quantity, String type)
         {
-            stop(quantity, 0, type);
+            return stop(quantity, 0, type);
         }
 
-        public void stop (long quantity)
+        public long stop (long quantity)
         {
-            stop(quantity, null);
+            return stop(quantity, null);
         }
 
         public int getState ()

@@ -176,11 +176,6 @@ public abstract class SimpleNode implements Node, Serializable
         return hasConstantValue ? constantValue : getValueBody(context, source);
     }
 
-    protected TypeInfo getTypeInfo (ExprContext context) throws ExprException
-    {
-        return null;
-    }
-
     protected void evaluateSetValueBody( ExprContext context, Object target, Object value ) throws ExprException
     {
         context.setCurrentObject(target);

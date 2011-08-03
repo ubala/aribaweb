@@ -2,7 +2,7 @@
     Copyright (c) 1996-2010 Ariba, Inc.
     All rights reserved. Patents pending.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#31 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#32 $
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -184,11 +184,11 @@ public final class MapUtil
     public static SortedMap copyAndSortMap (Map<String,Object> source)
     {
         SortedMap sortedMap = MapUtil.sortedMap();
-        
+
         if (MapUtil.nullOrEmptyMap(source)) {
             return sortedMap;
         }
-        
+
         // Iterate through the source Map and copy its contents to the SortedMap.
         for (Map.Entry<String,Object> e : source.entrySet()) {
             // If there are maps within maps, then recurse through them and convert them
@@ -210,7 +210,7 @@ public final class MapUtil
                 sortedMap.put(mapKey, mapValue);
             }
         }
-        
+
         return sortedMap;
     }
 
@@ -492,6 +492,16 @@ public final class MapUtil
                      (sourceValue instanceof String))
             {
                 dest.put(key, sourceValue);
+            }
+            else if (sourceValue == null) {
+                // explicit null
+                try {
+                    dest.put(key, null);
+                }
+                catch (NullPointerException e) {
+                    // dest doesn't support nulls, remove the value instead
+                    dest.remove(key);
+                }
             }
         }
         return dest;
@@ -1210,7 +1220,7 @@ public final class MapUtil
         }
         return IntegerFormatter.getIntValue(args.get(key));
     }
-    
+
     /**
      * Get a double value out of the exported map
      *

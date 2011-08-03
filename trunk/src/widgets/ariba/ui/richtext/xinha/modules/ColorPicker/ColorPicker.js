@@ -202,8 +202,8 @@ do{
 if(e.style.position=="fixed"){
 this.table.style.position="fixed";
 }
-top+=e.offsetTop;
-_24+=e.offsetLeft;
+top+=e.offsetTop-e.scrollTop;
+_24+=e.offsetLeft-e.scrollLeft;
 e=e.offsetParent;
 }while(e);
 var x,y;

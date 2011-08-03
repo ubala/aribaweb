@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2011 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,28 +12,31 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/JavaTypeProvider.java#18 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/JavaTypeProvider.java#20 $
 */
 
 package ariba.util.fieldtype;
 
 import ariba.util.core.Assert;
 import ariba.util.core.ClassUtil;
-import ariba.util.core.FastStringBuffer;
 import ariba.util.core.Fmt;
-import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
-import ariba.util.core.SetUtil;
 import ariba.util.core.StringUtil;
-import ariba.util.fieldvalue.FieldValueAccessorUtil;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
+import ariba.util.core.ListUtil;
+import ariba.util.core.SetUtil;
+import ariba.util.core.FastStringBuffer;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Method;
+import ariba.util.log.Log;
+import ariba.util.fieldvalue.FieldValueAccessorUtil;
+
 
 /**
     @aribaapi private
@@ -53,7 +56,7 @@ public class JavaTypeProvider extends TypeProvider
      */
     static final char ArrayDimensionIndicator = '[';
 
-    private static TypeProvider DefaultTypeProvider = new JavaTypeProvider();
+    private static JavaTypeProvider DefaultTypeProvider = new JavaTypeProvider();
     private static Map _classMap = MapUtil.map();
     private static Map _safeJavaClassMap = MapUtil.map();
 
@@ -66,7 +69,7 @@ public class JavaTypeProvider extends TypeProvider
         super(JavaTypeProviderId);
     }
 
-    public static TypeProvider instance ()
+    public static JavaTypeProvider instance ()
     {
         return DefaultTypeProvider;
     }
@@ -165,7 +168,7 @@ public class JavaTypeProvider extends TypeProvider
             TypeInfo elementInfo = getTypeInfo(elementTypeName);
 
             if (elementInfo != null) {
-                TypeInfo arrayInfo = new JavaTypeProvider.JavaArrayTypeInfo(
+                TypeInfo arrayInfo = new JavaArrayTypeInfo(
                                                      proxiedClass, index+1);
 
                 return new ContainerTypeInfo(arrayInfo, elementInfo);
@@ -235,14 +238,21 @@ public class JavaTypeProvider extends TypeProvider
     /**
      * Subclass of <code>TypeInfo</code> for Java class.
      */
+
     public static class JavaTypeInfo implements TypeInfo, PropertyResolver
     {
 
         protected Class   _proxiedClass;
-        protected Map     _fieldInfos;
-        protected Map     _methodInfos;
+        protected Map<String,FieldInfo>   _fieldInfos;
+        protected Map<String,JavaMethodInfo>   _methodInfos;
         protected boolean _hasMethodInfoLoaded = false;
         protected boolean _isJavaObjectType;
+        /**
+         * If this variable is not null, that means we are pseudo TypeInfo
+         * and get all fields and methods from _proxiedClass, but behave as if
+         * they come from _pseudoClass
+         */
+        private TypeInfo _pseudoClass = null;
 
         JavaTypeInfo ()
         {
@@ -256,12 +266,27 @@ public class JavaTypeProvider extends TypeProvider
             setProxiedClass(proxiedClass);
         }
 
-        public String      getName ()
+        /**
+         * For FMD classes, implementation would be FlexMasterData java type.
+         * However class type should be from classMeta e.g. vrealm.fmd.MYFMD.
+         * This method narrows the newly created JavaTypeInfo to the type passed in the
+         * argument. 
+         * @param pseudoClass has TypeInfo for vrealm.fmd.MYFMD
+         * @return
+         */
+        public JavaTypeInfo castToPseudoType (TypeInfo pseudoClass)
+        {
+            JavaTypeInfo ret = new JavaTypeInfo(this._proxiedClass);
+            ret._pseudoClass = pseudoClass;
+            return ret;
+        }
+
+        public String getName ()
         {
             return _proxiedClass.getName();
         }
 
-        public String      getImplementationName ()
+        public String getImplementationName ()
         {
             return getName();
         }
@@ -338,11 +363,11 @@ public class JavaTypeProvider extends TypeProvider
             if (other == null) {
                 return null;
             }
-            
+
             if (other instanceof NullTypeInfo) {
                 return null;
             }
-            
+
             JavaTypeInfo otherInfo = null;
             otherInfo = (JavaTypeInfo)(
                 other instanceof JavaTypeInfo ?
@@ -386,6 +411,7 @@ public class JavaTypeProvider extends TypeProvider
                                      List parameters,
                                      boolean staticOnly)
         {
+            JavaMethodInfo methodInfo = null;
             try {
                 if (!_hasMethodInfoLoaded) {
                     synchronized (this) {
@@ -394,21 +420,28 @@ public class JavaTypeProvider extends TypeProvider
                         }
                     }
                 }
-
                 String mungedName = JavaMethodInfo.getMungedMethodName(name, parameters);
-                MethodInfo methodInfo = (MethodInfo)_methodInfos.get(mungedName);
+                methodInfo = _methodInfos.get(mungedName);
                 if (methodInfo == null || (staticOnly && !methodInfo.isStatic())) {
-                    methodInfo = findAppropriateMethodInfo(retriever, name, parameters, staticOnly);
+                    methodInfo = findAppropriateMethodInfo(retriever, name,
+                            parameters, staticOnly);
                 }
-                return methodInfo;
+                if (_pseudoClass != null && methodInfo != null &&
+                    methodInfo.isStatic() &&    
+                    methodInfo.firstParameterIsClassName()) {
+                    /*
+                    Check if the static method takes first parameter as className.
+                    If so create a copy and provide the first parameter information
+                    */
+                   methodInfo = methodInfo.createProxiedMethodInfo(_pseudoClass);
+                }
             }
             catch (Throwable e) {
-                // ToDo
-                //e.printStackTrace();
+                Log.util.warn("getMethod failed",e);
             }
-            return null;
+            return methodInfo;
         }
-        
+
         public Set/*<MethodInfo>*/ getAllMethods (TypeRetriever retriever)
         {
             try {
@@ -506,6 +539,7 @@ public class JavaTypeProvider extends TypeProvider
                     MethodSpecification specification =
                         SafeJavaRepository.getInstance().getAllSafeMethodsForClass(
                             _proxiedClass);
+                    Set<JavaMethodInfo> firstParamClassNameMethods = SetUtil.set();
                     for (int i=0; i < methods.length; i++) {
                         Method method = methods[i];
                         boolean isSafe = (specification != null ?
@@ -516,34 +550,53 @@ public class JavaTypeProvider extends TypeProvider
                         _methodInfos.put(
                             methodInfo.getMungedName(),
                             methodInfo);
+
+                        if (methodInfo.firstParameterIsClassName()) {
+                            firstParamClassNameMethods.add(methodInfo);
+                        }
+                    }
+                    /*
+                     Add another method which automatically adds classname parameter during runtime
+                     but.. with the different signature of ignoring first param
+                     Do this in another loop so that we overwrite any accidental declaration of similar
+                     methods with our new mungedName
+                    */
+                    Iterator<JavaMethodInfo> mi = firstParamClassNameMethods.iterator();
+                    while (mi.hasNext()) {
+                        JavaMethodInfo oneInfo = mi.next();
+                        String mungedName = oneInfo.getMungedMethodNameSansFirstParam();
+                        if (mungedName!=null ) {
+                            _methodInfos.put(mungedName,oneInfo);
+                        }
                     }
                 }
                 _hasMethodInfoLoaded = true;
             }
         }
 
-        public MethodInfo findAppropriateMethodInfo (TypeRetriever retriever,
+
+        public JavaMethodInfo findAppropriateMethodInfo (TypeRetriever retriever,
                                                       String name,
                                                       List parameters,
                                                       boolean staticOnly)
         {
             return findMethodInfo(retriever,
-                    (Collection <MethodInfo>)_methodInfos.values(), name,
+                    _methodInfos.values(), name,
                     parameters, staticOnly);
         }
 
-        private MethodInfo findMethodInfo (TypeRetriever retriever,
-                                           Collection <MethodInfo> methods,
+        private JavaMethodInfo findMethodInfo (TypeRetriever retriever,
+                                           Collection<JavaMethodInfo> methods,
                                            String name,
                                            List parameters,
                                            boolean staticOnly)
         {
-            MethodInfo mostSpecific = null;
+            JavaMethodInfo mostSpecific = null;
 
             // Find matching method without narrowing or widening
-            Iterator iter = methods.iterator();
+            Iterator<JavaMethodInfo> iter = methods.iterator();
             while (iter.hasNext()) {
-                MethodInfo method = (MethodInfo)iter.next();
+                JavaMethodInfo method = iter.next();
                 if (isMatchingMethod(retriever, method, name, parameters,
                         false, false, staticOnly)) {
                     return method;
@@ -553,7 +606,7 @@ public class JavaTypeProvider extends TypeProvider
             // Find matching method with type widening
             iter = methods.iterator();
             while (iter.hasNext()) {
-                MethodInfo method = (MethodInfo)iter.next();
+                JavaMethodInfo method = iter.next();
                 if (isMatchingMethod(retriever, method, name, parameters,
                         true, false, staticOnly)) {
                     if (mostSpecific == null ||
@@ -570,7 +623,7 @@ public class JavaTypeProvider extends TypeProvider
             // Find metching method with type narrowing
             iter = methods.iterator();
             while (iter.hasNext()) {
-                MethodInfo method = (MethodInfo)iter.next();
+                JavaMethodInfo method = iter.next();
                 if (isMatchingMethod(retriever, method, name, parameters,
                         false, true, staticOnly)) {
                      if (mostSpecific == null ||
@@ -684,13 +737,13 @@ public class JavaTypeProvider extends TypeProvider
             return JavaTypeProvider.instance();
         }
     }
-
+    
     //---------------------------------------------------------------------
     // ArrayTypeInfo
 
     /**
-     * Subclass of <code>TypeInfo</code> for array type.
-     */
+    * Subclass of <code>TypeInfo</code> for array type.
+    */
     static class JavaArrayTypeInfo extends JavaTypeInfo
     {
         protected int      _dimension;
@@ -714,7 +767,7 @@ public class JavaTypeProvider extends TypeProvider
 
     //---------------------------------------------------------------------
     // JavaFieldInfo
-
+    
     static class JavaFieldInfo implements FieldInfo
     {
         protected Field _proxiedField;
@@ -756,7 +809,7 @@ public class JavaTypeProvider extends TypeProvider
         }
     }
 
-    public static class JavaMethodInfo implements MethodInfo
+    public static class JavaMethodInfo implements MethodInfo,Cloneable
     {
         protected Method     _proxiedMethod;
         protected TypeInfo   _parentType;
@@ -764,9 +817,12 @@ public class JavaTypeProvider extends TypeProvider
         protected boolean    _isSafe;
 
         protected List /* <TypeInfo> */ _parametersType = null;
-        protected boolean               _hasParametersLoaded = false;
+        protected boolean   _hasParametersLoaded = false;
 
         protected TypeInfo   _returnType = null;
+        // Class on which I am a pseudo method e.g: vrealm_1.fmd_1.myMFD
+        private String _proxiedClass = null;
+        private  SafeMethodOptions _annotation;
 
         JavaMethodInfo (TypeRetriever retriever,
                         TypeInfo type,
@@ -779,9 +835,48 @@ public class JavaTypeProvider extends TypeProvider
             _returnType = getReturnType(retriever);
             _mungedName = getMungedMethodName(getName(), _parametersType);
             _isSafe = isSafe;
+            _annotation = method.getAnnotation(SafeMethodOptions.class);
         }
 
-        public String      getName ()
+       /**
+        * Creates a new instance and fakes that methodInfo belongs to
+        * a class sent in the argument. This is used to assign methods to
+        * FMD classes. Depending upon the annotation about covariantReturn,
+        * it also narrows down the return type of the method to the type
+        * passed.
+        * @param otherProxy expected to be not null, has type info for vrealm.fmd.MyFMD class
+        */
+        protected JavaMethodInfo createProxiedMethodInfo (TypeInfo otherProxy)
+        {
+            JavaMethodInfo ret = null;
+            try {
+                ret = (JavaMethodInfo)super.clone();
+                ret._proxiedClass = otherProxy.getName();
+                if (hasCovariantReturn()) {
+                    //Change the return type based on annotation
+                    ret._returnType = otherProxy;
+                }
+            }
+            catch (CloneNotSupportedException e) {
+                Assert.fail(e, "JavaMethodInfo should be clonable");
+            }
+            return ret;
+        }
+
+        /**
+         * if annotation is set, returns the firstArgumentClassName
+         * that was set. 
+         * @return could be null
+         */
+        public String getFirstArgumentClassName ()
+        {
+            if (firstParameterIsClassName()) {
+                return _proxiedClass;
+            }
+            return null;
+        }
+
+        public String getName ()
         {
             return _proxiedMethod.getName();
         }
@@ -801,7 +896,6 @@ public class JavaTypeProvider extends TypeProvider
             return _proxiedMethod;
         }
 
-
         /**
          *
          * @param retriever
@@ -813,19 +907,16 @@ public class JavaTypeProvider extends TypeProvider
             if (_parametersType == null && !_hasParametersLoaded) {
                 Class[] classes = _proxiedMethod.getParameterTypes();
                 List types = ListUtil.list();
-                if (classes != null) {
-                    for (int i=0; i < classes.length; i++) {
-                        TypeInfo type = retriever.getTypeInfo(classes[i].getName());
-                        if (type != null) {
-                            types.add(type);
-                        }
-                        else {
-                            types = null;
-                            break;
-                        }
+                for (int i=0; i < classes.length; i++) {
+                    TypeInfo type = retriever.getTypeInfo(classes[i].getName());
+                    if (type != null) {
+                        types.add(type);
+                    }
+                    else {
+                        types = null;
+                        break;
                     }
                 }
-
                 _hasParametersLoaded = true;
                 _parametersType = types;
             }
@@ -838,7 +929,7 @@ public class JavaTypeProvider extends TypeProvider
          * @return Return a void class if there is no return type.  If the
          * return type exists but cannot be found, then return null.
          */
-        public TypeInfo    getReturnType (TypeRetriever retriever)
+        public TypeInfo getReturnType (TypeRetriever retriever)
         {
             if (_returnType == null) {
                 Class type = _proxiedMethod.getReturnType();
@@ -849,7 +940,7 @@ public class JavaTypeProvider extends TypeProvider
             return _returnType;
         }
 
-        public TypeInfo    getType (TypeRetriever retriever)
+        public TypeInfo getType (TypeRetriever retriever)
         {
             return getReturnType(retriever);
         }
@@ -869,6 +960,40 @@ public class JavaTypeProvider extends TypeProvider
         public TypeInfo    getParentType ()
         {
             return _parentType;
+        }
+
+        private boolean hasCovariantReturn ()
+        {
+            if (_annotation !=null) {
+                return _annotation.covariantReturn();
+            }
+            return false;
+        }
+
+        boolean firstParameterIsClassName ()
+        {
+            if (_annotation!=null && _annotation.firstParameterIsClassName()) {
+                Class[] params = _proxiedMethod.getParameterTypes();
+                if (params.length >0) {
+                    if (params[0].equals(String.class)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        String getMungedMethodNameSansFirstParam ()
+        {
+            int size = _parametersType.size();
+            if (size < 1 )return null;
+            List params = Collections.EMPTY_LIST;
+            if (size > 1) {
+                params = ListUtil.list();
+                ListUtil.copyInto(_parametersType,params,1,size-1);
+            }
+            String mungedName = getMungedMethodName(getName(),params);
+            return mungedName;
         }
 
         static String getMungedMethodName (String methodName,

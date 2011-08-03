@@ -39,8 +39,9 @@ import ariba.util.fieldtype.NullTypeInfo;
 import ariba.util.core.ListUtil;
 import ariba.util.core.ArrayUtil;
 import ariba.util.core.Assert;
-
-import java.util.*;
+import ariba.util.fieldtype.JavaTypeProvider.JavaTypeInfo;
+import ariba.util.fieldtype.JavaTypeProvider.JavaMethodInfo;
+import java.util.List;
 import java.lang.reflect.Method;
 
 /**
@@ -51,56 +52,59 @@ import java.lang.reflect.Method;
  */
 public class ObjectMethodAccessor implements MethodAccessor
 {
+
         /* MethodAccessor interface */
-    public Object callStaticMethod( Map context, Class targetClass, String methodName, Object[] args ) throws MethodFailedException
+    public Object callStaticMethod (ExprContext context,
+                                    Class targetClass,
+                                    String methodName,
+                                    Object[] args ) throws MethodFailedException
     {
-        List methods = getAppropriateMethod(targetClass, methodName, args, true);
-        return ExprRuntime.callAppropriateMethod( (ExprContext)context, targetClass, null, methodName, null, methods, args );
+        Method method = getMethod(targetClass,methodName,args,true);
+        Object ret = ExprRuntime.callAppropriateMethod(context,targetClass,null,
+                                                            methodName,method,args);
+        return ret;
     }
 
-    public Object callMethod( Map context, Object target, String methodName, Object[] args ) throws MethodFailedException
+    public Object callMethod (ExprContext context,
+                              Object target,
+                              String methodName,
+                              Object[] args ) throws MethodFailedException
     {
-        Class       targetClass = (target == null) ? null : target.getClass();
-        List methods = getAppropriateMethod(targetClass, methodName, args, false);
-        return ExprRuntime.callAppropriateMethod( (ExprContext)context, target, target, methodName, null, methods, args );
+        Class  targetClass = (target == null) ? null : target.getClass();
+        Method method = getMethod(targetClass,methodName,args,false);
+        Object ret = ExprRuntime.callAppropriateMethod(context,target,target,
+                                                       methodName,method,args);
+        return ret;
     }
 
-    private List<Method> getAppropriateMethod (Class targetClass,
-                                               String methodName,
-                                               Object[] args,
-                                               boolean isStatic)
+    private Method getMethod (Class targetClass,String methodName,
+                                              Object[] args, boolean isStatic)
     {
-        if (targetClass == null) {
-            return null;
-        }
+        Method ret = null;
+        if (targetClass != null) {
+            TypeRetriever retriever = JavaTypeRegistry.instance();
+            List <TypeInfo> argTypes = getArgumentTypes(args);
+            TypeInfo targetType = retriever.getTypeInfo(targetClass.getName());
 
-        String className = targetClass.getName();
-        List <TypeInfo> argTypes = getArgumentTypes(args);
-        TypeRetriever retriever = JavaTypeRegistry.instance();
-        TypeInfo targetType = retriever.getTypeInfo(className);
+            // In the case of nested class loaders we could have a class for which
+             // classForName() (using the system class loader) might fail,
+             // so we look up using the class explicitly
+             // Todo: reconsider the getTypeInfo interface: maybe add class as an (optional) arg
+            if (targetType == null) {
+                targetType = JavaTypeProvider.instance().getTypeInfo(targetClass);
+            }
 
-        // In the case of nested class loaders we could have a class for which
-        // classForName() (using the system class loader) might fail,
-        // so we look up using the class explicitly
-        // Todo: reconsider the getTypeInfo interface: maybe add class as an (optional) arg
-        if (targetType == null) {
-            targetType = ((JavaTypeProvider)JavaTypeProvider.instance()).getTypeInfo(targetClass);
-        }
-        
-        if (targetType instanceof JavaTypeProvider.JavaTypeInfo) {
-            JavaTypeProvider.JavaTypeInfo javaType =
-                    (JavaTypeProvider.JavaTypeInfo)targetType;
+            if (targetType instanceof JavaTypeInfo) {
+                JavaTypeInfo javaType =(JavaTypeInfo)targetType;
+                MethodInfo methodInfo = javaType.getMethod(retriever, methodName,
+                                                            argTypes, isStatic);
 
-             MethodInfo methodInfo = javaType.getMethod(
-                     retriever, methodName, argTypes, isStatic);
-            if (methodInfo != null &&
-                methodInfo instanceof JavaTypeProvider.JavaMethodInfo)
-            {
-                return ListUtil.list(((JavaTypeProvider.JavaMethodInfo)methodInfo).getMethod());
+                if (methodInfo instanceof JavaMethodInfo) {
+                   ret = ((JavaMethodInfo)methodInfo).getMethod();
+                }
             }
         }
-
-        return null;
+        return ret;
     }
 
     private List <TypeInfo> getArgumentTypes (Object[] args)
@@ -116,7 +120,7 @@ public class ObjectMethodAccessor implements MethodAccessor
                     Class argCls = arg.getClass();
                     type = retriever.getTypeInfo(argCls.getName());
                     Assert.that(type != null,
-                            "Fail to retrieve type for name '%s'.", argCls.getName());
+                            "Failed to retrieve type for name '%s'.", argCls.getName());
                 }
 
                 result.add(type);

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#59 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#60 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -108,8 +108,7 @@ public final class AWUtil extends AWBaseObject
     public static final char BeginQueryChar = '?';
     public static final String TokenizerDelim ="&";
     public static final char Equals = '=';
-	public static String fontFileLocation;
-	
+
     // ** Thread Safety Considerations: LocalesByBrowserLanguageString require locking -- everything else is either immutable or not shared.
 
     static
@@ -128,10 +127,6 @@ public final class AWUtil extends AWBaseObject
     public static AWClassLoader getClassLoader ()
     {
         return TheClassLoader;
-    }
-
-    public static void setFontPath(String path){
-         fontFileLocation = path;
     }
 
     // Use isAssignableFromClass?
@@ -1712,7 +1707,7 @@ public final class AWUtil extends AWBaseObject
         }
 
         boolean splitOnUC = !string.contains("_");
-        
+
         boolean allCaps = true;
         FastStringBuffer buf = new FastStringBuffer();
         int lastUCIndex = -1;
@@ -1751,7 +1746,7 @@ public final class AWUtil extends AWBaseObject
 
         return buf.toString();
     }
-    
+
     /////////////////
     // Debugging
     /////////////////
@@ -2181,7 +2176,7 @@ public final class AWUtil extends AWBaseObject
     {
         return UnsafeHeaderPattern.matcher(url).replaceAll("");
     }
-    
+
     public static AWStringKeyHashtable parseQueryString (String queryString)
     {
         AWStringKeyHashtable queryStringValues = new AWStringKeyHashtable();
@@ -2542,7 +2537,8 @@ public final class AWUtil extends AWBaseObject
      */
 
     public static void convertHTMLToPDF (InputStream htmlInputStream,
-                                         OutputStream outputStream)
+                                         OutputStream outputStream,
+                                         String fontFileLocation)
     {
         try
         {
@@ -2554,17 +2550,20 @@ public final class AWUtil extends AWBaseObject
             File dir = SystemUtil.getLocalTempDirectory();
             File tempFile = File.createTempFile("pdf", "pdf", dir);
             FileOutputStream temp = new FileOutputStream(tempFile);
-            
+
             tidy.parse(htmlInputStream, temp);
             temp.close();
 
             ITextRenderer renderer = new ITextRenderer();
-			renderer.getFontResolver().addFont(fontFileLocation, BaseFont.IDENTITY_H , BaseFont.EMBEDDED);
+            if (!StringUtil.nullOrEmptyOrBlankString(fontFileLocation))
+            {
+			    renderer.getFontResolver().addFont(fontFileLocation, BaseFont.IDENTITY_H , BaseFont.EMBEDDED);
+            }
             renderer.setDocument(tempFile);
             renderer.layout();
             renderer.createPDF(outputStream);
             if(tempFile.exists()) {
-                tempFile.delete();  
+                tempFile.delete();
             }
         }
         catch (IOException exception) {
@@ -2574,7 +2573,7 @@ public final class AWUtil extends AWBaseObject
             throw new AWGenericException(Fmt.S("Failed to generate pdf content : %s", SystemUtil.stackTrace(e)));
         }
     }
-    
+
 }
 
 /////////////////////////////

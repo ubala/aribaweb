@@ -12,9 +12,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/ASTCast.java#3 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/ASTCast.java#4 $
 */
 package ariba.util.expr;
+
+import ariba.util.fieldtype.TypeInfo;
 
 class ASTCast extends SimpleNode
 {
@@ -49,9 +51,18 @@ class ASTCast extends SimpleNode
         // method will convert the child value to an instance of the casted type.
         // Otherwise, the method will just return child value as it is if it is
         // convertable or return null.
-        Class targetClass = TypeConversionHelper.getClassForType(_classname);
+        String classNameToUse = _classname;
+        Class targetClass = TypeConversionHelper.getClassForType(classNameToUse);
+        if (targetClass == null) {
+            //Could it be Dynamic type?
+            TypeInfo myType = getTypeInfo();
+            if (myType!=null) {
+                classNameToUse = myType.getImplementationName();
+                targetClass = TypeConversionHelper.getClassForType(classNameToUse);
+            }
+        }
         if (TypeConversionHelper.canConvert(targetClass, value)) {
-            return TypeConversionHelper.convertPrimitive(_classname, value);
+            return TypeConversionHelper.convertPrimitive(classNameToUse, value);
         }
         else {
             return null;

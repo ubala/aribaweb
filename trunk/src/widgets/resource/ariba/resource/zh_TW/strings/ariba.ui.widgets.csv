@@ -1,6 +1,6 @@
 Big5,,,,
-"AribaAboutBox",a009,"&copy; 1996 - 2010 Ariba Inc. All Rights Reserved.","&copy; 1996 - 2010 Ariba, Inc. 保留所有權利",""
-"AribaAboutBox",a010,"'Ariba, Inc.', 'Ariba', the Ariba, Inc. logo, and 'Ariba.com' are trademarks and/or service marks of Ariba or Others. For additional information on Ariba trademarks and service marks, please see {0}www.ariba.com/trademarks.cfm{/0}. Unless otherwise noted on the Site, all other trademarks, service marks, and logos used in this Site are the trademarks, service marks or logos of their respective owners.","「Ariba, Inc.」、「Ariba」、Ariba, Inc. 標誌和「Ariba.com」都是 Ariba 或其他公司的商標和/或服務標誌。如需其他關於 Ariba 商標和服務標誌的資訊，請造訪 {0}www.ariba.com/trademarks.cfm{/0}。除非網站上另有註明，否則此網站中使用的所有其他商標、服務標誌或標誌均屬於其各自所有者。",""
+"AribaAboutBox",a009,"&copy; 1996 - 2011 Ariba Inc. All Rights Reserved.","&copy; 1996 - 2011 Ariba, Inc. 保留所有權利",""
+"AribaAboutBox",a010,"'Ariba, Inc.', 'Ariba', the Ariba, Inc. logo, and 'Ariba.com' are trademarks and/or service marks of Ariba or Others. For additional information on Ariba trademarks and service marks, please see {0}www.ariba.com/legal/trademarks.cfm{/0}. Unless otherwise noted on the Site, all other trademarks, service marks, and logos used in this Site are the trademarks, service marks or logos of their respective owners.","「Ariba, Inc.」、「Ariba」、Ariba, Inc. 標誌和「Ariba.com」都是 Ariba 或其他公司的商標和/或服務標誌。如需其他關於 Ariba 商標和服務標誌的資訊，請瀏覽 {0}www.ariba.com/legal/trademarks.cfm{/0}。除非網站上另有註明，否則此網站中使用的所有其他商標、服務標誌或標誌均屬於其各自所有者。",""
 "AribaBasicPageWrapper",a001,"Collapse the Navigation Panel","折疊導航面板",""
 "AribaBasicPageWrapper",a002,"Expand the Navigation Panel","展開導航面板",""
 "AribaBasicPageWrapper",a005,"Home","首頁",""
@@ -10,7 +10,7 @@ Big5,,,,
 "AribaBasicPageWrapper",a009,"Preferences","偏好設定",""
 "AribaContactBox",a001,"If you need help on how to use this product, click {0}Help{/0} at the top right of any product page to access documentation and tutorials.","如需有關如何使用此產品的幫助，請按一下任何產品頁面右上角的{0}「說明」{/0}，以存取相關文件和教學課程。",""
 "AribaLoginForm",a002,"System running in non-production mode","系統在非生產模式中執行",""
-"AribaLoginPageWrapper",a002,"&copy; 1996 &#150; 2010 Ariba Inc. All Rights Reserved","&copy; 1996 &#150; 2010 Ariba, Inc. 保留所有權利",""
+"AribaLoginPageWrapper",a002,"&copy; 1996 &#150; 2011 Ariba Inc. All Rights Reserved","&copy; 1996 &#150; 2011 Ariba, Inc. 保留所有權利",""
 "AribaLoginPageWrapper",a003,"Support","支援",""
 "AribaLoginPageWrapper",a004,"To properly view this application IE 6+, Firefox 3.6+, or Safari 4+ with Adobe Flash Player 7+ is required.","要正確檢視此應用程式，需要 IE 6+、Firefox 3.6 或 Safari 4+，並安裝 Adobe Flash Player 7+。",""
 "AribaNotificationDialog",a001,"Notification","通知",""

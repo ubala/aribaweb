@@ -1,6 +1,6 @@
 Cp1252,,,,
-"AribaAboutBox",a009,"&copy; 1996 - 2010 Ariba Inc. All Rights Reserved.","&copy; 1996-2010 Ariba, Inc. Alle Rechte vorbehalten.",""
-"AribaAboutBox",a010,"'Ariba, Inc.', 'Ariba', the Ariba, Inc. logo, and 'Ariba.com' are trademarks and/or service marks of Ariba or Others. For additional information on Ariba trademarks and service marks, please see {0}www.ariba.com/trademarks.cfm{/0}. Unless otherwise noted on the Site, all other trademarks, service marks, and logos used in this Site are the trademarks, service marks or logos of their respective owners.","""Ariba, Inc."", ""Ariba"", das Ariba, Inc.-Logo und ""Ariba.com"" sind Marken und/oder Dienstleistungsmarken von Ariba oder anderen Unternehmen. Weitere Informationen über Ariba-Marken und -Dienstleistungsmarken finden Sie unter {0}www.ariba.com/trademarks.cfm{/0} (auf Englisch). Wenn auf der Webseite nicht anders angegeben, gehören alle anderen hier erwähnten Marken, Dienstleistungsmarken und Logos den jeweiligen Eigentümern.",""
+"AribaAboutBox",a009,"&copy; 1996 - 2011 Ariba Inc. All Rights Reserved.","&copy; 1996-2011 Ariba, Inc. Alle Rechte vorbehalten.",""
+"AribaAboutBox",a010,"'Ariba, Inc.', 'Ariba', the Ariba, Inc. logo, and 'Ariba.com' are trademarks and/or service marks of Ariba or Others. For additional information on Ariba trademarks and service marks, please see {0}www.ariba.com/legal/trademarks.cfm{/0}. Unless otherwise noted on the Site, all other trademarks, service marks, and logos used in this Site are the trademarks, service marks or logos of their respective owners.","""Ariba, Inc."", ""Ariba"", das Ariba, Inc.-Logo und ""Ariba.com"" sind Marken und/oder Dienstleistungsmarken von Ariba oder anderen Unternehmen. Weitere Informationen über Ariba-Marken und -Dienstleistungsmarken finden Sie unter {0}www.ariba.com/legal/trademarks.cfm{/0} (auf Englisch). Wenn auf der Webseite nicht anders angegeben, gehören alle anderen hier erwähnten Marken, Dienstleistungsmarken und Logos den jeweiligen Eigentümern.",""
 "AribaBasicPageWrapper",a001,"Collapse the Navigation Panel","Navigationsfenster reduzieren",""
 "AribaBasicPageWrapper",a002,"Expand the Navigation Panel","Navigationsfenster erweitern",""
 "AribaBasicPageWrapper",a005,"Home","Startseite",""
@@ -10,7 +10,7 @@ Cp1252,,,,
 "AribaBasicPageWrapper",a009,"Preferences","Voreinstellungen",""
 "AribaContactBox",a001,"If you need help on how to use this product, click {0}Help{/0} at the top right of any product page to access documentation and tutorials.","Falls Sie Hilfe zur Verwendung dieses Produkts benötigen, klicken Sie am oberen Rand einer beliebigen Seite auf {0}Hilfe{/0}, um auf die Dokumentation sowie auf Lernprogramme zuzugreifen.",""
 "AribaLoginForm",a002,"System running in non-production mode","System läuft im Nicht-Produktionsmodus",""
-"AribaLoginPageWrapper",a002,"&copy; 1996 &#150; 2010 Ariba Inc. All Rights Reserved","&copy; 1996-2010 Ariba, Inc. Alle Rechte vorbehalten.",""
+"AribaLoginPageWrapper",a002,"&copy; 1996 &#150; 2011 Ariba Inc. All Rights Reserved","&copy; 1996-2011 Ariba, Inc. Alle Rechte vorbehalten.",""
 "AribaLoginPageWrapper",a003,"Support","Support",""
 "AribaLoginPageWrapper",a004,"To properly view this application IE 6+, Firefox 3.6+, or Safari 4+ with Adobe Flash Player 7+ is required.","Für die fehlerfreie Anzeige dieser Anwendung wird Internet Explorer 6+, Firefox 3.6+ oder Safari 4+ mit Adobe Flash Player 7+ benötigt.",""
 "AribaNotificationDialog",a001,"Notification","Benachrichtigung",""

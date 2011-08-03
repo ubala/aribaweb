@@ -12,16 +12,18 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestSessionSetup.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestSessionSetup.java#9 $
     Responsible: ksaleh
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWRequestContext;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWSession;
 import ariba.util.test.TestValidationParameter;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -57,4 +59,7 @@ public interface TestSessionSetup
     public String getRemoteRealmName ();
 
     public void executeStager(Runnable stagerRunnable);
+    
+    public void saveTestContext (String testId, TestContext tc) throws IOException;
+    public AWResponseGenerating restoreTestContext (String testId, AWRequestContext rq) throws IOException, ClassNotFoundException;
 }

@@ -1,23 +1,23 @@
 <!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
 <idea-plugin url="http://aribaweb.org/">
-    <name>AribaWeb Plugin</name>
-    <version>5.0RC1.1</version>
-    <vendor url="http://aribaweb.org/" email="">AribaWeb AJAX UI Developement Framework</vendor>
+	<name>AribaWeb Plugin</name>
+	<version>5.0GA</version>
+	<vendor url="http://aribaweb.org/" email="">AribaWeb AJAX UI Developement Framework</vendor>
 
-    <description>
-	    AribaWeb (http://aribaweb.org) is the Open Source component-based web application development framework for
-        creating rich, AJAX-enabled applications with the minimum of code (and no hand-coded JavaScript).
-  
-This IDEA plugin provides several productivity-boosting
-features to accelerate AW development within IDEA: 
-1) Component class to Template source toggle,
-2) Remote opening (clicking on component names in AW web pages will open them in IDEA),
-3) Several "Live Templates" for common AW Component tags.
-    </description>
+
+	<description>
+		AribaWeb (http://aribaweb.org) is the Open Source component-based web application development framework for
+		creating rich, AJAX-enabled applications with the minimum of code (and no hand-coded JavaScript).
+
+		This IDEA plugin provides several productivity-boosting
+		features to accelerate AW development within IDEA:
+		1) Component class to Template source toggle,
+		2) Remote opening (clicking on component names in AW web pages will open them in IDEA),
+		3) Several "Live Templates" for common AW Component tags.
+	</description>
 
     <change-notes>
-	    New in version 5.0RC1.1: IDEA 8.x compatibility, fixed live-template named to not collide with
-        new built-in 8.x templates.
+        New in version 5.0GA: IDEA 9.x and 10.x compatibility
     </change-notes>
 
 

@@ -217,11 +217,13 @@ ariba.Calendar = function() {
                         }
                         else {
                             Dom.removeClass(cell, AWTodayStyle);
+                            Dom.removeClass(cell, AWTodayStyle);
                         }
                         if (!this.showDay(cellIndex)) {
                             Dom.addClass(cell, AWDisabledStyle);
                         }
                         else {
+                            Dom.removeClass(cell, AWDisabledStyle);
                             Dom.removeClass(cell, AWDisabledStyle);
                         }
                         if ((selectedDay == currentDay) && (selectedMonth == calendarMonth) && (selectedYear == calendarYear)) {
@@ -229,7 +231,12 @@ ariba.Calendar = function() {
                         }
                         else {
                             // must call "remove" because we reuse the cells once rendered
+                            Dom.removeClass(cell, AWSelectedDayStyle); 
+                            // This second remove was added in 1-B8NJ91/1845273 because 
+                            // it was considered to risky to change removeClass to remove all class strings.
+                            // There is likely a defect in Dom.addClass that allows for multiple class strings to be added. 
                             Dom.removeClass(cell, AWSelectedDayStyle);
+                            Dom.removeClass(cell, AWFocusStyle);
                             Dom.removeClass(cell, AWFocusStyle);
                         }
                         currentDay += 1;
@@ -396,18 +403,42 @@ ariba.Calendar = function() {
             var dateFieldChanged = textfieldObj.getAttribute("awdidChange");
             var menuId = linkObj.getAttribute("awmenuId");
             var menu = Dom.getElementById(menuId);
-            if(linkObj._awcalendar) {
-                linkObj._awcalendar.renderCalendar(linkObj._awcalendar._selectedDate);
-            }
-            Menu.menuLinkOnClick(linkObj, menuId, null, mevent);
+
             if (dateFieldChanged == "1") {
+                var formId = textfieldObj.form.id;
+                var textFieldName = textfieldObj.name;
+                Handlers.textFieldRefresh(formId, textFieldName);
+            } else {
+                if (linkObj._awcalendar) {
+                    this.showCalendar(linkObj.id);
+                }
+            }
+            return false;
+        },
+
+        timeFieldOnClick : function (linkObj, mevent)
+        {
+            var nobrObj = Dom.findParent(linkObj, "NOBR", false);
+            var textfieldObj = Dom.findChild(nobrObj, "INPUT", false);
+            var textFieldChanged = textfieldObj.getAttribute("awdidChange");
+            var menuId = linkObj.getAttribute("awmenuId");
+            
+            Menu.menuLinkOnClick(linkObj, menuId, null, mevent);
+            
+            if (textFieldChanged == "1") {
                 var formId = textfieldObj.form.id;
                 var textFieldName = textfieldObj.name;
                 Handlers.textFieldRefresh(formId, textFieldName);
             }
             return false;
         },
+        
         dateTextChanged : function (textfieldObj)
+        {
+            textfieldObj.setAttribute("awdidChange", "1");
+        },
+
+        timeTextChanged : function (textfieldObj)
         {
             textfieldObj.setAttribute("awdidChange", "1");
         },
@@ -436,7 +467,10 @@ ariba.Calendar = function() {
             var linkObj = Dom.getElementById(linkId);
             var menuId = linkObj.getAttribute("awmenuId");
             Menu.hideActiveMenu();
-            Menu.menuLinkOnClick(linkObj, menuId, null, null);
+            if (linkObj._awcalendar) {
+                linkObj._awcalendar.renderCalendar(linkObj._awcalendar._selectedDate);
+                Menu.menuLinkOnClick(linkObj, menuId, null, null);
+            }
         },
 
         onTimeChange : function (selectObj, mevent)

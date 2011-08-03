@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#35 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#39 $
     </Copyright>
 
     <Overview>
@@ -72,7 +72,12 @@
         The emptyStringValue attribute allows for providing a default value in the event the user doesn't enter anything
         in the TextField.  For example, since an empty TextField will push an empty String into the object, you may want
         to treat this as $null.  You could do this with a formatter as well, but this provides an alternative to a custom
-        formatter.
+        formatter.  emptyStringValue does not get displayed to the user.
+    </Binding>
+
+    <Binding key="placeholder" type="Object" required="$false" direction="get">
+        Placeholder text displayed to the user when value is null or empty.
+        Placeholder does not get push to the parent component.
     </Binding>
 
     <Binding key="id" type="String" required="$false" direction="get" deprecated="$true">
@@ -107,6 +112,10 @@
         INPUT size (if not specified tfW class applied, resulting in 156px wide field)
     </Binding>
 
+    <Binding key="formValueStrings" direction="set" type="Object[]" required="$false">
+        The trimmed and untrimmed value pair.
+    </Binding>
+
 </a:Api>\
 <a:If ifTrue="$isEditable">\
     <input type="text" elementId="$elementId" id="$textFieldId" name="$textFieldName"
@@ -117,6 +126,8 @@
         size="$^size"
         class="$cssClass"
         bh="$^behavior:TF"
+        onBLur="$onBlurString"
+        _pl="$formatPlaceHolder"
         otherBindings="$otherBindingsValues"/>\
     <a:RefreshRegion>\
         <a:If ifTrue="$isInHighLightedErrorScope">

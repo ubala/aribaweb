@@ -62,6 +62,11 @@ public class ExprContext extends Object implements Map
     public static final TypeConverter   DEFAULT_TYPE_CONVERTER = new DefaultTypeConverter();
     public static final MemberAccess    DEFAULT_MEMBER_ACCESS = new DefaultMemberAccess(false);
 
+
+    /**
+     * Key for methodInfo being passed in the Map
+     */
+    public static final String          CURRENT_METHODINFO_IN_EXECUTION = "_currentMethodInfo";
     //--------------------------------------------------------------------------
     // nested class
 

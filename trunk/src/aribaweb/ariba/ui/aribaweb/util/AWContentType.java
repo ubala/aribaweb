@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWContentType.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWContentType.java#18 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -36,6 +36,7 @@ public final class AWContentType extends AWBaseObject
     public static final AWContentType TextAscii = AWContentType.registerContentType("text/ascii");
     public static final AWContentType TextPlain = AWContentType.registerContentType("text/plain");
     public static final AWContentType ImageGif = AWContentType.registerContentType("image/gif");
+    public static final AWContentType ImageIco = AWContentType.registerContentType("image/vnd.microsoft.icon");
     public static final AWContentType ImageJpeg = AWContentType.registerContentType("image/jpeg");
     public static final AWContentType ImagePng = AWContentType.registerContentType("image/png");
     public static final AWContentType ApplicationWWWFormUrlEncoded = AWContentType.registerContentType("application/x-www-form-urlencoded");
@@ -70,6 +71,7 @@ public final class AWContentType extends AWBaseObject
         registerContentTypeForFileExtension("txt", TextAscii);
         registerContentTypeForFileExtension("gif", ImageGif);
         registerContentTypeForFileExtension("jpeg", ImageJpeg);
+        registerContentTypeForFileExtension("ico", ImageIco);
         registerContentTypeForFileExtension("jpg", ImageJpeg);
         registerContentTypeForFileExtension("js", ApplicationXJavascript);
         registerContentTypeForFileExtension("vbs", ApplicationXVBscript);

@@ -12,17 +12,33 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWLock.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWLock.java#6 $
 */
 
 package ariba.ui.aribaweb.util;
 
-public final class AWLock extends AWBaseObject
+public class AWLock extends AWBaseObject
 {
     private boolean _isLocked = false;
 
     public synchronized void lock ()
     {
+        lockObject();
+    }
+
+
+    public synchronized void unlock ()
+    {
+        _isLocked = false;
+        this.notify();
+    }
+
+    public synchronized void relock ()
+    {
+        lockObject();
+    }
+
+    private void lockObject() {
         while (_isLocked) {
             try {
                 this.wait();
@@ -34,10 +50,5 @@ public final class AWLock extends AWBaseObject
         }
         _isLocked = true;
     }
-
-    public synchronized void unlock ()
-    {
-        _isLocked = false;
-        this.notify();
-    }
+    
 }
