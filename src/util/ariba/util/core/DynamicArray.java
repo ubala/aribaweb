@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2011 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/DynamicArray.java#11 $
+    $Id: //ariba/platform/util/core/ariba/util/core/DynamicArray.java#12 $
 */
 
 package ariba.util.core;
@@ -224,6 +224,21 @@ abstract public class DynamicArray
     }
 
     /**
+     * Add all elements in the passed array if not already present.
+     * @see #addElementIfAbsent (Object)
+     * @param that
+     */
+
+    public void addElementsIfAbsent (Object[] that)
+    {
+        if (that != null && that.length >0 ) {
+            for (Object obj : that) {
+                addElementIfAbsent(obj);
+            }
+        }
+    }
+
+    /**
         Add an element to the array, if it isn't in the array
         @param o The element to add.  If o is already in the array
         then it is not added.  The == operator is used to
@@ -248,7 +263,7 @@ abstract public class DynamicArray
     {
         addAll(that);
     }
-      
+
     /**
         Add all the elements from another array.
         @param that The array that we will copy from
@@ -400,7 +415,7 @@ abstract public class DynamicArray
     {
         return remove(index);
     }
-    
+
     /**
         Remove an element from the array
         @param index The index of the element to remove
@@ -444,7 +459,7 @@ abstract public class DynamicArray
     {
         add(index, element);
     }
-    
+
     /**
         Insert an object into the array
         @param element The object to be inserted
@@ -520,7 +535,7 @@ abstract public class DynamicArray
     }
 
     /**
-        Converts the array to a List. 
+        Converts the array to a List.
         @return A List version of the array
 
         @aribaapi public
@@ -545,4 +560,3 @@ abstract public class DynamicArray
         this.inUse = 0;
     }
 }
-

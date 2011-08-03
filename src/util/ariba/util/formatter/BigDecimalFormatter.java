@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/formatter/BigDecimalFormatter.java#21 $
+    $Id: //ariba/platform/util/core/ariba/util/formatter/BigDecimalFormatter.java#22 $
 */
 
 package ariba.util.formatter;
@@ -56,6 +56,7 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
     public static final String ClassName = "ariba.util.formatter.BigDecimalFormatter";
 
     private static final char CanonicalDecimalSeparator = '.';
+    private static final String CanonicalDecimalSeparatorString = ".";
     private static final char CanonicalMinusSign        = '-';
 
     private static final char CanadianEnglishGroupSeparator = ',';
@@ -1079,7 +1080,7 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
             }
 
             String stringGroupingSeparator = Character.toString(chGroupingSeparator);
-            return stringGroupingSeparator;
+            return StringUtil.escapeRegEx(stringGroupingSeparator);
         }
 
         /** create pattern helper */
@@ -1717,7 +1718,7 @@ public class BigDecimalFormatter extends DecimalFormatterCommon
                 // get component strings
                 String effectiveNegativePrefix = __getEffectiveNegativePrefix();
                 String integerDigits = getIntegerDigits();
-                String decimalSeparator = getDecimalSeparator();
+                String decimalSeparator = CanonicalDecimalSeparatorString;
                 String decimalDigits = getDecimalDigits();
 
                 // create final string value

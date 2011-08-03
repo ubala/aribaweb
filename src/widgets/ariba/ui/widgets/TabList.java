@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.java#4 $
 */
 
 package ariba.ui.widgets;
@@ -45,7 +45,7 @@ public final class TabList extends AWComponent
     private Object _selectedTabDefinition;
     private AWBinding _labelBinding;
     private boolean _wasPreviousSelected;
-    private String _semanticKey;
+    private AWBinding _semanticKeyBinding;
     public AWEncodedString _allTabsMenuId;
 
     public static void setTabTextStyle (String styleString)
@@ -82,7 +82,7 @@ public final class TabList extends AWComponent
         _allTabs = null;
         _visibleTabs = null;
         _isSubmitForm = false;
-        _semanticKey = null;
+        _semanticKeyBinding = null;
         _barExtensionBackground = null;
         _elementId = null;
         _currentTabDefinition = null;
@@ -229,7 +229,7 @@ public final class TabList extends AWComponent
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
-        _semanticKey = stringValueForBinding(AWBindingNames.semanticKeyBindingName());
+        _semanticKeyBinding = bindingForName(AWBindingNames.awname, false);
         _labelBinding = bindingForName(AWBindingNames.label, false);
         _barExtensionBackground = AWBaseImage.imageUrl(requestContext, component, "awxBarExtension.gif");
         super.renderResponse(requestContext, component);
@@ -252,13 +252,9 @@ public final class TabList extends AWComponent
         return (AWComponent)valueForBinding(AWBindingNames.action);
     }
 
-    public String currentSemanticKey ()
+    public AWEncodedString currentTabSemanticKey ()  
     {
-        String currentSemanticKey = null;
-        if (_semanticKey != null) {
-            currentSemanticKey = StringUtil.strcat(_semanticKey, AWUtil.toString(_currentIndex));
-        }
-        return currentSemanticKey;
+        return encodedStringValueForBinding(_semanticKeyBinding);
     }
 
     public boolean isNotDropTarget ()

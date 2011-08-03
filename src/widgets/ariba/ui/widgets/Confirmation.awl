@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#32 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Confirmation.awl#34 $
     </Copyright>
 
     <Overview>
@@ -247,7 +247,7 @@
         </a:RefreshRegion>
     </a:If>\
 \
-    <a:If ifTrue="$renderConfirmation">\
+    <a:If ifTrue="$renderConfirmation">\        
         <a:RelocatableDiv class="panelContainer" id="$confId">\
         <w:DialogBox id="$^id" class="panel" wrapperClass="dialogWrapper" usesPanelContainer="$true">\
             <div class="dialogInnerWrapper">
@@ -279,7 +279,7 @@
                     </tr>\
                     <tr>\
                         <td class="dialogButtons">
-                            <div style="float:right">
+                            <div class="buttonsContainer">
                                 <a:If ifTrue="$hasButtonsTemplate">\
                                     <a:IncludeContent name="buttons" required="$true"/>\
                                 <a:Else/>

@@ -12,14 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFor.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFor.java#7 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWSemanticKeyProvider;
+import ariba.ui.aribaweb.util.Log;
 import ariba.ui.aribaweb.util.SemanticKeyProvider;
 import ariba.ui.aribaweb.util.SemanticKeyProviderUtil;
+import ariba.util.core.Assert;
+import ariba.util.core.Fmt;
 import ariba.util.fieldvalue.OrderedList;
 
 import java.lang.reflect.Field;
@@ -229,13 +232,26 @@ public class AWFor extends AWContainerElement
             // two pushes in a row for the first iteration.
             int indexOfLoop = requestSenderIdPath.get(lastIndex) - 1;
             // advance the elementId the appropriate amount
-            requestContext.incrementElementId(indexOfLoop);
+            if (indexOfLoop < repeatCount) {
+                requestContext.incrementElementId(indexOfLoop);
 
-            requestContext.pushElementIdLevel();
-            pushIterationValues(component, indexOfLoop, orderedListClassExtension, orderedList, parentPath, scoping);
-            actionResults = super.invokeAction(requestContext, component);
-            requestContext.popElementIdLevel();
-            if (scoping) requestContext._popSubcomponentScope();
+                requestContext.pushElementIdLevel();
+                pushIterationValues(component, indexOfLoop, orderedListClassExtension, orderedList, parentPath, scoping);
+                actionResults = super.invokeAction(requestContext, component);
+                requestContext.popElementIdLevel();
+                if (scoping) requestContext._popSubcomponentScope();
+            }
+            else {
+                // assert in debug mode, and log warning in all cases
+                String debugString =
+                    Fmt.S("AWFor: %s, parentPath: %s, requestSenderIdPath: %s, requestSenderId: %s",
+                        this,
+                        AWElementIdPath.debugElementIdPath(parentPath),
+                        AWElementIdPath.debugElementIdPath(requestSenderIdPath),
+                        requestContext.requestSenderId());
+                Log.aribaweb.warning(10690, debugString);
+                Assert.that(!requestContext.isDebuggingEnabled(), debugString);
+            }
         }
         else {
             int index = _startIndex(component);

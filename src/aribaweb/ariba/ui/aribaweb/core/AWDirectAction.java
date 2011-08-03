@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#65 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#68 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -58,7 +58,7 @@ abstract public class AWDirectAction extends AWBaseObject
     public static final String DefaultActionName = "default";
     public static final String AWImgActionName = "awimg";
     public static final String AWResActionName = "awres";
-    private static final int AWResActionResourceIndex = 4;
+    private static final int AWResActionResourceVersionIndex = 3;
     public static final String AWResTestActionName = "test_awres";
     public static final String PingActionName = "ping";
     public static final String ProgressCheckActionName = "progressCheck";
@@ -334,6 +334,8 @@ abstract public class AWDirectAction extends AWBaseObject
         return awresAction(true);
     }
 
+    private static final Pattern ValidResourceVersionPattern =
+        Pattern.compile("[0-9]+");
     //
     // todo:
     // 1) generate the locale onto the URL so we don't use
@@ -363,25 +365,41 @@ abstract public class AWDirectAction extends AWBaseObject
         //
         // construct the filename
         //
-        // awres/brand/brandVersion/resourceVersion/blah/blah/filename.jpg
+        // new: awres/brand/brandVersion/resourceVersion/blah/blah/filename.jpg
+        // old: awres/brand/brandVersion/blah/blah/filename.jpg
         String[] requestHandlerPathComponents = request.requestHandlerPath();
         AWNodeManager nodeManager = application.getNodeManager();
         if (nodeManager != null) {
             requestHandlerPathComponents =
                 nodeManager.filterUrlForNodeValidation(requestHandlerPathComponents);
         }
-        String brandName = requestHandlerPathComponents[1];
-        String brandVersion = requestHandlerPathComponents[2];
-        // requestHandlerPathComponents[3] (resource version) is only used for cache busting
-        String filename = requestHandlerPathComponents[AWResActionResourceIndex];
-        if (requestHandlerPathComponents.length > AWResActionResourceIndex + 1) {
-            FastStringBuffer sb = new FastStringBuffer();
-            for (int i=AWResActionResourceIndex; i < requestHandlerPathComponents.length -1; i++) {
-                sb.append(requestHandlerPathComponents[i]);
-                sb.append("/");
+        String filename = "";
+        String brandName = "";
+        String brandVersion = "";
+
+        if (requestHandlerPathComponents.length > AWResActionResourceVersionIndex) {
+            brandName = requestHandlerPathComponents[1];
+            brandVersion = requestHandlerPathComponents[2];
+
+            int resourceIndex = AWResActionResourceVersionIndex + 1;
+            // requestHandlerPathComponents[3] (resource version) is only used for cache busting
+            String resourceVersion = requestHandlerPathComponents[AWResActionResourceVersionIndex];
+            if (!ValidResourceVersionPattern.matcher(resourceVersion).matches()) {
+                // if resource version is missing, then treat it as part of the resource path.
+                resourceIndex = AWResActionResourceVersionIndex;
             }
-            sb.append(requestHandlerPathComponents[requestHandlerPathComponents.length -1]);
-            filename = sb.toString();
+            if (requestHandlerPathComponents.length > resourceIndex) {
+                filename = requestHandlerPathComponents[resourceIndex];
+                if (requestHandlerPathComponents.length > resourceIndex + 1) {
+                    FastStringBuffer sb = new FastStringBuffer();
+                    for (int i=resourceIndex; i < requestHandlerPathComponents.length -1; i++) {
+                        sb.append(requestHandlerPathComponents[i]);
+                        sb.append("/");
+                    }
+                    sb.append(requestHandlerPathComponents[requestHandlerPathComponents.length -1]);
+                    filename = sb.toString();
+                }
+            }
         }
 
         if (!isValidResourceFilename(filename)) {
@@ -440,7 +458,7 @@ abstract public class AWDirectAction extends AWBaseObject
     }
 
     private static Pattern invalidImageFilename = Pattern.compile(".*\\.\\..*");
-    private static Pattern validResourceFilename = Pattern.compile(".*\\.(gif|jpg|css|ico|js)");
+    private static Pattern validResourceFilename = Pattern.compile(".*\\.(png|gif|jpg|css|ico|js)");
 
     protected static boolean isValidResourceFilename(String filename)
     {
@@ -482,12 +500,10 @@ abstract public class AWDirectAction extends AWBaseObject
         else {
             response.setContentFromFile(((AWFileResource)imageResource)._fullPath());
             int indexOfDot = filename.lastIndexOf('.');
-            if (filename.regionMatches(true, indexOfDot + 1, GifExtension, 0, GifExtensionLength)) {
-                response.setContentType(AWContentType.ImageGif);
-            }
-            else {
-                response.setContentType(AWContentType.ImageJpeg);
-            }
+            String fileExtension = filename.substring(indexOfDot + 1);            
+            AWContentType contentType =
+                AWContentType.contentTypeForFileExtension(fileExtension);
+            response.setContentType(contentType);
         }
 
         // 24 hours
@@ -507,7 +523,7 @@ abstract public class AWDirectAction extends AWBaseObject
 
     public AWResponseGenerating progressCheckAction ()
     {
-        String key = request().formValueForKey(ProgressCheckSessionKeyName);
+        String key = ((AWBaseRequest)request()).initSessionId();
         ProgressMonitor progress = ProgressMonitor.getInstanceForKey(key);
         AWApplication application = application();
         AWResponse newResponse = application.createResponse(request());

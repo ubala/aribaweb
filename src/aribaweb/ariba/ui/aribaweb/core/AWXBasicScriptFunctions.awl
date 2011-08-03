@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#46 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.awl#47 $
     </Copyright>
 
     <Overview>
@@ -113,8 +113,5 @@
                 );\
             </a:ClientSideScript>
         </a:If>\
-        <a:ClientSideScript synchronous="$true">
-            ariba.Refresh.AWAllowParentFrame = <a:String value="$=ariba.ui.aribaweb.core.AWPage.AllowParentFrame"/>;
-        </a:ClientSideScript>
     </a:RefreshRegion>\
 </a:Singleton>\

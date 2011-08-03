@@ -1194,6 +1194,9 @@ ariba.Datatable = function() {
 
             Dom.setElementValue(tableInfo.leftPosId, tableInfo.body.scrollLeft);
 
+            // clear any stale scroll type
+            delete tableInfo.scrollType;
+
             if (faultData[AWTFaultIndex_Position] != 0) {
                 if (_AWTPendingScroll) {
                     // Debug.log("<font color='red'>RACE CONDITION</font>");

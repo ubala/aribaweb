@@ -27,3 +27,27 @@ is the official repository for known issues and enhancement requests.  If you're
 having a problem, find out if it's already known (and if a workaround is available)
 or file a new issue report.
 
+Contribute to AribaWeb
+====================
+We welcome patches and enhancements to our code and documentation. 
+In order to make contribution to AribaWeb that involves intellectual property,
+we ask that you sign and return the AribaWeb Contributor Agreement ("Agreement") by completing the following steps:
+
+1. Review the **[Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)**.
+All AribaWeb components are issued under this license, and contributions you make to the library will we subject to this license.
+
+2. Download the **[AribaWeb Contributor Agreement](http://aribaweb.org/AribaWeb_Contributor_Agreement.pdf)**.
+
+3. Submit your Agreement by emailing a PDF copy to Ed Scanzano at escanzano@ariba.com.
+   You can address any questions about the Agreement to same email address.
+   You will receive confirmation of your submission via the email address provided on the Agreement.
+
+Get the source code
+-------
+Use any Subversion client and checkout the **[AribaWeb Source Code](http://code.google.com/p/aribaweb/source/checkout)**
+using your Google account specified in the Agreement.
+
+Sumbit your contribution
+-------
+Simply open a ticket and attach a zip file containing your changes on the
+**[AribaWeb Issues Tracker](http://code.google.com/p/aribaweb/issues/list)**.

@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPasswordField.java#22 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWPasswordField.java#24 $
 */
 
 package ariba.ui.aribaweb.html;
 
 import ariba.ui.aribaweb.core.AWBinding;
+import ariba.ui.aribaweb.core.AWBindingNames;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWErrorManager;
@@ -49,13 +50,17 @@ public class AWPasswordField extends AWComponent
         BindingNames.errorKey,
         BindingNames.onKeyDown,
         BindingNames.classBinding,
-        BindingNames.size
+        BindingNames.size,
+        BindingNames.placeholder
     };
 
     private AWEncodedString _inputName = null;
     private Object _errorKey;
     public AWEncodedString _warnId = null;
     private boolean _indicateLength = false;
+    private String _formattedString;
+    private String _placeholder;
+
     
     // ** Thread Safety Considerations: see AWComponent.
 
@@ -77,32 +82,39 @@ public class AWPasswordField extends AWComponent
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
+        // recalculate formattedString
+        _formattedString = null;
+        formattedString();
+        _placeholder = stringValueForBinding(AWBindingNames.placeholder);
         // The value of a password field cannot be rendered in an IFrame incremental update.
         // This is due IE browser security against setting/getting password value using javascript.
         // So we need to force a FPR when we have a password field in a non-XMLHTTP on IE
         if (requestContext().isIncrementalUpdateRequest()
                 && !requestContext().isXMLHttpIncrementalRequest()
-                && request().isBrowserMicrosoft()) {
+                && request().isBrowserMicrosoft()
+                && !StringUtil.nullOrEmptyString(_formattedString)) {
             requestContext.forceFullPageRefresh();
         }
+
         super.renderResponse(requestContext, component);
     }
-
+    
     public String formattedString ()
     {
-        String formattedString = "";
-        Object objectValue = valueForBinding(BindingNames.value);
-        Object formatter = valueForBinding(BindingNames.formatter);
-        if (formatter == null) {
-            formattedString = AWUtil.toString(objectValue);
+        if (_formattedString == null) {
+            Object objectValue = valueForBinding(BindingNames.value);
+            Object formatter = valueForBinding(BindingNames.formatter);
+            if (formatter == null) {
+                _formattedString = AWUtil.toString(objectValue);
+            }
+            else {
+                _formattedString = AWFormatting.get(formatter).format(formatter, objectValue);
+            }
+            if (!StringUtil.nullOrEmptyString(_formattedString)) {
+                _formattedString = getMaskedValue(_formattedString);
+            }
         }
-        else {
-            formattedString = AWFormatting.get(formatter).format(formatter, objectValue);
-        }
-        if (!StringUtil.nullOrEmptyString(formattedString)) {
-            formattedString = getMaskedValue(formattedString);
-        }
-        return formattedString;
+        return _formattedString;
     }
 
     public void setFormValue (String formValueString)
@@ -217,5 +229,34 @@ public class AWPasswordField extends AWComponent
     private boolean isMaskedValue (String value)
     {
         return MaskeValuePattern.matcher(value).matches();
+    }
+
+    public String placeholder ()
+    {        
+        return _placeholder;
+    }
+
+    public boolean displayPlaceholder ()
+    {
+        return _placeholder != null;
+    }
+
+    public String pfcClass ()
+    {
+        if (displayPlaceholder() &&
+            StringUtil.nullOrEmptyString(formattedString())) {
+            return "pfc";
+        }
+        return null;
+    }
+
+    public String onFocus ()
+    {
+        return displayPlaceholder() ? "ariba.Handlers.hPassFocus(this, event)" : null;
+    }
+
+    public String onBlur ()
+    {
+        return displayPlaceholder() ? "ariba.Handlers.hPassBlur(this, event)" : null;
     }
 }

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/CueTip.awl#15 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/CueTip.awl#16 $
     </Copyright>
 
     <Overview>
@@ -61,10 +61,6 @@
 
     <Binding key="autoSize" type="boolean" direction="get" default="$true">
         Determines whether or not the CueTip is automatically sized.  True by default.
-    </Binding>
-
-    <Binding key="image" type="String" direction="get" required="$false">
-        Image to override default icon
     </Binding>
 
 </a:Api>\

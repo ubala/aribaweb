@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#85 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#86 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -53,6 +53,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     public static AWComponentActionRequestHandler SharedInstance;
     private AWEncodedString _requestHandlerUrl;
     private AWEncodedString _fullRequestHandlerUrl;
+    private AWEncodedString _fullRequestHandlerUrlSecure;
     private AWEncodedString _fullRequestHandlerBaseUrl;
 
     private static final String HistoryKey = "awh";
@@ -88,7 +89,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
 
     private AWEncodedString requestHandlerUrlEncoded (AWRequest request, boolean fullUrl)
     {
-        if (_fullRequestHandlerUrl == null || _requestHandlerUrl == null) {
+        if (_fullRequestHandlerUrlSecure ==null || _fullRequestHandlerUrl == null || _requestHandlerUrl == null) {
             // no need to synchronize this -- worst case it'll get recomputed twice to the same thing.
             String applicationNumber = request.applicationNumber();
             applicationNumber = (applicationNumber == null) ?
@@ -100,17 +101,32 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                                   applicationNumber, requestHandlerKey());
             _requestHandlerUrl = AWEncodedString.sharedEncodedString(requestHandlerUrl);
 
-            String fullAdaptorUrl = fullAdaptorUrlForRequest(request);
+            String fullAdaptorUrl = fullAdaptorUrl(false);
             requestHandlerUrl =
                 StringUtil.strcat(fullAdaptorUrl,
                                   fullAdaptorUrl.endsWith("/") ? "":"/",
                                   application().name(),
                                   applicationNameSuffix(),
                                   applicationNumber, requestHandlerKey());
+
+
             _fullRequestHandlerUrl =
                 AWEncodedString.sharedEncodedString(requestHandlerUrl);
+
+            fullAdaptorUrl = fullAdaptorUrl(true);
+            requestHandlerUrl =
+                StringUtil.strcat(fullAdaptorUrl,
+                                  fullAdaptorUrl.endsWith("/") ? "":"/",
+                                  application().name(),
+                                  applicationNameSuffix(),
+                                  applicationNumber, requestHandlerKey());
+
+            _fullRequestHandlerUrlSecure =
+                AWEncodedString.sharedEncodedString(requestHandlerUrl);
+
         }
-        return fullUrl ? _fullRequestHandlerUrl : _requestHandlerUrl;
+        return fullUrl ? ((request !=null && !request.isSecureScheme())?_fullRequestHandlerUrl:_fullRequestHandlerUrlSecure) :
+                _requestHandlerUrl;
     }
 
     public String requestHandlerUrl (AWRequest request, boolean fullUrl)

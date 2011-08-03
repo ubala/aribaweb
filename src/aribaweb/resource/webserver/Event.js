@@ -256,7 +256,24 @@ ariba.Event = function() {
                     // Use func.call(this) instead of func(); otherwise a callback registered
                     // from a plugin in FF2 generates a security exception ("Permission denied
                     // to get property Function.__parent__").
-                    if (typeof(func) == 'function') func.call(this); else this.evalJSSpan(id);
+                    try {
+                         if (typeof(func) == 'function') func.call(this); else this.evalJSSpan(id);
+                    } catch (exp) {
+                        // Here we might be in FF4 selenium mode where callbacks
+                        // can't be passed from plugin to resident page. We need to use
+                        // standard events notifications
+                        // In IE6/7/8 (other?) the API createEvent/dispatchEvent is not supported
+                        // why we are adding a try catch
+                        try {
+                            if (ariba.Request.AWDebugEnabled) {
+                                var event = document.createEvent("UIEvents");
+                                event.initUIEvent(eventName, true, true, window, 1);
+                                window.dispatchEvent(event);
+                            }
+                        } catch (exp2) {
+                            //does nothing
+                        }
+                    }
                 }
             }
         },

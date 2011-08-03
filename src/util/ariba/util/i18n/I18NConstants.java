@@ -51,6 +51,8 @@ public final class I18NConstants
     public static final int MS932         = count++;
     public static final int Cp1252        = count++;
     public static final int Cp1251        = count++;
+    public static final int Cp1254        = count++;
+    public static final int Cp1250        = count++;
 
     public static final String[] CharacterEncoding = new String[count];
     public static final String[] IANACharset       = new String[count];
@@ -75,6 +77,8 @@ public final class I18NConstants
         CharacterEncoding[MS932]         = "MS932";
         CharacterEncoding[Cp1252]        = "Cp1252";
         CharacterEncoding[Cp1251]        = "Cp1251";
+        CharacterEncoding[Cp1254]        = "Cp1254";
+        CharacterEncoding[Cp1250]        = "Cp1250";
 
         /*
             MIME, HTML, and XML charset names (defined by IANA)
@@ -98,6 +102,8 @@ public final class I18NConstants
         IANACharset[MS932]               = "Windows-31J";
         IANACharset[Cp1252]              = "windows-1252";
         IANACharset[Cp1251]              = "windows-1251";
+        IANACharset[Cp1254]              = "windows-1254";
+        IANACharset[Cp1250]              = "windows-1250";
     }
 
         // For reading files only

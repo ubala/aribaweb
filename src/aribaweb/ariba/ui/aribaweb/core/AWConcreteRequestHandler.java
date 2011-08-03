@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteRequestHandler.java#20 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteRequestHandler.java#21 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -164,15 +164,22 @@ abstract public class AWConcreteRequestHandler extends AWBaseObject implements A
 
     public String fullAdaptorUrlForRequest (AWRequest request)
     {
+        return fullAdaptorUrl(request.isSecureScheme());
+    }
+
+
+    protected String fullAdaptorUrl (boolean httpSecureScheme)
+    {
         String adaptorUrl = null;
         AWApplication application = application();
-        if (!request.isSecureScheme()) {
+
+        if (!httpSecureScheme) {
             adaptorUrl = application.adaptorUrl();
         }
         else {
             adaptorUrl = application.adaptorUrlSecure();
         }
-        return adaptorUrl;
+        return adaptorUrl;        
     }
 
     // record and playback

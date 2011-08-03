@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.java#36 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.java#41 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -32,15 +32,29 @@ public final class AWXBasicScriptFunctions extends AWComponent
         new AWEncodedString("javascript:void(document.open());void(document.write(\"<html></html>\"));void(document.close());");
     private static AWEncodedString _RequestHandlerUrl;
 
+
     public AWEncodedString requestHandlerUrl ()
     {
-        if (_RequestHandlerUrl == null) {
-            boolean useFullURL = TestContext.isTestAutomationMode(requestContext());
-            String requestHandlerUrl =
-                AWComponentActionRequestHandler.SharedInstance.requestHandlerUrl(request(), useFullURL);
-            _RequestHandlerUrl = AWEncodedString.sharedEncodedString(requestHandlerUrl);
+        boolean useFullURL = false;
+        if (AWConcreteServerApplication.IsDebuggingEnabled) {
+            // we should consult with the requestContext every time since the url may be dependent on
+            // the incoming request
+            useFullURL = TestContext.isTestAutomationMode(requestContext());
         }
-        return _RequestHandlerUrl;
+
+        if (useFullURL) {
+            // do not cache the full url since the incoming request can be either HTTP or HTTPS
+            return AWEncodedString.sharedEncodedString(AWComponentActionRequestHandler.SharedInstance.requestHandlerUrl(request(),
+                    true));
+        }
+        else {
+            if (_RequestHandlerUrl == null) {
+                String requestHandlerUrl =
+                    AWComponentActionRequestHandler.SharedInstance.requestHandlerUrl(request(), false);
+                _RequestHandlerUrl = AWEncodedString.sharedEncodedString(requestHandlerUrl);
+            }
+            return _RequestHandlerUrl;
+        }
     }
 
     public boolean allowsWhitespaceCompression ()
@@ -148,17 +162,22 @@ public final class AWXBasicScriptFunctions extends AWComponent
 
     public String getProgressCheckUrl ()
     {
+        if (!AWConcreteServerApplication.AllowsConcurrentRequestHandling) {
+            return null;
+        }
         AWDirectActionUrl url = AWDirectActionUrl.checkoutUrl();
         url.setDirectActionName(AWDirectAction.ProgressCheckActionName);
-        if (!AWConcreteApplication.IsCookieSessionTrackingEnabled && request().applicationNumber() != null) {
-            // Without cookies, this ensures the progress check goes to the same app instance
+        
+        if (!AWConcreteApplication.IsCookieSessionTrackingEnabled) {
+        // Set session id and application number on the url if cookie tracking is disabled.
+            url.setSessionId(session().sessionId());
+        }
+        if (!StringUtil.nullOrEmptyOrBlankString(request().applicationNumber())) {
+            // this ensures the progress check goes to the same app instance
             url.setApplicationNumber(request().applicationNumber());
         }
-        url.put(AWDirectAction.ProgressCheckSessionKeyName, session().sessionId());
-        String s = url.finishUrl();
         // Use null request context to avoid associating to the session
-        s = AWDirectActionUrl.decorateUrl(null, s);
-        return s;
+        return AWDirectActionUrl.decorateUrl(null, url.finishUrl());
     }
 
     public String waitAlertMillis ()

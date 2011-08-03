@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/outline/OutlineState.java#2 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/outline/OutlineState.java#3 $
 */
 package ariba.ui.outline;
 
@@ -32,6 +32,7 @@ public final class OutlineState
     protected boolean _allowMultiPath = false;
     protected Map _expansionStates;
     protected boolean _defaultExpansionState = false;  // i.e. closed
+    protected boolean _didExecuteCollapseAll = false;
 
     // state for current rendering -- pushed through by OutlineRepetition
     protected int _nestingLevel;
@@ -75,8 +76,19 @@ public final class OutlineState
     {
         _expansionStates.clear();
         _defaultExpansionState = false;
+        _didExecuteCollapseAll = true;
     }
 
+    public boolean didExecuteCollapseAll () 
+    {
+        return _didExecuteCollapseAll;
+    }
+    
+    public void setDidExecuteCollapseAll (boolean didExecuteCollapseAll) 
+    {
+        _didExecuteCollapseAll = didExecuteCollapseAll; 
+    }
+    
     public Object selectedObject ()
     {
         return _selectedObject;

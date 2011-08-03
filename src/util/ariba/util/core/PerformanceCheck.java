@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceCheck.java#7 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceCheck.java#8 $
 */
 
 package ariba.util.core;
@@ -57,6 +57,8 @@ public class PerformanceCheck
     private static final String ParameterPrefix = "System.Debug.PerformanceThresholds";
     private static final String TypeKey         = "Types";
     private static final String TimerKey        = "Timer";
+    //default not stable
+    private static final String StableKey        = "Stable";    
     
     private static final Map/*<String, PerformanceCheck>*/ Registry = MapUtil.map(1);
     
@@ -104,12 +106,15 @@ public class PerformanceCheck
                 Fmt.S("%s.%s.%s", sectionParam, metricName, ErrorKey));
             long warningLevel = params.getLongParameter(
                 Fmt.S("%s.%s.%s", sectionParam, metricName, WarningKey));
+            boolean isStable = params.getBooleanParameter(
+                Fmt.S("%s.%s.%s", sectionParam, metricName, StableKey));
             boolean useTimer = params.getBooleanParameter(
                 Fmt.S("%s.%s.%s", sectionParam, metricName, TimerKey));
             Map typeLevels = params.getMapParameter(
                 Fmt.S("%s.%s.%s", sectionParam, metricName, TypeKey));
             PerformanceChecker check = new PerformanceChecker(
                 metricName,
+                isStable,
                 useTimer,
                 errorLevel,
                 warningLevel,
@@ -127,6 +132,10 @@ public class PerformanceCheck
     public void addChecker (PerformanceChecker check)
     {
         _checks.put(check.getMetricName(), check);
+    }
+
+    public Map/*<String, PerformanceChecker>*/  getCheckers () {
+        return _checks;
     }
     
     public int checkAndRecord (PerformanceState.Stats stats, ErrorSink sink)

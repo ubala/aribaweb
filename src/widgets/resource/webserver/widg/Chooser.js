@@ -522,10 +522,21 @@ ariba.Chooser = function() {
                 chooserInfo.skipBlur = keyCode == Input.KeyCodeEnter;
                 if (Menu.AWActiveMenu && Menu.AWLinkId == chooserInfo.textField.id) {
                     // forward key down to menu item
-                    Menu.menuKeyDown(event, chooserInfo.menu);
-                    var menuItems = Menu.menuItems(chooserInfo.menu);
-                    if (menuItems.length > 1) {
-                        chooserInfo.skipBlur = keyCode == Input.KeyCodeTab;
+                    var activeMenuItem = Menu.getActiveItem();
+                    if (keyCode == Input.KeyCodeEnter && activeMenuItem && 
+                            Menu.AWActiveItemId != chooserInfo.searchLink.id) {
+                        this.chooserMenuTrigger(activeMenuItem,event);
+                        var formId = Dom.lookupFormId(chooserInfo.textField);
+                        var senderId = chooserInfo.textField.id;
+                        Request.submitFormForElementName(formId, senderId, event, null);
+                        Menu.hideActiveMenu();
+                    }
+                    else {
+                        Menu.menuKeyDown(event, chooserInfo.menu);
+                        var menuItems = Menu.menuItems(chooserInfo.menu);
+                        if (menuItems.length > 1) {
+                            chooserInfo.skipBlur = keyCode == Input.KeyCodeTab;
+                        }
                     }
                 }
                 Debug.log("skipBlur " + chooserInfo.skipBlur + " keycode " + keyCode);

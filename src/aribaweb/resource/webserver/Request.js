@@ -238,7 +238,7 @@ ariba.Request = function() {
             else {
                 separator = '&';
             }
-            urlString = urlString + separator + key + "=" + value;
+            urlString = urlString + separator + key + "=" + encodeURIComponent(value);
             return urlString;
         },
 
@@ -711,7 +711,9 @@ ariba.Request = function() {
         // start timer to make sure something comes back in the iframe
             setTimeout(this.startRefreshTimer.bind(this), 1);
             Input.AWWaitMillis = 20 * 60 * 1000;  // force off auto-hinding of panel -- 20 mins, anyway...
-            this.initProgressCheck(this.AWProgressUrl, Input.AWWaitAlertMillis + 2000, Input.AWWaitAlertMillis);
+            if (this.AWProgressUrl) {
+                this.initProgressCheck(this.AWProgressUrl, Input.AWWaitAlertMillis + 2000, Input.AWWaitAlertMillis);
+            }
         },
 
         isRequestInProgress : function ()

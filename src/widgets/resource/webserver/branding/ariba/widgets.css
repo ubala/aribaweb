@@ -52,6 +52,25 @@ INPUT.tf {
 .IsSaf INPUT.tf {
     margin-right:2px;
 }
+
+.ph {
+    color:#999999;
+    font-style:italic;
+}
+.pfc {
+    position:relative;    
+}
+label.ph {
+    display:none;
+}
+
+.pfc label.ph {
+    display:block;
+    position:absolute;
+    top:3px;
+    left:7px;
+}
+
 .IsMoz SELECT {
     border: 1px solid #7F9DB9 !important;
     padding:1px;
@@ -2878,7 +2897,9 @@ div.dialogContentWrapper {
 .dialogButtons {
     padding:8px 5px 8px 5px;
 }
-
+.buttonsContainer {
+    float:right;
+}
  /*concatenated styles set width for wrapper*/
 .dw300 {
     width:300px;
@@ -4344,4 +4365,120 @@ div.doc {
 }
 #pollCountDown {
     margin:0 5px;
+}
+/* Compact Form */
+td.cff {
+    height:25px;
+}
+td.cff input.tf {
+    border-color:#666 !important;
+    -moz-border-radius:3px;
+    -webkit-border-radius:3px;
+    width:200px;
+}
+td.cff input.tf:focus {
+    outline-width:0;
+}
+tr.cfe input.tf {
+    border-color:#FD1313 !important;
+}
+td.cft {
+    padding-left:3px;
+}
+/* Hover Tip */
+a.hoverTip {
+    display:block;
+    background-image:url(cssHoverTip.png);
+    width:16px;
+    height:16px;
+    text-decoration:none;
+}
+.hoverTipContent {
+    display:none;
+    position:absolute;
+    right:-20px;
+    bottom:25px;
+    background-color:#D1F2FF;
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+    padding:10px;
+    width:230px;
+}
+.hoverTipPointer {
+    display:none;
+    position:absolute;
+    width:0;
+    height:0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 7px solid #D1F2FF;
+    border-bottom: 0;
+    line-height:0px;
+    font-size:0px;
+    left:1px;
+    bottom:18px;
+}
+.IsIE6 .hoverTipPointer {
+    border-left: 7px solid #FFFFFF;
+    border-right: 7px solid #FFFFFF;
+}
+a.hoverTip:hover {
+    position:relative;
+}
+a.hoverTip:hover .hoverTipContent,
+a.hoverTip:hover .hoverTipPointer {
+    display:block;
+}
+/** Hover Card **/
+.hcard {
+    position:absolute;
+}
+.hcContent {
+    background-color:#FFFFFF;
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+    -moz-box-shadow:3px 3px 5px #CCCCCC;
+    -webkit-box-shadow:3px 3px 5px #CCCCCC;
+    border:3px solid #9CA6B5;
+    padding:10px;
+    width:260px;
+    margin-left:10px;
+}
+.hoverLeft .hcContent {
+    margin-left:0px;
+    margin-right:10px;
+}
+.hcPointer {
+    position:absolute;
+    width:0;
+    height:0;
+    border-left: 0;
+    line-height:0px;
+    font-size:0px;
+    top:20px;
+    border-style:solid solid solid none;
+    border-width:8px 11px 8px 0;
+    border-color:transparent #9CA6B5 transparent;
+    left:0px
+}
+.hcPointerInner {
+    border-right-color:#FFF;
+    left:4px;
+}
+.IsIE6 .hcPointer {
+    border-top-color:pink !important;
+    border-bottom-color:pink !important;
+    filter: chroma(color=pink);
+}
+.hoverLeft .hcPointer {
+    border-style:solid none solid solid;
+    border-width:8px 0 8px 11px;
+    border-color:transparent transparent transparent #9CA6B5;        
+    right:0px;
+    left:auto;
+}
+.hoverLeft .hcPointerInner {
+    border-left-color:#FFF;
+    right:4px;
+    left:auto;
 }

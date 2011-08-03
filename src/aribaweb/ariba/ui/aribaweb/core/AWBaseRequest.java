@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#75 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#76 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1029,6 +1029,10 @@ abstract public class AWBaseRequest extends AWBaseObject
         return request;
     }
 
+    public static boolean isInternalRequest (AWRequestContext requestContext)
+    {
+        return requestContext.request() instanceof InternalRequest;
+    }
     
     public AWBaseRequest getBaseRequest ()
     {

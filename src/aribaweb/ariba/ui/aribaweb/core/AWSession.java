@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#89 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#90 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -596,6 +596,11 @@ public class AWSession extends AWBaseObject
     private String _testShortId;
     private String _testId;
     private String _testLine;
+
+    /**
+        Overrides global AWPage.AllowParentFrame
+    */
+    private boolean _allowParentFrame = false;
 
     // ** Thread Safety Considerations: sessions are never shared by multiple threads -- no locking required.
 
@@ -1694,6 +1699,16 @@ public class AWSession extends AWBaseObject
         if (_shutdownState != null) {
             _shutdownState.getWarning();
         }
+    }
+
+    public void setAllowParentFrame (boolean allowParentFrame)
+    {
+        _allowParentFrame = allowParentFrame;
+    }
+
+    public boolean allowParentFrame ()
+    {
+        return AWPage.AllowParentFrame || _allowParentFrame;
     }
 }
 

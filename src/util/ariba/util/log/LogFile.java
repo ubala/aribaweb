@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/LogFile.java#7 $
+    $Id: //ariba/platform/util/core/ariba/util/log/LogFile.java#9 $
 */
 package ariba.util.log;
 
@@ -63,13 +63,13 @@ class LogFile
     }
 
     /**
-        Return an int as a String, making sure its padded with zeroes
-        if it is between 0 and 10.
-    */
+     Return an int as a String, making sure its padded with zeroes
+     if it is between 0 and 10.
+     */
     private static final String pad0 (int value)
     {
         if ((value >= 0) &&
-            (value < 10))
+                (value < 10))
         {
             return Fmt.S("0%s", value);
         }
@@ -77,40 +77,45 @@ class LogFile
     }
 
     /**
-        LogFile implements MoveTo since it should decide on the
-        encoding scheme
-    */
+     LogFile implements MoveTo since it should decide on the
+     encoding scheme
+     */
     boolean moveTo (File targetDirectory)
     {
         Date now = new Date();
         String logFileSaveName =
-            Fmt.S("%s.%s-%02s-%02s_%02s.%02s.%02s.%s",
-                  ArrayUtil.array(
-                      this.prefix,
-                      Constants.getInteger(Date.getYear(now)),
-                      Constants.getInteger(Date.getMonth(now)+1),
-                      Constants.getInteger(Date.getDayOfMonth(now)),
-                      Constants.getInteger(Date.getHours(now)),
-                      Constants.getInteger(Date.getMinutes(now)),
-                      Constants.getInteger(Date.getSeconds(now)),
-                      this.suffix));
+                Fmt.S("%s.%s-%02s-%02s_%02s.%02s.%02s.%s",
+                        ArrayUtil.array(
+                                this.prefix,
+                                Constants.getInteger(Date.getYear(now)),
+                                Constants.getInteger(Date.getMonth(now)+1),
+                                Constants.getInteger(Date.getDayOfMonth(now)),
+                                Constants.getInteger(Date.getHours(now)),
+                                Constants.getInteger(Date.getMinutes(now)),
+                                Constants.getInteger(Date.getSeconds(now)),
+                                this.suffix));
         this.archivedFileName = logFileSaveName;
         File saveToFile =
-            new File(targetDirectory.getAbsolutePath(), logFileSaveName);
-            // renameTo does not modify the current object - hence
-            // this.file is left unchanged
-        boolean success = this.file.renameTo(saveToFile);
-        if (!success) {
+                new File(targetDirectory.getAbsolutePath(), logFileSaveName);
+        // renameTo does not modify the current object - hence
+        // this.file is left unchanged
+        boolean success = false;
+        if (this.file.exists()) {
+            success = this.file.renameTo(saveToFile);
+            if (!success) {
                 //if renameTo failed, try copying before we give up
-            success = IOUtil.copyFile(this.file, saveToFile);
-            if (success) {
-                this.file.delete();
-            }
-            else {
-                this.archivedFileName = null;
-                Log.util.warning(2801,
-                                 file.getAbsolutePath(),
-                                 saveToFile.getAbsolutePath());
+                if (this.file.exists()) {
+                    success = IOUtil.copyFile(this.file, saveToFile);
+                    if (success) {
+                        this.file.delete();
+                    }
+                    else {
+                        this.archivedFileName = null;
+                        Log.util.warning(2801,
+                                file.getAbsolutePath(),
+                                saveToFile.getAbsolutePath());
+                    }
+                }
             }
         }
         return success;

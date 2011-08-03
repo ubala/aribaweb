@@ -47,14 +47,11 @@ import java.math.BigInteger;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import ariba.util.fieldtype.PrimitiveTypeProvider;
 
 /**
@@ -797,7 +794,7 @@ public abstract class ExprRuntime extends Object
         and the converted arguments in actualArgs.  If unsuccessful this method will return
         null and the actualArgs will be empty.
      */
-    public static Method getAppropriateMethod( ExprContext context, Object source, Object target, String methodName, String propertyName, List methods, Object[] args, Object[] actualArgs )
+    private static Method getAppropriateMethod( ExprContext context, Object source, Object target, String propertyName, List methods, Object[] args, Object[] actualArgs )
     {
         Method      result = null;
         Class[]     resultParameterTypes = null;
@@ -831,13 +828,28 @@ public abstract class ExprRuntime extends Object
         return result;
     }
 
-    public static Object callAppropriateMethod( ExprContext context, Object source, Object target, String methodName, String propertyName, List methods, Object[] args ) throws MethodFailedException
+    public static Object callAppropriateMethod (ExprContext context, Object source,
+                                                Object target, String methodName,
+                                                Method method, Object[] args)
+                                                throws MethodFailedException
+    {
+        List <Method> methods = null;
+        if (method!=null) {
+            methods = Collections.singletonList(method);
+        }
+        return internalCallAppropriateMethod(context,source,target,methodName,null,methods,args);
+    }
+
+    //TODO figureout when and why would there be multiple methods.. no caller is passing a list so far.
+    private static Object internalCallAppropriateMethod(ExprContext context, Object source, Object target,
+                                                        String methodName, String propertyName, List methods, Object[] args )
+                                                        throws MethodFailedException
     {
         Throwable   reason = null;
         Object[]    actualArgs = objectArrayPool.create(args.length);
 
         try {
-            Method      method = getAppropriateMethod( context, source, target, methodName, propertyName, methods, args, actualArgs );
+            Method      method = getAppropriateMethod( context, source, target, propertyName, methods, args, actualArgs );
 
             if ( (method == null) || !isMethodAccessible(context, source, method, propertyName) )
             {
@@ -876,7 +888,8 @@ public abstract class ExprRuntime extends Object
             Class           targetClass = classForName(context, className);
             MethodAccessor  ma = getMethodAccessor(targetClass);
 
-            return ma.callStaticMethod(context, targetClass, methodName, args);
+            result = ma.callStaticMethod(context, targetClass, methodName, args);
+            return result;
         } catch (ClassNotFoundException ex) {
             throw new MethodFailedException(className, methodName, ex);
         }
@@ -1007,7 +1020,7 @@ public abstract class ExprRuntime extends Object
                 Object[]        args = objectArrayPool.create(value);
 
                 try {
-                    callAppropriateMethod(context, target, target, m.getName(), propertyName, Collections.nCopies(1, m), args);
+                    internalCallAppropriateMethod(context, target, target, m.getName(), propertyName, Collections.nCopies(1, m), args);
                 } finally {
                     objectArrayPool.recycle(args);
                 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#19 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#21 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -20,35 +20,54 @@ package ariba.ui.aribaweb.test;
 import ariba.ui.aribaweb.core.AWConcreteServerApplication;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWSession;
+import ariba.ui.aribaweb.util.AWStringKeyHashtable;
+import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.Assert;
 import ariba.util.core.Base64;
 import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
+import ariba.util.core.PerformanceState;
 import ariba.util.core.StringUtil;
 import ariba.util.i18n.I18NUtil;
+
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import javax.servlet.http.HttpSession;
 
 
-public class TestContext
+public class TestContext implements Serializable 
 {
+    private static final long serialVersionUID = 102L;
+
     public static final String Name = "uiTestContext";
     public static final String ID = "testContextId";
     public static final String TestAutomationMode = "taMode";
     public static final String SuiteDataParam = "suiteData";
     public static final String ReturnUrlParam = "returnUrl";
 
-    private Map<String, Object> _internalContext = MapUtil.map();
+    public static final String TestClientContextParam = "testClientContext";
 
-    private Map<Object, Object> _context = MapUtil.map();
+    private transient TestContextDataProvider _dataProvider;
+    
+    private Map<String, Object> _internalContext = MapUtil.map();
+    // Marking as transient to handle not serializable objects
+    // test TestContext save and restore operations
+    private transient Map<Object, Object> _context = MapUtil.map();
+    // Context from the browser (dynamic variables) 
+    private Map<String, String> _clientContext = MapUtil.map();
     private List<String> _unhandledObjectList = ListUtil.list();
     private String _username;
-    private TestContextDataProvider _dataProvider;
     private String _id;
     private String[] _returnUrl;
 
@@ -64,6 +83,20 @@ public class TestContext
     public String getId ()
     {
         return _id;
+    }
+
+    public String getTestId () {
+        String testId = null;
+        AWRequestContext rc = AWRequestContext._requestContext();
+        if (rc != null) {
+            testId = rc.formValueForKey("testId");
+        }
+        // If not found try from the PerformanceState
+        // This will be the common case
+        if (testId == null && PerformanceState.getThisThreadHashtable() != null) {
+            testId = PerformanceState.getThisThreadHashtable().getTestId();
+        }
+        return testId;
     }
 
     public static TestContext getSavedTestContext (AWRequestContext requestContext)
@@ -97,6 +130,11 @@ public class TestContext
     public Object getInternalParam (String key)
     {
         return _internalContext.get(key);
+    }
+
+    public Set internalKeys ()
+    {
+        return _internalContext.keySet();
     }
 
     public void setDataProvider (TestContextDataProvider dataProvider)
@@ -238,6 +276,62 @@ public class TestContext
         }
     }
 
+    public void _populateClientContext ()
+    {
+        AWRequestContext rc = AWRequestContext._requestContext();
+        String testClientContextStr = rc.formValueForKey(TestClientContextParam);
+        if (StringUtil.nullOrEmptyOrBlankString(testClientContextStr)) {
+            String queryString = rc.request().queryString();
+            if (!StringUtil.nullOrEmptyOrBlankString(queryString)) {
+                AWStringKeyHashtable qh = AWUtil.parseQueryString(queryString);
+                if (qh.get(TestClientContextParam) != null) {
+                    testClientContextStr = ((String[])qh.get(TestClientContextParam))[0];
+                }
+            }
+        }
+        if (!StringUtil.nullOrEmptyOrBlankString(testClientContextStr)) {
+
+            // AW: 01/15/11 key/value in the encoded string key1=value1&key2=value2
+            // are not encoded themselves. So decoding not encoded parameters
+            // (AWUtil.parseQueryString) modifies the original values:
+            // ex + replaced by space
+            // This fix is just doing the parsing of the query string without decoding.
+
+            /*AWStringKeyHashtable ccm = AWUtil.parseQueryString(testClientContextStr);
+            // AWStringKeyHashtable supports arrays for values but in our case we only
+            // want one value per key
+            Iterator it = ccm.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry)it.next();
+                String key = (String)entry.getKey();
+                String value = ((String[])entry.getValue())[0];
+                _clientContext.put(key, value);
+            }*/
+            StringTokenizer paramsTok = new StringTokenizer(testClientContextStr, "&");
+            while (paramsTok.hasMoreTokens()) {
+                String valuesPair = paramsTok.nextToken();
+                StringTokenizer valuesTok = new StringTokenizer(valuesPair, "=");
+                if (valuesTok.countTokens() == 2) {
+                    String key = valuesTok.nextToken();
+                    String value = valuesTok.nextToken();
+                    _clientContext.put(key, value);
+                }
+            }
+        }
+    }
+
+    public void putClientContextValue (String key, String value) {
+        _clientContext.put(key, value);
+    }
+
+    public String getClientContextValue (String key) {
+        return _clientContext.get(key);
+    }
+
+    public Map<String, String> getClientContext () {
+        return _clientContext;
+    }
+
     public void setUsername (String username)
     {
         _username = username;
@@ -251,6 +345,7 @@ public class TestContext
     public void clear ()
     {
         _context = MapUtil.map();
+        _clientContext = MapUtil.map();
         _unhandledObjectList = ListUtil.list();
     }
 
@@ -415,6 +510,42 @@ public class TestContext
         return _returnUrl != null ? _returnUrl[1] : null;
     }
 
+    private void readObject (ObjectInputStream inputStream)
+    throws ClassNotFoundException, IOException {
+        inputStream.defaultReadObject();
+        //reads the context map now and replaces string keys with classes
+        _context = MapUtil.map();
+        Map<String, Object> serializableContext = (Map)inputStream.readObject();
+        Iterator<Map.Entry<String, Object>> it = serializableContext.entrySet().iterator(); 
+        while (it.hasNext()) {
+            Map.Entry<String, Object> entry = it.next();
+            Class theClass = Class.forName(entry.getKey());
+            _context.put(theClass, entry.getValue());
+        }
+    }
+
+    private void writeObject (ObjectOutputStream outputStream)
+    throws IOException {
+
+        outputStream.defaultWriteObject();
+        // writes the _context map now to handle not Serializable/Externalizable object
+        Map<Object, Object> serializableContext = MapUtil.map();
+        Iterator<Map.Entry<Object, Object>> it = _context.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Object, Object> entry = it.next();
+            if (entry.getValue() instanceof Serializable ||
+                    entry.getValue() instanceof Externalizable) {
+                serializableContext.put(((Class)entry.getKey()).getName(), entry.getValue());
+            } else {
+                Log.aribaweb_test.debug("[TestContext] Object of type %s in " +
+                        "TestContext %s is not serializable. Not saved.",
+                        entry.getKey(), getId());
+            }
+        }
+        outputStream.writeObject(serializableContext);
+    }
+
+
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(super.toString()).append(": ");
@@ -425,6 +556,10 @@ public class TestContext
         buffer.append("InternalContext: ");
         buffer.append((_internalContext != null)?
             MapUtil.toSerializedString(_internalContext):"null");
+        buffer.append(";");
+        buffer.append("ClientContext: ");
+        buffer.append((_clientContext != null)?
+            MapUtil.toSerializedString(_clientContext):"null");
         buffer.append(";");
         return buffer.toString();
     }

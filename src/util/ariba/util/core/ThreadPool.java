@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2011 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ThreadPool.java#7 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ThreadPool.java#8 $
 */
 
 package ariba.util.core;
@@ -219,6 +219,15 @@ public class ThreadPool implements Executor
         // other methods accessing the queue. But we're just 
         // accessing the size of the list so it's fine
         return _queue.getSize();
+    }
+
+    /**
+     * Returns the configured max thread limit.
+     * @return
+     */
+    public int getMaxThreadCount()
+    {
+        return _maxThreads;
     }
 
     /**

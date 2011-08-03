@@ -1,0 +1,49 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2010 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HoverCard.awl#3 $
+    </Copyright>
+
+    <Overview>
+        The HoverCard widget adds hover behavior to any element.
+        On hover, the specified content is lazily loaded
+        on the left or right side of the element.
+
+        Usage:
+        <HoverCard>
+            <AWContent name="link">
+                <AWHyperlink action="$profileClicked">User A</AWHyperlink>
+            </AWContent>
+            <AWContent name="content">
+                <h3>User A</h3>
+                User Profile
+            </AWContent>
+        </HoverCard>
+    </Overview>
+
+</a:Api>\
+
+<span bh="HCC">
+    <a:IncludeContent name="link"/>
+    <a:RelocatableDiv class="hcard" style="display:none" bh="HC">
+        <div class="hcContent">
+            <AWLazyDiv>
+                <a:IncludeContent name="content"/>
+            </AWLazyDiv>
+        </div>
+        <span class="hcPointer"></span>
+        <span class="hcPointer hcPointerInner"></span>
+    </a:RelocatableDiv>
+</span>

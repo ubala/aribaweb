@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#67 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#68 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -626,7 +626,7 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
 
     public void relockRequestHandling ()
     {
-        _cooperativeMultithreadingLock.lock();
+        _cooperativeMultithreadingLock.relock();
     }
 
     ////////////////

@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2010 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
     (by <a href="mailto:bill@burkecentral.com">Bill Burke</a>)
     also licensed under Apache v 2.0.
     
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWJarWalker.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWJarWalker.java#9 $
 */
 package ariba.ui.aribaweb.util;
 
@@ -711,7 +711,7 @@ public class AWJarWalker
         try {
             InputStream is = iter.getInputStream();
             ClassReader cr = new ClassReader(is);
-            cr.accept(visitor, false);
+            cr.accept(visitor, 0);
         } catch (IOException e) {
             // skip?
         }

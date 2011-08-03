@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#37 $
+    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#40 $
 */
 
 package ariba.util.core;
@@ -965,18 +965,27 @@ public class HTML
        Escaping unsafe tags and attributes
 
        safeTags and safeAttrs stores the definitions of safe tags and attributes
-       unsafeAttrValues defines unsafe substrings in attribute values
+       unsafeAttrValuesInTag defines unsafe substrings in attribute values in tags
+       unsafeAttrValues defines unsafe substrings in standalone attribute values
        safeConfigDefined will be true if any of the two arrays is not empty
     */
     private static String[] safeTags = new String[0];
 
     private static String[] safeAttrs = new String[0];
 
+    private static final String[] unsafeAttrValuesInTag = {
+        "javascript\\s*:",
+        "vbscript\\s*:",
+        "url\\s*\\(",
+        "expression\\s*\\("        
+    };
+
     private static final String[] unsafeAttrValues = {
         "javascript\\s*:",
         "vbscript\\s*:",
         "url\\s*\\(",
-        "expression\\s*\\("
+        "expression\\s*\\(",
+        "\""
     };
 
     private static final List<Pattern> unsafeAttributeValuePatterns =
@@ -1016,7 +1025,7 @@ public class HTML
         }
         return true;
     }
-    
+
     public static boolean isSafeAttributeValue (String attribute, String value)
     {
         final boolean hasComments = attributeCanHaveCommentsInValue(attribute);
@@ -1211,6 +1220,12 @@ public class HTML
         return RemoveTagsPattern.matcher(text).find();
     }
 
+    /**
+     * Convert a string to plain text and convert encoded safe html tags
+     *
+     * @param text
+     * @return converted string
+     */
     public static String fullyConvertToPlainText (String text)
     {
         String converted = text.replaceAll("(<br/>)|(<br>)|(</div>)|(</[p|P]>)","\n");
@@ -1221,6 +1236,30 @@ public class HTML
         for (Map.Entry<String,String> e : safeHtmlCharacterMap.entrySet()) {
             converted = converted.replaceAll(e.getKey(), e.getValue());
         }
+
+        return converted;
+    }
+
+    /**
+     * Convert a string to plain text by removing all html including encoded html
+     * this method really attempts to take the string
+     * and extract the html markup even in the case
+     * that the client generated the html and xml
+     * encoded it so thats its not markup but instead content
+     * so we go through and look for that content that
+     * looks like markup and strip it out.
+     *
+     * @param text
+     * @return converted string
+     */
+    public static String convertToPlainTextNoHTML (String text)
+    {
+        String converted = text.replaceAll("&amp;","&");
+        for (Map.Entry<String,String> e : safeHtmlCharacterMap.entrySet()) {
+            converted = converted.replaceAll(e.getKey(), e.getValue());
+        }
+        converted = converted.replaceAll("(<br/>)|(<br>)|(</div>)|(</[p|P]>)","\n");
+        converted = RemoveTagsPattern.matcher(converted).replaceAll("");
 
         return converted;
     }
@@ -1365,7 +1404,7 @@ public class HTML
             Pattern.compile(stb+"((?:(?!"+ste+").)*)"+ste, Pattern.DOTALL);
 
         static {
-            for (String regex : unsafeAttrValues) {
+            for (String regex : unsafeAttrValuesInTag) {
                 String regexInTag = Fmt.S("(%s)%s", regex, endOfTagRegex);
                 final int flags = Pattern.DOTALL | Pattern.CASE_INSENSITIVE;
                 Pattern pattern = Pattern.compile(regexInTag, flags);

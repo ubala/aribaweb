@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#10 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#12 $
     </Copyright>
 
     <Overview>
@@ -59,7 +59,7 @@
 
     <Binding key="visibles" type="ariba.util.fieldvalue.OrderedList" direction="get" required="$false">
         If specified, tabs in this list will be be displayed.
-        Others will be under the "More..." menu tab.  
+        Others will be under the "More..." menu tab.
     </Binding>
 
     <Binding key="submitForm" type="boolean" direction="get">
@@ -86,14 +86,14 @@
         The index of the current tab.  While rendering the list of tabs, we push the index
         into the referring parent's context in case its useful in that context.
     </Binding>
- 
+
     <Binding key="label" type="String" direction="get">
         The string to display on each label.  The string is html-escaped before rendering.
     </Binding>
 
     <Binding key="disabled" type="boolean" direction="get">
         Render as (and behave as) disabled.
-    </Binding>    
+    </Binding>
 </a:Api>\
 
 <a:If ifTrue="$requestContext.isPrintMode">\
@@ -118,8 +118,13 @@
                                         <td class="$currentTabCssClass"><div class="tabSelectedLeft"></div></td>
                                         <td>
                                             <w:RoundedBox class="$currentTabCssClass" hideGradient="$true">\
-                                                <a:Hyperlink omitTags="$^disabled" action="$tabClicked" class="$currentTabCssClass" submitForm="$isSubmitForm">\
-                                                    <a:String value="$currentLabel"/>\
+                                                <a:Hyperlink omitTags="$^disabled"
+                                                             action="$tabClicked"
+                                                             class="$currentTabCssClass"
+                                                             submitForm="$isSubmitForm"
+                                                             awname="$currentTabSemanticKey">\
+                                                    <a:String value="$currentLabel"
+                                                              escapeUnsafeHtml="$true"/>\
                                                 </a:Hyperlink>\
                                             </w:RoundedBox>\
                                         </td>
@@ -131,8 +136,13 @@
                                         <td class="$currentTabCssClass"><div class="tabLeft"></div></td>\
                                         <td>
                                             <div class="$currentTabCssClass">\
-                                                <a:Hyperlink omitTags="$^disabled" action="$tabClicked" class="$currentTabCssClass" submitForm="$isSubmitForm">\
-                                                    <a:String value="$currentLabel"/>\
+                                                <a:Hyperlink omitTags="$^disabled"
+                                                             action="$tabClicked"
+                                                             class="$currentTabCssClass"
+                                                               submitForm="$isSubmitForm"
+                                                             awname="$currentTabSemanticKey">\
+                                                    <a:String value="$currentLabel"
+                                                              escapeUnsafeHtml="$true"/>\
                                                 </a:Hyperlink>\
                                             </div>\
                                         </td>
@@ -163,7 +173,7 @@
                                     </a:For>
                                 </w:PopupMenu>
                             </td>
-                            <td class="lastTab tab"><div class="tabRight"></div></td>\                            
+                            <td class="lastTab tab"><div class="tabRight"></div></td>\
                         </a:If>
                     </tr>
                 </table>

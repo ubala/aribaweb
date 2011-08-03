@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#54 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#55 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -99,6 +99,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
     private boolean _selectedErrorNeedAdjustment = false;
     private boolean _enablePageAutoScroll = true;
     private boolean _tableAutoScrollInProgress;
+    private boolean _disableErrorPanel;
 
     // constants indicate the phase we're in
     public static int OutOfPhase = 0;
@@ -243,6 +244,7 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
                 rerunValidation();
                 _rerunValidationInProgress = true;
             }
+            _disableErrorPanel = false;
         }
         else if (phase == OutOfPhase && _phase == RenderPhase) { // exiting append
             if (getNumberOfErrors() == 0) {
@@ -1351,6 +1353,16 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
         _enablePageAutoScroll = true;
     }
 
+    public void disableErrorPanel ()
+    {
+        _disableErrorPanel = true;
+    }
+
+    public boolean errorPanelDisabled ()
+    {
+        return _disableErrorPanel;
+    }
+    
     private AWComponent invokeNavHandlers (AWErrorInfo dstError,
                                            AWComponent pageComponent)
     {

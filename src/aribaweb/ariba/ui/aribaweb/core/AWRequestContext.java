@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#146 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#148 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -50,7 +50,7 @@ import java.util.Map;
     The RequestContext encapsulates the incoming {@link AWRequest} and the outgoing
     {@link AWResponse}.  As the primary argument in the {@link AWCycleable methods}
     it tracks the evolving ElementId as the document structure unfolds, providing Ids
-    through {@link #nextElementId()}, {@link #pushElementIdLevel()}, and {@link @popElementIdLevel}. 
+    through {@link #nextElementId()}, {@link #pushElementIdLevel()}, and {@link @popElementIdLevel}.
   */
 public class AWRequestContext extends AWBaseObject implements DebugState
 {
@@ -71,7 +71,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         new ThreadDebugKey("RequestContext");
     public static final String RefreshRequestKey = "awrr";
     public static final String RecordingModeKey = "awrm";
-    public static boolean UseXmlHttpRequests = false;
+    public static boolean UseXmlHttpRequests = true;
 
     public static final String IgnoreRefreshCompleteKey = "IgnoreRefreshComplete";
 
@@ -594,6 +594,13 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         _request = newRequest;
     }
 
+    /*
+     * Do not use this method!
+     *
+     * For XMLHTTP responses use setXHRRCompatibleResponse .
+     * For normal downloads return the response on the method invocation.
+     * For large downloads return AWStreamingServletResponse on AWFileDownload.action binding
+     */
     public void setResponse (AWResponse response)
     {
         // swapping responses is generally not permitted if doing an XMLHHTP incremental refresh
@@ -957,12 +964,28 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     // the current page
                     return null;
                 }
+                else if (page().downloadResponse() != null) {
+                    //if we have a cached download response, return it.
+                    actionResults = page().downloadResponse();
+                    page().setDownloadResponse(null);
+                }
                 else {
                     try {
                         actionResults = _currentPage.invokeAction();
 
                         if ((actionResults instanceof AWResponse) && (actionResults != _response)) {
-                            assertFileDownloadCompatibleRequestRequired();
+                            if (actionResults instanceof AWBaseResponse &&
+                                    _responseCompleteCallback != null) {
+                                ((AWBaseResponse)actionResults).setResponseCompleteCallback(
+                                        _responseCompleteCallback);
+                            }
+                            //if we have a normal response (html or file download) on a
+                            //XMLHttp request, cache this response on the page issue a
+                            //retry. Return this response on the retry.
+                            if (isXMLHttpIncrementalRequest()) {
+                                page().setDownloadResponse((AWResponse)actionResults);
+                                assertFileDownloadCompatibleRequestRequired();
+                            }
                         }
                     }
                     catch (AWRequestContext.RetryRequestException e) {
@@ -1847,7 +1870,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         Assert.that(responseGenerating instanceof AWComponent, "Static link returned non-AW Component results");
         return ((AWConcreteApplication)_application).getStaticizer().note((AWComponent)responseGenerating);
     }
-    
+
     /*
         Support for item-scoped subcomponent state.
         See AWFor scopeSubcomponentsByItem for more details.

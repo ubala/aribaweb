@@ -1,0 +1,47 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2010 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/validation/CompactForm.awl#2 $
+    </Copyright>
+
+    <Overview>
+        The CompactForm widget is used in conjunction with CompactFormRow
+        to display a form where there is limited space.
+        The form labels are displayed inside each form control.
+        Error messages are displayed on the top of the form,
+        and form fields with error are highlighted in red.
+        Each field provides has a hover tool tip.
+
+        Usage:        
+        <CompactForm>
+            <CompactFormRow tip="Username are case-sensitive..." errorKey="credential">
+                <AWTextField value="$username" placeholder="Enter Username"/>
+            </CompactFormRow>
+            <CompactFormRow tip="Password must..." errorKey="credential">
+                <AWPasswordField value="$password" placeholder="Enter Password"/>
+            </CompactFormRow>
+        </CompactForm>
+    </Overview>
+
+</a:Api>\
+        
+<a:If ifTrue="$showError">
+    <div colspan="2" class="error">
+        $errorMessage
+    </div>
+</a:If>
+<w:FormTable omitLabelPadding="$true">
+    <a:IncludeContent/>
+</w:FormTable>

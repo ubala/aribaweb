@@ -18,20 +18,23 @@ ariba.Dom = function() {
     var WindowsArray = new Array();
     var _apV = navigator.appVersion;
     var IsIE = (window.attachEvent && !window.opera) ? true : false;
+    var IsIE9 = _apV.indexOf("MSIE 9") != -1;
     var IsIE8 = _apV.indexOf("MSIE 8") != -1;
     var IsIE7 = _apV.indexOf("MSIE 7") != -1;
     var IsIE6 = _apV.indexOf("MSIE 6") != -1;
-    var IsIE7Up = IsIE7 || IsIE8;
+    var IsIE8Up = IsIE8 || IsIE9;
+    var IsIE7Up = IsIE7 || IsIE8Up;
     var IsIE6Up = IsIE6 || IsIE7Up;
 
     var Dom = {
         // Public Globals
         IsIE : IsIE,
+        IsIE9 : IsIE9,
         IsIE8 : IsIE8,
         IsIE7 : IsIE7Up,
         IsIE6Only : IsIE6,
         IsIE6 :  IsIE6Up,
-        IsIEonMac : (IsIE && (navigator.platform != "Win32")) ? true : false,
+        IsIEonMac : (IsIE && (navigator.platform != "Win32") && (navigator.platform != "Win64")) ? true : false,
         IsNS6 : (!document.all && document.getElementById) ? true : false,
         IsMoz : (!document.all && document.getElementById) ? true : false,
         isSafari : navigator.appVersion.indexOf("Safari") != -1,
@@ -121,6 +124,15 @@ ariba.Dom = function() {
             }
 
             return node;
+        },
+
+        find : function (parent, selector) {
+            // only supporting classname for now
+            return this.findChildrenUsingPredicate(parent,
+                function (e) {
+                    return e.className && e.className.indexOf(selector) >= 0;
+                }
+            );
         },
 
         findChildrenUsingPredicate : function (poTarget, matchFunc, checkCurrent)
@@ -416,7 +428,7 @@ ariba.Dom = function() {
         setOpacity : function (element, opacity)
         {
             var style = element.style;
-            if (typeof style.filter != 'undefined') {
+            if (IsIE) {
                 style.filter = "alpha(opacity=" + opacity + ")";
             }
             else {
@@ -498,7 +510,7 @@ ariba.Dom = function() {
             }
             return divLeft;
         },
-
+        
         correctForBottomEdge : function (divTop, div)
         {
             var clientHeight =

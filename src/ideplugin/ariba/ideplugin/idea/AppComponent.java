@@ -6,7 +6,6 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.codeInsight.template.Template;
 import com.intellij.codeInsight.template.impl.TemplateImpl;
 import com.intellij.codeInsight.template.impl.TemplateSettings;
-import com.intellij.openapi.util.DefaultJDOMExternalizer;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.codeInsight.template.impl.TemplateContext;
 import org.jdom.Document;
@@ -23,10 +22,10 @@ public class AppComponent implements ApplicationComponent
 
     public void initComponent()
     {
-        // auto-associate .awl files as htm if not otherwise mapped
+        // auto-associate .awl files as xml if not otherwise mapped
         FileType awlType = FileTypeManager.getInstance().getFileTypeByExtension("awl");
         if (awlType.getName().endsWith("UnknownFileType") || awlType.getName().equals("UNKNOWN")) {
-            FileType htmType = FileTypeManager.getInstance().getFileTypeByExtension("htm");
+            FileType htmType = FileTypeManager.getInstance().getFileTypeByExtension("xml");
             FileTypeManager.getInstance().registerFileType(htmType, new String[] {"awl"});
         }
 
@@ -53,19 +52,30 @@ public class AppComponent implements ApplicationComponent
         return "AribaWebApplicationComponent";
     }
 
+    public static final String TemplateGroupName = "AribaWeb";
+
     void loadTemplates (InputStream inputStream, final String templateName) {
         final SAXBuilder parser = new SAXBuilder();
         try {
+            
             TemplateSettings templateSettings = TemplateSettings.getInstance();
             Document doc = parser.build(inputStream);
             Element root = doc.getRootElement();
             for (Object element : root.getChildren()) {
                 if (element instanceof Element) {
                     final Template template = readExternal((Element) element, templateName);
-                    final String key = template.getKey();
-                    // Only add if not present
-                    if (key != null && templateSettings.getTemplate(key) == null) {
-                        templateSettings.addTemplate(template);
+                    final String key = template.getKey();                  
+                    if (key != null) {
+                        TemplateImpl existingTemplate =
+                            templateSettings.getTemplate(key, TemplateGroupName);
+                        if (existingTemplate == null) {
+                            templateSettings.addTemplate(template);
+                        }
+                        else if (TemplateGroupName.equals(existingTemplate.getGroupName())) {
+                            // Update only add if template is in the AribaWeb group
+                            templateSettings.removeTemplate(existingTemplate);
+                            templateSettings.addTemplate(template);
+                        }
                     }
                 }
             }
@@ -92,7 +102,7 @@ public class AppComponent implements ApplicationComponent
         Element contextElement = element.getChild("context");
         if (contextElement != null) {
             try {
-                DefaultJDOMExternalizer.readExternal(context, contextElement);
+                context.readExternal(contextElement);
             } catch (InvalidDataException e) {
                 e.printStackTrace();
             }

@@ -21,6 +21,19 @@ ariba.Handlers = function() {
     var AWCapsLockErrorDiv;
     var AWDisableMouseClick = false;
 
+    // private functions
+    function updateTextPlaceHolder (textField)
+    {
+        var placeholder = textField.getAttribute('_pl');
+        if (placeholder) {
+            var value = textField.value;
+            if (placeholder == value) {
+                textField.value = "";
+                Dom.removeClass(textField, "ph");
+            }
+        }
+    }
+
     var Handlers = {
 
        // Public Globals
@@ -199,7 +212,38 @@ ariba.Handlers = function() {
 
             return true;
         },
-
+        hPassFocus : function (passwordField, event)
+        {
+            Dom.removeClass(passwordField.parentNode, "pfc");
+            Input.focus(passwordField);
+        },
+        hPassBlur : function (passwordField, event)
+        {
+            if (!passwordField.value) {
+                Dom.addClass(passwordField.parentNode, "pfc");
+            }
+        },
+        hTextKeyPress : function (textField, mevent)
+        {
+            if (Input.isCharChange(mevent)) {
+                updateTextPlaceHolder(textField);
+            }
+        },
+        hTextClick : function (textField, mevent)
+        {
+            updateTextPlaceHolder(textField);       
+        },
+        hTextBlur : function (textField, mevent)
+        {
+            var placeholder = textField.getAttribute('_pl');
+            if (placeholder) {
+                var value = textField.value;
+                if (!value) {
+                    textField.value = placeholder;
+                    Dom.addClass(textField, "ph");
+                }
+            }
+        },
         textNoSubmit : function (mevent, textField)
         {
             if (Event.keyCode(mevent) == Input.KeyCodeEnter) {
@@ -441,6 +485,7 @@ ariba.Handlers = function() {
         // Text Field
         TF : {
             keypress : function (elm, evt) {
+                ariba.Handlers.hTextKeyPress(elm, evt);
                 return ariba.Handlers.textNoSubmit(evt, elm);
             },
             keydown : function (elm, evt) {
@@ -450,9 +495,21 @@ ariba.Handlers = function() {
                 return (type == "AC") ? ariba.Handlers.hTagKeyDown(elm, formId, null, null, evt, false, null)
                      : (type == "ROKP") ? ariba.Handlers.hTagRefreshKeyDown(elm, formId, null, null, evt, false, null)
                      : ariba.Handlers.textRefresh(evt, elm);
+            },
+            click : function (elm, evt) {
+                ariba.Handlers.hTextClick(elm, evt);
+                return true;
             }
         },
 
+        PF : {
+            click : function (elm, evt) {
+                var passwordField = Dom.findChild(elm, "INPUT");
+                ariba.Handlers.hPassFocus(passwordField);
+                return true;
+            }
+        },
+        
         TA : {
             // onKeyUp="$limitTextJavaScriptString" onKeyDown="$onKeyDownString"
             keyup : function (elm, evt) {

@@ -251,3 +251,6 @@
 10371, "Error deserializing list: {0}",
 10405, "safeWriteObject: The file {0} does not exists. Creating new file.", 0-file name
 10410, "The file {0} will be deleted when the virtual machine terminates.", 0-file name
+10843, "cXML date format does not allow milliseconds. Ignoring milliseconds in a date string = ""{0}""", 0-date string
+10886, "Can not create directory ""{0}"" path=""{1}"" stack trace: {2}", 0 - directory name 1 - directory path 2 - stack trace
+10887, "File ""{0}"" path=""{1}"" is not a directory. Stack trace: {2}", 0 - directory name 1 - directory path 2 - stack trace

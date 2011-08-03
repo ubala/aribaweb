@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBody.awl#23 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBody.awl#27 $
     </Copyright>
 
     <Overview>
@@ -33,7 +33,11 @@
     </Binding>
 </a:Api>\
 
-<body background="$backgroundUrl" onLoad="$^onLoad" otherBindings="$^otherBindings:$otherBindingsValues">
+<body background="$backgroundUrl" onLoad="$^onLoad" otherBindings="$^otherBindings:$otherBindingsValues"
+      style="display:none">
+    <a:ClientSideScript synchronous='$true'>
+        ariba.Refresh.checkParentFrame($session.allowParentFrame);
+    </a:ClientSideScript>
     <div id="AWHistoryFrameDiv"></div>\
 \
     <a:IncludeContent/>\
@@ -49,7 +53,7 @@
         <a:Image filename="widg/dragIcon.gif"/>\
     </div>\
     <div id="awwaitAlertDiv"
-         style="display:none;position:absolute;border:1px solid black;padding:5px;background-color:#fff;text-align:center;z-index:999">\
+         style="display:none;position:absolute;border:1px solid black;padding:5px;background-color:#fff;text-align:center;z-index:1999">\
         <a:Image id="awProgressBar" filename="anxProgressBar.gif"/>\
         <!--- See Request.js:progressBarSetWidth() for reference ... -->\
         <div id="awwaitMessage"></div>\

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/SafeJavaRepository.java#14 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/SafeJavaRepository.java#16 $
 */
 
 package ariba.util.fieldtype;
@@ -356,6 +356,11 @@ public class SafeJavaRepository
     //-----------------------------------------------------------------------
     // private data members
 
+    // _name2Specification should not contain
+    // {@link MethodSpecification#AlwaysFalseMethodSpecification} and
+    // {@link MethodSpecification#CompositeMethodSpecification} since they
+    // are cons up on the fly during runtime.
+
     private GrowOnlyHashtable/*<String, MethodSpecification>*/ _name2Specification;
 
     //-----------------------------------------------------------------------
@@ -422,17 +427,12 @@ public class SafeJavaRepository
 
     /**
      * This method returns all the class names in the safe java files.
+     * Caller must not modify the return value.
      * @return A set of safe class names used in the safe java files.
      */
     public Set getAllSafeClassNames ()
     {
-        Iterator iter = _name2Specification.keySet().iterator();
-        Set result = SetUtil.set();
-        while (iter.hasNext()) {
-            result.add(iter.next());
-        }
-
-        return result;
+        return Collections.unmodifiableSet(_name2Specification.keySet());
     }
 
     /**
@@ -568,13 +568,11 @@ public class SafeJavaRepository
     
     private MethodSpecification getSafeMethodsForClass (Class aClass)
     {
-        String className = aClass.getName();      
+        String className = aClass.getName();
         // if we could not find the specification, we return an instance  
         // of AlwaysFalseMethodSpecification.
         if (!_name2Specification.containsKey(className)) {
-            _name2Specification.put(
-                className,
-                MethodSpecification.AlwaysFalseMethodSpecification);
+            return MethodSpecification.AlwaysFalseMethodSpecification;
         }
         return (MethodSpecification)_name2Specification.get(className);
     }

@@ -1,6 +1,6 @@
 Shift_JIS,,,,
-"AribaAboutBox",a009,"&copy; 1996 - 2010 Ariba Inc. All Rights Reserved.","&copy; 1996 - 2010 Ariba Inc. All Rights Reserved.",""
-"AribaAboutBox",a010,"'Ariba, Inc.', 'Ariba', the Ariba, Inc. logo, and 'Ariba.com' are trademarks and/or service marks of Ariba or Others. For additional information on Ariba trademarks and service marks, please see {0}www.ariba.com/trademarks.cfm{/0}. Unless otherwise noted on the Site, all other trademarks, service marks, and logos used in this Site are the trademarks, service marks or logos of their respective owners.","Ariba, Inc.、Ariba、Ariba, Inc. ロゴ、および Ariba.com は、Ariba 社の商標またはサービスマークです。Ariba 社の商標とサービスマークに関する詳細は、{0}www.ariba.com/trademarks.cfm{/0} を参照してください。このサイト上で特に記載のない場合は、使用されているその他すべての商標、サービスマーク、およびロゴは、それぞれの著作者に属する商標、サービスマーク、またはロゴであることを意味します。",""
+"AribaAboutBox",a009,"&copy; 1996 - 2011 Ariba Inc. All Rights Reserved.","&copy; 1996 - 2011 Ariba Inc. All Rights Reserved.",""
+"AribaAboutBox",a010,"'Ariba, Inc.', 'Ariba', the Ariba, Inc. logo, and 'Ariba.com' are trademarks and/or service marks of Ariba or Others. For additional information on Ariba trademarks and service marks, please see {0}www.ariba.com/legal/trademarks.cfm{/0}. Unless otherwise noted on the Site, all other trademarks, service marks, and logos used in this Site are the trademarks, service marks or logos of their respective owners.","Ariba, Inc.、Ariba、Ariba, Inc. ロゴ、および Ariba.com は、Ariba 社の商標またはサービスマークです。Ariba 社の商標とサービスマークに関する詳細は、{0}www.ariba.com/legal/trademarks.cfm{/0} を参照してください。このサイト上で特に記載のない場合は、使用されているその他すべての商標、サービスマーク、およびロゴは、それぞれの著作者に属する商標、サービスマーク、またはロゴであることを意味します。",""
 "AribaBasicPageWrapper",a001,"Collapse the Navigation Panel","ナビゲーションパネルを閉じる",""
 "AribaBasicPageWrapper",a002,"Expand the Navigation Panel","ナビゲーションパネルを開く",""
 "AribaBasicPageWrapper",a005,"Home","ホーム",""
@@ -10,7 +10,7 @@ Shift_JIS,,,,
 "AribaBasicPageWrapper",a009,"Preferences","ユーザー設定",""
 "AribaContactBox",a001,"If you need help on how to use this product, click {0}Help{/0} at the top right of any product page to access documentation and tutorials.","この製品の使用方法についての情報が必要な場合、任意の製品ページの右上にある {0}[ヘルプ]{/0} をクリックすると、ドキュメントとチュートリアルを入手できます。",""
 "AribaLoginForm",a002,"System running in non-production mode","システムは本稼動モード以外のモードで動作しています。",""
-"AribaLoginPageWrapper",a002,"&copy; 1996 &#150; 2010 Ariba Inc. All Rights Reserved","&copy; 1996 &#150; 2010 Ariba Inc. All Rights Reserved",""
+"AribaLoginPageWrapper",a002,"&copy; 1996 &#150; 2011 Ariba Inc. All Rights Reserved","&copy; 1996 &#150; 2011 Ariba Inc. All Rights Reserved",""
 "AribaLoginPageWrapper",a003,"Support","サポート",""
 "AribaLoginPageWrapper",a004,"To properly view this application IE 6+, Firefox 3.6+, or Safari 4+ with Adobe Flash Player 7+ is required.","このアプリケーションを適切に表示するには、Internet Explorer 6以降、Firefox 3.6以降、または Safari 4以降と、Adobe Flash Player 7以降が必要です。",""
 "AribaNotificationDialog",a001,"Notification","通知",""
