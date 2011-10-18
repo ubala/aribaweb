@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2011 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#123 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#125 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -40,8 +40,6 @@ import ariba.util.core.Constants;
 import ariba.util.core.Fmt;
 import java.util.Map;
 import ariba.util.i18n.I18NUtil;
-import ariba.util.fieldvalue.FieldValue;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -258,6 +256,8 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
             DefaultTemplateParser.registerContainerClassForTagName("Responsible", AWHtmlTemplateParser.LiteralContainer.class);
             DefaultTemplateParser.registerContainerClassForTagName("Todo", AWHtmlTemplateParser.LiteralContainer.class);
             DefaultTemplateParser.registerContainerClassForTagName("Overview", AWHtmlTemplateParser.LiteralContainer.class);
+            DefaultTemplateParser.registerContainerClassForTagName("Example", AWExampleApi.class);
+            DefaultTemplateParser.registerContainerClassForTagName("IncludeExample", AWIncludeExample.class);
 
             DefaultTemplateParser.registerContainerClassForTagName("script", AWPrivateScript.class);
             DefaultTemplateParser.registerContainerClassForTagName("Script", AWPrivateScript.class);
@@ -274,6 +274,8 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         resolver.addAllowedGlobal("Responsible");
         resolver.addAllowedGlobal("Todo");
         resolver.addAllowedGlobal("Overview");
+        resolver.addAllowedGlobal("Example");
+        resolver.addAllowedGlobal("IncludeExample");
         resolver.addAllowedGlobal("Script");
     }
     
@@ -694,18 +696,20 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         return resource;
     }
 
-    /**
-        We need to use the same resource manager for loading templates.
-        Otherwise, each component instances can potential get templates with
-        a different structure (ie, AWIncludeComponent maps)
-     */
+
     public static AWResourceManager templateResourceManager ()
     {
-        if (_templateResourceManager == null) {
-            _templateResourceManager =
-                AWConcreteApplication.sharedInstance().createTemplateResourceManager();
-        }
         return _templateResourceManager;
+    }
+
+    /**
+     * We need to use the same resource manager for loading templates.
+     * Otherwise, each component instances can potential get templates with
+     * a different structure (ie, AWIncludeComponent maps)
+     */
+    public static void initTemplateResourceManager (AWResourceManager manager)
+    {
+        _templateResourceManager = manager;
     }
 
     protected boolean hasTemplate ()

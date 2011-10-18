@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/io/CSVDefaultErrorHandler.java#2 $
+    $Id: //ariba/platform/util/core/ariba/util/io/CSVDefaultErrorHandler.java#3 $
 */
 
 package ariba.util.io;
@@ -45,16 +45,16 @@ public class CSVDefaultErrorHandler
         switch (errorCode) {
             case CSVReader.ErrorMissingComma:
                     // "end of field not followed by newline or comma in ""{0}"", line {1}"
-                Log.util.warning(2793, location, lineNumber);
+                Log.util.info(2793, location, lineNumber);
                 break;
             case CSVReader.ErrorUnbalancedQuotes:
                     // "Unbalanced quotes in ""{0}"", line {1}"
-                Log.util.warning(8832, location, lineNumber);
+                Log.util.info(8832, location, lineNumber);
                 break;
             case CSVReader.ErrorIllegalCharacterOrByteSequence:
                     // "Exception during reading line {0} of {1}, perhaps the
                     // wrong encoding is used to read the resource"
-                Log.util.warning(8379, location, lineNumber);
+                Log.util.info(8379, location, lineNumber);
                 break;
             default:
                 Object[] args = {

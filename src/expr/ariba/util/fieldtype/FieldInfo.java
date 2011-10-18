@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/FieldInfo.java#4 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/FieldInfo.java#5 $
 */
 
 package ariba.util.fieldtype;
@@ -23,5 +23,8 @@ package ariba.util.fieldtype;
 */
 public interface FieldInfo extends PropertyInfo
 {
-   
+    /**
+     * @return true if this is a static field
+     */
+    boolean isStatic();
 }

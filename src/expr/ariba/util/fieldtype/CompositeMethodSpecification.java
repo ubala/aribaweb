@@ -12,36 +12,36 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/CompositeMethodSpecification.java#2 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/CompositeMethodSpecification.java#3 $
 */
 
 package ariba.util.fieldtype;
 
 import java.lang.reflect.Method;
-import java.util.Iterator;
 import java.util.List;
-import ariba.util.core.ListUtil;
 
 /**
-*/
+ */
 public class CompositeMethodSpecification extends MethodSpecification
 {
-	List/*<MethodSpecification>*/ _methodSpecifications;
-	
-	public CompositeMethodSpecification (List collection)
-	{
-	    _methodSpecifications = ListUtil.list();
-	    _methodSpecifications.addAll(collection);
-	}
-	
-	public boolean isSatisfiedBy (Method method)
-	{
-		for (Iterator i = _methodSpecifications.iterator(); i.hasNext();) {
-			MethodSpecification spec = (MethodSpecification)i.next();
-			if (spec.isSatisfiedBy(method)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    List<MethodSpecification> _methodSpecifications;
+
+    /**
+     * @param collection Caches the passed parameter, expected to contain non duplicate
+     * MethodSpecifications
+     */
+    public CompositeMethodSpecification (List<MethodSpecification> collection)
+    {
+        _methodSpecifications = collection;
+    }
+
+    public boolean isSatisfiedBy (Method method)
+    {
+        for (MethodSpecification spec : _methodSpecifications) {
+            if (spec.isSatisfiedBy(method)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

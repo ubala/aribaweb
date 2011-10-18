@@ -1,0 +1,8 @@
+<a:Api>
+    <Example name="Example1">
+        <a:SubmitButton/>
+    </Example>
+    <Example name="Example2">
+        <a:TextField value="$essai"/>
+    </Example>
+</a:Api>

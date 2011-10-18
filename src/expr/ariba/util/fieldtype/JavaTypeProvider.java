@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/JavaTypeProvider.java#20 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/JavaTypeProvider.java#22 $
 */
 
 package ariba.util.fieldtype;
@@ -243,6 +243,7 @@ public class JavaTypeProvider extends TypeProvider
     {
 
         protected Class   _proxiedClass;
+        //@todo Kiran this is not threadsafe
         protected Map<String,FieldInfo>   _fieldInfos;
         protected Map<String,JavaMethodInfo>   _methodInfos;
         protected boolean _hasMethodInfoLoaded = false;
@@ -379,10 +380,10 @@ public class JavaTypeProvider extends TypeProvider
         public FieldInfo getField (TypeRetriever retriever, String name)
         {
             try {
-                FieldInfo fieldInfo = (FieldInfo)_fieldInfos.get(name);
+                FieldInfo fieldInfo = _fieldInfos.get(name);
                 if (fieldInfo == null) {
                     synchronized (this) {
-                        fieldInfo = (FieldInfo)_fieldInfos.get(name);
+                        fieldInfo = _fieldInfos.get(name);
                         if (fieldInfo == null) {
                             Field field = _proxiedClass.getField(name);
                             fieldInfo = createFieldInfo(field);
@@ -491,19 +492,32 @@ public class JavaTypeProvider extends TypeProvider
             return null;
         }
 
-        public PropertyInfo resolvePropertyForName (TypeRetriever retriever,
-                                                    String name)
+        public PropertyInfo resolvePropertyForName (TypeRetriever retriever, String name)
         {
             FieldInfo field = getField(retriever, name);
             if (field != null) {
                 return field;
             }
-
+            if (!_hasMethodInfoLoaded) {
+                //performance shortcut if there is no method matching the name
+                //just return null
+                Method[] methods = _proxiedClass.getMethods();
+                boolean found = false;
+                for (Method method : methods) {
+                    if (FieldValueAccessorUtil.matchForGetter(name, method.getName())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    return null;
+                }
+            }
             loadMethods(retriever);
             Iterator methods = _methodInfos.keySet().iterator();
             while (methods.hasNext()) {
                 String key = (String)methods.next();
-                JavaMethodInfo method = (JavaMethodInfo)_methodInfos.get(key);
+                JavaMethodInfo method = _methodInfos.get(key);
                 String methodName = method.getMethod().getName();
                 if (FieldValueAccessorUtil.matchForGetter(name, methodName)) {
                     return method;
@@ -535,13 +549,13 @@ public class JavaTypeProvider extends TypeProvider
         {
             if (!_hasMethodInfoLoaded) {
                 Method[] methods = _proxiedClass.getMethods();
-                if (methods != null) {
+                if (methods != null && methods.length > 0) {
                     MethodSpecification specification =
                         SafeJavaRepository.getInstance().getAllSafeMethodsForClass(
                             _proxiedClass);
                     Set<JavaMethodInfo> firstParamClassNameMethods = SetUtil.set();
-                    for (int i=0; i < methods.length; i++) {
-                        Method method = methods[i];
+
+                    for (Method method : methods) {
                         boolean isSafe = (specification != null ?
                                           specification.isSatisfiedBy(method) :
                                           false);
@@ -795,6 +809,11 @@ public class JavaTypeProvider extends TypeProvider
             return _parentType;
         }
 
+        public boolean isStatic ()
+        {
+            return Modifier.isStatic(_proxiedField.getModifiers());
+        }
+
         public int getAccessibility ()
         {
             int modifiers = _proxiedField.getModifiers();
@@ -957,7 +976,7 @@ public class JavaTypeProvider extends TypeProvider
             return getName();
         }
 
-        public TypeInfo    getParentType ()
+        public TypeInfo getParentType ()
         {
             return _parentType;
         }
@@ -986,7 +1005,7 @@ public class JavaTypeProvider extends TypeProvider
         String getMungedMethodNameSansFirstParam ()
         {
             int size = _parametersType.size();
-            if (size < 1 )return null;
+            if (size < 1) return null;
             List params = Collections.EMPTY_LIST;
             if (size > 1) {
                 params = ListUtil.list();

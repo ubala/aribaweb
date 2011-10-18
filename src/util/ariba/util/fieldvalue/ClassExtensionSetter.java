@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/ClassExtensionSetter.java#3 $
+    $Id: //ariba/platform/util/core/ariba/util/fieldvalue/ClassExtensionSetter.java#4 $
 */
 
 package ariba.util.fieldvalue;
@@ -36,7 +36,6 @@ by passing the actual targte as the first argument in the args array.
 */
 public class ClassExtensionSetter extends ReflectionMethodSetter
 {
-    private static final int ArgValuesCount = 2;
     private final ClassExtension _classExtension;
 
     /**
@@ -105,21 +104,6 @@ public class ClassExtensionSetter extends ReflectionMethodSetter
     protected void invokeSetMethod (Object target, Object value)
         throws InvocationTargetException, IllegalAccessException
     {
-        // This does a 'checkout' of _sharedArgValuesArray
-        Object[] argValuesArray = null;
-        synchronized (this) {
-            argValuesArray = _sharedArgValuesArray;
-            _sharedArgValuesArray = null;
-        }
-        if (argValuesArray == null) {
-            argValuesArray = new Object[ArgValuesCount];
-        }
-        argValuesArray[0] = target;
-        argValuesArray[1] = value;
-        _method.invoke(_classExtension, argValuesArray);
-        argValuesArray[0] = null;
-        argValuesArray[1] = null;
-        // ...and this checks it back in
-        _sharedArgValuesArray = argValuesArray;
+        _method.invoke(_classExtension, target, value);
     }
 }

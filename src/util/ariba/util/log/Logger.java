@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/Logger.java#27 $
+    $Id: //ariba/platform/util/core/ariba/util/log/Logger.java#28 $
 */
 
 package ariba.util.log;
@@ -1143,7 +1143,23 @@ public class Logger extends org.apache.log4j.Logger
                       null);
         }
     }
-
+    
+    /**
+     * Print a message to this Logger. This will only print a
+     * message if this Logger is enabled for the DEBUG level.
+     * The control string works in the same fashion as the <b>Fmt</b> control
+     * string.
+     * 
+     * @param messageID ID of the message that is to be used
+     * @param args the first argument to the format string of <b>messageID</b>
+     * @aribaapi documented
+     */
+    public void debug (int messageID, Object... args)
+    {
+        if (isEnabledFor(Level.DEBUG)) {
+            forcedLocalizedLog(FQCN, Level.DEBUG, null, messageID, ListUtil.arrayToList(args));
+        }
+    }
 
     /**
         Print a message to this Logger. This will only print a

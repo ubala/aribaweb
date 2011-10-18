@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/SimpleMethodSpecification.java#3 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/SimpleMethodSpecification.java#4 $
 */
 
 package ariba.util.fieldtype;
@@ -29,7 +29,7 @@ import java.util.List;
 */
 public class SimpleMethodSpecification extends MethodSpecification
 {
-    private List/*<Method>*/ _methods;
+    private List<Method> _methods;
     
     public SimpleMethodSpecification ()
     {
@@ -49,11 +49,9 @@ public class SimpleMethodSpecification extends MethodSpecification
     */
     public static boolean secondSatisfiesFirst (Method first, Method second)
     {
-        Class firstClass = first.getDeclaringClass();
-        return firstClass.isAssignableFrom(second.getDeclaringClass()) &&
-            first.getName().equals(second.getName()) &&
-            ArrayUtil.arrayEquals(
-                first.getParameterTypes(), second.getParameterTypes());      
+        return first.getName().equals(second.getName()) &&
+            first.getDeclaringClass().isAssignableFrom(second.getDeclaringClass()) &&
+            ArrayUtil.arrayEquals(first.getParameterTypes(), second.getParameterTypes());
     }
     
     public boolean isSatisfiedBy (Method method)

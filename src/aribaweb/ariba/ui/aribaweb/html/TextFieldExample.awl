@@ -1,0 +1,5 @@
+<a:Api>
+     <Example name="Binding use">
+        <a:TextField value="$value"/>
+    </Example>
+</a:Api>

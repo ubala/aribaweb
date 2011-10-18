@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1996-2010 Ariba, Inc.
+    Copyright (c) 1996-2011 Ariba, Inc.
     All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#45 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#48 $
 */
 
 package ariba.util.core;
@@ -21,6 +21,7 @@ package ariba.util.core;
 import ariba.util.core.PerformanceStateCore.MetricObserver;
 import ariba.util.log.Log;
 import ariba.util.log.LogManager;
+import ariba.util.formatter.StringFormatter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,20 +32,30 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-    
+
 /**
-    This class maintains performance state for the current thread.
+ This class maintains performance state for the current thread.
 
-    It can be considered a specialized extension to ThreadDebugState (and, in fact,
-    stores itself there).
+ It can be considered a specialized extension to ThreadDebugState (and, in fact,
+ stores itself there).
 
-    @aribaapi ariba
-*/
+ @aribaapi ariba
+ */
 public class PerformanceState
 {
     protected static List _RegisteredMetrics = ListUtil.list();
     protected static String NodeName = "UnknownNode";
+    protected static int communityId = -1;
     private static boolean _RegistrationComplete = false;
+    private static boolean allowSuspending = true;
+
+    // perfTestMode is a flag to indicate that the currently running instance is
+    // running performance related tests.  This flag is intended to be used to determine
+    // if the gathering of additional diagnostic information should be turned off.  It is *not* intended
+    // to affect functionality in the application.
+    // The default value is false, performance testing installations should set this
+    // value to true.
+    private static boolean perfTestMode = false;
 
     private static final String PlanPrefix = "plan-";
 
@@ -59,11 +70,18 @@ public class PerformanceState
             new PerformanceStateCPUTimedCounter();
 
     private static final String ParameterLogArchivingDisabled
-        = "System.Performance.ScheduledLogArchivingDisabled";
+            = "System.Performance.ScheduledLogArchivingDisabled";
+
+    public static final String ParameterAllowRecordingSuspensions =
+            "System.Performance.AllowRecordingSuspensions";
+
+    public static final String ParameterEnableLoadTestingMode =
+          "System.Performance.EnableLoadTesting";
+
 
     /**
-        Must be called by app after all metrics have been registered.  At that point
-        logging can begin (and no further registration should be performed)
+     Must be called by app after all metrics have been registered.  At that point
+     logging can begin (and no further registration should be performed)
      */
     public static void registrationComplete ()
     {
@@ -75,28 +93,46 @@ public class PerformanceState
         return ThreadDebugState.threadStateEnabled;
     }
 
+    /**
+     * Returns true if the current thread is running a qual test.  The intent of
+     * this method is to return true when additional diagnostic information should be
+     * captured.  There are 3 components to this determination:
+     * 1) threadStateEnabled()
+     * 2) qualMode - this is set at server startup indicating that thread state is
+     * enabled and it is possible that a qual (LQ/BQ) test could be running.
+     * (opposed to a performance test).
+     * 3) The testId property is non-null on the current thread.
+     *
+     * @return
+     */
+    public static final boolean isQualTest ()
+    {
+        return threadStateEnabled() && !perfTestMode &&
+              getThisThreadHashtable().getTestId() != null;
+    }
+
     public static boolean isLoggingEnabled ()
     {
         return Log.perf_log_trace.isDebugEnabled();
     }
 
     /**
-        Remove all values that are currently stored.
-        @deprecated  Use ThreadDebugState.clear()
-    */
+     Remove all values that are currently stored.
+     @deprecated  Use ThreadDebugState.clear()
+     */
     public static void clear ()
     {
         ThreadDebugState.clear();
     }
 
     /**
-        Set a thread to have its execution time monitored.  If clear() has
-        not been called for this thread before the <code>errorDuration</code>
-        has passed, then the thread debug state will be written to the error log.
+     Set a thread to have its execution time monitored.  If clear() has
+     not been called for this thread before the <code>errorDuration</code>
+     has passed, then the thread debug state will be written to the error log.
 
-        @param checker -- the performance check object.  It's warningTimeMillis determines
-                            the logging period
-    */
+     @param checker -- the performance check object.  It's warningTimeMillis determines
+     the logging period
+     */
     public static void watchPerformance (PerformanceCheck checker)
     {
         if (threadStateEnabled()) {
@@ -105,10 +141,10 @@ public class PerformanceState
             stats._startTime = System.currentTimeMillis();
             stats._performanceCheck = checker;
             long duration = (checker._errorRuntimeMillis > 0 ?
-                             checker._errorRuntimeMillis : 30000);
+                    checker._errorRuntimeMillis : 30000);
             stats._deadline = stats._startTime + duration;
             WatcherDaemon.add(ThreadDebugState.getThisThreadHashtable(),
-                              Thread.currentThread());
+                    Thread.currentThread());
         }
     }
 
@@ -128,7 +164,7 @@ public class PerformanceState
             }
             stats._deadline = stats._startTime + duration;
             WatcherDaemon.update(ThreadDebugState.getThisThreadHashtable(),
-                                 Thread.currentThread());
+                    Thread.currentThread());
         }
     }
 
@@ -161,8 +197,8 @@ public class PerformanceState
 
 
     /**
-        Called by ThreadDebugState.clear();
-    */
+     Called by ThreadDebugState.clear();
+     */
     protected static void internalClear (ThreadDebugState.StateMap debugState,
                                          boolean endOfEvent)
     {
@@ -200,20 +236,20 @@ public class PerformanceState
                 PerformanceStateCore existing =
                         (PerformanceStateCore)_RegisteredMetrics.get(i);
                 Assert.that(!metric.hasSameNameAs(existing),
-                            "Registering metric with duplicate name: '%s'",
-                            metric.getName());
+                        "Registering metric with duplicate name: '%s'",
+                        metric.getName());
             }
 
             Assert.that((metric.getLogRank() == 0) || !_RegistrationComplete,
-                        "Registered metric after log started ! You must register during init");
+                    "Registered metric after log started ! You must register during init");
             _RegisteredMetrics.add(metric);
         }
     }
 
     /**
 
-        @aribaapi ariba
-    */
+     @aribaapi ariba
+     */
     public String toString ()
     {
         return String.valueOf(getThisThreadHashtable());
@@ -254,14 +290,14 @@ public class PerformanceState
     private static final State state = StateFactory.createState();
 
     /**
-        If you need direct access to the hashtable, you can get it
-        this way. If you intend to save the object for later use (past
-        the bounds of the current ui boundary, you should call clone
-        on the data so that when this object is cleared, your shared
-        copy of the hashtable is not also cleared.
+     If you need direct access to the hashtable, you can get it
+     this way. If you intend to save the object for later use (past
+     the bounds of the current ui boundary, you should call clone
+     on the data so that when this object is cleared, your shared
+     copy of the hashtable is not also cleared.
 
-        @aribaapi ariba
-    */
+     @aribaapi ariba
+     */
     public static Stats getThisThreadHashtable ()
     {
         if (!threadStateEnabled()) {
@@ -307,10 +343,43 @@ public class PerformanceState
     public static boolean isRecordingSuspended ()
     {
         if (threadStateEnabled()) {
-            return getThisThreadHashtable().isRecordingSuspended();
+            return getThisThreadHashtable().isRecordingSuspended() && isSuspendingAllowed();
         }
         return false;
     }
+
+    /**
+     * Performance recording should not be suspended if this method returns true.
+     * this is done during performance testing so the perf logs more accurately
+     * reflect the true load on the system.
+     *
+     * @return
+     */
+    public static boolean isSuspendingAllowed ()
+    {
+        return allowSuspending;
+    }
+
+    public static void setAllowRecordingSuspensions (boolean flag)
+    {
+        allowSuspending = flag;
+    }
+
+    /**
+     * perfTestMode is a flag to indicate that the currently running instance is
+     * running performance related tests.  This flag is intended to be used to determine
+     * if the gathering of additional diagnostic information should be turned off.  It is *not* intended
+     * to affect functionality in the application.
+     * The default value is false, performance testing installations should set this
+     * value to true.
+     *
+     * @param flag
+     */
+    public static void setPerfTestMode (boolean flag)
+    {
+        perfTestMode = flag;
+    }
+
 
     /* Type of activity -- User request, Background task, ... */
     public static final String Type_User = "User";
@@ -336,8 +405,8 @@ public class PerformanceState
 
 
     /**
-        @aribaapi ariba
-    */
+     @aribaapi ariba
+     */
     public static class Stats extends EqHashtable
     {
         PerformanceCheck _performanceCheck;
@@ -347,7 +416,7 @@ public class PerformanceState
         protected long _deadline;
         protected boolean toBeContinued;
         protected boolean recordingSuspended;
-        
+
         protected String realm;
         protected String realmType;
         protected String sessionID;
@@ -391,11 +460,11 @@ public class PerformanceState
         }
 
         /**
-            Indicates that this performance state will be continued in a subsequent
-            request (and so should not be logged on clear().  This is used by AWSession
-            when it bridges a single perf measure across the two-request
-            form-post-redirect sequence.
-        */
+         Indicates that this performance state will be continued in a subsequent
+         request (and so should not be logged on clear().  This is used by AWSession
+         when it bridges a single perf measure across the two-request
+         form-post-redirect sequence.
+         */
         public boolean isToBeContinued ()
         {
             return toBeContinued;
@@ -486,9 +555,9 @@ public class PerformanceState
         }
 
         /**
-            For AW this is the AW page (class name) that processed the incoming request.
-            Could re-appropriated for scheduled tasks to be the scheduled task name
-        */
+         For AW this is the AW page (class name) that processed the incoming request.
+         Could re-appropriated for scheduled tasks to be the scheduled task name
+         */
         public String getSourcePage ()
         {
             return sourcePage;
@@ -500,8 +569,8 @@ public class PerformanceState
         }
 
         /**
-            Sub-area within the source page.  Could be the Tab name or Wizard step
-        */
+         Sub-area within the source page.  Could be the Tab name or Wizard step
+         */
         public String getSourceArea ()
         {
             return sourceArea;
@@ -513,8 +582,8 @@ public class PerformanceState
         }
 
         /**
-            The page returned from the request
-        */
+         The page returned from the request
+         */
         public String getDestinationPage ()
         {
             return destinationPage;
@@ -536,11 +605,11 @@ public class PerformanceState
         }
 
         /**
-            Returns String suitable to display in perf or other logging, encoding context
-            information in (source, destination) x (Page, Area), while avoiding boring
-            repetition.
-            @aribaapi private
-        */
+         Returns String suitable to display in perf or other logging, encoding context
+         information in (source, destination) x (Page, Area), while avoiding boring
+         repetition.
+         @aribaapi private
+         */
         public String getDisplayPageArea ()
         {
             String sp = getSourcePage();
@@ -578,7 +647,7 @@ public class PerformanceState
         }
 
         /**
-            Type_User, Type_Task, etc...
+         Type_User, Type_Task, etc...
          */
         public String getType ()
         {
@@ -591,7 +660,7 @@ public class PerformanceState
         }
 
         /**
-            Status_Success, Status_InternalError, etc...
+         Status_Success, Status_InternalError, etc...
          */
         public String getStatus ()
         {
@@ -604,13 +673,13 @@ public class PerformanceState
         }
 
         /**
-            An additional metric that should be logged in the CSV.
+         An additional metric that should be logged in the CSV.
 
-            E.g.:
-            PerformanceState.getThisThreadHashtable().setAppMetric(NumberOfSourcingEvents)
+         E.g.:
+         PerformanceState.getThisThreadHashtable().setAppMetric(NumberOfSourcingEvents)
 
-            This metric name and value will be logged in the CSV metrics file.
-        */
+         This metric name and value will be logged in the CSV metrics file.
+         */
         public PerformanceState getAppMetric ()
         {
             return appMetric;
@@ -622,9 +691,9 @@ public class PerformanceState
         }
 
         /**
-            Arbitrary descriptive information that will be written to the CSV.
-            Example usage: Name of the Report being opened, ...
-        */
+         Arbitrary descriptive information that will be written to the CSV.
+         Example usage: Name of the Report being opened, ...
+         */
         public String getAppInfo ()
         {
             return appInfo;
@@ -636,10 +705,10 @@ public class PerformanceState
         }
 
         /**
-            AppDimension (1 & 2) can be used for storing application-specific
-            categorization information that can we used to slice/group information
-            during analysis.  For instance, AQS might put RFXType, and RFXName here.
-            Analysis might put Fact Table name, and UsesSlowDimensions flag.
+         AppDimension (1 & 2) can be used for storing application-specific
+         categorization information that can we used to slice/group information
+         during analysis.  For instance, AQS might put RFXType, and RFXName here.
+         Analysis might put Fact Table name, and UsesSlowDimensions flag.
          */
         public String getAppDimension1 ()
         {
@@ -774,7 +843,7 @@ public class PerformanceState
     }
 
     /**
-        Must be initialized by server prior to first log event
+     Must be initialized by server prior to first log event
      */
     public static void setNodeName (String nodeName)
     {
@@ -786,26 +855,39 @@ public class PerformanceState
         return NodeName;
     }
 
-    protected static final String FileHeader = "Date, Realm, RealmType, NodeName, "
-                    + "SessionID, User, SourcePage, SourceArea, DestPage, DestArea, "
-                    + "Type, Status, "
-                    + "AppMetricName, AppMetric, AppDimension1, AppDimension2, "
-                    + "AppInfo, Referer, AcceptLanguages, UserAgent, TestShortId, "
-                    + "TestId, TestLine, ";
-    protected static final String PlanFileHeader = "Date, Realm, RealmType, NodeName, "
-                    + "SessionID, User, SourcePage, SourceArea, DestPage, DestArea, "
-                    + "Type, Status, "
-                    + "AppDimension1, AppDimension2, AppInfo, TestShortId, TestId, "
-                    + "TestLine, Query, Plan";
+    /**
+     Must be initialized prior to first log event
+     */
+    public static void setCommunity (int communityId)
+    {
+        PerformanceState.communityId =  communityId;
+    }
+
+    public static int getCommunity ()
+    {
+        return communityId;
+    }
+
+    protected static final String FileHeader = "Date, Realm, RealmType, Community, NodeName, "
+            + "SessionID, User, SourcePage, SourceArea, DestPage, DestArea, "
+            + "Type, Status, "
+            + "AppMetricName, AppMetric, AppDimension1, AppDimension2, "
+            + "AppInfo, Referer, AcceptLanguages, UserAgent, TestShortId, "
+            + "TestId, TestLine, ";
+    protected static final String PlanFileHeader = "Date, Realm, RealmType, Community, NodeName, "
+            + "SessionID, User, SourcePage, SourceArea, DestPage, DestArea, "
+            + "Type, Status, "
+            + "AppDimension1, AppDimension2, AppInfo, TestShortId, TestId, "
+            + "TestLine, Query, Plan";
 
     protected static PerformanceStateCore[] _LogMetrics = null;
 
     /**
-        Returns an array of the {@link PerformanceStateCore} objects to be
-        used in logging. <p/>
+     Returns an array of the {@link PerformanceStateCore} objects to be
+     used in logging. <p/>
 
-        @aribaapi ariba
-    */
+     @aribaapi ariba
+     */
     public static PerformanceStateCore[] logMetrics ()
     {
         if (_LogMetrics == null) {
@@ -821,7 +903,7 @@ public class PerformanceState
                     }
                 }
                 PerformanceStateCore[] temp =
-                    new PerformanceStateCore[rankedMetrics.size()];
+                        new PerformanceStateCore[rankedMetrics.size()];
                 rankedMetrics.toArray(temp);
                 Arrays.sort(temp, PerformanceStateCore.LogRankComparator);
                 _LogMetrics = temp;
@@ -861,8 +943,9 @@ public class PerformanceState
         buf.append('"');
         String escaped = StringUtil.replaceCharByString(s, '"', "\"\"");
         if (replaceNewline) {
-                escaped = escaped.replace('\n', ' ');
+            escaped = escaped.replace('\n', ' ');
         }
+        escaped = escaped.replaceAll(StringFormatter.getStringValue(sep), ";");
         buf.append(escaped);
         buf.append('"');
     }
@@ -870,9 +953,9 @@ public class PerformanceState
 
     public static void logToFile (Stats stats)
     {
-        // if the test line number is -1, do not log the stats 
+        // if the test line number is -1, do not log the stats
         if (!StringUtil.nullOrEmptyString(stats.getTestLine()) &&
-            stats.getTestLine().equals("-1"))
+                stats.getTestLine().equals("-1"))
         {
             return;
         }
@@ -885,6 +968,7 @@ public class PerformanceState
 
         buf.append(stats.getRealm()); buf.append(sep);
         buf.append(stats.getRealmType()); buf.append(sep);
+        buf.append(PerformanceState.getCommunity()); buf.append(sep);
         buf.append(PerformanceState.getNodeName()); buf.append(sep);
         buf.append(stats.getSessionID()); buf.append(":");
         buf.append(stats.getIPAddress()); buf.append(sep);
@@ -901,7 +985,7 @@ public class PerformanceState
             buf.append(sep);
 
             PerformanceStateCore.Instance stat
-                        = (PerformanceStateCore.Instance)stats.get(stats.appMetric);
+                    = (PerformanceStateCore.Instance)stats.get(stats.appMetric);
             if (stat != null) {
                 buf.append(stat.getCount());
             }
@@ -954,9 +1038,9 @@ public class PerformanceState
             stats = new Stats();
         }
 
-        // if the test line number is -1, do not log the stats 
+        // if the test line number is -1, do not log the stats
         if (StringUtil.nullOrEmptyString(stats.getTestLine()) ||
-            stats.getTestLine().equals("-1"))
+                stats.getTestLine().equals("-1"))
         {
             return;
         }
@@ -969,6 +1053,7 @@ public class PerformanceState
 
         buf.append(stats.getRealm()); buf.append(sep);
         buf.append(stats.getRealmType()); buf.append(sep);
+        buf.append(PerformanceState.getCommunity()); buf.append(sep);
         buf.append(PerformanceState.getNodeName()); buf.append(sep);
         buf.append(ThreadNameAbbreviation.getName()); buf.append(":");
         buf.append(stats.getSessionID()); buf.append(":");
@@ -1008,8 +1093,8 @@ public class PerformanceState
     }
 
     /**
-        If we're logging performance exceptions, then check against registered
-        threshholds and log if we're "in the red"...
+     If we're logging performance exceptions, then check against registered
+     threshholds and log if we're "in the red"...
      */
     static void logPerfExceptions (Stats stats)
     {
@@ -1054,7 +1139,7 @@ public class PerformanceState
                     {
                         return false;
                     }
-                    }); // OK
+                }); // OK
 
                 try {
                     instance = new WatcherDaemon();
@@ -1094,11 +1179,11 @@ public class PerformanceState
         }
 
         /**
-            Start handling the events as they come in.  This is for the
-            implementation of Runnable
+         Start handling the events as they come in.  This is for the
+         implementation of Runnable
 
-            @aribaapi private
-        */
+         @aribaapi private
+         */
         public void run ()
         {
             while (true) {
@@ -1137,14 +1222,14 @@ public class PerformanceState
             Iterator iter = map.keySet().iterator();
             while (iter.hasNext()) {
                 ThreadDebugState.StateMap stateMap =
-                    (ThreadDebugState.StateMap)iter.next();
+                        (ThreadDebugState.StateMap)iter.next();
                 if (currentTime > deadline(stateMap)) {
                     Thread thread = (Thread)map.get(stateMap);
                     StackTraceElement[] stack = stackTraces.get(thread);
                     String stackString = "";
                     if (stack != null) {
                         FastStringBuffer sb = new FastStringBuffer(
-                            "Current stack for long running thread: ");
+                                "Current stack for long running thread: ");
                         sb.append(thread.toString());
                         for (StackTraceElement line: stack) {
                             sb.append("\n\t");
@@ -1166,7 +1251,7 @@ public class PerformanceState
                     iter.remove();
 
                     long origDeadline = stats._startTime +
-                        stats._performanceCheck._errorRuntimeMillis;
+                            stats._performanceCheck._errorRuntimeMillis;
                     long oldInterval = stats._deadline - origDeadline;
                     long newInterval = (oldInterval < 10000) ? 10000 : oldInterval * 2;
                     stats._deadline += newInterval;
@@ -1251,11 +1336,11 @@ final class PerfLogger implements Runnable
     }
 
     /**
-        Start handling the events as they come in.  This is for the
-        implementation of Runnable
+     Start handling the events as they come in.  This is for the
+     implementation of Runnable
 
-        @aribaapi private
-    */
+     @aribaapi private
+     */
     public void run ()
     {
         setArchiveFlag(true);
@@ -1268,7 +1353,7 @@ final class PerfLogger implements Runnable
             }
             _out.println(pageSummary);
             _out.flush();
-                // the code peeked at it before, now remove it.
+            // the code peeked at it before, now remove it.
             _queue.nextObject();
         }
     }
@@ -1284,18 +1369,18 @@ final class PerfLogger implements Runnable
     }
 
     /**
-        Take the event that is passed and place it in the queue.
+     Take the event that is passed and place it in the queue.
 
-        @aribaapi private
-    */
+     @aribaapi private
+     */
     public void sendEvent (String event)
     {
         _queue.insertObject(event);
     }
 
     /**
-        Flush the queue of all of the events that it has.
-    */
+     Flush the queue of all of the events that it has.
+     */
     void flushQueues ()
     {
         _queue.waitForEmpty();
@@ -1303,8 +1388,8 @@ final class PerfLogger implements Runnable
 
     private String namePrefix ()
     {
-            //get the node name from the Custom tag used by logging.
-            //This will return something like "supplierdirect:Samuel_Johnson:isax7g:Node1"
+        //get the node name from the Custom tag used by logging.
+        //This will return something like "supplierdirect:Samuel_Johnson:isax7g:Node1"
         if (_namePrefix == null) {
             FastStringBuffer fsb = new FastStringBuffer();
             fsb.append(NamePrefix);
@@ -1318,23 +1403,23 @@ final class PerfLogger implements Runnable
     {
         Date now = new Date();
         String logFileSaveName =
-            Fmt.S("%s.%s-%02s-%02s_%02s.%02s.%02s.%s",
-                  ArrayUtil.array(
-                      namePrefix(),
-                      Constants.getInteger(Date.getYear(now)),
-                      Constants.getInteger(Date.getMonth(now)+1),
-                      Constants.getInteger(Date.getDayOfMonth(now)),
-                      Constants.getInteger(Date.getHours(now)),
-                      Constants.getInteger(Date.getMinutes(now)),
-                      Constants.getInteger(Date.getSeconds(now)),
-                      _suffix));
+                Fmt.S("%s.%s-%02s-%02s_%02s.%02s.%02s.%s",
+                        ArrayUtil.array(
+                                namePrefix(),
+                                Constants.getInteger(Date.getYear(now)),
+                                Constants.getInteger(Date.getMonth(now)+1),
+                                Constants.getInteger(Date.getDayOfMonth(now)),
+                                Constants.getInteger(Date.getHours(now)),
+                                Constants.getInteger(Date.getMinutes(now)),
+                                Constants.getInteger(Date.getSeconds(now)),
+                                _suffix));
         File saveToFile =
-            new File(targetDirectory, logFileSaveName);
-            // renameTo does not modify the current object - hence
-            // file is left unchanged
+                new File(targetDirectory, logFileSaveName);
+        // renameTo does not modify the current object - hence
+        // file is left unchanged
         boolean success = file.renameTo(saveToFile);
         if (!success) {
-                //if renameTo failed, try copying before we give up
+            //if renameTo failed, try copying before we give up
             success = IOUtil.copyFile(file, saveToFile);
             if (success) {
                 file.delete();

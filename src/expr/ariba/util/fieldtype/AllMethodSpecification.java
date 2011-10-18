@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/AllMethodSpecification.java#2 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/AllMethodSpecification.java#3 $
 */
 
 package ariba.util.fieldtype;
 
+import ariba.util.core.ArrayUtil;
 import java.lang.reflect.Method;
 
 /**
@@ -33,13 +34,22 @@ public class AllMethodSpecification extends MethodSpecification
     
     public boolean isSatisfiedBy (Method method)
     {
-        try {
-            _class.getDeclaredMethod(
-                method.getName(), method.getParameterTypes());
+        if (method.getDeclaringClass() == _class) {
             return true;
         }
-        catch (NoSuchMethodException ex) {
-            return false;
+        //call to _class.getDeclaredMethod() is more expensive than this logic as
+        //it tries to match all the methods for possible return type override
+        String name = method.getName();
+        Class[] types = method.getParameterTypes();
+        Method[] methods = _class.getMethods();
+        for (Method m : methods) {
+            if (m.getName().equals(name)) {
+                Class[] ts = m.getParameterTypes();
+                if (ArrayUtil.arrayEquals(ts, types)) {
+                    return true;
+                }
+            }
         }
+        return false;
     }
 }

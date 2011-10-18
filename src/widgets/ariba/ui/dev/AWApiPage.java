@@ -12,24 +12,21 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWApiPage.java#6 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWApiPage.java#7 $
 */
 
 package ariba.ui.dev;
 
-import ariba.ui.aribaweb.core.AWComponent;
-import ariba.util.core.ListUtil;
-import ariba.ui.aribaweb.core.AWComponentApiManager;
-import ariba.ui.aribaweb.core.AWApi;
-import ariba.ui.aribaweb.core.AWComponentDefinition;
-import ariba.ui.aribaweb.core.AWResponseGenerating;
-import ariba.ui.aribaweb.core.AWRequestContext;
-import ariba.ui.aribaweb.core.AWConcreteApplication;
+import ariba.ui.aribaweb.core.*;
 import ariba.ui.aribaweb.util.AWFileResource;
 import ariba.ui.table.AWTDisplayGroup;
-
-import java.util.List;
+import ariba.util.core.ArrayUtil;
 import ariba.util.core.Assert;
+import ariba.util.core.ListUtil;
+import ariba.util.core.MapUtil;
+
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public final class AWApiPage extends AWComponent
@@ -39,10 +36,14 @@ public final class AWApiPage extends AWComponent
     //----------------------------------------------------------------------
     public static final String Name = "AWApiPage";
     public static boolean _didLoadAll = false;
-    public List _packageNames;
+    public List _packageNames = ListUtil.list();
     public AWTDisplayGroup _displayGroup;
     public Object _currentObject;
+    private Map _selectedTabsByDefinition = MapUtil.map();
+    public AWApi inlineApi;
+    public Object _currentItem;
 
+    @Override
     public void init ()
     {
         super.init();
@@ -51,20 +52,34 @@ public final class AWApiPage extends AWComponent
         _displayGroup.setSelectedObject(_packageNames);
     }
 
-    protected void initPackageList ()
+    public Object getSelectedTab ()
     {
-        _packageNames = application().resourceManager().registeredPackageNames();
-        ListUtil.sortStrings(_packageNames, true);
+        return _selectedTabsByDefinition.get(selectedObjectAWApi());
     }
 
-    void setSelectedComponent (AWComponentDefinition componentDefintion)
+    public void setSelectedTab (Object selectedTab)
     {
-        String pkg = AWComponentApiManager.packageNameForComponent(componentDefintion);
-        int idx = _packageNames.indexOf(pkg);
-        if (idx != -1) {
-            List path = ListUtil.list(_packageNames.get(idx), componentDefintion);
+        _selectedTabsByDefinition.put(selectedObjectAWApi(), selectedTab);
+    }
+
+    protected void initPackageList ()
+    {
+//        _packageNames = application().resourceManager().registeredPackageNames();
+        _packageNames.clear();
+
+        _packageNames.add("ariba.ui.aribaweb.html");
+        _packageNames.add("ariba.ui.aribaweb.core");
+//        ListUtil.sortStrings(_packageNames, true);
+    }
+
+    void setSelectedComponent (AWComponentDefinition componentDefinition)
+    {
+        String pkg = AWComponentApiManager.packageNameForComponent(componentDefinition);
+        int index = _packageNames.indexOf(pkg);
+        if (index != -1) {
+            List path = ListUtil.list(_packageNames.get(index), componentDefinition);
             _displayGroup.outlineState().setExpansionPath(path);
-            _displayGroup.setSelectedObject(componentDefintion);
+            _displayGroup.setSelectedObject(componentDefinition);
         }
     }
 
@@ -101,16 +116,36 @@ public final class AWApiPage extends AWComponent
         return !isCurrentObjectPackage();
     }
 
-    private List childrenForObject (String _currentObject)
+       private List childrenForObject (String _currentObject)
     {
         List result;
+        List temp = ListUtil.list();
         if (isPackageName(_currentObject)) {
             result = AWComponentApiManager.sharedInstance().getSortedComponentDefinitionList(_currentObject);
+
+            Iterator iterator = result.iterator();
+            
+            while(iterator.hasNext()) {
+                AWComponentDefinition currentCompDefinition = (AWComponentDefinition)iterator.next();
+
+                if (hardcode(currentCompDefinition))
+                    temp.add(currentCompDefinition);
+            }
         }
         else {
             result = ListUtil.list();
         }
-        return result;
+
+        return temp;
+    }
+
+    public boolean hardcode (AWComponentDefinition compDef)
+    {
+        if ( compDef.componentName().equals("AWTextField")  || compDef.componentName().equals("AWPasswordField")
+           || compDef.componentName().equals("AWSingleton"))
+            return true;
+        else
+            return false;
     }
 
     public boolean hasChildren ()
@@ -185,13 +220,48 @@ public final class AWApiPage extends AWComponent
 
     public AWApi selectedObjectAWApi ()
     {
-        // _currentObject should be the name of a component
-        AWApi api = selectedComponentDefinition().componentApi();
+            inlineApi = selectedComponentDefinition().componentApi();
 
-        Assert.that(api != null,
-                    "SelectedObjectAWApi should only be called when an AWApi is available");
+            Assert.that(inlineApi != null, "SelectedObjectAWApi should only be called when an AWApi is available");
+        
+        return inlineApi;
+    }
 
-        return api;
+    public List<AWExampleApi> exampleApiList ()
+    {
+        selectedObjectAWApi();
+        List<AWExampleApi> result = ListUtil.list();
+
+        for (AWExampleApi inlineExampleApi : inlineApi.exampleApis()) {
+            inlineExampleApi .setIsInline(true);
+            result.add(inlineExampleApi );
+        }
+
+        for (AWIncludeExample awIncludeExample : inlineApi.includeExamples()) {
+
+            AWApi includeExampleApi = awIncludeExample.exampleComponentApi();
+
+            if (includeExampleApi == null || includeExampleApi.exampleApis() == null) {
+                continue;
+            }
+
+            for (AWExampleApi importExampleApi : includeExampleApi.exampleApis()) {
+                importExampleApi.setIsInline(false);
+                importExampleApi._includeExampleName = awIncludeExample.componentName();
+                result.add(importExampleApi);
+            }
+        }
+
+        return result;
+    }
+
+    public boolean selectedObjectAWApiHasExamples ()
+    {
+        if (selectedObjectAWApi() == null) {
+            return false;
+        }
+        return !(ArrayUtil.nullOrEmptyArray(selectedObjectAWApi().exampleApis())
+                && ArrayUtil.nullOrEmptyArray(selectedObjectAWApi().includeExamples()));
     }
 
     public boolean isSelectedObjectPageLevel ()
@@ -232,7 +302,8 @@ public final class AWApiPage extends AWComponent
     }
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component) {
-        if (!isPage()) setSelectedComponent((AWComponentDefinition)valueForBinding("componentDefinition"));
+        if (!isPage())
+            setSelectedComponent((AWComponentDefinition)valueForBinding("componentDefinition"));
         super.renderResponse(requestContext, component);
     }
 

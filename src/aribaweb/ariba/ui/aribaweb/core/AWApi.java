@@ -12,15 +12,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApi.java#13 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApi.java#14 $
 */
 
 package ariba.ui.aribaweb.core;
 
-import java.util.List;
-import ariba.util.core.ListUtil;
-import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWEncodedString;
+import ariba.ui.aribaweb.util.AWUtil;
+import ariba.util.core.ListUtil;
+
+import java.util.List;
 
 /**
     <Binding key="leftSideOfBinding" direction="setOrGetOrBoth" type="classOfField" required="$false" alternate="otherKey" default="defaultValueIfNotRequiredAndNotProvided">
@@ -41,10 +42,14 @@ import ariba.ui.aribaweb.util.AWEncodedString;
 */
 public final class AWApi extends AWContainerElement
 {
-    private static final AWBindingApi[] EmptyBindingApis = new AWBindingApi[0];
-    private static final AWContentApi[] EmptyContentApis = new AWContentApi[0];
-    private AWBindingApi[] _bindingApis = EmptyBindingApis;
-    private AWContentApi[] _contentApiAWs = EmptyContentApis;
+    private static final AWBindingApi[]     EmptyBindingApis     = new AWBindingApi[0];
+    private static final AWContentApi[]     EmptyContentApis     = new AWContentApi[0];
+    private static final AWExampleApi[]     EmptyExampleApis     = new AWExampleApi[0];
+    private static final AWIncludeExample[] EmptyIncludeExamples = new AWIncludeExample[0];
+    private AWBindingApi[]     _bindingApis     = EmptyBindingApis;
+    private AWContentApi[]     _contentApiAWs   = EmptyContentApis;
+    private AWExampleApi[]     _exampleApis     = EmptyExampleApis;
+    private AWIncludeExample[] _includeExamples = EmptyIncludeExamples;
     private AWElement _overview = null;
     private AWEncodedString _responsible = null;
     private boolean _allowsBindingPassThrough = true;
@@ -81,6 +86,40 @@ public final class AWApi extends AWContainerElement
             }
         }
         return _contentApiAWs;
+    }
+
+    public AWExampleApi[] exampleApis()
+    {
+        if (_exampleApis == EmptyExampleApis) {
+            AWElement contentElement = contentElement();
+            if (contentElement instanceof AWTemplate) {
+                AWTemplate template = (AWTemplate)contentElement();
+                _exampleApis = (AWExampleApi[])template.extractElementsOfClass(AWExampleApi.class);
+            }
+            else if (contentElement instanceof AWExampleApi) {
+                _exampleApis = new AWExampleApi[] {
+                    (AWExampleApi)contentElement,
+                };
+            }
+        }
+        return _exampleApis;
+    }
+
+    public AWIncludeExample[] includeExamples()
+    {
+        if (_includeExamples == EmptyIncludeExamples) {
+            AWElement contentElement = contentElement();
+            if (contentElement instanceof AWTemplate) {
+                AWTemplate template = (AWTemplate)contentElement();
+                _includeExamples = (AWIncludeExample[])template.extractElementsOfClass(AWIncludeExample.class);
+            }
+            else if (contentElement instanceof AWIncludeExample) {
+                _includeExamples = new AWIncludeExample[] {
+                        (AWIncludeExample)contentElement,   
+                };
+            }
+        }
+        return _includeExamples;
     }
 
     public AWGenericContainer locateTagNamed (String tagName)

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#37 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ListUtil.java#38 $
 */
 
 package ariba.util.core;
@@ -1673,6 +1673,30 @@ public abstract class ListUtil
             }
         }
         return delta;
+    }
+  
+    public static List[] getChunkedLists (List list, int maxChunkSize)
+    {
+        int totalCount = (list != null ? list.size() : 0);
+        if (maxChunkSize < 1) {
+            maxChunkSize = totalCount;
+        }
+        int chunkCount = (totalCount + maxChunkSize - 1) / maxChunkSize;
+        List[] results = new List[chunkCount];
+        if (chunkCount == 1) {
+            results[0] = list;
+        }
+        else {
+            for (int i = 0; i < chunkCount; i++) {
+                int startIdx = i * maxChunkSize;
+                int endIdx = startIdx + maxChunkSize;
+                if (endIdx > totalCount) {
+                    endIdx = totalCount;
+                }
+                results[i] = list.subList(startIdx, endIdx);
+            }
+        }
+        return results;
     }
 
     public static int size (Collection list)

@@ -1,79 +1,128 @@
-<a:If ifTrue="$isPage">
-    <w:BasicPageWrapper omitWrapperFrame="$true" hasForm="$true" hasSidebarNotch="$false" isSidebarVisible="$false" isDebugVisible="$false"
-            debugTitle="AW Component APIs">\
-    <table width="100%">
-        <tr>
-            <td valign="top">
-                <div class="flexContainer">
-                    <div style="float:top"><a:Image filename="cleardot.gif" height="1" width="240"/></div>
-                    <t:DataTable list="$packageNames" item="$currentObject" displayGroup="$displayGroup"
-                                hasChildren="$hasChildren" children="$children"
-                                singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
-                                title="Component List" showColumnHeader="$false" enableScrolling="$true">
-                        <t:Column>
-                            <a:If ifTrue="$isCurrentObjectPackage">
-                                <w:OutlineControl title="$currentObject" style="font-weight:bold"/>
-                            <a:Else ifTrue="$currentObjectHasEmpiricalApi"/>
-                                <a:If ifTrue="$currentObjectHasReferences">
-                                    <w:OutlineControl title="$currentObject.componentName" style="font-style:italic"/>
-                                <a:Else/>
-                                    <w:OutlineControl title="$currentObject.componentName" style="font-style:italic;color:#AAAAAA"/>
+<a:If ifTrue="$isPage" xmlns:a="">
+    <w:BasicPageWrapper omitWrapperFrame="$true" hasForm="$true" hasSidebarNotch="$false" isSidebarVisible="$false"
+                        isDebugVisible="$false"
+                        debugTitle="AW Component APIs">\
+        <table width="100%">
+            <tr>
+                <td valign="top">
+                    <div class="flexContainer">
+                        <div style="float:top">
+                            <a:Image filename="cleardot.gif" height="1" width="240"/>
+                        </div>
+                        <t:DataTable list="$packageNames" item="$currentObject" displayGroup="$displayGroup"
+                                     hasChildren="$hasChildren" children="$children"
+                                     singleSelect="$true" showSelectionColumn="$false" submitOnSelectionChange="$true"
+                                     title="Component List" showColumnHeader="$false" enableScrolling="$true">
+                            <t:Column>
+                                <a:If ifTrue="$isCurrentObjectPackage">
+                                    <w:OutlineControl title="$currentObject" style="font-weight:bold"/>
+                                    <a:Else ifTrue="$currentObjectHasEmpiricalApi"/>
+                                    <a:If ifTrue="$currentObjectHasReferences">
+                                        <w:OutlineControl title="$currentObject.componentName"
+                                                          style="font-style:italic"/>
+                                        <a:Else/>
+                                        <w:OutlineControl title="$currentObject.componentName"
+                                                          style="font-style:italic;color:#AAAAAA"/>
+                                    </a:If>
+                                    <a:Else/>
+                                    <w:OutlineControl title="$currentObject.componentName" style="font-weight:bold"/>
                                 </a:If>
-                            <a:Else/>
-                                <w:OutlineControl title="$currentObject.componentName" style="font-weight:bold"/>
-                            </a:If>
-                        </t:Column>
-                        <t:ButtonArea>
-                            <a:If ifFalse="$didLoadAll">
-                                <b><a:Hyperlink action="$loadAllTemplates">Load All Components</a:Hyperlink></b>
-                                <br/>
-                            </a:If>
-                            <b><a:Hyperlink  target="awValidationErrorPage" action="$openValidationErrorPage">Show All Validation Errors</a:Hyperlink></b>
-                        </t:ButtonArea>
-                    </t:DataTable>
-                </div>
-            </td>
+                            </t:Column>
+                            <t:ButtonArea>
+                                <a:If ifFalse="$didLoadAll">
+                                    <b>
+                                        <a:Hyperlink action="$loadAllTemplates">Load All Components</a:Hyperlink>
+                                    </b>
+                                    <br/>
+                                </a:If>
+                                <b>
+                                    <a:Hyperlink target="awValidationErrorPage" action="$openValidationErrorPage">Show
+                                        All Validation Errors
+                                    </a:Hyperlink>
+                                </b>
+                            </t:ButtonArea>
+                        </t:DataTable>
+                    </div>
+                </td>
 
-            <td style="margin-right:100px;margin-left:100px">\
-                <a:Image filename="cleardot.gif" height="600" width="1"/>\
-            </td>
+                <td style="margin-right:100px;margin-left:100px">\
+                    <a:Image filename="cleardot.gif" height="600" width="1"/>\
+                </td>
 
-            <td valign="top" width="100%">
-                <a:IncludeBlock name="Detail"/>
-            </td>
-        </tr>
-    </table>
+                <td valign="top" width="100%">
+                    <a:IncludeBlock name="Detail"/>
+                </td>
+            </tr>
+        </table>
     </w:BasicPageWrapper>
     <a:ClientSideScript>
         // force window to foreground
         window.focus();
     </a:ClientSideScript>
-<a:Else/>
+    <a:Else/>
     <a:IncludeBlock name="Detail"/>
 </a:If>\
 \
 <a:Block name="Detail">\
-    <h3>$selectedObject</h3>
+    <h3 class="ObjectName">$selectedObject</h3>
     <a:If ifTrue="$selectedObjectIsComponent">
-        File Location: $selectedObjectFileLocation
+        <div class="fileLocation">
+            File Location: $selectedObjectFileLocation
+        </div>
         <br/>
         <br/>
+
         <a:If ifFalse="$selectedObjectHasEmpiricalApi">
-            <a:ComponentApi awApi="$selectedObjectAWApi"/>
+            <a:If ifTrue="$selectedObjectAWApiHasExamples">
+                <w:BaseTabSet vertical="true" list="$exampleApiList" item="$currentItem"
+                              label="$currentItem.name" selection="$selectedTab">
+                    <a:ClientSideScript filename="widg/prettify.js"/>
+                    <a:ClientSideScript>prettyPrint()</a:ClientSideScript>
+                    <!-- need a way to know if this ExampleApi is import or inline -->
+                    <a:If ifFalse="$selectedTab.getIsInline">
+                        <!-- import case need to use example tag content from awl -->
+                        <a:IncludeComponent name="$selectedTab.includeExampleName" templateName="$selectedTab.name"/>
+                    <a:Else/>
+                        <!-- inline case - component is AWApiPage -->
+                        <a:IncludeContent template="$selectedTab"/>
+                    </a:If>
+                </w:BaseTabSet>
+            <a:Else/>
+                No examples available yet
+            </a:If>
         <a:Else/>
-            <a:ComponentApi empiricalApi="$selectedObjectEmpiricalApi"/>
+            No examples available yet
         </a:If>
-        <a:If ifTrue="$isSelectedObjectPageLevel">
-            <i>Used as a Page Level Component</i>
-        </a:If>
-        <a:If ifTrue="$selectedObjectHasReferences">
-            <t:DataTable title="Used By" enableScrolling="$true" valign="middle"
-                          list="$selectedObjectReferencedByList"
-                          showOptionsMenu="$false"
-                          showBatchNavigation="$false">
-                <t:Column key="componentName" label="Component Name" align="left"/>
-                <t:Column key="lineNumbers" label="Line Number" align="left"/>
-            </t:DataTable>
-        </a:If>
+
+        <w:TabSet>
+            <w:Tab label="Overview">
+                <a:If ifFalse="$selectedObjectHasEmpiricalApi">
+                    <a:ComponentApi overview="$selectedObjectAWApi"/>
+                <a:Else/>
+                    No Overview
+                </a:If>
+            </w:Tab>
+            <w:Tab label="Binding Apis">
+                <a:If ifFalse="$selectedObjectHasEmpiricalApi">
+                    <a:ComponentApi awApi="$selectedObjectAWApi"/>
+                <a:Else/>
+                    <a:ComponentApi empiricalApi="$selectedObjectEmpiricalApi"/>
+                </a:If>
+            </w:Tab>
+            <w:Tab label="Used By">
+                <a:If ifTrue="$isSelectedObjectPageLevel">
+                    <i>Used as a Page Level Component</i>
+                </a:If>
+                <a:If ifTrue="$selectedObjectHasReferences">
+                    <t:DataTable title="Used By" enableScrolling="$true" valign="middle"
+                                  list="$selectedObjectReferencedByList"
+                                  showOptionsMenu="$false"
+                                  showBatchNavigation="$false">
+                        <t:Column key="componentName" label="Component Name" align="left"/>
+                        <t:Column key="lineNumbers" label="Line Number" align="left"/>
+                    </t:DataTable>
+                </a:If>
+            </w:Tab>
+        </w:TabSet>
     </a:If>
 </a:Block>

@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2011 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSingleLocaleResourceManager.java#18 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSingleLocaleResourceManager.java#19 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -39,7 +39,7 @@ import java.util.regex.Matcher;
 
 public class AWSingleLocaleResourceManager extends AWResourceManager
 {
-    private static final Map CharacterEncodingsByLocale = MapUtil.map();
+    private static final GrowOnlyHashtable CharacterEncodingsByLocale = new GrowOnlyHashtable();
     private static GrowOnlyHashtable ExtendedFilenames = new GrowOnlyHashtable();
     private static int NextIndex = 0;
     private final AWMultiLocaleResourceManager _multiLocaleResourceManager;
@@ -161,21 +161,21 @@ public class AWSingleLocaleResourceManager extends AWResourceManager
         AWResource resource = (AWResource)_resources.get(resourceName);
         if (resource == null) {
             synchronized (_resources) {
-                resource = (AWResource)_resources.get(resourceName);
+            resource = (AWResource)_resources.get(resourceName);
+            if (resource == null) {
+                resource = _multiLocaleResourceManager.resourceNamed(resourceName, _locale);
                 if (resource == null) {
-                    resource = _multiLocaleResourceManager.resourceNamed(resourceName, _locale);
-                    if (resource == null) {
-                        AWResourceManager base = getBaseResourceManager();
-                        if (base != null) {
-                            resource = base.resourceNamed(resourceName);
-                        }
-                    }
-
-                    if (resource != null) {
-                        _resources.put(resourceName, resource);
+                    AWResourceManager base = getBaseResourceManager();
+                    if (base != null) {
+                        resource = base.resourceNamed(resourceName);
                     }
                 }
+
+                if (resource != null) {
+                    _resources.put(resourceName, resource);
+                }
             }
+        }
         }
         return resource;
     }
