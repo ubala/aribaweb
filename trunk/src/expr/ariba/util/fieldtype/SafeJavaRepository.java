@@ -12,20 +12,22 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/SafeJavaRepository.java#16 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/SafeJavaRepository.java#20 $
 */
 
 package ariba.util.fieldtype;
 
+import ariba.util.core.ArrayUtil;
+import ariba.util.core.Assert;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.Constants;
 import ariba.util.core.Fmt;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
-import ariba.util.core.StringUtil;
 import ariba.util.core.SetUtil;
-import ariba.util.core.Assert;
+import ariba.util.core.StringUtil;
+import ariba.util.core.SystemUtil;
 import ariba.util.i18n.I18NUtil;
 import ariba.util.io.CSVConsumer;
 import ariba.util.io.CSVReader;
@@ -250,19 +252,16 @@ public class SafeJavaRepository
         private String stripSafeJavaRootFromPath (String path)
         {
             String result = path;
-            Set /*<File>*/ safeJavaCSVRoots = SetUtil.set();
+            Set<File> safeJavaCSVRoots = SetUtil.set(2);
             safeJavaCSVRoots.add(SafeJavaCSVRoot);
-            if (isFromUnitTest()) {
-                safeJavaCSVRoots.add(SafeJavaCSVInternalRoot);
-            }
-            for (Iterator iter = safeJavaCSVRoots.iterator(); iter.hasNext();) {
-                File safeJavaRoot = (File)iter.next();
+            safeJavaCSVRoots.add(SafeJavaCSVInternalRoot);
+            for (File safeJavaRoot : safeJavaCSVRoots) {
                 String safeJavaRootName = safeJavaRoot.getName();
                 int pos = result.indexOf(safeJavaRootName);
                 if (pos > 0) {
-                   pos += safeJavaRootName.length() + File.separator.length();
-                   result = result.substring(pos);
-                   break;
+                    pos += safeJavaRootName.length() + File.separator.length();
+                    result = result.substring(pos);
+                    break;
                 }               
             }
             return result;
@@ -369,10 +368,10 @@ public class SafeJavaRepository
     /*
         Suppresses default constructor for noninstantiability
     */
-    private SafeJavaRepository (boolean initialized)
+    private SafeJavaRepository (boolean initialize)
     {
         _name2Specification = new GrowOnlyHashtable();
-        if (initialized) {
+        if (initialize) {
             fullInitialize();
         }
     }
@@ -420,7 +419,7 @@ public class SafeJavaRepository
     */
     public MethodSpecification getAllSafeMethodsForClass (Class aClass)
     {
-        List/*<MethodSpecifications>*/ collection  = ListUtil.list();
+        List<MethodSpecification> collection  = ListUtil.list();
         collectAllSafeMethodsForClass(aClass, collection);
         return new CompositeMethodSpecification(collection);
     }
@@ -466,7 +465,7 @@ public class SafeJavaRepository
     {
         Set/*<File>*/ safeJavaCSVRoots = SetUtil.set();
         safeJavaCSVRoots.add(SafeJavaCSVRoot);
-        if (isFromUnitTest()) {
+        if (!skipLoadingFromInternalRoot()) {
             safeJavaCSVRoots.add(SafeJavaCSVInternalRoot);
         }
         
@@ -504,19 +503,29 @@ public class SafeJavaRepository
     {
         _name2Specification = new GrowOnlyHashtable();
     }
-    
-    private static boolean isFromUnitTest ()
+
+    /**
+        Returns <code>true</code> if it should skip loading any SafeJava.csv
+        in the internal directory, or <code>false</code> otherwise.  It has
+        no effect on file registered explicitly thru
+        {@link #registerSafeJavaFile(java.util.List)}.
+     */
+    private static boolean skipLoadingFromInternalRoot ()
     {
-        final String EligibleUnitTestClassPrefix = "test.ariba.";
-        StackTraceElement[] callStack = (new Throwable()).getStackTrace();
-        for (int i=0; i<callStack.length; i++) {
-            if (callStack[i].getClassName().startsWith(EligibleUnitTestClassPrefix)) {
-                return true;
+        // currently, we load from internal root only if school is installed
+        boolean isSchoolInstalled = false;
+        File aribaRoot = SystemUtil.getSystemDirectory();
+        if (aribaRoot != null && aribaRoot.isDirectory()) {
+            File variantsRoot = new File(aribaRoot, "variants");
+            if (variantsRoot != null && variantsRoot.isDirectory()) {
+                String[] contents = variantsRoot.list();
+                isSchoolInstalled = contents != null &&
+                        ArrayUtil.contains(contents, "PlainCornell");
             }
         }
-        return false;
+        return !isSchoolInstalled;
     }
-        
+
     private List/*<File>*/ listFilesRecursively (File directory, FilenameFilter filter)
     {
         List/*<File>*/ result = ListUtil.list();
@@ -551,11 +560,11 @@ public class SafeJavaRepository
         }       
     }
     
-    private void collectAllSafeMethodsForClass (Class aClass, List collector)
+    private void collectAllSafeMethodsForClass (Class aClass, List<MethodSpecification> collector)
     {
         MethodSpecification methodSpec = getSafeMethodsForClass(aClass);
         if (methodSpec != null) {
-            collector.add(methodSpec);
+            ListUtil.addElementIfAbsent(collector, methodSpec);
         }
         if (aClass.getSuperclass() != null) {
             collectAllSafeMethodsForClass(aClass.getSuperclass(), collector);

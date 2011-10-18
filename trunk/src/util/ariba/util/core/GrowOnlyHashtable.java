@@ -683,14 +683,14 @@ public class GrowOnlyHashtable<K,V> extends AbstractMap<K,V>
         }
     }
 
-    public static class IdentityMap extends GrowOnlyHashtable
+    public static class IdentityMap<K, V> extends GrowOnlyHashtable<K, V>
     {
-        protected boolean objectsAreEqualEnough (Object obj1, Object obj2)
+        protected boolean objectsAreEqualEnough (K obj1, K obj2)
         {
             return  obj1 == obj2;
         }
 
-        protected int getHashValueForObject (Object o)
+        protected int getHashValueForObject (K o)
         {
             return System.identityHashCode(o);
         }

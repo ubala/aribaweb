@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2009 Ariba, Inc.
+    Copyright (c) 1996-2011 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/io/FormattingSerializer.java#9 $
+    $Id: //ariba/platform/util/core/ariba/util/io/FormattingSerializer.java#10 $
 */
 
 package ariba.util.io;
 
 import ariba.util.core.DebugState;
+import ariba.util.core.Fmt;
 import ariba.util.core.OrderedHashtable;
 import ariba.util.core.Sort;
 import ariba.util.core.StringCompare;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -509,8 +511,40 @@ public class FormattingSerializer extends Serializer
             serializeNull();
         }
         else {
-            serializeString(anObject.toString());
+            String s = objectToString(anObject);
+            serializeString(s);
         }
+    }
+
+    private static String objectToString (Object anObject)
+    {
+        String s;
+        try {
+            s = anObject.toString();
+        }
+        catch (Exception e) { // OK
+            // if object is marked as "released from the cache" as a result of transactionRollback(),
+            // object.toString() asserts with ID2811 
+            Object baseIdString = getBaseIdString(anObject);
+            String className = anObject.getClass().getName();
+            s = Fmt.S("[%s %s]", className, baseIdString);
+        }
+        return s;
+    }
+
+    private static String getBaseIdString (Object anObject)
+    {
+        String result;
+        try {
+            Class<? extends Object> clazz = anObject.getClass();
+            Method method = clazz.getMethod("getBaseId", (Class<?>[])null);
+            Object baseId = method.invoke(anObject, (Object[])null);
+            result = (baseId == null) ? "[BaseId=null]" : baseId.toString();
+        }
+        catch (Throwable t) { // OK
+            result = "[BaseId is N/A]";
+        }
+        return result;
     }
 
     /** Overridden to produce a formatted serialization of <b>anObject</b>.

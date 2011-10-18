@@ -2749,7 +2749,7 @@ a.tabSelected:link, a.tabSelected:visited {
 }
 
 .vTabSet .tocItemCurrent {
-    background-color:#E9E9F1;
+    background-color:transparent;
     font-weight: bold;
 }
 
@@ -4326,7 +4326,7 @@ div.quoteCode {
 
 div.quoteSample {
     clear:both;
-    padding:10px 10px 10px 45px;
+    padding:10px 10px 10px 25px;
 }
 
 div.doc {
@@ -4336,6 +4336,16 @@ div.doc {
 .doc h2 {
     font-size:15px;
     padding:8px 10px 0px 0px;
+}
+
+div.fileLocation {
+    color:#000000;
+    font:normal 11px Verdana, Arial, Helvetica, sans-serif;
+    text-align:center;
+}
+
+h3.ObjectName {
+    text-align:center;
 }
 
 .doc p {

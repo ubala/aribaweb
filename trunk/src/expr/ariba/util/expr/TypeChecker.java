@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeChecker.java#32 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeChecker.java#35 $
 */
 
 package ariba.util.expr;
@@ -31,6 +31,7 @@ import ariba.util.fieldtype.MethodInfo;
 import ariba.util.fieldtype.NullTypeInfo;
 import ariba.util.fieldtype.PrimitiveTypeProvider;
 import ariba.util.fieldtype.PropertyInfo;
+import ariba.util.fieldtype.PropertyResolver;
 import ariba.util.fieldtype.TypeInfo;
 import ariba.util.fieldtype.TypeRetriever;
 import java.util.Collection;
@@ -849,7 +850,6 @@ public class TypeChecker extends ASTNodeVisitor
             }
 
             TypeInfo type = getCurrentTypeInfo();
-
             TypeInfo fieldType = getFieldTypeInfo(node, type, name);
             if (fieldType != null) {
                 // This property is a known field type for the class.
@@ -904,6 +904,13 @@ public class TypeChecker extends ASTNodeVisitor
                 // a property but part of the class name.
                 _unresolvedPropertyList.add(node.getName());
                 if (_firstUnresolvedProperty == null) {
+                    if (type != null && fieldType == null &&
+                        !isFirstInPropertyChain(node)) {
+                        //we are in a propertyChain and predecessors are resolved already
+                        //and it is not a field log an error
+                        //e.g. cus_myField.Integer.numberOfLeadingZeros(4)
+                        Log.expression.error(10950,getFullPath(node));
+                    }
                     _firstUnresolvedProperty = node.getName();
                 }
             }
@@ -932,6 +939,19 @@ public class TypeChecker extends ASTNodeVisitor
     private boolean isInPropertyChain (Node node)
     {
         return (node.jjtGetParent() instanceof ASTChain);
+    }
+
+    private SemanticRecord getSemanticRecordForPredecessorInPropertyChain (Node node)
+    {
+        SemanticRecord record = null;
+        if (isInPropertyChain(node)) {
+            ASTChain parent = (ASTChain)node.jjtGetParent();
+            Node predecessor = parent.jjtGetChild(0);
+            if (predecessor != null && predecessor != node) {
+                record = getSemanticRecordForNode(predecessor);
+            }
+        }
+        return record;
     }
 
     /**
@@ -1416,17 +1436,8 @@ public class TypeChecker extends ASTNodeVisitor
         // find the method if the parent type is known
         if (type != null) {
             // check if the method is in invoked in a class context
-            boolean staticOnly = false;
-            SemanticRecord record = null;
-            if (isInPropertyChain(node)) {
-                ASTChain parent = (ASTChain)node.jjtGetParent();
-                Node predecessor = parent.jjtGetChild(0);
-                if (predecessor != null && predecessor != node) {
-                    record = getSemanticRecordForNode(predecessor);
-                    staticOnly = (record != null && record.getSymbolKind() == Symbol.Type);
-                }
-            }
-
+            SemanticRecord record = getSemanticRecordForPredecessorInPropertyChain(node);
+            boolean staticOnly = (record != null && record.getSymbolKind() == Symbol.Type);
             method = type.getMethod(_env.getTypeRetriever(), methodName, parameters,
                                                                          staticOnly);
             if (method != null) {
@@ -2053,9 +2064,25 @@ public class TypeChecker extends ASTNodeVisitor
             // If type info is not known, then the return null for field info.
             return null;
         }
-        return classTypeInfo.getPropertyResolver().resolveTypeForName(
-                                                 _env.getTypeRetriever(),
-                                                 fieldName);
+        PropertyResolver resolver = classTypeInfo.getPropertyResolver();
+        TypeInfo ret = resolver.resolveTypeForName(_env.getTypeRetriever(), fieldName);
+        if (ret != null) {
+            SemanticRecord record = getSemanticRecordForPredecessorInPropertyChain(node);
+            boolean staticInvocation =
+                (record != null && record.getSymbolKind() == Symbol.Type);
+            if (staticInvocation) {
+                //fieldName may resolve to Field or a Method; check here is limited to Field
+                //example expression : "ariba.use.core.UpdatePassword.hasSecretAnswer"
+                FieldInfo fieldInfo = classTypeInfo.getField(_env.getTypeRetriever(),
+                    fieldName);
+                if (fieldInfo != null && !fieldInfo.isStatic()) {
+                    Log.expression.error(10962, getFullPath(node));
+                    //@todo kiran in future when we tighten this up completely we will return null
+                    //ret = null;
+                }
+            }
+        }
+        return ret;
     }
 
     private PropertyInfo getPropertyInfo (TypeInfo typeInfo,

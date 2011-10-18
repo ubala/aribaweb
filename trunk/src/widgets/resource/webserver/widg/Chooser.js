@@ -615,7 +615,9 @@ ariba.Chooser = function() {
 
                 if (sourceElm == chooserInfo.textField &&
                     elm == chooserInfo.textField) {
-                    setTimeout(processChooseKeyDown.bind(this), 1);
+                    if (!Request.isRequestInProgress()) {
+                        setTimeout(processChooseKeyDown.bind(this), 1);
+                    }
                 }
             }
         },
@@ -668,6 +670,8 @@ ariba.Chooser = function() {
 
             var chooserFullMatch = function ()
             {
+                if (Request.isRequestInProgress()) return;
+                
                 chooserInfo.searchPattern = searchPattern;
 
                 /*

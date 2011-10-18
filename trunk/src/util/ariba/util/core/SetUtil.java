@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/SetUtil.java#15 $
+    $Id: //ariba/platform/util/core/ariba/util/core/SetUtil.java#16 $
 */
 
 package ariba.util.core;
@@ -368,10 +368,36 @@ public final class SetUtil
     public static <T> Set<T> intersect (Set<? extends T> set1, Set<? extends T> set2)
     {
         Set<T> s = set();
+        intersect(set1, set2, s);
+        return s;
+    }
+
+    /**
+        Perform the operation intersect on two given sets. The operation is
+        nondestructive.<p>
+
+        If one of the sets is null or empty, nothing would be added to the
+        result set.<p>
+
+        @param set1 input set
+        @param set2 input set
+        @param result result set
+        @throw IllegalArgumentException when result is <code>null</code>.
+        @aribaapi ariba
+     */
+    public static <T> void intersect (
+            Set<? extends T> set1,
+            Set<? extends T> set2,
+            Set<T> result)
+    {
+        if (result == null) {
+            throw new IllegalArgumentException("result must not be null");            
+        }
+
         if (set1 == null || set2 == null ||
             set1.isEmpty() || set2.isEmpty())
         {
-            return s;
+            return;
         }
 
         Set<? extends T> iterateThru = null;
@@ -388,11 +414,9 @@ public final class SetUtil
         for (Iterator<? extends T> it=iterateThru.iterator(); it.hasNext();) {
             T o = it.next();
             if (check.contains(o)) {
-                s.add(o);
+                result.add(o);
             }
         }
-
-        return s;
     }
 
     /**
@@ -410,21 +434,46 @@ public final class SetUtil
     public static <T> Set<T> subtract (Set<? extends T> set1, Set<? extends T> set2)
     {
         Set<T> s = set();
+        subtract(set1, set2, s);
+        return s;
+    }
+
+    /**                                  
+        Performs the operation subtract set2 from set1. The operation
+        is nondestructive.<p>
+
+        @param set1 input set
+        @param set2 input set
+        @param result result set (containing the elements of the operation
+               set1 - set2.  If set1 is null or empty, no element would be added
+               to it. If on the other hand set2 is null or empty, all the elements
+               in set1 would be added to it).
+        @throw IllegalArgumentException when result is <code>null</code>.
+        @aribaapi ariba
+    */
+    public static <T> void subtract (
+            Set<? extends T> set1,
+            Set<? extends T> set2,
+            Set<T> result)
+    {
+        if (result == null) {
+            throw new IllegalArgumentException("result must not be null");
+        }
+
         if (set1 == null || set1.isEmpty()) {
-            return s;
+            return;
         }
 
         if (set2 == null || set2.isEmpty()) {
-            return SetUtil.set(set1);
+            result.addAll(set1);
+            return;
         }
 
         for (T t : set1) {
             if (!set2.contains(t)) {
-                s.add(t);
+                result.add(t);
             }
         }
-
-        return s;
     }
 
     /**

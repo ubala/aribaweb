@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StringArray.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StringArray.java#6 $
 */
 package ariba.util.core;
 
@@ -31,6 +31,8 @@ public class StringArray extends DynamicArray
         localArray = new String[ size ];
         return localArray;
     }
+
+    public static final String[] EMPTY_ARRAY = new String[0];
 
     /**
         Typesafe access to the storage array

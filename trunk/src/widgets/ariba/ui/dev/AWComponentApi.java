@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentApi.java#5 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentApi.java#6 $
 */
 
 package ariba.ui.dev;
@@ -31,10 +31,12 @@ public final class AWComponentApi extends AWComponent
 {
     private static final String EmpiricalApiBinding = "empiricalApi";
     private static final String AWApiBinding        = "awApi";
+    private static final String Overview            = "overview";
 
     protected Map _empiricalApiTable = null;
     protected List _empiricalApiBindingList = null;
     protected AWApi _apiContainer = null;
+    protected AWApi _apiOverview = null;
     public AWBindingApi _binding;
     
     ////////////////////////////////
@@ -52,6 +54,7 @@ public final class AWComponentApi extends AWComponent
         _empiricalApiTable = null;
         _empiricalApiBindingList = null;
         _apiContainer = null;
+        _apiOverview = null;
     }
 
     ////////////////////////////////
@@ -87,6 +90,14 @@ public final class AWComponentApi extends AWComponent
             _apiContainer = (AWApi)valueForBinding(AWApiBinding);
         }
         return _apiContainer;
+    }
+    
+    public AWApi apiOverview ()
+    {
+        if (_apiOverview == null) {
+            _apiOverview = (AWApi)valueForBinding(Overview);
+        }
+        return _apiOverview;
     }
 
     public boolean bindingHasAlternates ()

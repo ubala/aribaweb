@@ -70,10 +70,12 @@ class ASTCtor extends SimpleNode
             for ( int i=0; i < count; ++i ) {
                 args[i] = children[i].getValue(context, root);
             }
+            //className may just be smart name such as just "Money" instead of "ariba.base.core.Money"
+            String typeName = getTypeInfo().getName();
             if (isArray) {
                 if (args.length == 1) {
                     try {
-                        Class       componentClass = ExprRuntime.classForName(context, className);
+                        Class       componentClass = ExprRuntime.classForName(context, typeName);
                         List        sourceList = null;
                         int         size;
 
@@ -98,13 +100,13 @@ class ASTCtor extends SimpleNode
                             }
                         }
                     } catch (ClassNotFoundException ex) {
-                        throw new ExprException("array component class '" + className + "' not found", ex);
+                        throw new ExprException("array component class '" + typeName + "' not found", ex);
                     }
                 } else {
                     throw new ExprException("only expect array size or fixed initializer list");
                 }
             } else {
-                result = ExprRuntime.callConstructor( context, className, args );
+                result = ExprRuntime.callConstructor( context, typeName, args );
             }
 
             return result;

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.java#26 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.java#28 $
 */
 
 package ariba.ui.widgets;

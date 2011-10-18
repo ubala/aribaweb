@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#6 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#7 $
     </Copyright>
 
     <Overview>
@@ -124,13 +124,13 @@
     <a:Else/>
         <table class="vTabSet" cellspacing="0" cellpadding="0" width="100%">\
             <tr>\
-                <td class="$^class:pageTabWrapper" valign="top" width="1%">\
+                <td class="$^class:wizBox" valign="top" width="1%">\
                     <w:RoundedBox class="wizBox" roundStyle="$ariba.ui.widgets.RoundedBox.BottomLeft" hideGradient="$true">
                         <w:TabList list="$tabList" visibles="$^visibles" item="$^item"
                                    index="$^index" label="$^label:^displayString"
                                    selection="$selectedTab" submitForm="$^submitForm"
                                    awname="$^awname"
-                                   class="$^class:pageTabWrapper" vertical="$^vertical"
+                                   class="$^class:wizBox" vertical="$^vertical"
                                    dropType="$^dropType" dropAction="$^dropAction"
                                    action="$^action"
                                    actionMenuId="$^actionMenuId"

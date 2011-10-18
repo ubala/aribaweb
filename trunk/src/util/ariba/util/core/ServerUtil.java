@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2011 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ServerUtil.java#12 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ServerUtil.java#13 $
 */
 
 package ariba.util.core;
@@ -37,12 +37,12 @@ import java.util.Random;
 public class ServerUtil
 {
 
-/******************************************************************************
+/*
 
 Rewrite 's' expanding each occurrence of character 'quote' with two of
 the same.
 
-******************************************************************************/
+*/
 
     public static String quoteQuotes (String s, char quote)
     {
@@ -132,11 +132,11 @@ the same.
         }
     }
 
-/******************************************************************************
+/*
 
 Map file extension to Mime Type
 
-******************************************************************************/
+*/
 
     private static File MimeTypeFile;
     private static final String DefaultMimeType = "application/octet-stream";
@@ -144,18 +144,26 @@ Map file extension to Mime Type
     private static Mapping MimeTypeMapping;
     private static boolean MimeTypeInitialized;
 
-    private static void initMimeType ()
+    /**
+     * Initializes the mime type mapping from the MimeTypes.csv.
+     * This method is synchronized to make the initialization thread safe.
+     *
+     * Thread safety was an issue when enabling multiple upstream realms at the
+     * same time and the mime types had not been loaded yet.
+     */
+    private static synchronized void initMimeType ()
     {
         if (MimeTypeInitialized) {
             return;
         }
 
-        MimeTypeFile = new File(SystemUtil.getConfigDirectory(), 
-                                "MimeTypes.csv");
+
+        MimeTypeFile = new File(SystemUtil.getConfigDirectory(),
+              "MimeTypes.csv");
 
         MimeTypeMapping = new Mapping(URLUtil.urlAbsolute(MimeTypeFile),
-                                      I18NUtil.EncodingASCII,
-                                      DefaultMimeType);
+              I18NUtil.EncodingASCII,
+              DefaultMimeType);
 
         try {
             MimeTypeMapping.read();

@@ -739,6 +739,10 @@ ariba.Request = function() {
             AWPollEnabled = false;
         },
 
+        isRequestInProgress : function() {
+            return AWRequestInProgress;
+        },
+
         displayErrorDiv : function (innerHtml) {
             var div = document.createElement("div");
             div.className="debugFloat";

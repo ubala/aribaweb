@@ -1,5 +1,6 @@
 /*
-    Copyright 1996-2010 Ariba, Inc.
+    Copyright (c) 1996-2011 Ariba, Inc.
+    All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,15 +13,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#26 $
+    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#27 $
 */
-
-
 
 package ariba.util.core;
 
-import ariba.util.log.Log;
 import ariba.util.i18n.I18NUtil;
+import ariba.util.log.Log;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -32,20 +31,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.io.LineNumberReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.List;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
     Input/Output Utilities. These are helper functions for dealing with
@@ -275,9 +274,9 @@ public final class IOUtil
         // a bad encoding string is passed on to java.io.InputStreamReader
         // Check ahead to make sure we don't pass a bad encoding 
         if (isInvalidEncodingString(encoding)) {
-            String errorMsg = StringUtil.strcat(
-                "UnsupportedEncodingException thrown: encoding parameter : ",
-                encoding, " is invalid.");
+            String errorMsg = Fmt.S(
+                    "UnsupportedEncodingException thrown: encoding (%s) is invalid.",
+                    encoding);
             Log.util.debug(errorMsg);
             throw new UnsupportedEncodingException(errorMsg);
         }

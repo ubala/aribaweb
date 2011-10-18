@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentApi.awl#8 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWComponentApi.awl#9 $
     </Copyright>
 
     <Overview>
@@ -27,6 +27,11 @@
     <Binding key="empiricalApi" direction="get" type="String" alternates="awApi">
         TBD
     </Binding>
+
+    <Binding key="overview" direction="get" type="AWApi">
+        TBD
+    </Binding>
+
 </a:Api>\
 
 <a:If notEqualNull="$empiricalApiTable">
@@ -51,9 +56,13 @@
     </a:For>
 
 </a:If>
-<a:If notEqualNull="$apiContainer">
+
+<a:If notEqualNull="$apiOverview">
     <b>Overview:</b>
-    <w:Markdown value="$apiContainer.overview.bareStringContent"/>
+    <w:Markdown value="$apiOverview.overview.bareStringContent"/>
+</a:If>
+
+<a:If notEqualNull="$apiContainer">
     <t:DataTable title="Bindings" multiSelect="$false"
                       batchSize="999" valign="middle"
                       list="$apiContainer.bindingApis"

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#131 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#132 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -322,6 +322,8 @@ abstract public class AWConcreteApplication
         // Load the safe HTML tags and attributes definition
         loadSafeHtmlConfig();
 
+        AWComponent.initTemplateResourceManager(createTemplateResourceManager());
+        
         ShutdownManager.addShutdownDelayer(this);
         initSessionMonitor();
     }

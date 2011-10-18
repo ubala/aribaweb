@@ -35,3 +35,8 @@
 10581, "Executing shutdown hooks",
 10582, "Calling hook.join on hook {0}, will wait for this thread to complete",  0-hook
 10583, "Finished running last shutdown hook {0}." ,0-hook
+10954, "Received response from first node = {0} , Setting system shutdown status to = {1}.", 0-firstNodeName 1-sysemStatus
+10955, "Call responses, nodeName: {0}, systemShutdownStatus={1}", 0-nodeName 1-systemShutdownStatus
+10956, "ShutdownManagerProcessor.onCall action: {0} , senderNode : {1}, returning systemShutdownStatus={2}, nodeShutdownStatus={3}", 0-nodeName 1-senderNode 2-systemShutdownStatus 3-nodeShutdownStatus
+10930, "Not safe to recycle: {0}", "0-recycle delayed message"
+

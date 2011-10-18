@@ -1,0 +1,4 @@
+8859_1,,
+,,
+10950,"Invalid property chain in the expression: {0}", {0} - ariba expression
+10962,"Static invocation in the property chain on non static property : {0}", {0} - ariba expression 
