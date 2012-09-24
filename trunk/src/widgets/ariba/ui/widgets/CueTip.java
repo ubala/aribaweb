@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/CueTip.java#7 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/CueTip.java#8 $
 */
 
 package ariba.ui.widgets;
@@ -104,7 +104,7 @@ public final class CueTip extends AWComponent
     public String getOnDisplayHandler ()
     {
         if (!isManualFormatting()) {
-            return "ariba.Widgets.sizeMsgDiv";
+            return "ariba.Widgets.sizeMsgDiv(elm)";
         }
         return null;
     }

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#29 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#30 $
     </Copyright>
 
     <Overview>
@@ -79,6 +79,14 @@
         Do not use this binding.  This is documented here to prevent onKeyDown
         from being available in "otherBindings".
     </Binding>
+
+    <Binding key="placeholder" type="Object" required="$false" direction="get">
+        Placeholder text displayed to the user when value is null or empty.
+    </Binding>
+
+    <Binding key="behavior" type="Object" required="$false" direction="get">
+        For internal use: Allow for override of text field behavior.
+    </Binding>
 </a:Api>\
 <a:If ifTrue="$isEditable">
     <a:If ifFalse="$showMaxLengthIndicator">\
@@ -110,7 +118,8 @@
 </a:If>\
 <a:Block name="Input">
     <textarea name="$textAreaName" formValue="$formValue" elementId="$elementId"
-              bh="TA" _mL="$maxLength" _isRF="$^isRefresh"
+              bh="$^behavior:TA" _mL="$maxLength" _isRF="$^isRefresh"
+              _pl="$formatPlaceHolder" onBLur="$onBlurString" class="$cssClass"
               otherBindings="$otherBindingsValues" id="$textAreaId" disabled="$disabled">\
         <a:String value="$formattedString" escapeHtml="$^escapeHtml:$true"/>\
     </textarea>\

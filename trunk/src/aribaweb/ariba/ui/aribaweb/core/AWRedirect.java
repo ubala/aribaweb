@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#36 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#37 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -23,7 +23,6 @@ import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.Log;
 import ariba.util.core.ListUtil;
 import ariba.util.core.PerformanceState;
-import ariba.util.core.StringUtil;
 import ariba.util.core.URLUtil;
 import ariba.util.core.Fmt;
 
@@ -261,6 +260,8 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
             browserBack(response);
             return;
         }
+
+        PerformanceState.getThisThreadHashtable().setAppDimension1(url());
 
         initiateRedirect(requestContext);
 

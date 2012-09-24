@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#23 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWResponseBuffer.java#25 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -612,10 +612,10 @@ public final class AWResponseBuffer extends AWBaseObject
         context.popLevel();
     }
     
-    private static final AWEncodedString WriteScopeUpdate1 = new AWEncodedString("<script>parent.ariba.Refresh.registerScopeUpdate('");
+    private static final AWEncodedString WriteScopeUpdate1 = new AWEncodedString("<script>ariba.Refresh.registerScopeUpdate('");
     private static final AWEncodedString Separator = new AWEncodedString("','");
     private static final AWEncodedString EndScript = new AWEncodedString("');</script>");
-    private static final AWEncodedString WriteChanges = new AWEncodedString("<script>parent.ariba.Refresh.registerScopeChanges('");
+    private static final AWEncodedString WriteChanges = new AWEncodedString("<script>ariba.Refresh.registerScopeChanges('");
     private static final AWEncodedString ChangeNoInsSeparator = new AWEncodedString("',null,");
     private static final AWEncodedString ChangeInsStartSeparator = new AWEncodedString("',['");
     private static final AWEncodedString ChangeInsEndSeparator = new AWEncodedString("'],");

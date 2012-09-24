@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/LogManager.java#30 $
+    $Id: //ariba/platform/util/core/ariba/util/log/LogManager.java#31 $
 */
 
 package ariba.util.log;
@@ -20,17 +20,20 @@ package ariba.util.log;
 import ariba.util.core.ArgumentParser;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.FileUtil;
+import ariba.util.core.Fmt;
 import ariba.util.core.ListUtil;
 import ariba.util.core.Parameters;
+import ariba.util.core.PerformanceState;
 import ariba.util.core.StringUtil;
 import ariba.util.i18n.I18NUtil;
-import ariba.util.core.PerformanceState;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Enumeration;
 import org.apache.log4j.Appender;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.varia.DenyAllFilter;
+
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 
 /**
     Helper class with utility methods for creation and access of
@@ -228,11 +231,36 @@ public class LogManager extends org.apache.log4j.LogManager
     */
     public static String getArchiveDirectoryName ()
     {
-        return (archiveDirectoryName != null) ?
-            archiveDirectoryName :
-            DefaultLogArchive;
+        return addYearMonthDayHierarchy((archiveDirectoryName != null) ?
+            archiveDirectoryName : DefaultLogArchive);
     }
 
+    /**   
+     * Add year, month (padded 0), day(padded 0) hierarchy
+     */
+    private static String addYearMonthDayHierarchy (String directoryName)
+    {
+        if (StringUtil.nullOrEmptyOrBlankString(directoryName)) {
+            return directoryName;
+        }
+
+        Calendar gc = Calendar.getInstance();
+        String y = String.valueOf(gc.get(Calendar.YEAR));
+
+        /* month starts with 0 */
+        String m = String.valueOf(gc.get(Calendar.MONTH)+1);
+        if (gc.get(Calendar.MONTH) < 9) {
+            m = StringUtil.strcat("0", m);
+        }
+
+        String d = String.valueOf(gc.get(Calendar.DAY_OF_MONTH));
+        if (gc.get(Calendar.DAY_OF_MONTH) < 10) {
+            d = StringUtil.strcat("0", d);
+        }
+
+        return FileUtil.fixFileSeparators(Fmt.S("%s/%s/%s/%s",directoryName, y, m, d));
+    }
+    
     /**
         Deactivates the DefaultConsole appender that is defined as part of
         the static configuration of log4j.

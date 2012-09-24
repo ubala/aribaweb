@@ -1,0 +1,43 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2012 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ComboButton.awl#1 $
+    </Copyright>
+
+    <NamedContent name="default" required="true">
+        The left part of the multiple action button. It should be a single action.
+    </NamedContent>
+
+    <NamedContent name="actions" required="true">
+        The right part of the multiple action button. When clicking on the right arrow,
+        a dropdown menu will show up with the different other actions that can be clicked.
+    </NamedContent>
+</a:Api>
+\
+<table width="1%" cellspacing="0" cellpadding="0" border="0">\
+    <tr>\
+        <td width="1%" nowrap="true" class="multiple_button_left">\
+            <a:IncludeContent name="default"/>\
+        </td>\
+        <td width="20">\
+            <w:PopupMenuLink menuId="$elementId" position="right" class="multiple_button_right">\
+                <div class="dropdownarrow" style="position:relative;top:10px;left:2px;height:16px;"></div>\
+            </w:PopupMenuLink>\
+            <w:PopupMenu menuId="$elementId" class="multiple_button_dropdown catalog_box_shadow">\
+                <a:IncludeContent name="actions"/>\
+            </w:PopupMenu>\
+        </td>\
+    </tr>\
+</table>\

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionHeading.awl#15 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionHeading.awl#16 $
     </Copyright>
 
     <Overview>
@@ -50,7 +50,7 @@
                 </w:RoundedBox>
             </td>
             <td class="sectionHTitle">
-                <h2>$^title</h2>
+                <h2>$title</h2>
             </td>
             <td class="sectionHRight">
                 <div></div>

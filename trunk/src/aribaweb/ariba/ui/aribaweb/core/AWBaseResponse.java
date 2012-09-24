@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#41 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseResponse.java#42 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -48,7 +48,7 @@ import java.util.HashMap;
 abstract public class AWBaseResponse extends AWBaseObject implements AWResponse
 {
     private static final AWEncodedString RootBufferName = new AWEncodedString("awrootbuffer");
-    private static final AWEncodedString BodyTagOpen = new AWEncodedString("<html><body onLoad='parent.ariba.Refresh.completeRefreshOnLoad()'>");
+    private static final AWEncodedString BodyTagOpen = new AWEncodedString("<html><body onLoad='ariba.Refresh.completeRefreshOnLoad()'>");
     private static final AWEncodedString BodyTagClose = new AWEncodedString("</body></html>");
 
     public static PerformanceStateCounter ResponseSizeCounter =

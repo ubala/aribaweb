@@ -19,6 +19,7 @@ DateMonthYearFmt,"MMMM d, yyyy","Technical: Must be a valid java.text.DateFormat
 FullDateMonthYearFmt,"MMMM d, yyyy 'at' h:mm a","Technical: Must be a valid java.text.DateFormat format.; "
 FullDateMonthYearTZFmt,"MMMM d, yyyy 'at' h:mm a, zzzz","Technical: Must be a valid java.text.DateFormat format.; "
 LongDayDateMonthYearFmt,"EEEE, MMMM d, yyyy","Technical: Must be a valid java.text.DateFormat format.; "
+LongDayDateMonthYearTZFmt,"EEEE, MMMM d, yyyy zzz","Technical: Must be a valid java.text.DateFormat format.; "
 FullDayDateMonthYearFmt,"EEEE, MMMM d, yyyy 'at' h:mm a","Technical: Must be a valid java.text.DateFormat format.; "
 FullDayDateMonthYearTZFmt,"EEEE, MMMM d, yyyy 'at' h:mm a, zzzz","Technical: Must be a valid java.text.DateFormat format.; "
 HoursMinutesSecondsFmt,"h:mm:ss","Technical: Must be a valid java.text.DateFormat format.; "

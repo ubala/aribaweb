@@ -1,13 +1,12 @@
-<h3>Latest Release: v5.0GA PREVIEW 5 (10/18/2010)</h3>
+<h3>Latest Release: v5.1 (9/20/2012)</h3>
 <ul>
-<li>v5.0 GA is just around the corner!</li>
-<li>Performance fixes</li>
+<li>New components</li>
 <li>Security fixes</li>
 </ul>
 <div style="height:30px;margin-left:80px">
     <w:TextButton buttonWrapperStyle="LeftRight"
                   buttonClass="siteBtn"
                   action='${ariba.ui.aribaweb.core.AWRedirect.getRedirect(requestContext,"https://sourceforge.net/projects/aribaweb/")}'>
-        Download v5.0GA
+        Download v5.1
     </w:TextButton>
 </div>

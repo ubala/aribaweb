@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/PrimitiveTypeProvider.java#13 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/PrimitiveTypeProvider.java#14 $
 */
 
 package ariba.util.fieldtype;
@@ -565,13 +565,13 @@ public class PrimitiveTypeProvider extends TypeProvider
             return null;
         }
 
-        public MethodInfo getMethod (TypeRetriever retriever,
-                                     String name,
-                                     List parameters,
-                                     boolean staticOnly)
+        public MethodInfo getMethodForName (TypeRetriever retriever,
+                                            String name,
+                                            List<String> parameters,
+                                            boolean staticOnly)
         {
             if (PrimitiveTypeProvider.isBoxedType(this)) {
-                return super.getMethod(retriever, name, parameters, staticOnly);
+                return super.getMethodForName(retriever, name, parameters, staticOnly);
             }
             return null;
         }

@@ -277,6 +277,12 @@ public class AWStaticSiteGenerator
         {
             return "http://STATIC_SITE";
         }
+
+        @java.lang.Override
+        public String name ()
+        {
+            return "StaticSite";
+        }
     }
 
     static class FakeRequest extends AWBaseRequest

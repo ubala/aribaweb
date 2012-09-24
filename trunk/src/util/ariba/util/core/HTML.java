@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#40 $
+    $Id: //ariba/platform/util/core/ariba/util/core/HTML.java#42 $
 */
 
 package ariba.util.core;
@@ -266,6 +266,29 @@ public class HTML
             newBuffer.append(c);
         }
         return newBuffer.toString();
+    }
+
+    private static Pattern scriptPattern = 
+        Pattern.compile("<(script[^>]*>)",Pattern.CASE_INSENSITIVE);
+
+    /**
+     * All tags within a HTML attribute are ignored by the browser. But with XMLHTTP 
+     * requests, we search for the script tags and execute them. Fixing this on 
+     * the client is expensive.
+     * 
+     *  This method replaces all quotes with &QUOT; and the opening angle bracket of the 
+     *  script tag with a ?. 
+     * 
+     * @param attr
+     * @return String with escaped quotes and ? for opening angle bracket of script tag.
+     */
+    public static String escapeHTMLAttribute (String attr)
+    {
+        if(StringUtil.nullOrEmptyString(attr)) {
+            return attr;
+        }
+        String ret = StringUtil.replaceCharByString(attr, '"', "&QUOT;");
+        return scriptPattern.matcher(ret).replaceAll("?$1");
     }
 
     /**
@@ -1416,6 +1439,7 @@ public class HTML
         {
             // specially escape some equal signs(=)
             str = encodeEqualsInStringLiteral(str);
+            str = safeTagPattern.matcher(str).replaceAll("&amp;STB;$1&amp;STE;");
 
             // prevent safe tags from being stripped
             for (String safeTag : safeTags) {

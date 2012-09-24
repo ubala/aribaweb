@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#15 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestLinkHolder.java#16 $
 */
 
 package ariba.ui.aribaweb.test;
@@ -24,7 +24,9 @@ import ariba.ui.aribaweb.util.SemanticKeyProvider;
 import ariba.util.core.ClassUtil;
 import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
+import ariba.util.core.PerformanceState;
 import ariba.util.core.StringUtil;
+import ariba.util.core.ThreadDebugState;
 import ariba.util.test.StagerArgs;
 import ariba.util.test.TestDestager;
 import ariba.util.test.TestPageLink;
@@ -481,11 +483,25 @@ public class TestLinkHolder implements SemanticKeyProvider
 
     public static void testStagerClick (AWRequestContext requestContext, Method m)
     {
+        String testId = null;
+        String testShortId = null;
+        String testLine = null;
+        if (PerformanceState.threadStateEnabled()) {
+            PerformanceState.Stats stats = PerformanceState.getThisThreadHashtable();
+            testId = stats.getTestId();
+            testShortId = stats.getTestShortId();
+            testLine = stats.getTestLine();
+            // Sets the line to -1 so that the JDBCConnection does not
+            // log SQL statements suring stager execution
+            stats.setTestLine("-1");
+        }
+
         TestContext testContext = TestContext.getTestContext(requestContext);
         TestSessionSetup testSessionSetup = TestLinkManager.instance().getTestSessionSetup();
 
         Object obj = AnnotationUtil.getObjectToInvoke(requestContext, m);
         Object sessionState = testSessionSetup.getSessionState();
+        long startTime = System.currentTimeMillis();
         try {
             Log.aribaweb_test.debug("[TestLinkHolder] Starting stager call %s " +
                 "on object %s with TestContext %s.", m.toGenericString(), obj,
@@ -499,11 +515,29 @@ public class TestLinkHolder implements SemanticKeyProvider
             }
         }
         finally {
+            long endTime = System.currentTimeMillis();
             testSessionSetup.restoreSessionStateIfNeeded(sessionState);
             Log.aribaweb_test.debug("[TestLinkHolder] Finished stager call %s on " +
                 "object %s with TestContext %s.",
                 m.toGenericString(), obj,
                 testContext.toString());
+            // ATTENTION: This log format is expected by the StagerUsageReportGenerator
+            // to extract from logs stager execution time. DO NOT CHANGE.
+            Log.aribaweb_test.debug("[TestLinkHolder] Stager: '%s', TestId: '%s', TestShortId: '%s', TestLine: '%s', " +
+                    "StartedAt: '%s', EndedAt: '%s', Duration: '%s'",
+                    new Object[]{m.toGenericString(),
+                            testId,
+                            testShortId,
+                            testLine,
+                            startTime,
+                            endTime,
+                            endTime-startTime});
+            //Restores the original testLine
+            if (PerformanceState.threadStateEnabled() &&
+                    !"-1".equals(testLine)) {
+                PerformanceState.Stats stats = PerformanceState.getThisThreadHashtable();
+                stats.setTestLine(testLine);
+            }
         }
     }
 

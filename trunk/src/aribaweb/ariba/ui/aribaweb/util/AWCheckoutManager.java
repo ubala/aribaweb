@@ -12,12 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWCheckoutManager.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWCheckoutManager.java#10 $
 */
 
 package ariba.ui.aribaweb.util;
 
 import ariba.util.core.Assert;
+import ariba.util.core.FastStringBuffer;
+import ariba.util.core.Fmt;
 import ariba.util.core.MapUtil;
 import java.util.Map;
 import ariba.util.core.Constants;
@@ -39,7 +41,7 @@ public final class AWCheckoutManager extends AWBaseObject
 
     private final AWCountingHashtable _waitingThreadForKeyCount =
         new AWCountingHashtable();
-    private final Map _checkedOutKeys = MapUtil.map();
+    private final Map<Object, Thread> _checkedOutKeys = MapUtil.map();
     private int _maxWaitingThreadsPerKey = MaxWaitingThreadsPerKey;
     private long _maxThreadWaitMillis = MaxThreadWaitMillis;
 
@@ -101,12 +103,13 @@ public final class AWCheckoutManager extends AWBaseObject
             _waitingThreadForKeyCount.add(key);
             try {
                 long checkoutDeadline = System.currentTimeMillis() + _maxThreadWaitMillis;
-                while (_checkedOutKeys.get(key) != null) {
+                Thread checkedOutThread = _checkedOutKeys.get(key);
+                while (checkedOutThread != null) {
                     waitForTimeout();
                     if (System.currentTimeMillis() > checkoutDeadline) {
-                        throw new AWThreadTimeoutException("instance " +
-                            _instanceName + " key " + key);
+                        throwThreadTimeoutException(key, checkedOutThread);
                     }
+                    checkedOutThread = _checkedOutKeys.get(key);
                 }
             }
             finally {
@@ -114,6 +117,23 @@ public final class AWCheckoutManager extends AWBaseObject
             }
         }
         _checkedOutKeys.put(key, Thread.currentThread());
+    }
+
+    private void throwThreadTimeoutException (Object key, Thread checkedOutThread)
+    {
+        String stackStr = "No Stack";
+        StackTraceElement[] stack = checkedOutThread.getStackTrace();
+        if (stack != null) {
+            FastStringBuffer sb = new FastStringBuffer();
+            for (StackTraceElement line: stack) {
+                sb.append("\n\t");
+                sb.append(line);
+            }
+            stackStr = sb.toString();
+        }
+        String message = Fmt.S("instance: %s, key: %s, checked out thread stack: %s",
+            _instanceName, key, stackStr);
+        throw new AWThreadTimeoutException(message);
     }
 
     public synchronized boolean isCheckedOut (Object key)

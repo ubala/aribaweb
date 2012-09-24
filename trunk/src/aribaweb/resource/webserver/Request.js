@@ -40,6 +40,8 @@ ariba.Request = function() {
     var _XMLHTTP_COUNT = 0;
     var _XMLQUEUE = [];
 
+    document.cookie = 'awscreenstats=' + window.screen.width + 'x' + window.screen.height;
+
     var Request = {
         // Public Globals
         AWSenderIdKey : 'awsn',
@@ -207,6 +209,11 @@ ariba.Request = function() {
             return this.partialUrl() + this.AWSenderIdKey + '=' + senderId;
         },
 
+        formatInPageRequestUrl : function (senderId)
+        {
+            return this.formatSenderUrl(senderId) +"&awip=1"
+        },
+
         appendScrollValues : function (urlString)
         {
             if (urlString.indexOf("#") == -1) {
@@ -297,7 +304,7 @@ ariba.Request = function() {
                     Debug.log("page changed -- go get content");
                     // use the special sender id to indicate that we should re-render for update
                     if (!AWRequestInProgress) {
-                        this.getContent(this.formatSenderUrl(AWPollUpdateSenderId));
+                        this.getContent(this.formatInPageRequestUrl(AWPollUpdateSenderId));
                     }
                     scheduleTimer = true;
                 } else if (response == "<AWPoll state='nochange'/>") {
@@ -322,7 +329,7 @@ ariba.Request = function() {
                     if (this.AWPollCallback) {
                         this.AWPollCallback(this.AWPollState);
                     }
-                    var url = this.formatSenderUrl(AWPollSenderId);
+                    var url = this.formatInPageRequestUrl(AWPollSenderId);
                 // wrap the awLoadLazyDivCallback in an anonymous function so we can
                     // pass the additional divObject to it
                     this.initiateXMLHttpRequest(url, callback.bind(this));
@@ -710,8 +717,8 @@ ariba.Request = function() {
             if (!noWaitCursor) Input.showWaitCursor();
         // start timer to make sure something comes back in the iframe
             setTimeout(this.startRefreshTimer.bind(this), 1);
-            Input.AWWaitMillis = 20 * 60 * 1000;  // force off auto-hinding of panel -- 20 mins, anyway...
             if (this.AWProgressUrl) {
+                Input.AWWaitMillis = 20 * 60 * 1000;  // force off auto-hinding of panel -- 20 mins, anyway...
                 this.initProgressCheck(this.AWProgressUrl, Input.AWWaitAlertMillis + 2000, Input.AWWaitAlertMillis);
             }
         },
@@ -744,10 +751,15 @@ ariba.Request = function() {
         },
 
         displayErrorDiv : function (innerHtml) {
-            var div = document.createElement("div");
-            div.className="debugFloat";
-            div.innerHTML = innerHtml;
-            document.body.appendChild(div);
+            if (AWDebugEnabled) {
+                var div = document.createElement("div");
+                div.className="debugFloat";
+                div.innerHTML = innerHtml;
+                document.body.appendChild(div);
+            } 
+            else {
+                this.redirectRefresh();
+            }
         },
 
         createRequestIFrame : function (frameName, showFrame)

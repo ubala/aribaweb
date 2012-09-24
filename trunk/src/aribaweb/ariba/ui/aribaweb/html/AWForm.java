@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.java#37 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWForm.java#38 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -178,7 +178,9 @@ public class AWForm extends AWComponent implements AWHtmlForm
             try {
                 requestContext.pushElementIdLevel();
                 requestContext.setCurrentForm(this);
-                requestContext.setFormInputIds(formInputIds(_formElementId));
+                if (!requestContext.isPrintMode()) {
+                    requestContext.setFormInputIds(formInputIds(_formElementId));
+                }
                 super.renderResponse(requestContext, component);
                 requestContext.setFormInputIds(null);
             }

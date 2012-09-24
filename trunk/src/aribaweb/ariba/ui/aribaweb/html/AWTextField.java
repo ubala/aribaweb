@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#62 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.java#64 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -33,8 +33,8 @@ import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.Log;
 import ariba.util.core.StringUtil;
-import ariba.util.core.ArrayUtil;
 import ariba.util.formatter.FormatterHandlesNulls;
+import ariba.util.core.ArrayUtil;
 
 // subclassed for validation
 public class AWTextField extends AWComponent
@@ -170,7 +170,6 @@ public class AWTextField extends AWComponent
                 }
             }
         }
-
         if (textFieldName() != null) {
             // get old cached value
             Object _oldV = page().pageComponent().dict(textFieldName().string());

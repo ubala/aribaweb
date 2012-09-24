@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Version.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Version.java#9 $
 */
 
 package ariba.util.core;
@@ -21,6 +21,7 @@ import ariba.util.formatter.DateFormatter;
 import ariba.util.formatter.IntegerFormatter;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Calendar;
 
 /**
     This class provides access to build version information.  This information
@@ -61,6 +62,7 @@ public final class Version
     public static final String hfpack;
     public static final String langpack;
     public static final String date;
+    public static final int year;
     /** Build name is only valid for shared services.  It is normally null for CD. */
     public static final String buildName;
 
@@ -97,22 +99,32 @@ public final class Version
 
         String dateString = ResourceService.getString(BuildStringTable,
             "date", ResourceService.LocaleOfLastResort, false);
+
+        int buildYear;
+
         try {
             Date date = DateFormatter.parseDate(dateString, "MM/dd/yyyy");
             dateString = DateFormatter.toPaddedConciseDateString(date);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            buildYear = calendar.get(Calendar.YEAR);
         }
         catch (ParseException e) {
             dateString = null;
+            Calendar calendar = Calendar.getInstance();
+            buildYear = calendar.get(Calendar.YEAR);
         }
+
         date = dateString;
+        year = buildYear;
         buildName = readBuildName();
     }
 
     public static final long version =
         (major << 26) | (minor << 21) | (patch << 16) | build;
 
-    public static final String copyrightImage =
-        ResourceService.getString(LocalStringTable, "copyright");
+    public static final String copyrightImage = makeVersionString();
+
 
     public static final String versionImage =
         makeVersionString(product, major, minor, patch, build, svcpack, date, hfpack, langpack);
@@ -169,7 +181,13 @@ public final class Version
 
         return versionString;
     }
-    
+
+    private static final String makeVersionString ()
+    {
+        String copyrightStr = ResourceService.getString(LocalStringTable, "copyright");
+        return Fmt.Si(copyrightStr,Integer.toString(year));
+    }
+
     /**
      * Looks for the BuildName file in well known locations.
      * If the file is found, returns the build name in the file.
@@ -184,7 +202,7 @@ public final class Version
             "internal/build/config/BuildName"
         };
         String buildName = null;
-        
+
         for (int i = 0; i < possiblePaths.length; i++) {
             buildName = readBuildName(possiblePaths[i]);
             if (!StringUtil.nullOrEmptyString(buildName)) {
@@ -193,7 +211,7 @@ public final class Version
         }
         return null;
     }
-    
+
     private static final String readBuildName (String path)
     {
         URL buildNameFileURL = null;
@@ -201,7 +219,7 @@ public final class Version
         buildNameFileURL = URLUtil.url(path);
         // read the content of that URL
         String buildName = IOUtil.stringFromURL(buildNameFileURL, null);
-        return (buildName == null) ? null : 
+        return (buildName == null) ? null :
             StringUtil.removeCarriageReturns(buildName).trim();
     }
 }

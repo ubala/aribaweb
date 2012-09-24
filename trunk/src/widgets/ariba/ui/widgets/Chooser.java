@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#36 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#37 $
 */
 
 
@@ -51,7 +51,9 @@ public class Chooser extends AWComponent
         BindingNames.size, BindingNames.state,
         BindingNames.multiSelect, BindingNames.searchAction,
         BindingNames.noSelectionString,
-        BindingNames.errorKey, allowFullMatchOnInput
+        BindingNames.errorKey, BindingNames.basic,
+        BindingNames.classBinding,
+        allowFullMatchOnInput
     };
 
     public static String NoSelectionString = "(none selected)";
@@ -65,6 +67,7 @@ public class Chooser extends AWComponent
     private boolean _fullMatchNeeded;
     private Object _errorKey;
     private boolean _allowFullMatchOnInput;
+    public boolean _basic;
     private List _selectionList;
 
     public String[] supportedBindingNames ()
@@ -79,6 +82,7 @@ public class Chooser extends AWComponent
         _disabled = booleanValueForBinding(BindingNames.disabled) ||
             AWEditableRegion.disabled(requestContext());
         _allowFullMatchOnInput = booleanValueForBinding(allowFullMatchOnInput);
+        _basic = booleanValueForBinding(BindingNames.basic);
     }
 
     protected void sleep ()
@@ -183,7 +187,7 @@ public class Chooser extends AWComponent
 
     public String displayValue ()
     {
-        String displayValue = _chooserState.isInvalid() ? _chooserState.pattern() : null;
+        String displayValue = _chooserState.isInvalid() || _basic ? _chooserState.pattern() : null;
         if (displayValue == null) {
             displayValue = displayObjectString();
         }
@@ -481,16 +485,22 @@ public class Chooser extends AWComponent
         }
     }
 
-    private void selectAction (List selections, int selectionIndex)
+    protected void selectAction (List selections, int selectionIndex)
     {
         if (selections.size() > selectionIndex) {
             Object item = selections.get(selectionIndex);
-            _chooserState.updateSelectedObjects(item);
+            if (_basic) {
+                _chooserState.setPattern(item.toString());
+                searchAction();
+            }
+            else {
+                _chooserState.updateSelectedObjects(item);
+            }
             updateState();
         }
     }
 
-    private void updateState ()
+    protected void updateState ()
     {
         _chooserState.setFocus(true);
         _chooserState.setRender(true);
@@ -534,8 +544,11 @@ public class Chooser extends AWComponent
         clearValidationError(errorKey());        
     }
 
-    private void validateAndRecordErrors ()
+    protected void validateAndRecordErrors ()
     {
+        if (_basic) {
+            return;
+        }
         Object match = null;
         List filterSelections = _chooserState.filteredSelections();
         if (filterSelections != null && filterSelections.size() > 0) {
@@ -634,6 +647,14 @@ public class Chooser extends AWComponent
         }
     }
 
+    public AWResponseGenerating textAction ()
+    {
+        if (_basic) {
+            return searchAction();
+        }
+        return null;
+    }
+
     public AWResponseGenerating searchAction ()
     {
         if (hasBinding(BindingNames.searchAction)) {
@@ -652,6 +673,26 @@ public class Chooser extends AWComponent
         return _disabled;
     }
 
+    public String wrapperClass ()
+    {
+        String wrapperClass = "chWrapper ";
+        String cssClass = stringValueForBinding(BindingNames.classBinding);
+        if (!StringUtil.nullOrEmptyOrBlankString(cssClass)) {
+            wrapperClass += cssClass;           
+        }
+        return wrapperClass;
+    }
+
+    public String menuClass ()
+    {
+        String menuClass = "awmenu ";
+        String cssClass = stringValueForBinding(BindingNames.classBinding);
+        if (!StringUtil.nullOrEmptyOrBlankString(cssClass)) {
+            menuClass += cssClass + "Menu";
+        }
+        return menuClass;
+    }
+    
     public String cssClass ()
     {
         String ret = "chText ";
@@ -664,7 +705,7 @@ public class Chooser extends AWComponent
         else if (noSelectionString().equals(displayValue())) {
             ret += "chNoSelection";
         }
-        else {
+        else if (!_basic) {
             ret += "chValidSelection";
         }
         return ret;

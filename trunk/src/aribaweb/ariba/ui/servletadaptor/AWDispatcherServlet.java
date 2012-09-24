@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWDispatcherServlet.java#5 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWDispatcherServlet.java#8 $
 */
 
 package ariba.ui.servletadaptor;
@@ -24,6 +24,7 @@ import ariba.util.core.FatalAssertionException;
 import ariba.util.core.Fmt;
 import ariba.util.core.HTTP;
 import ariba.util.core.PerformanceState;
+import ariba.util.core.StringUtil;
 import ariba.util.core.SystemUtil;
 import ariba.util.core.ThreadDebugState;
 import ariba.util.core.WrapperRuntimeException;
@@ -152,14 +153,7 @@ public class AWDispatcherServlet extends HttpServlet
     protected String requestString (HttpServletRequest servletRequest)
     {
         FastStringBuffer requestString = new FastStringBuffer();
-        requestString.append(servletRequest.getScheme());
-        requestString.append("://");
-        requestString.append(servletRequest.getServerName());
-        requestString.append(":");
-        requestString.append(String.valueOf(servletRequest.getServerPort()));
-        requestString.append(servletRequest.getContextPath());
-        requestString.append(servletRequest.getServletPath());
-        requestString.append(((servletRequest.getPathInfo() != null) ? servletRequest.getPathInfo() : ""));
+        requestString.append(servletRequest.getRequestURL());
         requestString.append(((servletRequest.getQueryString() != null) ? "?"+servletRequest.getQueryString() : ""));
         return requestString.toString();
     }
@@ -170,6 +164,10 @@ public class AWDispatcherServlet extends HttpServlet
         try {
             // Set default performance exception logging
             PerformanceState.watchPerformance(_awapplication.defaultPerformanceCheck());
+            String sessionID = servletRequest.getRequestedSessionId();
+            if (!StringUtil.nullOrEmptyString(sessionID)) {
+                PerformanceState.getThisThreadHashtable().setSessionID(sessionID);
+            }
             if (Log.aribaweb_request.isDebugEnabled()) {
                 Log.aribaweb_request.debug("##########################################################");
                 Log.aribaweb_request.debug("request: %s", requestString(servletRequest));
@@ -188,6 +186,7 @@ public class AWDispatcherServlet extends HttpServlet
             }
             AWServletRequest awservletRequest = (AWServletRequest)_awapplication.createRequest(servletRequest);
             awservletRequest.setupHttpServletRequest(servletRequest, servletResponse, this.getServletContext());
+            PerformanceState.getThisThreadHashtable().setUserAgent(awservletRequest.headerForKey(HTTP.HeaderUserAgent));
             AWServletResponse awresponse = (AWServletResponse)_awapplication.dispatchRequest(awservletRequest);
             // awresponse can return in jsp world if IOException/SocketException is encounted
             if (awresponse != null) {

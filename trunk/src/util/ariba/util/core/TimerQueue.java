@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/TimerQueue.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/core/TimerQueue.java#6 $
 */
 
 package ariba.util.core;
@@ -20,20 +20,17 @@ package ariba.util.core;
 /**
     Private class to manage a queue of Timers. The Timers are chained
     together in a linked list sorted by the order in which they will expire.
-    @note 1.0 changes to detect and stop dealocking better
+    @note 1.0 changes to detect and stop deadlocking better
 
     @aribaapi private
 */
-class TimerQueue implements Runnable
+abstract public class TimerQueue implements Runnable
 {
-    Timer firstTimer;
     boolean running = false;
 
-    public TimerQueue ()
-    {
-        start();
-    }
-
+    /**
+     * Create and start a new Thread to process the timers.
+     */
     synchronized void start ()
     {
         Assert.that(!running, "Can't start a TimerQueue that is already running");
@@ -58,91 +55,7 @@ class TimerQueue implements Runnable
         notify();
     }
 
-    synchronized void addTimer (Timer timer, long expirationTime)
-    {
-        Timer previousTimer, nextTimer;
-
-        // If the Timer is already in the queue, then ignore the add.
-
-        if (timer.running) {
-            return;
-        }
-
-        previousTimer = null;
-        nextTimer = firstTimer;
-
-        // Insert the Timer into the linked list in the order they will
-        // expire.  If two timers expire at the same time, put the newer entry
-        // later so they expire in the order they came in.
-
-        while (nextTimer != null) {
-            if (nextTimer.expirationTime > expirationTime) {
-                break;
-            }
-
-            previousTimer = nextTimer;
-            nextTimer = nextTimer.nextTimer;
-        }
-
-        if (previousTimer == null) {
-            firstTimer = timer;
-        }
-        else {
-            previousTimer.nextTimer = timer;
-        }
-
-        timer.expirationTime = expirationTime;
-        timer.nextTimer = nextTimer;
-        timer.running = true;
-
-        notify();
-    }
-
-    synchronized void removeTimer (Timer timer)
-    {
-        boolean found;
-        Timer previousTimer, nextTimer;
-
-        if (!timer.running) {
-            return;
-        }
-
-        previousTimer = null;
-        nextTimer = firstTimer;
-        found = false;
-
-        while (nextTimer != null) {
-            if (nextTimer == timer) {
-                found = true;
-                break;
-            }
-
-            previousTimer = nextTimer;
-            nextTimer = nextTimer.nextTimer;
-        }
-
-        if (!found) {
-            return;
-        }
-
-        if (previousTimer == null) {
-            firstTimer = timer.nextTimer;
-        }
-        else {
-            previousTimer.nextTimer = timer.nextTimer;
-        }
-
-        timer.expirationTime = 0;
-        timer.nextTimer = null;
-        timer.running = false;
-    }
-
-    synchronized boolean containsTimer (Timer timer)
-    {
-        return timer.running;
-    }
-
-    /**
+        /**
         If there are a ton of timers, this method may never return. It
         loops checking to see if the head of the Timer list has
         expired. If it has, it posts the Timer and reschedules it if
@@ -157,7 +70,7 @@ class TimerQueue implements Runnable
         // when we have no Timers to wait for.
 
         do {
-            timer = firstTimer;
+            timer = getFirstTimer();
             if (timer == null) {
                 return 0;
             }
@@ -167,7 +80,7 @@ class TimerQueue implements Runnable
 
             if (timeToWait <= 0) {
                 timer.post();
-                removeTimer(timer);
+                removeFirstTimer();
 
                 // This tries to keep the interval uniform at the cost of
                 // drift.
@@ -193,6 +106,45 @@ class TimerQueue implements Runnable
         return timeToWait;
     }
 
+    /**
+     * Remove the first timer in the queue.
+     */
+    abstract void removeFirstTimer ();
+
+    /**
+     * Get the first timer in the queue
+     * @return The first (soonest to fire) Timer.
+     */
+    abstract Timer getFirstTimer ();
+
+    /**
+     * Add a new Timer to the queue that will fire after the specified time
+     *
+     * @param timer The Timer to add
+     * @param expirationTime The time at which the timer should fire.
+     */
+    abstract void addTimer (Timer timer, long expirationTime);
+
+    /**
+     * Remove a Timer from the queue. The passed-in Timer must be == to the removed Timer.
+     * @param timer The Timer to remove.
+     */
+    abstract void removeTimer (Timer timer);
+
+    /**
+     * Returns true whether the current Timer is in the queue. (Actually returns true if
+     * the Timer is running, i.e. if it's in any currently running TimerQueue).
+     * @param timer The Timer to test
+     * @return true if the timer is running
+     */
+    synchronized boolean containsTimer (Timer timer)
+    {
+        return timer.running;
+    }
+
+    /**
+     * Run the timer-processing loop.
+     */
     public synchronized void run ()
     {
         long timeToWait;
@@ -207,22 +159,10 @@ class TimerQueue implements Runnable
         }
     }
 
-    public synchronized String toString ()
-    {
-        FastStringBuffer buf = new FastStringBuffer();
-        buf.append("TimerQueue (");
-
-        Timer nextTimer = firstTimer;
-        while (nextTimer != null) {
-            buf.append(nextTimer.toString());
-
-            nextTimer = nextTimer.nextTimer;
-            if (nextTimer != null) {
-                buf.append(", ");
-            }
-        }
-
-        buf.append(")");
-        return buf.toString();
-    }
+    /**
+     * Get the number of Timers that are in this queue. (Repeating timers are counted
+     * once).
+     * @return the current number of pending timers.
+     */
+    abstract public int size ();
 }

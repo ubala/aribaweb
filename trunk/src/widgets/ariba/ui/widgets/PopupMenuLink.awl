@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuLink.awl#31 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuLink.awl#32 $
     </Copyright>
 
     <Overview>
@@ -109,6 +109,11 @@
         an html element under which the PopupMenu will appear.  If so,
         the upper-left corner fo the PopupMenu will be positioned at the
         lower left corner of the element in question.
+        If you want to align the PopupMenu right, specify 'right' as position.
+    </Binding>
+
+    <Binding key="shouldOpen" direction="get" type="boolean" required="$false">
+        Tells weather the popup menu has to be open by default when displayed.
     </Binding>
 </a:Api>
 <!--- Note that we generate a span to handle key clicks, and an anchor to handle mouse down events
@@ -132,3 +137,12 @@
     omitTags="$omitTags">\
     <a:IncludeContent/>\
 </a:GenericContainer>\
+
+<a:If ifTrue="$^shouldOpen">\
+    <a:RefreshRegion alwaysRender="$true">\
+        <a:ClientSideScript>\
+            var link = ariba.Dom.getElementById('$elementId');
+            ariba.Menu.menuLinkOnClick(link, link.getAttribute("_mid"), '$elementId', null);
+        </a:ClientSideScript>\
+    </a:RefreshRegion>
+</a:If>\

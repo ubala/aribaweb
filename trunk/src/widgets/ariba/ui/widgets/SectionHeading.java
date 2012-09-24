@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionHeading.java#10 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/SectionHeading.java#12 $
 */
 
 package ariba.ui.widgets;
 
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.util.core.ResourceService;
 
 public final class SectionHeading extends AWComponent
 {
@@ -27,4 +28,15 @@ public final class SectionHeading extends AWComponent
         return inSectionWrapper != null ? inSectionWrapper.booleanValue() : false;
     }
 
+    public String getTitle ()
+    {
+        String title = stringValueForBinding("title");
+        if (title != null && ResourceService.getService().getRestrictedLocale(
+            preferredLocale()).getLanguage().equals("tr"))
+        {
+            title = title.replace((char)0x131, (char)0x49); 
+            title = title.replace((char)0x69, (char)0x130);
+        }
+        return title;
+    }
 }

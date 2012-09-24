@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#31 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.awl#33 $
     </Copyright>
 
     <Overview>
@@ -66,11 +66,41 @@
         TBD
     </Binding>
 
+    <Binding key="basic" type="boolean" required="$false" direction="get" default="$false">
+        If true, the chooser will run in the basic mode with the following:
+
+        - Search for more link hidden
+        - Multi selection hidden
+        - Pick list hidden
+        - No validation
+        - chooserState.pattern() should be used instead of chooserState.selectedObject()
+        - searchAction is required 
+    </Binding>
+
+    <Binding key="class" type="String" required="$false" direction="get">
+        CSS class for wrapper and match menu element. "Menu" will be appended for the menu class name.
+
+        Example:
+
+        .foo {
+            // style wrapper
+        }
+
+        .foo input {
+            // style text field
+        }
+
+        .fooMenu {
+            // style menu
+        }
+    </Binding>
+
     <Binding key="allowFullMatchOnInput" type="boolean" required="$false" direction="get" default="$false">
         Temp binding to allow full match on input.  Later it will be true always.
     </Binding>
+
 </a:Api>
-<span class="chWrapper"
+<span class="$wrapperClass"
       elementId="$chooserId"
       id="$chooserId"
       _ns="$noSelectionString"
@@ -87,40 +117,45 @@
                     <td class="chWrapLeft">
                         <a:TextField class="$cssClass"
                                      value="$displayValue"
+                                     _awname="$displayValue"
                                      behavior="$behavior"
                                      onFOcus="return ariba.Chooser.chooserFocus(this, event);"
                                      onBLur="return ariba.Chooser.chooserBlur(this, event);"
                                      autocomplete="off"
+                                     autoselect="$!^basic"
                                      disabled="$^disabled"
+                                     action="$textAction"
                                      size="$^size"/>
                     </td>
-                    <td class="chWrapRight">
-                        <a href="#" omitTags="$isDisabled" tabindex="-1">\
-                            <a:Image class="chModeLink" filename="pull_down.gif" title="$[a002]Select from the list"
-                                     awname="$chooserDropDownSemanticKey"/>\
-                        </a>\
-                        <a:Image class="chPickListImg hide" filename="pull_down.gif" title="$[a002]Select from the list"/>\
-                        <a:Image class="chSearchImg hide" filename="search.gif" title="$[a001]Search for more"/>\
-                    </td>\
-                    <a:If ifTrue="$chooserState.multiSelect">
+                    <a:If ifFalse="$basic">
+                        <td class="chWrapRight">
+                            <a href="#" omitTags="$isDisabled" tabindex="-1">\
+                                <a:Image class="chModeLink" filename="pull_down.gif" title="$[a002]Select from the list"
+                                         awname="$chooserDropDownSemanticKey"/>\
+                            </a>\
+                            <a:Image class="chPickListImg hide" filename="pull_down.gif" title="$[a002]Select from the list"/>\
+                            <a:Image class="chSearchImg hide" filename="search.gif" title="$[a001]Search for more"/>\
+                        </td>\
+                        <a:If ifTrue="$chooserState.multiSelect">
+                            <td>
+                                <a:If ifTrue="$canAdd">
+                                    <a href="#" omitTags="$isDisabled" tabindex="-1">
+                                        <a:Image class="chAddLink" filename="add_on.gif" awname="$chooserAddLinkSemanticKey"  title="$[a005]Multiple selections allowed"/>
+                                    </a>
+                                <a:Else/>
+                                    <a omitTags="$isDisabled" tabindex="-1">
+                                        <a:Image class="chAddLink" filename="add_off.gif" awname="$chooserAddLinkSemanticKey"  title="$[a003]Add another selection"/>
+                                    </a>
+                                </a:If>
+                                <a:Image class="chAddOffImg hide" filename="add_off.gif" title="$[a005]Multiple selections allowed"/>
+                                <a:Image class="chAddOnImg hide" filename="add_on.gif" title="$[a003]Add another selection"/>
+                                <a:Checkbox class="chAddMode hide" value="$chooserState.addMode"/>
+                            </td>
+                        </a:If>
                         <td>
-                            <a:If ifTrue="$canAdd">
-                                <a href="#" omitTags="$isDisabled" tabindex="-1">
-                                    <a:Image class="chAddLink" filename="add_on.gif" awname="$chooserAddLinkSemanticKey"  title="$[a005]Multiple selections allowed"/>
-                                </a>
-                            <a:Else/>
-                                <a omitTags="$isDisabled" tabindex="-1">
-                                    <a:Image class="chAddLink" filename="add_off.gif" awname="$chooserAddLinkSemanticKey"  title="$[a003]Add another selection"/>
-                                </a>
-                            </a:If>
-                            <a:Image class="chAddOffImg hide" filename="add_off.gif" title="$[a005]Multiple selections allowed"/>
-                            <a:Image class="chAddOnImg hide" filename="add_on.gif" title="$[a003]Add another selection"/>
-                            <a:Checkbox class="chAddMode hide" value="$chooserState.addMode"/>
+                            <a:IncludeContent/>
                         </td>
                     </a:If>
-                    <td>
-                        <a:IncludeContent/>
-                    </td>
                 </tr>
                 <a:If ifTrue="$chooserState.multiSelect">
                     <a:For list="$chooserState.recentSelectedObjects"
@@ -162,7 +197,7 @@
                     </a:If>
                 </a:If>
             </table>\
-            <w:PopupMenu menuId="$menuId" class="awmenu">\
+            <w:PopupMenu menuId="$menuId" class="$menuClass">\
                 <a:IncludeBlock name="SelectionContainer"
                                 value="$toggleValue">\
                     <span class="chSelections">\
@@ -178,14 +213,16 @@
                                 value="$selectValue"
                                 selectionList="$selectionList">\
                     <span class="chMatches"></span>\
-                </a:IncludeBlock>
-                <div class="chSeperator"></div>\
-                <w:PopupMenuItem action="$searchAction">
-                    <div class="chSearchLink"><a:String value="$[a001]Search for more"/>...</div>\
-                </w:PopupMenuItem>
+                </a:IncludeBlock>                
+                <a:If ifFalse="$basic">
+                    <div class="chSeperator"></div>\
+                    <w:PopupMenuItem action="$searchAction">
+                        <div class="chSearchLink"><a:String value="$[a001]Search for more"/>...</div>\
+                    </w:PopupMenuItem>
+                </a:If>
             </w:PopupMenu>\
             <a:ClientSideScript isSingleton="$false">\
-                ariba.Chooser.initChooser('$chooserId', $chooserState.multiSelect, $chooserState.focus, $chooserState.isInvalid, $itemCountChanged);
+                ariba.Chooser.initChooser('$chooserId', $chooserState.multiSelect, $chooserState.focus, $chooserState.isInvalid, $itemCountChanged, $basic);
             </a:ClientSideScript>\
             <a:Checkbox class="chfullMatch hide" value="$fullMatchValue"></a:Checkbox>\
         </a:RefreshRegion>\
@@ -201,7 +238,7 @@
                     name="$=FilteredSelections">
         <a:PrimitiveString value="$currentItemHighlightedString"/>
     </a:IncludeBlock>
-    <div class="chSeperator"></div>
+    <div class="chSeperator" emitTags="${chooserState.filteredSelections != null}"></div>
     <a:IncludeBlock templateName="ChooserList"
                     list="$chooserState.matches"
                     name="$=Matches">

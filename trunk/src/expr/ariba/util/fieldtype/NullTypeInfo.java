@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/NullTypeInfo.java#7 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/NullTypeInfo.java#8 $
 */
 
 package ariba.util.fieldtype;
@@ -76,10 +76,10 @@ public class NullTypeInfo implements TypeInfo
         return null;
     }
 
-    public MethodInfo getMethod (TypeRetriever retriever,
-                                 String name,
-                                 List /* <TypeInfo> */ parameters,
-                                 boolean staticOnly)
+    public MethodInfo getMethodForName (TypeRetriever retriever,
+                                        String name,
+                                        List<String> parameters,
+                                        boolean staticOnly)
     {
         return null;
     }

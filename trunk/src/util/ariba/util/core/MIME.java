@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MIME.java#9 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MIME.java#10 $
 */
 
 package ariba.util.core;
@@ -132,6 +132,8 @@ public final class MIME
     public static final String CharSetKSC5601    = "KSC5601";
     public static final String CharSetISO2022CN  = "ISO-2022-CN";
     public static final String CharSetISO2022CN2 = "ISO-2022-CN-EXT";
+    public static final String CharSetCp1250     = "Cp1250";
+    public static final String CharSetCp1254     = "Cp1254";
     public static final String CharSetCp1251     = "Cp1251";
     public static final String CharSetCp1252     = "Cp1252";
 
@@ -324,6 +326,8 @@ public final class MIME
             CharSetKSC5601.equalsIgnoreCase(charset)    ||
             CharSetISO2022CN.equalsIgnoreCase(charset)  ||
             CharSetISO2022CN2.equalsIgnoreCase(charset) ||
+            CharSetCp1250.equalsIgnoreCase(charset)     ||
+            CharSetCp1254.equalsIgnoreCase(charset)     ||
             CharSetCp1251.equalsIgnoreCase(charset)     ||
             CharSetCp1252.equalsIgnoreCase(charset)) {
                 return true;

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericElement.java#46 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericElement.java#47 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -527,7 +527,9 @@ public final class AWGenericElement extends AWBindableElement
              * in question.
             */
             elementIdPath = requestContext.nextElementIdPath();
-            requestContext.recordFormInputId(elementIdPath);
+            if (!requestContext.isPrintMode()) {
+                requestContext.recordFormInputId(elementIdPath);
+            }
         }
         AWEncodedString nameString = initNameString(requestContext, component, elementIdPath);
         if (tagName != null) {

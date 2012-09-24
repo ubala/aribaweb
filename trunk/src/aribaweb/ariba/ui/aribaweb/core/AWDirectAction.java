@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#68 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#75 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -38,9 +38,12 @@ import ariba.util.core.Fmt;
 import ariba.util.core.PerformanceState;
 import ariba.util.core.ProgressMonitor;
 import ariba.util.core.HTML;
+import ariba.util.core.Assert;
 import ariba.util.fieldvalue.FieldValue;
 import ariba.util.fieldvalue.FieldValueException;
 import ariba.util.shutdown.ShutdownManager;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -201,7 +204,7 @@ abstract public class AWDirectAction extends AWBaseObject
             }
         }
         else {
-            newResponse.appendContent(InvalidMachineMessage);
+            newResponse = application().handleMalformedRequest(request(), "");
         }
         return newResponse;
     }
@@ -224,7 +227,7 @@ abstract public class AWDirectAction extends AWBaseObject
             }
         }
         else {
-            newResponse.appendContent(InvalidMachineMessage);
+            newResponse = application().handleMalformedRequest(request(), "");
         }
         return newResponse;
     }
@@ -356,8 +359,7 @@ abstract public class AWDirectAction extends AWBaseObject
         AWResponse response = application.createResponse(request);
 
         if (!((AWConcreteApplication)application).allowBrandingImages()) {
-            response.appendContent("action not allowed");
-            return response;
+            return application.handleMalformedRequest("action not allowed");
         }
 
         response.setBrowserCachingEnabled(enableBrowserCache);
@@ -403,8 +405,8 @@ abstract public class AWDirectAction extends AWBaseObject
         }
 
         if (!isValidResourceFilename(filename)) {
-            response.appendContent("Invalid request: " + HTML.escape(filename));
-            return response;
+            Log.directAction.warning(11213, filename, "invalid resource file name.");
+            return application.handleMalformedRequest("Invalid request.");
         }
 
         //
@@ -428,7 +430,8 @@ abstract public class AWDirectAction extends AWBaseObject
         AWResource resource = rm.resourceNamed(filename, true);
 
         if (resource == null) {
-            response.appendContent(Fmt.S("Cannot find resource named: %s",HTML.escape(filename)));
+            Log.directAction.warning(11213, filename, "Cannot find resource.");
+            return application.handleMalformedRequest("Cannot find resource.");
         }
         else {
             if (Log.aribawebResource_brand.isDebugEnabled()) {
@@ -468,6 +471,12 @@ abstract public class AWDirectAction extends AWBaseObject
         return validResourceFilename.matcher(filename).matches();
     }
 
+    protected AWResourceManager applicationResourceManager()
+    {
+        Assert.that(requestContext().session(false)==null, "Use application resource manager only if app is session less");
+        return application().resourceManager();
+    }
+
     public AWResponse awimgAction ()
     {
         AWRequest request = request();
@@ -491,7 +500,7 @@ abstract public class AWDirectAction extends AWBaseObject
             imageResource = session.resourceManager().resourceNamed(filename,true);
         }
         else {
-            imageResource = application.resourceManager().resourceNamed(filename,true);
+            imageResource = applicationResourceManager().resourceNamed(filename,true);
         }
 
         if (imageResource == null) {
@@ -575,11 +584,12 @@ abstract public class AWDirectAction extends AWBaseObject
             actionResults = (AWResponseGenerating)FieldValue.getFieldValue(this, actionMethodName);
         }
         catch (FieldValueException fieldValueException) {
-            String message = Fmt.S("Unable to invoke action named \"%s\"", actionName);
+            String message = "Unable to invoke action.";
             logString(fieldValueException.getMessage());
             if (AWConcreteApplication.IsDebuggingEnabled) {
                 Log.logStack(Log.aribaweb_request, message);
             }
+            Log.directAction.warning(11213, this.getClass().getName()+"."+actionName, message);
             actionResults = application().handleMalformedRequest(request(), message);
         }
         return actionResults;
@@ -617,17 +627,66 @@ abstract public class AWDirectAction extends AWBaseObject
     }
 
     /**
+     * Return true to pop the current request into the top frame on the browser.
+     * 
+     * @param actionName - the action being invoked. Note this does not have the 
+     *                     suffix "Action".
+     * @return
+     */
+    protected boolean shouldValidateTopFrame (String actionName)
+    {
+        return false;
+    }
+
+    protected AWResponseGenerating validateTopFramePost (AWRequestContext requestContext)
+    {
+        AWFormRedirect redirect = null;
+        if (!Boolean.valueOf(requestContext.formValueForKey("AWTopFramePost"))) {
+
+            redirect = (AWFormRedirect)application().createPageWithName(
+                AWFormRedirect.PageName, requestContext);
+            redirect.setFormActionUrl(requestContext.requestUrl());
+            redirect.addFormValues(requestContext.formValues());
+            redirect.addFormValue("AWTopFramePost", "true");
+            // copy form values
+            redirect.setTarget(AWFormRedirect.TopTarget);
+        }
+        return redirect;
+    }
+
+    /**
         Allows AWSessionValidator to evaluate before the direct action is called.
-        Should be overridden by page components that do not require session validation.
+        Should be overridden by direct actions that do not require session validation.
 
         In this case, no actions defined in that subclass will have session validation
-        enabled and thus will need to explicitly enable session validation on a per action basis by calling
-        validateSession(requestContext) at the point that a valid session is required.
+        enabled and thus will need to explicitly enable session validation on a per action basis
+        by using the annotation AWRequestValidation(shouldValidateSession=false)
+        or by calling validateSession(requestContext) at the point that a valid session is required.
         @return true by default
     */
     protected boolean shouldValidateSession ()
     {
         return true;
+    }
+
+    /**
+        Allows AWSessionValidator to evaluate before the direct action is called.
+
+        It first checks for the annotation AWRequestValidation(shouldValidateSession)
+        for the given action.
+        If not specify, then the direct action level shouldValidateSession is used.
+        @param  actionName The action name to check.
+        @return true by default
+    */
+    protected boolean shouldValidateSession (String actionName)
+    {
+        String actionMethodName = actionMethodName(actionName);
+        AWRequestValidation requestValidation =
+            lookupRequestValidation(actionMethodName);
+        if (requestValidation != null) {
+            return requestValidation.shouldValidateSession();
+        }
+        return shouldValidateSession();
     }
 
     /**
@@ -646,17 +705,37 @@ abstract public class AWDirectAction extends AWBaseObject
 
     /**
         Allows AWNodeValidator to evaluate before the direct action is called.
-        Should be overridden by page components that require node validation.
+        Should be overridden by direct actions that require node validation.
 
         By default, no actions defined in a subclass of AWDirectAction will have node
         validation enabled and can explicitly enable node validation on a per action basis
-        by calling validateNode(requestContext) at the point that a valid node is
-        required.
+        by using the annotation AWRequestValidation(shouldValidateNode=true)
+        or by calling validateNode(requestContext) at the point that a valid node is required.
         @return false by default
     */
     protected boolean shouldValidateNode ()
     {
         return false;
+    }
+
+    /**
+        Allows AWNodeValidator to evaluate before the direct action is called.
+
+        It first checks for the annotation AWRequestValidation(shouldValidateNode)
+        for the given action.
+        If not specify, then the direct action level shouldValidateNode is used.
+        @param  actionName The action name to check.
+        @return false by default
+    */
+    protected boolean shouldValidateNode (String actionName)
+    {
+        String actionMethodName = actionMethodName(actionName);
+        AWRequestValidation requestValidation =
+            lookupRequestValidation(actionMethodName);
+        if (requestValidation != null) {
+            return requestValidation.shouldValidateNode();
+        }
+        return shouldValidateNode();
     }
 
     /**
@@ -678,14 +757,35 @@ abstract public class AWDirectAction extends AWBaseObject
     }
 
     /**
-     * Allows request validation before executing the request.  If this method returns
-     * false, verification can still occur on an action by action basis by directly
-     * calling validateRequest(RequestContext).
-     * @return true if all requests in the DirectAction class should be verified
-     */
+        Allows request validation before executing the request.  If this method returns
+        false, verification can still occur on an action by action basis by
+        using the AWRequestValidation(shouldValidateRequest=true) annotation.
+        directly calling validateRequest(RequestContext).
+        @return true if all requests in the DirectAction class should be verified
+    */
     protected boolean shouldValidateRequest ()
     {
         return false;
+    }
+
+    /**
+        Allows request validation before executing the request.
+
+        It first checks for the annotation AWRequestValidation(shouldValidateRequest)
+        for the given action.
+        If not specify, then the direct action level shouldValidateRequest is used.
+        @param  actionName The action name to check.
+        @return true if all requests in the direct action method should be verified
+    */
+    protected boolean shouldValidateRequest (String actionName)
+    {
+        String actionMethodName = actionMethodName(actionName);
+        AWRequestValidation requestValidation =
+            lookupRequestValidation(actionMethodName);
+        if (requestValidation != null) {
+            return requestValidation.shouldValidateRequest();
+        }
+        return shouldValidateRequest();
     }
 
     /**
@@ -697,6 +797,29 @@ abstract public class AWDirectAction extends AWBaseObject
         application().validateRequest(requestContext);
     }
 
+    private AWRequestValidation lookupRequestValidation (String actionMethodName)
+    {
+        Method actionMethod = lookupActionMethod(actionMethodName);
+        AWRequestValidation requestValidation = null;
+        if (actionMethod != null) {
+            requestValidation =
+                actionMethod.getAnnotation(AWRequestValidation.class);
+        }
+        return requestValidation;
+    }
+
+    private Method lookupActionMethod (String actionMethodName)
+    {
+        Method actionMethod = null;
+        try {
+            actionMethod =
+                this.getClass().getDeclaredMethod(actionMethodName, (Class[])null);
+        }
+        catch (NoSuchMethodException nsme) {
+        }
+        return actionMethod;
+    }
+        
     /////////////////
     // Debugging
     /////////////////

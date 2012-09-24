@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MRUTabList.java#6 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/MRUTabList.java#8 $
 */
 package ariba.ui.widgets;
 
@@ -38,6 +38,7 @@ public class MRUTabList extends AWComponent
     static class Tab {
         Object item;
         String label;
+        String semanticKey;
         int rank;
         boolean isVisible;
     }
@@ -87,6 +88,7 @@ public class MRUTabList extends AWComponent
             Tab tab = new Tab();
             tab.item = item;
             tab.label = stringValueForBinding(labelBinding);
+            tab.semanticKey = stringValueForBinding(bindingForName(AWBindingNames.awname));
             if (item == selectedItem) {
                 _selectedTab = tab;
                 tab.rank = -100000;
@@ -134,6 +136,11 @@ public class MRUTabList extends AWComponent
         Number rankVal = (Number)valueForBinding(rankBinding);
         if (rankVal == null) rankVal = getMRU(session(), componentReference()).rankForKey(key);
         return (rankVal != null) ? rankVal.intValue() : defaultRank;
+    }
+
+    public String currentTabSemanticKey ()
+    {
+        return _currentTab.semanticKey;
     }
 
     public String currentTabLabel ()

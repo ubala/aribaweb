@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/i18n/I18NUtil.java#16 $
+    $Id: //ariba/platform/util/core/ariba/util/i18n/I18NUtil.java#17 $
 */
 
 package ariba.util.i18n;
@@ -126,6 +126,19 @@ public class I18NUtil
     */
     public static final String EncodingCp1251 = "Cp1251";
 
+    /**
+            Cp1250 encoding
+
+            @aribaapi private
+    */
+    public static final String EncodingCp1250 = "Cp1250";
+
+    /**
+            Cp1254 encoding
+
+            @aribaapi private
+    */
+    public static final String EncodingCp1254 = "Cp1254";
     /*-----------------------------------------------------------------------
         Public Methods
       -----------------------------------------------------------------------*/
@@ -488,6 +501,8 @@ public class I18NUtil
             encoding.equals(I18NUtil.EncodingKorean) ||
             encoding.equals(I18NUtil.EncodingUTF8) ||
             encoding.equals(I18NUtil.EncodingUTF_8) ||
+            encoding.equals(I18NUtil.EncodingCp1250) ||
+            encoding.equals(I18NUtil.EncodingCp1254) ||
             encoding.equals(I18NUtil.EncodingCp1252) ||
             encoding.equals(I18NUtil.EncodingCp1251))
         {

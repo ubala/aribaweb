@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2010 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ResourceService.java#59 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ResourceService.java#60 $
 */
 
 package ariba.util.core;
@@ -1895,9 +1895,16 @@ public class ResourceService
         processor.mergeStringTables(allStrings, systemStrings);
 
         // From classpath
-        URL url = Thread.currentThread().getContextClassLoader().getResource(
-                 Fmt.S("%s/%s/%s/%s.csv", ResourceRoot, searchLocale, StringsDirectory, path)
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        URL url = null;
+        // 1-BU48HL Some system threads (for example, a finalizer thread) do not have a
+        // class loader, so if null, skip and just use config's strings.
+        if (classLoader != null) {
+            url = classLoader.getResource(
+                Fmt.S("%s/%s/%s/%s.csv", ResourceRoot, searchLocale, 
+                      StringsDirectory, path)
             );
+        }
         if (url != null) {
             StringCSVConsumer consumer =
                 processor.createStringCSVConsumer(url, displayWarning);

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/io/Deserializer.java#6 $
+    $Id: //ariba/platform/util/core/ariba/util/io/Deserializer.java#7 $
 */
 
 package ariba.util.io;
@@ -563,9 +563,15 @@ public class Deserializer extends FilterReader
     private void syntaxError () throws DeserializationException
     {
         int line = tokenGenerator.lineForLastToken();
-        throw new DeserializationException(
-            Fmt.S("Syntax error at line %s", line),
-            line);
+        String lineStr = "[not available]";
+        try {
+            lineStr = String.valueOf(tokenGenerator.charsForLastToken());
+        }
+        catch (Throwable th) {
+            // suppress it in case there is bad data and token string cannot be obtained
+        }
+        throw new DeserializationException(Fmt.S("Syntax error at line %s. Current token: \"%s\"", line,
+            lineStr), line);
     }
 
     private void internalInconsistency (String type) throws

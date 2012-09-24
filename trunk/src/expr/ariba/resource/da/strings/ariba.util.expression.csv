@@ -1,0 +1,3 @@
+Cp1252,,
+,,
+MalformedExpression,"Parsingfejl opstod nær token ""{0}"" på linje ""{1}"" og kolonne ""{2}"".", "An syntactic error has occured while parsing the expression"

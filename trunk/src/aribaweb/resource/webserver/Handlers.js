@@ -10,6 +10,7 @@ ariba.Handlers = function() {
     var Input = ariba.Input;
     var Request = ariba.Request;
     var Dom = ariba.Dom;
+    var Util = ariba.Util;
 
     // private vars
     var AWFormActionKey = 'awfa';
@@ -20,6 +21,9 @@ ariba.Handlers = function() {
     // caps lock checks
     var AWCapsLockErrorDiv;
     var AWDisableMouseClick = false;
+
+    var _viewportContainerScrollInited = false;
+    var _viewportContainerIds = [];
 
     // private functions
     function updateTextPlaceHolder (textField)
@@ -452,6 +456,64 @@ ariba.Handlers = function() {
         _awHandlers_MARKER : function () {
         },
 
+        ////////////////
+        // Hover Behavior
+        ////////////////
+
+        hoverControlOver : function (hoverControl) {
+            var hoverContainer = Dom.findParentUsingPredicate(hoverControl,
+                function (e) {
+                    return e.getAttribute("bh") == "AWHC";
+                });
+            if (hoverContainer) {
+                Dom.setState(hoverContainer, "hover");
+            }
+        },
+
+        hoverContainerOver : function (hoverContainer) {            
+            Event.clearTimeout(hoverContainer);
+        },
+
+        hoverContainerOut : function (hoverContainer) {
+            var hoverOut = function() {
+                Dom.unsetState(hoverContainer, "hover");
+            };
+            Event.setTimeout(hoverContainer, hoverOut, 500);
+            return true;            
+        },
+
+        ////////////////
+        // Viewport Behavior
+        ////////////////
+        initViewportContainer : function (containerId)
+        {
+            if (!_viewportContainerScrollInited) {
+                _viewportContainerScrollInited = true;
+                var checkViewport = this.checkViewportContainers.bind(this);
+                var enqueueCheckViewport = function () {
+                    Event.eventEnqueue(checkViewport);
+                };
+                Event.registerRefreshCallback(enqueueCheckViewport);
+                Event.registerWindowOnScroll(this.checkViewportContainers.bind(this));
+            }
+            Util.arrayAddIfNotExists(_viewportContainerIds, containerId);
+        },
+
+        checkViewportContainers : function ()
+        {
+            var i, containerId, elm, viewportState;
+            var inDomViewportContainerIds = [];
+            for (i = 0; i < _viewportContainerIds.length; i++) {
+                containerId = _viewportContainerIds[i];
+                elm = Dom.getElementById(containerId);
+                if (elm) {
+                    Util.arrayAddIfNotExists(inDomViewportContainerIds, containerId);
+                    Dom.setViewportState(elm);
+                }
+            }
+            _viewportContainerIds = inDomViewportContainerIds;
+        },
+
         EOF:0};
 
     //********************************************************************
@@ -538,10 +600,39 @@ ariba.Handlers = function() {
             },
 
             mouseout : function (elm, evt) {
-                elm.className = elm.getAttribute('origClass');;
+                elm.className = elm.getAttribute('origClass');
                 return true;
             }
+        },
+
+        // Generic Hover
+        GH : {
+            mouseover : function (elm, evt) {
+                Dom.setState(elm, "hover");
+            },
+            mouseout : function (elm, evt) {
+                Dom.unsetState(elm, "hover");
+            }
+        },        
+
+        // Hover Container
+        AWHC : {
+            mouseover : function (hoverContainer, evt) {
+                ariba.Handlers.hoverContainerOver(hoverContainer);
+
+            },
+            mouseout : function (hoverContainer, evt) {
+                ariba.Handlers.hoverContainerOut(hoverContainer);
+            }
+        },
+
+        // Hover Control
+        AWHCT : {
+            mouseover : function (hoverControl, evt) {
+                ariba.Handlers.hoverControlOver(hoverControl);
+            }
         }
+
     });
 
 

@@ -12,12 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#21 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#23 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.ui.aribaweb.util.AWUtil;
+import ariba.util.core.FastStringBuffer;
 import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
 import ariba.util.core.PerformanceState;
@@ -163,6 +165,26 @@ public class AWFormRedirect extends AWComponent
         }
     }
 
+    public void removeFormName (String name)
+    {
+        List names = getFormNames();
+        int idx = names.indexOf(name);
+        if (idx >= 0) {
+            names.remove(idx);
+            getFormValues().remove(idx);
+        }
+    }
+    
+    public String getFormValue (String name)
+    {
+        List names = getFormNames();
+        int idx = names.indexOf(name);
+        if (idx >= 0) {
+            return (String)getFormValues().get(idx);
+        }
+        return null;
+    }
+    
     public void setFormActionUrl (String url)
     {
         _formActionUrl = url;
@@ -209,5 +231,25 @@ public class AWFormRedirect extends AWComponent
     public boolean isDebuggingMode()
     {
         return AWConcreteServerApplication.IsDebuggingEnabled;
+    }
+
+    public String convertToQueryString ()
+    {
+        if (ListUtil.nullOrEmptyList(_names)) {
+            return "";
+        }
+        FastStringBuffer buf = new FastStringBuffer();
+
+        for (int i=0; i<_names.size(); i++) {
+            Object name = _names.get(i);
+            Object value = _values.get(i);
+            if (i != 0) {
+                buf.append("&");
+            }
+            buf.append(AWUtil.encodeString(AWUtil.toString(name)));
+            buf.append("=");
+            buf.append(AWUtil.encodeString(AWUtil.toString(value)));
+        }
+        return buf.toString();
     }
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBaseImage.java#25 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBaseImage.java#28 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -84,41 +84,46 @@ abstract public class AWBaseImage extends AWComponent
         AWConcreteApplication application =
             (AWConcreteApplication)AWConcreteApplication.sharedInstance();
 
-        if (application.allowBrandingImages()) {
-            AWBrand brand =
-                requestContext.application().getBrand(requestContext);
-            if (brand != null) {
-                imageUrl = AWDirectAction.brandUrlForResourceNamed(requestContext,
+        AWBrand brand = null;
+        if (application.allowBrandingImages() &&
+            (brand = requestContext.application().getBrand(requestContext)) != null) {
+
+            imageUrl = AWDirectAction.brandUrlForResourceNamed(requestContext,
                                                                    filename,
                                                                    brand);
-            }
-            else {
-                // The way we're constructing the URL is a bit messy.
-                // If we need a full URL, use checkoutFullUrl in order to contruct the
-                // full URL and pass requestContext as is required to create full URL.
-                // But, do not set set AWRequestContext on the AWDirectActionUrl as doing
-                // this will cause an response id to be added to the URL.  This can lead
-                // to our image URL's causing FPR's.
-                // Also, explicitly onstructing the URL prevents URL decorators
-                // from being used.
-                AWDirectActionUrl url = useFullUrl ?
-                            AWDirectActionUrl.checkoutFullUrl(requestContext) :
-                            AWDirectActionUrl.checkoutUrl();
-                url.setDirectActionName(AWDirectAction.AWImgActionName);
-                url.put("name", filename);
-                imageUrl = url.finishUrl();
-                if (useFullUrl) {
-                    AWNodeManager nodeManager = application.getNodeManager();
-                    if (nodeManager != null) {
-                        imageUrl = nodeManager.prepareUrlForNodeValidation(imageUrl);
-                    }
+            if (useFullUrl) {
+                AWNodeManager nodeManager = application.getNodeManager();
+                if (nodeManager != null) {
+                    imageUrl = nodeManager.prepareUrlForNodeValidation(imageUrl);
                 }
             }
-            Log.aribawebResource_brand.debug("AWBaseImage: imageUrl() directConnect %s", imageUrl);
+
+            Log.aribawebResource_brand.debug("AWBaseImage: imageUrl() directConnect %s", 
+                imageUrl);
+        }
+        else if (AWConcreteApplication.IsRapidTurnaroundEnabled) {
+            // The way we're constructing the URL is a bit messy.
+            // If we need a full URL, use checkoutFullUrl in order to contruct the
+            // full URL and pass requestContext as is required to create full URL.
+            // But, do not set set AWRequestContext on the AWDirectActionUrl as doing
+            // this will cause an response id to be added to the URL.  This can lead
+            // to our image URL's causing FPR's.
+            // Also, explicitly onstructing the URL prevents URL decorators
+            // from being used.
+            AWDirectActionUrl url = useFullUrl ?
+                        AWDirectActionUrl.checkoutFullUrl(requestContext) :
+                        AWDirectActionUrl.checkoutUrl();
+            url.setDirectActionName(AWDirectAction.AWImgActionName);
+            url.put("name", filename);
+            imageUrl = url.finishUrl();
         }
         else if (component != null) {
-            imageUrl = component.urlForResourceNamed(filename, useFullUrl, true);
-            Log.aribawebResource_brand.debug("AWBaseImage: imageUrl() component.urlForResourceNamed %s", imageUrl);
+            //Set versioned to true if this is a UI request. If this is used for 
+            //generating email content, the request will be null.
+            imageUrl = component.urlForResourceNamed(filename, useFullUrl, 
+                    requestContext.request() != null);
+            Log.aribawebResource_brand.debug(
+                "AWBaseImage: imageUrl() component.urlForResourceNamed %s", imageUrl);
         }
         return imageUrl;
     }
@@ -186,7 +191,7 @@ abstract public class AWBaseImage extends AWComponent
                 }
                 else {
                     // Todo: remove MetaTemplateMode
-                    boolean useFullUrl = requestContext().isMetaTemplateMode();                      
+                    boolean useFullUrl = useFullUrl() || requestContext().isMetaTemplateMode();                      
                     String url = urlForResourceNamed(filename, useFullUrl, true);
                     imageUrl = AWEncodedString.sharedEncodedString(url);
                     Log.aribawebResource_brand.debug("AWBaseImage: imageInfo.url %s", imageUrl);

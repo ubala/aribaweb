@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.java#33 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.java#34 $
 */
 
 package ariba.ui.widgets;
@@ -64,7 +64,8 @@ public final class BasicPageWrapper extends PageWrapper
 
     public boolean omitWrapperBoilerplate ()
     {
-        return booleanValueForBinding(BindingNames.omitWrapperFrame);
+        return session().omitWrapperFrame() ||
+                booleanValueForBinding(BindingNames.omitWrapperFrame);
     }
 
     public String bodyClass ()

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Calendar.awl#34 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Calendar.awl#35 $
     </Copyright>
 
     <Overview>
@@ -58,6 +58,10 @@
         The "*" is used to indicate all days of the week, so "-*" means disable all days
         of the week. This can be used in combination with days of the week, "-*, 2,3" would 
         enable Mondays and Tuesdays.
+    </Binding>
+
+    <Binding key="isStandalone" direction="get" type="String" required="$false" default="$true">
+        Flag to indicate if the calendar is standalone or wrapped by a DateField.
     </Binding>
 
 </a:Api>\
@@ -205,11 +209,12 @@
         </tr>
     </tbody>
 </a:IncludeBlock>\
-
 <a:RefreshRegion>
-    <a:ClientSideScript isSingleton="$false">
-        new ariba.Calendar.Control('$elementId', new Date($selectedYear, $selectedMonth, $selectedDayOfMonth), '$^enabledCalendarDays');
-    </a:ClientSideScript>
+    <a:If ifTrue="$^isStandalone:$true">
+        <a:ClientSideScript isSingleton="$false">
+            new ariba.Calendar.Control('$elementId', new Date($selectedYear, $selectedMonth, $selectedDayOfMonth), '$^enabledCalendarDays');
+        </a:ClientSideScript>
+    </a:If>
 </a:RefreshRegion>
 
 <a:Block name="TableWrapper">

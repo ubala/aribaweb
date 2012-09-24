@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/BindingNames.java#23 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/BindingNames.java#24 $
 */
 
 package ariba.ui.aribaweb.html;

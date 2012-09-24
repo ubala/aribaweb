@@ -1,6 +1,6 @@
 <a:Api>
     <Copyright>
-        Copyright 1996-2008 Ariba, Inc.
+        Copyright 1996-2010 Ariba, Inc.
 
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#37 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DateField.awl#39 $
     </Copyright>
 
     <Overview>
@@ -63,6 +63,11 @@
         See ariba.ui.aribaweb.html.AWTextField
     </Binding>
 
+    <Binding key="formValueStrings" direction="set" type="Object[]" required="$false">
+        The trimmed and untrimmed value pair. When the user uses the calendar control we 
+        set this to null. 
+    </Binding>
+
 </a:Api>\
 <!---
      The nobr is needed for both layout and reference node in dateFieldOnClick and dateFieldMouseDown
@@ -83,6 +88,7 @@
                            disabled="$^disabled"
                            class="$^class"
                            errorKey="$^errorKey"
+                           formValueStrings="$formValueStrings"
                            id="$dateTextFieldId"/>\
     </a:RefreshRegion>\
     <!--- The invokeAction below is need when using a shared calendar to fire the calendarAction -->
@@ -107,8 +113,8 @@
 <a:Singleton>\
 <w:PopupMenu menuId="calendar_menu">
     <a:RefreshRegion>
-        <w:Calendar selection="$date" action="$calendarAction" showYearNavigation="$^showYearNavigation"
-                  dateFactory="$dateFactory" bodyBehavior="DFB" enabledCalendarDays="$^enabledCalendarDays"/>
+        <w:Calendar selection="$date" action="$calendarAction" showYearNavigation="$^showYearNavigation" 
+                  dateFactory="$dateFactory" bodyBehavior="DFB" enabledCalendarDays="$^enabledCalendarDays" isStandalone="$false"/>
         <a:If ifTrue="$showCalendar">
             <a:ClientSideScript>
                 ariba.Calendar.showCalendar('$linkId');

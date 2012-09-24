@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#40 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#42 $
     </Copyright>
 
     <Overview>
@@ -104,16 +104,16 @@
         For internal use: Allow for override of text field behavior.
     </Binding>
 
+    <Binding key="formValueStrings" direction="set" type="Object[]" required="$false">
+        The trimmed and untrimmed value pair.
+    </Binding>
+
     <Binding key="class" direction="get" type="String" required="$false">
         CSS class
     </Binding>
 
     <Binding key="size" direction="get" type="int" required="$false">
         INPUT size (if not specified tfW class applied, resulting in 156px wide field)
-    </Binding>
-
-    <Binding key="formValueStrings" direction="set" type="Object[]" required="$false">
-        The trimmed and untrimmed value pair.
     </Binding>
 
     <IncludeExample component="TextFieldExample"/>

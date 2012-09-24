@@ -1,0 +1,9 @@
+Cp1252,,,,
+"AWBody",a001,"Please wait. An action is pending...","Vennligst vent. En handling pågår...",""
+"AWErrorFlag",a001,"Error","Feil",""
+"AWFileUploadInternals",a001,"Error: Your request cannot be processed. Please check that file paths for all file uploads are valid.","Feil: Forespørselen kan ikke bli behandlet. Kontroller at filbanene for alle opplastede filer er gyldige.",""
+"AWPasswordField",a001,"Warning","Advarsel",""
+"AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","Advarsel: Caps Lock er på. Dette kan føre til at du legger inn passordet feil.",""
+"AWSubmitButton",a001,"Submit","Send",""
+"AWTextArea",a001,"Characters left","Gjenværende tegn",""
+"AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","En feil oppstod under behandling av forespørselen. Oppdater siden og prøv igjen.",""

@@ -30,19 +30,20 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
-import ariba.util.fieldtype.TypeInfo;
-import ariba.util.fieldtype.TypeRetriever;
-import ariba.util.fieldtype.JavaTypeRegistry;
-import ariba.util.fieldtype.JavaTypeProvider;
-import ariba.util.fieldtype.MethodInfo;
-import ariba.util.fieldtype.NullTypeInfo;
-import ariba.util.core.ListUtil;
 import ariba.util.core.ArrayUtil;
 import ariba.util.core.Assert;
-import ariba.util.fieldtype.JavaTypeProvider.JavaTypeInfo;
+import ariba.util.core.ListUtil;
 import ariba.util.fieldtype.JavaTypeProvider.JavaMethodInfo;
-import java.util.List;
+import ariba.util.fieldtype.JavaTypeProvider.JavaTypeInfo;
+import ariba.util.fieldtype.JavaTypeProvider;
+import ariba.util.fieldtype.JavaTypeRegistry;
+import ariba.util.fieldtype.MethodInfo;
+import ariba.util.fieldtype.NullTypeInfo;
+import ariba.util.fieldtype.TypeInfo;
+import ariba.util.fieldtype.TypeRetriever;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Implementation of PropertyAccessor that uses reflection on the target object's class to
@@ -83,7 +84,7 @@ public class ObjectMethodAccessor implements MethodAccessor
         Method ret = null;
         if (targetClass != null) {
             TypeRetriever retriever = JavaTypeRegistry.instance();
-            List <TypeInfo> argTypes = getArgumentTypes(args);
+            List<String> argTypes = getArgumentTypes(args);
             TypeInfo targetType = retriever.getTypeInfo(targetClass.getName());
 
             // In the case of nested class loaders we could have a class for which
@@ -96,8 +97,8 @@ public class ObjectMethodAccessor implements MethodAccessor
 
             if (targetType instanceof JavaTypeInfo) {
                 JavaTypeInfo javaType =(JavaTypeInfo)targetType;
-                MethodInfo methodInfo = javaType.getMethod(retriever, methodName,
-                                                            argTypes, isStatic);
+                MethodInfo methodInfo = javaType.getMethodForName(
+                    retriever, methodName, argTypes, isStatic);
 
                 if (methodInfo instanceof JavaMethodInfo) {
                    ret = ((JavaMethodInfo)methodInfo).getMethod();
@@ -107,25 +108,25 @@ public class ObjectMethodAccessor implements MethodAccessor
         return ret;
     }
 
-    private List <TypeInfo> getArgumentTypes (Object[] args)
+    private static List<String> getArgumentTypes (Object[] args)
     {
-        TypeRetriever retriever = JavaTypeRegistry.instance();
-        List result = ListUtil.list();
-        if (!ArrayUtil.nullOrEmptyArray(args)) {
-            for (int i=0; i < args.length; i++) {
-                Object arg = args[i];
-                TypeInfo type = NullTypeInfo.instance;
-
-                if (arg != null) {
-                    Class argCls = arg.getClass();
-                    type = retriever.getTypeInfo(argCls.getName());
-                    Assert.that(type != null,
-                            "Failed to retrieve type for name '%s'.", argCls.getName());
-                }
-
-                result.add(type);
-            }
+        if (ArrayUtil.nullOrEmptyArray(args)) {
+            return Collections.EMPTY_LIST;
         }
+
+        TypeRetriever retriever = JavaTypeRegistry.instance();
+        List<String> result = ListUtil.list(args.length);
+        for (Object arg : args) {
+            TypeInfo type = NullTypeInfo.instance;
+            if (arg != null) {
+                Class argCls = arg.getClass();
+                type = retriever.getTypeInfo(argCls.getName());
+                Assert.that(type != null,
+                        "Failed to retrieve type for name '%s'.", argCls.getName());
+            }
+            result.add(type.getName());
+        }
+
         return result;
     }
 }

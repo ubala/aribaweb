@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#9 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -129,6 +129,11 @@ public final class AWFileUploadInternals extends AWComponent
 
         if (fileData != null && (fileData.bytesRead() > 0 || booleanValueForBinding("newMode"))) {
             String filename = fileData.filename();
+            if (filename != null) {
+                //some version of IE on windowsXP give the full path to the file
+                //trim this to get the filename
+                filename = AWUtil.lastComponent(filename, '\\');
+            }
             setValueForBinding(filename, BindingNames.filename);
             setValueForBinding(fileData.mimeType(), BindingNames.mimeType);
             setValueForBinding(fileData.fileIncomplete(), BindingNames.fileSizeExceeded);

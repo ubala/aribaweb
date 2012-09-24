@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,22 +12,22 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Util.java#11 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Util.java#12 $
 */
 
 package ariba.ui.widgets;
 
-import java.util.List;
-import ariba.util.core.StringUtil;
-import ariba.util.core.Fmt;
 import ariba.ui.aribaweb.core.AWRequest;
 import ariba.ui.aribaweb.core.AWRequestContext;
-import ariba.ui.aribaweb.core.AWSession;
 import ariba.ui.aribaweb.core.AWResponse;
-import ariba.ui.aribaweb.util.AWUtil;
+import ariba.ui.aribaweb.core.AWSession;
 import ariba.ui.aribaweb.util.AWCharacterEncoding;
-
+import ariba.ui.aribaweb.util.AWUtil;
+import ariba.util.core.Fmt;
+import ariba.util.core.StringUtil;
 import java.lang.reflect.Array;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public final class Util extends Object
 {
@@ -134,7 +134,9 @@ public final class Util extends Object
         Sets the Content-Disposition header in a browser dependent way.
         Encodes filename in UTF-8.
     */
-    public static void setHeadersForDownload (AWRequestContext requestContext, AWResponse response, String fileName)
+    public static void setHeadersForDownload (AWRequestContext requestContext,
+                                              AWResponse response,
+                                              String fileName)
     {
         if (!StringUtil.nullOrEmptyOrBlankString(fileName)) {
             fileName = AWUtil.encodeString(fileName, false, AWCharacterEncoding.UTF8.name);
@@ -156,4 +158,26 @@ public final class Util extends Object
         }
     }
 
+    private static final Pattern _leadingZerosPattern = Pattern.compile("^0[0-9.]+|[0-9.]+0$");
+
+    /**
+        This is to handle the case when exporting a string that is a number
+        prefixed with some 0s like 00012345 or 123.4500 which when opened in Excel would be
+        treated as 12345 or 123.45 (numbers) which stops other systems from using them
+        as a lookup key without the leading/ending 0s.
+        <p/>
+        This method will return a string in this format ="00012345" or ="123.4500" so that
+        Excel will treat it as a string and not to chop off the leading/ending 0s,
+        when necessary.
+    */
+    public static Object stringValueForExcel (Object objectValue)
+    {
+        if (objectValue instanceof String) {
+            String string = (String)objectValue;
+            if (_leadingZerosPattern.matcher(string).matches()) {
+                objectValue = Fmt.S("=\"%s\"", objectValue);
+            }
+        }
+        return objectValue;
+    }
 }

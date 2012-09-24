@@ -358,8 +358,8 @@
 
         <!-- plus lucene -->
         <fileset dir="${lib-demo.dir}">
-            <include name="lucene-core.jar"/>
-            <include name="lucene-highlighter.jar"/>
+            <include name="lucene-core-3.6.0.jar"/>
+            <include name="lucene-highlighter-3.6.0.jar"/>
         </fileset>
     </path>
 

@@ -12,14 +12,31 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HoverCard.java#1 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HoverCard.java#2 $
 */
 
 package ariba.ui.widgets;
 
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.util.core.Fmt;
+import ariba.util.core.StringUtil;
 
 public class HoverCard extends AWComponent
-{    
+{
+    private static final String ClassContentDefault = "hcard";
+
+    public boolean disableLazyDiv ()
+    {
+        return !booleanValueForBinding("disableLazyDiv");
+    }
+
+    public String hcClass ()
+    {
+        String cardClass = stringValueForBinding(BindingNames.classBinding);
+        if (StringUtil.nullOrEmptyOrBlankString(cardClass)) {
+            return ClassContentDefault;
+        }
+        return StringUtil.strcat(ClassContentDefault, " ", cardClass, "Card");
+    }
 }
 

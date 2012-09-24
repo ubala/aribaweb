@@ -1,7 +1,7 @@
 /*
     Copyright 1996-2010 Ariba, Inc.
     All rights reserved. Patents pending.
-    
+
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 
 
-    $Id: //ariba/platform/util/core/ariba/util/io/CSVReader.java#26 $
+    $Id: //ariba/platform/util/core/ariba/util/io/CSVReader.java#27 $
 */
 
 package ariba.util.io;
@@ -55,6 +55,8 @@ public final class CSVReader
     public static final int ErrorMissingComma = 1;
     public static final int ErrorUnbalancedQuotes = 2;
     public static final int ErrorIllegalCharacterOrByteSequence = 3;
+      //represents All Lines
+    public static final int AllLines = -1;
 
     private static final char DoubleQuote  = '"';
     private static final char Comma        = ',';
@@ -78,6 +80,8 @@ public final class CSVReader
     private String encoding;
     private boolean encodingIsExplicitlySet = false;
     private boolean returnNoValueAsNull = false;
+      //Max number of lines to consider while reading. -1 implies all.
+    private int numberOfLines = AllLines;
 
     /**
         Create a new CSVReader using a specific CSVConsumer to handle
@@ -147,6 +151,17 @@ public final class CSVReader
     public boolean isEncodingExplicitlySet ()
     {
         return encodingIsExplicitlySet;
+    }
+
+    /**
+        Sets the number of lines consider while reading.
+        @param n number of lines
+        @aribaapi private
+    */
+    public void setNumberOfLines (int n)
+    {
+        Assert.that(n >= AllLines, "Number of lines %s is not valid.", n);
+        numberOfLines = n;
     }
 
     /**
@@ -341,7 +356,7 @@ public final class CSVReader
         ByteBuffer bb = java.nio.ByteBuffer.wrap(buf);
         CharBuffer cb = bb.asCharBuffer();
         char marker = cb.get(0);
-        
+
         if (marker == 0xfffe || marker == 0xfeff) {
             Reader reader = IOUtil.bufferedReader(bais, "UTF-16");
             LineNumberReader line = new LineNumberReader(reader);
@@ -539,9 +554,15 @@ public final class CSVReader
                   }
 
                   case StateBeginningOfLine: {
-                      csvConsumer.consumeLineOfTokens(location,
-                                                      lineNumberToConsume,
-                                                      tokens);
+                      if (canConsume(lineNumberToConsume)) {
+                          csvConsumer.consumeLineOfTokens(location,
+                                                          lineNumberToConsume,
+                                                          tokens);
+                      }
+                      else {
+                          state = StateEOF;
+                          break;
+                      }
                       tokens = ListUtil.list();
                       state = StateBeginningOfField;
                       break;
@@ -678,7 +699,7 @@ public final class CSVReader
                 }
             }
 
-            if (!tokens.isEmpty()) {
+            if (!tokens.isEmpty() && canConsume(lineNumberToConsume)) {
                 csvConsumer.consumeLineOfTokens(location,
                                                 lineNumberToConsume,
                                                 tokens);
@@ -692,6 +713,15 @@ public final class CSVReader
         finally {
             reader.close();
         }
+    }
+
+    /**
+        @param lineNumberToConsume line number of the line being consumed
+        @return true if the line can be consumed
+    */
+    private boolean canConsume (int lineNumberToConsume)
+    {
+        return ((numberOfLines == AllLines) || (lineNumberToConsume <= numberOfLines));
     }
 
     /**
@@ -782,6 +812,22 @@ public final class CSVReader
                                       boolean emptyValueAsNull)
       throws IOException
     {
+         return readNLines(file, encoding, ignoreComments,
+                           commentMarker, emptyValueAsNull, AllLines);
+    }
+
+     /**
+         @see #readAllLines(File, String, boolean, String, boolean)
+         @param nLines number of lines to read
+     */
+     public static List readNLines  (File    file,
+                                       String  encoding,
+                                       boolean ignoreComments,
+                                       String  commentMarker,
+                                       boolean emptyValueAsNull,
+                                       int nLines)
+       throws IOException
+     {
         Assert.that(file != null, "File is null!");
 
         if (!file.canRead()) {
@@ -795,6 +841,7 @@ public final class CSVReader
                 ignoreComments,
                 commentMarker);
         CSVReader reader = new CSVReader(csvConsumerHelper);
+        reader.setNumberOfLines(nLines);
         reader.setReturnEmptyValueAsNull(emptyValueAsNull);
         if (encoding == null) {
             reader.readForSpecifiedEncoding(file);

@@ -9,6 +9,7 @@ import org.apache.lucene.search.*
 import org.apache.lucene.search.highlight.*
 import org.apache.lucene.store.FSDirectory
 import org.apache.lucene.index.IndexReader
+import org.apache.lucene.util.Version
 
 class SourceSearcher {
     String _name
@@ -64,7 +65,7 @@ class SourceSearcher {
         if (reader) return;
         ProgressMonitor.instance().prepare("Loading Search Indexes...", 0)
         println "Warming docId cache from  ${_indexDir}"
-        reader = IndexReader.open(_indexDir.getAbsolutePath())
+        reader = IndexReader.open(FSDirectory.open(_indexDir))
         def searchState = new SearchState (source:this)
         pathsByDocId = []; typesByDocId = []
         def typeCollector = typeCollector(fullFileTypes)
@@ -79,7 +80,7 @@ class SourceSearcher {
         }
         println "Read full paths: ${pathsByDocId.size()}"
 
-        searcher = new IndexSearcher(FSDirectory.getDirectory(_indexDir, false))
+        searcher = new IndexSearcher(FSDirectory.open(_indexDir))
         analyzer = SourceCodeAnalyzer.analyzerForField("contents", null); // StandardAnalyzer()
     }
 
@@ -102,7 +103,7 @@ class SearchState {
     SourceSearcher source
     Highlighter excerptHighlighter, fullHighlighter
     def search (String q, Closure collector) {
-        def query = new QueryParser("contents", source.analyzer).parse(q)
+        def query = new QueryParser(Version.LUCENE_36, "contents", source.analyzer).parse(q)
         source.searcher.search(query, new CollectorRelay( closure: { docId, score -> collector(new DocRef(this, docId, score)) }))
         excerptHighlighter = new Highlighter(highlightFormatter, new QueryScorer(query))
         fullHighlighter = new Highlighter(highlightFormatter, new QueryScorer(query))
@@ -163,9 +164,17 @@ class DocRef {
     public boolean equals (Object other) {(other instanceof DocRef) && (docId == other.docId) }
 }
 
-class CollectorRelay extends HitCollector {
+class CollectorRelay extends Collector {
     def closure;
     public void collect(int doc, float score) { closure(doc, score) }
+
+    public void collect(int doc) { closure(doc, 1) }
+
+    public void setScorer(Scorer scorer)  { }
+
+    public boolean acceptsDocsOutOfOrder() { return true;}
+
+    public void setNextReader(IndexReader r, int i) { }
 }
 
 class Node {

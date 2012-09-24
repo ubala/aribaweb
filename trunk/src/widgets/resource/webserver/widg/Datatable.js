@@ -1096,23 +1096,7 @@ ariba.Datatable = function() {
 
         checkWindowScrollbar : function (checkWindow, shouldScroll)
         {
-            if (checkWindow) {
-                var obj = document.documentElement;
-                shouldScroll = (obj.scrollHeight > obj.clientHeight);
-            }
-
-            if (shouldScroll && document.documentElement.style.overflowY != "scroll") {
-                document.documentElement.style.overflowY = "scroll";
-                //debug("<font style='color:blue'>vertical scroll enabled</font>");
-                return true;
-            }
-
-            if (!shouldScroll && document.documentElement.style.overflowY != "hidden") {
-                document.documentElement.style.paddingRight = "0px";
-                document.documentElement.style.overflowY = "hidden";
-                return true;
-            }
-            return false;
+            return Dom.checkWindowScrollbar(checkWindow, shouldScroll);
         },
 
 

@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#48 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceState.java#52 $
 */
 
 package ariba.util.core;
@@ -436,10 +436,13 @@ public class PerformanceState
         protected String referer;
         protected String acceptLanguage;
         protected String userAgent;
+        protected String screenSize;
 
         protected String testShortId;
         protected String testId;
         protected String testLine;
+        
+        protected String shutdownMode;
 
         public PerformanceCheck getPerformanceCheck ()
         {
@@ -790,6 +793,26 @@ public class PerformanceState
             this.testLine = testLine;
         }
 
+        public String getShutdownMode ()
+        {
+            return shutdownMode;
+        }
+
+        public void setShutdownMode (String shutdownMode)
+        {
+            this.shutdownMode = shutdownMode;
+        }
+
+        public String getScreenSize ()
+        {
+            return screenSize;
+        }
+
+        public void setScreenSize (String size)
+        {
+            this.screenSize = size;
+        }
+
         public String toString ()
         {
             Map m = MapUtil.map(this);
@@ -838,6 +861,12 @@ public class PerformanceState
             if (testLine != null) {
                 m.put("testLine", testLine);
             }
+            if (shutdownMode != null) {
+                m.put("shutdownMode", shutdownMode);
+            }
+            if (screenSize != null) {
+                m.put("screenSize", screenSize);
+            }
             return m.toString();
         }
     }
@@ -873,7 +902,7 @@ public class PerformanceState
             + "Type, Status, "
             + "AppMetricName, AppMetric, AppDimension1, AppDimension2, "
             + "AppInfo, Referer, AcceptLanguages, UserAgent, TestShortId, "
-            + "TestId, TestLine, ";
+            + "TestId, TestLine, ShutdownMode, ScreenSize,";
     protected static final String PlanFileHeader = "Date, Realm, RealmType, Community, NodeName, "
             + "SessionID, User, SourcePage, SourceArea, DestPage, DestArea, "
             + "Type, Status, "
@@ -1016,6 +1045,14 @@ public class PerformanceState
         csvOutput(buf, stats.getTestLine(), false);
         buf.append(sep);
 
+        // add shutdown mode
+        csvOutput(buf, stats.getShutdownMode(), false);
+        buf.append(sep);
+
+        // add Screen size
+        csvOutput(buf, stats.getScreenSize(), false);
+        buf.append(sep);
+        
         PerformanceStateCore[] logMetrics = logMetrics();
         int len = logMetrics.length;
         for (int i = 0; i < len; i++) {

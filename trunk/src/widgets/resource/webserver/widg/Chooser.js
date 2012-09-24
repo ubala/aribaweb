@@ -21,7 +21,7 @@ ariba.Chooser = function() {
 
     var Chooser = {
 
-        initChooser : function (chooserId, multiSelect, focus, isInvalid, itemCountChanged)
+        initChooser : function (chooserId, multiSelect, focus, isInvalid, itemCountChanged, basic)
         {
             var chooserInfo = new Object();
             AWChooserInfo[chooserId] = chooserInfo;
@@ -32,6 +32,7 @@ ariba.Chooser = function() {
             chooserInfo.multiSelect = multiSelect;
             chooserInfo.textTimeoutId = null;
             chooserInfo.keyDownTimeoutId = null;
+            chooserInfo.basic = basic;
 
             chooserInfo.initialized = false;
 
@@ -62,17 +63,20 @@ ariba.Chooser = function() {
                 return e.tagName == "DIV" && Dom.hasClass(e, "awmenu");
             });
             chooserInfo.menuLinks = Menu.menuItems(chooserInfo.menu);
-            var searchLinkText = Dom.findChildUsingPredicate(chooserInfo.menu, function (e) {
-                return e.tagName == "DIV" && Dom.hasClass(e, "chSearchLink");
-            });
-            chooserInfo.searchLink = searchLinkText.parentNode;
+            if (!chooserInfo.basic) {
+                var searchLinkText = Dom.findChildUsingPredicate(chooserInfo.menu, function (e) {
+                    return e.tagName == "DIV" && Dom.hasClass(e, "chSearchLink");
+                });
+                chooserInfo.searchLink = searchLinkText.parentNode;
+                chooserInfo.validSelection = this.hasSelection(chooserInfo) && !chooserInfo.isInvalid;
+            }
             chooserInfo.selectionContainer = Dom.findChildUsingPredicate(wrapper, function (e) {
                 return e.tagName == "SPAN" && Dom.hasClass(e, "chSelections");
             });
             chooserInfo.matchesContainer = Dom.findChildUsingPredicate(wrapper, function (e) {
                 return e.tagName == "SPAN" && Dom.hasClass(e, "chMatches");
             });
-            chooserInfo.validSelection = this.hasSelection(chooserInfo) && !chooserInfo.isInvalid;
+
             chooserInfo.fullMatchCheckbox = Dom.findChildUsingPredicate(wrapper, function (e) {
                 return e.tagName == "INPUT" && Dom.hasClass(e, "chfullMatch");
             });
@@ -261,9 +265,11 @@ ariba.Chooser = function() {
         {
             chooserInfo.mode = AWChooserPickListMode;
             chooserInfo.matchesContainer.innerHTML = '';
-            chooserInfo.modeLink.src = chooserInfo.pickListImage.src;
-            chooserInfo.modeLink.title = chooserInfo.pickListImage.title;
-            chooserInfo.selectionContainer.style.display = '';
+            if (!chooserInfo.basic) {
+                chooserInfo.modeLink.src = chooserInfo.pickListImage.src;
+                chooserInfo.modeLink.title = chooserInfo.pickListImage.title;
+                chooserInfo.selectionContainer.style.display = '';
+            }
             chooserInfo.searchPattern = '';
             this.chooserPickListLinks(chooserInfo, "0");
         },
@@ -271,8 +277,10 @@ ariba.Chooser = function() {
         chooserAutoCompleteMode : function (chooserInfo)
         {
             chooserInfo.mode = AWChooserAutoCompleteMode;
-            chooserInfo.modeLink.src = chooserInfo.searchImage.src;
-            chooserInfo.modeLink.title = chooserInfo.searchImage.title;
+            if (!chooserInfo.basic) {
+                chooserInfo.modeLink.src = chooserInfo.searchImage.src;
+                chooserInfo.modeLink.title = chooserInfo.searchImage.title;
+            }
             chooserInfo.selectionContainer.style.display = 'none';
             this.chooserPickListLinks(chooserInfo, "1");
             chooserInfo.validSelection = false;
@@ -372,7 +380,7 @@ ariba.Chooser = function() {
         displayChooserMenu : function (chooserInfo)
         {            
             if (!Menu.AWActiveMenu || Menu.AWActiveMenu != chooserInfo.menu) {
-                Menu.menuLinkOnClick(chooserInfo.menuPositionObj, chooserInfo.menu.id, chooserInfo.textField.id, null, true);
+                Menu.menuLinkOnClick(chooserInfo.menuPositionObj, chooserInfo.menu.id, chooserInfo.textField.id, null, !chooserInfo.basic);
             }
         },
 
@@ -523,9 +531,13 @@ ariba.Chooser = function() {
                 if (Menu.AWActiveMenu && Menu.AWLinkId == chooserInfo.textField.id) {
                     // forward key down to menu item
                     var activeMenuItem = Menu.getActiveItem();
-                    if (keyCode == Input.KeyCodeEnter && activeMenuItem && 
-                            Menu.AWActiveItemId != chooserInfo.searchLink.id) {
-                        this.chooserMenuTrigger(activeMenuItem,event);
+                    var searchLinkId  = null;
+                    if (!chooserInfo.basic) {
+                        searchLinkId = chooserInfo.searchLink.id;
+                    }
+                    if (keyCode == Input.KeyCodeEnter && activeMenuItem &&
+                            Menu.AWActiveItemId != searchLinkId) {
+                        this.chooserMenuTrigger(activeMenuItem, event);
                         var formId = Dom.lookupFormId(chooserInfo.textField);
                         var senderId = chooserInfo.textField.id;
                         Request.submitFormForElementName(formId, senderId, event, null);
@@ -547,7 +559,16 @@ ariba.Chooser = function() {
             if (keyCode == Input.KeyCodeEnter) {
                 if (sourceElm == chooserInfo.textField &&
                     elm == chooserInfo.textField) {
-                    return this.chooserSearch(chooserInfo, event);
+                    if (chooserInfo.basic) {
+                        Event.cancelBubble(event);
+                        Menu.hideActiveMenu();
+                        var formId = Dom.lookupFormId(chooserInfo.textField);
+                        var senderId = chooserInfo.textField.id;
+                        Request.submitFormForElementName(formId, senderId, event, null);
+                    }
+                    else {
+                        return this.chooserSearch(chooserInfo, event);
+                    }
                 }
                 else if (chooserInfo.addLink) {
                     if (sourceElm == chooserInfo.addLink ||
@@ -632,25 +653,38 @@ ariba.Chooser = function() {
                 if (searchPattern == chooserInfo.textField.value &&
                     xmlHttp.responseText.indexOf('chooser match') > -1) {
                     chooserInfo.matchesContainer.innerHTML = xmlHttp.responseText;
-                    this.displayChooserMenu(chooserInfo);
                     var menuLinks = Menu.menuItems(chooserInfo.menu);
-                    if (menuLinks.length >= 2) {
+                    var displayChooserMenu = true;
+
+                    var hiliteMenuItem = menuLinks.length >= 2;
+
+                    if (chooserInfo.basic) {
+                        displayChooserMenu = menuLinks.length > 0; 
+                        hiliteMenuItem = false;
+                    }
+                    if (displayChooserMenu) {
+                        this.displayChooserMenu(chooserInfo);
+                    }
+                    else {
+                        Menu.hideActiveMenu();
+                    }
+                    if (hiliteMenuItem) {
                         Menu.hiliteMenuItem(menuLinks[0], chooserInfo.menu);
                     }
                 }
-            }
+            };
 
             var chooserFetchList = function ()
             {
                 chooserInfo.searchPattern = searchPattern;
-                var urlString = Request.formatSenderUrl(chooserInfo.wrapper.id);
+                var urlString = Request.formatInPageRequestUrl(chooserInfo.wrapper.id);
             // todo: need to url encode the searchPattern
                 urlString = urlString + "&chsp=" + encodeURIComponent(searchPattern);
                 if (this.addMode(chooserInfo)) {
                     urlString = urlString + "&chadd=1";
                 }
                 Request.initiateXMLHttpRequest(urlString, chooserFetchListCallback.bind(this));
-            }
+            };
 
             return setTimeout(chooserFetchList.bind(this), delay);
         },

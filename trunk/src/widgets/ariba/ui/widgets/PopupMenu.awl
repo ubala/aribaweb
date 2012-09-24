@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.awl#22 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.awl#24 $
     </Copyright>
 
     <Overview>
@@ -104,12 +104,16 @@
     <Binding key="class" direction="get" type="String" required="$false">
         Override the default css class (awmenu)
     </Binding>
+
+    <Binding key="closeTimeout" direction="get" type="Integer" required="$false">
+        Time in millisecond to automatically close the popup menu (minimum is 3 sec)
+    </Binding>
 </a:Api>\
 <t:ExportConditional>\
     <a:Singleton>\
         <w:WidgetsJavaScript/>\
     </a:Singleton>\
-    <a:RelocatableDiv id="$menuId" class="$^class:awmenu" style="display:none;" onDisplay="$^onDisplayHandler">
+    <a:RelocatableDiv id="$menuId" class="$^class:awmenu" style="display:none;" _ondisplay="$^onDisplayHandler">
         <!--- This dummy image works around a bug and is required to make entire div clickable -->\
         <div><img width="0" height="0" border="0"/></div>\
         <!--- put ourselves on environment so PopupItem call call us back with setHasCollapedItem() -->
@@ -126,3 +130,18 @@
         </a:If>\
     </a:RelocatableDiv>
 </t:ExportConditional>\
+
+<a:If ifTrue="$shouldAutoClose">\
+    <a:RefreshRegion alwaysRender="$true">\
+        <a:ClientSideScript>\
+            var autoClose = function () {
+                if (ariba.Menu.AWActiveMenu) {
+                    if (ariba.Menu.AWActiveMenu.id == '$menuId') {
+                        ariba.Menu.hideActiveMenu();
+                    }
+                }
+            }
+            setTimeout(autoClose, $autoCloseTimeout);
+        </a:ClientSideScript>\
+    </a:RefreshRegion>\
+</a:If>\

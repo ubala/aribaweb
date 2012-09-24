@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2011 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSingleLocaleResourceManager.java#19 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWSingleLocaleResourceManager.java#23 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -29,6 +29,7 @@ import ariba.util.core.ResourceService;
 import java.util.List;
 import ariba.util.i18n.LocaleSupport;
 import ariba.util.i18n.I18NUtil;
+import ariba.ui.aribaweb.core.AWApplication;
 import ariba.ui.aribaweb.core.AWSession;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 
@@ -206,12 +207,13 @@ public class AWSingleLocaleResourceManager extends AWResourceManager
                 urlForResource = (String) _urlsForResource.get(resource);
                 if (urlForResource == null) {
                     urlForResource = resourceUrl;
+                    String webserverUrlPrefix = "";
                     if (isFullUrl && !resourceUrl.startsWith("http:") &&
                         !resourceUrl.startsWith("https:")) {
                         if (!resourceUrl.startsWith("/")) {
                             resourceUrl = StringUtil.strcat("/", resourceUrl);
                         }
-                        String webserverUrlPrefix = AWMultiLocaleResourceManager.webserverUrlPrefix(isSecure);
+                        webserverUrlPrefix = AWMultiLocaleResourceManager.webserverUrlPrefix(isSecure);
                         if (webserverUrlPrefix.endsWith("/")) {
                             webserverUrlPrefix = webserverUrlPrefix.substring(0, webserverUrlPrefix.length() - 1);
                         }
@@ -219,10 +221,19 @@ public class AWSingleLocaleResourceManager extends AWResourceManager
                     }
                     if (isVersioned) {
                         String version = AWMultiLocaleResourceManager.resourceVersion(resource.name());
-                        if (!StringUtil.nullOrEmptyOrBlankString(version)) {
-                            int indexOfLastSeparator = urlForResource.lastIndexOf('/');
-                            String resourcePrefix = urlForResource.substring(0, indexOfLastSeparator);
-                            String resourceSuffix = urlForResource.substring(indexOfLastSeparator);
+                        if (!StringUtil.nullOrEmptyOrBlankString(version))
+                        {
+                            int index = webserverUrlPrefix.length() + 1;
+                            // urlprefix can be of the form 
+                            // <AWApplication.resourceURL>/<pathToResource> in this case,
+                            // insert version after the first slash
+                            int firstSlash = urlForResource.indexOf('/', index + 1);
+                            if (firstSlash > -1) {
+                                index = firstSlash;
+                            }
+
+                            String resourcePrefix = urlForResource.substring(0, index);
+                            String resourceSuffix = urlForResource.substring(index);
                             urlForResource = Fmt.S("%s/%s%s",
                                     resourcePrefix, version, resourceSuffix); 
                         }
