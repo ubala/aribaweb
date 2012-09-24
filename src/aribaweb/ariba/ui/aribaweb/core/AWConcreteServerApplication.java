@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#68 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#69 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -634,13 +634,13 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
     ////////////////
     public void logString (String message)
     {
-        System.out.println(message);
+        Log.aribaweb.debug(message);
     }
 
     public void debugString (String message)
     {
         if (AWConcreteServerApplication.IsDebuggingEnabled) {
-            System.out.println(message);
+            Log.aribaweb.debug(message);
         }
     }
 }

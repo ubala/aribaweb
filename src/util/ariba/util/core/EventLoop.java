@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/EventLoop.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/core/EventLoop.java#6 $
 */
 
 package ariba.util.core;
@@ -30,17 +30,31 @@ public class EventLoop extends EventQueue implements Runnable
 
     private EventExceptionListener exceptionEvent = null;
 
-    private TimerQueue timerQueue = new TimerQueue();
+    protected TimerQueue timerQueue;
 
     public void setExceptionEvent (EventExceptionListener e)
     {
         exceptionEvent = e;
     }
 
+    /**
+     * Create a new EventLoop using a new LinkedTimerQueue.
+     */
     public EventLoop ()
     {
+        this(new LinkedTimerQueue());
+    }
+
+    /**
+     * Create a new EventLoop using the specified TimerQueue.
+     * @param queue The TimerQueue to use.
+     */
+    public EventLoop (TimerQueue queue)
+    {
+        timerQueue = queue;
         this.stopRunning = true;
     }
+
 
     /**
         Runnable interface method implemented to process Events as
@@ -79,6 +93,7 @@ public class EventLoop extends EventQueue implements Runnable
     */
     public synchronized void stopRunning ()
     {
+        timerQueue.stop();
         stopRunning = true;
     }
 

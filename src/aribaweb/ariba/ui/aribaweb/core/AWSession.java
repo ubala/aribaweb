@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#90 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#95 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -25,7 +25,6 @@ import ariba.util.core.MapUtil;
 import ariba.util.core.PerformanceState;
 import ariba.util.core.Fmt;
 import ariba.util.core.HTTP;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Iterator;
@@ -209,6 +208,11 @@ final class AWRequestHistory extends AWBaseObject implements AWDisposable
                         requestType = AWSession.InterruptedNewRequest;
                     }
                 }
+            }
+            else if (requestContext.isInPageRequest()) {
+                // this is a stray request from an action that does not 
+                // require page navigation. ignore it.
+                requestType = AWSession.NoOpRequest;
             }
             else {
                 if (indexOfRequestId < _currentRequestIdIndex) {
@@ -543,6 +547,7 @@ public class AWSession extends AWBaseObject
     public static final int RefreshRequest = 3;
     // This occurrs when the user clicks stop and then clicks something else.
     public static final int InterruptedNewRequest = 4;
+    public static final int NoOpRequest = 5;
     private AWApplication _application;
     private HttpSession _httpSession;
     private String _sessionId;
@@ -601,6 +606,8 @@ public class AWSession extends AWBaseObject
         Overrides global AWPage.AllowParentFrame
     */
     private boolean _allowParentFrame = false;
+    
+    private boolean _omitWrapperFrame;
 
     // ** Thread Safety Considerations: sessions are never shared by multiple threads -- no locking required.
 
@@ -1454,6 +1461,11 @@ public class AWSession extends AWBaseObject
                 if (userAgent != null) {
                     stats.setUserAgent(userAgent);
                 }
+                
+                String[] screenSize = request.cookieValuesForKey("awscreenstats");
+                if (screenSize != null && screenSize.length > 0 && screenSize[0] != null){
+                    stats.setScreenSize(screenSize[0]);
+                }
 
                 String seleniumShortId = request.formValueForKey("testShortId");
                 String seleniumId = request.formValueForKey("testId");
@@ -1473,6 +1485,8 @@ public class AWSession extends AWBaseObject
                 stats.setTestId(_testId);
                 stats.setTestLine(_testLine);
 
+                stats.setShutdownMode(Boolean.toString(
+                    application().monitorStats().isInShutdownWarningPeriod()));
             }
 
             _lastAccessedTime = _httpSession.getLastAccessedTime();
@@ -1709,6 +1723,20 @@ public class AWSession extends AWBaseObject
     public boolean allowParentFrame ()
     {
         return AWPage.AllowParentFrame || _allowParentFrame;
+    }
+
+    public boolean omitWrapperFrame ()
+    {
+        return _omitWrapperFrame;
+    }
+
+    /**
+     * @param omit when true, the wrapper frame is omitted on all pages rendered
+     * in this session. When false, the binding value on the page wrapper is used.  
+     */
+    public void setOmitWrapperFrame (boolean omit)
+    {
+        this._omitWrapperFrame = omit;
     }
 }
 

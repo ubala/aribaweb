@@ -1,8 +1,8 @@
 /*
-    Copyright (c) 1996-2010 Ariba, Inc.
+    Copyright (c) 1996-2012 Ariba, Inc.
     All rights reserved. Patents pending.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#32 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#34 $
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -19,20 +19,21 @@
 
 package ariba.util.core;
 
-
+import ariba.util.formatter.BigDecimalFormatter;
+import ariba.util.formatter.BooleanFormatter;
+import ariba.util.formatter.DateFormatter;
+import ariba.util.formatter.DoubleFormatter;
+import ariba.util.formatter.IntegerFormatter;
+import ariba.util.formatter.LongFormatter;
 import ariba.util.io.DeserializationException;
 import ariba.util.io.Deserializer;
 import ariba.util.io.Serializer;
 import ariba.util.log.Log;
-import ariba.util.formatter.DateFormatter;
-import ariba.util.formatter.IntegerFormatter;
-import ariba.util.formatter.DoubleFormatter;
-import ariba.util.formatter.LongFormatter;
-import ariba.util.formatter.BigDecimalFormatter;
-import ariba.util.formatter.BooleanFormatter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -42,8 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Collection;
-import java.math.BigDecimal;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
     Map Utilities. These are helper functions for dealing with
@@ -129,6 +129,18 @@ public final class MapUtil
     public static <K,V> Map<K,V> map (Map<? extends K, ? extends V> source)
     {
         return new HashMap<K,V>(source); // OK
+    }
+
+    /**
+     * Creates an empty ConcurrentHashMap
+     * 
+     * @return new empty ConcurrentHashMap implementation
+     * @see java.util.concurrent.ConcurrentHashMap
+     * @aribaapi private
+     */
+    public static <K, V> ConcurrentHashMap<K, V> concurrentMap ()
+    {
+        return new ConcurrentHashMap<K, V>();
     }
 
     //----------------------------------------------------
@@ -924,6 +936,26 @@ public final class MapUtil
         }
         catch (DeserializationException e) {
             Log.util.error(2757, e);
+        }
+        finally {
+            reader.close();
+        }
+    }
+
+    /**
+     * Populates the hashtable with serialized data from the string.  Does not handle exceptions.
+     *
+     * @param m Hashtable to populate.
+     * @param serialized String containing serialized hashtable data
+     * @aribaapi private
+     */
+    public static void deserializeFromString (Map m, String serialized)
+        throws IOException, DeserializationException
+    {
+        StringReader reader = new StringReader(serialized);
+
+        try {
+            new Deserializer(reader).readObject(m);
         }
         finally {
             reader.close();

@@ -65,6 +65,7 @@ ariba.Event = function() {
     // for the final doc ready check
     var _docReadyLockCount = 0;
 
+    var Timeouts = new Object();
 
     var Event = {
         // All registered behaviors
@@ -803,6 +804,26 @@ ariba.Event = function() {
         GlobalEvalVBScript : function (str)
         {
             alert("GlobalEvalVBScript is IE only...");
+        },
+
+        setTimeout : function (elm, func, delay)
+        {
+            if (elm && elm.id) {
+                this.clearTimeout(elm);
+                var timeout = setTimeout(func, delay);
+                Timeouts[elm.id] = timeout;
+            }
+        },
+
+        clearTimeout : function (elm)
+        {
+            if (elm && elm.id) {
+                var timeout = Timeouts[elm.id];
+                if (timeout) {
+                    clearTimeout(timeout);
+                    delete Timeouts[elm.id]
+                }
+            }
         },
 
         EOF:0};

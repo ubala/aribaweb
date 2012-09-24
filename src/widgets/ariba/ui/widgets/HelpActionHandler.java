@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HelpActionHandler.java#17 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HelpActionHandler.java#19 $
 */
 
 package ariba.ui.widgets;
@@ -42,7 +42,6 @@ public class HelpActionHandler extends ActionHandler
     static {
         /* default HelpAreas are Doc, Training and Support */
         List<String> list = ListUtil.list(StringHandler.Documentation,
-                                          StringHandler.Training,
                                           StringHandler.Support);
         _AllHelpAreas = Collections.unmodifiableList(list);
     }
@@ -159,8 +158,8 @@ public class HelpActionHandler extends ActionHandler
                           helpKey, userType,
                           realmName, userLang, anId,
                           featureString, area, windowAttribute};
-        _helpUrl = Fmt.S("javascript:ariba.Widgets.gotoDoc('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');ariba.Event.cancelBubble(event);",
-                         args);
+        _helpUrl = Fmt.S("javascript:ariba.Widgets.gotoDoc('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');"+
+            "ariba.Event.cancelBubble(event);ariba.Menu.hideActiveMenu();", args);
     }
 
     public String getActionName ()

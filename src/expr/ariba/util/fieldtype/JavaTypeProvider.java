@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/JavaTypeProvider.java#22 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/JavaTypeProvider.java#24 $
 */
 
 package ariba.util.fieldtype;
@@ -241,7 +241,6 @@ public class JavaTypeProvider extends TypeProvider
 
     public static class JavaTypeInfo implements TypeInfo, PropertyResolver
     {
-
         protected Class   _proxiedClass;
         //@todo Kiran this is not threadsafe
         protected Map<String,FieldInfo>   _fieldInfos;
@@ -400,32 +399,36 @@ public class JavaTypeProvider extends TypeProvider
             return null;
         }
 
-        public MethodInfo getMethod (TypeRetriever retriever,
-                                     String name,
-                                     List parameters)
+        public MethodInfo getMethodForName (TypeRetriever retriever,
+                                            String name,
+                                            List<String> parameters)
         {
-            return getMethod(retriever, name, parameters, false);
+            return getMethodForName(retriever, name, parameters, false);
         }
 
-        public MethodInfo getMethod (TypeRetriever retriever,
-                                     String name,
-                                     List parameters,
-                                     boolean staticOnly)
+        public MethodInfo getMethodForName (TypeRetriever retriever,
+                                            String name,
+                                            List<String> parameters,
+                                            boolean staticOnly)
         {
             JavaMethodInfo methodInfo = null;
             try {
                 if (!_hasMethodInfoLoaded) {
                     synchronized (this) {
                         if (!_hasMethodInfoLoaded) {
-                            loadMethods(retriever);
+                            loadMethods();
                         }
                     }
                 }
+
                 String mungedName = JavaMethodInfo.getMungedMethodName(name, parameters);
                 methodInfo = _methodInfos.get(mungedName);
                 if (methodInfo == null || (staticOnly && !methodInfo.isStatic())) {
-                    methodInfo = findAppropriateMethodInfo(retriever, name,
-                            parameters, staticOnly);
+                    // dlee 11/08/2011: methodInfo being null does not mean the given
+                    // method does not exist.  It could be that one of the specified
+                    // parameters is the super type.  Keep looking.
+                    methodInfo = findAppropriateMethodInfo(
+                            retriever, name, parameters, staticOnly);
                 }
                 if (_pseudoClass != null && methodInfo != null &&
                     methodInfo.isStatic() &&    
@@ -438,7 +441,7 @@ public class JavaTypeProvider extends TypeProvider
                 }
             }
             catch (Throwable e) {
-                Log.util.warn("getMethod failed",e);
+                Log.util.warn("getMethodForName failed",e);
             }
             return methodInfo;
         }
@@ -449,7 +452,7 @@ public class JavaTypeProvider extends TypeProvider
                 if (!_hasMethodInfoLoaded) {
                     synchronized (this) {
                         if (!_hasMethodInfoLoaded) {
-                            loadMethods(retriever);
+                            loadMethods();
                         }
                     }
                 }
@@ -513,7 +516,7 @@ public class JavaTypeProvider extends TypeProvider
                     return null;
                 }
             }
-            loadMethods(retriever);
+            loadMethods();
             Iterator methods = _methodInfos.keySet().iterator();
             while (methods.hasNext()) {
                 String key = (String)methods.next();
@@ -532,20 +535,17 @@ public class JavaTypeProvider extends TypeProvider
             return new JavaFieldInfo(this, field);
         }
 
-        protected MethodInfo createMethodInfo (TypeRetriever retriever,
-                                               Method method)
-        {
-            return new JavaMethodInfo(retriever, this, method, false);
-        }
-
-        protected MethodInfo createMethodInfo (TypeRetriever retriever,
-                                               Method method,
+        protected MethodInfo createMethodInfo (Method method,
                                                boolean isSafe)
         {
-            return new JavaMethodInfo(retriever, this, method, isSafe);
+            return new JavaMethodInfo(this, method, isSafe);
         }
 
-        private void loadMethods (TypeRetriever retriever)
+        /**
+            Loads all the methods of {@link #_proxiedClass} regardless their safeness
+            onto <code>this</code>.
+         */
+        private void loadMethods ()
         {
             if (!_hasMethodInfoLoaded) {
                 Method[] methods = _proxiedClass.getMethods();
@@ -559,10 +559,9 @@ public class JavaTypeProvider extends TypeProvider
                         boolean isSafe = (specification != null ?
                                           specification.isSatisfiedBy(method) :
                                           false);
-                        JavaMethodInfo methodInfo = (JavaMethodInfo)
-                            createMethodInfo(retriever, method, isSafe);
+                        JavaMethodInfo methodInfo = (JavaMethodInfo)createMethodInfo(method, isSafe);
                         _methodInfos.put(
-                            methodInfo.getMungedName(),
+                            methodInfo.getMungedName().intern(),
                             methodInfo);
 
                         if (methodInfo.firstParameterIsClassName()) {
@@ -580,7 +579,7 @@ public class JavaTypeProvider extends TypeProvider
                         JavaMethodInfo oneInfo = mi.next();
                         String mungedName = oneInfo.getMungedMethodNameSansFirstParam();
                         if (mungedName!=null ) {
-                            _methodInfos.put(mungedName,oneInfo);
+                            _methodInfos.put(mungedName.intern(), oneInfo);
                         }
                     }
                 }
@@ -589,20 +588,38 @@ public class JavaTypeProvider extends TypeProvider
         }
 
 
-        public JavaMethodInfo findAppropriateMethodInfo (TypeRetriever retriever,
-                                                      String name,
-                                                      List parameters,
-                                                      boolean staticOnly)
+        private JavaMethodInfo findAppropriateMethodInfo (
+                TypeRetriever retriever,
+                String name,
+                List<String> parameters,
+                boolean staticOnly)
         {
-            return findMethodInfo(retriever,
-                    _methodInfos.values(), name,
-                    parameters, staticOnly);
+            List<TypeInfo> parameterTypes = Collections.EMPTY_LIST;
+            if (!ListUtil.nullOrEmptyList(parameters)) {
+                parameterTypes = ListUtil.list(parameters.size());
+                for (String parameter : parameters) {
+                    TypeInfo typeInfo = retriever.getTypeInfo(parameter);
+                    if (typeInfo != null) {
+                        parameterTypes.add(typeInfo);
+                    }
+                    else {
+                        parameterTypes.add(NullTypeInfo.instance);
+                    }
+                }
+            }
+
+            return findMethodInfo(
+                    retriever,
+                    _methodInfos.values(),
+                    name,
+                    parameterTypes,
+                    staticOnly);
         }
 
         private JavaMethodInfo findMethodInfo (TypeRetriever retriever,
                                            Collection<JavaMethodInfo> methods,
                                            String name,
-                                           List parameters,
+                                           List<TypeInfo> parameters,
                                            boolean staticOnly)
         {
             JavaMethodInfo mostSpecific = null;
@@ -634,7 +651,7 @@ public class JavaTypeProvider extends TypeProvider
                 return mostSpecific;
             }
 
-            // Find metching method with type narrowing
+            // Find matching method with type narrowing
             iter = methods.iterator();
             while (iter.hasNext()) {
                 JavaMethodInfo method = iter.next();
@@ -668,7 +685,7 @@ public class JavaTypeProvider extends TypeProvider
             }
 
             // p1 - formal parameters
-            // p2 - acutal parameters
+            // p2 - actual parameters
             List p1 = method.getParameters(retriever);
             List p2 = parameters;
 
@@ -831,28 +848,25 @@ public class JavaTypeProvider extends TypeProvider
     public static class JavaMethodInfo implements MethodInfo,Cloneable
     {
         protected Method     _proxiedMethod;
-        protected TypeInfo   _parentType;
+        protected JavaTypeInfo   _parentType;
         protected String     _mungedName;
         protected boolean    _isSafe;
 
-        protected List /* <TypeInfo> */ _parametersType = null;
-        protected boolean   _hasParametersLoaded = false;
-
-        protected TypeInfo   _returnType = null;
+        protected List<String> _parameterTypeNames;
+        protected String   _returnTypeName;
         // Class on which I am a pseudo method e.g: vrealm_1.fmd_1.myMFD
         private String _proxiedClass = null;
         private  SafeMethodOptions _annotation;
 
-        JavaMethodInfo (TypeRetriever retriever,
-                        TypeInfo type,
+        JavaMethodInfo (JavaTypeInfo type,
                         Method method,
                         boolean isSafe)
         {
             _proxiedMethod = method;
             _parentType = type;
-            _parametersType = getParameters(retriever);
-            _returnType = getReturnType(retriever);
-            _mungedName = getMungedMethodName(getName(), _parametersType);
+            _parameterTypeNames = getParameterTypeNames();
+            _returnTypeName = getReturnTypeName();
+            _mungedName = getMungedMethodName(getName(), _parameterTypeNames);
             _isSafe = isSafe;
             _annotation = method.getAnnotation(SafeMethodOptions.class);
         }
@@ -870,10 +884,11 @@ public class JavaTypeProvider extends TypeProvider
             JavaMethodInfo ret = null;
             try {
                 ret = (JavaMethodInfo)super.clone();
-                ret._proxiedClass = otherProxy.getName();
+                String otherProxyName = otherProxy.getName();
+                ret._proxiedClass = otherProxyName;
                 if (hasCovariantReturn()) {
                     //Change the return type based on annotation
-                    ret._returnType = otherProxy;
+                    ret._returnTypeName = otherProxyName;
                 }
             }
             catch (CloneNotSupportedException e) {
@@ -916,47 +931,67 @@ public class JavaTypeProvider extends TypeProvider
         }
 
         /**
-         *
-         * @param retriever
-         * @return Return an empty list if there is no parameter.  If any
-         * parameter type cannot be retrieved, return null.
+            Returns all the parameter types of <code>this</code>.  
+            Empty list would be returned if there is no parameter.
          */
-        public List /* <TypeInfo> */ getParameters (TypeRetriever retriever)
+        private List<String> getParameterTypeNames ()
         {
-            if (_parametersType == null && !_hasParametersLoaded) {
-                Class[] classes = _proxiedMethod.getParameterTypes();
-                List types = ListUtil.list();
-                for (int i=0; i < classes.length; i++) {
-                    TypeInfo type = retriever.getTypeInfo(classes[i].getName());
-                    if (type != null) {
-                        types.add(type);
-                    }
-                    else {
-                        types = null;
-                        break;
-                    }
-                }
-                _hasParametersLoaded = true;
-                _parametersType = types;
+            Class[] parameters = _proxiedMethod.getParameterTypes();
+            if (parameters.length == 0) {
+                return Collections.EMPTY_LIST;
             }
-            return _parametersType;
+            List result = ListUtil.list(parameters.length);
+            for (Class parameter : parameters) {
+                result.add(parameter.getName());
+            }
+            return result;
         }
 
         /**
-         *
-         * @param retriever
-         * @return Return a void class if there is no return type.  If the
-         * return type exists but cannot be found, then return null.
+            Returns a {@link List} of {@link TypeInfo}s for all the parameters
+            of <code>this</code>.  Empty list would be returned if there is
+            no parameter.  If any parameter type cannot be retrieved, it
+            returns <code>null</code>.
+        */
+        public List<TypeInfo> getParameters (TypeRetriever retriever)
+        {
+            if (!ListUtil.nullOrEmptyList(_parameterTypeNames)) {
+                List<TypeInfo> result = ListUtil.list(_parameterTypeNames.size());
+                for (String parameterTypeName : _parameterTypeNames) {
+                    TypeInfo type = retriever.getTypeInfo(parameterTypeName);
+                    if (type == null) {
+                        // 11/07/2011: if there is a parameter without typeinfo,
+                        // we clear the result.  We do this just to make it
+                        // backward-compatable to the original code.
+                        result.clear();
+                        break;
+                    }
+                    result.add(type);
+                }
+                return result;
+            }
+            return Collections.EMPTY_LIST;
+        }
+
+        /**
+            Returns the type name of the return type of <code>this</code>.
+         */
+        private String getReturnTypeName ()
+        {
+            Class type = _proxiedMethod.getReturnType();
+            return type != null ? type.getName() : null;
+        }
+
+        /**
+            Returns the return type as {@link TypeInfo} of <code>this</code>.
+            If there is no return type, it returns a void class.  If the
+            return type exists but cannot be found, it returns <code>null</code>.
          */
         public TypeInfo getReturnType (TypeRetriever retriever)
         {
-            if (_returnType == null) {
-                Class type = _proxiedMethod.getReturnType();
-                if (type != null) {
-                    _returnType = retriever.getTypeInfo(type.getName());
-                }
-            }
-            return _returnType;
+            return _returnTypeName != null ?
+                    retriever.getTypeInfo(_returnTypeName) :
+                    null;
         }
 
         public TypeInfo getType (TypeRetriever retriever)
@@ -1002,29 +1037,39 @@ public class JavaTypeProvider extends TypeProvider
             return false;
         }
 
+        /**
+            Returns a {@link String} as the munged name of <code>this</code>
+            method less the first parameter if necessary.
+         */
         String getMungedMethodNameSansFirstParam ()
         {
-            int size = _parametersType.size();
-            if (size < 1) return null;
+            int size = _parameterTypeNames.size();
+            if (size < 1) {
+                return null;
+            }
             List params = Collections.EMPTY_LIST;
             if (size > 1) {
-                params = ListUtil.list();
-                ListUtil.copyInto(_parametersType,params,1,size-1);
+                params = ListUtil.list(size - 1);
+                ListUtil.copyInto(_parameterTypeNames, params, 1, size-1);
             }
-            String mungedName = getMungedMethodName(getName(),params);
-            return mungedName;
+            return getMungedMethodName(getName(), params);
         }
 
-        static String getMungedMethodName (String methodName,
-                                           List parameters)
+        /**
+            Returns a {@link String} as the munged name for the method with
+            the given <code>methodName</code> and the {@link List} of
+            parameter type names.
+        */
+        static String getMungedMethodName (
+                String methodName,
+                List<String> parameterTypeNames)
         {
             FastStringBuffer buffer = new FastStringBuffer();
             buffer.append(methodName);
-            if (!ListUtil.nullOrEmptyList(parameters)) {
-                for (int i=0; i < parameters.size(); i++) {
-                    TypeInfo paramType = (TypeInfo)parameters.get(i);
+            if (!ListUtil.nullOrEmptyList(parameterTypeNames)) {
+                for (String parameterTypeName : parameterTypeNames) {
                     buffer.append('#');
-                    buffer.append(paramType.getName());
+                    buffer.append(parameterTypeName);
                 }
             }
             return buffer.toString();

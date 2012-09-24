@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#86 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#89 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -114,16 +114,18 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                 AWEncodedString.sharedEncodedString(requestHandlerUrl);
 
             fullAdaptorUrl = fullAdaptorUrl(true);
-            requestHandlerUrl =
-                StringUtil.strcat(fullAdaptorUrl,
-                                  fullAdaptorUrl.endsWith("/") ? "":"/",
-                                  application().name(),
-                                  applicationNameSuffix(),
-                                  applicationNumber, requestHandlerKey());
+            if (fullAdaptorUrl != null) {
+                requestHandlerUrl =
+                    StringUtil.strcat(fullAdaptorUrl,
+                            fullAdaptorUrl.endsWith("/") ? "" : "/",
+                            application().name(),
+                            applicationNameSuffix(),
+                            applicationNumber, requestHandlerKey());
 
-            _fullRequestHandlerUrlSecure =
-                AWEncodedString.sharedEncodedString(requestHandlerUrl);
+                _fullRequestHandlerUrlSecure =
+                        AWEncodedString.sharedEncodedString(requestHandlerUrl);
 
+            }
         }
         return fullUrl ? ((request !=null && !request.isSecureScheme())?_fullRequestHandlerUrl:_fullRequestHandlerUrlSecure) :
                 _requestHandlerUrl;
@@ -601,6 +603,10 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
                     else {
                         response = actionResults.generateResponse();
                     }
+                    break;
+                }
+                case AWSession.NoOpRequest: {
+                    response = application().createResponse();
                     break;
                 }
                 default: {

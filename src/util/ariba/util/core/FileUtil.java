@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/FileUtil.java#26 $
+    $Id: //ariba/platform/util/core/ariba/util/core/FileUtil.java#27 $
 */
 
 package ariba.util.core;
@@ -717,6 +717,42 @@ public final class FileUtil
             }
         }
     }
+
+    public static void populateAllSubdirectories(List dirList,
+                                                 FileFilter purgeTempFolderFilter,
+                                                 File dir, boolean addSelfToList) {
+        if (dir != null) {
+            File[] files = dir.listFiles(purgeTempFolderFilter);
+            if (files != null) {
+                for (int i = 0; i < files.length; i++) {
+                    File f = files[i];
+                    if (f.isDirectory()) {
+                        populateAllSubdirectories(dirList, purgeTempFolderFilter, f, true);
+                    }
+                }
+            }
+            if (addSelfToList) {
+                dirList.add(dir);
+            }
+        }
+    }
+
+    public static void deleteAllEmptySubdirectories(List<File> dirList) {
+        if (ListUtil.nullOrEmptyList(dirList)) {
+            return;
+        }
+        for (File dir : dirList) {
+            try {
+                File[] files = dir.listFiles();
+                if (files == null || files.length < 1) {
+                    dir.delete();
+                }
+            }
+            catch (SecurityException se) {
+                Log.utilIO.error(8911, dir);
+            }
+        }
+    }   
 
     /**
         Lists the files in a specific directory that satisfy the filter.

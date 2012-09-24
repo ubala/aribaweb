@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/EventQueue.java#4 $
+    $Id: //ariba/platform/util/core/ariba/util/core/EventQueue.java#5 $
 */
 
 package ariba.util.core;
@@ -63,7 +63,10 @@ public class EventQueue
                 catch (InterruptedException e) {
                 }
             }
-            nextEvent = (EventProcessor)events.dequeue();
+            // we could leave the loop due to stopRunning
+            if (!events.isEmpty()) {
+                nextEvent = (EventProcessor)events.dequeue();
+            }
         }
         return nextEvent;
     }

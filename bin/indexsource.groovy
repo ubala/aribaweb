@@ -45,6 +45,10 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.document.Document
 import org.apache.lucene.document.Field
 import org.apache.lucene.index.IndexWriter
+import org.apache.lucene.index.IndexWriterConfig
+import org.apache.lucene.index.LogByteSizeMergePolicy
+import org.apache.lucene.store.FSDirectory
+import org.apache.lucene.util.Version
 import ariba.util.core.*
 import java.util.regex.*
 
@@ -115,8 +119,15 @@ def createIndex (args) {
              "dtd", "groovy", "table", "pl", "module", "bdf", "rul", "pml", "acf"]);
              // not:  "xml", "csv"
     File indexDir = new File(args[0])
-    // def _writer = new IndexWriter(indexDir, new StandardAnalyzer(), true)
-    def _writer = new IndexWriter(indexDir, search.SourceCodeAnalyzer.analyzerForField("contents", null), true)
+    def _analyzer = search.SourceCodeAnalyzer.analyzerForField("contents", null);
+    def _writerConfig = new IndexWriterConfig(Version.LUCENE_36, _analyzer);
+    _writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+    def mp = new LogByteSizeMergePolicy();
+    mp.setUseCompoundFile(true);
+    mp.setNoCFSRatio(1.0);
+    _writerConfig.setMergePolicy(mp);
+    println ("Creating writer")
+    def _writer = new IndexWriter(FSDirectory.open(indexDir), _writerConfig)
     _writer.useCompoundFile = false
     println "Created index in ${args[0]}"
 
@@ -148,11 +159,11 @@ def createIndex (args) {
                     String className = f.getName().replaceAll(/\.(\w+)$/, "")
                     def doc = new Document()
                     doc.add(new Field("contents", new FileReader(f)))
-                    doc.add(new Field("className", className, Field.Store.YES, Field.Index.TOKENIZED))
+                    doc.add(new Field("className", className, Field.Store.YES, Field.Index.ANALYZED))
                     // doc.add(new Field("type", m.group(1), Field.Store.YES, Field.Index.TOKENIZED))
-                    doc.add(new Field("type", type, Field.Store.YES, Field.Index.TOKENIZED))
+                    doc.add(new Field("type", type, Field.Store.YES, Field.Index.ANALYZED))
                     doc.add(new Field("dir", dirName, Field.Store.YES, Field.Index.NO))
-                    doc.add(new Field("path", path, Field.Store.YES, Field.Index.TOKENIZED))
+                    doc.add(new Field("path", path, Field.Store.YES, Field.Index.ANALYZED))
 
                     // check for extra search fields in special comment at top of .awl files
                     if (f.name.endsWith(".awl")) {
@@ -160,7 +171,7 @@ def createIndex (args) {
                         if (fieldsMatch) {
                             println " -- ${f.name}: Found extra search fields decl: ${fieldsMatch.group(1)}"
                             (fieldsMatch.group(1) =~ (/\s*(\w+)\s*:\s*(.+?)\s*/ + "(?:;|\$)")).each { all, key, value ->
-                                doc.add(new Field(key, value, Field.Store.YES, Field.Index.TOKENIZED))
+                                doc.add(new Field(key, value, Field.Store.YES, Field.Index.ANALYZED))
                                 // println "--- <${key}> : <${value}>"
                             }
                         }
@@ -174,7 +185,7 @@ def createIndex (args) {
         }
     }
 
-    println ("Number of files indexed ${_writer.docCount()}")
+    println ("Number of files indexed ${_writer.numDocs()}")
     _writer.optimize()
     _writer.close()  // Close index
 }

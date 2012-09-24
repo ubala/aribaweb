@@ -1,5 +1,5 @@
 GB2312,,
-copyright, "版权所有 (c) 1996-2011 Ariba, Inc. 保留所有权利。专利申请中。",
+copyright, "版权所有 (c) 1996-{0} Ariba, Inc. 保留所有权利。专利申请中。",
 versionWithSvPackWithDateWithPatchWithLangPack, "{0}.{1}.{2} Service Pack {5} 语言包 {6} (内部版本号 {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
 versionWithSvPackNoDateWithPatchWithLangPack, "{0}.{1}.{2} Service Pack {5} 语言包 {6} (内部版本号 {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
 versionWithSvPackWithDateNoPatchWithLangPack, "{0}.{1} Service Pack {5} 语言包 {6} (内部版本号 {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack

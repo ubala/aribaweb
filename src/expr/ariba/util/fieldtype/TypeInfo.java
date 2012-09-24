@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/TypeInfo.java#8 $
+    $Id: //ariba/platform/util/expr/ariba/util/fieldtype/TypeInfo.java#9 $
 */
 
 package ariba.util.fieldtype;
@@ -117,16 +117,16 @@ public interface TypeInfo
      * @param retriever - A <code>TypeRetriever</code> for retriever type
      * information.
      * @param name - the name of the method
-     * @param parameters
+     * @param parameters - list of parameter type names
      * @param staticOnly will be true when used in a class static context such as
      * className.staticMethod(), will be false for non static usages e.g.
      * instance.staticMethod() or instance.nonStaticMethod()
      * @return A <code>MethodInfo</code> object representing the method.
      */
-    public MethodInfo getMethod (TypeRetriever retriever,
-                                 String name,
-                                 List /* <TypeInfo> */ parameters,
-                                 boolean staticOnly);
+    public MethodInfo getMethodForName (TypeRetriever retriever,
+                                        String name,
+                                        List<String> parameters,
+                                        boolean staticOnly);
     
     
     /**

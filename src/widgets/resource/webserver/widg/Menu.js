@@ -27,6 +27,25 @@ ariba.Menu = function() {
         AWMenuOffset : 15,
 
 
+        activateMenuLink : function (elm)
+        {
+            var activeClass = elm.getAttribute('_activeClass');
+            if (activeClass) {
+                Dom.addClass(elm, activeClass);
+            }
+        },
+
+        deactivateMenuLink : function()
+        {
+            if(this.AWLinkId) {
+                var menuLink = Dom.getElementById(this.AWLinkId);
+                var activeClass = menuLink.getAttribute('_activeClass');
+                if (activeClass) {
+                    Dom.removeClass(menuLink, activeClass);
+                }
+            }
+        },
+    
         unhiliteDiv : function (divObject)
         {
             if (divObject != null) {
@@ -46,6 +65,7 @@ ariba.Menu = function() {
             if (this.AWActiveMenu != null && Dom.elementInDom(this.AWActiveMenu)) {
                 Event.disableDocumentClick();
                 Refresh.undisplayDiv(this.AWActiveMenu);
+                this.deactivateMenuLink();
             }
             this.AWActiveMenu = null;
             this.AWActiveItemId = null;
@@ -56,6 +76,7 @@ ariba.Menu = function() {
             var formId = Dom.boolAttr(elm, "_sf", true) ? Dom.lookupFormId(elm) : null;
             Menu.handleClientTrigger(elm, evt);
             if (Event.shouldBubble(evt)) {
+                evt.hideActiveMenu = true;
                 return Menu.menuClicked(elm, elm.id, formId);
             }
             return false;
@@ -141,7 +162,7 @@ ariba.Menu = function() {
         menu : function (menuCellDivLink)
         {
             return Dom.findParentUsingPredicate(menuCellDivLink, function(n) {
-                    return (n.tagName == "DIV" && n.className == "awmenu")
+                    return (n.tagName == "DIV" && n.className && n.className.indexOf("awmenu") > -1);
                 });
         },
 
@@ -154,12 +175,24 @@ ariba.Menu = function() {
         // to explicitly cancel mouse down.
         menuOnMouseDown : function (mevent)
         {
-            this.hideActiveMenu();
-            Event.cancelBubble(mevent);
-            return false;
+            if (mevent.hideActiveMenu) {
+                this.hideActiveMenu();
+                Event.cancelBubble(mevent);
+                return false;
+            }
+            // from elemnt in the menu,
+            // but not from PMI,
+            // so keep active menu
+            mevent.keepActiveMenu = true;
+            return true;
         },
 
         menuLinkOnClick : function (positioningObject, menuName, linkId, mevent, hilite)
+        {
+            return this._menuLinkOnClick(null, positioningObject, menuName, linkId, mevent);
+        },
+
+        _menuLinkOnClick : function (position, positioningObject, menuName, linkId, mevent, hilite)
         {
             var divObject = Dom.getElementById(menuName);
             var x;
@@ -189,7 +222,14 @@ ariba.Menu = function() {
                 if (hilite) {
                     this.hiliteMenuItem(null, divObject);
                 }
-                Event.enableDocumentClick(this.hideActiveMenu.bind(this));
+                var hideActiveMenu = this.hideActiveMenu.bind(this);
+                var docClicked = function (evt)
+                {
+                    if (!evt.keepActiveMenu) {
+                        hideActiveMenu();
+                    }
+                };
+                Event.enableDocumentClick(docClicked);
                 Dom.removeClass(divObject, "awmenuEx");  // collapse expanded menu on new open
                 this.checkMenuLayout(divObject);
                 if (positioningObject != null) {
@@ -207,9 +247,15 @@ ariba.Menu = function() {
                     }
                     var newTop = Dom.absoluteTop(positioningObject) + positioningObject.offsetHeight;
                     newTop = Dom.correctForBottomEdge(newTop, divObject);
-                    var newLeft = Dom.absoluteLeft(positioningObject);
-                    newLeft = Dom.correctForRightEdge(newLeft, divObject);
-                    Dom.setAbsolutePosition(divObject, newLeft, newTop);
+                    if (position == "right") {
+                        var newLeft = Dom.absoluteLeft(positioningObject) + positioningObject.offsetWidth - divObject.offsetWidth;
+                        Dom.setAbsolutePosition(divObject, newLeft, newTop);
+                    }
+                    else {
+                        var newLeft = Dom.absoluteLeft(positioningObject);
+                        newLeft = Dom.correctForRightEdge(newLeft, divObject);
+                        Dom.setAbsolutePosition(divObject, newLeft, newTop);
+                    }
                     Refresh.displayDiv(divObject);
                 }
                 else {
@@ -221,10 +267,9 @@ ariba.Menu = function() {
             }
 
         // if the div has an onDisplay handler defined, then call it
-            var onDisplay = divObject.getAttribute("onDisplay");
-            var onDisFunc;
-            if (onDisplay && (onDisFunc = this[onDisplay])) {
-                onDisFunc.call(this, divObject);
+            var onDisplay = divObject.getAttribute("_ondisplay");
+            if (onDisplay) {
+                Event.handleInline(onDisplay, mevent, divObject);
             }
 
             // cancelBubble is required because the document.onmousedown gets called after this method is called,
@@ -739,15 +784,18 @@ ariba.Menu = function() {
         // PopupMenuLink
         PML : {
              click : function (elm, evt) {
+                 ariba.Widgets.hideActiveHoverCard();
+                 Menu.activateMenuLink(elm);
                  var ret = true;
                  var pos = elm.getAttribute("_pos");
-                 var target = (pos == null || pos == "this") ? elm : Dom.getElementById(pos);
-                 ret = Menu.menuLinkOnClick(target, elm.getAttribute("_mid"), elm.id, evt);
+                 var target = (pos == null || pos == "this" || pos == "right") ? elm : Dom.getElementById(pos);
+                 ret = Menu._menuLinkOnClick(pos, target, elm.getAttribute("_mid"), elm.id, evt);
                  return ret;
              },
 
 
              keydown : function (elm, evt) {
+                 Menu.activateMenuLink(elm);
                  return Menu.menuLinkOnKeyDown(elm, elm.getAttribute("_mid"), elm.id, evt);
              }
          },

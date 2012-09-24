@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#148 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#153 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -71,6 +71,8 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         new ThreadDebugKey("RequestContext");
     public static final String RefreshRequestKey = "awrr";
     public static final String RecordingModeKey = "awrm";
+    public static final String InPageAction = "awipa";
+    public static final String InPageRequest = "awip";
     public static boolean UseXmlHttpRequests = true;
 
     public static final String IgnoreRefreshCompleteKey = "IgnoreRefreshComplete";
@@ -795,15 +797,21 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     ////////////////////
     public void setFormInputIds (AWArrayManager formInputIds)
     {
-        _formInputIds = formInputIds;
-        _targetFormIdIndex = 0;
-        _targetFormIdPath = _formInputIds == null ? null : (AWElementIdPath)_formInputIds.objectAt(_targetFormIdIndex);
+        if (_isPrintMode) {
+            Log.aribawebvalidation_exportMode.debug("Attempt to record form input id in print mode.");
+        }
+        else {
+            _formInputIds = formInputIds;
+            _targetFormIdIndex = 0;
+            _targetFormIdPath = _formInputIds == null ? null
+                : (AWElementIdPath)_formInputIds.objectAt(_targetFormIdIndex);
+        }
     }
 
     public void recordFormInputId (AWElementIdPath elementIdPath)
     {
         Assert.that(_currentForm != null, "Attempt to record form input id outside AWForm.");
-        if (_isExportMode) {
+        if (_isExportMode || _isPrintMode) {
             Log.aribawebvalidation_exportMode.debug("Attempt to record form input id in export mode.");
         }
         else {
@@ -1065,16 +1073,20 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         }
     }
 
-    private boolean isPollRequest()
+    private boolean isPollRequest ()
     {
         return AWPollInterval.AWPollSenderId.equals(requestSenderId());
     }
 
-    public boolean isPollUpdateRequest()
+    public boolean isPollUpdateRequest ()
     {
         return AWPollInterval.AWPollUpdateSenderId.equals(requestSenderId());
     }
 
+    public boolean isInPageRequest ()
+    {
+        return "1".equals(formValueForKey(InPageRequest));
+    }
 
     public AWResponse generateResponse (AWResponse response)
     {

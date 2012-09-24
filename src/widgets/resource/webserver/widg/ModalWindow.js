@@ -231,7 +231,12 @@ ariba.ModalWindow = function() {
         {
             try {
                 if (AWModalWindowChild != null) {
-                    AWModalWindowChild.focus();
+                    if (AWModalWindowChild.closed) {
+                        this.modalComplete();
+                    }
+                    else{
+                        AWModalWindowChild.focus();
+                    }
                 }
             }
             catch (e) {

@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2012 Ariba, Inc.
     All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Pool.java#11 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Pool.java#12 $
 */
 
 package ariba.util.core;
@@ -109,6 +109,7 @@ public class Pool implements LockHandlerConditions
     {
         synchronized (this.lockHandler.lock) {
             this.freeList.insert(linkable);
+            poolChanged(inUseCount, this.freeList.size(), PoolChangeReason.Add);
         }
     }
 
@@ -122,6 +123,7 @@ public class Pool implements LockHandlerConditions
             if (linkable.inuse()) {
                 linkable.setInuse(false);
                 inUseCount--;
+                poolChanged(inUseCount, this.freeList.size(), PoolChangeReason.Remove);
             }
         }
     }
@@ -194,6 +196,7 @@ public class Pool implements LockHandlerConditions
             linkable.setInuse(false);
             this.inUseCount--;
             this.freeList.add(linkable);
+            poolChanged(inUseCount, this.freeList.size(), PoolChangeReason.Release);
             this.lockHandler.lock.notify();
         }
     }
@@ -211,6 +214,7 @@ public class Pool implements LockHandlerConditions
             this.inUseCount++;
             Assert.that(!linkable.inuse(), "Object is already in use");
             linkable.setInuse(true);
+            poolChanged(inUseCount, this.freeList.size(), PoolChangeReason.Allocate);
         }
         this.allocationSum++;
         return linkable;
@@ -228,6 +232,7 @@ public class Pool implements LockHandlerConditions
         if (linkable == obj) {
             this.freeList.remove(linkable);
             this.inUseCount++;
+            poolChanged(inUseCount, this.freeList.size(), PoolChangeReason.Allocate);
             Assert.that(!linkable.inuse(), "Object is already in use");
             linkable.setInuse(true);
             this.allocationSum++;
@@ -261,5 +266,40 @@ public class Pool implements LockHandlerConditions
             linkable = this.freeList.next(linkable);
         }
         return free;
+    }
+
+    /**
+     * Used with poolChange method to indicate the reason the pool was changed.
+     * @aribaapi private
+     */
+    public enum PoolChangeReason
+    {
+        Add,
+        Remove,
+        Allocate,
+        Release
+    }
+
+    /**
+     * Subclasses can override this method to get the new in use cound and new free count
+     * whenever the pool is changed.
+     * This method is always called when thread is synchronized on lockHandler.lock
+     * @param inUseCount new in use count.
+     * @param freeCount new free count.
+     * @param reason the reason the pool was changed.
+     * @aribaapi private
+     */
+    protected void poolChanged (int inUseCount, int freeCount, PoolChangeReason reason)
+    {
+    }
+
+    /**
+     * Allows subclasses access to the LockeHandler for use during synchronization.
+     * @return
+     * @aribaapi private
+     */
+    protected LockHandler getLockHandler ()
+    {
+        return lockHandler;
     }
 }

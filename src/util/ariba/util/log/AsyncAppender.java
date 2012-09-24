@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/AsyncAppender.java#10 $
+    $Id: //ariba/platform/util/core/ariba/util/log/AsyncAppender.java#11 $
 */
 
 package ariba.util.log;
@@ -126,9 +126,7 @@ public class AsyncAppender extends org.apache.log4j.AppenderSkeleton
             }
 
             bf.put(event);
-            if (bf.wasEmpty()) {
-                bf.notify();
-            }
+            bf.notify();
         }
     }
 
@@ -335,9 +333,7 @@ class Dispatcher extends Thread
             interrupted = true;
             // We have a waiting dispacther if and only if bf.length is
             // zero.  In that case, we need to give it a death kiss.
-            if (bf.length() == 0) {
-                bf.notify();
-            }
+            bf.notify();
         }
     }
 
@@ -374,9 +370,7 @@ class Dispatcher extends Thread
                     }
                 }
                 event = bf.get();
-                if (bf.wasFull()) {
-                    bf.notify();
-                }
+                bf.notify();
             } // synchronized
 
             // The synchronization on parent is necessary to protect against

@@ -1,5 +1,5 @@
 Cp1251,,
-copyright, "Авторское право (c) Ariba, Inc., 1996-2011. Все права защищены. Патенты заявлены.",
+copyright, "Авторское право (c) Ariba, Inc., 1996-{0}. Все права защищены. Патенты заявлены.",
 versionWithSvPackWithDateWithPatchWithLangPack, "{0}.{1}.{2} пакет обновлений {5} языковой пакет {6} (сборка {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
 versionWithSvPackNoDateWithPatchWithLangPack, "{0}.{1}.{2} пакет обновлений {5} языковой пакет {6} (сборка {3})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack
 versionWithSvPackWithDateNoPatchWithLangPack, "{0}.{1} пакет обновлений {5} языковой пакет {6} (сборка {3}, {4})", 0-major 1-minor 2-patch 3-build 4-date 5-svcpack 6-langpack

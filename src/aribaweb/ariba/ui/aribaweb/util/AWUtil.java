@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#60 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#61 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -102,6 +102,11 @@ public final class AWUtil extends AWBaseObject
     private static final String[] IntegerStrings = new String[MaxIntegerStrings];
     private static AWSizeLimitedHashtable HtmlEscapedStrings = new AWSizeLimitedHashtable(512);
     private static AWSizeLimitedHashtable HtmlUnsafeEscapedStrings = new AWSizeLimitedHashtable(512);
+    /* Limit the max size of each cache to 100MB. Strings internally have a char array
+       so 2 bytes per char. AWEncodedString stores it as a byte array, so it's 1 byte per
+       char for ASCI and 2 for unicode. Worse case, it's 2 bytes per char. To limit to
+       100MB, each string should be limited to 200KB i.e. 102400 chars.*/
+    private static int MaxCacheStringSize = 102400;
     private static GrowOnlyHashtable EncodedHtmlAttributes = new GrowOnlyHashtable();
     private static AWClassLoader TheClassLoader = new AWClassLoader();
     private static Map _environment = null;
@@ -841,13 +846,15 @@ public final class AWUtil extends AWBaseObject
                 escapedString = HTML.escape(keyString, unsafeOnly);
             }
             escapedEncodedString = AWEncodedString.sharedEncodedString(escapedString);
-            if (RequiresThreadSafety) {
-                synchronized (cache) {
+            if (escapedString.length() < MaxCacheStringSize) {
+                if (RequiresThreadSafety) {
+                    synchronized(cache) {
+                        cache.put(keyString, escapedEncodedString);
+                    }
+                }
+                else {
                     cache.put(keyString, escapedEncodedString);
                 }
-            }
-            else {
-                cache.put(keyString, escapedEncodedString);
             }
         }
         return escapedEncodedString;

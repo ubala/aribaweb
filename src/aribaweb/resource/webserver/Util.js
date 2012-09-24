@@ -71,6 +71,28 @@ ariba.Util = function() {
             return !orig ? obj : (this.isArray(orig) ? orig.push(obj) : [orig].push(obj));
         },
 
+        arrayIndexOf : function (array, item)
+        {
+            var i, length;
+            if (array) {
+                if (array.indexOf) {
+                    return array.indexOf(item);
+                }
+                for (i = 0; i < array.length; i++) {
+                    if (array[i] === item) {
+                        return i;                        
+                    }
+                }
+            }
+            return -1;
+        },
+
+        arrayAddIfNotExists : function (array, item)
+        {
+            if (this.arrayIndexOf(array, item) < 0) {
+                array.push(item);
+            }
+        },
 
         isUndefined : function (value)
         {

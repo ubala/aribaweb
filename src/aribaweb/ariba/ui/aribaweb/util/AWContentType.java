@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWContentType.java#18 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWContentType.java#23 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -44,6 +44,7 @@ public final class AWContentType extends AWBaseObject
     public static final AWContentType ApplicationXVBscript = AWContentType.registerContentType("application/x-vbscript");
     public static final AWContentType ApplicationCsv = AWContentType.registerContentType("application/csv");
     public static final AWContentType ApplicationVndMsexcel = AWContentType.registerContentType("application/vnd.ms-excel");
+    public static final AWContentType ApplicationVndMsexcel2007 = AWContentType.registerContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     public static final AWContentType ApplicationMSWord = AWContentType.registerContentType("application/msword");
     public static final AWContentType ApplicationMSProject = AWContentType.registerContentType("application/vnd.ms-project");
     public static final AWContentType ApplicationUnknown = AWContentType.registerContentType("application/unknown");
@@ -79,6 +80,7 @@ public final class AWContentType extends AWBaseObject
         registerContentTypeForFileExtension("zip", ApplicationDownload);
         registerContentTypeForFileExtension("jnlp", ApplicationJnlp);
         registerContentTypeForFileExtension("xls", ApplicationVndMsexcel);
+        registerContentTypeForFileExtension("xlsx", ApplicationVndMsexcel2007);
         registerContentTypeForFileExtension("doc", ApplicationMSWord);
     }
 

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#34 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Date.java#35 $
 */
 
 package ariba.util.core;
@@ -1623,6 +1623,17 @@ public class Date extends java.util.Date implements Externalizable
         date.setTime(date.getTime() + ((long)(MillisPerDay * daysToAdd)));
     }
 
+    /**
+        Adds a specified number of minutes to the given <code>Date</code>.
+        @param date The <code>Date</code> object to modify.
+        @param minutesToAdd an integer of the number of minutes to add.
+        @aribaapi documented
+    */
+    public static void addMinutes (Date date, int minutesToAdd)
+    {
+        addToCalendarField(date, minutesToAdd, Calendar.MINUTE);
+    }
+    
     private static void addToCalendarField (Date date, int number, int field)
     {
             // get the appropriate Calendar instance

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#135 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#137 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1442,6 +1442,11 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     public String toString ()
     {
         return StringUtil.strcat(super.toString(), ":", pageComponent().toString());
+    }
+
+    public AWBaseResponse getPreviousResponse ()
+    {
+        return browserState()._previousResponse;
     }
 
     /////////////////////////

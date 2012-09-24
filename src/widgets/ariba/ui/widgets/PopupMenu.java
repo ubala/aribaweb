@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.java#18 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.java#19 $
 */
 
 package ariba.ui.widgets;
@@ -178,5 +178,19 @@ public final class PopupMenu extends AWComponent
     public static void flagHasCollapsedItem (AWComponent item)
     {
         ((PopupMenu)item.env().peek("popupMenu"))._hasCollapsed = true;
+    }
+
+    public boolean shouldAutoClose ()
+    {
+        return valueForBinding("closeTimeout") != null;
+    }
+
+    public int autoCloseTimeout ()
+    {
+        Integer result = (Integer)valueForBinding("closeTimeout");
+        if (result < 3000) {
+            return 3000;
+        }
+        return result;
     }
 }

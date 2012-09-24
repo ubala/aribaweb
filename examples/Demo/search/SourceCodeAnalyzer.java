@@ -7,6 +7,7 @@ import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.util.Version;
 
 import java.io.Reader;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public final class SourceCodeAnalyzer extends Analyzer
 
     static PerFieldAnalyzerWrapper analyzerForField (String fieldName, Analyzer defaultAnalyzer)
     {
-        if (defaultAnalyzer == null) defaultAnalyzer = new StandardAnalyzer();
+        if (defaultAnalyzer == null) defaultAnalyzer = new StandardAnalyzer(Version.LUCENE_36);
         PerFieldAnalyzerWrapper analyzer = new PerFieldAnalyzerWrapper(defaultAnalyzer);
         analyzer.addAnalyzer(fieldName, new SourceCodeAnalyzer());
         return analyzer;

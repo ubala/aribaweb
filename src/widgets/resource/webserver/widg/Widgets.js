@@ -44,6 +44,8 @@ ariba.Widgets = function() {
 
     var AWFooter = null;
 
+    var hcTimeout = null;
+
     var Widgets = {
 
         showPanel : function (id, positioningObject, skipOverlay)
@@ -423,7 +425,7 @@ ariba.Widgets = function() {
                         Dom.findParentUsingPredicate(div, function (e) {
                             return Dom.hasClass(e, "panelContainer");
                         });
-                Dom.relocateDiv(panelWrapper);
+                Dom.relocateDiv(panelWrapper, true);
                 this.showDialogDiv(div, f, null, true);
                 if (!ss) {
                     // for client side confirmations, load lazy divs
@@ -464,7 +466,21 @@ ariba.Widgets = function() {
         {
             //debug('cancel confirmation');
             Input.uncoverDocument();
+            var activeDiv = AWActiveDialogDiv;
             this.hideDialogDiv();
+            //on incremental updates, we remove relocated copy (AWRelocatableDiv.awl)
+            //and then show it again (Confirmation.awl). In this case, the active div 
+            //will not have the parent node. 
+            if (activeDiv && activeDiv.parentNode) {
+                var id = activeDiv.parentNode.id;
+                // If this is a client side confirmation, the revert will put the 
+                // div back to its original location.
+                Dom.revertRelocatedCopy(id);
+                //If this is a server side confirmation, the orignal location marker
+                //is overwritten, delete the moved copy. This HTML will be regenerated
+                //when the dialog is displayed.
+                Dom.removeRelocatedCopy(id);
+            }
             awConfirmationId = null;
         },
 
@@ -587,6 +603,8 @@ ariba.Widgets = function() {
                 return (n.className == "hintBoxClosed")
             });
             div.className = "hintBoxOpen";
+
+            Dom.checkWindowScrollbar(true);
         },
 
         closeHintMessage : function (element)
@@ -595,6 +613,9 @@ ariba.Widgets = function() {
                 return (n.className == "hintBoxOpen")
             });
             div.className = "hintBoxClosed";
+            
+            // hide scroll bar if not needed
+            Dom.checkWindowScrollbar(true);
         },
 
         openHintMessageKeyDown : function (element, mevent)
@@ -773,7 +794,7 @@ ariba.Widgets = function() {
             // directly into the document.
             // This first check only catches the case that help window is opened from same
             // page.  see catch statement below for case where help is left open across pages.
-            if (!docWin.closed && docWin.location) {
+            if (docWin && !docWin.closed && docWin.location) {
                 docWin.close();
             }
 
@@ -1380,25 +1401,81 @@ ariba.Widgets = function() {
             var hoverCard = this.getHoverCard(hoverLink);
             Dom.relocateDiv(hoverCard);
             this._hideActiveHoverCard(hoverCard);
-            
-            var newTop = Dom.absoluteTop(hoverLink) - 20;
 
-            var hoverLinkLeft = Dom.absoluteLeft(hoverLink);
-            var hoverLinkWidth = hoverLink.offsetWidth;
-            var linkLeftCenter =
-                 hoverLinkLeft + hoverLinkWidth / 2;
+            var newTop = 0;
             var newLeft = 0;
-            if (linkLeftCenter <= Dom.documentClientWidth() / 2) {
-                newLeft = hoverLinkLeft + hoverLinkWidth;
+            var position = hoverLink.getAttribute("_pos");
+            if (position == "bottom") {
+                Dom.addClass(hoverCard, "hoverBottom");
+                // calculate newTop and newLeft
+                newTop = Dom.absoluteTop(hoverLink) + hoverLink.offsetHeight;
+                newLeft = Dom.absoluteLeft(hoverLink);
+                var childrenArray = Dom.getChildren(hoverCard);
+                var arrayLength = childrenArray.length;
+                var hcContentWidth = 0;
+                hoverCard.style.display = '';
+                for (index = 0; index < arrayLength; index++) {
+                    var childObject = childrenArray[index];
+                    if (Dom.hasClass(childObject, "hcContent")) {
+                        hcContentWidth = childObject.offsetWidth;
+                        break;
+                    }
+                }
+                if (newLeft + hcContentWidth >= Dom.documentClientWidth()-20) {
+                    // hover will be shifted left due to space issue
+                    Widgets.positionHoverCardBottomPointer(hoverLink, hoverCard, hcContentWidth, "left");
+                    newLeft = Dom.absoluteLeft(hoverLink) + hoverLink.offsetWidth - hcContentWidth;
+                }
+                else {
+                    Widgets.positionHoverCardBottomPointer(hoverLink, hoverCard, hcContentWidth, null);
+                }
             }
             else {
-                hoverCard.style.display='';
-                newLeft = hoverLinkLeft - hoverCard.offsetWidth;
-                Dom.addClass(hoverCard, "hoverLeft");
+                var newTop = Dom.absoluteTop(hoverLink) - 20;
+
+                var hoverLinkLeft = Dom.absoluteLeft(hoverLink);
+                var hoverLinkWidth = hoverLink.offsetWidth;
+                var linkLeftCenter =
+                     hoverLinkLeft + hoverLinkWidth / 2;
+                var newLeft = 0;
+                if (linkLeftCenter <= Dom.documentClientWidth() / 2) {
+                    newLeft = hoverLinkLeft + hoverLinkWidth;
+                }
+                else {
+                    hoverCard.style.display='';
+                    newLeft = hoverLinkLeft - hoverCard.offsetWidth;
+                    Dom.addClass(hoverCard, "hoverLeft");
+                }
             }
             Dom.setAbsolutePosition(hoverCard, newLeft, newTop);
             Refresh.displayDiv(hoverCard);
             this.ActiveHoverCard = hoverCard;
+            hcTimeout = null;
+        },
+
+        positionHoverCardBottomPointer : function (hoverLink, hoverCard, hcContentWidth, position)
+        {
+            var childrenArray = Dom.getChildren(hoverCard);
+            var arrayLength = childrenArray.length;
+            for (index = 0; index < arrayLength; index++) {
+                var childObject = childrenArray[index];
+                var pointerPosition = hoverLink.offsetWidth/2 + 'px';
+                if (hoverLink.offsetWidth >= hcContentWidth) {
+                    // If link is longer than hover card content, the position of
+                    // the pointer will be half of the hover card content box
+                    pointerPosition = hcContentWidth/2 + 'px';
+                }
+                if (Dom.hasClass(childObject, "hcPointer") || Dom.hasClass(childObject, "hcPointerInner")) {
+                    if (position == "left") {
+                        childObject.style.right = pointerPosition;
+                        childObject.style.left = 'auto';
+                    }
+                    else {
+                        childObject.style.left = pointerPosition;
+                        childObject.style.right = 'auto';
+                    }
+                }
+            }
         },
 
         hideActiveHoverCard : function ()
@@ -1596,10 +1673,15 @@ ariba.Widgets = function() {
 
         // HoverCard
         HCC : {
-            mousemove : function (hoverLink, evt) {
-                ariba.Widgets.displayHoverCard(hoverLink);
+            mouseover : function (hoverLink, evt) {
+                hcTimeout = setTimeout(function() {ariba.Widgets.displayHoverCard(hoverLink);}, 500);
             },
             mouseout : function (hoverLink, evt) {
+                if (hcTimeout) {
+                    clearTimeout(hcTimeout);
+                    hcTimeout = null;
+                    return;
+                }
                 ariba.Widgets.hideActiveHoverCard();
             }
         },
@@ -1610,20 +1692,8 @@ ariba.Widgets = function() {
             mouseout : function (hoverLink, evt) {
                 ariba.Widgets.hideActiveHoverCard();
             }
-        },
+        }
 
-        // Generic Hover
-        GH : {
-            mouseover : function (category, evt) {
-                var hoverClassName = category.className + "-hover";
-                category.setAttribute("_hoverClass", hoverClassName);
-                ariba.Dom.addClass(category, hoverClassName);
-            },
-            mouseout : function (category, evt) {
-                var hoverClassName = category.getAttribute("_hoverClass");
-                ariba.Dom.removeClass(category, hoverClassName);
-            }
-        }        
     });
 
     return Widgets;

@@ -20,7 +20,7 @@ BlockoutChar,"X","default blockout character for SecureStringFormatter; Do we ha
 ,,
 ,,
 ,,
-ListSeparator,"， ","used to delimit a series of strings when presented "
+ListSeparator,", ","used to delimit a series of strings when presented "
 DayAbbrev,"天","abbreviation for day; "
 HourAbbrev,"小时","abbreviation for hours; "
 MinutesAbbrev,"分钟","abbreviation for minutes; "

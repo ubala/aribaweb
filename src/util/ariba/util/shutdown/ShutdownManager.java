@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#23 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#24 $
 */
 
 package ariba.util.shutdown;
@@ -708,7 +708,7 @@ public class ShutdownManager
             throw new IllegalArgumentException("ExitHook cannot be null !");
         }
         if (_exitHook != null) {
-            Log.shutdown.warning(9271, hook, _exitHook);
+            Log.shutdown.info(9271, hook, _exitHook);
         }
         _exitHook = hook;
     }

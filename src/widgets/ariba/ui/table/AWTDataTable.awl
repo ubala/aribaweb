@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#130 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.awl#132 $
     </Copyright>
 
     <Overview>
@@ -668,11 +668,11 @@
                 </tr>
                 <a:SetValue currentItem="$null"/>
             <a:Else/>\
-                <tr>\
+                <a:RefreshRegion tagName="tr" disabled="$disableRefresh" awname="TableHeader">\
                     <a:For list="$displayedColumns" item="$currentColumn">\
                         <a:IncludeComponent awcomponentName="$currentColumn.rendererComponentName" table="$this" isHeader="$true"/>\
                     </a:For>\
-                </tr>
+                </a:RefreshRegion>
             </a:If>\
             <a:SetValue renderingHeader="$false"/>
         </a:Content>

@@ -1,3 +1,87 @@
+New in Version 5.1 (9/20/2012)
+---------------------------------------------
+
+- New components
+  - Add new DOM state framework
+  - Add AWLazyAction that gets triggered when element is in client viewport
+  - Add AWHoverContainer and AWHoverControl
+  - Add AWViewportContainer
+
+- Enhancements
+  - Placeholder text support for text fields
+  - Add annotation for request validation
+  - Allow extra params and param removal in AWFormRedirect
+  - Office 2010 compatibility
+  - Right aligned and preopen popup menu support
+  - Add client screen size in perf log
+
+- Security fixes
+  - Fix XSS vulnerability inside HTML attribute
+  - Fix cookie setting during frame-busting
+  - Remove echo from awresAction
+
+- Bug fixes
+  - Fix form id recording in print mode  
+  - Improve logging in AWCheckoutManager
+  - Fix race condition with Chooser
+  - Fix XMLHTTP in iframe case
+  - Fix url generation in AWBaseImage
+  - Fix hint message expansion
+  - Fix modal window dismissal on Firefox
+  - Fix shared calendar bug
+
+- Upgrades
+  - Lucene 3.6.0
+
+New in Version 5.0GA - PREVIEW 7 (10/18/2011)
+---------------------------------------------
+
+- Initial AribaWeb Playground Framework
+    - Documentation with running examples
+- Performance State enhancements
+- Util enhancements
+- Bug fixes
+    - Fixed Chooser race condition when multiple full matches are triggered
+    - Fixed potential ResourceManager synchronization issue
+    
+New in Version 5.0GA - PREVIEW 6 (8/3/2011)
+---------------------------------------------
+
+- New widgets
+    - Hover Card
+    - Compact Form
+    - Placeholder text support for text fields
+    - Cross browser modal panel background
+
+- Security fixes
+    - Cross frame scripting fixes
+    - Fix progressCheck direct action to not use the JSESSIONID in the query string
+
+- XMLHTTP fixes
+    - Fix file download request complete callback
+    - Fix refresh region id extraction
+
+- New data structure
+    - Consistent Hash Ring is a data structure that is used to load balance resources across several server nodes.
+
+- Update plugin to be IDEA 9.x and 10.x compatible
+- Windows 7 / IE8 support
+- Updating asm.jar to version 3.3
+- Formatted tab label support
+
+- Misc bug fixes
+    - Fix multiple calendars regression
+    - Fix scroll faulting issue and row refresh
+
+- Fix bugs reported from the community
+    - Fix ariba.aw-all-src.jar needs appcore source files
+	  http://code.google.com/p/aribaweb/issues/detail?id=76
+    - Fix Integrate User object override fix for metaui-jpa
+	  http://code.google.com/p/aribaweb/issues/detail?id=79
+    - Fix http://<app_url>/ad/restore :: causes exception
+	  http://code.google.com/p/aribaweb/issues/detail?id=75
+	- Fix Collapse All when selectionPath is binded
+
 New in Version 5.0GA - PREVIEW 5 (10/18/2010)
 ---------------------------------------------
 

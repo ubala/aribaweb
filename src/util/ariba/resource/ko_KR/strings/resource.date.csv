@@ -19,6 +19,7 @@ DateMonthYearFmt,"yyyy년 M월 d일","Technical: Must be a valid java.text.DateForm
 FullDateMonthYearFmt,"yyyy년 M월 d일 a h시mm분","Technical: Must be a valid java.text.DateFormat format.; "
 FullDateMonthYearTZFmt,"yyyy년 M월 d일 a h시mm분, zzzz","Technical: Must be a valid java.text.DateFormat format.; "
 LongDayDateMonthYearFmt,"yyyy년M월d일, (E)","Technical: Must be a valid java.text.DateFormat format.; "
+LongDayDateMonthYearTZFmt,"yyyy년M월d일, (E) zzz","Technical: Must be a valid java.text.DateFormat format.; "
 FullDayDateMonthYearFmt,"yyyy년 M월 d일, (E) a h시mm분","Technical: Must be a valid java.text.DateFormat format.; "
 FullDayDateMonthYearTZFmt,"yyyy년 M월 d일, (E) a h시mm분, zzzz","Technical: Must be a valid java.text.DateFormat format.; "
 HoursMinutesSecondsFmt,"h시mm분ss초","Technical: Must be a valid java.text.DateFormat format.; "

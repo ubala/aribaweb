@@ -26,6 +26,19 @@ ariba.Dom = function() {
     var IsIE7Up = IsIE7 || IsIE8Up;
     var IsIE6Up = IsIE6 || IsIE7Up;
 
+    var ViewportBelowState = 'below';
+    var ViewportTopInState = 'topIn';
+    var ViewportInState = 'in';
+    var ViewportTopOutState = 'topOut';
+    var ViewportAboveState = 'above';
+    var ViewportStates = [
+        ViewportBelowState,
+        ViewportTopInState,
+        ViewportInState,
+        ViewportTopOutState,
+        ViewportAboveState
+    ];
+
     var Dom = {
         // Public Globals
         IsIE : IsIE,
@@ -41,7 +54,6 @@ ariba.Dom = function() {
         AWEmptyDocScriptlet : IsIE6 ? "javascript:false" : "javascript:void(0);",
 
         AWOpenWindowErrorMsg : null,
-
 
         getElementById : function (id)
         {
@@ -486,6 +498,44 @@ ariba.Dom = function() {
             return elementTopVisible || elementBottomVisible;
         },
 
+        isElementInViewport : function (element)
+        {
+            var viewportState = this._viewportState(element);
+            // in, topIn, and topOut are ok
+            return viewportState != ViewportAboveState &&
+                   viewportState != ViewportBelowState; 
+        },
+
+        setViewportState : function (element)
+        {
+            var viewportState = this._viewportState(element);
+            this.setState(element, viewportState, ViewportStates);
+        },
+        
+        _viewportState : function (element)
+        {
+            var clientRect = element.getBoundingClientRect();
+            var windowSize = this.getWindowSize();
+            var clientTop = clientRect.top;
+            var clientBottom = clientRect.bottom;
+            var windowHeight = windowSize[1];
+            if (clientTop > windowHeight) {
+                return ViewportBelowState;
+            }
+            else if (clientTop <= windowHeight &&
+                clientBottom > windowHeight) {
+                return ViewportTopInState;
+            }
+            else if (clientTop < 0 &&
+                clientBottom <= windowHeight) {
+                return ViewportTopOutState;
+            }
+            else if (clientBottom < 0) {
+                return ViewportAboveState;
+            }
+            return ViewportInState;
+        },
+
         //
         // Div Positioning
         //
@@ -764,10 +814,10 @@ ariba.Dom = function() {
                 classString += this.IsIE7 ? " IsIE7" : " IsIE6";
             }
             else if (this.isSafari) {
-                classString += "IsSaf";    
+                classString += " IsSaf";
             }
             else {
-                classString += "IsMoz";
+                classString += " IsMoz";
             }
             this.addClass(document.body, classString);
         },
@@ -830,7 +880,7 @@ ariba.Dom = function() {
         //
         // Relocate Div support -- moving DIVs to correct IE zindex bug for dialogs
         //
-        relocateDiv : function (divObject)
+        relocateDiv : function (divObject, markOriginalLocation)
         {
             if (divObject.getAttribute("_reloc") == '1') {
                 var divId = divObject.id;
@@ -843,10 +893,37 @@ ariba.Dom = function() {
                     var container = document.createElement('div');
                     container.id = divId + "_MovedCopy";
 
-                    divObject.parentNode.removeChild(divObject);
+                    if (markOriginalLocation) {
+                        var origId = divId + "_OrigLocation";
+                        var origMarker = document.createElement('div');
+                        var origId = divId + "_OrigLocation";
+                        origMarker.id = origId;
+
+                        divObject.parentNode.replaceChild(origMarker, divObject);
+                    }
+                    else {
+                        divObject.parentNode.removeChild(divObject);
+                    }
+
                     relocDestElm.appendChild(container);
                     container.appendChild(divObject);
                     divObject.setAttribute('_reloc', 0);
+                }
+            }
+        },
+
+        revertRelocatedCopy : function (id)
+        {
+            var container = this.getElementById(id + "_MovedCopy");
+            if (container) {
+                var origMarker = this.getElementById(id + "_OrigLocation");
+                //Ignore server-side div, the orignal marker may have been 
+                //removed with incremental update.
+                if(origMarker) {
+                    container.parentNode.removeChild(container);
+                    var divObject = container.firstChild;
+                    divObject.setAttribute("_reloc",'1');
+                    origMarker.parentNode.replaceChild(divObject, origMarker);
                 }
             }
         },
@@ -928,7 +1005,116 @@ ariba.Dom = function() {
         {
             return document.documentElement;
         },
+        
+        checkWindowScrollbar : function (checkWindow, shouldScroll)
+        {
+            if (checkWindow) {
+                var obj = document.documentElement;
+                shouldScroll = (obj.scrollHeight > obj.clientHeight);
+            }
 
+            if (shouldScroll && document.documentElement.style.overflowY != "scroll") {
+                document.documentElement.style.overflowY = "scroll";
+                //debug("<font style='color:blue'>vertical scroll enabled</font>");
+                return true;
+            }
+
+            if (!shouldScroll && document.documentElement.style.overflowY != "hidden") {
+                document.documentElement.style.paddingRight = "0px";
+                document.documentElement.style.overflowY = "hidden";
+                return true;
+            }
+            return false;
+        },
+
+        /*
+            Add CSS classes to the DOM element with the given new state.
+            CSS rules can be specify that reflects the new state.
+
+            DOM element can be in multiple states if they belong to different state groups.
+
+            Example:
+            
+            setState("hover") on <div class="foo bar"> becomes
+
+                <div class="foo bar foo-hover bar-hover">
+
+            setState("topOut", ["in", "topOut"]) on <div class="foo bar foo-hover foo-in bar-in"> becomes
+
+                <div class="foo bar foo-hover foo-topOut bar-topOut">
+        */
+        setState : function (elm, newState, allStates)
+        {
+            if (!elm) return;
+
+            var elmClassName = elm.className;
+            if (!elmClassName) return;
+
+            if (!allStates) {
+                allStates = [newState];
+            }
+
+            var i, j, state, stateClass, elmClass, isStateClass, addStateClass;
+            var newClasses = [];
+            
+            var elmClasses = elmClassName.split(" ");
+            for (i = 0; i < elmClasses.length; i++) {
+                addStateClass = false;
+                elmClass = elmClasses[i];
+                
+                for (j = 0; j < allStates.length; j++) {
+                    state = allStates[j];
+                    if (state == newState) {
+                        // only add if matches new state
+                        addStateClass = true;
+                    }                    
+                    isStateClass = this._isStateClass(elmClass, state);
+                    if (isStateClass) {
+                        break;
+                    }
+                }
+
+                if (!isStateClass) {
+                    // is normal class
+                    newClasses.push(elmClass);
+                    if (addStateClass) {
+                        stateClass = elmClass + "-" + newState;
+                        newClasses.push(stateClass);
+                    }
+                }
+
+            }
+
+            elm.className = newClasses.join(" ");
+        },
+
+        unsetState : function (elm, state)
+        {
+            if (!elm) return;
+
+            var elmClassName = elm.className;
+            if (!elmClassName) return;
+
+            var i, j, stateClass, elmClass;
+            var newClasses = [];
+
+            var elmClasses = elmClassName.split(" ");
+            for (i = 0; i < elmClasses.length; i++) {
+                elmClass = elmClasses[i];
+                if (!this._isStateClass(elmClass, state)) {
+                    // only add if doesn't match state class 
+                    newClasses.push(elmClass);
+                }
+            }
+
+            elm.className = newClasses.join(" ");
+        },
+
+        _isStateClass : function (elmClass, state)
+        {
+            return elmClass.indexOf("-" + state) >= 0;
+        },
+        
         EOF:0};
 
     //

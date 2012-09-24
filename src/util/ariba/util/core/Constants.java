@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2011 Ariba, Inc.
     All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Constants.java#23 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Constants.java#27 $
 */
 
 package ariba.util.core;
@@ -210,6 +210,13 @@ public class Constants implements Externalizable
     public static final String TimestampType = Timestamp.class.getName();
 
     /**
+        String constant for ariba.util.core.Date
+        @aribaapi private
+    */
+    public static final String AribaDateType   = ariba.util.core.Date.class.getName();
+
+
+    /**
         String constant for <code>ariba.util.Blob</code>
         @aribaapi ariba
     */
@@ -393,6 +400,8 @@ public class Constants implements Externalizable
     public static final Object[] EmptyArray = new Object[0];
 
     public static final String KeySystemDirectoryProperty = "ariba.systemDirectory";
+
+    public static final String SQL_ERROR = "SQL Error";
 
     /**
         The only other class that should this method is ariba.util.parameters.Parameters

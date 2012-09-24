@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#63 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectActionRequestHandler.java#67 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -126,6 +126,11 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
         Class directActionClass = null;
         String[] requestHandlerPathComponents = request.requestHandlerPath();
         if (requestHandlerPathComponents != null) {
+            AWNodeManager nodeManager = application.getNodeManager();
+            if (nodeManager != null) {
+                requestHandlerPathComponents =
+                    nodeManager.filterUrlForNodeCallback(requestHandlerPathComponents);
+            }
             int requestHandlerPathComponentsLength = requestHandlerPathComponents.length;
             if (requestHandlerPathComponentsLength > 0) {
                 actionName = requestHandlerPathComponents[0];
@@ -226,8 +231,8 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
                 directActionClass = reloadedClass;
             }
         }
-
-        requestContext.setCurrentDirectAction(className, directActionName[ActionNameIndex]);
+        String actionName = directActionName[ActionNameIndex];
+        requestContext.setCurrentDirectAction(className, actionName);
         AWDirectAction directAction = null;
         try {
             directAction = (AWDirectAction)directActionClass.newInstance();
@@ -290,19 +295,28 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
                         filter.execute(requestContext);
                     }
                 }
-                if (!directAction.skipValidation(directActionName[ActionNameIndex])) {
-                    if (!AWDirectAction.isServerManagementAction(request) &&
-                        directAction.shouldValidateNode()) {
-                        directAction.validateNode(requestContext,
-                                                  directActionName[ClassNameIndex],
-                                                  directActionName[ActionNameIndex]);
+                if (!directAction.skipValidation(actionName)) {
+                    if (directAction.shouldValidateTopFrame(actionName))
+                    {
+                        response = directAction.validateTopFramePost(requestContext);
+                        if (response != null) {
+                            return response;
+                        }
+
                     }
 
-                    if (directAction.shouldValidateSession()) {
+                    if (!AWDirectAction.isServerManagementAction(request) &&
+                        directAction.shouldValidateNode(actionName)) {
+                        directAction.validateNode(requestContext,
+                                                  directActionName[ClassNameIndex],
+                                                  actionName);
+                    }
+
+                    if (directAction.shouldValidateSession(actionName)) {
                         directAction.validateSession(requestContext);
                     }
 
-                    if (directAction.shouldValidateRequest()) {
+                    if (directAction.shouldValidateRequest(actionName)) {
                         directAction.validateRequest(requestContext);
                     }
                 }
@@ -531,6 +545,9 @@ public final class AWDirectActionRequestHandler extends AWConcreteRequestHandler
         catch (AWSessionRestorationException exception) {
             requestContext.createHttpSession();
             response = handleSessionRestorationError(requestContext).generateResponse();
+        }
+        catch (AWRemoteHostMismatchException exception) {
+            response = this.handleRemoteHostMismatchException(requestContext, exception).generateResponse();
         }
         catch (Exception exception) {
             response = handleUncaughtException(requestContext, exception);

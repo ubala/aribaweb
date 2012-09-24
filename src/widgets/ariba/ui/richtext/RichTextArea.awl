@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.awl#22 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/richtext/RichTextArea.awl#23 $
     </Copyright>
 
     <Overview>
@@ -64,7 +64,9 @@
     </Binding>
 
 </a:Api>\
-<a:If ifTrue="$^readonly:$false">
+<a:If ifTrue="$requestContext.isPrintMode">\
+    <a:String value="$displayValue" escapeUnsafeHtml="$true"/>\
+<a:Else ifTrue="$^readonly:$false"/>
     <a:ClientSideScript filename="widg/richtext.js"/>\
     <span elementId="$areaName">
         <textarea type="textarea"

@@ -113,6 +113,10 @@ public final class I18NConstants
     public static final String CharacterEncodingCp1255     = "Cp1255";
         // Russian
     public static final String CharacterEncodingCp1251     = "Cp1251";
+        // Polish
+    public static final String CharacterEncodingCp1250     = "Cp1250";
+        // Turkish
+    public static final String CharacterEncodingCp1254     = "Cp1254";
         // Japanese
     public static final String CharacterEncodingMS932      = "MS932";
         // Simplified Chinese

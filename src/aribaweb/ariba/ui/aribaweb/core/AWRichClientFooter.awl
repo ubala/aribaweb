@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientFooter.awl#26 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRichClientFooter.awl#27 $
     </Copyright>
 
     <Overview>
@@ -22,7 +22,7 @@
 </a:Api>\
 
 <a:RefreshRegion alwaysRender="$true">\
-    <a:If ifFalse="$requestContext.isPollUpdateRequest">\
+    <a:If ifFalse="$requestContext.isInPageRequest">\
         <a:ClientSideScript globalScope="$true" executeOn="onRefreshRequestComplete">\
             ariba.Input.registerActiveElementId();
         </a:ClientSideScript>

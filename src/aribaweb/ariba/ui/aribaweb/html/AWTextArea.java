@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.java#31 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.java#32 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -49,7 +49,9 @@ public class AWTextArea extends AWComponent
          BindingNames.errorKey,
          BindingNames.editable,
          BindingNames.onKeyDown,
-         BindingNames.showMaxLength
+         BindingNames.showMaxLength,
+         BindingNames.placeholder,
+         BindingNames.behavior
     };
     public AWEncodedString _elementId;
     public AWEncodedString _textAreaId;
@@ -58,6 +60,7 @@ public class AWTextArea extends AWComponent
     private Object _formatter;
     private boolean _formatterHandlesNulls;
     private boolean _disabled;
+    private String _placeholder;
 
     private static final String LimitTextLengthFmt =
         "ariba.Dom.limitTextLength(document.%s.%s,%s);";
@@ -76,6 +79,7 @@ public class AWTextArea extends AWComponent
             _formatterHandlesNulls = true;
         }
         _disabled = AWEditableRegion.disabled(requestContext());
+        _placeholder = stringValueForBinding("placeholder");
     }
 
     protected void sleep ()
@@ -87,6 +91,7 @@ public class AWTextArea extends AWComponent
         _formatter = null;
         _formatterHandlesNulls = false;
         _disabled = false;
+        _placeholder = null;
     }
 
     public AWEncodedString limitTextJavaScriptString ()
@@ -140,6 +145,10 @@ public class AWTextArea extends AWComponent
                     AWFormatting.get(_formatter).format(_formatter, objectValue);
             }
         }
+        if (_placeholder != null &&
+            StringUtil.nullOrEmptyString(formattedString)) {
+            formattedString = formatPlaceHolder();
+        }
         return formattedString;
     }
 
@@ -147,6 +156,10 @@ public class AWTextArea extends AWComponent
     {
         if (_disabled) {
             return;
+        }
+        if (_placeholder != null &&
+            formValueString.indexOf(_placeholder) >= 0) {
+            formValueString = "";
         }
         Object objectValue = null;
         if (formValueString.length() == 0) {
@@ -251,5 +264,26 @@ public class AWTextArea extends AWComponent
         String formattedString = formattedString();
         int stringLength = formattedString != null ? formattedString.length() : 0;
         return Math.max(maxLength - stringLength, 0);
+    }
+
+    public String cssClass ()
+    {
+        if (_placeholder != null) {
+            if (formattedValue().equals(formatPlaceHolder())) {
+                return "ph";
+            }
+        }
+        return "";
+    }
+
+    public String formatPlaceHolder ()
+    {
+        return _placeholder == null ? null : StringUtil.strcat(" ", _placeholder);
+    }
+
+    public AWEncodedString onBlurString ()
+    {
+        return _placeholder == null ? null :
+                AWEncodedString.sharedEncodedString("ariba.Handlers.hTextBlur(this, event)");
     }
 }

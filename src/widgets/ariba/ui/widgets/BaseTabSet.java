@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.java#4 $
 */
 
 package ariba.ui.widgets;
@@ -22,6 +22,7 @@ import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.util.fieldvalue.OrderedList;
 import ariba.util.core.Assert;
+import ariba.util.core.StringUtil;
 
 public final class BaseTabSet extends AWComponent
 {
@@ -114,4 +115,17 @@ public final class BaseTabSet extends AWComponent
     {
         return hasBinding(BindingNames.classBinding);
     }
+    
+    //If css class doesnt exist, we need to return pageTabWrapper 
+    //otherwise, the tabset style will be garbled 
+    public String cssClass () {
+        String cssClass = stringValueForBinding(BindingNames.classBinding);
+        
+        if (StringUtil.nullOrEmptyOrBlankString(cssClass)) {
+            return "pageTabWrapper";
+        } else {
+            return cssClass;
+        }
+    }
+
 }

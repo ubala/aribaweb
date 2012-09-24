@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#7 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#8 $
     </Copyright>
 
     <Overview>
@@ -97,7 +97,7 @@
     <a:If ifFalse="$^vertical">
         <table cellspacing="0" cellpadding="0" width="100%">\
             <tr>\
-                <td class="$^class:pageTabWrapper">\
+                <td class="$cssClass">\
                     <w:TabList list="$tabList" visibles="$^visibles" item="$^item"
                                index="$^index" label="$^label:^displayString"
                                selection="$selectedTab" submitForm="$^submitForm"

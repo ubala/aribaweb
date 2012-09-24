@@ -12,13 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FooterLinks.java#3 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/FooterLinks.java#4 $
 */
 
 package ariba.ui.widgets;
 
-import ariba.util.core.StringUtil;
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWSession;
+import ariba.util.core.StringUtil;
 
 /**
     Provides a method for applications to register a footer links component.
@@ -92,7 +93,17 @@ public class FooterLinks extends AWComponent
 
     public void hideFooter ()
     {
-        session().dict().put(HideFooter, HideFooter);
+        hideFooter(session());
     }
+    
+    public static void hideFooter (AWSession session)
+    {
+        session.dict().put(HideFooter, HideFooter);
+    }
+    
+    public static void showFooter (AWSession session)
+    {
+        session.dict().remove(HideFooter);
+    }    
 }
 

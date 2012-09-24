@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#76 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#77 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -570,7 +570,7 @@ abstract public class AWBaseRequest extends AWBaseObject
     /**
      Produce a URI which can be sent to the client and used later
      to replay the request.
-     
+
      This method should decorate the URI or mutate the form values as necessary
      to ensure the request will be associated back to the same application instance
      and session (not necessary when cookies are used for this purpose).
@@ -773,7 +773,7 @@ abstract public class AWBaseRequest extends AWBaseObject
 
         }
         if (!StringUtil.nullOrEmptyOrBlankString(contentString)) {
-            parameters = parametersFromUrlEncodedString(contentString);            
+            parameters = parametersFromUrlEncodedString(contentString);
         }
         if (!StringUtil.nullOrEmptyOrBlankString(queryStringForPost) &&
                 parameters != null) {
@@ -934,7 +934,7 @@ abstract public class AWBaseRequest extends AWBaseObject
 
     public void removeCookieValue (String cookieName)
     {
-        _cookieValues.remove(cookieName);
+        cookieValues().remove(cookieName);
     }
 
     public String[] cookieValuesForKey (String cookieName)
@@ -1033,7 +1033,7 @@ abstract public class AWBaseRequest extends AWBaseObject
     {
         return requestContext.request() instanceof InternalRequest;
     }
-    
+
     public AWBaseRequest getBaseRequest ()
     {
         return this;

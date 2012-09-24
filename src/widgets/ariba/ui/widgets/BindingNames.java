@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BindingNames.java#54 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BindingNames.java#55 $
 */
 
 package ariba.ui.widgets;
@@ -85,6 +85,7 @@ public class BindingNames extends ariba.ui.aribaweb.html.BindingNames
     public static final String selectAllUrl     = "selectAllUrl";
     public static final String selectedStep     = "selectedStep";
     public static final String searchAction     = "searchAction";
+    public static final String shouldOpen       = "shouldOpen";
     public static final String showFooterMessage= "showFooterMessage";
     public static final String showCancel       = "showCancel";
     public static final String showOk           = "showOk";
@@ -129,4 +130,5 @@ public class BindingNames extends ariba.ui.aribaweb.html.BindingNames
     public static final String prefix           = "prefix";
     public static final String ignoreCase       = "ignoreCase";
     public static final String showTip          = "showTip";
+    public static final String basic            = "basic";
 }

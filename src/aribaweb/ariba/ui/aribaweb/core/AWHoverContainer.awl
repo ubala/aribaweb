@@ -1,0 +1,58 @@
+<a:Api>
+    <Copyright>
+        Copyright 1996-2012 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License");
+        you may not use this file except in compliance with the License.
+        You may obtain a copy of the License at
+            http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHoverContainer.awl#1 $
+    </Copyright>
+
+    <Overview>
+        Behavior that set the element DOM state to "hover" when user mouses over the element.
+        "hover" state is remove when user mouses out the element.
+
+        Example:
+        <AWHoverContainer class="foo">Bar</AWHoverContainer>
+
+        .foo {
+            background-color:red;
+        }
+
+        .foo-hover {
+            background-color:green;
+        }
+
+        -- AWHoverControl --
+        If it contains a hover control, DOM state to "hover" happens when user mouses over the control element,
+        rather than on the container element. "hover" state is remove when user mouses out the container element.  
+
+        Example:
+        <AWHoverContainer class="foo">
+            Bar
+            <AWHoverControl>Control</AWHoverControl>
+        </AWHoverContainer>
+
+    </Overview>
+
+    <Binding key="tagName" direction="get" type="String" required="$false">
+        Tag name used. "div" tag is used by default.
+    </Binding>
+
+</a:Api>\
+<a:GenericContainer elementId="$elementId"
+                    tagName="^tagName:div" id="$elementId"
+                    bh="$behavior"
+                    otherBindings="$otherBindingsValues">
+    <a:AppendEnvironment hoverContainer="$this">
+        <a:IncludeContent/>
+    </a:AppendEnvironment>
+</a:GenericContainer>

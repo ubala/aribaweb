@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2010 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/SystemUtil.java#37 $
+    $Id: //ariba/platform/util/core/ariba/util/core/SystemUtil.java#38 $
 */
 
 package ariba.util.core;
@@ -1421,4 +1421,113 @@ public final class SystemUtil
     {
         return InternalDirectory.isDirectory() ? InternalDirectory : null;
     }
+
+    /**
+     * Validates that a method is allowed to call another method.
+     * @param validCallers an array of valid callers.  See the ValidCaller 
+     *        constructor for details on what an entry looks like.
+     *        To improve this method's performance, valid callers that require 
+     *        a search through the full stack should be at the end of the array.
+     * @param fatalAssert if true, an invalid caller causes a fatal assert, otherwise
+     *                    a non-fatal assert.
+     * @aribaapi private
+     */
+    public static void validateCaller (ValidCaller[] validCallers, boolean fatalAssert)
+    {
+        /**
+         * The index in the stack array to start looking for a valid caller. Indexes are:
+         *  0 - Thread.getStackTrace()
+         *  1 - This method
+         *  2 - This method's caller which is the method requesting validation of its caller.
+         *  3 - Caller of the requesting method.  This is the caller we want to validate.
+         */
+        final int startIndex = 3;
+        boolean found = false;
+
+        StackTraceElement[] stes = Thread.currentThread().getStackTrace();
+        Assert.that(stes.length > startIndex, "No caller on stack to validate");
+
+        for (ValidCaller validCaller : validCallers) {
+            // If not a full stack search, we only look at one method up the stack.
+            int endIndex = validCaller._checkFullStack ? stes.length : startIndex + 1;
+            for (int i = startIndex; i < endIndex; i++) {
+                StackTraceElement ste = stes[i];
+                String className = ste.getClassName();
+                String methodName = ste.getMethodName();
+
+                if (validCaller._classNameIsPrefix) {
+                    // Just need to check if the class name starts with validCaller
+                    // class name (which is probably just a package name).
+                    if (className.startsWith(validCaller._className) &&
+                        (validCaller._methodName == null || 
+                         validCaller._methodName.equals(methodName))) {
+                        found = true;
+                        break;
+                    }
+                }
+                else if (validCaller._className.equals(className) &&
+                         (validCaller._methodName == null || 
+                          validCaller._methodName.equals(methodName))) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        if (!found) {
+            String invalidClassName = stes[startIndex].getClassName();
+            String invalidMethodName = stes[startIndex].getMethodName();
+            String requestClassName = stes[startIndex-1].getClassName();
+            String requestMethodName = stes[startIndex-1].getMethodName();
+            String msg = "validateCaller method %s.%s is not allowed to call %s.%s";
+            if (fatalAssert) {
+                Assert.that(false, msg,
+                            invalidClassName, invalidMethodName, 
+                            requestClassName, requestMethodName);
+            }
+            else {
+                Assert.assertNonFatal(false, msg,
+                                      invalidClassName, invalidMethodName, 
+                                      requestClassName, requestMethodName);
+            }
+        }
+    }
+
+    /**
+     * A simple bean to hold the attributes of a valid caller for use by validateCaller
+     * method.  See constructor for details.
+     * @aribaapi private
+     */
+    public static class ValidCaller
+    {
+        public final String _className;
+        public final String _methodName;
+        public final boolean _classNameIsPrefix;
+        public final boolean _checkFullStack;
+        
+        /**
+         * Definition of a valid caller.
+         * @param className the full class name (package name plus class name).
+         *                  If classNameIsPrefix is true this is a prefix for the class
+         *                  name, typically a package name.   
+         * @param methodName the method name.  If null, any method in class is valid.
+         *                   Note that method signature is not checked.
+         * @param classNameIsPrefix when true the className is a prefix.  Any full class
+         *                          name that starts with the className prefix is valid.
+         *                          Typically this is used to validate an entire package.
+         * @param checkFullStack if true, the full stack is searched for a match.
+         *                       This is useful when there is unknown methods (such as
+         *                       reflection methods) on the stack before the valid method.
+         *                       If false, only the immediately caller of the requesting
+         *                       method is checked. 
+         * @aribaapi private
+         */
+        public ValidCaller (String className, String methodName, 
+                            boolean classNameIsPrefix, boolean checkFullStack)
+        {
+            _className = className;
+            _methodName = methodName;
+            _classNameIsPrefix = classNameIsPrefix;
+            _checkFullStack = checkFullStack;
+        }
+    }   
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWEncodedString.java#20 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWEncodedString.java#21 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -323,7 +323,7 @@ final class AWEscapedString extends AWEncodedString
                 break;
             }
             case HtmlAttributeEscaped: {
-                escapedString = StringUtil.replaceCharByString(originalString, '"', AWUtil.QuoteString);
+                escapedString = HTML.escapeHTMLAttribute(originalString);
                 break;
             }
             case XmlEscaped: {

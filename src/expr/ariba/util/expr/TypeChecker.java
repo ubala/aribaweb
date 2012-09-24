@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeChecker.java#35 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/TypeChecker.java#38 $
 */
 
 package ariba.util.expr;
@@ -20,6 +20,7 @@ package ariba.util.expr;
 import ariba.util.core.ArithmeticOperations;
 import ariba.util.core.Assert;
 import ariba.util.core.ClassUtil;
+import ariba.util.core.FastStringBuffer;
 import ariba.util.core.Fmt;
 import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
@@ -1418,7 +1419,7 @@ public class TypeChecker extends ASTNodeVisitor
             Node child = node.jjtGetChild(i);
             TypeInfo argType = getTypeInfoForNode(child);
             if (argType != null) {
-                parameters.add(argType);
+                parameters.add(argType.getName());
             }
             else if (hasRootType()) {
                 addError(node,
@@ -1427,7 +1428,7 @@ public class TypeChecker extends ASTNodeVisitor
                 return;
             }
             else {
-                parameters.add(NullTypeInfo.instance);
+                parameters.add(NullTypeInfo.instance.getName());
             }
         }
 
@@ -1438,15 +1439,15 @@ public class TypeChecker extends ASTNodeVisitor
             // check if the method is in invoked in a class context
             SemanticRecord record = getSemanticRecordForPredecessorInPropertyChain(node);
             boolean staticOnly = (record != null && record.getSymbolKind() == Symbol.Type);
-            method = type.getMethod(_env.getTypeRetriever(), methodName, parameters,
-                                                                         staticOnly);
+            method = type.getMethodForName(
+                    _env.getTypeRetriever(), methodName, parameters, staticOnly);
             if (method != null) {
                 registerMethodReturnType(node, method);
                 found = true;
             }
-            else if (staticOnly
-                && type.getMethod(_env.getTypeRetriever(),
-                                  methodName, parameters, false) != null) {
+            else if (staticOnly &&
+                    type.getMethodForName(
+                            _env.getTypeRetriever(), methodName, parameters, false) != null) {
                 addError(node,
                     Fmt.S("Try to invoke a non-static method '%s' from a class context '%s'.",
                         methodName, record.getSymbolName()));
@@ -1463,10 +1464,11 @@ public class TypeChecker extends ASTNodeVisitor
 
                 if (methodName.equals(name)) {
                     type = getTypeInfo(node, typename);
-                    method = type.getMethod(_env.getTypeRetriever(),
-                                           newMethodName,
-                                           parameters,
-                                           false);
+                    method = type.getMethodForName(
+                            _env.getTypeRetriever(),
+                            newMethodName,
+                            parameters,
+                            false);
                     if (method != null) {
                         registerMethodReturnType(node, method);
                         found = true;
@@ -1492,25 +1494,22 @@ public class TypeChecker extends ASTNodeVisitor
         }
     }
 
-    private String getParameterSignature (List parameters)
+    private static String getParameterSignature (List<String> parameters) 
     {
-        String result = "";
-        if (ListUtil.nullOrEmptyList(parameters)) {
-            return result;
-        }
-
-        for (int i=0; i < parameters.size(); i++) {
-            TypeInfo argType = (TypeInfo)parameters.get(i);
-            String type = (argType != null ? argType.getName() : "<unknown>");
-            if (i < parameters.size() - 1) {
-                result += type + ", ";
-            }
-            else {
-                result += type;
+        FastStringBuffer buffer = new FastStringBuffer();
+        if (!ListUtil.nullOrEmptyList(parameters)) {
+            for (Iterator iter = parameters.iterator(); iter.hasNext();) {
+                String parameter = (String)iter.next();
+                if (StringUtil.nullOrEmptyOrBlankString(parameter)) {
+                    parameter = "<unknown>";
+                }
+                buffer.append(parameter);
+                if (iter.hasNext()) {
+                    buffer.append(", ");
+                }
             }
         }
-
-        return result;
+        return buffer.toString();
     }
 
     private void registerMethodReturnType (Node node, MethodInfo method)

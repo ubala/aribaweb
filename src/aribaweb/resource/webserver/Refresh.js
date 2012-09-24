@@ -69,6 +69,11 @@ ariba.Refresh = function() {
     var _historyLength;
     var _runCompleteRefreshOnLoad = false;
 
+    var _lazyActionScrollInited = false;
+    var _lazyActionIds = [];
+    var _inViewportLazyActionIds = [];
+    var _FireLazyActionsTimeout;
+
 
     // Incremental request completion is indicated by the refreshRequestComplete()
     // callback from the incremental update content.  In addition, there is expected to
@@ -1090,6 +1095,63 @@ ariba.Refresh = function() {
             return false;
         },
 
+        initLazyAction : function (lazyActionId)
+        {
+            if (!_lazyActionScrollInited) {
+                _lazyActionScrollInited = true;
+                Event.registerRefreshCallback(this.checkLazyActions.bind(this));
+                Event.registerWindowOnScroll(this.checkLazyActions.bind(this));
+            }
+            _lazyActionIds.push(lazyActionId);
+        },
+
+        checkLazyActions : function ()
+        {
+            var i, lazyActionId, elm, fireLazyActions;
+            var notInViewportLazyActionIds = [];
+            for (i = 0; i < _lazyActionIds.length; i++) {
+                // bucket 
+                lazyActionId = _lazyActionIds[i];
+                elm = Dom.getElementById(lazyActionId);
+                if (elm) {
+                    if (Dom.isElementInViewport(elm)) {
+                        Debug.log(lazyActionId + " in viewport");
+                        Util.arrayAddIfNotExists(_inViewportLazyActionIds, lazyActionId);
+                        fireLazyActions = true;
+                    }
+                    else {
+                        Util.arrayAddIfNotExists(notInViewportLazyActionIds, lazyActionId);
+                    }
+                }
+            }
+            if (fireLazyActions) {
+                this.fireLazyActions();
+            }
+            _lazyActionIds = notInViewportLazyActionIds;
+        },
+
+        fireLazyActions : function ()
+        {
+            if (_FireLazyActionsTimeout) {
+                clearTimeout(_FireLazyActionsTimeout);
+            }
+            _FireLazyActionsTimeout = setTimeout(this._fireLazyActions.bind(this), 500);                
+        },
+
+        _fireLazyActions : function ()
+        {
+            if (!Request.isRequestInProgress()) {
+                var senderId = _inViewportLazyActionIds.join(",");
+                _inViewportLazyActionIds = [];                
+                Request.getContent(Request.formatInPageRequestUrl(senderId));
+            }
+            else {
+                this.fireLazyActions();
+            }
+        },
+
+
+        
         evalOnVisibleScript : function (element)
         {
             var children = element.childNodes;

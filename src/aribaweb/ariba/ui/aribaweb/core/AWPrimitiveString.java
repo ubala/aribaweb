@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,15 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPrimitiveString.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPrimitiveString.java#9 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWUtil;
-import java.util.Map;
 import java.lang.reflect.Field;
+import java.util.Map;
 
 public class AWPrimitiveString extends AWBindableElement
 {
@@ -39,20 +39,24 @@ public class AWPrimitiveString extends AWBindableElement
         return _value;
     }
 
-    protected AWEncodedString stringValueForObjectInComponent (Object objectValue, AWComponent component)
+    protected AWEncodedString stringValueForObjectInComponent (Object objectValue,
+                                                               AWComponent component)
     {
-        return (objectValue instanceof AWEncodedString) ? (AWEncodedString)objectValue : AWEncodedString.sharedEncodedString(AWUtil.toString(objectValue));
+        return (objectValue instanceof AWEncodedString) ?
+                (AWEncodedString)objectValue :
+                AWEncodedString.sharedEncodedString(AWUtil.toString(objectValue));
     }
 
-    public void renderResponse(AWRequestContext requestContext, AWComponent component)
+    public void renderResponse (AWRequestContext requestContext, AWComponent component)
     {
         Object objectValue = _value.value(component);
-        AWEncodedString stringValue = (objectValue == null) ? null : stringValueForObjectInComponent(objectValue, component);
+        AWEncodedString stringValue = (objectValue == null) ?
+                null : stringValueForObjectInComponent(objectValue, component);
         requestContext.response().appendContent(stringValue);
     }
 
     protected Object getFieldValue (Field field)
-      throws IllegalArgumentException, IllegalAccessException
+            throws IllegalArgumentException, IllegalAccessException
     {
         try {
             return field.get(this);

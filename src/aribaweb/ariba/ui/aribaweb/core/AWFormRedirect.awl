@@ -10,20 +10,21 @@
 <body>
     <!--- Put special marker around form so it's parsed out by XMLHTTPUpdateSource -->\
     <a:PrimitiveString value="<!--@&@-->"/>\
-    <form method="post" id="formRedirectForm" name="formRedirectForm" action="$formActionUrl" target="$target">
+    <form method="post" id="formRedirectForm" name="$^formName:formRedirectForm" action="$formActionUrl" target="$target">
         <a:For list="$formValues" index="$currIndex">\
             <a:HiddenFormParameter name="$currentName" value="$currentValue"/>
         </a:For>\
+        <a:IncludeContent name="extraFormParams" required="$false"/>
     </form>\
     <a:PrimitiveString value="<!--@&@-->"/>\
     <a:IncludeContent/>
     <a:GenericContainer tagName="script" type="text/javascript">
         if (window.name == "AWRefreshFrame" || window.ariba_IR) {
             <a:CurrWindowDecl/>
-            ariba.Refresh.iFrameFormSubmit("formRedirectForm");
+            ariba.Refresh.iFrameFormSubmit("<a:String value="$^formName:formRedirectForm"/>");
         }
         else {
-            document.formRedirectForm.submit();
+            document.<a:String value="$^formName:formRedirectForm"/>.submit();
         }
     </a:GenericContainer>
 </body>
