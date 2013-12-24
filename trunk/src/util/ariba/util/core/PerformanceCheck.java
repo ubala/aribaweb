@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceCheck.java#8 $
+    $Id: //ariba/platform/util/core/ariba/util/core/PerformanceCheck.java#9 $
 */
 
 package ariba.util.core;
@@ -70,7 +70,7 @@ public class PerformanceCheck
             check = new PerformanceCheck(name, params);
             // we don't need to synchronize. Worst case we create two instances
             // of the same PerformanceCheck and the last one will be the one stored
-            Registry.put(check, name);
+            Registry.put(name, check);
         }
         return check;
     }

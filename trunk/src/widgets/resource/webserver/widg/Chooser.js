@@ -748,6 +748,19 @@ ariba.Chooser = function() {
         },
         EOF:0};
 
+    //
+    // iPad - specific methods
+    //
+    if (Dom.isIPad) Util.extend(Chooser, function () {
+        return {
+            displayChooserMenu : function (chooserInfo)
+            {
+                Menu.menuLinkOnClick(chooserInfo.menuPositionObj, chooserInfo.menu.id, chooserInfo.textField.id, null, !chooserInfo.basic);
+            },
+
+        EOF:0};
+    }());
+
     // Behaviors
     ariba.Event.registerBehaviors({
         // CH - Chooser

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBindingNames.java#32 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBindingNames.java#33 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -131,6 +131,8 @@ abstract public class AWBindingNames extends AWBaseObject
     public static final String checked                = "checked";
     public static final String background             = "background";
     public static final String label                  = "label";
+    public static final String tip                    = "tip";
+    public static final String showTip                = "showTip";
     public static final String isVisible              = "isVisible";
     public static final String initiallyVisible       = "initiallyVisible";
     public static final String fontFace               = "fontFace";

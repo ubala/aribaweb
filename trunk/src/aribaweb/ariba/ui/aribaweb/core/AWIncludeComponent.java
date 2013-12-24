@@ -12,19 +12,19 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWIncludeComponent.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWIncludeComponent.java#12 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWUtil;
+import ariba.ui.aribaweb.util.Log;
 import ariba.util.core.Assert;
 import ariba.util.core.Constants;
 import ariba.util.core.Fmt;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.MapUtil;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -277,11 +277,36 @@ public class AWIncludeComponent extends AWContainerElement
         if (index != null) {
             return index;
         }
-
+        boolean result = canCreate || component.requestContext().allowFailedComponentRendezvous();
+        if(AWConcreteServerApplication.IsDebuggingEnabled && !result)
+        {
+            Iterator<Integer> iterator1 = _elementReferencesForId.keySet().iterator();  
+            Log.aribaweb.debug("[AWIncludeComponent] - elementReferenceId() - Start Printing values for " +
+                "_elementReferencesForId: ");
+            while (iterator1.hasNext()) {  
+                int iindex = iterator1.next().intValue();
+                AWBindable elem  = (AWBindable) _elementReferencesForId.get(iindex);  
+                Log.aribaweb.debug("[AWIncludeComponent] - elementReferenceId() - Index: " + iindex + " - " 
+                    + " Element Tagname: " + elem.tagName());  
+            }
+            Log.aribaweb.debug("[AWIncludeComponent] - elementReferenceId() - End Printing Values for " +
+                "_elementReferenceIds: "); 
+            Iterator<AWBindable> iterator2 = _elementReferenceIds.keySet().iterator();
+            Log.aribaweb.debug("[AWIncludeComponent] - - elementReferenceId() - Start Printing values for " +
+                "_elementReferenceIds: ");
+            while (iterator2.hasNext()) {  
+                AWBindable elem = iterator2.next();
+                int iindex = (Integer) _elementReferenceIds.get(elem);  
+                Log.aribaweb.debug("[AWIncludeComponent] - elementReferenceId() - Element Tagname: " 
+                    + elem.tagName() + " -  " + " Index: " + iindex);
+            }
+            Log.aribaweb.debug("[AWIncludeComponent] - - elementReferenceId() - End Printing values for " +
+                "_elementReferenceIds: ");
+        }
         Assert.that(canCreate || component.requestContext().allowFailedComponentRendezvous(),
-                "IncludeComponent failed to rendezvous with existing element "
-                + "-- likely cause: illegal change between phases that shouldn't:  New ComponentReference: %s",
-                element);
+             "IncludeComponent failed to rendezvous with existing element " 
+              + "-- likely cause: illegal change between phases that shouldn't:  New ComponentReference: %s",
+              element);
 
         index = computeIndexForElement(element, component);
         AWBindable existingElement = (AWBindable) _elementReferencesForId.get(index);

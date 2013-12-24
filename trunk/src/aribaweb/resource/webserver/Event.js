@@ -829,6 +829,22 @@ ariba.Event = function() {
         EOF:0};
 
     //
+    // iPad - specific methods
+    //
+    if (Dom.isIPad) Util.extend(Event, function () {
+        return {
+            enableDocumentClick : function (func)
+            {
+            },
+
+            disableDocumentClick : function ()
+            {
+            },
+
+        EOF:0};
+    }());
+
+    //
     // IE - specific methods
     //
     if (Dom.IsIE) Util.extend(Event, function () {
@@ -841,12 +857,16 @@ ariba.Event = function() {
             // Events
             /////////////////////////
 
-            cancelBubble : function (mevent)
+            cancelBubble : function (mevent, allowDefault)
             {
                 if (!Util.isNullOrUndefined(mevent)) {
                     mevent.cancelBubble = true;
                 // used by gl_handler
                     mevent.awCancelBubble = true;
+
+                    if (!allowDefault) {
+                       Event.preventDefault(mevent);
+                    }
                 }
             },
 

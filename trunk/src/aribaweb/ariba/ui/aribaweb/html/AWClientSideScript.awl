@@ -1,6 +1,6 @@
 <a:Api>
     <Copyright>
-        Copyright 1996-2008 Ariba, Inc.
+        Copyright 1996-2013 Ariba, Inc.
 
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWClientSideScript.awl#28 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWClientSideScript.awl#29 $
     </Copyright>
 
     <Overview>
@@ -31,7 +31,7 @@
     <Binding key="isSingleton" direction="get" type="boolean" default="$true">
         Only meaningful when not using scriptFile binding and the
         AWClientSideScript is used to render a script block.  By default, the
-        value of this binding is $true.  If a resusable component uses an
+        value of this binding is $true.  If a reusable component uses an
         AWClientSideScript to define a block of inline script this binding
         should most likely be set binding to false or else only a single
         instance of the script block will be rendered per page.  When this
@@ -91,18 +91,28 @@
         <a:ClientSideScript handle="$dict.handle"> some script here ... </a:ClientSideScript>
         <td onKeyPress="$dict.handler"></td>
     </Binding>
+
+    <Binding key="RJSMayNotBeDefined" direction="get" type="boolean" required="$false" default="$false">
+        Option to encapsulate the JS function in RJS if defined, else create RJS function
+        that evaluate the function right away. Creating RJS is fine because if Request.js
+        is included later, it will overwrite this RJS function.
+    </Binding>
 </a:Api>\
 <a:If notEqualNull="$filename">\
     <a:Singleton key="$filename">\
             <!--- AWClientSideScript - js urls -->\
         <a:If ifTrue="$useDirectInclude">\
             <a:RefreshRegion forceRefreshOnChange="$true" useId="$filename">
-                <a:GenericContainer tagName="script" language="$^language:JavaScript" src="$scriptFileUrl">\
+                <a:GenericContainer tagName="script"
+                                    language="$^language:JavaScript"
+                                    src="$scriptFileUrl">\
                     <!--- this should always be empty -->\
                 </a:GenericContainer>\
             </a:RefreshRegion>\
         <a:Else/>\
-            <a:ClientSideScript executeOnIncrementalUpdate="$true" isSingleton="$false" synchronous="$true">\
+            <a:ClientSideScript executeOnIncrementalUpdate="$true"
+                                isSingleton="$false"
+                                synchronous="$true">\
                 ariba.Refresh.loadJSFile("$scriptFileUrl");
             </a:ClientSideScript>\
         </a:If>\
@@ -132,11 +142,27 @@
     </a:If>\
 </a:If>\
 <a:Block name="ScriptTemplate">\
+    <!--- 1-CK5JND
+        RJS should always be defined on the login page.
+        In redirect cases, RJS is not defined, we assign RJS to this function.
+        This allows to avoid JavaScript hoisting.
+    --->
+    <a:If ifTrue=$^RJSMayNotBeDefined>
+        <a:GenericContainer tagName="script">
+            if (typeof(RJS) !== 'function'){
+                RJS = function (inc, sync, isGS, f) {
+                    f();
+                }
+            }
+        </a:GenericContainer>
+    </a:If>
     <a:If ifFalse="$hasScriptBinding">\
         <a:If ifFalse="$isVBScript">
             <a:If ifTrue="$useDirectGlobalScript">\
                 <a:RefreshRegion forceRefreshOnChange="$true">
-                    <a:GenericContainer tagName="script" elementId="$^elementId" invokeAction="$^invokeAction">\
+                    <a:GenericContainer tagName="script"
+                                        elementId="$^elementId"
+                                        invokeAction="$^invokeAction">\
                         RJS(<a:String value="$^executeOnIncrementalUpdate:$true"/>, \
                             <a:String value="$^synchronous:$false"/>, \
                             <a:String value="$isGlobalScope"/>, \
@@ -145,7 +171,9 @@
                 </a:RefreshRegion>\
             <a:Else/>\
                 <a:If ifFalse="$formatInPre">\
-                    <a:GenericContainer tagName="script" elementId="$^elementId" invokeAction="$^invokeAction">\
+                    <a:GenericContainer tagName="script"
+                                        elementId="$^elementId"
+                                        invokeAction="$^invokeAction">\
                         RJS(<a:String value="$^executeOnIncrementalUpdate:$true"/>, \
                             <a:String value="$^synchronous:$false"/>, \
                             <a:String value="$isGlobalScope"/>, \
@@ -157,7 +185,8 @@
                         <a:IncludeContent/>\
                     </pre>\
                     <a:If notEqualNull="$executeOn">\
-                        <a:ClientSideScript isSingleton="$false" globalScope="$isGlobalScope">
+                        <a:ClientSideScript isSingleton="$false"
+                                            globalScope="$isGlobalScope">
                             ariba.Event.registerHandler("$spanId", "$executeOn");
                         </a:ClientSideScript>\
                     </a:If>\
@@ -169,16 +198,19 @@
             </a:If>
             <a:If ifTrue="$useDirectGlobalScript">\
                 <a:RefreshRegion forceRefreshOnChange="$true" useId="">
-                    <a:GenericContainer tagName="script" language="$^language:JavaScript"
+                    <a:GenericContainer tagName="script"
+                                        language="$^language:JavaScript"
                         otherBindings="$otherBindingsValues">\
                         <a:IncludeContent/>\
                     </a:GenericContainer>\
                 </a:RefreshRegion>
             <a:Else/>\
                 <a:MethodInvocation invoke="$setupSpanId"/>\
-                <!--- Needed for ACM DFS: they're inconsistent about what's global script so we have to tread non
-                     globalScope script as if it is... When we fix them, and switch to full dynamic script loading, then
-                     we'll want to switch this off to avoid unnecessary FPRs
+                <!--- Needed for ACM DFS: they're inconsistent about what's
+                     global script so we have to tread non globalScope script
+                     as if it is... When we fix them, and switch to full
+                     dynamic script loading, then we'll want to switch this
+                     off to avoid unnecessary FPRs
                 -->\
                 <pre id="$spanId" style="display:none">\
                     <a:RefreshRegion forceRefreshOnChange="$true">
@@ -187,11 +219,13 @@
                 </pre>\
                 <a:GenericContainer tagName="script">\
                     if (!ariba_IR) {\
-                        ariba.Refresh.RVBS('$spanId', <a:String value="$isGlobalScope"/>);\
+                        ariba.Refresh.RVBS('$spanId',
+                            <a:String value="$isGlobalScope"/>);\
                     }\
                     <a:If ifTrue="$^executeOnIncrementalUpdate:$true">\
                         else {\
-                            ariba.Refresh.RVBS('$spanId', <a:String value="$isGlobalScope"/>);\
+                            ariba.Refresh.RVBS('$spanId',
+                                <a:String value="$isGlobalScope"/>);\
                         }\
                     </a:If>\
                 </a:GenericContainer>\
@@ -199,7 +233,7 @@
         </a:If>\
     <a:Else/>\
         <!--- AWClientSideScript - script binding-->\
-        <!--- FIXME!  Is this implcitly GlobalScope?  I.e. should we forceRefreshOnChange? -->\
+        <!--- FIXME!  Is this implicitly GlobalScope?  I.e. should we forceRefreshOnChange? -->\
         <a:GenericContainer tagName="script" language="$^language:JavaScript"
             otherBindings="$otherBindingsValues">\
             <a:PrimitiveString value="$scriptString"/>\

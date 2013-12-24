@@ -1,8 +1,8 @@
 /*
-    Copyright (c) 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2012 Ariba, Inc.
     All rights reserved. Patents pending.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/ReadOnlyMap.java#6 $
+    $Id: //ariba/platform/util/core/ariba/util/core/ReadOnlyMap.java#7 $
 
     Responsible: jshultis
 */
@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import ariba.util.io.FormattingSerializer;
 
 
@@ -87,7 +86,7 @@ public class ReadOnlyMap <K,V>
         return (m == null) || (m.map == null) || m.map.isEmpty();
     }
 
-     public int size ()
+    public int size ()
     {
         return map == null ? 0 : map.size();
     }
@@ -121,12 +120,11 @@ public class ReadOnlyMap <K,V>
         return map == null ? 0 : map.hashCode();
     }
 
-    public Set entrySet ()
+    public Set<Entry<K, V>> entrySet ()
     {
-        Iterator entries = map.entrySet().iterator();
-        Set myEntries = SetUtil.set(map.size());
-        while (entries.hasNext()) {
-            Entry myEntry = new Entry((Map.Entry)entries.next());
+        Set<Entry<K, V>> myEntries = SetUtil.set(map.size());
+        for (java.util.Map.Entry<K, V> entry : map.entrySet()) {
+            Entry<K, V> myEntry = new Entry<K, V>(entry);
             myEntries.add(myEntry);
         }
         return myEntries;
@@ -194,9 +192,10 @@ public class ReadOnlyMap <K,V>
         return MapUtil.immutableMap(map);
     }
 
-    public static Map immutableMap(ReadOnlyMap roMap)
+    public static Map immutableMap (ReadOnlyMap roMap)
     {
-        return (roMap == null || roMap.map == null) ? null : MapUtil.immutableMap(roMap.map);
+        return (roMap == null || roMap.map == null) ? null :
+                MapUtil.immutableMap(roMap.map);
     }
 
     public class Entry <K,V>

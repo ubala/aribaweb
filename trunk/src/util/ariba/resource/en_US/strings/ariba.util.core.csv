@@ -39,4 +39,8 @@ NumberFormatError,"The numeric value is not in the appropriate format.","friendl
 MaxValueExceeded,"Value ''{0}'' is greater than the maximum allowed value ''{1}''.", "Error when value is greater than allowed (integer overflow)"
 MinValueExceeded,"Value ''{0}'' is less than the minimum allowed value ''{1}''.", "Error when value is less than allowed (integer underflow)"
 WholeNumberRequiredKey,"Value ''{0}'' must be a whole number.", "Error when integer value contains fractions"
-
+,,
+,, AWMultiTabException
+,,
+MultiTabExceptionMessage,"You are attempting to open a new Ariba tab or window in this browser. You already opened the maximum number of Ariba tabs/windows allowed in a single browser session.","Message on multitab exception page"
+MultiTabExceptionReportMessage,"Close one of the other tabs or windows and try again.","Report message on multitab exception page"

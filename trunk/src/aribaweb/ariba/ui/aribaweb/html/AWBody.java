@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBody.java#7 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBody.java#9 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -25,6 +25,11 @@ public final class AWBody extends AWComponent
     private static final String[] SupportedBindingNames = {
         BindingNames.filename, BindingNames.onLoad, BindingNames.background
     };
+    // Wait indicator for desktop browsers
+    private static final String ProgressBar = "anxProgressBar.gif";
+    // Wait indicator for iPad
+    private static final String Spinner = "anxWaitSpinner.gif";
+
     protected static final String JavaScriptLessThanSymbol = "<";
 
     // ** Thread Safety Considerations: see AWComponent.
@@ -45,5 +50,15 @@ public final class AWBody extends AWComponent
             }
         }
         return imageUrl;
+    }
+
+    public String waitImg ()
+    {
+        if (request() !=null && request().isIPad()) {
+            return Spinner;
+        }
+        else {
+            return ProgressBar;
+        }
     }
 }

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuLink.java#30 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuLink.java#31 $
 */
 
 package ariba.ui.widgets;
@@ -31,7 +31,7 @@ public final class PopupMenuLink extends AWComponent
         BindingNames.tagName, "containerStyle",
         BindingNames.menuId, BindingNames.index, BindingNames.classBinding, BindingNames.onMouseOver,
         BindingNames.onMouseOut, BindingNames.omitTags, BindingNames.title, BindingNames.style,
-        BindingNames.actionSetup, BindingNames.position, BindingNames.shouldOpen
+        BindingNames.actionSetup, BindingNames.position, BindingNames.shouldOpen,  BindingNames.behavior
     };
 
     public AWEncodedString _elementId;

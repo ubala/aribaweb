@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.awl#40 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/dev/AWDebugPane.awl#41 $
     </Copyright>
 
     <Overview>
@@ -153,11 +153,21 @@
                                             </w:Confirmation>
                                         </td>
                                     </a:If>
-                                    <td colspan="2">
+                                    <td colspan="${isUserCommunityEnabled ? 1 : 2}">
                                         <w:PopupMenuItem action="$reRender">\
                                             Re-Render $rerenderCount times ($rerenderMode)
                                         </w:PopupMenuItem>
                                     </td>
+                                    <a:If ifTrue="$isUserCommunityEnabled">
+                                        <td>
+                                            <span onMouseDown="ariba.Community.viewCommunityContext();">
+                                                <w:PopupMenuItem>\
+                                                    View Community Context
+                                                </w:PopupMenuItem>
+                                            </span>
+                                         </td>
+                                    </a:If>
+
                                 </tr>
                             </table>
                         </a:If>\

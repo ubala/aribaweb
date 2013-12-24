@@ -12,13 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/log/Log.java#24 $
+    $Id: //ariba/platform/util/core/ariba/util/log/Log.java#25 $
 */
 
 package ariba.util.log;
 
 import org.apache.log4j.Level;
-
 import java.io.Writer;
 import java.io.StringWriter;
 import java.io.PrintWriter;
@@ -108,6 +107,24 @@ public class Log
     */
     public static final Logger customer =
         (Logger)Logger.getLogger("customer");
+
+    /**
+     Log message categories for socket connect and disconnect
+     reporting.
+
+     @aribaapi documented
+     */
+    public static final Logger http =
+            (Logger)Logger.getLogger("http");
+
+    /**
+     Log message categories for servlet related logging. This is a
+     child of the connect category.
+
+     @aribaapi documented
+     */
+    public static final Logger httpServlet =
+            (Logger)Logger.getLogger("http.servlet");
 
     /**
         Logger for util class messages.

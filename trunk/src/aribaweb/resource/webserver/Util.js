@@ -9,7 +9,7 @@ if (!this.ariba) this.ariba = { awCurrWindow : null };
 ariba.Debug = {
     log : function () {},
     logEvent : function () {}
-}
+};
 
 ariba.Util = function() {
 
@@ -17,39 +17,96 @@ ariba.Util = function() {
     
     var Util = {
 
-        extend : function(dest, source) {
-            for (var p in source) dest[p] = source[p];
-            return dest;
+        /**
+         * @deprecated use http://api.jquery.com/jQuery.proxy/
+         */
+        bind : function (f, oCtx)
+        {
+            return $.proxy(f, oCtx);
         },
 
-        // add elements from src to dest, [contingent on pred], [unrolling children]
-        _arrayAdd : function (dest, src, pred, childFn) {
-            for (var i = 0; i < src.length; i++) {
-                var o = src[i], children;
-                if (!pred || pred(o)) dest.push(o);
-                if (childFn && (children = childFn(o))) {
-                    this._arrayAdd(dest, children, pred, childFn);
-                }
+        /**
+         * @deprecated use http://api.jquery.com/jQuery.extend/
+         */
+        extend : function (oDest, oSrc)
+        {
+            return $.extend(oDest, oSrc);
+        },
+
+        /**
+         * Add elements from one array to another, but with optional
+         * restrictions determined by fnPredicate and fnChildren.
+         * Note: Does not modify the original array.
+         * Note: I don't like this function, avoid it -msnider
+         * @param aArray1 {Array|Array-like} The first array (all values copied).
+         * @param aArray2 {Array|Array-like} A second array (some or all values copied).
+         * @param fnPredicate {Function} A predicate function indicating
+         *                               if the value at index in aArray2
+         *                               should be copied.
+         * @param fnChildren {Function} A function to fetch children from
+         *                              value at index in aArray2.
+         * @returns {Array} The new array.
+         * @private
+         */
+        _arrayAdd : function (aArray1, aArray2, fnPredicate, fnChildren) {
+            var aNewArray = [].concat(aArray1);
+
+            // no predicate function, so just return true
+            if (!fnPredicate) {
+                fnPredicate = function () {
+                    return true;
+                };
             }
-            return dest;
+
+            // no children function, so just return null
+            if (!fnChildren) {
+                fnChildren = function () {
+                    return null;
+                };
+            }
+
+            $.each(aArray2, function(i, o) {
+                var oChildren;
+
+                if (fnPredicate(o)) {
+                    aNewArray.push(o);
+                }
+
+                if ((oChildren = fnChildren(o))) {
+                    aNewArray = Util._arrayAdd(
+                        aNewArray, oChildren, fnPredicate, fnChildren);
+                }
+            });
+
+            return aNewArray;
         },
 
-        concatArr : function (a, b) {
-            if (!a || !a.length) return b;
-            if (!b || !b.length) return a;
-            var r = new Array(a.length + b.length);
-            var i = a.length; while (i--) r[i] = a[i];
-            i = b.length; while (i--) r[i+a.length] = b[i];
-            return r;
+        /**
+         * @deprecated use Array.concat instead.
+         */
+        concatArr : function (a, b)
+        {
+            // ensure a is defined and an array
+            if (!(a && a.length)) {
+                a = [];
+            }
+            // ensure b is defined and an array
+            if (!(b && b.length)) {
+                b = [];
+            }
+            return a.concat(b);
         },
 
-        toArray : function (arr) {
-          var i = (arr) ? arr.length : 0, r = new Array(i);
-          while (i--) r[i] = arr[i];
-          return r;
+        /**
+         * @deprecated use http://api.jquery.com/jQuery.makeArray/
+         */
+        toArray : function (o)
+        {
+            return $.makeArray(o);
         },
 
-        arrayRemoveMatching : function (arr, target, getter) {
+        arrayRemoveMatching : function (arr, target, getter)
+        {
             if (!arr) return;
             for (var i = 0, c = arr.length; i < c; i++) {
                 var e = (getter) ? getter(arr[i]) : arr[i];
@@ -60,53 +117,91 @@ ariba.Util = function() {
             }
         },
 
-        isArray: function (obj)
+        /**
+         * @deprecated use http://api.jquery.com/jQuery.isArray/
+         */
+        isArray : function (o)
         {
-            return obj != null && typeof obj == "object" &&
-                   'splice' in obj && 'join' in obj;
+            return $.isArray(o);
         },
 
+        /**
+         * Note: This function is very magic and should be avoided -msnider
+         */
         itemOrArrAdd : function (orig, obj)
         {
-            return !orig ? obj : (this.isArray(orig) ? orig.push(obj) : [orig].push(obj));
+            return !orig ? obj : ($.isArray(orig) ? orig.push(obj) : [orig].push(obj));
         },
 
-        arrayIndexOf : function (array, item)
+        /**
+         * @deprecated use http://api.jquery.com/jQuery.inArray/
+         */
+        arrayIndexOf : function (a, o)
         {
-            var i, length;
-            if (array) {
-                if (array.indexOf) {
-                    return array.indexOf(item);
-                }
-                for (i = 0; i < array.length; i++) {
-                    if (array[i] === item) {
-                        return i;                        
-                    }
-                }
-            }
-            return -1;
+            $.inArray(a, o);
         },
 
-        arrayAddIfNotExists : function (array, item)
+        /**
+         * Add an element to the array if it does not already exist.
+         * @param a {Array} Required. Array to add into.
+         * @param o {Object} Required. Value to evaluate and add.
+         */
+        arrayAddIfNotExists : function (a, o)
         {
-            if (this.arrayIndexOf(array, item) < 0) {
-                array.push(item);
+            if ($.inArray(a, o) < 0) {
+                a.push(o);
             }
         },
 
-        isUndefined : function (value)
+        /**
+         * Creates a copy of the provided array with only the unique values.
+         * @param aOriginal The array to make unique.
+         * @return {Array} A unique version of the array.
+         */
+        arrayMakeUnique : function (aOriginal)
         {
-            return (typeof value == "undefined");
+            var oFound = {},
+                aCopy = [],
+                i = aOriginal.length;
+
+            while (i-- >= 0) {
+                if (!oFound[aOriginal[i]]) {
+                    oFound[aOriginal[i]] = true;
+                    aCopy.push(aOriginal[i]);
+                }
+            }
+
+            return aCopy;
         },
 
-        isNullOrUndefined : function (value)
+        /**
+         * Evaluate if the object undefined.
+         * @param o {object} Required. Any object to evaluate.
+         * @returns {boolean} If undefined.
+         */
+        isUndefined : function (o)
         {
-            return (value == null || (typeof value == "undefined"));
+            return o === undefined;
         },
 
-        isNullOrBlank : function (value)
+        /**
+         * Evaluate if the object undefined or null.
+         * @param o {object} Required. Any object to evaluate.
+         * @returns {boolean} If undefined or null.
+         */
+        isNullOrUndefined : function (o)
         {
-            return (value == null || (typeof value == "undefined") || (value == ""));
+            return o === null || Util.isUndefined(o);
+        },
+
+        /**
+         * Evaluate if the object undefined or null or empty string.
+         * @param o {object} Required. Any object to evaluate.
+         * @returns {boolean} If undefined or null or empty string.
+         */
+        isNullOrBlank : function (o)
+        {
+            return Util.isNullOrUndefined(o) || o === "";
         },
 
         stringEndsWith : function (sourceString, searchString)
@@ -189,37 +284,39 @@ ariba.Util = function() {
 
         uriEncode : function (s) {
             // strangely, the default JavaScript function doesn't handle "+" correctly
-            return escape(s).replace("+", "%2B").replace("/", "%2F");
+            return encodeURIComponent(s).replace("+", "%2B").replace("/", "%2F");
         },
 
         ///////////////
         // String util
         ///////////////
 
-        strTrim : function (str)
+        /**
+         * @deprecated use http://api.jquery.com/jQuery.trim/
+         */
+        strTrim : function (s)
         {
-            //Match spaces at beginning and end of text and replace with null strings
-            return str.replace(/^\s+/, '').replace(/\s+$/, '');
+            return $.trim(s)
         },
 
-        max : function (value1, value2)
+        /**
+         * @deprecated use Math.max instead.
+         */
+        max : function (iNumber1, iNumber2)
         {
-            return value1 > value2 ? value1 : value2;
+            return Math.max(iNumber1, iNumber2);
         },
 
         ///////////
         // Util
         ///////////
 
-        indexOf : function (list, item)
+        /**
+         * @deprecated use http://api.jquery.com/jQuery.inArray/
+         */
+        indexOf : function (a, o)
         {
-            var length = list.length;
-            for (var index = 0; index < length; index++) {
-                if (list[index] == item) {
-                    return index;
-                }
-            }
-            return -1;
+            $.inArray(a, o);
         },
 
         indexOfCharInSet : function (targetString, startIndex, charSet)
@@ -338,12 +435,15 @@ ariba.Util = function() {
         },
         EOF:0};
 
+    /**
+     * @deprecated use http://api.jquery.com/jQuery.proxy/
+     */
     Function.prototype.bind = function() {
         var __method = this, a = Util.toArray(arguments), obj = a.shift();
         return function() {
-            return __method.apply(obj, Util.concatArr(a, arguments));
+            return __method.apply(obj, Util.concatArr(a, Util.toArray(arguments)));
         }
-    }
+    };
 
     return Util;
 }();

@@ -35,6 +35,17 @@ your running AW app may display file names from your source code in the web page
 In these cases, when then name is displayed as a hyperlink, clicking it will open
 the file in your IDE (and navigate to the correct line number)!
 
+
+#### Code completition for AWL files
+We are now supporting code completion for AWL files. The only thing you need to do
+is to build AW distribution so you have .XSD files under docs/* and once you set
+AW_HOME all starts working.
+
+
+#### Structured view for OSS files and highlighting
+There is no more plain text files for oss. but normal code like we are used to for other
+supported types.
+
 INSTALLING
 ----------
 

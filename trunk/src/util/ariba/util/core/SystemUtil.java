@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2012 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/SystemUtil.java#38 $
+    $Id: //ariba/platform/util/core/ariba/util/core/SystemUtil.java#39 $
 */
 
 package ariba.util.core;
@@ -944,6 +944,21 @@ public final class SystemUtil
     public static String stackTraceCodePath ()
     {
         return stackTraceCodePath(stackTrace());
+    }
+
+    /**
+        Returns String stackTrace for given Throwable, reduced to focus on most relevant
+        stack frames for analyzing application execution. It removes the tail of the
+        stackTrace starting with the ariba.ui.servletadaptor frame, because the details of
+        servlet dispatch are boring and not helpful. It elides (replaces with ...) all
+        ariba.ui frames (except AWKeyPathBinding), because they are boring and voluminous,
+        and almost never helpful for understanding application performance. It elides the
+        details of reflexive method invokation under FieldValue_Object.getFieldValue. Etc.
+        @aribaapi private
+    */
+    public static String stackTraceCodePath (Throwable t)
+    {
+        return stackTraceCodePath(stackTrace(t));
     }
 
     /**

@@ -1,3 +1,3 @@
 Big5,,
 ,,
-MalformedExpression,"位於列 ""{1}"" 和欄 ""{2}"" 上的令牌 ""{0}"" 附近發生解析錯誤。", "An syntactic error has occured while parsing the expression"
+MalformedExpression,"位於列「{1}」和欄「{2}」上的令牌「{0}」附近發生解析錯誤。", "An syntactic error has occured while parsing the expression"

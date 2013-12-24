@@ -1,3 +1,56 @@
+New in Version 5.2 (12/23/2013)
+---------------------------------------------
+
+- New components
+  - Add Spotlight widget
+  - Add OutlineMenu with hover effect
+  - Add AribaBanner for the BasicPageWrapper
+
+- Enhancements
+  - Updated IDE plugin for Intellij IDEA with new features: currently compatible with 12,13.
+  - New RemoveContentLeftRightMarginHandler to better control rendered content
+  - Add support for new application/json content type
+  - Add new API for AWRedirect for better internal dispatch handling
+  - Improved string decoding in AWUtil
+  - Mobile Safari support on iPad
+  - Escape string value for awname attribute used for debugging or testing
+  - Add better handling for AWErrorManager when multiple erros occurs
+  - Dom.js added new optimized functions for DOM manipulation
+  - Add Util.js Performance improvements for string searches
+  - Add JQuery support to AW framework
+  - Using jQuery;h to replace Util.js functions
+  - Improved Calendar.js api which handles the closing of the pop-up menus
+  - AribaPrintMenu added new popup menu
+  - Improved AribaHelp
+  - Add the windowTitle and metaTags support in BasicPageWrapper
+  - Add special character handling for SectionHeading
+  - Chooser entered characters are fully escaped
+  - New JBoss 7.1.0
+  - Jetty 8.1 support
+  - GlassFish 3 support
+
+- Security fixes
+  - Fix cookie Header splitting in cookie value vulnerability
+
+- Bug fixes
+  - Fix initProgressCheck call which was missed from XMLHTTP
+  - Fix for displayErrorDiv javascript error in IE6
+  - Fix an IE8 specific javascript problem with button.
+  - Fix Request.js: issue while clicking on the Tab in Chrome
+  - Fix AWPopup event handling. Specific to IE and FireFox
+  - Fix Refresh.js: updated refresh table function
+  - Chrome support: attachements does not work as expected when using Chrome
+  - Fix error applying incremental refresh (in Firefox 24.0)
+  - BaseTabSet Rounded edges inconsistent in Firefox
+  - Fix GoogleAnalytics: 'Error messages: google.pageTracker'
+  - Fix Rows do not line up correctly for AWTDataTable excel export
+  - Fix NumberFormatException for Chooser when using Chrome
+  - Fix MasterDetail demo: User chooser not working
+
+* Please check this post for JBoss deployment. Need to disable logging to avoid ClassCastException:
+  https://groups.google.com/forum/#!searchin/aribaweb/jboss-deployment-structure/aribaweb/m3nKA5D5gRA/uoE_Fu4ElNcJ
+
+
 New in Version 5.1 (9/20/2012)
 ---------------------------------------------
 

@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.awl#26 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTOptionsMenuItems.awl#28 $
     </Copyright>
 
     <Overview>
@@ -188,12 +188,12 @@
             Export to Excel\
         </a:Local>\
     </w:PopupMenuHeading>
-    <w:PopupMenuItem action="$table.downloadToExcelAll">\
+    <w:PopupMenuItem action="$table.downloadToExcelAll" disabled="$request.isIPad">\
         <a:Local key="a010">\
             Export all Rows\
         </a:Local>\
     </w:PopupMenuItem>
-    <w:PopupMenuItem action="$table.downloadToExcelCurrent">\
+    <w:PopupMenuItem action="$table.downloadToExcelCurrent" disabled="$request.isIPad">\
         <a:Local key="a011">\
             Export Current Page\
         </a:Local>\

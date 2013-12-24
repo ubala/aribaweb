@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,16 +12,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApplication.java#35 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWApplication.java#39 $
 */
 
 package ariba.ui.aribaweb.core;
 
-import ariba.ui.aribaweb.util.AWBookmarker;
 import ariba.ui.aribaweb.util.AWBrand;
 import ariba.ui.aribaweb.util.AWBrandManager;
 import ariba.ui.aribaweb.util.AWNodeManager;
 import ariba.ui.aribaweb.util.AWParameters;
+import ariba.util.http.multitab.MaximumTabExceededException;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
 
@@ -32,7 +32,7 @@ import javax.servlet.http.HttpSession;
     provide methods links to via services (e.g. {@link #resourceManager()}) and methods overridden,
     acts as a factory for vital objects involved in request handling (e.g. {@link #createSession(AWRequestContext)},
     {@link #createRequestContext(AWRequest)}, and provides hooks to be overridden by
-    by subclasses to affect process flow (e.g. {@link #handleSessionRestorationError(AWRequestContext)}. 
+    by subclasses to affect process flow (e.g. {@link #handleSessionRestorationError(AWRequestContext)}.
  */
 public interface AWApplication extends AWServerApplication
 {
@@ -50,6 +50,7 @@ public interface AWApplication extends AWServerApplication
     public String adaptorUrlSecure ();
     public void setUseEmbeddedKeyPathes (boolean useEmbeddedKeyPathes);
     public boolean useEmbeddedKeyPathes ();
+    public String getApplicationType ();
 
     //////////////////////
     // Page Creation
@@ -95,6 +96,8 @@ public interface AWApplication extends AWServerApplication
         AWRequestContext requestContext);
     public AWResponseGenerating handleRemoteHostMismatchException (
         AWRequestContext requestContext, AWRemoteHostMismatchException exception);
+    public AWResponseGenerating handleMaxWindowException (AWRequestContext requestContext,
+                                          MaximumTabExceededException exception);
 
     public String applicationUrl (AWRequest request);
     public void setRefusingNewSessions (boolean refusingNewSessions);

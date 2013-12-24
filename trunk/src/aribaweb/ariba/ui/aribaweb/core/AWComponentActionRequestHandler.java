@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2008 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,24 +12,26 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#89 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponentActionRequestHandler.java#96 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWGenericException;
-import ariba.ui.aribaweb.util.Log;
 import ariba.ui.aribaweb.util.AWNodeChangeException;
-import ariba.ui.aribaweb.util.AWNodeValidator;
 import ariba.ui.aribaweb.util.AWNodeManager;
+import ariba.ui.aribaweb.util.AWNodeValidator;
 import ariba.ui.aribaweb.util.AWSingleLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWUtil;
-import ariba.util.core.StringUtil;
-import ariba.util.core.WrapperRuntimeException;
+import ariba.ui.aribaweb.util.Log;
 import ariba.util.core.Assert;
 import ariba.util.core.PerformanceState;
 import ariba.util.core.ProgressMonitor;
+import ariba.util.core.StringUtil;
+import ariba.util.core.WrapperRuntimeException;
+import ariba.util.http.multitab.MultiTabSupport;
+
 import javax.servlet.http.HttpSession;
 
 public final class AWComponentActionRequestHandler extends AWConcreteRequestHandler
@@ -51,10 +53,10 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         AWRequestContext.ResponseIdKey + "=";
 
     public static AWComponentActionRequestHandler SharedInstance;
-    private AWEncodedString _requestHandlerUrl;
-    private AWEncodedString _fullRequestHandlerUrl;
-    private AWEncodedString _fullRequestHandlerUrlSecure;
-    private AWEncodedString _fullRequestHandlerBaseUrl;
+    private AWEncodedString[] _requestHandlerUrl;
+    private AWEncodedString[] _fullRequestHandlerUrl;
+    private AWEncodedString[] _fullRequestHandlerUrlSecure;
+    private AWEncodedString[] _fullRequestHandlerBaseUrl;
 
     private static final String HistoryKey = "awh";
     private static final String HistoryKeyEquals = HistoryKey + "=";
@@ -66,8 +68,8 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     public static final String DebugRerenderCountKey = "awd_rr";
     public static final String DebugRerenderAsRefreshKey = "awd_inc";
 
-    private String RefreshUrl;
-    private String FullRefreshUrl;
+    private String[] RefreshUrl;
+    private String[] FullRefreshUrl;
 
     private static final String ComponentName = "AWComponentActionRequestHandler";
 
@@ -77,6 +79,16 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     {
         super.init(application, requestHandlerKey);
         SharedInstance = this;
+        MultiTabSupport multiTabSupport = MultiTabSupport.Instance.get();
+        _requestHandlerUrl = new AWEncodedString[multiTabSupport.maximumNumberOfTabs()];
+        _fullRequestHandlerUrl = new AWEncodedString[multiTabSupport
+                .maximumNumberOfTabs()];
+        _fullRequestHandlerUrlSecure = new AWEncodedString[multiTabSupport
+                .maximumNumberOfTabs()];
+        _fullRequestHandlerBaseUrl = new AWEncodedString[multiTabSupport
+                .maximumNumberOfTabs()];
+        RefreshUrl = new String[multiTabSupport.maximumNumberOfTabs()];
+        FullRefreshUrl = new String[multiTabSupport.maximumNumberOfTabs()];
     }
 
     //////////////////////
@@ -87,48 +99,84 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
         return requestHandlerUrlEncoded(request, false);
     }
 
-    private AWEncodedString requestHandlerUrlEncoded (AWRequest request, boolean fullUrl)
+    /**
+     Returns the appropriate encoded request handler URL for the current tab.
+     This is either a full or relative URL depending on the value of ``fullUrl``
+     and automatically determines if SSL should be used. The result will be
+     a concatenation of the desired following URL parts:
+     {https?}//{domain}/{web-app-name}/_?{servlet-name}/{tab-index}/{application-number}/{request-handler-key}/
+     The values returned by this function are cached in a tab aware way, so
+     they only need to be created once per-tab, per-application.
+     * @param request The AWRequest.
+     * @param fullUrl Return a fully qualified URL, instead of relative.
+     * @return A base URL to append extra URL parts to.
+     */
+    private AWEncodedString requestHandlerUrlEncoded (
+            AWRequest request, boolean fullUrl)
     {
-        if (_fullRequestHandlerUrlSecure ==null || _fullRequestHandlerUrl == null || _requestHandlerUrl == null) {
-            // no need to synchronize this -- worst case it'll get recomputed twice to the same thing.
+        MultiTabSupport tabSupport = MultiTabSupport.Instance.get();
+        int tabIndex = tabSupport.uriToTabNumber(request.uri(), 0);
+
+        AWEncodedString fullRequestHandlerUrlSecure =
+                _fullRequestHandlerUrlSecure[tabIndex];
+        AWEncodedString fullRequestHandlerUrl =
+                _fullRequestHandlerUrl[tabIndex];
+        AWEncodedString requestHandlerUrlEncoded =
+                _requestHandlerUrl[tabIndex];
+
+        if (fullRequestHandlerUrlSecure == null || fullRequestHandlerUrl == null
+                || requestHandlerUrlEncoded == null) {
+            // no need to synchronize this -- worst case it'll get recomputed
+            // twice to the same thing.
             String applicationNumber = request.applicationNumber();
             applicationNumber = (applicationNumber == null) ?
                 "" : StringUtil.strcat(applicationNumber, "/");
-            String requestHandlerUrl =
-                StringUtil.strcat(adaptorPrefix(),
-                                  application().name(),
-                                  applicationNameSuffix(),
-                                  applicationNumber, requestHandlerKey());
-            _requestHandlerUrl = AWEncodedString.sharedEncodedString(requestHandlerUrl);
+            // note: the use of application name here, means something different
+            //  that it does in the tomcat sense.
+            String tabAwareAppName = tabSupport.tabNumberToUri(application().name(),
+                    applicationNameSuffix(),
+                    tabIndex, request.uri());
 
+            // relative URL
+            String requestHandlerUrl = StringUtil.strcat(
+                    adaptorPrefix(), tabAwareAppName, applicationNumber,
+                    requestHandlerKey());
+            requestHandlerUrlEncoded = AWEncodedString.sharedEncodedString(
+                    requestHandlerUrl);
+            _requestHandlerUrl[tabIndex] = requestHandlerUrlEncoded;
+
+            // full URL
             String fullAdaptorUrl = fullAdaptorUrl(false);
-            requestHandlerUrl =
-                StringUtil.strcat(fullAdaptorUrl,
-                                  fullAdaptorUrl.endsWith("/") ? "":"/",
-                                  application().name(),
-                                  applicationNameSuffix(),
-                                  applicationNumber, requestHandlerKey());
+            requestHandlerUrl = StringUtil.strcat(
+                    fullAdaptorUrl, fullAdaptorUrl.endsWith("/") ? "" : "/",
+                    tabAwareAppName, applicationNumber, requestHandlerKey());
+            fullRequestHandlerUrl = AWEncodedString.sharedEncodedString(
+                    requestHandlerUrl);
+            _fullRequestHandlerUrl[tabIndex] = fullRequestHandlerUrl;
 
-
-            _fullRequestHandlerUrl =
-                AWEncodedString.sharedEncodedString(requestHandlerUrl);
-
+            // full SSL URL
             fullAdaptorUrl = fullAdaptorUrl(true);
             if (fullAdaptorUrl != null) {
-                requestHandlerUrl =
-                    StringUtil.strcat(fullAdaptorUrl,
-                            fullAdaptorUrl.endsWith("/") ? "" : "/",
-                            application().name(),
-                            applicationNameSuffix(),
-                            applicationNumber, requestHandlerKey());
+                requestHandlerUrl = StringUtil.strcat(
+                        fullAdaptorUrl, fullAdaptorUrl.endsWith("/") ? "" : "/",
+                        tabAwareAppName, applicationNumber,
+                        requestHandlerKey());
 
-                _fullRequestHandlerUrlSecure =
+                fullRequestHandlerUrlSecure =
                         AWEncodedString.sharedEncodedString(requestHandlerUrl);
+                _fullRequestHandlerUrlSecure[tabIndex] =
+                        fullRequestHandlerUrlSecure;
 
             }
         }
-        return fullUrl ? ((request !=null && !request.isSecureScheme())?_fullRequestHandlerUrl:_fullRequestHandlerUrlSecure) :
-                _requestHandlerUrl;
+
+        if (fullUrl) {
+            return !request.isSecureScheme() ? fullRequestHandlerUrl :
+                    fullRequestHandlerUrlSecure;
+        }
+        else {
+            return requestHandlerUrlEncoded;
+        }
     }
 
     public String requestHandlerUrl (AWRequest request, boolean fullUrl)
@@ -222,12 +270,18 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
 
     private AWEncodedString urlPrefix (AWRequestContext requestContext)
     {
-        if (_requestHandlerUrl == null) {
-            _requestHandlerUrl = requestHandlerUrlEncoded(requestContext.request());
+        int tabIndex = requestContext.getTabIndex();
+        AWEncodedString requestHandlerUrl = _requestHandlerUrl[tabIndex];
+
+        if (requestHandlerUrl == null) {
+            requestHandlerUrl = requestHandlerUrlEncoded(
+                    requestContext.request());
+            _requestHandlerUrl[tabIndex] = requestHandlerUrl;
         }
+
         return requestContext.isMetaTemplateMode() ?
             fullRequestHandlerBaseUrl(requestContext):
-            _requestHandlerUrl;
+                requestHandlerUrl;
     }
 
     private String sessionId (AWRequestContext requestContext)
@@ -257,25 +311,38 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     }
 
     /**
-        JRHEE:  Added (with review by Charles) in order to support AWXScriptedLink, which requires a
-        full url - i.e., a url with the full http specification such as http://www.foo.com.  Otherwise,
-        IE4 complains with a javascript Access Denied error if you try to set a non-full url in a
-        window's location href.
+    JRHEE:  Added (with review by Charles) in order to support AWXScriptedLink,
+    which requires a full url - i.e., a url with the full http specification
+    such as http://www.foo.com.  Otherwise, IE4 complains with a javascript
+    Access Denied error if you try to set a non-full url in a
+    window's location href.
     */
-    protected AWEncodedString fullRequestHandlerBaseUrl (AWRequestContext requestContext)
+    protected AWEncodedString fullRequestHandlerBaseUrl (
+            AWRequestContext requestContext)
     {
-        if (_fullRequestHandlerBaseUrl == null) {
+        int tabIndex = requestContext.getTabIndex();
+        AWEncodedString fullRequestHandlerBaseUrl =
+                _fullRequestHandlerBaseUrl[tabIndex];
+
+        if (fullRequestHandlerBaseUrl == null) {
             AWRequest request = requestContext.request();
             String applicationNumber = request.applicationNumber();
             applicationNumber = (applicationNumber == null) ?
                 "" : StringUtil.strcat(applicationNumber, "/");
-            String fullRequestHandlerBaseUrl =
-                StringUtil.strcat(addTrailingSlash(fullAdaptorUrlForRequest(request)),
+            String fullRequestHandlerUrl =
+                StringUtil.strcat(addTrailingSlash(
+                        fullAdaptorUrlForRequest(request)),
                     application().name(), applicationNameSuffix(),
                     applicationNumber, requestHandlerKey());
-            _fullRequestHandlerBaseUrl = new AWEncodedString(fullRequestHandlerBaseUrl);
+
+            MultiTabSupport multiTabSupport = MultiTabSupport.Instance.get();
+            fullRequestHandlerBaseUrl = new AWEncodedString(
+                    multiTabSupport.insertTabInUri(fullRequestHandlerUrl, tabIndex, true)
+            );
+            _fullRequestHandlerBaseUrl[tabIndex] = fullRequestHandlerBaseUrl;
         }
-        return _fullRequestHandlerBaseUrl;
+
+        return fullRequestHandlerBaseUrl;
     }
 
     public String fullUrlWithSenderId (AWRequestContext requestContext,
@@ -936,7 +1003,7 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     private AWResponse responseForException (AWRequestContext requestContext,
                                              Exception exception)
     {
-        AWResponse response = null;
+        AWResponse response;
         try {
             AWResponseGenerating handlerResults =
                 handleException(requestContext, exception);
@@ -958,13 +1025,15 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     {
         String requestUrl = requestHandlerUrl(requestContext.request());
         if (AWConcreteApplication.IsCookieSessionTrackingEnabled) {
-            return StringUtil.strcat(requestUrl,"?",HistoryKey, "=", actionName, "&",
-                    AWRequestContext.SessionSecureIdKey, "=", sessionSecureId(requestContext));
+            return StringUtil.strcat(requestUrl,"?",HistoryKey, "=", actionName,
+                    "&", AWRequestContext.SessionSecureIdKey, "=",
+                    sessionSecureId(requestContext));
         }
         else {
-            String[] strings = {requestUrl,"?", HistoryKeyEquals, actionName, "&",
-                    SessionIdKeyEquals, sessionId(requestContext), "&",
-                    AWRequestContext.SessionSecureIdKeyEquals, sessionSecureId(requestContext)};
+            String[] strings = {requestUrl,"?", HistoryKeyEquals, actionName,
+                    "&", SessionIdKeyEquals, sessionId(requestContext), "&",
+                    AWRequestContext.SessionSecureIdKeyEquals,
+                    sessionSecureId(requestContext)};
             return StringUtil.strcat(strings);
         }
     }
@@ -972,14 +1041,22 @@ public final class AWComponentActionRequestHandler extends AWConcreteRequestHand
     private String constructRefreshUrl (AWRequestContext requestContext, boolean fullUrl)
     {
         AWRequest request = requestContext.request();
-        if (RefreshUrl == null || FullRefreshUrl == null) {
-            RefreshUrl = StringUtil.strcat(requestHandlerUrl(request), "?",
-                                           HistoryKeyEquals, RefreshActionName);
-            FullRefreshUrl = StringUtil.strcat(requestHandlerUrl(request, true), "?",
-                                               HistoryKeyEquals, RefreshActionName);
+        int tabIndex = requestContext.getTabIndex();
+        String refreshUrl = RefreshUrl[tabIndex];
+        String fullRefreshUrl = FullRefreshUrl[tabIndex];
+
+        if (refreshUrl == null || fullRefreshUrl == null) {
+            refreshUrl = StringUtil.strcat(
+                    requestHandlerUrl(request), "?",
+                    HistoryKeyEquals, RefreshActionName);
+            fullRefreshUrl = StringUtil.strcat(
+                    requestHandlerUrl(request, true), "?",
+                    HistoryKeyEquals, RefreshActionName);
+            RefreshUrl[tabIndex] = refreshUrl;
+            FullRefreshUrl[tabIndex] = fullRefreshUrl;
         }
 
-        String effectiveUrl = fullUrl ? FullRefreshUrl : RefreshUrl;
+        String effectiveUrl = fullUrl ? fullRefreshUrl : refreshUrl;
 
         if (requestContext.frameName() != null) {
             effectiveUrl =

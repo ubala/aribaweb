@@ -14,6 +14,7 @@ ariba.Widgets = function() {
     var Debug = ariba.Debug;
     var Refresh = ariba.Refresh;
     var Request = ariba.Request;
+    var hoverCt = 0;
 
     // private vars
     var AWCover;
@@ -46,7 +47,23 @@ ariba.Widgets = function() {
 
     var hcTimeout = null;
 
+    var HoverCardContentBehavior = {
+         mouseover : function (hoverLink, evt) {
+             ariba.Widgets.clearHideHoverCard();
+             hcTimeout = setTimeout(function() {ariba.Widgets.displayHoverCard(hoverLink);}, 500);
+         },
+         mouseout : function (hoverLink, evt) {
+             if (hcTimeout) {
+                 clearTimeout(hcTimeout);
+                 hcTimeout = null;
+                 return;
+             }
+             ariba.Widgets.hideActiveHoverCard();
+         }
+    };
+
     var Widgets = {
+        HoverCardContentBehavior : HoverCardContentBehavior,
 
         showPanel : function (id, positioningObject, skipOverlay)
         {
@@ -416,7 +433,7 @@ ariba.Widgets = function() {
                 div.setAttribute("_cfOpen", "true");
                 var f = function () {
                     this.disablePage("000");
-                    Input.coverDocument(0, 50);
+                    Input.coverDocument(50, 50);
                 }.bind(this);
                 // set up the preclose function
                 div.awPreCloseDialogFunc = this.enablePage.bind(this);
@@ -786,7 +803,7 @@ ariba.Widgets = function() {
             return false;
         },
 
-        gotoDoc : function (url, ss, key, ut, rn, ul, anID, fts, area, winAttr)
+        gotoDoc : function (url, ss, key, ut, un, rn, ul, anID, fts, area, winAttr)
         {
             // if the window is open, then close it.  This is unfortunately necessary since
             // the help "app" is on a remote machine.  once we write the form and submit, the
@@ -813,6 +830,7 @@ ariba.Widgets = function() {
                     '<input name="ss" value="' + ss + '" type="hidden"/>' +
                     '<input name="doc" value="' + key + '" type="hidden"/>' +
                     '<input name="ut" value="' + ut + '" type="hidden"/>' +
+                    '<input name="un" value="' + un + '" type="hidden"/>' +
                     '<input name="rn" value="' + rn + '" type="hidden"/>' +
                     '<input name="ul" value="' + ul + '" type="hidden"/>' +
                     '<input name="anId" value="' + anID + '" type="hidden"/>' +
@@ -897,7 +915,7 @@ ariba.Widgets = function() {
                 content.parentNode.removeChild(content);
                 pageWrapper.parentNode.appendChild(content);
                 pageWrapper.style.display = "none";
-                document.body.className = "";
+                Dom.removeClass(document.body, "hide");
                 window.setTimeout(this.print.bind(this), 100);
             } else {
                 alert("Failed to find print wrapper:  AWPrintContent=" + content + ", BPR_Body=" + pageWrapper);
@@ -1499,6 +1517,255 @@ ariba.Widgets = function() {
             clearTimeout(this.HideActiveHoverCardTimeout);
         },
 
+        showSpotlights : function (spotlightIds)
+        {
+            var spotlights = this.getSortedSpotlights(spotlightIds);
+            var dimCovers = this.computeDimCols(spotlights);
+            if (!dimCovers) {
+                spotlights = spotlights.sort(this.spotlightTopSort);
+                dimCovers = this.computeDimRows(spotlights);
+            }
+            if (!dimCovers) {
+                console.log("Cannot compute dim covers");
+                return;
+            }
+            for (var i = 0; i < dimCovers.length; i++) {
+                var dimCover = dimCovers[i];
+                if (Dom.IsIE) {
+                    // workaround for rendering issue at higher opacity
+                    this.dimDocument(dimCover, 20);
+                    this.dimDocument(dimCover, 20);
+                }
+                else {
+                    this.dimDocument(dimCover, 50);
+                }
+            }
+            var spotlightsDiv = Dom.getElementById("spotlights");
+            var documentElement = Dom.getDocumentElement();
+            var docWidth = Util.max(documentElement.scrollWidth, documentElement.clientWidth);
+            var rightCount = 0;
+            for (i = 0; i < spotlights.length; i++) {
+                var spotlight = spotlights[i];
+                var spotlightTop = spotlight.top;
+                var spotlightLeft = spotlight.left;
+                var spotlightWidth = spotlight.width;
+                var spotlightHeight = spotlight.height;
+                var title = spotlight.elm.getAttribute("_t");
+                var value = spotlight.elm.getAttribute("_v");
+                var text =
+                    Dom.createElement('<div class="spotlightText"><h2>' + title + '</h2>' + value + '</div>');
+                var line = null;
+                if (spotlightLeft >= spotlightTop) {
+                    // top right half
+                    text.style.top = spotlightTop + spotlightHeight + 35 + "px";
+
+                    line = Dom.createElement('<div class="spotlightVLine"></div>');
+                    var left = spotlightLeft + Math.min(50, spotlightWidth/2);
+                    line.style.top = spotlightTop + spotlightHeight + "px";
+                    line.style.left = left + "px";
+                    line.style.height = "40px";
+                    
+                    if ((spotlightLeft + spotlightWidth / 2) > docWidth / 2) {
+                        // right
+                        text.style.right = docWidth - spotlightLeft - spotlightWidth + "px";
+                        if (rightCount % 2 == 1) {
+                            // flip even ones above spotlight
+                            text.style.top = spotlightTop - 70 + "px";
+                            line.style.top = spotlightTop - 25 + "px";
+                        }
+                        rightCount++;
+                    }
+                    else {
+                        // top
+                        text.style.left = spotlightLeft + 20 + "px";
+
+                    }
+                }
+                else {
+                    // bottom left half
+                    text.style.top = spotlightTop + 35 + "px";
+                    text.style.left = spotlightLeft + spotlightWidth + 20 + "px";
+
+                    line = Dom.createElement('<div class="spotlightHLine"></div>');
+                    line.style.top = spotlightTop + 50 + "px";
+                    line.style.left = spotlightLeft + spotlightWidth + "px";
+                    line.style.width = "25px";
+                }
+                spotlightsDiv.appendChild(text);
+                spotlightsDiv.appendChild(line);
+            }
+        },
+
+        dimDocument : function (dimCover, opacity)
+        {
+            if (dimCover.opacity !== undefined) {
+                opacity = dimCover.opacity;
+            }
+            var coverDiv = ariba.Input.createCoverDiv(50, opacity);
+            var coverStyle = coverDiv.style;
+            coverStyle.top = dimCover.top + "px";
+            coverStyle.left = dimCover.left + "px";
+            coverStyle.width = dimCover.width + "px";
+            coverStyle.height = dimCover.height + "px";
+            var spotlightsDiv = Dom.getElementById("spotlights");
+            spotlightsDiv.appendChild(coverDiv);
+        },
+
+        spotlightLeftSort : function (spotlightA, spotlightB)
+        {
+             return spotlightA.left - spotlightB.left;
+        },
+
+        spotlightTopSort : function (spotlightA, spotlightB)
+        {
+             return spotlightA.top - spotlightB.top;
+        },
+
+        getSortedSpotlights : function (spotlightIds)
+        {
+            var spotlights = [];
+            var padding = 6;
+            for (var i = 0; i < spotlightIds.length; i++) {
+                var spotlight = Dom.getElementById(spotlightIds[i]);
+                var top = Dom.absoluteTop(spotlight) - padding;
+                var left = Dom.absoluteLeft(spotlight) - padding;
+                var width = Util.max(spotlight.clientWidth, spotlight.scrollWidth);
+                width = width + 2 * padding;
+                var height =Util.max(spotlight.clientHeight, spotlight.scrollHeight);
+                height = height + 2 * padding;
+                spotlights.push({ elm : spotlight, top : top, left : left, width : width, height : height });
+            }
+            return spotlights.sort(this.spotlightLeftSort);
+        },
+
+        computeDimCols : function (spotlights)
+        {
+            var documentElement = Dom.getDocumentElement();
+            var docWidth = Util.max(documentElement.scrollWidth, documentElement.clientWidth);
+            var docHeight = Util.max(documentElement.scrollHeight, documentElement.clientHeight);
+            var banner = Dom.getElementById("BPR_Banner");
+            var bannerHeight = Util.max(banner.clientHeight, banner.scrollHeight)+10;
+            var dimCovers = [];
+            var top = 0;
+            var left = 0;
+            var width = 0;
+            var height = 0;
+            for (var i = 0; i < spotlights.length; i++) {
+                var spotlight = spotlights[i];
+                var spotlightTop = spotlight.top;
+                var spotlightLeft = spotlight.left;
+                var spotlightWidth = spotlight.width;
+                var spotlightHeight = spotlight.height;
+
+                // left full height cover
+                top = bannerHeight;
+                width = spotlightLeft - left;
+                if (width < 0) {
+                    return null;
+                }
+                height = docHeight - top;
+                dimCovers.push(
+                    {top : top, left : left, width : width, height : height }
+                );
+
+                //top cover
+                left += width;
+                width = spotlightWidth;
+                height = spotlightTop - top;
+                dimCovers.push(
+                    {top : top, left : left, width : width, height : height }
+                );
+
+                // center cover
+                top += height;
+                height = spotlightHeight;
+                dimCovers.push(
+                    {top : top, left : left, width : width, height : height, opacity : 0 }
+                );
+
+                // bottom cover
+                top += height;
+                height = docHeight - top;
+                dimCovers.push(
+                    {top : top, left : left, width : width, height : height }
+                );
+
+                left += width;
+            }
+            // right most cover
+            top = bannerHeight;
+            width = docWidth - left;
+            height = docHeight - top;
+            dimCovers.push(
+                {top : top, left : left, width : width, height : height }
+            );
+            return dimCovers;
+        },
+
+        computeDimRows : function (spotlights)
+        {
+            var documentElement = Dom.getDocumentElement();
+            var docWidth = Util.max(documentElement.scrollWidth, documentElement.clientWidth);
+            var docHeight = Util.max(documentElement.scrollHeight, documentElement.clientHeight);
+            var banner = Dom.getElementById("BPR_Banner");
+            var bannerHeight = Util.max(banner.clientHeight, banner.scrollHeight)+10;
+            var dimCovers = [];
+            var top = bannerHeight;
+            var left = 0;
+            var width = 0;
+            var height = 0;
+            for (var i = 0; i < spotlights.length; i++) {
+                var spotlight = spotlights[i];
+                var spotlightTop = spotlight.top;
+                var spotlightLeft = spotlight.left;
+                var spotlightWidth = spotlight.width;
+                var spotlightHeight = spotlight.height;
+
+                // top full width cover
+                left = 0;
+                width = docWidth;
+                height = spotlightTop - top;
+                if (height < 0) {
+                    return null;
+                }
+                dimCovers.push(
+                    {top : top, left : left, width : width, height : height }
+                );
+
+                //left cover
+                top += height;
+                height = spotlightHeight;
+                width = spotlightLeft;
+                dimCovers.push(
+                    {top : top, left : left, width : width, height : height }
+                );
+
+                // center cover
+                left += width;
+                width = spotlightWidth;
+                dimCovers.push(
+                    {top : top, left : left, width : width, height : height, opacity : 0 }
+                );
+
+                // right cover
+                left += width;
+                width = docWidth - left;
+                dimCovers.push(
+                    {top : top, left : left, width : width, height : height }
+                );
+
+                top += height;
+            }
+            // bottom most cover
+            left = 0;
+            width = docWidth;
+            height = docHeight - top;
+            dimCovers.push(
+                {top : top, left : left, width : width, height : height }
+            );
+            return dimCovers;
+        },
+
     EOF:0};
 
     //
@@ -1672,19 +1939,8 @@ ariba.Widgets = function() {
         },
 
         // HoverCard
-        HCC : {
-            mouseover : function (hoverLink, evt) {
-                hcTimeout = setTimeout(function() {ariba.Widgets.displayHoverCard(hoverLink);}, 500);
-            },
-            mouseout : function (hoverLink, evt) {
-                if (hcTimeout) {
-                    clearTimeout(hcTimeout);
-                    hcTimeout = null;
-                    return;
-                }
-                ariba.Widgets.hideActiveHoverCard();
-            }
-        },
+        HCC : Widgets.HoverCardContentBehavior,
+
         HC : {
             mouseover : function (hoverCard, evt) {
                 ariba.Widgets.clearHideHoverCard();

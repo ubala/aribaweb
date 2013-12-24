@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#42 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextField.awl#44 $
     </Copyright>
 
     <Overview>
@@ -134,7 +134,8 @@
         bh="$^behavior:TF"
         onBLur="$onBlurString"
         _pl="$formatPlaceHolder"
-        otherBindings="$otherBindingsValues"/>\
+        otherBindings="$otherBindingsValues"
+        autocorrect="off" autocapitalize="off"/>\
     <a:RefreshRegion>\
         <a:If ifTrue="$isInHighLightedErrorScope">
             <a:ClientSideScript>\

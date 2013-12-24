@@ -80,6 +80,15 @@
                     <department>R-D</department>
                 </etc>
             </User>
+            <User id="fkolar">
+                <name>Frank Kolar</name>
+                <phone>(650) 391-4133</phone>
+                <email>fkolar</email>
+                <etc>
+                    <dashboard>Member</dashboard>
+                    <department>R-D</department>
+                </etc>
+            </User>
         </manages>
     </User>
 

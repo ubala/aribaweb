@@ -216,7 +216,7 @@ public final class AWClasspathResourceDirectory extends AWResourceDirectory
             
      */
     public static final String AWJarPropertiesPath = "META-INF/aribaweb.properties";
-    static final Pattern _URLJarNamePattern = Pattern.compile(".*[/\\\\](.+)\\.(jar|zip)\\!/.*");;
+    static final Pattern _URLJarNamePattern = Pattern.compile(".*[/\\\\](.+)\\.(jar|zip)\\!?/.*");;
     static final String _ZipMarker = ".zip!";
 
     static Map<String, URL> _AWJarUrlsByName = null;

@@ -1,12 +1,13 @@
-<h3>Latest Release: v5.1 (9/20/2012)</h3>
+<h3>Latest Release: v5.2 (12/23/2013)</h3>
 <ul>
-<li>New components</li>
+<li>New components and enhancements</li>
 <li>Security fixes</li>
+<li>JBoss support</li>
 </ul>
 <div style="height:30px;margin-left:80px">
     <w:TextButton buttonWrapperStyle="LeftRight"
                   buttonClass="siteBtn"
                   action='${ariba.ui.aribaweb.core.AWRedirect.getRedirect(requestContext,"https://sourceforge.net/projects/aribaweb/")}'>
-        Download v5.1
+        Download v5.2
     </w:TextButton>
 </div>

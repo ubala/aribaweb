@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.awl#7 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.awl#9 $
     </Copyright>
 
     <Overview>
@@ -106,6 +106,10 @@
         This option can only be selected if the AWApplication provides an encryption provider.
     </Binding>
 
+    <Binding key="disabled" type="boolean" direction="get" required="$false">
+        Makes the File upload control unclickable and greys out its appearance.
+    </Binding>
+
 </a:Api>\
 
 <!--- Note: the voodoo for "formValue" is to indicate that this is never evaluated.
@@ -114,7 +118,7 @@
       Note: DO NOT add any additional elements to this template, see javadoc in
       corresponding java file. -->\
 <input type="file" elementId="$elementId" name="$fileUploadName" otherBindings="$otherBindingsValues"
-       formValue="voodoo" id="$env.awinputId"/>\
+       formValue="voodoo" id="$env.awinputId" disabled="$disabled"/>\
 <a:If ifTrue="$inPlaybackMode">\
     <nobr>URL:<input type="text" name="$urlInputName" id="$urlInputName"/></nobr>
 </a:If>

@@ -6,8 +6,8 @@
                     <td valign="bottom">
                         <a:IncludeContent name="titleArea" required="$false"/>\
                     </td>
-                    <td>&nbsp;</td>
                     <a:If ifTrue="$^showButtons:$true">
+                        <td>&nbsp;</td>
                         <td width="1%" align="$languageRight" valign="bottom">
                             <table border="0" cellspacing="0" cellpadding="0" width="100%">\
                                 <tr>

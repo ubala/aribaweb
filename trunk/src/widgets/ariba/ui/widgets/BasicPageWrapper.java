@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,13 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.java#34 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.java#37 $
 */
 
 package ariba.ui.widgets;
 
 import ariba.ui.aribaweb.html.AWImage;
-import ariba.util.core.ListUtil;
 import ariba.util.core.StringUtil;
 
 public final class BasicPageWrapper extends PageWrapper
@@ -26,6 +25,7 @@ public final class BasicPageWrapper extends PageWrapper
     static {
         FooterIncludes.registerInclude(MessageBanner.class.getName());
         FooterIncludes.registerInclude(PollDialog.class.getName());
+        FooterIncludes.registerInclude(SpotlightFooter.class.getName());
     }
 
     public String  _formActionUrl;
@@ -76,6 +76,15 @@ public final class BasicPageWrapper extends PageWrapper
             bodyClass = StringUtil.strcat(bodyClass, " hide");
         }
         return bodyClass;
+    }
+
+    /**
+     * Gets the module name from the application.
+     * @return module name.
+     */
+    public String applicationType ()
+    {
+        return application().getApplicationType();
     }
 
     public String favIconUrl ()

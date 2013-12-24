@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#23 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWFormRedirect.java#24 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -43,6 +43,7 @@ public class AWFormRedirect extends AWComponent
     private List _values;
     private int _currentIndex;
     private String _target;
+    private String _enctype;
 
     protected boolean shouldValidateSession ()
     {
@@ -117,6 +118,17 @@ public class AWFormRedirect extends AWComponent
         return _title;
     }
 
+    public void setEnctype (String enctype)
+    {
+    	_enctype = enctype;
+    }
+
+    public String getEnctype ()
+    {
+        return _enctype;
+    }
+
+
     public void setCurrIndex (int index)
     {
         _currentIndex = index;
@@ -174,7 +186,7 @@ public class AWFormRedirect extends AWComponent
             getFormValues().remove(idx);
         }
     }
-    
+
     public String getFormValue (String name)
     {
         List names = getFormNames();
@@ -184,7 +196,7 @@ public class AWFormRedirect extends AWComponent
         }
         return null;
     }
-    
+
     public void setFormActionUrl (String url)
     {
         _formActionUrl = url;

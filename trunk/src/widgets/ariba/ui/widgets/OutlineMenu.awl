@@ -1,0 +1,64 @@
+<style>
+.olmParentLabel {
+    overflow: hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    width:160px;
+    display:inline-block;
+}
+.olmChild {
+    overflow: hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    width:250px;
+    display:inline-block;
+}
+</style>
+
+<a:For list="$list" item="$^item" index="$index">
+    <a:If ifFalse="$^hasChildren">\
+       <a:HoverContainer class="olmRoot" style="$currLinkStyle">
+            <div class="olmParent" width="180px" align="left">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td>
+                            <span class="olmParentLabel">
+                                <a:Hyperlink action="$^action" style="color:#336699;">
+                                    <a:IncludeContent/>
+                                </a:Hyperlink>
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </a:HoverContainer>
+    <a:Else/>
+        <a:HoverContainer class="olmRoot" style="$currLinkStyle">
+            <div class="olmParent" width="180px" align="left">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td>
+                            <span  class="olmParentLabel">
+                                <a:IncludeContent/>
+                            </span>
+                        </td>
+                        <td width="1%" valign="middle">
+                            <div class="olmArrow"/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="$childrenClass">
+                <a:For list="$^children" item="$^item">
+                    <div class="olmChild">
+                        <a:Hyperlink action="$^action" class="olmChild">
+                                <span class="olmLeaf">
+                                    <a:IncludeContent/>
+                                </span>
+                        </a:Hyperlink>
+                    </div>
+                </a:For>
+            </div>
+        </a:HoverContainer>
+    </a:If>
+</a:For>

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#37 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Chooser.java#42 $
 */
 
 
@@ -182,7 +182,7 @@ public class Chooser extends AWComponent
                 ? displayObject.toString()
                 : AWFormatting.get(_formatter).format(_formatter, displayObject, preferredLocale());
         }
-        return displayValue;
+            return displayValue;
     }
 
     public String displayValue ()
@@ -255,8 +255,19 @@ public class Chooser extends AWComponent
         _chooserState.clearRecentSelectedObjects();
         if (errorManager().isValidationRequiredInAppend() &&
             _chooserState.isInvalid()) {
-            // update error manager in case revalidation is required 
-            recordValidationError(errorKey(), noMatchFoundString(), _chooserState.pattern());
+            // vjagannath 5/3/2013
+            // Check for null error key before we attempt to record the validation error.
+            // Currently this is a stateless component and there are scenarios where the
+            // error key may be null (Please refer CR# 1-C4KIT3). In such scenarios we
+            // don't record the error as it could lead to a FAE if we attempt
+            // to do so.
+            Object errorKey = errorKey();
+            if (errorKey != null) {
+            // update error manager in case revalidation is required
+                recordValidationError(errorKey,
+                                      noMatchFoundString(),
+                                      _chooserState.pattern());
+            }
         }
         template().elementArray()[1].renderResponse(requestContext, this);
         _chooserState.setFocus(false);
@@ -435,6 +446,9 @@ public class Chooser extends AWComponent
 
     public void setSelectValue (String selectionIndexValue)
     {
+        if (StringUtil.nullOrEmptyOrBlankString(selectionIndexValue)) {
+            return;
+        }
         int selectionIndex = Integer.parseInt(selectionIndexValue);
         if (selectionIndex > -1) {
             selectAction(_selectionList, selectionIndex);
@@ -444,6 +458,13 @@ public class Chooser extends AWComponent
 
     public void setToggleValue (String selectionIndexValue)
     {
+        // This might happen if browser behaves unpredictably e.g. sending multiple
+        // dom events for onblur, onselect etc. Putting the safety net for typeahead
+        // so that we do not throw a NumberFormatException to the user. -Kiran 10/18/2013
+        if (StringUtil.nullOrEmptyOrBlankString(selectionIndexValue)) {
+            return;
+        }
+
         int selectionIndex = Integer.parseInt(selectionIndexValue);
         if (selectionIndex > -1) {
             _chooserState.setAddMode(true);
@@ -531,7 +552,8 @@ public class Chooser extends AWComponent
         _fullMatchNeeded = false;
     }
 
-    private void resetChooser(){
+    private void resetChooser ()
+    {
         // if blank, and we had valid object, then set it back
         if (!_chooserState.addMode() && !_chooserState.isInvalid()) {
             Object selectedObject = _chooserState.selectedObject();

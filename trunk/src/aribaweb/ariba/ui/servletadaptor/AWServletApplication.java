@@ -12,45 +12,47 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWServletApplication.java#20 $
 */
 
 package ariba.ui.servletadaptor;
 
+import ariba.ui.aribaweb.core.AWBaseMonitorStatsPage;
+import ariba.ui.aribaweb.core.AWComponentActionRequestHandler;
 import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWConcreteServerApplication;
+import ariba.ui.aribaweb.core.AWDirectAction;
+import ariba.ui.aribaweb.core.AWDirectActionRequestHandler;
+import ariba.ui.aribaweb.core.AWMergedStringLocalizer;
 import ariba.ui.aribaweb.core.AWRequest;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWRequestHandler;
 import ariba.ui.aribaweb.core.AWResponse;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWServerApplication;
-import ariba.ui.aribaweb.core.AWMergedStringLocalizer;
-import ariba.ui.aribaweb.core.AWStringLocalizer;
-import ariba.ui.aribaweb.core.AWBaseMonitorStatsPage;
 import ariba.ui.aribaweb.core.AWSessionValidator;
-import ariba.ui.aribaweb.core.AWDirectActionRequestHandler;
-import ariba.ui.aribaweb.core.AWDirectAction;
-import ariba.ui.aribaweb.core.AWComponentActionRequestHandler;
+import ariba.ui.aribaweb.core.AWStringLocalizer;
 import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.Log;
+import ariba.util.core.Assert;
+import ariba.util.core.ClassUtil;
+import ariba.util.core.ResourceService;
 import ariba.util.core.StringArray;
 import ariba.util.core.StringUtil;
-import ariba.util.core.ResourceService;
-import ariba.util.core.ClassUtil;
 import ariba.util.core.URLUtil;
-import ariba.util.core.Assert;
+import ariba.util.http.multitab.MultiTabSupport;
 import ariba.util.i18n.LocalizedJavaString;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.ServletConfig;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Enumeration;
-import java.net.URL;
-import java.net.MalformedURLException;
+import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 /**
     An {@link ariba.ui.aribaweb.core.AWApplication} for javax.servlet-based applications.
@@ -207,7 +209,7 @@ public class AWServletApplication extends AWConcreteApplication
         Class cls = AWUtil.classForName("app.Session");
         return (cls != null) ? cls : super.sessionClass();
     }
-    
+
     public String name ()
     {
         return "AribaWeb";
@@ -319,6 +321,13 @@ public class AWServletApplication extends AWConcreteApplication
         return servletUrlPrefixComponentCount;
     }
 
+    /**
+     Returns the number of "component parts" in the {@link #servletUrlPrefix()}.
+     This turns out to be the number of path parts in the web app name.
+     E.g. if the web app name is "Buyer", this method
+     will return 1. If it's "foo/bar", it will return 2.
+     @return the number of component parts in the web app name
+     */
     public int servletUrlPrefixComponentCount ()
     {
         if (_servletUrlPrefixComponentCount == -1) {
@@ -332,6 +341,11 @@ public class AWServletApplication extends AWConcreteApplication
         return _servletUrlPrefixComponentCount;
     }
 
+    /**
+     Returns a string representing the part before the servlet name in
+     request URLs. This turns out to be the web app name with a leading slash.
+     @return a string of the following form: "/{web-app-name}"
+     */
     public String servletUrlPrefix ()
     {
         if (_ServletUrlPrefix == null) {
@@ -345,7 +359,17 @@ public class AWServletApplication extends AWConcreteApplication
         return "/";
     }
 
-    public AWConcreteApplication.RequestURLInfo requestUrlInfo (String urlString)
+    /**
+     Parses the RequestURLInfo out from <code>urlString</code> and returns it.
+     @param urlString the "path" part of the URI, not including request params.
+                      Doesn't include the protocol and hostname.
+                      E.g. usually looks like one of the following:
+     /{web-app-name}/{servlet-name}/{request-handler-key}/{extra-stuff}
+     /{web-app-name}/{servlet-name}/{tab-index}/{request-handler-key}/{extra-stuff}
+     @return
+     */
+    public AWConcreteApplication.RequestURLInfo requestUrlInfo (
+            String urlString)
     {
         // if fully specified (versus relative) then strip it
         if (urlString.startsWith("http")) {
@@ -356,51 +380,91 @@ public class AWServletApplication extends AWConcreteApplication
                 throw new AWGenericException(e);
             }
         }
-        AWConcreteApplication.RequestURLInfo info = new AWConcreteApplication.RequestURLInfo();
+
+        AWConcreteApplication.RequestURLInfo info =
+                new AWConcreteApplication.RequestURLInfo();
         // Note: the requestHandlerPath is really the URI
         //String requestHandlerPath = _servletRequest.getPathInfo();
         String requestHandlerPath = urlString;
         if (requestHandlerPath != null) {
             int requestHandlerPathLength = requestHandlerPath.length();
             if (requestHandlerPathLength > 0) {
-                StringArray pathComponents = AWUtil.componentsSeparatedByString(requestHandlerPath, "/");
-                // Note: first entry is always empty string since requestHandlerPath starts with "/".
+                StringArray pathComponents = AWUtil.componentsSeparatedByString(
+                        requestHandlerPath.replaceAll("//", "/"), "/");
+                // Note: first entry is always empty string since
+                //  requestHandlerPath starts with "/".
                 int pathComponentCount = pathComponents.inUse();
-                int servletUrlPrefixComponentCount = ((AWServletApplication)AWConcreteApplication.SharedInstance).servletUrlPrefixComponentCount();
+                int servletUrlPrefixComponentCount = (
+                        (AWServletApplication)AWConcreteApplication
+                              .SharedInstance).servletUrlPrefixComponentCount();
                 int currentFieldIndex = servletUrlPrefixComponentCount + 1;
                 if (requestHandlerPath.startsWith("/")) {
                     currentFieldIndex ++;
                 }
-                // aling: I don't not fully understand why for catalog login URL currentFieldIndex
-                // could equal to array lenth, for buyer logic url it equals length - 1, which is correct
+                // aling: I don't not fully understand why for catalog login
+                // URL currentFieldIndex could equal to array length, for buyer
+                // logic url it equals length - 1, which is correct
 
                 if (pathComponentCount > currentFieldIndex) {
                     String[] pathComponentsArray = pathComponents.array();
-                    String firstField = pathComponentsArray[currentFieldIndex];
+                    String pathPart = pathComponentsArray[currentFieldIndex];
+
                     // Note: when user types trailing "/" in their URL,
-                    // say http://y:8001/Ariba/Buyer/, here we got "", so this if branch
-                    // is to solve the trailing "/" problem
+                    // say http://y:8001/Ariba/Buyer/, here we got "", so this
+                    // if branch is to solve the trailing "/" problem
                     // Defect 81707 and 79077
-                    if (firstField != null) {
-                        if (!firstField.equals("")) {
-                            char firstChar = firstField.charAt(0);
-                            if ((firstChar >= '0') && (firstChar <= '9')) {
-                                // if we're in here, firstField must be an instance id.
-                                info.applicationNumber = firstField;
-                                currentFieldIndex++;
-                                if (pathComponentCount > currentFieldIndex) {
-                                    info.requestHandlerKey = pathComponentsArray[currentFieldIndex];
+                    if (!StringUtil.nullOrEmptyString(pathPart)) {
+                        char firstChar = pathPart.charAt(0);
+                        String pref = MultiTabSupport.Instance.get().defaultTabPrefix();
+                        // first field is instance id or tab id
+                        while ((firstChar >= '0') && (firstChar <= '9')) {
+                            // looking at previous field, we are tabbing
+                            if (pathComponentsArray[currentFieldIndex - 1]
+                                    .contains(pref)) {
+                                info.tabIndex = pathPart;
+                            }
+                            else {
+                                // if we're in here, pathPart must be an
+                                // instance id.
+                                info.applicationNumber = pathPart;
+                            }
+
+                            currentFieldIndex++;
+
+                            if (pathComponentCount > currentFieldIndex) {
+                                pathPart = pathComponentsArray[
+                                        currentFieldIndex];
+
+                                if (StringUtil.nullOrEmptyString(pathPart)) {
+                                    currentFieldIndex++;
+                                    pathPart = "";
+                                    break;
+                                }
+                                else {
+                                    firstChar = pathPart.charAt(0);
                                 }
                             }
                             else {
-                                info.requestHandlerKey = firstField;
+                                pathPart = "";
+                                break;
                             }
-                            currentFieldIndex++;
-                            if ((info.requestHandlerKey != null) && (info.requestHandlerKey.length() == 0)) {
-                                info.requestHandlerKey = null;
-                            }
-                            else if (pathComponentCount > currentFieldIndex) {
-                                info.requestHandlerPath = (String[])AWUtil.sublist(pathComponentsArray, currentFieldIndex, pathComponentCount);
+                        }
+
+                        if (!StringUtil.nullOrEmptyString(pathPart)) {
+                            info.requestHandlerKey = pathPart;
+                        }
+
+                        currentFieldIndex++;
+
+                        if (pathComponentCount > currentFieldIndex) {
+                            pathPart = pathComponentsArray[currentFieldIndex];
+
+                            if (!StringUtil.nullOrEmptyString(pathPart)) {
+                                info.requestHandlerPath =
+                                        (String[])AWUtil.sublist(
+                                                pathComponentsArray,
+                                                currentFieldIndex,
+                                                pathComponentCount);
                             }
                         }
                     }

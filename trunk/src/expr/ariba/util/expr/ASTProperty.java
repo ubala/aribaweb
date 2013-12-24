@@ -1,21 +1,27 @@
+/*
+    Copyright (c) 2013 Ariba, Inc.
+    All rights reserved. Patents pending.
+
+    $Id: //ariba/platform/util/expr/ariba/util/expr/ASTProperty.java#10 $
+ */
 //--------------------------------------------------------------------------
-//	Copyright (c) 1998-2004, Drew Davidson and Luke Blanshard
+//  Copyright (c) 1998-2004, Drew Davidson and Luke Blanshard
 //  All rights reserved.
 //
-//	Redistribution and use in source and binary forms, with or without
+//  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
 //
-//	Redistributions of source code must retain the above copyright notice,
+//  Redistributions of source code must retain the above copyright notice,
 //  this list of conditions and the following disclaimer.
-//	Redistributions in binary form must reproduce the above copyright
+//  Redistributions in binary form must reproduce the above copyright
 //  notice, this list of conditions and the following disclaimer in the
 //  documentation and/or other materials provided with the distribution.
-//	Neither the name of the Drew Davidson nor the names of its contributors
+//  Neither the name of the Drew Davidson nor the names of its contributors
 //  may be used to endorse or promote products derived from this software
 //  without specific prior written permission.
 //
-//	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 //  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 //  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 //  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
@@ -30,11 +36,9 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
-import ariba.util.fieldvalue.FieldPath;
 import ariba.util.core.Assert;
-import ariba.util.core.ClassUtil;
 import ariba.util.fieldtype.TypeInfo;
-import ariba.util.fieldtype.PrimitiveTypeProvider;
+import ariba.util.fieldvalue.FieldPath;
 
 /**
  * @author Luke Blanshard (blanshlu@netscape.net)
@@ -50,25 +54,26 @@ class ASTProperty extends SimpleNode implements Symbol
     */
     FieldPath _fieldPath;
 
-    public ASTProperty(int id)
+    public ASTProperty (int id)
     {
         super(id);
     }
 
-    public ASTProperty(ExprParser p, int id)
+    public ASTProperty (ExprParser p, int id)
     {
         super(p, id);
     }
 
-    public void jjtClose()
+    public void jjtClose ()
     {
-        Assert.that(children != null && children.length == 1 && children[0] instanceof ASTConst,
-                "Property node must have constant child");
-        // String fieldName = ((ASTConst)children[0]).getValue().toString();
+        Assert.that(children != null && children.length == 1
+                    && children[0] instanceof ASTConst,
+                    "Property node must have constant child");
         _fieldPath = new FieldPath(toString());
     }
 
-    protected Object getValueBody( ExprContext context, Object source ) throws ExprException
+    protected Object getValueBody (ExprContext context, Object source)
+    throws ExprException
     {
         Integer symbolKind = context.getSymbolKind(this);
 
@@ -92,12 +97,12 @@ class ASTProperty extends SimpleNode implements Symbol
         }
     }
 
-    protected void setValueBody( ExprContext context, Object target, Object value ) throws ExprException
+    protected void setValueBody (ExprContext context, Object target, Object value)
+    throws ExprException
     {
         Integer symbolKind = context.getSymbolKind(this);
 
-        if (Symbol.Field.equals(symbolKind) &&
-            (target instanceof TypeInfo)) {
+        if (Symbol.Field.equals(symbolKind) && (target instanceof TypeInfo)) {
             // If the source is a TypeInfo, then the property is a static
             // field of the type/class.
             String typeName = ((TypeInfo)target).getName();
@@ -116,12 +121,13 @@ class ASTProperty extends SimpleNode implements Symbol
         }
     }
 
-    public boolean isNodeSimpleProperty( ExprContext context ) throws ExprException
+    public boolean isNodeSimpleProperty (ExprContext context) throws ExprException
     {
-        return true;  // (children != null) && (children.length == 1) && ((SimpleNode)children[0]).isConstant(context);
+        //was: return (children != null) && (children.length == 1) && ((SimpleNode)children[0]).isConstant(context);
+        return true;
     }
 
-    public String toString()
+    public String toString ()
     {
         return ((ASTConst)children[0]).getValue().toString();
     }
@@ -135,5 +141,13 @@ class ASTProperty extends SimpleNode implements Symbol
     {
         acceptChildren(visitor);
         visitor.visit(this);
+    }
+
+    @Override
+    protected void traceEvaluation (final Object result)
+    {
+        if (!(this.parent instanceof ASTChain) && SimpleNode.shouldTraceValue(result)) {
+            super.traceEvaluation(result);
+        }
     }
 }

@@ -43,6 +43,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.AnnotatedElement;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -57,14 +58,20 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AWJarWalker
 {
     private static final ConcurrentHashMap<String, DirectoryIteratorFactory> registry
             = new ConcurrentHashMap<String, DirectoryIteratorFactory>();
+    private static final Pattern JBossJarNamePattern = Pattern.compile(".*[/\\\\](.+\\" +
+            ".jar|zip)-\\w+");
+
 
     static {
         registry.put("file", new FileProtocolIteratorFactory());
+        registry.put("vfs", new VfsProtocolIteratorFactory());
     }
 
 
@@ -353,6 +360,43 @@ public class AWJarWalker
             } else {
                 return new JarIterator(url, filter);
             }
+        }
+    }
+
+    /**
+     JBoss specific. a test to get the path without VFS API from JBOSS
+     */
+    public static class VfsProtocolIteratorFactory implements DirectoryIteratorFactory
+    {
+        private final String JBossVF = "org.jboss.vfs.VirtualFile";
+        private final String JBossVFMethod = "getPhysicalFile";
+
+        public StreamIterator create (URL url, Filter filter) throws IOException
+        {
+            URLConnection urlConnection = url.openConnection();
+            Object virtualFile = urlConnection.getContent();
+            try {
+                if (url.getContent().getClass().getName().equals(JBossVF)) {
+                    File contentsFile = (File)virtualFile.getClass().getDeclaredMethod
+                            (JBossVFMethod).invoke(virtualFile, new Object[0]);
+                    File parentFile = contentsFile.getParentFile();
+
+                    if (parentFile.isDirectory()) {
+                        Matcher matcher = JBossJarNamePattern.matcher(parentFile
+                                .getAbsolutePath());
+                        if (matcher.matches()) {
+                            String jarName = matcher.group(1);
+                            File fullJarPath = new File(parentFile, jarName);
+                            return new JarIterator(fullJarPath.toURI().toURL(), filter);
+                        }
+                    }
+                }
+            }
+            catch (Exception e) {
+                throw new IOException(e);
+            }
+            throw new IOException("Invalid file protocol content: " +
+                    virtualFile);
         }
     }
 

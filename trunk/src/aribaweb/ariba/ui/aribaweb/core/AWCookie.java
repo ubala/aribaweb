@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWCookie.java#10 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWCookie.java#11 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWBaseObject;
+import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.FastStringBuffer;
 import ariba.util.core.StringUtil;
 
@@ -97,6 +98,7 @@ public final class AWCookie extends AWBaseObject
     private String finalizeStringBuffer (FastStringBuffer stringBuffer)
     {
         String string = stringBuffer.toString();
+        string = AWUtil.filterUnsafeHeader(string);
         stringBuffer.truncateToLength(0);
         SharedStringBuffer = stringBuffer;
         return string;

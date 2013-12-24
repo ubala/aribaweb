@@ -1,7 +1,14 @@
-<a:Hyperlink action="$openPrintWindow" submitForm="$submitForm" class="$^class">\
-   <a:If ifTrue="$^showIcon"><a:Image filename="widg/icn_print.gif"/> </a:If>\
-   <a:IncludeContent/>\
-</a:Hyperlink>\
+<a:If ifTrue="$^isPopupMenuItem">\
+    <w:PopupMenuItem action="$openPrintWindow" submitForm="$submitForm">
+        <a:IncludeContent/>\
+    </w:PopupMenuItem>\
+<a:Else/>\
+    <a:Hyperlink action="$openPrintWindow" submitForm="$submitForm" class="$^class">\
+       <a:If ifTrue="$^showIcon"><a:Image filename="widg/icn_print.gif"/> </a:If>\
+
+    </a:Hyperlink>\
+</a:If >
+
 <!---
 <a:SetValue menuId="$requestContext.nextElementId"/>\
 \

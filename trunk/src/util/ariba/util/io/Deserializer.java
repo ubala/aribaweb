@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/io/Deserializer.java#7 $
+    $Id: //ariba/platform/util/core/ariba/util/io/Deserializer.java#8 $
 */
 
 package ariba.util.io;
@@ -193,6 +193,7 @@ public class Deserializer extends FilterReader
         Object key;
         Object value;
         int token;
+        int nextToken;
 
         key = readObjectInternal();
         if (key == null) {
@@ -211,12 +212,22 @@ public class Deserializer extends FilterReader
         if (!tokenGenerator.hasMoreTokens()) {
             unterminatedExpression();
         }
+        
+        // This code is here and not in readObjectInternal() because we
+        // only want to allow null in arrays and maps.  It should be a syntax error
+        // for the null token to appear elsewhere.
 
-        value = readObjectInternal();
-        if (value == null) {
-            unterminatedExpression();
+        nextToken = tokenGenerator.peekNextToken();
+        if (nextToken == TokenGenerator.NULL_VALUE_TOKEN) {
+            tokenGenerator.nextToken();
+            value = null;
         }
-
+        else {
+            value = readObjectInternal();
+            if (value == null) {
+                unterminatedExpression();
+            }
+        }
         result.put(key, value);
 
         if (!tokenGenerator.hasMoreTokens()) {

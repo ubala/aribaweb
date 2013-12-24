@@ -12,10 +12,11 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTMetaColumnRenderer.java#17 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTMetaColumnRenderer.java#18 $
 */
 package ariba.ui.table;
 
+import ariba.ui.aribaweb.core.AWRedirect;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.table.AWTDataTable;
 import ariba.ui.widgets.HTMLActions;
@@ -146,6 +147,8 @@ public final class AWTMetaColumnRenderer extends AWTDataTable.ColumnRenderer
 
     public AWResponseGenerating actionClicked ()
     {
+        // For XMLHTTP during file download
+        AWRedirect.disallowInternalDispatch(requestContext());
         return HTMLActions.handleAction(actionString(), actionTarget(), _table);
     }
 

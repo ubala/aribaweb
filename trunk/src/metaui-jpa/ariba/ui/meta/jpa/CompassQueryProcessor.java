@@ -139,7 +139,10 @@ class CompassQueryProcessor implements QueryProcessor
         CompassQuery query = queryForPredicate(builder, spec.getPredicate());
 
         Class targetClass = ClassUtil.classForName(spec.getEntityName());
-        query.setTypes(targetClass);
+
+        //Check if we are not superceding this class
+        Class currentClass = PersistenceMeta.supercedingChildClass(targetClass);
+        query.setTypes(currentClass);
 
         // CompassHits hits = session.find(query);
         List results = processHits(context, query.hits());

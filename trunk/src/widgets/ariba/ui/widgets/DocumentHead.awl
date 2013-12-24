@@ -1,6 +1,6 @@
 <a:Api>
     <Copyright>
-        Copyright 1996-2008 Ariba, Inc.
+        Copyright 1996-2013 Ariba, Inc.
 
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DocumentHead.awl#24 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/DocumentHead.awl#26 $
     </Copyright>
 
     <Overview>
@@ -39,13 +39,21 @@
         See the binding named escapeHtml for more.
     </Binding>
 
+    <Binding key="metaTags" direction="get" type="Map" default="$null">
+        Map of string tag name to tag content. By default, the map is null,
+        you can add 1 or more meta tags as needed.
+    </Binding>
+
     <Binding key="escapeTitle" direction="get" type="boolean" default="$true">
         Depreciated.  Title will always escape unsafe HTML.        
     </Binding>
 </a:Api>\
 <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
     <meta http-equiv="imagetoolbar" content="no"/>
+    <a:For list="$metaKeys" item="$currentMetaKey">
+        <meta name="$currentMetaKey" content="$currentMetaValue"/>
+    </a:For>
     <a:MetaContentType/>
     <a:Environment scriptForceDirectInclude="$true">
         <w:WidgetsJavaScript sessionless="$^sessionless:$false"/>

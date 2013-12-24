@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericContainer.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericContainer.java#10 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -21,6 +21,7 @@ import ariba.ui.aribaweb.util.AWEncodedString;
 import java.util.Map;
 import ariba.util.core.StringUtil;
 import java.lang.reflect.Field;
+import static ariba.ui.aribaweb.core.AWComponent.RenderingListener.InterestLevel;
 
 public class AWGenericContainer extends AWContainerElement
 {
@@ -76,16 +77,29 @@ public class AWGenericContainer extends AWContainerElement
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
+        InterestLevel interestLevel = InterestLevel.Interested;
+
+        if (interestLevel == InterestLevel.Interested) {
+            interestLevel = component.componentWillRender(requestContext, this, component);
+        }
         AWEncodedString encodedTagName = _genericElement.tagNameInComponent(component);
         // let this method decide how to deal with null bytes
         _genericElement.renderResponse(requestContext, component, encodedTagName);
         super.renderResponse(requestContext, component);
         if (encodedTagName != null) {
             AWResponse response = requestContext.response();
+            // hook for listeners to inject any more content
+            if (interestLevel == InterestLevel.Interested) {
+                interestLevel = component.componentClosingTag(requestContext, this, component);
+            }
             response.appendContent(LeftAngleSlash);
             response.appendContent(encodedTagName);
             response.appendContent(RightAngle);
         }
+        if (interestLevel == InterestLevel.Interested) {
+            interestLevel = component.componentFinishedRender(requestContext, this, component);
+        }
+
     }
 
     public String toString ()

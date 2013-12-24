@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/RecycleManager.java#9 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/RecycleManager.java#10 $
 */
 
 package ariba.util.shutdown;
@@ -37,9 +37,9 @@ import java.util.Random;
  */
 public class RecycleManager
 {
+    public static final String RecycleLock = "RecyleLock_";
 
     private static final int Infinite = 365 * 24 * 60;
-    private static final String RecycleLock = "RecyleLock_";
     private String globalLockName = RecycleLock;
     // the maximum taskcount before recycle
     // setting to -1 ( disabled ) unless set by parameter.

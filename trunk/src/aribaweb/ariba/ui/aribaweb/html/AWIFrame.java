@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWIFrame.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWIFrame.java#10 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -20,9 +20,11 @@ package ariba.ui.aribaweb.html;
 import ariba.ui.aribaweb.core.AWBinding;
 import ariba.ui.aribaweb.core.AWComponent;
 import ariba.ui.aribaweb.core.AWComponentActionRequestHandler;
+import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.core.AWGenericActionTag;
 import ariba.ui.aribaweb.util.AWEncodedString;
+import ariba.util.core.StringUtil;
 
 public final class AWIFrame extends AWComponent
 {
@@ -56,15 +58,21 @@ public final class AWIFrame extends AWComponent
 
     public String srcUrl ()
     {
-        String srcUrl = null;
+        String srcUrl;
         AWBinding binding = bindingForName(BindingNames.src, false);
+
         if (binding != null) {
             srcUrl = (String)valueForBinding(binding);
         }
         else {
             srcUrl = AWComponentActionRequestHandler.SharedInstance.urlWithSenderId(requestContext(), _elementId);
         }
-        return srcUrl;
+
+        // append the frameName onto the URL, so AW can know it is
+        // operating in an iframe
+        return StringUtil.strcat(
+                srcUrl, "&", AWRequestContext.FrameNameKey, "=",
+                this.frameName().toString());
     }
 
     public AWResponseGenerating getFrameContent ()

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#75 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWDirectAction.java#76 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -47,6 +47,7 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpSession;
 
@@ -66,6 +67,17 @@ abstract public class AWDirectAction extends AWBaseObject
     public static final String PingActionName = "ping";
     public static final String ProgressCheckActionName = "progressCheck";
     public static final String ProgressCheckSessionKeyName = "awpcid";
+
+    //Ariba User Community Constants
+    public static final String IframeNameParam = "iframeName";
+    public static final String DisplayParam = "display";
+    public static final String StyleClassParam = "styleClass";
+    public enum DisplayParamValues {
+            none, block
+    }
+    public enum StyleClassParamValues {
+        aucIframeExpanded, aucIframeCollapsed
+    }
 
     private static GrowOnlyHashtable ActionMethodNames = new GrowOnlyHashtable();
     // ** This is the abstract superclass for all DirectAction classes.  The default class is DirectAction, which must be provided by the user's application if DirectActions are to be used.
@@ -876,6 +888,58 @@ abstract public class AWDirectAction extends AWBaseObject
         return response;
     }
     */
+
+    /**
+     * DirectAction to resize community content iframe based on parameters passed.
+     * The iFrame will get resized to height and width specified as parameter.
+     * This direct action will be called from all the applications where the
+     * Community iFrame is displayed and it will internally load a static html 
+     * and resize the same
+     * @return AWResponseGenerating
+     */
+    public AWResponseGenerating resizeIframeAction () {
+
+        AWResponse response = application().createResponse(request());
+
+        String paramIframeName = request().formValueForKey(IframeNameParam);
+        String paramDisplay = request().formValueForKey(DisplayParam);
+        String paramStyleClass = request().formValueForKey(StyleClassParam);
+
+        //If any of the above mentioned parameters are null, return blank response
+        if ((paramIframeName == null) || (paramDisplay == null) || (paramStyleClass == null)) {
+            return response;
+        }
+
+        //Check the iframeName parameter. Iframe Name is combination of upper and lower case letters
+        Pattern pattern = Pattern.compile("[a-zA-Z]+.");
+        Matcher matcher = pattern.matcher(paramIframeName);
+        //If pattern is not matched, return blank response
+        if (!matcher.find()) {
+            return response;
+        }
+
+        //If Display param is not NONE or BLOCK, then return blank response
+        if (!((paramDisplay.equalsIgnoreCase(DisplayParamValues.none.toString())) ||
+                (paramDisplay.equalsIgnoreCase(DisplayParamValues.block.toString())))) {
+            return  response;
+        }
+
+        //If style class param is not aucIframeExpanded or aucIframeCollapsed, then return blank response
+        if (!((paramStyleClass.equalsIgnoreCase(StyleClassParamValues.aucIframeExpanded.toString())) ||
+                (paramStyleClass.equalsIgnoreCase(StyleClassParamValues.aucIframeCollapsed.toString())))) {
+            return  response;
+        }
+
+        AWCommunityResponse communityResponse = (AWCommunityResponse) pageWithName(AWCommunityResponse.class.getName());
+
+        communityResponse.setIframeName(paramIframeName);
+        communityResponse.setDisplay(paramDisplay);
+        communityResponse.setClassName(paramStyleClass);
+
+        response.setContent(communityResponse.generateStringContents().getBytes());
+        response.setContentType(AWContentType.TextHtml);
+        return response;
+    }
 
     public interface DirectActionObserver {
         // Observers can peek at form values

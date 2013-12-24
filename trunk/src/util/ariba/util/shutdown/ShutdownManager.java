@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 2006-2009 Ariba, Inc.
+    Copyright (c) 2006-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#24 $
+    $Id: //ariba/platform/util/core/ariba/util/shutdown/ShutdownManager.java#26 $
 */
 
 package ariba.util.shutdown;
@@ -22,15 +22,17 @@ import ariba.util.core.ClassUtil;
 import ariba.util.core.Constants;
 import ariba.util.core.Date;
 import ariba.util.core.ListUtil;
+import ariba.util.core.MapUtil;
 import ariba.util.core.SignalHandler;
 import ariba.util.core.SystemUtil;
 import ariba.util.core.ThreadFactory;
-import ariba.util.core.MapUtil;
 import ariba.util.log.Log;
 import ariba.util.log.LogManager;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * The ShutdownManager is responsible for executing shutdown requests
  * as graceful as possible.
@@ -43,6 +45,7 @@ import java.util.Map;
  * </ol>
  * @aribaapi ariba
  */
+@SuppressWarnings("nls")
 public class ShutdownManager
 {
     /**
@@ -131,7 +134,20 @@ public class ShutdownManager
     public static final String FinalShutdownNoticeTopic = "FinalShutdownNoticeTopic";
     public static final String NodeKey = "Node";
 
+    /**
+     * Time at which initial "stable" state was determined for current node/JVM.
+     * {@code 0} indicates no determination attempted yet.
+     * @see #getMetastableSystemStatus(int, int)
+     */
+    private static AtomicLong initialStableTime = new AtomicLong(0L);
+    
+    /**
+     * Presumed initial cluster state: may be inaccurate during initial cluster start.
+     * To get a "stable" version of this, use {@link #getMetastableSystemStatus(int, int)}.
+     */
     private int systemStatus = StatusSystemRunning;
+    
+    /** Current node status: clearly the current node is initially running */
     private int nodeStatus = StatusNodeRunning;
     private static long shutdownStartTime = -1;
 
@@ -523,7 +539,8 @@ public class ShutdownManager
     {
         if (systemStatus != StatusSystemRunning &&
             !SignalKey.equals(type)) {
-            Log.shutdown.warning(9669, type,
+            Log.shutdown.warning(9669,
+                                 type,
                                  getSystemStatusAsString(getSystemStatus()));
             return;
         }
@@ -718,9 +735,79 @@ public class ShutdownManager
         return new ShutdownSignalHandler(this);
     }
 
+    /**
+     * Determine the current system shutdown (cluster) status.
+     * During initialization of a node this system shutdown status may be inaccurate for
+     *  an interval; use {@link #getMetastableSystemStatus(int, int)} instead to allow
+     *  for a delayed response.
+     *
+     * @return possibly incorrect system status
+     */
     public static int getSystemStatus ()
     {
         return get().systemStatus;
+    }
+
+    /**
+     * Get a meta-stable value of the Shutdown Manager's state.
+     * <p/>
+     * Since the initialization of nodes may cause a false presumption of "normal running"
+     *  ({@link #StatusSystemRunning}) while all the nodes get to the correct stable
+     *  state, wait up to the specified number of minutes before returning the shutdown
+     *  state of the cluster.
+     * Subsequent calls only wait additional time if the largest prior window, plus any
+     *  time elapsed since then, is not long enough to cover the new window.
+     * If two distinct invocations have differing minute windows, both window requests
+     *  will be effectively honored.
+     * 
+     * @param minuteWindow maximum number of minutes to wait before considering the system
+     *  stable; values below {@code 1} treated as {@code 1};
+     *  values over {@code 60} treated as {@code 60} (i.e., maximum delay to obtain a
+     *  stable sample is an hour)
+     * @param samples number of times to sample the shutdown state during window;
+     *  values below {@code 2} treated as {@code 2}
+     *  values over (the limited value of) <em>2*minuteWindow</em> treated as that value
+     *  (i.e., the maximum sample rate is twice per minute)
+     * @return stable cluster state
+     */
+    public static int getMetastableSystemStatus (final int minuteWindow, final int samples)
+    {
+        final int minuteCount = Math.min(60, Math.max(1, minuteWindow));
+        final int sampleCount = Math.min(minuteCount * 2, Math.max(2, samples));
+        final long windowTotalTime = Date.MillisPerMinute * minuteCount;
+        final long pause = Date.MillisPerMinute * minuteCount / sampleCount;
+        final long now = System.currentTimeMillis();
+        final long lastStableTime = initialStableTime.get();
+        long timeNeeded = Math.min(windowTotalTime, now - lastStableTime);
+        
+        // since initial state is always StatusSystemRunning, wait for other values
+        
+        while (timeNeeded > 0L) {
+            if (getSystemStatus() != ShutdownManager.StatusSystemRunning) {
+                break;
+            }
+            SystemUtil.sleep(pause);
+            timeNeeded -= pause;
+        }
+        
+        // either time is up or there has been a change from StatusSystemRunning
+
+        final int stableStatus = getSystemStatus();
+        final long elapsedTime = System.currentTimeMillis() - now;
+        
+        /*
+         * Two threads running concurrently could set initialStableTime to the more recent
+         * time, but that would not affect the correctness of the log or the result.  In
+         * the worst case, some unneeded delays may be caused in future calls.
+         */
+        if (lastStableTime == 0L) {
+            initialStableTime.set(now);
+        }
+        Log.shutdown.info(11946,
+                ShutdownManager.getSystemStatusAsString(stableStatus),
+                Long.valueOf(elapsedTime));
+        
+        return stableStatus;
     }
 
     public static String getSystemStatusAsString (int status)

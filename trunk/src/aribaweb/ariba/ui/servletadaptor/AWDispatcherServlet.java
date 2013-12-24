@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,15 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWDispatcherServlet.java#8 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/servletadaptor/AWDispatcherServlet.java#21 $
 */
 
 package ariba.ui.servletadaptor;
 
 import ariba.ui.aribaweb.core.AWConcreteApplication;
+import ariba.ui.aribaweb.core.AWRequestContext;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 import ariba.ui.aribaweb.util.Log;
-import ariba.util.core.FastStringBuffer;
-import ariba.util.core.FatalAssertionException;
 import ariba.util.core.Fmt;
 import ariba.util.core.HTTP;
 import ariba.util.core.PerformanceState;
@@ -28,25 +28,28 @@ import ariba.util.core.StringUtil;
 import ariba.util.core.SystemUtil;
 import ariba.util.core.ThreadDebugState;
 import ariba.util.core.WrapperRuntimeException;
-import ariba.util.log.LogManager;
-
+import ariba.util.http.AribaServlet;
+import ariba.util.http.multitab.MaximumTabExceededException;
+import ariba.util.http.multitab.MultiTabHandler;
+import ariba.util.log.Logger;
+import java.io.IOException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
 
 
 /**
     @aribaapi private
 */
-public class AWDispatcherServlet extends HttpServlet
+public class AWDispatcherServlet extends AribaServlet
 {
-    AWServletApplication _awapplication;
+    protected AWServletApplication _awapplication;
 
-    // ** Thread Safety Considerations: the ivar _awapplication doesn't ever change, so this needs no locking.
+
+    // ** Thread Safety Considerations: the ivar _awapplication doesn't ever
+    // change, so this needs no locking.
 
     public void init (ServletConfig servletConfig) throws ServletException
     {
@@ -63,165 +66,155 @@ public class AWDispatcherServlet extends HttpServlet
     public AWServletApplication createApplication ()
     {
         String applicationClassName = applicationClassName();
-
-        AWServletApplication servletApplication =
-                (AWServletApplication)AWConcreteApplication.createApplication(
+        return (AWServletApplication)AWConcreteApplication.createApplication(
                         applicationClassName, AWServletApplication.class);
-
-        return servletApplication;
     }
 
-    public void service (HttpServletRequest  request,
-                         HttpServletResponse response)
-      throws ServletException, IOException
+    @Override
+    protected Logger getLogger ()
     {
-        try {
-            logServletServiceRequest(request, response);
-            _awapplication.initAdaptorUrl(request);
-            super.service(request, response);
-        }
-        catch (ServletException ex) {
-            logServletException(ex);
-            throw(ex);
-        }
-        catch (IOException ex) {
-            logServletException(ex);
-            throw(ex);
-        }
-        catch (RuntimeException ex) {
-            logServletException(ex);
-            throw(ex);
-        }
-        catch (Error ex) {
-            logServletException(ex);
-            throw(ex);
-        }
-        finally {
-                // the finally for the parent class, LoggingServlet,
-                // will already have run, so it is ok to clear the
-                // thread debug state now.
-            ThreadDebugState.clear();
-        }
+        return Log.servletadaptor;
     }
 
-    /**
-        Servlet logging method. This is used internally by
-        LoggingServlet to log messages. Or if your class can not
-        extend LoggingServlet, you can manually call
-        logServletException which is static for your calling
-        convinence.
-        @aribaapi ariba
-    */
-    public static void logServletException (Throwable t)
+
+    @Override
+    protected void runBeforeService (HttpServletRequest request,
+                                     HttpServletResponse response)
     {
-        if (LogManager.loggingInitialized()) {
-            if (t instanceof FatalAssertionException) {
-                Log.servletadaptor.warning(6567, t);
-            }
-            else {
-                Log.servletadaptor.warning(6566,
-                                           ThreadDebugState.makeString(),
-                                           SystemUtil.stackTrace(t));
-            }
-        }
+        _awapplication.initAdaptorUrl(request);
     }
 
-    /**
-        Servlet logging method. This is used internally by
-        LoggingServlet to log messages. Or if your class can not
-        extend LoggingServlet, you can manually call
-        logServletException which is static for your calling
-        convinence.
-        @aribaapi ariba
-    */
-    public static void logServletServiceRequest (HttpServletRequest  request,
-                                                 HttpServletResponse response)
-    {
-        if (LogManager.loggingInitialized()) {
-            Log.servletadaptor.debug("ServletRequest: %s", request);
-        }
-    }
     protected String cookieHeader (HttpServletRequest servletRequest)
     {
         String cookieHeader = servletRequest.getHeader("HTTP_COOKIE");
+
         if (cookieHeader == null) {
             cookieHeader = servletRequest.getHeader("cookie");
         }
+
         return cookieHeader;
     }
 
-    protected String requestString (HttpServletRequest servletRequest)
+    @Override
+    public void processRequest (
+            HttpServletRequest request,
+            HttpServletResponse response,
+            boolean isGet) throws IOException, ServletException
     {
-        FastStringBuffer requestString = new FastStringBuffer();
-        requestString.append(servletRequest.getRequestURL());
-        requestString.append(((servletRequest.getQueryString() != null) ? "?"+servletRequest.getQueryString() : ""));
-        return requestString.toString();
+        aribawebDispatcher(request, response);
     }
 
-    protected void aribawebDispatcher (HttpServletRequest servletRequest, HttpServletResponse servletResponse)
-        throws IOException, ServletException
+    @Override
+    public String multiTabHandlerName ()
+    {
+        return MultiTabHandler.AppHandlder;
+    }
+
+    @Override
+    public void delegateTooManyTabsError (HttpServletRequest servletRequest,
+                                          HttpServletResponse servletResponse)
+            throws IOException, ServletException
+    {
+        try {
+            AWServletResponse awServletResponse = renderResponse(servletRequest,
+                    servletResponse, true);
+            // awServletResponse can return in jsp world if
+            // IOException/SocketException is encountered
+            if (awServletResponse != null) {
+                awServletResponse.writeToServletResponse(servletResponse);
+            }
+        }
+        catch (ServletException servletException) {
+            servletException.printStackTrace();
+        }
+    }
+
+
+
+    protected void aribawebDispatcher (
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse)
+            throws IOException, ServletException
     {
         try {
             // Set default performance exception logging
-            PerformanceState.watchPerformance(_awapplication.defaultPerformanceCheck());
+            PerformanceState.watchPerformance(
+                    _awapplication.defaultPerformanceCheck());
             String sessionID = servletRequest.getRequestedSessionId();
             if (!StringUtil.nullOrEmptyString(sessionID)) {
-                PerformanceState.getThisThreadHashtable().setSessionID(sessionID);
+                PerformanceState.getThisThreadHashtable().setSessionID(
+                        sessionID);
             }
             if (Log.aribaweb_request.isDebugEnabled()) {
-                Log.aribaweb_request.debug("##########################################################");
-                Log.aribaweb_request.debug("request: %s", requestString(servletRequest));
-                Log.aribaweb_request.debug("cookies: %s", cookieHeader(servletRequest));
+                Log.aribaweb_request.debug(
+                        "##########################################" +
+                                "################");
+                Log.aribaweb_request.debug(
+                        "request: %s", requestString(servletRequest));
+                Log.aribaweb_request.debug(
+                        "cookies: %s", cookieHeader(servletRequest));
 
                 HttpSession session = servletRequest.getSession(false);
-                if (!servletRequest.isRequestedSessionIdValid() && session != null) {
+                if (!servletRequest.isRequestedSessionIdValid() &&
+                        session != null) {
                     if (session.isNew()) {
-                        Log.aribaweb_request.debug("Warning: new HttpSession not created by AW.");
+                        Log.aribaweb_request.debug(
+                                "Warning: new HttpSession not created by AW.");
                     }
                     // is this possible?
                     Log.aribaweb_request.debug(
-                        "Warning: HttpSession %s exists with invalid request session id %s.",
-                        session.getId(), servletRequest.getRequestedSessionId());
+                        "Warning: HttpSession %s exists with " +
+                                "invalid request session id %s.",
+                        session.getId(),
+                            servletRequest.getRequestedSessionId());
                 }
             }
-            AWServletRequest awservletRequest = (AWServletRequest)_awapplication.createRequest(servletRequest);
-            awservletRequest.setupHttpServletRequest(servletRequest, servletResponse, this.getServletContext());
-            PerformanceState.getThisThreadHashtable().setUserAgent(awservletRequest.headerForKey(HTTP.HeaderUserAgent));
-            AWServletResponse awresponse = (AWServletResponse)_awapplication.dispatchRequest(awservletRequest);
-            // awresponse can return in jsp world if IOException/SocketException is encounted
-            if (awresponse != null) {
-                awresponse.writeToServletResponse(servletResponse);
+            AWServletResponse awServletResponse =
+                    renderResponse(servletRequest, servletResponse, false);
+
+            // awServletResponse can return in jsp world if
+            // IOException/SocketException is encountered
+            if (awServletResponse != null) {
+                awServletResponse.writeToServletResponse(servletResponse);
             }
         }
         catch (Throwable throwable) { // OK
             try {
                 /*
-                    The following test should be converted to a series of catch block
-                    But at the time this code is written, the code in the try block
-                    doesn't throw any IOException or ServletException. But in case later
-                    it will do it, we don't want to catch these by mistake. That's why there is
+                    The following test should be converted to a series of
+                    catch block. But at the time this code is written, the
+                    code in the try block doesn't throw any IOException or
+                    ServletException. But in case later it will do it, we
+                    don't want to catch these by mistake. That's why there is
                     this instanceof test
                 */
                 if (throwable instanceof WrapperRuntimeException) {
-                    WrapperRuntimeException wrapperException = (WrapperRuntimeException)throwable;
-                    Exception originalException = wrapperException.originalException();
-                    if (originalException != null && (originalException instanceof java.net.SocketException ||
+                    WrapperRuntimeException wrapperException = (
+                            WrapperRuntimeException)throwable;
+                    Exception originalException =
+                            wrapperException.originalException();
+                    if (originalException != null && (originalException
+                            instanceof java.net.SocketException ||
                         originalException.getClass().getName().equals(
-                            "org.apache.catalina.connector.ClientAbortException"))) {
+                            "org.apache.catalina.connector." +
+                                    "ClientAbortException"))) {
                         // ignore all "Connection reset by peer"
                     }
                     else {
                         logServletException(throwable);
                             //we handle this by creating a 500 error page
-                        _awapplication.logWarning(Fmt.S("** Error: uncaught exception : %s",
-                                                       SystemUtil.stackTrace(throwable)));
+                        _awapplication.logWarning(Fmt.S(
+                                "** Error: uncaught exception : %s",
+                                SystemUtil.stackTrace(throwable)));
                         servletResponse.sendError(HTTP.CodeInternalServerError);
                     }
                 }
                 else if (throwable instanceof IOException) {
-                    // do a string comparison to avoid dependency on a Tomcat class
+                    // do a string comparison to avoid dependency on a
+                    // Tomcat class
                     if (throwable.getClass().getName().equals(
-                            "org.apache.catalina.connector.ClientAbortException"))
+                            "org.apache.catalina.connector." +
+                                    "ClientAbortException"))
                     {
                         // similar to Connection reset by peer
                     }
@@ -235,14 +228,16 @@ public class AWDispatcherServlet extends HttpServlet
                 else {
                     logServletException(throwable);
                         // we handle this by creating a 500 error page
-                    _awapplication.logWarning(Fmt.S("** Error: uncaught exception : %s",
-                                                   SystemUtil.stackTrace(throwable)));
+                    _awapplication.logWarning(Fmt.S(
+                            "** Error: uncaught exception : %s",
+                            SystemUtil.stackTrace(throwable)));
                     servletResponse.sendError(HTTP.CodeInternalServerError);
                 }
             }
             catch (java.net.SocketException e) {
-                // keep the logs clean on the rare chance that the client is closed and
-                // we're trying to render a HTTP.CodeInternalServerError response.
+                // keep the logs clean on the rare chance that the client is
+                // closed and we're trying to render a
+                // HTTP.CodeInternalServerError response.
                 Log.aribaweb_request.debug(
                     "** Error: exception thrown while handling exception : %s",
                     SystemUtil.stackTrace(e));
@@ -253,15 +248,44 @@ public class AWDispatcherServlet extends HttpServlet
         }
     }
 
-    protected void doGet (HttpServletRequest servletRequest, HttpServletResponse servletResponse)
-        throws ServletException, java.io.IOException
+    private AWServletResponse renderResponse (HttpServletRequest servletRequest,
+                                             HttpServletResponse servletResponse,
+                                             boolean isTooManyTabRequest)
+            throws IOException, ServletException
     {
-        aribawebDispatcher(servletRequest, servletResponse);
-    }
-
-    protected void doPost (HttpServletRequest servletRequest, HttpServletResponse servletResponse)
-        throws ServletException, java.io.IOException
-    {
-        aribawebDispatcher(servletRequest, servletResponse);
+        AWServletResponse awServletResponse = null;
+        AWServletRequest awServletRequest =
+                (AWServletRequest)_awapplication.createRequest(
+                        servletRequest);
+        awServletRequest.setTooManyTabRequest(isTooManyTabRequest);
+        if (isTooManyTabRequest) {
+            AWRequestContext requestContext =
+                    _awapplication.createRequestContext(awServletRequest);
+            try {
+                AWResponseGenerating awResponseGenerating =
+                        _awapplication.handleMaxWindowException(requestContext,
+                                new MaximumTabExceededException());
+                awServletResponse = (AWServletResponse)awResponseGenerating.generateResponse();
+                requestContext.setHttpSession(awServletRequest.getSession());
+            }
+            finally {
+                // The MultiTabException page is not processed as any other request
+                // through the AWDirectActionRequestHandler.
+                // Special case for MultiTabException which is using tab 0 sessionId:
+                // Lock was checkout by the sessionId at the beginning of the
+                // renderResponse method when the session object is created.
+                // This gives back the lock (check in) for the sessionId of tab 0
+                requestContext.checkInExistingHttpSession();
+            }
+        }
+        else {
+            awServletRequest.setupHttpServletRequest(
+                    servletRequest, servletResponse, this.getServletContext());
+            PerformanceState.getThisThreadHashtable().setUserAgent(
+                    awServletRequest.headerForKey(HTTP.HeaderUserAgent));
+            awServletResponse = (AWServletResponse)_awapplication.dispatchRequest(
+                    awServletRequest);
+        }
+        return awServletResponse;
     }
 }

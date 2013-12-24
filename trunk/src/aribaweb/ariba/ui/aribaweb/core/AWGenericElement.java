@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericElement.java#47 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWGenericElement.java#48 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -544,7 +544,8 @@ public final class AWGenericElement extends AWBindableElement
                 AWEncodedString semanticKey = computeSemanticKey(requestContext, component, tagName, nameString);
                 if (semanticKey != null) {
                     response.appendContent(AWNameEquals);
-                    response.appendContent(semanticKey);
+                    AWEncodedString escapedSemanticKey = component.escapeAttribute(semanticKey);
+                    response.appendContent(escapedSemanticKey);
                     response.appendContent(AWConstants.Quote);
                 }
             }

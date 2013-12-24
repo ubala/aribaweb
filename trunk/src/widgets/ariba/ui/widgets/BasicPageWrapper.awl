@@ -1,6 +1,6 @@
 <a:Api>
     <Copyright>
-        Copyright 1996-2008 Ariba, Inc.
+        Copyright 1996-2013 Ariba, Inc.
 
         Licensed under the Apache License, Version 2.0 (the "License");
         you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#101 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BasicPageWrapper.awl#106 $
     </Copyright>
 
     <Overview>
@@ -30,14 +30,14 @@
 
     <Binding key="commands" direction="get" type="String" default="$null">
         The commands is the name of the "Toolbar" component.  You needn't provide the package
-        name of the component, just the component's class name without the packag will suffice.
+        name of the component, just the component's class name without the package will suffice.
         If commands is null or unspecified, the toolbar's commands region will be blank.
     </Binding>
 
     <Binding key="toc" direction="get" type="String" default="$null">
         The toc is the name of the "Table of Contents" component, which is often called the
         left side menu.  You needn't provide the package name of the component, just the
-        component's class name without the packag will suffice.  If toc is null or unspecified,
+        component's class name without the package will suffice.  If toc is null or unspecified,
         the left side region will be blank.
     </Binding>
 
@@ -47,6 +47,14 @@
 
     <Binding key="debugTitle" direction="get" type="String" required="$false">
         TBD
+    </Binding>
+
+    <Binding key="metaTags" direction="get" type="Map" required="$false">
+        see metaTags in ariba.ui.widgets.DocumentHead.awl
+    </Binding>
+
+    <Binding key="windowTitle" direction="get" type="String" required="$false">
+        see windowTitle in ariba.ui.widgets.DocumentHead.awl
     </Binding>
 
     <Binding key="escapeTitle" direction="get" type="boolean" default="$true">
@@ -112,7 +120,7 @@
     </Binding>
 
     <Binding key="isNavigatorVisible" direction="get" type="boolean" default="$true">
-        Specifies the visibility of the nagivator bar.
+        Specifies the visibility of the navigator bar.
         (see AribaBasicPageWrapper.htm)
     </Binding>
 
@@ -198,11 +206,11 @@
 <a:PhaseInvocation append="$requestContext.disableComponentPathDebugging"/>\
 <a:Environment PageWrapper="$this" nestedPageWrapper="$false">\
 <w:DocumentContainer>
-<w:DocumentHead applicationCSS="$^applicationCSS" windowTitle="$windowTitle" escapeTitle="$^escapeTitle:$true" sessionless="$^sessionless">
+<w:DocumentHead applicationCSS="$^applicationCSS" windowTitle="$^windowTitle:$windowTitle" metaTags="$^metaTags" escapeTitle="$^escapeTitle:$true" sessionless="$^sessionless">
     <!---   Note: [Also see comment below] Note the "required" attribute here.  In
             Buyer world, these will be defined.  However, in Jsp world, they will
             not be defined, but that's okay since they are not required.  This stuff
-            (styles and script) is invisble to the user anyway. -->\
+            (styles and script) is invisible to the user anyway. -->\
     <a:IncludeContent name="styles" required="$false"/>
     <a:IncludeContent name="script" required="$false"/>
 </w:DocumentHead>
@@ -211,6 +219,7 @@
         <a:RefreshRegion useId="BPR_Body" class="rr relocdest">
             <a:ClientSideScript synchronous="$true">
                 ariba.Dom.setBodyClass("$bodyClass");
+                ariba.Dom.ApplicationType = "$applicationType";
             </a:ClientSideScript>
           <w:PageWrapperForm action="$^action" formName="$formName" formActionUrl="$formActionUrl" formEncodingType ="$formEncodingType" submitFormDefault="$^submitFormDefault" omitTags="$omitFormTags">\
             <a:If ifTrue="$omitWrapperBoilerplate">\
@@ -274,8 +283,8 @@
                 <AribaShutdownWarning/>
                 <w:ErrorBubble/>
                 <a:If ifTrue="$hasTestPane">
-                	<a:IncludeComponent awcomponentName="$testPane"/>\
-				</a:If>
+                    <a:IncludeComponent awcomponentName="$testPane"/>\
+                </a:If>
                 <a:If ifFalse="$^sessionless">
                     <a:If ifFalse="$omitWrapperBoilerplate">
                         <a:If ifTrue="$^isDebugVisible:$true">\

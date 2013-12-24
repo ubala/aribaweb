@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HoverCard.awl#4 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HoverCard.awl#6 $
     </Copyright>
 
     <Overview>
@@ -42,6 +42,10 @@
         Don't lazily initialize the hover card content.
     </Binding>
 
+    <Binding key="shouldOpen" type="boolean" direction="get" required="false" default="false">
+        Should keep the hover card content open.
+    </Binding>
+
     <Binding key="class" type="String" direction="get" required="false">
         CSS class for wrapper and match card element. "Card" will be appended for the hover card content/pointer name.
 
@@ -63,15 +67,30 @@
     </Binding>
 </a:Api>\
 
-<span bh="HCC" _pos="$^position" class="$^class">
-    <a:IncludeContent name="link"/>
-    <a:RelocatableDiv class="$hcClass" style="display:none" bh="HC">
-        <div class="hcContent">
-            <a:LazyDiv ifTrue="$disableLazyDiv">
-                <a:IncludeContent name="content"/>
-            </a:LazyDiv>
-        </div>
-        <span class="hcPointer"></span>
-        <span class="hcPointer hcPointerInner"></span>
-    </a:RelocatableDiv>
-</span>
+<a:If ifFalse="$^shouldOpen">\
+    <span bh="HCC" _pos="$^position" class="$^class">
+        <a:IncludeContent name="link"/>
+        <a:RelocatableDiv class="$hcClass" style="display:none" bh="HC">
+            <div class="hcContent">
+                <a:LazyDiv ifTrue="$disableLazyDiv">
+                    <a:IncludeContent name="content"/>
+                </a:LazyDiv>
+            </div>
+            <span class="hcPointer"></span>
+            <span class="hcPointer hcPointerInner"></span>
+        </a:RelocatableDiv>
+    </span>
+<a:Else/>
+    <span>
+        <a:IncludeContent name="link"/>
+        <a:RelocatableDiv class="hcard hoverBottom">
+            <div class="hcContent">
+                <a:LazyDiv ifTrue="$disableLazyDiv">
+                    <a:IncludeContent name="content"/>
+                </a:LazyDiv>
+            </div>
+            <span class="hcPointer hcPointerInner"></span>
+        </a:RelocatableDiv>
+    </span>
+</a:If>
+

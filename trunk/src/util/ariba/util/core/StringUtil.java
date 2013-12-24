@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1996-2010 Ariba, Inc.
+    Copyright (c) 1996-2013 Ariba, Inc.
     All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#39 $
+    $Id: //ariba/platform/util/core/ariba/util/core/StringUtil.java#41 $
 */
 
 package ariba.util.core;
@@ -544,6 +544,53 @@ public final class StringUtil
             }
         }
         return true;
+    }
+
+    /**
+     * Evaluates if the first CharSequence ends with the second. If both
+     * strings are null, then the substring is considered to be a substring
+     * of the search string.
+     * @param s The search space.
+     * @param sub The substring to evaluate.
+     * @return True when s ends with sub or both values are null.
+     */
+    public static boolean endsWith(CharSequence s, CharSequence sub) {
+        // special-case nulls, (null, null) should be true
+        if (null == s) {
+            return null == sub;
+        }
+        else if (null == sub) {
+            return false;
+        }
+
+        int l1 = s.length();
+        int l2 = sub.length();
+        // .toString required, because .equals on CharSequence doesn't
+        // behave as expected
+        return l1 >= l2 && s.subSequence(l1 - l2, l1).equals(
+                sub.toString());
+    }
+
+    /**
+     * Evaluate if hte first CharSequence ends with any of the following
+     * CharSequences. The string null is considered to contain null.
+     * @param s The search space.
+     * @param subs The substrings to evaluate.
+     * @return True when s ends with at least one sub or both values are null.
+     */
+    public static boolean endsWithAny(
+            CharSequence s, CharSequence... subs)
+    {
+        if ((null != s && s == "") || ArrayUtil.nullOrEmptyArray(subs)) {
+            return false;
+        }
+        for (CharSequence searchString : subs) {
+            if (endsWith(s, searchString)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -1714,7 +1761,10 @@ public final class StringUtil
         }
         /* Fix CR 1-AXYCVB: Don't get divide by zero when label is empty string. */
         int numChars = label.length();
-        int bytesPerChar = (numChars < 1 ? 1 : numBytes / numChars);
+        //1-CF76UN numBytes / numChars will always result in int value. The float value will be lost
+        //In some cases (combination of latin and non-latin characters),
+        // value of bytesPerChar may be a float between 1 and 2
+        float bytesPerChar = (numChars < 1 ? 1 : (float)numBytes / numChars);
 
         int idealSize = 0;
         int halfMaxSize = Math.round(maxSize * HalfLengthMultiplier);

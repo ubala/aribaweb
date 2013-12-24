@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWViewportContainer.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWViewportContainer.java#2 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -32,6 +32,13 @@ public final class AWViewportContainer extends AWComponent
     public String[] supportedBindingNames ()
     {
         return SupportedBindingNames;
+    }
+
+    @Override
+    protected void sleep ()
+    {
+        _elementId = null;
+        super.sleep();
     }
 
 }

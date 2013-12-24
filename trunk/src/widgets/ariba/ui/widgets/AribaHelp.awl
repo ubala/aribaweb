@@ -3,7 +3,7 @@
 </w:PopupMenuLink>
 <w:PopupMenu menuId="help">
     <a:For list="$helpAreas" item="$currentArea">
-        <w:PopupMenuItem clientTrigger="$helpScript"><AribaString name="$currentArea"/></w:PopupMenuItem>\
+        <w:PopupMenuItem action="$currentItemClicked" clientTrigger="$helpScript"><AribaString name="$currentArea"/></w:PopupMenuItem>\
     </a:For>
     <AribaCondition ifTrue="enableContactBox">\
         <w:PopupMenuItem clientTrigger="ariba.Widgets.toggleAboutBox('AWContactDiv',event);ariba.Event.cancelBubble(event);">

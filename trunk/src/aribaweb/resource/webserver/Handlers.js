@@ -98,7 +98,20 @@ ariba.Handlers = function() {
                 // capture current selected index in case the key changes the selection
             else {
                 this.AWActionPopupEnabled = false;
-                popup.setAttribute(AWPopupSelectedCaptured, popup.selectedIndex);
+                if (ariba.Dom.IsMoz) {
+                    // In Mozilla Firefox, if you type letters using keyboard to choose
+                    // an option; if the successive key presses do not change the index
+                    // selected, actionPopupChanged doesn't get called. See the check
+                    // above before calling actionPopupChanged-
+                    //      popup.selectedIndex != selectedCaptured
+                    // selectedIndex and selectedCaptured would contain the same value.
+                    // So, handling it in an alternative way that the condition above
+                    // evaluates to true and actionPopupChanged gets called.
+                    popup.setAttribute(AWDidChangeKey, "1");
+                }
+                else {
+                    popup.setAttribute(AWPopupSelectedCaptured, popup.selectedIndex);
+                }
             }
             return true;
         },
@@ -287,6 +300,15 @@ ariba.Handlers = function() {
 
         hPopupChanged : function (popup, mevent)
         {
+            // Special code for IE here. actionPopupChanged can get called here or from
+            // actionPopupKeyDown for Enter key press. IE used to require pressing Enter
+            // key twice for it to fire the action. With this check for IE, we set
+            // AWActionPopupEnabled to true so when the change event is fired in IE on
+            // hitting the Enter key the first time, we can fire the action i.e.
+            // Request.submitForm in actionPopupChanged.  
+            if (ariba.Dom.IsIE) {
+                this.AWActionPopupEnabled = true;
+            }
             return this.actionPopupChanged(popup, mevent);
         },
 

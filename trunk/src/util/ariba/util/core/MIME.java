@@ -1,6 +1,10 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 2013-2013 Ariba, Inc.
+    All rights reserved. Patents pending.
 
+    $Id: //ariba/platform/util/core/ariba/util/core/MIME.java#12 $
+
+    
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -12,7 +16,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MIME.java#10 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MIME.java#12 $
 */
 
 package ariba.util.core;
@@ -33,11 +37,9 @@ import java.util.Locale;
 
     @aribaapi private
 */
-public final class MIME
+public final class MIME extends MimeEncoding
 {
-    private MIME ()
-    {
-    }
+
 
     /*-----------------------------------------------------------------------
         Public Constants
@@ -107,35 +109,36 @@ public final class MIME
         // used with ContentTypeTextHTML
     public static final String ParameterCharSet  = "charset";
     public static final String CharSetUSASCII    = "US-ASCII";
-    public static final String CharSetUTF        = "UTF-8";
-    public static final String CharSetISO88591   = "ISO-8859-1";
-    public static final String CharSetISO88592   = "ISO-8859-2";
     public static final String CharSetISO88593   = "ISO-8859-3";
     public static final String CharSetISO88594   = "ISO-8859-4";
     public static final String CharSetISO88595   = "ISO-8859-5";
     public static final String CharSetISO88596   = "ISO-8859-6";
     public static final String CharSetISO88597   = "ISO-8859-7";
-    public static final String CharSetISO88598   = "ISO-8859-8";
     public static final String CharSetISO88599   = "ISO-8859-9";
-    public static final String CharSetISO2022KR  = "ISO-2022-KR";
-    public static final String CharSetEUCKR      = "EUC-KR";
-    public static final String CharSetISO2022JP  = "ISO-2022-JP";
     public static final String EncodingISO2022JP  = "ISO2022JP";
     public static final String CharSetISO2022JP2 = "ISO-2022-JP-2";
     public static final String CharSetKOI8R      = "KOI8-R";
-    public static final String CharSetShiftJIS   = "Shift_JIS";
-    public static final String CharSetEUCJP      = "EUC-JP";
-    public static final String CharSetGB2312     = "GB2312";
     public static final String CharSetEUCCN      = "EUC-CN";
-    public static final String CharSetBig5       = "Big5";
     public static final String CharSetEUCTW      = "EUC-TW";
-    public static final String CharSetKSC5601    = "KSC5601";
-    public static final String CharSetISO2022CN  = "ISO-2022-CN";
     public static final String CharSetISO2022CN2 = "ISO-2022-CN-EXT";
-    public static final String CharSetCp1250     = "Cp1250";
-    public static final String CharSetCp1254     = "Cp1254";
-    public static final String CharSetCp1251     = "Cp1251";
-    public static final String CharSetCp1252     = "Cp1252";
+
+
+    private MIME ()
+    {
+       super();
+       EncodingSet.add(CharSetUSASCII.toLowerCase());
+       EncodingSet.add(CharSetISO88593.toLowerCase());
+       EncodingSet.add(CharSetISO88594.toLowerCase());
+       EncodingSet.add(CharSetISO88595.toLowerCase());
+       EncodingSet.add(CharSetISO88596.toLowerCase());
+       EncodingSet.add(CharSetISO88597.toLowerCase());
+       EncodingSet.add(CharSetISO88599.toLowerCase());
+       EncodingSet.add(CharSetISO2022JP2.toLowerCase());
+       EncodingSet.add(CharSetKOI8R.toLowerCase());
+       EncodingSet.add(CharSetEUCCN.toLowerCase());
+       EncodingSet.add(CharSetEUCTW.toLowerCase());
+       EncodingSet.add(CharSetISO2022CN2.toLowerCase());
+    }
 
         // used with HeaderContentDisposition
     public static final String ParameterName     = "name";
@@ -301,35 +304,7 @@ public final class MIME
 
     public static boolean isValidCharset (String charset)
     {
-        if (CharSetUSASCII.equalsIgnoreCase(charset)    ||
-            CharSetUTF.equalsIgnoreCase(charset)        ||
-            CharSetISO88591.equalsIgnoreCase(charset)   ||
-            CharSetISO2022JP.equalsIgnoreCase(charset)  ||
-            CharSetISO2022JP2.equalsIgnoreCase(charset) ||
-            CharSetShiftJIS.equalsIgnoreCase(charset)   ||
-            CharSetEUCJP.equalsIgnoreCase(charset)      ||
-            CharSetGB2312.equalsIgnoreCase(charset)     ||
-            CharSetEUCCN.equalsIgnoreCase(charset)      ||
-            CharSetBig5.equalsIgnoreCase(charset)       ||
-            CharSetEUCTW.equalsIgnoreCase(charset)      ||
-            CharSetISO2022KR.equalsIgnoreCase(charset)  ||
-            CharSetEUCKR.equalsIgnoreCase(charset)      ||
-            CharSetISO88592.equalsIgnoreCase(charset)   ||
-            CharSetISO88593.equalsIgnoreCase(charset)   ||
-            CharSetISO88594.equalsIgnoreCase(charset)   ||
-            CharSetISO88595.equalsIgnoreCase(charset)   ||
-            CharSetISO88596.equalsIgnoreCase(charset)   ||
-            CharSetISO88597.equalsIgnoreCase(charset)   ||
-            CharSetISO88598.equalsIgnoreCase(charset)   ||
-            CharSetISO88599.equalsIgnoreCase(charset)   ||
-            CharSetKOI8R.equalsIgnoreCase(charset)      ||
-            CharSetKSC5601.equalsIgnoreCase(charset)    ||
-            CharSetISO2022CN.equalsIgnoreCase(charset)  ||
-            CharSetISO2022CN2.equalsIgnoreCase(charset) ||
-            CharSetCp1250.equalsIgnoreCase(charset)     ||
-            CharSetCp1254.equalsIgnoreCase(charset)     ||
-            CharSetCp1251.equalsIgnoreCase(charset)     ||
-            CharSetCp1252.equalsIgnoreCase(charset)) {
+        if (EncodingSet.contains(charset.toLowerCase())) {
                 return true;
         }
         else {

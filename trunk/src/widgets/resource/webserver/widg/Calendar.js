@@ -451,6 +451,10 @@ ariba.Calendar = function() {
         */
         dateFieldMouseDown : function (evt)
         {
+            // Set this flag, to be (eventually) passed on to 'menuOnMouseDown' in Menu.js.
+            // That reads this flag on event and calls hideActiveMenu api that un-displays
+            // the div containing the Calendar pop-up.
+            evt.hideActiveMenu = true;
             var srcElement = Event.eventSourceElement(evt);
             var srcElementInnerText = Dom.getInnerText(srcElement);
             var table = Dom.findParent(srcElement, "TABLE", false);
@@ -888,6 +892,25 @@ ariba.Calendar = function() {
             return this.parseDate(dateString, pattern);
         },
         EOF:0};
+
+    //
+    // iPad - specific methods
+    //
+    if (Dom.isIPad) Util.extend(Calendar, function () {
+        return {
+            showCalendar : function (linkId)
+            {
+                var linkObj = Dom.getElementById(linkId);
+                var menuId = linkObj.getAttribute("awmenuId");
+                if (linkObj._awcalendar) {
+                    linkObj._awcalendar.renderCalendar(linkObj._awcalendar._selectedDate);
+                    Menu.menuLinkOnClick(linkObj, menuId, null, null);
+                }
+            },
+
+        EOF:0};
+
+    }());
 
 
     Event.registerBehaviors({

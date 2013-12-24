@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#203 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDataTable.java#204 $
 */
 
 package ariba.ui.table;
@@ -2335,7 +2335,7 @@ public final class AWTDataTable extends AWComponent
     // Called when TD is done rendering so we can check if we need to emit an nbsp for empty content
     public void setIteratorForTDContentCheck (AWPagedVector.AWPagedVectorIterator elements)
     {
-        if (AWOutputRangeCheck.hasVisbibleContent(elements)) {
+        if (AWOutputRangeCheck.hasVisbibleContent(elements) || renderToExcel()) {
             return;
         }
         response().appendContent("&nbsp;");

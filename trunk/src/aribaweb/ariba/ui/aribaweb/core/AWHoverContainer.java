@@ -12,13 +12,15 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHoverContainer.java#1 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWHoverContainer.java#2 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.html.BindingNames;
 import ariba.ui.aribaweb.util.AWEncodedString;
+
+import java.util.Map;
 
 public final class AWHoverContainer extends AWComponent
 {
@@ -32,6 +34,13 @@ public final class AWHoverContainer extends AWComponent
     public String[] supportedBindingNames ()
     {
         return SupportedBindingNames;
+    }
+
+    @Override
+    protected void sleep ()
+    {
+        _elementId = null;
+        super.sleep();    
     }
 
     public String behavior ()

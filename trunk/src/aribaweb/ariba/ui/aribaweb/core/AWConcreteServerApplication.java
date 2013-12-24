@@ -12,34 +12,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#69 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteServerApplication.java#73 $
 */
 
 package ariba.ui.aribaweb.core;
-
-import ariba.ui.aribaweb.util.AWBase64;
-import ariba.ui.aribaweb.util.AWBaseObject;
-import ariba.ui.aribaweb.util.AWFileResource;
-import ariba.ui.aribaweb.util.AWGenericException;
-import ariba.ui.aribaweb.util.AWLock;
-import ariba.ui.aribaweb.util.AWLogHandling;
-import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
-import ariba.ui.aribaweb.util.AWResourceManagerFactory;
-import ariba.ui.aribaweb.util.AWSingleLocaleResourceManager;
-import ariba.ui.aribaweb.util.AWUtil;
-import ariba.ui.aribaweb.util.Log;
-import ariba.ui.aribaweb.util.AWNamespaceManager;
-import ariba.ui.aribaweb.util.AWSelfAccess;
-import ariba.ui.aribaweb.util.AWClasspathResourceDirectory;
-import ariba.util.core.ClassUtil;
-import ariba.util.core.ListUtil;
-import ariba.util.core.MapUtil;
-import ariba.util.core.PerformanceCheck;
-import ariba.util.core.PerformanceChecker;
-import ariba.util.core.PerformanceState;
-import ariba.util.core.HTML;
-import ariba.util.core.StringUtil;
-import ariba.util.core.SystemUtil;
 
 import java.util.List;
 import java.util.Locale;
@@ -50,7 +26,29 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.File;
-
+import ariba.ui.aribaweb.util.AWBase64;
+import ariba.ui.aribaweb.util.AWBaseObject;
+import ariba.ui.aribaweb.util.AWClasspathResourceDirectory;
+import ariba.ui.aribaweb.util.AWFileResource;
+import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.ui.aribaweb.util.AWLock;
+import ariba.ui.aribaweb.util.AWLogHandling;
+import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
+import ariba.ui.aribaweb.util.AWNamespaceManager;
+import ariba.ui.aribaweb.util.AWResourceManagerFactory;
+import ariba.ui.aribaweb.util.AWSelfAccess;
+import ariba.ui.aribaweb.util.AWSingleLocaleResourceManager;
+import ariba.ui.aribaweb.util.AWUtil;
+import ariba.ui.aribaweb.util.Log;
+import ariba.util.core.ClassUtil;
+import ariba.util.core.HTML;
+import ariba.util.core.ListUtil;
+import ariba.util.core.MapUtil;
+import ariba.util.core.PerformanceCheck;
+import ariba.util.core.PerformanceChecker;
+import ariba.util.core.PerformanceState;
+import ariba.util.core.StringUtil;
+import ariba.util.core.SystemUtil;
 import org.apache.log4j.Level;
 
 abstract public class AWConcreteServerApplication extends AWBaseObject
@@ -59,6 +57,7 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
     public static boolean AllowsConcurrentRequestHandling = false;
     public static boolean IsRapidTurnaroundEnabled = false;
     public static boolean IsDebuggingEnabled = false;
+    protected static boolean IsUserCommunityEnabled = false;
     public static boolean IsVerboseMode = false;
     public static boolean IsStatisticsGatheringEnabled = false;
     public static boolean IsAutomationTestModeEnabled = false;
@@ -72,7 +71,9 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
     private AWLock _cooperativeMultithreadingLock;
     private int _requestsSinceLastFlush = 0;
     private String _resourceUrl;
-
+    protected static String _aribaUserCommunityUrl = null;
+    protected static int _foldInSituOnWindowSize = 1280;
+    
     // ** Thread Safety Considerations: all the ivars in this object are either read-only
     // after init time, or immutable, or offer their own locking (eg resourceMangaer) or
     // are not interdependent so that, if one thing changes, it won't affect others.  As
@@ -642,5 +643,36 @@ abstract public class AWConcreteServerApplication extends AWBaseObject
         if (AWConcreteServerApplication.IsDebuggingEnabled) {
             Log.aribaweb.debug(message);
         }
+    }
+
+    /**
+     * Provide the option of disabling/enabling user community functionality.
+     * Products may over-ride this by implementing:
+     * initUserCommunityEnabled
+     * to turn on or off the user community functionality
+     * by using their own configuration.
+     */
+    public static boolean isUserCommunityEnabled()
+    {
+        return IsUserCommunityEnabled;
+    }
+
+    /**
+     * Get the Ariba user community product url
+     * @return String
+     */
+    public static String getAribaUserCommunityUrl ()
+    {
+        return _aribaUserCommunityUrl;
+    }
+
+    /**
+     * Get the window size at which In Situ pane will be displayed in folded manner.
+     * Each application can override this value.
+     * @return int
+     */
+    public static int getFoldInSituWindowSize ()
+    {
+        return _foldInSituOnWindowSize;
     }
 }

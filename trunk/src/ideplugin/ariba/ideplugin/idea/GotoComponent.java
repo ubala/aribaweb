@@ -15,6 +15,7 @@
     $Id: //ariba/platform/ui/ideplugin/ariba/ideplugin/idea/GotoComponent.java#4 $
 */
 package ariba.ideplugin.idea;
+
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.roots.ProjectRootManager;
@@ -31,7 +32,8 @@ import com.intellij.openapi.editor.Document;
 import java.util.Vector;
 
 
-public class GotoComponent extends AnAction {
+public class GotoComponent extends AnAction
+{
     private static final Logger LOG = Logger.getInstance(GotoComponent.class.getName());
 
     /*-----------------------------------------------------------------------
@@ -39,18 +41,20 @@ public class GotoComponent extends AnAction {
       -----------------------------------------------------------------------*/
 
     /**
-     * Find the file corresponding to an awl tag. The AWL file defining this tag will open.
+     * Find the file corresponding to an awl tag. The AWL file defining this tag will
+     * open.
      * If the file does not exist the java file will open.
-     * @param event occured
+     *
+     * @param event occurred
      */
     public void actionPerformed (AnActionEvent event)
     {
-       
+
         LOG.info("User performed GotoComponent!");
         Project project = (Project)event.getDataContext().getData(DataConstants.PROJECT);
 
-        VirtualFile[] selectedFile =  FileEditorManager.getInstance(project).
-                                                            getSelectedFiles();
+        VirtualFile[] selectedFile = FileEditorManager.getInstance(project).
+                getSelectedFiles();
 
         if (selectedFile.length == 0) {
             showError("No file is currently selected", project);
@@ -79,20 +83,26 @@ public class GotoComponent extends AnAction {
 
             // find components
             Vector components = new Vector();
-            VirtualFile[] rootDirectories = rootManager.getContentSourceRoots();
-            for (int index = 0; index < rootDirectories.length; index ++) {
-                findJavaFileWithName(javaFileName, awlFileName,
-                                    rootDirectories[index], components);
+            findComponents(rootManager, javaFileName, awlFileName, components);
+            if (components.isEmpty()) {
+                javaFileName = nameWithPrefix(componentName, "") + ".java";
+                awlFileName = nameWithPrefix(componentName, "") + ".awl";
+                findComponents(rootManager, javaFileName, awlFileName, components);
             }
+            if (components.isEmpty()) {
+                javaFileName = nameWithPrefix(componentName, "AW") + ".java";
+                awlFileName = nameWithPrefix(componentName, "AW") + ".awl";
+                findComponents(rootManager, javaFileName, awlFileName, components);
+            }
+
+            if (components.isEmpty()) {
+                javaFileName = nameWithPrefix(componentName, "AWT") + ".java";
+                awlFileName = nameWithPrefix(componentName, "AWT") + ".awl";
+                findComponents(rootManager, javaFileName, awlFileName, components);
+            }
+
             if (!components.isEmpty()) {
-                // open the first one by default
-                VirtualFile javaFile = (VirtualFile)components.firstElement();
-                OpenFileDescriptor fd = new OpenFileDescriptor(project,javaFile);
-                Editor newEditor = FileEditorManager.getInstance(project).
-                                                     openTextEditor(fd,true);
-                if (newEditor == null) {
-                    showError("Can't open editor", project);
-                }
+                openFile(project, components);
             }
             else {
                 String errorMessage = "cannot find component " + componentName;
@@ -101,14 +111,48 @@ public class GotoComponent extends AnAction {
         }
     }
 
+    private void openFile (Project project, Vector components)
+    {
+        // open the first one by default
+        VirtualFile javaFile = (VirtualFile)components.firstElement();
+        OpenFileDescriptor fd = new OpenFileDescriptor(project, javaFile);
+        Editor newEditor = FileEditorManager.getInstance(project).
+                openTextEditor(fd, true);
+        if (newEditor == null) {
+            showError("Can't open editor", project);
+        }
+    }
+
+    private void findComponents (ProjectRootManager rootManager, String javaFileName,
+                                 String awlFileName, Vector components)
+    {
+
+        VirtualFile[] rootDirectories = rootManager.getContentSourceRoots();
+        for (int index = 0; index < rootDirectories.length; index++) {
+            findJavaFileWithName(javaFileName, awlFileName, rootDirectories[index],
+                    components);
+        }
+    }
+
+    private String nameWithPrefix (String componentName, String prefix)
+    {
+        // has prefix
+        if (componentName.charAt(1) == ':') {
+            return prefix.concat(componentName.substring(2));
+
+        }
+        return componentName;
+    }
+
     /*-----------------------------------------------------------------------
          Private Methods.
       -----------------------------------------------------------------------*/
 
     /**
      * Look for the name of the awl tag on which the pointer is
+     *
      * @param document, current document
-     * @param offset in the document
+     * @param offset    in the document
      * @return the name of the tag
      */
     private String findComponentName (Document document, int offset)
@@ -117,7 +161,7 @@ public class GotoComponent extends AnAction {
         // search forward until "<" or " " is found
         int startIndex = -1;
         int endIndex = -1;
-        for (int index = offset; index >= 0; index --) {
+        for (int index = offset; index >= 0; index--) {
             char eachChar = text[index];
             if (Character.isWhitespace(eachChar) || eachChar == '<' || eachChar == '/') {
                 startIndex = index + 1;
@@ -125,10 +169,10 @@ public class GotoComponent extends AnAction {
             }
         }
 
-        for (int index = startIndex; index < text.length; index ++) {
+        for (int index = startIndex; index < text.length; index++) {
             char eachChar = text[index];
             if (Character.isWhitespace(eachChar) || eachChar == '>' || eachChar == '/') {
-                endIndex = index -1;
+                endIndex = index - 1;
                 break;
             }
         }
@@ -144,10 +188,11 @@ public class GotoComponent extends AnAction {
     /**
      * This function look for the file awlFileName and put it into results,
      * if it does not exist put the java file corresponding into result
+     *
      * @param javaFileName name of the java file
-     * @param awlFileName name of the awl file
-     * @param file, root directories
-     * @param results, the name of the files
+     * @param awlFileName  name of the awl file
+     * @param file,        root directories
+     * @param results,     the name of the files
      */
     private void findJavaFileWithName (String javaFileName, String awlFileName,
                                        VirtualFile file, Vector results)
@@ -155,9 +200,9 @@ public class GotoComponent extends AnAction {
         if (results.isEmpty()) {
             if (file.isDirectory()) {
                 VirtualFile[] children = file.getChildren();
-                for (int index = 0; index < children.length; index ++) {
-                    findJavaFileWithName(javaFileName, awlFileName,
-                                            children[index], results);
+                for (int index = 0; index < children.length; index++) {
+                    findJavaFileWithName(javaFileName, awlFileName, children[index],
+                            results);
                 }
             }
             else if (file.getName().equals(javaFileName)) {
@@ -174,13 +219,14 @@ public class GotoComponent extends AnAction {
 
     /**
      * Display an error into a popup window
+     *
      * @param project, current project
-     * @param error, the message to display
+     * @param error,   the message to display
      */
     private void showError (String error, Project project)
     {
         Messages.showMessageDialog(project, error, "Goto Component",
-                                    Messages.getInformationIcon());
+                Messages.getInformationIcon());
         LOG.info(error);
     }
 }

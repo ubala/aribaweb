@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBaseImage.java#28 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWBaseImage.java#31 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -108,7 +108,7 @@ abstract public class AWBaseImage extends AWComponent
             // But, do not set set AWRequestContext on the AWDirectActionUrl as doing
             // this will cause an response id to be added to the URL.  This can lead
             // to our image URL's causing FPR's.
-            // Also, explicitly onstructing the URL prevents URL decorators
+            // Also, explicitly constructing the URL prevents URL decorators
             // from being used.
             AWDirectActionUrl url = useFullUrl ?
                         AWDirectActionUrl.checkoutFullUrl(requestContext) :
@@ -125,6 +125,7 @@ abstract public class AWBaseImage extends AWComponent
             Log.aribawebResource_brand.debug(
                 "AWBaseImage: imageUrl() component.urlForResourceNamed %s", imageUrl);
         }
+
         return imageUrl;
     }
 
@@ -144,6 +145,9 @@ abstract public class AWBaseImage extends AWComponent
 
     protected String filename ()
     {
+        // fkolar
+        // Please keep this == as it is and do not change it.
+        // We need to compare the references!
         if (_filename == NoFilename) {
             _filename = initFilename();
         }

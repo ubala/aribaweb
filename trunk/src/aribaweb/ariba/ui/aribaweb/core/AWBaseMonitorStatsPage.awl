@@ -3,11 +3,14 @@
     <monitorStatus>    
         <a:IncludeContent name="applicationExtension"/>
         <a:For list="$itemsToDisplay" item="$item">
-        <$item.name>$item.value</$item.name>
+            <$item.name>$item.value</$item.name>
         </a:For>
         <sessions>$activeSessionCount</sessions>
         <a:For list="$activeSessionCountBuckets" item="$item">
             <sessionsForBucket$item.name>$item.value</sessionsForBucket$item.name>
+        </a:For>\
+        <a:For list="$activeSessionStatusBuckets" item="$item">
+            <sessionStatusesForBucket$item.name>$item.value</sessionStatusesForBucket$item.name>
         </a:For>
         <state>\
             <a:If ifTrue="$monitorStats.isInShutdownWarningPeriod">\
