@@ -5,6 +5,9 @@
     </AribaCondition>
     <a href="#content" accesskey="3"><AribaString name="JumpToContent"/></a>
 </AribaCondition>
+<a:RefreshRegion awname="BPR_Banner" useId="BPR_Banner" class="">
+    <AribaBanner/>
+</a:RefreshRegion>        
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
     <!--- Row 1: Command Bar Top -->
     <!--- Row 2: Command Bar -->
@@ -77,7 +80,7 @@
                                 <AribaCondition ifTrue="needsWrapperActionDelimiter">&nbsp;|&nbsp;</AribaCondition>\
                                 <AribaSite/>
                                 <AribaCondition ifTrue="needsDelimiter"/>\
-                            </AribaCondition>\                            
+                            </AribaCondition>\
                             <AribaCondition ifFalse="disableLogoutAction">\
                                 <AribaCondition ifTrue="needsWrapperActionDelimiter">&nbsp;|&nbsp;</AribaCondition>\
                                 <AribaAction name="logout"><AribaString name="Logout"/></AribaAction>\
@@ -175,9 +178,16 @@
                     </td>
 
                     <!-- Column 3: content -->
-                    <td valign="top" class="content">\
-                        <AribaPageContent/>\
-                    </td>
+                    <AribaCondition ifTrue="removeContentLeftRightMargin">\
+                        <td valign="top">\
+                            <AribaPageContent/>\
+                        </td>
+                    </AribaCondition>\
+                    <AribaCondition ifFalse="removeContentLeftRightMargin">\
+                        <td valign="top" class="content">\
+                            <AribaPageContent/>\
+                        </td>
+                    </AribaCondition>\
                 </tr>
             </table>
         </td>

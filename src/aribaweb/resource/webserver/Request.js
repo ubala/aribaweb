@@ -315,7 +315,7 @@ ariba.Request = function() {
                         this.AWPollCallback(this.AWPollErrorState);
                     }                    
                 }
-                // check for nochange explicity, since the sesssion might have expired
+                // check for no change explicitly, since the session might have expired
                 if (scheduleTimer) {
                     timer();
                 }
@@ -355,7 +355,7 @@ ariba.Request = function() {
         // This function should be used for all form submissions
         // in AW javascript.
         //
-        // This method is overriden in Sourcing to catch multiple form
+        // This method is overwritten in Sourcing to catch multiple form
         // submissions from the same page for the purpose of confirming
         // or preventing multiple submissions.
 
@@ -647,7 +647,7 @@ ariba.Request = function() {
                 }
             }
             location.href = url;
-            // in somes cases, we are trying to redirect while the download �Save/Open� dialog is up.
+            // in some cases, we are trying to redirect while the download 'Save/Open' dialog is up.
             // We need to retry in those cases.
             if (Dom.IsIE6Only) {
                 function retry() {
@@ -658,6 +658,18 @@ ariba.Request = function() {
                     }
                 }
                 setTimeout(retry, 500);
+            }
+            // window.location.href gets canceled on Chrome (tested on version 27) and
+            // We are using the following trick of redirecting after a short delay to get the redirect to take effect.
+            // This isn't a problem on Safari but delayed redirect is harmless
+            // Once the Chrome redirect problem is fixed, this code can be removed.
+            if (Dom.isSafari) {
+                setTimeout(
+                    function () {
+                        if (document.readyState != "loading") {
+                            window.location.href = url;
+                        }
+                    },500);
             }
         },
 
@@ -751,6 +763,15 @@ ariba.Request = function() {
         },
 
         displayErrorDiv : function (innerHtml) {
+            // CR# 1-C397FU: Unable to navigate to Downstream from Upstream with IE6.
+            // Refer 2248549, where the check below was changed to Request.AWDebugEnabled
+            // In IE6, this check gets evaluated correctly to false in PROD (expected).
+            // But that triggers the else portion- redirectRefresh, bringing the user
+            // back to Upstream. We had to move this back to just AWDebugEnabled.
+            // The end users now hit a javascript error in IE6- AWDebugEnabled is
+            // undefined. But depending on the Browser settings, it shows up as a small
+            // icon on the bottom left of IE6. The flow works fine thereafter with this
+            // trade-off.  
             if (AWDebugEnabled) {
                 var div = document.createElement("div");
                 div.className="debugFloat";
@@ -1291,7 +1312,7 @@ ariba.Request = function() {
         progressBarSetWidth : function () {
             if (Dom.isWindowNarrow()) {
                 var img = Dom.getElementById('awProgressBar');
-                if (img) img.width = "150px";
+                if (img && img.width > 150) img.width = "150px";
             }
         },
 

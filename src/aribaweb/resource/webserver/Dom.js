@@ -50,10 +50,16 @@ ariba.Dom = function() {
         IsIEonMac : (IsIE && (navigator.platform != "Win32") && (navigator.platform != "Win64")) ? true : false,
         IsNS6 : (!document.all && document.getElementById) ? true : false,
         IsMoz : (!document.all && document.getElementById) ? true : false,
+        isChrome : navigator.appVersion.indexOf("Chrome") != -1,
         isSafari : navigator.appVersion.indexOf("Safari") != -1,
+        isIPad : navigator.platform.indexOf("iPad") != -1,
         AWEmptyDocScriptlet : IsIE6 ? "javascript:false" : "javascript:void(0);",
-
+        ApplicationType : "",
         AWOpenWindowErrorMsg : null,
+
+        ///////////////////////////////
+        // Functions for DOM searching
+        ///////////////////////////////
 
         getElementById : function (id)
         {
@@ -69,6 +75,94 @@ ariba.Dom = function() {
                 // swallow
             }
             return element;
+        },
+
+        /**
+         * Fetches elements under the root node with the provided tag that are
+         * matched by the provided evaluation function. There is a fast path
+         * to prevent additional iteration when you only want the first node.
+         * @param elRoot The root element.
+         * @param sTagName The tag name to look for (use '*' for all)
+         * @param fnEval The function to evaluate each node. Should accept
+         *               an element as its only argument and return true
+         *               or false.
+         * @param bReturnFirst Optional. When true, will only return the first
+         *                     matched element.
+         * @return {Array|Element} A list of matched elements (may be empty).
+         */
+        getElementsBy : function (elRoot, sTagName, fnEval, bReturnFirst)
+        {
+            var aNodes = [],
+                aElements = elRoot.getElementsByTagName(sTagName),
+                                i = 0, j = aElements.length;
+
+            for (; i < j; ++i) {
+                if (fnEval(aElements[i])) {
+                    if (bReturnFirst) {
+                        return aElements[i];
+                    }
+                    else {
+                        aNodes.push(aElements[i]);
+                    }
+                }
+            }
+
+            return aNodes;
+        },
+
+        /**
+         * Fetches the first element under the root node with the provided tag
+         * that is matched by the provided evaluation function.
+         * @param elRoot The root element.
+         * @param sTagName The tag name to look for (use '*' for all)
+         * @param fnEval The function to evaluate each node. Should accept
+         *               an element as its only argument and return true
+         *               or false.
+         * @return {Element} A single node or null.
+         */
+        getElementBy : function (elRoot, sTagName, fnEval)
+        {
+            return Dom.getElementsBy(elRoot, sTagName, fnEval, true) || null;
+        },
+
+        /**
+         * Fetches elements under the root node with the provided tag that are
+         * matched by the provided evaluation function. There is a fast path
+         * to prevent additional iteration when you only want the first node.
+         * @param elRoot The root element.
+         * @param sClassName The target class to look for.
+         * @param sTagName Optional. The tag name to look for (use '*' for all).
+         *                 Providing a tagName will drastically improve the
+         *                 performance of this DOM search.
+         * @return {Array|NodeList} A list of matched elements (may be empty).
+         */
+        getElementsByClassName : function (elRoot, sClassName, sTagName)
+        {
+            var aNodes = [],
+                aElements;
+
+            // use native function if possible (maximum performance)
+            if (elRoot.getElementsByClassName) {
+                aElements = elRoot.getElementsByClassName(sClassName);
+
+                if (sTagName) {
+                    for (var i = 0, j = aElements.length; i < j; ++i) {
+                        if (sTagName === aElements[i].tagName) {
+                            aNodes.push(aElements[i]);
+                        }
+                    }
+                    return aNodes;
+                }
+                else {
+                    return aElements;
+                }
+            }
+            else {
+                return Dom.getElementsBy(elRoot, sTagName || '*', function (el)
+                {
+                    return Dom.hasClass(el, sClassName);
+                });
+            }
         },
 
         getDocumentElementById : function (doc, id)
@@ -119,6 +213,7 @@ ariba.Dom = function() {
             return node;
         },
 
+        // note: getElementsBy is more efficient than this function
         findChildUsingPredicate : function (poTarget, matchFunc, checkCurrent)
         {
             var node = null;
@@ -149,13 +244,13 @@ ariba.Dom = function() {
 
         findChildrenUsingPredicate : function (poTarget, matchFunc, checkCurrent)
         {
-            var nodes = new Array();
+            var nodes = [];
 
             if (!poTarget) {
                 return poTarget;
             }
             else if (checkCurrent && matchFunc(poTarget)) {
-                return new Array(poTarget);
+                return [poTarget];
             }
             else if (poTarget.childNodes) {
                 var childNodes = poTarget.childNodes;
@@ -168,18 +263,36 @@ ariba.Dom = function() {
             return nodes;
         },
 
+        elementInDom : function (e) {
+            var de = this.documentElement();
+            while (e && e != de) e = e.parentNode;
+            return e == de;
+        },
+
+        /////////////////////////////////////////////
+        // Functions for DOM reading and manipulation
+        /////////////////////////////////////////////
+
+        /**
+         * Generic method for appending to the body element. Will alert,
+         * if body is not found.
+         */
+        appendToBody: function (el) {
+            if (document && document.body) {
+                document.body.appendChild(el);
+            }
+            else {
+                // ### debug
+                alert("unable to find document / document.body");
+            }
+        },
+
         // append all children in array to node
         _appendChildren : function (n, arr)
         {
             for (var i = 0; i < arr.length; i++) {
                 n.appendChild(arr[i]);
             }
-        },
-
-        elementInDom : function (e) {
-            var de = this.documentElement();
-            while (e && e != de) e = e.parentNode;
-            return e == de;
         },
 
         //  innerText support
@@ -309,7 +422,12 @@ ariba.Dom = function() {
             var child = formObject[fieldName];
             if (child && child.parentNode) {
                 child.parentNode.removeChild(child);
-                formObject[fieldName] = null;
+                if (ariba.Dom.IsMoz) {
+                    delete formObject[fieldName];
+                }
+                else {
+                    formObject[fieldName] = null;
+                }
             }
         },
 
@@ -388,6 +506,7 @@ ariba.Dom = function() {
 
         hasClass : function (e, className)
         {
+            // todo: indexOf is faster than regex matching.
             return e.className && (e.className.match(new RegExp("(^|\\s)" + className + "(\\s|$)")) != null);
         },
 
@@ -815,6 +934,12 @@ ariba.Dom = function() {
             }
             else if (this.isSafari) {
                 classString += " IsSaf";
+                if (this.isIPad) {
+                    classString += " IsIPad";
+                }
+                if (this.isChrome) {
+                    classString += " IsChr";
+                }
             }
             else {
                 classString += " IsMoz";
@@ -917,7 +1042,7 @@ ariba.Dom = function() {
             var container = this.getElementById(id + "_MovedCopy");
             if (container) {
                 var origMarker = this.getElementById(id + "_OrigLocation");
-                //Ignore server-side div, the orignal marker may have been 
+                //Ignore server-side div, the original marker may have been
                 //removed with incremental update.
                 if(origMarker) {
                     container.parentNode.removeChild(container);
@@ -1114,7 +1239,13 @@ ariba.Dom = function() {
         {
             return elmClass.indexOf("-" + state) >= 0;
         },
-        
+
+        createElement : function (html)
+        {
+             var tmpDiv = document.createElement("div");
+             tmpDiv.innerHTML = html;
+             return tmpDiv.firstChild;
+        },
         EOF:0};
 
     //

@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2011 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,12 +12,13 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#126 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWComponent.java#129 $
 */
 
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWBaseObject;
+import ariba.util.core.GrowOnlyHashSet;
 import ariba.util.core.MapUtil;
 import ariba.ui.aribaweb.util.AWCharacterEncoding;
 import ariba.ui.aribaweb.util.AWEnvironmentStack;
@@ -38,6 +39,7 @@ import ariba.util.core.PerformanceState;
 import ariba.util.core.StringUtil;
 import ariba.util.core.Constants;
 import ariba.util.core.Fmt;
+import java.util.ArrayList;
 import java.util.Map;
 import ariba.util.i18n.I18NUtil;
 import java.io.IOException;
@@ -50,6 +52,8 @@ import java.util.TimeZone;
 import java.util.Iterator;
 import java.util.List;
 import javax.servlet.http.HttpSession;
+
+import static ariba.ui.aribaweb.core.AWComponent.RenderingListener.InterestLevel;
 
 /**
     AWComponent is the key class for template/based interactive content.  All "pages",
@@ -90,6 +94,7 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     private static AWResourceManager _templateResourceManager = null;
 
     protected AWComponentReference _componentReference;
+
     private AWPage _page;
     private AWComponent _parent;
     private AWElement _currentTemplateElement;
@@ -421,6 +426,63 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
     public AWComponent pageComponent ()
     {
         return _page.pageComponent();
+    }
+
+    /**
+     * Note: Should be overwritten in sub-classing page-level components.
+     * @return The driving business logic.
+     */
+    public Object getDrivingBusinessObject ()
+    {
+        return null;
+    }
+
+    /**
+     * Note: Can be overwritten by sub-class if page is always rendered in a
+     * certain version.
+     * @return The rendering version of this page.
+     */
+    public UIRenderMeta.RenderVersion getPageRenderVersion ()
+    {
+        AWComponent renderingComponent = pageComponent();
+
+        // if we can't find the renderingComponent, give up
+        if (renderingComponent == null) {
+            return UIRenderMeta.RenderVersion.AW5;
+        }
+
+        // if this is the renderingComponent, then proceed
+        if (this.equals(renderingComponent)) {
+            // only in debug mode?
+            UIRenderMeta.RenderVersion renderVersion = requestContext()
+                    .getQueryRenderVersion();
+
+            if (renderVersion != null) {
+                return renderVersion;
+            }
+
+            Object businessObject = renderingComponent
+                    .getDrivingBusinessObject();
+
+            if (businessObject != null) {
+                UIRenderMeta uiRenderMeta = UIRenderMeta.get(businessObject);
+
+                if (uiRenderMeta != null) {
+                    return uiRenderMeta.getRenderVersion(businessObject);
+                }
+            }
+
+            return UIRenderMeta.RenderVersion.AW5;
+        }
+        // delegate work to the renderingComponent
+        else {
+            return renderingComponent.getPageRenderVersion();
+        }
+    }
+
+    public boolean isRenderAW5 ()
+    {
+        return UIRenderMeta.RenderVersion.AW5.equals(getPageRenderVersion());
     }
 
     public AWSession session ()
@@ -923,10 +985,10 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
 
     /**
         Overridden by AWComponent subclasses to indicate whether component instances
-        should be preseved with the page/session (i.e. are "stateful") or can be
+        should be preserved with the page/session (i.e. are "stateful") or can be
         pooled and reused for each phase of request processing (i.e. are stateless)
 
-        Default is to be statelss unless the component is used as the top-level
+        Default is to be stateless unless the component is used as the top-level
         (page) component.
      */
     public boolean isStateless ()
@@ -955,6 +1017,11 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)
     {
+        // the interest level code is an optimization so we do not try (more than once) to find
+        // community context for a component that does not have it
+        InterestLevel interestLevel = getInterestLevel(this);
+        InterestLevel origLevel = interestLevel;
+
         if (AWConcreteApplication.IsDebuggingEnabled) {
             validate(requestContext.validationContext());
         }
@@ -967,7 +1034,18 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
                 _page.swapBacktrackStates(existingUserBacktrackState);
             }
         }
+        // call rendering cycle start and end events
+        if (interestLevel == InterestLevel.Interested) {
+            interestLevel = componentWillRender(requestContext, this, component);
+        }
         template().renderResponse(requestContext, this);
+        if (interestLevel == InterestLevel.Interested) {
+            interestLevel = componentFinishedRender(requestContext, this, component);
+        }
+
+        if (interestLevel == InterestLevel.NeverInterested && interestLevel != origLevel) {
+            markNeverInterested(this);
+        }
     }
 
     // these should be called when not calling via ComponentReference
@@ -1989,16 +2067,218 @@ public class AWComponent extends AWBaseObject implements AWCycleable, AWCycleabl
         // Default is to do nothing.  Users can override,
         // but are not required to call super.
     }
-
-    /**
-     * Sets the destination page for performance monitoring.  This method is defined to
-     * allow component subclasses to control the setting of the perf. logging fields.
-     */
+	
+	/**
+	* Sets the destination page for performance monitoring.  This method is defined to
+    * allow component subclasses to control the setting of the perf. logging fields.
+    */
     public void setPerfDestinationInfo()
     {
         if (PerformanceState.threadStateEnabled()) {
              PerformanceState.getThisThreadHashtable().setDestinationPage(namePath());
         }
+	}
+
+    /**
+     * Provide ability to turn off community features at the application level
+     * @return
+     */
+    public boolean isUserCommunityEnabled()
+    {
+        return AWConcreteApplication.isUserCommunityEnabled();
+    }
+
+    /**
+     * Get window size on which In Situ pane will fold. 
+     * @return int
+     */
+    public int getFoldInSituOnWindowSizeParam ()
+    {
+        return AWConcreteApplication.getFoldInSituWindowSize();
+    }
+    /**
+     * Implementers of this interface can be used in conjunction with the rendering listener
+     * interfaces below, or anywhere to model a boolean predicate on the 3 rendering argus
+     */
+    public static interface RenderingFilter {
+
+        public boolean isSatisfiedBy (AWRequestContext requestContext, AWCycleable thisElem, AWComponent parentComponent);
+    }
+
+    /**
+     * Allow listeners to monitor rendering 'lifecycle' events
+     */
+    public static interface RenderingListener
+    {
+        /**
+         * The APIs return this enum to indicate whether further calls should be made.
+         * The common case is that during render we will call componentWillRender which
+         * might return NeverInterested if there was no community context for this component.
+         * This value should be cached in platform and further calls will not be made
+         * for this component.
+         *
+         * For another component the call might return NotInterested in which case there is
+         * not reason to call any later APIS (componentClosingTag or componentFinishedRender)
+         * in the context of the rendering of this particular component.  Next time this same
+         * component is rendered the result might be different.
+         *
+         * If Interested is returned, then later calls will be made
+         */
+        static public enum InterestLevel {
+            NeverInterested,
+            NotInterested,
+            Interested,
+        }
+        // called before render
+        InterestLevel componentWillRender (AWRequestContext requestContext, AWCycleable thisElem, AWComponent parentComponent);
+
+        // called after rendering content, but before closing tag (this is a point
+        // at which content can be injected into the rendered result).
+        // Note that this call will only be generated by some container components
+        InterestLevel componentClosingTag (AWRequestContext requestContext, AWCycleable thisElem, AWComponent parentComponent);
+
+        // called after render
+        InterestLevel componentFinishedRender (AWRequestContext requestContext, AWCycleable thisElem, AWComponent parentComponent);
+    }
+
+    private static InterestLevel maxInterest(InterestLevel m0, InterestLevel m1)
+    {
+        return (m0.compareTo(m1) > 0) ? m0 : m1;
+    }
+
+    /**
+     * Give listener chance to clean up any state now that this rendering is finished.
+     *
+     *
+     * @param requestContext
+     * @param thisElem
+     * @param parentComponent
+     * @return InterestLevel of Interested to continue with next API in this session,
+     *                           NeverInterested to make no more calls to these APIs for this component again
+     *                           NotInterested to make no more calls to these APIs for this call to component renderResponse
+     *
+     * Here is the explantion of InterestedLevel complication.
+     * If any of the calls to the listener return Interested, then this method must return Interested.
+     * Else if any of the calls to the listener return NotInterested, then this method must return NotInterested.
+     * Else (by default) return NeverInterested
+     *
+     * So for any particular call:
+     * We implement this by keeping track of the maximum inmtrest level
+     * (where NeverIntersted < NotInterested < Interested
+     *
+     */
+    protected InterestLevel componentWillRender(AWRequestContext requestContext, AWCycleable thisElem, AWComponent parentComponent)
+    {
+        if (_RenderingListeners == null || _RenderingListeners.size() == 0) {
+            return InterestLevel.NeverInterested;
+        }
+        InterestLevel retInterestLevel = InterestLevel.NeverInterested;
+
+        for (RenderingListener l : _RenderingListeners) {
+            InterestLevel interestLevel =
+                    l.componentWillRender(requestContext, thisElem, parentComponent);
+            
+            retInterestLevel = maxInterest(retInterestLevel, interestLevel);
+        }
+
+        return retInterestLevel;
+    }
+
+    /**
+     * Give listener chance to add any content before the closing tag is emitted.  The listener must ensure
+     * that any generated HTML will be valid.
+     *
+     *
+     * @param requestContext
+     * @param thisElem
+     * @param parentComponent
+     * @return InterestLevel of Interested to continue with next API in this session,
+     *                           NeverInterested to make no more calls to these APIs for this component again
+     *                           NotInterested to make no more calls to these APIs for this call to component renderResponse
+     *
+     * @see AWComponent#componentWillRender for explantion of InterestedLevel complication.
+     * 
+     */
+    protected InterestLevel componentClosingTag(AWRequestContext requestContext, AWCycleable thisElem, AWComponent parentComponent)
+    {
+        if (_RenderingListeners == null || _RenderingListeners.size() == 0) {
+            return InterestLevel.NeverInterested;
+        }
+        InterestLevel retInterestLevel = InterestLevel.NeverInterested;
+
+        for (RenderingListener l : _RenderingListeners) {
+            InterestLevel interestLevel =
+                    l.componentClosingTag(requestContext, thisElem, parentComponent);
+
+            retInterestLevel = maxInterest(retInterestLevel, interestLevel);
+        }
+
+        return retInterestLevel;
+    }
+
+    /**
+     * Give listener chance to clean up any state now that this rendering is finished.
+     *     *
+     * @param requestContext
+     * @param thisElem
+     * @param parentComponent
+     * @return InterestLevel of Interested to continue with next API in this session,
+     *                           NeverInterested to make no more calls to these APIs for this component again
+     *                           NotInterested to make no more calls to these APIs for this call to component renderResponse
+     *
+     * @see AWComponent#componentWillRender for explantion of InterestedLevel complication.
+     * 
+     */
+    protected InterestLevel componentFinishedRender(AWRequestContext requestContext, AWCycleable thisElem, AWComponent parentComponent)
+    {
+
+        if (_RenderingListeners == null || _RenderingListeners.size() == 0) {
+            return InterestLevel.NeverInterested;
+        }
+
+        InterestLevel retInterestLevel = InterestLevel.NeverInterested;
+
+        for (RenderingListener l : _RenderingListeners) {
+            InterestLevel interestLevel =
+                    l.componentFinishedRender(requestContext, thisElem, parentComponent);
+
+            retInterestLevel = maxInterest(retInterestLevel, interestLevel);
+        }
+
+        return retInterestLevel;
+    }
+
+    private static List<RenderingListener> _RenderingListeners = null;
+
+    public static void registerRenderingListener(RenderingListener listener)
+    {
+        if (_RenderingListeners == null) _RenderingListeners = new ArrayList();
+        _RenderingListeners.add(listener);
+    }
+
+    /**
+     * If a component (by name) shows up in this set then we are not interested in it, ever!
+     * We will then skip calling the RenderingListener APIs for that component.
+     */
+    private static GrowOnlyHashSet _CachedNeverInterestedSet =
+            new GrowOnlyHashSet();
+
+    /**
+     * This method will assume interest unless the component name shows up in the never interested set.
+     *
+     * @param comp
+     * @return
+     */
+    static InterestLevel getInterestLevel(AWComponent comp)
+    {
+        return (_CachedNeverInterestedSet.contains(comp.name()))
+                ? InterestLevel.NeverInterested
+                : InterestLevel.Interested;
+    }
+
+    static void markNeverInterested(AWComponent comp)
+    {
+        _CachedNeverInterestedSet.add(comp.name());
     }
 }
 

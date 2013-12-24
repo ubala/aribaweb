@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMultiLocaleResourceManager.java#56 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWMultiLocaleResourceManager.java#57 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -21,6 +21,7 @@ import ariba.ui.aribaweb.core.AWConcreteApplication;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.util.core.Assert;
 import ariba.util.core.ClassUtil;
+import ariba.util.core.GrowOnlyHashSet;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.ListUtil;
 import ariba.util.core.MapUtil;
@@ -69,6 +70,9 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
     private GrowOnlyHashtable _classPackages = new GrowOnlyHashtable();
 
     private GrowOnlyHashtable _packageFlags = new GrowOnlyHashtable();
+
+    //'add consumers to register a callback for packaged resource directory
+    private GrowOnlyHashSet _packagedResourceDirectoryCallbacks = new GrowOnlyHashSet();
 
     public static void setWebserverHostName (String webserverHostName)
     {
@@ -246,6 +250,13 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
             }
         }
     }
+
+    // allow for callbacks by consumers of a resource directory
+    public void registerResourceDirectoryCallback(AWResourceDirectoryHandler handler)
+    {
+        _packagedResourceDirectoryCallbacks.add(handler);
+    }
+
 
     private boolean directoryAlreadyRegistered (String directoryPathString)
     {
@@ -960,6 +971,11 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
             addClassPackages(fileList, packageName);
             addResources(fileResourceDirectory, packageDirPath, fileList);
         }
+
+        for(Object o :  _packagedResourceDirectoryCallbacks) {
+            AWResourceDirectoryHandler handler = (AWResourceDirectoryHandler)o;
+            handler.registeredResourceDirectory(fileResourceDirectory, packageDirPath, packageName);
+        }
     }
 
     protected String [] filesWithExtension (String path, String extension)
@@ -1293,6 +1309,12 @@ abstract public class AWMultiLocaleResourceManager extends AWResourceManager
     public static interface ResourceVersionManager
     {
         public String version (String resourceName);    
+    }
+
+    public interface AWResourceDirectoryHandler {
+
+        void registeredResourceDirectory(AWResourceDirectory resourceDirectory, String packageDirPath, String packageName);
+
     }
 }
 

@@ -1,5 +1,6 @@
 email,name,password,memberOf.name
 craig@aribaweb.org,Craig Federighi,ariba,AdminUsers
 mohan@aribaweb.org,Mohan Reddy,ariba,DefaultUsers
+fkolar@aribaweb.org,Frank Kolar,ariba,DefaultUsers
 dave@aribaweb.org,Dave Finlay,ariba,DefaultUsers
 kingsley@aribaweb.org,Kingsley Ngan,ariba,DefaultUsers

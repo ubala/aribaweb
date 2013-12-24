@@ -3,6 +3,6 @@ Big5
 ,,
 ,, AWMessagesList
 ,,
-ErrorMessage, "錯誤: {0}", generic error message printed *usually* at the top of the page. The argument #0 is a localized string
-AlertMessage, "警告: {0}", generic warning message printed *usually* at the top of the page. The argument #0 is a localized string
-ConfirmMessage, "確認: {0}", generic confirmation message printed *usually* at the top of the page. The argument #0 is a localized string
+ErrorMessage, "錯誤：{0}", generic error message printed *usually* at the top of the page. The argument #0 is a localized string
+AlertMessage, "警告：{0}", generic warning message printed *usually* at the top of the page. The argument #0 is a localized string
+ConfirmMessage, "確認：{0}", generic confirmation message printed *usually* at the top of the page. The argument #0 is a localized string

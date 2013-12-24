@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.java#19 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenu.java#20 $
 */
 
 package ariba.ui.widgets;
@@ -93,6 +93,7 @@ import java.util.List;
 
 public final class PopupMenu extends AWComponent
 {
+    private static String PopupMenuString = "PopupMenu";
     protected static final String MenuLinkSenderIdKey = AWComponentActionRequestHandler.SenderKey;
     private static final AWEncodedString MenuLinkSenderId = new AWEncodedString(PopupMenu.MenuLinkSenderIdKey);
     protected static final AWEncodedString MenuClickedFunctionName =
@@ -164,7 +165,7 @@ public final class PopupMenu extends AWComponent
             if (menuIds.contains(menuId)) {
                 AWValidationContext validationContext = requestContext.validationContext();
                 String msg = Fmt.S("Error: multiple menus found with the same menu id: %s", menuId);
-                validationContext.addGeneralError(msg);
+                validationContext.addGeneralError(getMultipleMenusErrorMessage());
                 ariba.ui.aribaweb.util.Log.dumpAWStack(component,msg);
             }
 
@@ -172,6 +173,15 @@ public final class PopupMenu extends AWComponent
         }
         _hasCollapsed = false;
         super.renderResponse(requestContext, component);
+    }
+    
+    private String getMultipleMenusErrorMessage ()
+    {
+        String msg = "Multiple menus found with the same menu id";
+        return localizedJavaString(PopupMenuString, 1,
+                msg,
+                AWConcreteApplication.SharedInstance.
+                        resourceManager(this.preferredLocale()));
     }
 
     // may be called back during append by collapsed items to tell us to show expand control

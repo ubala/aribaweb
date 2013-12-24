@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#61 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWUtil.java#62 $
 */
 
 package ariba.ui.aribaweb.util;
@@ -2005,6 +2005,7 @@ public final class AWUtil extends AWBaseObject
     {
         FastStringBuffer buffer = new FastStringBuffer();
 
+        boolean hasError = false;
         int length = string.length();
         int i = -1;
         for (i = 0; i < length; i++) {
@@ -2018,6 +2019,12 @@ public final class AWUtil extends AWBaseObject
 
               case '%':
                 String str = "";
+                 // if the % is not trailed by two characters, just move on similar
+                  // to the case where the trailing two chars are not valid integer
+                if (length < i+3) {
+                    hasError = true;
+                    break;
+                }
 
                 try {
                     str = string.substring(i+1, i+3);
@@ -2025,6 +2032,7 @@ public final class AWUtil extends AWBaseObject
                     buffer.append((char)val);
                 }
                 catch (ParseException e) {
+                    hasError = true;
                         // if the parse fails just append the chars
                     buffer.append(str);
                 }
@@ -2038,6 +2046,10 @@ public final class AWUtil extends AWBaseObject
         }
 
         String result = buffer.toString();
+        if (hasError) {
+            Log.aribaweb.warn("****** decode warning/invalid string: " + string);
+        }
+
         try {
             return new String(result.getBytes(I18NUtil.EncodingISO8859_1),
                               encoding);

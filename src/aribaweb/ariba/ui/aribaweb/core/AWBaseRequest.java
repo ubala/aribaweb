@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#77 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseRequest.java#81 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -89,7 +89,10 @@ abstract public class AWBaseRequest extends AWBaseObject
     private boolean _isBrowserMicrosoft;
     private boolean _isBrowserIE55;
     private boolean _isBrowserSafari;
+    private boolean _isBrowserChrome;
     private boolean _isMacintosh;
+    private boolean _isIPad;
+    private boolean _isTooManyTabRequest;
     private byte[] _content;
 
     public static final String CharacterEncodingKey = "awcharset";
@@ -145,7 +148,10 @@ abstract public class AWBaseRequest extends AWBaseObject
         _isBrowserFirefox = initIsBrowserFirefox();
         _isBrowserMicrosoft = initIsBrowserMicrosoft();
         _isBrowserSafari = initIsBrowserSafari();
+        _isBrowserChrome = initIsBrowserChrome();
         _isMacintosh = initisMacintosh();
+        _isIPad = initIsIPad();
+        _isTooManyTabRequest = false;
         String frameName = formValueForKey(AWRequestContext.FrameNameKey, false);
         if (frameName != null) {
             _frameName = AWEncodedString.sharedEncodedString(frameName);
@@ -421,6 +427,16 @@ abstract public class AWBaseRequest extends AWBaseObject
         return isBrowserSafari;
     }
 
+    public boolean initIsBrowserChrome ()
+    {
+        boolean isBrowserChrome = false;
+        String userAgent = userAgent();
+        if ((userAgent != null) && (userAgent.indexOf("Chrome") != -1)) {
+            isBrowserChrome = true;
+        }
+        return isBrowserChrome;
+    }
+
     public boolean initisMacintosh ()
     {
         boolean isMacintosh = false;
@@ -429,6 +445,16 @@ abstract public class AWBaseRequest extends AWBaseObject
             isMacintosh = true;
         }
         return isMacintosh;
+    }
+
+    public boolean initIsIPad ()
+    {
+        boolean isIPad = false;
+        String userAgent = userAgent();
+        if ((userAgent != null) && (userAgent.indexOf("iPad") != -1)) {
+            isIPad = true;
+        }
+        return isIPad;
     }
 
     public String acceptLanguage ()
@@ -501,9 +527,19 @@ abstract public class AWBaseRequest extends AWBaseObject
         return _isBrowserSafari;
     }
 
+    public boolean isBrowserChrome ()
+    {
+        return _isBrowserChrome;
+    }
+
     public boolean isMacintosh ()
     {
         return _isMacintosh;
+    }
+
+    public boolean isIPad ()
+    {
+        return _isIPad;
     }
 
     public boolean isSecureScheme ()
@@ -517,6 +553,16 @@ abstract public class AWBaseRequest extends AWBaseObject
 
         return serverPort.equals(DefaultSecureHttpPort) ||
             serverPort.equals(AWDirectActionUrl.alternateSecurePort());
+    }
+
+    public boolean isTooManyTabRequest ()
+    {
+        return _isTooManyTabRequest;
+    }
+
+    public void setTooManyTabRequest (boolean isTooManyTabRequest)
+    {
+        _isTooManyTabRequest = isTooManyTabRequest;
     }
 
     /////////////////////

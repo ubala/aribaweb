@@ -1,6 +1,6 @@
 Big5,,,,
-"WizardMeta","NextActionHint","Go to next step","前往下一步",""
-"WizardMeta","PrevActionHint","Go to previous step","返回前一步",""
+"WizardMeta","NextActionHint","Go to next step","移至下一步",""
+"WizardMeta","PrevActionHint","Go to previous step","移至前一步",""
 "WizardMeta","ExitActionHint","Exit","退出",""
 "WizardMeta","OkActionHint","OK","確定",""
 "WizardMeta","CancelActionHint","Cancel","取消",""

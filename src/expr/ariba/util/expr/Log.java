@@ -1,5 +1,6 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2013 Ariba, Inc.
+    All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/Log.java#3 $
+    $Id: //ariba/platform/util/expr/ariba/util/expr/Log.java#4 $
 */
 
 package ariba.util.expr;
@@ -31,4 +32,13 @@ public class Log extends ariba.util.log.Log
     */
     public static final Logger expression =
         (Logger)Logger.getLogger("util.expression");
+
+    /**
+        Log message category to log messages from expression evaluation. 
+        Off by default; output only if Priority set to INFO or DEBUG.
+
+        @aribaapi private
+    */
+    public static final Logger exprTrace =
+        (Logger)Logger.getLogger("exprTrace");
 }

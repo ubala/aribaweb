@@ -1,6 +1,8 @@
 /*
-    Copyright 1996-2010 Ariba, Inc.
+    Copyright (c) 2013-2013 Ariba, Inc.
+    All rights reserved. Patents pending.
 
+    $Id: //ariba/platform/util/core/ariba/util/i18n/I18NUtil.java#19 $
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -12,7 +14,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/i18n/I18NUtil.java#17 $
+    $Id: //ariba/platform/util/core/ariba/util/i18n/I18NUtil.java#19 $
 */
 
 package ariba.util.i18n;
@@ -30,7 +32,7 @@ import java.util.StringTokenizer;
     @aribaapi documented
 */
 
-public class I18NUtil
+public class I18NUtil extends I18NEncodingUtil
 {
     /*-----------------------------------------------------------------------
         Public Constants
@@ -61,26 +63,6 @@ public class I18NUtil
         @aribaapi private
     */
     public static final String EncodingUTF8 = "UTF8";
-    public static final String EncodingUTF_8 = "UTF-8";
-
-    /**
-        We use the standard ASCII encoding for table files because the
-        FormattingSerializer code already converts from   Unicode
-        escapes.
-
-        @aribaapi private
-    */
-    public static final String EncodingASCII = "ASCII";
-
-    /**
-        We use the standard ISO 8859-1 encoding for the old HTML
-        client while it still lives.
-
-        Also, we use it as a stop gap for the CSV and File editors...
-
-        @aribaapi private
-    */
-    public static final String EncodingISO8859_1 = "8859_1";
 
     /**
         We use the non-standard Shift_JIS encoding for the japanese HTML client.
@@ -89,56 +71,14 @@ public class I18NUtil
         @aribaapi private
     */
     public static final String EncodingShiftJIS = "Shift_JIS";
-
-    /**
-        We use GB2312 encoding for the simplified chinese HTML client.
-
-        @aribaapi private
-    */
-    public static final String EncodingGB2312 = "GB2312";
-
-    /**
-        We use Big5 encoding for the traditional chinese HTML client.
-
-        @aribaapi private
-    */
-    public static final String EncodingBig5 = "Big5";
-
+    
     /**
         We use GB2312 encoding for the korean HTML client.
 
         @aribaapi private
     */
     public static final String EncodingKorean = "KSC5601";
-
-
-    /**
-        Cp1252 encoding
-
-        @aribaapi private
-    */
-    public static final String EncodingCp1252 = "Cp1252";
-
-    /**
-        Cp1251 encoding
-
-        @aribaapi private
-    */
-    public static final String EncodingCp1251 = "Cp1251";
-
-    /**
-            Cp1250 encoding
-
-            @aribaapi private
-    */
-    public static final String EncodingCp1250 = "Cp1250";
-
-    /**
-            Cp1254 encoding
-
-            @aribaapi private
-    */
-    public static final String EncodingCp1254 = "Cp1254";
+    
     /*-----------------------------------------------------------------------
         Public Methods
       -----------------------------------------------------------------------*/
@@ -494,18 +434,7 @@ public class I18NUtil
     */
     public static int stringWidthWhenPrinted (String string, String encoding)
     {
-        if (encoding.equals(I18NUtil.EncodingISO8859_1) ||
-            encoding.equals(I18NUtil.EncodingShiftJIS) ||
-            encoding.equals(I18NUtil.EncodingGB2312) ||
-            encoding.equals(I18NUtil.EncodingBig5) ||
-            encoding.equals(I18NUtil.EncodingKorean) ||
-            encoding.equals(I18NUtil.EncodingUTF8) ||
-            encoding.equals(I18NUtil.EncodingUTF_8) ||
-            encoding.equals(I18NUtil.EncodingCp1250) ||
-            encoding.equals(I18NUtil.EncodingCp1254) ||
-            encoding.equals(I18NUtil.EncodingCp1252) ||
-            encoding.equals(I18NUtil.EncodingCp1251))
-        {
+        if (isValidEncoding(encoding)) {
             return stringLengthBytes(string, encoding);
         }
         Log.util.debug("%s is not a supported encoding for calculating string width",

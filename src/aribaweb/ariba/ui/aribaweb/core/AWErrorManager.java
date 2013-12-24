@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#55 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWErrorManager.java#56 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -2530,7 +2530,10 @@ public class AWErrorManager extends AWBaseObject implements AWNavigation.Interce
             for (int i = 0; i < bucket.size(); i++) {
                 // assign the same display order for all errors of the same key
                 AWErrorInfo curError = bucket.get(i);
-                curError.setDisplayOrder(order);
+                // set the display order only if it is not set
+                if (curError.getDisplayOrder() == AWErrorInfo.NotDisplayed) {
+                    curError.setDisplayOrder(order);
+                }
             }
 
             Log.aribaweb_errorManager.debug(

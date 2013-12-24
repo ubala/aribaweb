@@ -10,7 +10,7 @@
 <body>
     <!--- Put special marker around form so it's parsed out by XMLHTTPUpdateSource -->\
     <a:PrimitiveString value="<!--@&@-->"/>\
-    <form method="post" id="formRedirectForm" name="$^formName:formRedirectForm" action="$formActionUrl" target="$target">
+    <form method="post" id="formRedirectForm" name="$^formName:formRedirectForm" action="$formActionUrl" enctype="$enctype" target="$target">
         <a:For list="$formValues" index="$currIndex">\
             <a:HiddenFormParameter name="$currentName" value="$currentValue"/>
         </a:For>\

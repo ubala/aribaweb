@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWClientSideScript.java#25 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWClientSideScript.java#26 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -39,19 +39,22 @@ import java.io.InputStream;
 public final class AWClientSideScript extends AWComponent
 {
     private static final String isSingleton = "isSingleton";
-    private static final String executeOnIncrementalUpdate = "executeOnIncrementalUpdate";
+    private static final String executeOnIncrementalUpdate =
+            "executeOnIncrementalUpdate";
     private static final String globalScope = "globalScope";
     private static final String executeOn = "executeOn";
     private static final String handle = "handle";
+    private static final String RJSMayNotBeDefined = "RJSMayNotBeDefined";
 
     private static final String[] SupportedBindingNames =
         {BindingNames.scriptFile, BindingNames.scriptString,
          BindingNames.language, BindingNames.filename,
-         BindingNames.elementId, BindingNames.invokeAction,
+         BindingNames.elementId, BindingNames.invokeAction, RJSMayNotBeDefined,
          isSingleton, executeOnIncrementalUpdate, globalScope, executeOn, handle,
          BindingNames.forceDirectInclude, BindingNames.synchronous};
 
-    private static final GrowOnlyHashtable ScriptFileHashtable = new GrowOnlyHashtable();
+    private static final GrowOnlyHashtable ScriptFileHashtable =
+            new GrowOnlyHashtable();
 
     private static final String Javascript = "javascript";
     private static final String VBScript = "vbscript";
@@ -78,7 +81,8 @@ public final class AWClientSideScript extends AWComponent
         _filename = stringValueForBinding(BindingNames.filename);
 
         String language = stringValueForBinding(BindingNames.language);
-        language = StringUtil.nullOrEmptyOrBlankString(language) ? Javascript : language.toLowerCase();
+        language = StringUtil.nullOrEmptyOrBlankString(language) ?
+                Javascript : language.toLowerCase();
         _isVBScript = VBScript.equals(language);
 
         if (booleanValueForBinding(globalScope)) {
@@ -89,7 +93,10 @@ public final class AWClientSideScript extends AWComponent
         _executeOn = stringValueForBinding(executeOn);
     }
 
-    private static boolean nullOrFalse (Object o) { return (o == null) || !((Boolean)o).booleanValue(); }
+    private static boolean nullOrFalse (Object o)
+    {
+        return (o == null) || !((Boolean)o).booleanValue();
+    }
 
     public boolean useDirectInclude ()
     {
@@ -108,7 +115,7 @@ public final class AWClientSideScript extends AWComponent
         return (_executeOn != null || hasBinding(handle));
     }
 
-    public void renderResponse(AWRequestContext requestContext, AWComponent component)
+    public void renderResponse (AWRequestContext requestContext, AWComponent component)
     {
         // if this clientsidescript is for a .js resource, then we need to have a full
         // page refresh so the methods, global vars, etc. get registered in the main
@@ -160,16 +167,20 @@ public final class AWClientSideScript extends AWComponent
 
     public String scriptFileUrl ()
     {
-        String scriptFileUrl = (((AWConcreteApplication)application()).allowsJavascriptUrls())
+        String scriptFileUrl =
+                (((AWConcreteApplication)application()).allowsJavascriptUrls())
             ? urlForResourceNamed(_filename, false, true)
             : AWXDebugResourceActions.urlForResourceNamed(requestContext(), _filename);
-        Assert.that(scriptFileUrl != null, "%s: unable to locate file named \"%s\"", getClass().getName(), _filename);
+        Assert.that(scriptFileUrl != null, "%s: unable to locate " +
+                "file named \"%s\"", getClass().getName(), _filename);
         return scriptFileUrl;
     }
 
     public boolean hasScriptBinding ()
     {
-        boolean hasScriptBinding = (bindingForName(BindingNames.scriptFile, true) != null) || (bindingForName(BindingNames.scriptString, true) != null);
+        boolean hasScriptBinding =
+                (bindingForName(BindingNames.scriptFile, true) != null) ||
+                (bindingForName(BindingNames.scriptString, true) != null);
         return hasScriptBinding;
     }
 
@@ -183,7 +194,8 @@ public final class AWClientSideScript extends AWComponent
             if (scriptString == null) {
                 AWResource resource = resourceManager().resourceNamed(scriptFileName);
                 if (resource == null) {
-                    throw new AWGenericException("Unable to locate script file named: " + scriptFileName);
+                    throw new AWGenericException("Unable to locate script " +
+                            "file named: " + scriptFileName);
                 }
                 InputStream scriptInputStream = resource.inputStream();
                 scriptString = AWUtil.stringWithContentsOfInputStream(scriptInputStream);
@@ -221,5 +233,4 @@ public final class AWClientSideScript extends AWComponent
         // prevent semantic key generation
         return null;
     }
-
 }

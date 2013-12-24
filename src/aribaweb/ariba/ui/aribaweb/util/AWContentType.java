@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,20 +12,17 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWContentType.java#23 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/util/AWContentType.java#26 $
 */
 
 package ariba.ui.aribaweb.util;
 
-import ariba.ui.aribaweb.util.AWCaseInsensitiveHashtable;
-import ariba.ui.aribaweb.util.AWCharacterEncoding;
-import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.StringUtil;
 
 public final class AWContentType extends AWBaseObject
 {
-    public static final int SupportedContentTypeCount = 16;
+    public static final int SupportedContentTypeCount = 17;
     private static GrowOnlyHashtable ContentTypesByName;
     private static AWCaseInsensitiveHashtable ContentTypesByFileExtension = new AWCaseInsensitiveHashtable();
     private static AWContentType[] ContentTypesByIndex;
@@ -54,6 +51,7 @@ public final class AWContentType extends AWBaseObject
     public static final AWContentType ApplicationDownload = AWContentType.registerContentType("application/download");
     public static final AWContentType ApplicationXCompressed = AWContentType.registerContentType("application/x-compressed");
     public static final AWContentType ApplicationJnlp = AWContentType.registerContentType("application/jnlp");
+    public static final AWContentType ApplicationJson = AWContentType.registerContentType("application/json");
     public static final AWContentType MultipartRelated = AWContentType.registerContentType("multipart/related");
     public static final AWContentType MultipartFormData = AWContentType.registerContentType("multipart/form-data");
 
@@ -79,9 +77,13 @@ public final class AWContentType extends AWBaseObject
         registerContentTypeForFileExtension("csv", ApplicationCsv);
         registerContentTypeForFileExtension("zip", ApplicationDownload);
         registerContentTypeForFileExtension("jnlp", ApplicationJnlp);
+        registerContentTypeForFileExtension("json", ApplicationJson);
         registerContentTypeForFileExtension("xls", ApplicationVndMsexcel);
         registerContentTypeForFileExtension("xlsx", ApplicationVndMsexcel2007);
         registerContentTypeForFileExtension("doc", ApplicationMSWord);
+        registerContentTypeForFileExtension("png", ImagePng);
+        // if you add a new Content Type For File Extension,
+        // do not forget to increase the SupportedContentTypeCount
     }
 
     private static AWContentType registerContentType (String contentTypeName)

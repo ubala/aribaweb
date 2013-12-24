@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#8 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BaseTabSet.awl#9 $
     </Copyright>
 
     <Overview>
@@ -95,9 +95,7 @@
     <a:IncludeContent/>\
 <a:Else/>
     <a:If ifFalse="$^vertical">
-        <table cellspacing="0" cellpadding="0" width="100%">\
-            <tr>\
-                <td class="$cssClass">\
+           <div class="$cssClass">\
                     <w:TabList list="$tabList" visibles="$^visibles" item="$^item"
                                index="$^index" label="$^label:^displayString"
                                selection="$selectedTab" submitForm="$^submitForm"
@@ -107,20 +105,14 @@
                                action="$^action"
                                actionMenuId="$^actionMenuId"
                                actionMenuLabel="$^actionMenuLabel"/>\
-                </td>
-                \
-            </tr>
-            <tr>\
-                <td class="$^contentClass">\
+        </div>
+        <div class="$^contentClass">
                     <div class="tabPanel" emitTags="$true">\
                         <a:MethodInvocation invoke="$pushElementId"/>\
                         <a:IncludeContent/>\
                         <a:MethodInvocation invoke="$popElementId"/>\
                     </div>
-                </td>
-                \
-            </tr>
-        </table>
+        </div>
     <a:Else/>
         <table class="vTabSet" cellspacing="0" cellpadding="0" width="100%">\
             <tr>\

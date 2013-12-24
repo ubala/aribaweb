@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#37 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRedirect.java#38 $
 */
 package ariba.ui.aribaweb.core;
 
@@ -35,6 +35,7 @@ import java.util.List;
 // This is subclassed by ARPRedirectError
 public class AWRedirect extends AWComponent implements AWResponseGenerating.ResponseSubstitution
 {
+    private static final String DisallowInternalDispatchKey = "DisallowInternalDispatch";
     protected final static AWEncodedString BrowserHistoryBack = new AWEncodedString(
         "<script id='AWRefreshComplete'>history.go(-1);</script>");
 
@@ -67,6 +68,7 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
         _isSelfRedirect = false;
         _isRefresh = false;
         _url = null;
+        initFromRequestContext();
     }
 
     // If we're not doing self redirect then we need to
@@ -181,6 +183,23 @@ public class AWRedirect extends AWComponent implements AWResponseGenerating.Resp
         else {
             Log.aribaweb.debug("AWRedirect -- full page redirect %s", url);
             fullPageRedirect(requestContext, url);
+        }
+    }
+
+    public static void disallowInternalDispatch (AWRequestContext requestContext)
+    {
+        if (requestContext != null) {
+            requestContext.put(DisallowInternalDispatchKey, Boolean.TRUE);
+        }
+    }
+
+    public void initFromRequestContext ()
+    {
+        Object disallowInternalDispatch =
+            requestContext().get(DisallowInternalDispatchKey);
+        if (disallowInternalDispatch != null &&
+            ((Boolean)disallowInternalDispatch).booleanValue()) {
+            setAllowInternalDispatch(false);
         }
     }
 

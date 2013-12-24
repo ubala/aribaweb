@@ -12,14 +12,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#21 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/test/TestContext.java#22 $
 */
 
 package ariba.ui.aribaweb.test;
 
 import ariba.ui.aribaweb.core.AWConcreteServerApplication;
+import ariba.ui.aribaweb.core.AWPage;
 import ariba.ui.aribaweb.core.AWRequestContext;
 import ariba.ui.aribaweb.core.AWSession;
+import ariba.ui.aribaweb.util.AWContentType;
 import ariba.ui.aribaweb.util.AWStringKeyHashtable;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.Assert;
@@ -29,8 +31,8 @@ import ariba.util.core.MapUtil;
 import ariba.util.core.PerformanceState;
 import ariba.util.core.StringUtil;
 import ariba.util.i18n.I18NUtil;
-
 import java.io.Externalizable;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -74,6 +76,15 @@ public class TestContext implements Serializable
     private static Map<String, TestContext> _savedTestContext = MapUtil.map();
     private static Map<String, TestContextObjectFactory> _factoriesById = MapUtil.map();
     private static Map<Class, String> _factoryIdsByClass = MapUtil.map();
+
+    private static final String AribaUi = StringUtil.strcat("ariba", File.separator, "ui");
+
+    private static PageLifeCycleListener _pageListener;
+
+    static {
+        _pageListener = new PageLifeCycleListener();
+        AWPage.registerLifecycleListener(_pageListener);
+    }
 
     public TestContext ()
     {
@@ -563,4 +574,49 @@ public class TestContext implements Serializable
         buffer.append(";");
         return buffer.toString();
     }
+
+    /**
+     * We neeed to inject the user community context into the TestContext when the page is rendered so we can
+     * examine it in validators for test automation
+     */
+    static class PageLifeCycleListener implements AWPage.LifecycleListener   {
+
+        // called before render() passed on the pageComponent
+        @Override
+        public void pageWillRender (AWPage page)
+        {
+            if (AWConcreteServerApplication.isUserCommunityEnabled()) {
+                AWRequestContext rc = page.requestContext();
+
+                // only interested in rendered user pages, not queries, cxml docs, etc.
+                if (rc == null ||
+                        (rc.response() != null && rc.response().contentType() != AWContentType.TextHtml)) {
+                    return;
+                }
+
+                // if we are going to visit the validator page, etc. do not over-write the test context!
+                String p = page.perfPageName();
+                if (p.indexOf(AribaUi) != -1) {
+                    return;
+                }
+
+                TestContext tc = TestContext.getTestContext(rc);
+                if (tc != null && page.getCommunityContext() != null) {
+                   tc.put(page.getCommunityContext());
+                }
+            }
+
+        }
+
+        // do not care about other methods
+        
+        // called before awake (but after requestContext assigned)
+        @Override
+        public void pageWillAwake (AWPage page) {}
+
+        // called before sleep (and before requestContext removed)
+        @Override
+        public void pageWillSleep (AWPage page) {}
+    }
+
 }

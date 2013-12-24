@@ -12,13 +12,14 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaHelp.java#6 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/AribaHelp.java#7 $
 */
 
 package ariba.ui.widgets;
 
 import java.util.List;
 import ariba.ui.aribaweb.core.AWComponent;
+import ariba.ui.aribaweb.core.AWResponseGenerating;
 
 public class AribaHelp extends AWComponent
 {
@@ -45,6 +46,18 @@ public class AribaHelp extends AWComponent
         _currentArea = null;
 	    _helpAreas = null;
     }
+
+    public AWResponseGenerating currentItemClicked ()
+    {
+        if (helpScript() == null) {
+            requestContext().put(HelpArea, _currentArea);
+            ActionHandler handler = handler();
+            return handler.actionClicked(requestContext());
+        }
+
+        return null;
+    }
+
 
     public String helpScript ()
     {

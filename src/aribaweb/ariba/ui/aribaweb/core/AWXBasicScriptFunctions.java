@@ -12,15 +12,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.java#41 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXBasicScriptFunctions.java#44 $
 */
 
 package ariba.ui.aribaweb.core;
 
-import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.test.TestContext;
-import ariba.util.core.StringUtil;
+import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.util.core.Fmt;
+import ariba.util.core.StringUtil;
+import ariba.util.http.multitab.MultiTabSupport;
 
 public final class AWXBasicScriptFunctions extends AWComponent
 {
@@ -30,30 +31,50 @@ public final class AWXBasicScriptFunctions extends AWComponent
     private static final AWEncodedString CloseFunction = new AWEncodedString("');");
     public static final AWEncodedString EmptyDocScriptlet =
         new AWEncodedString("javascript:void(document.open());void(document.write(\"<html></html>\"));void(document.close());");
-    private static AWEncodedString _RequestHandlerUrl;
+    private static AWEncodedString[] _RequestHandlerUrl;
 
 
     public AWEncodedString requestHandlerUrl ()
     {
+        MultiTabSupport multiTabSupport = MultiTabSupport.Instance.get();
+        if (_RequestHandlerUrl == null) {
+            _RequestHandlerUrl = new AWEncodedString[multiTabSupport.maximumNumberOfTabs()];
+        }
         boolean useFullURL = false;
         if (AWConcreteServerApplication.IsDebuggingEnabled) {
-            // we should consult with the requestContext every time since the url may be dependent on
-            // the incoming request
+            // we should consult with the requestContext every time since the
+            // url may be dependent on the incoming request
             useFullURL = TestContext.isTestAutomationMode(requestContext());
         }
 
+        int tabIndex = requestContext().getTabIndex();
+
         if (useFullURL) {
-            // do not cache the full url since the incoming request can be either HTTP or HTTPS
-            return AWEncodedString.sharedEncodedString(AWComponentActionRequestHandler.SharedInstance.requestHandlerUrl(request(),
-                    true));
+            // do not cache the full url since the incoming request can be
+            // either HTTP or HTTPS
+            String requestHandlerUrl = AWComponentActionRequestHandler
+                    .SharedInstance.requestHandlerUrl(request(), true);
+            requestHandlerUrl = multiTabSupport.insertTabInUri(requestHandlerUrl, tabIndex, true);
+            return AWEncodedString.sharedEncodedString(requestHandlerUrl);
         }
         else {
-            if (_RequestHandlerUrl == null) {
+            AWEncodedString requestHandlerUrlEncoded =
+                    _RequestHandlerUrl[tabIndex];
+
+            if (requestHandlerUrlEncoded == null) {
+                // todo: if requestHandlerUrlEncoded was public, we would
+                // remove two steps, where we decode only to encode again
                 String requestHandlerUrl =
-                    AWComponentActionRequestHandler.SharedInstance.requestHandlerUrl(request(), false);
-                _RequestHandlerUrl = AWEncodedString.sharedEncodedString(requestHandlerUrl);
+                        AWComponentActionRequestHandler.SharedInstance
+                                .requestHandlerUrl(request(), false);
+                requestHandlerUrl = multiTabSupport.insertTabInUri(requestHandlerUrl,
+                        tabIndex, true);
+                requestHandlerUrlEncoded = AWEncodedString.sharedEncodedString(
+                        requestHandlerUrl);
+                _RequestHandlerUrl[tabIndex] = requestHandlerUrlEncoded;
             }
-            return _RequestHandlerUrl;
+
+            return requestHandlerUrlEncoded;
         }
     }
 
@@ -125,7 +146,8 @@ public final class AWXBasicScriptFunctions extends AWComponent
         AWSession session = session();
         String refreshURL = session.getRefreshURL();
         if (refreshURL == null) {
-            refreshURL = AWComponentActionRequestHandler.SharedInstance.refreshUrl(requestContext());
+            refreshURL = AWComponentActionRequestHandler.SharedInstance
+                    .refreshUrl(requestContext());
             session.setRefreshURL(refreshURL);
         }
         return refreshURL;
@@ -136,8 +158,10 @@ public final class AWXBasicScriptFunctions extends AWComponent
         AWSession session = session();
         String backTrackURL = session.getBackTrackURL();
         if (backTrackURL == null) {
-            backTrackURL = AWComponentActionRequestHandler.SharedInstance.historyRequestHandlerUrl(requestContext(),
-                                AWComponentActionRequestHandler.BackTrackActionName);
+            backTrackURL = AWComponentActionRequestHandler.SharedInstance
+                    .historyRequestHandlerUrl(requestContext(),
+                            AWComponentActionRequestHandler
+                                    .BackTrackActionName);
             session.setBackTrackURL(backTrackURL);
         }
         return backTrackURL;
@@ -148,8 +172,10 @@ public final class AWXBasicScriptFunctions extends AWComponent
         AWSession session = session();
         String forwardTrackURL = session.getForwardTrackURL();
         if (forwardTrackURL == null) {
-            forwardTrackURL = AWComponentActionRequestHandler.SharedInstance.historyRequestHandlerUrl(requestContext(),
-                                AWComponentActionRequestHandler.ForwardTrackActionName);
+            forwardTrackURL = AWComponentActionRequestHandler.SharedInstance
+                    .historyRequestHandlerUrl(requestContext(),
+                            AWComponentActionRequestHandler
+                                    .ForwardTrackActionName);
             session.setForwardTrackURL(forwardTrackURL);
         }
         return forwardTrackURL;
@@ -157,7 +183,10 @@ public final class AWXBasicScriptFunctions extends AWComponent
 
     public String getPingUrl ()
     {
-        return AWDirectActionUrl.urlForDirectAction(AWDirectAction.PingActionName, null);
+        MultiTabSupport multiTabSupport = MultiTabSupport.Instance.get();
+        return multiTabSupport.insertTabInUri(
+                AWDirectActionUrl.urlForDirectAction(AWDirectAction.PingActionName, null),
+                requestContext().getTabIndex(), true);
     }
 
     public String getProgressCheckUrl ()
@@ -165,9 +194,10 @@ public final class AWXBasicScriptFunctions extends AWComponent
         if (!AWConcreteServerApplication.AllowsConcurrentRequestHandling) {
             return null;
         }
+        MultiTabSupport multiTabSupport = MultiTabSupport.Instance.get();
         AWDirectActionUrl url = AWDirectActionUrl.checkoutUrl();
         url.setDirectActionName(AWDirectAction.ProgressCheckActionName);
-        
+
         if (!AWConcreteApplication.IsCookieSessionTrackingEnabled) {
         // Set session id and application number on the url if cookie tracking is disabled.
             url.setSessionId(session().sessionId());
@@ -177,7 +207,10 @@ public final class AWXBasicScriptFunctions extends AWComponent
             url.setApplicationNumber(request().applicationNumber());
         }
         // Use null request context to avoid associating to the session
-        return AWDirectActionUrl.decorateUrl(null, url.finishUrl());
+        String finishedUrl = url.finishUrl();
+        return multiTabSupport.insertTabInUri(
+                AWDirectActionUrl.decorateUrl(null, finishedUrl),
+                requestContext().getTabIndex(), true);
     }
 
     public String waitAlertMillis ()

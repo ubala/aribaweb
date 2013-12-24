@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#30 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.awl#31 $
     </Copyright>
 
     <Overview>
@@ -120,7 +120,8 @@
     <textarea name="$textAreaName" formValue="$formValue" elementId="$elementId"
               bh="$^behavior:TA" _mL="$maxLength" _isRF="$^isRefresh"
               _pl="$formatPlaceHolder" onBLur="$onBlurString" class="$cssClass"
-              otherBindings="$otherBindingsValues" id="$textAreaId" disabled="$disabled">\
+              otherBindings="$otherBindingsValues" id="$textAreaId" disabled="$disabled"
+              onpaste="$onPasteString">\
         <a:String value="$formattedString" escapeHtml="$^escapeHtml:$true"/>\
     </textarea>\
 </a:Block>

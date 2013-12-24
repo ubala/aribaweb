@@ -1,0 +1,57 @@
+<!--- <AWApi>
+    <Copyright>
+        Copyright (c) 2013 Ariba, Inc.
+
+        Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+        file except in compliance with the License.
+        You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+
+        Unless required by applicable law or agreed to in writing, software
+        distributed under the License is distributed on an "AS IS" BASIS,
+        WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        See the License for the specific language governing permissions and
+        limitations under the License.
+
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWMultiTabException.awl#3 $
+    </Copyright>
+
+
+    <Overview>
+        Page displayed when the app catches a MaximumTabExceededException
+    </Overview>
+</AWApi> -->
+    <!-- Page Title -->
+<html>
+    <head>
+        <title><a:String value="$multiTabExceptionPageTitle"/></title>
+    </head>
+<div style="width:980px; height:auto; margin-left:auto; margin-right:auto;">
+    <div style="position:absolute; text-align: center; margin-left:30px;">
+        <a:Image filename="toomanytabs_bg.gif"
+                 fullUrl="$true" width="920px" height="358px" />
+    </div>
+    <div style="position:absolute; width:880px; margin-top:200px;
+                margin-left:30px; text-align:center;">
+        <a:Image filename="toomanytabs_man.gif"
+                 fullUrl="$true" width="287px" height="96px" />
+    </div>
+    <div style="position:absolute; width:980px; margin-top:370px;
+                text-align:center;">
+        <div style="font-family:Verdana; font-size:25px; color:#8C969A;
+                    text-align:center">
+            <a:String value="$multiTabExceptionPageMessage"/>
+        </div>
+        <div style="height:25px"> </div>
+        <div style="font-family:Verdana; font-size:17px; color:#8C969A;
+                    text-align:center">
+            <a:String value="$multiTabExceptionMessage"/>
+        </div>
+        <div style="height:30px"> </div>
+        <div style="font-family:Verdana; font-size:17px; color:#8C969A;
+                    text-align:center">
+            <a:String value="$multiTabExceptionReportMessage"/>
+        </div>
+    </div>
+</div>
+</html>

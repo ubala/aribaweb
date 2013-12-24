@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2010 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#153 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestContext.java#162 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -38,12 +38,13 @@ import ariba.util.core.ThreadDebugKey;
 import ariba.util.core.ThreadDebugState;
 import ariba.util.core.WrapperRuntimeException;
 import ariba.util.fieldvalue.FieldValue;
+import ariba.util.http.multitab.MultiTabSupport;
 
-import javax.servlet.http.HttpSession;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpSession;
 
 /**
     The context tracking state through all phases of a single request/response cycle.
@@ -85,6 +86,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     private boolean _isBrowserFirefox;
     private boolean _isBrowserMicrosoft;
     private boolean _isBrowserSafari;
+    private boolean _isBrowserChrome;
     private boolean _isMetaTemplateMode;
     private String _browserMinWidth;
     private String _browserMaxWidth;
@@ -113,6 +115,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     private int _targetFormIdIndex;
     private AWElementIdPath _targetFormIdPath;
     private boolean _dataValuePushedInInvokeAction;
+    private boolean _isTooManyTabRequest;
 
     // history requests
     private boolean _isHistoryRequest = false;
@@ -126,6 +129,9 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     private boolean _pageRequiresPreGlidCompatibility = false;
     private boolean _allowsSkipping = true;
 
+    // rendering variables
+    private UIRenderMeta.RenderVersion _queryRenderVersion = null;
+
     // generating printable rendering, or data export?
     private boolean _isPrintMode;
     private boolean _isExportMode;
@@ -133,6 +139,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     private boolean _initializingSession = false;
     private boolean _isContentGeneration = false;
     private boolean _fullRefreshRequired = false;
+    private int     _tabIndex = 0;
 
     private boolean _allowIncrementalUpdateApppend = true;
     private AWBaseResponse.AWResponseCompleteCallback _responseCompleteCallback;
@@ -155,9 +162,27 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         _application = application;
         _request = request;
         if (_request != null) {
+            /*
+             This NPE can be caused by:
+             //ariba/buyer/contentui/ariba/htmlui/content/PunchOutSetupRequestHandler.java
+             If the AWRequest.init is never called with a valid
+             HttpServletRequest, then the AWRequest object is in a fubar
+             state, and method promised to be implemented by the interface
+             will throw NPEs.
+             */
+            try {
+                MultiTabSupport multiTabSupport = MultiTabSupport.Instance.get();
+                _tabIndex = multiTabSupport.uriToTabNumber(request.uri(), 0);
+            }
+            catch (NullPointerException e) {
+                _tabIndex = 0;
+            }
+
             _isBrowserFirefox = _request.isBrowserFirefox();
             _isBrowserMicrosoft = _request.isBrowserMicrosoft();
             _isBrowserSafari = _request.isBrowserSafari();
+            _isBrowserChrome = _request.isBrowserChrome();
+            _isTooManyTabRequest = _request.isTooManyTabRequest();
             _frameName = request.frameName();
             String[] requestSenderIds = ((AWBaseRequest)request).senderIds();
             if (requestSenderIds != null) {
@@ -168,6 +193,29 @@ public class AWRequestContext extends AWBaseObject implements DebugState
                     // pop the first -- it's set
                     ListUtil.removeFirstElement(_requestSenderIds);
                 }
+            }
+           try {
+                // override the render version that is set on the session
+                if (_request.queryString() != null) {
+                    String value = _request.formValueForKey("renderVersion");
+
+                    if (!StringUtil.nullOrEmptyString(value)) {
+                        try {
+                            _queryRenderVersion = UIRenderMeta.RenderVersion
+                                .valueOf(value);
+                        }
+                        catch (IllegalArgumentException e) {
+                            // it's okay, invalid renderVersion provided
+                            // we'll just use the default behavior
+                        }
+                    }
+                }
+            }
+            catch (NullPointerException e) {
+                //Request coming from PunchOutSetupRequestHandler.java
+                // does not have query string, so it would raise Null POinter
+                //Exception if we validate query string. We just catch the 
+                //Exception and do nothing for the Punch Out to happen
             }
         }
         else {
@@ -188,13 +236,22 @@ public class AWRequestContext extends AWBaseObject implements DebugState
      *
      * @return the request context or null
      */
-    public static AWRequestContext _requestContext() {
+    public static AWRequestContext _requestContext ()
+    {
         return (AWRequestContext)ThreadDebugState.get(RequestContextID);
     }
 
     public AWValidationContext validationContext ()
     {
         return page().validationContext();
+    }
+
+    /**
+     * Fetch the render version set by the URL query parameters; usually null.
+     */
+    public UIRenderMeta.RenderVersion getQueryRenderVersion ()
+    {
+        return _queryRenderVersion;
     }
 
     public boolean isDebuggingEnabled ()
@@ -582,6 +639,14 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         return _awsession;
     }
 
+    /**
+     * @return The Http Session or null if it's not available yet.
+     */
+    public HttpSession peekHttpSession ()
+    {
+        return _awsession == null ? null : _awsession.httpSession();
+    }
+
     ////////////////////
     // Request/Response
     ////////////////////
@@ -650,6 +715,11 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     public boolean isBrowserSafari ()
     {
         return _isBrowserSafari;
+    }
+
+    public boolean isBrowserChrome ()
+    {
+        return _isBrowserChrome;
     }
 
     public String browserMinWidth ()
@@ -1747,7 +1817,7 @@ public class AWRequestContext extends AWBaseObject implements DebugState
             _response = _application.createResponse(_request);
             _response.appendContent("<script>ariba.Request.__retryRequest('"
                                 + requestSenderId() + "');\n"
-                    + "ariba.Refresh.completeRequest(0,0,true);\n"
+                    + "ariba.Request.refreshRequestComplete();\n"
                     + "</script>\n");
             throw new RetryRequestException();
         }
@@ -1869,6 +1939,24 @@ public class AWRequestContext extends AWBaseObject implements DebugState
         return ((AWConcreteApplication)_application).getStaticizer() != null;
     }
 
+    /**
+     * Evaluate the current URL is a tabbed one.
+     * @return Is tabbed request.
+     */
+    public boolean isTabbed ()
+    {
+        return 0 < _tabIndex;
+    }
+
+    /**
+     * Fetch the tab index.
+     * @return The tab index.
+     */
+    public int getTabIndex ()
+    {
+        return _tabIndex;
+    }
+
     public String staticUrlForActionResults (AWResponseGenerating responseGenerating)
     {
         if (responseGenerating == null) {
@@ -1958,6 +2046,11 @@ public class AWRequestContext extends AWBaseObject implements DebugState
     protected void putStatefulComponent(AWElementIdPath path, AWComponent instance)
     {
         _currentLookupScope().putStatefulComponent(path, instance);
+    }
+
+    public boolean isTooManyTabRequest ()
+    {
+        return _isTooManyTabRequest;
     }
 
     // implemented by SubcomponentScope and AWPage

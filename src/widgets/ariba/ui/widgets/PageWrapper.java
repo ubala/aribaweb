@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageWrapper.java#28 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PageWrapper.java#30 $
 */
 
 package ariba.ui.widgets;
@@ -23,6 +23,9 @@ import ariba.ui.aribaweb.core.AWConcreteServerApplication;
 import ariba.util.core.StringUtil;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 abstract public class PageWrapper extends AWComponent implements ActionInterceptor
 {
@@ -31,6 +34,8 @@ abstract public class PageWrapper extends AWComponent implements ActionIntercept
 
     public static final int PAGE_WRAPPER_NO_COLUMNS = 4;
     public static final String IsDialogPageKey = "widg_IsDialogPage";
+
+    public String currentMetaKey = null;
 
     private final static String EnvironmentKey = "PageWrapper";
 
@@ -47,6 +52,8 @@ abstract public class PageWrapper extends AWComponent implements ActionIntercept
         return (PageWrapper)component.env().peek(EnvironmentKey);
     }
 
+    private Map _metaTags = null;
+    private List<String> _metaKeys = null;
     private String _commands;
     private String _toc;
     private String _helpKey;
@@ -61,6 +68,9 @@ abstract public class PageWrapper extends AWComponent implements ActionIntercept
 
     protected void sleep ()
     {
+        currentMetaKey = null;
+        _metaTags = null;
+        _metaKeys = null;
         _commands = null;
         _toc = null;
         _helpKey = null;
@@ -113,6 +123,20 @@ abstract public class PageWrapper extends AWComponent implements ActionIntercept
             }
         }
         return _windowTitle;
+    }
+
+    public List getMetaKeys ()
+    {
+        _metaTags = (Map)valueForBinding("metaTags");
+        if (_metaTags != null) {
+            _metaKeys = new ArrayList<String>(_metaTags.keySet());
+        }
+        return _metaKeys;
+    }
+
+    public String getCurrentMetaValue ()
+    {
+        return _metaTags.get(currentMetaKey).toString();
     }
 
     public String debugTitle ()

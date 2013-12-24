@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2009 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,11 +12,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#132 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteApplication.java#141 $
 */
 
 package ariba.ui.aribaweb.core;
 
+import ariba.ui.aribaweb.html.AWMultiTabException;
 import ariba.ui.aribaweb.util.AWBookmarker;
 import ariba.ui.aribaweb.util.AWBrand;
 import ariba.ui.aribaweb.util.AWBrandManager;
@@ -25,15 +26,16 @@ import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWMultiLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWNodeManager;
 import ariba.ui.aribaweb.util.AWNodeValidator;
-import ariba.util.fieldvalue.OrderedList;
 import ariba.ui.aribaweb.util.AWParameters;
 import ariba.ui.aribaweb.util.AWResource;
 import ariba.ui.aribaweb.util.AWResourceManager;
+import ariba.ui.aribaweb.util.AWStaticSiteGenerator;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.Log;
-import ariba.ui.aribaweb.util.AWStaticSiteGenerator;
 import ariba.util.core.Assert;
 import ariba.util.core.Constants;
+import ariba.util.core.Date;
+import ariba.util.core.FastStringBuffer;
 import ariba.util.core.Fmt;
 import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.HTML;
@@ -43,20 +45,24 @@ import ariba.util.core.NamedValue;
 import ariba.util.core.PerformanceState;
 import ariba.util.core.StringUtil;
 import ariba.util.core.SystemUtil;
+import ariba.util.fieldvalue.OrderedList;
+import ariba.util.http.multitab.MaximumTabExceededException;
 import ariba.util.io.CSVConsumer;
 import ariba.util.io.CSVReader;
 import ariba.util.shutdown.ShutdownDelayer;
 import ariba.util.shutdown.ShutdownManager;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.net.URL;
-import java.net.MalformedURLException;
 import javax.servlet.http.HttpSession;
 
 abstract public class AWConcreteApplication
@@ -79,6 +85,8 @@ abstract public class AWConcreteApplication
     private static final String ClassComment = "<!-- class:";
     private static final String ClassCommentAlt = "<!--- class:";
     public static Class DefaultComponentClass = AWComponent.ClassObject;
+    // the optional name of the application
+    private static String ApplicationType = null;
 
     private int _pageCacheSize = 15;
     private GrowOnlyHashtable _componentDefinitionHashtable;
@@ -127,14 +135,18 @@ abstract public class AWConcreteApplication
     private AWSessionMonitor _sessionMonitor;
     boolean _didCompleteInit;
 
-    // ** Thread Safety Considerations: We need to serialize access to the _componentDefinitionHashtable.
-    // The sessionStore offers its own thread saftey as does the timeout manager.
+    // ** Thread Safety Considerations: We need to serialize access to the
+    // _componentDefinitionHashtable.
+    // The sessionStore offers its own thread safety as does the timeout manager.
 
     public static AWApplication defaultApplication ()
     {
-        AWApplication defaultApplication = (AWApplication)AWConcreteServerApplication.sharedInstance();
+        AWApplication defaultApplication =
+                (AWApplication)AWConcreteServerApplication.sharedInstance();
         if (defaultApplication == null) {
-            defaultApplication = createApplication(AWDefaultApplication.class.getName(), AWDefaultApplication.class);
+            defaultApplication =
+                    createApplication(AWDefaultApplication.class.getName(),
+                    AWDefaultApplication.class);
         }
         return defaultApplication;
     }
@@ -172,6 +184,23 @@ abstract public class AWConcreteApplication
         application.awake();
 
         return application;
+    }
+
+    /**
+     * Gets the module name of the current running module.
+     * @return the module name.
+     */
+    public String getApplicationType ()
+    {
+        return ApplicationType;
+    }
+
+    /**
+     * Sets the module name of the current running module.
+     */
+    public static void registerApplicationType (String applicationType)
+    {
+        ApplicationType = applicationType;
     }
 
     public interface DidInitCallback {
@@ -231,6 +260,38 @@ abstract public class AWConcreteApplication
         return false;
     }
 
+    /**
+     * Provide the option of disabling/enabling user community functionality.
+     * Products may over-ride this to turn on or off the user community functionality
+     * by using their own configuration.
+     */
+    protected boolean initUserCommunityEnabled ()
+    {
+        return false;
+    }
+
+    /**
+     * Get the user user community product url.
+     * This needs to be configured in product configs
+     * @return String
+     */
+
+    protected String initAribaUserCommunityUrl ()
+    {
+        return null;
+    }
+
+    /**
+     * Default value of the window size (in pixels) at which
+     * user community In Situ Pane will be folded.
+     * Products can override this value.
+     * @return int
+     */
+    protected int initFoldInSituOnWindowSize()
+    {
+        return 1280;
+    }
+
     protected int initRemoteHostMask ()
     {
         return 0xffff0000;
@@ -248,14 +309,18 @@ abstract public class AWConcreteApplication
 
     public void initRequestHandlers ()
     {
-        AWComponentActionRequestHandler componentActionRequestHandler = new AWComponentActionRequestHandler();
+        AWComponentActionRequestHandler componentActionRequestHandler =
+                new AWComponentActionRequestHandler();
         componentActionRequestHandler.init(this, ComponentActionRequestHandlerKey);
-        registerRequestHandlerForKey(componentActionRequestHandler, ComponentActionRequestHandlerKey);
+        registerRequestHandlerForKey(componentActionRequestHandler,
+                ComponentActionRequestHandlerKey);
         setDefaultRequestHandler(componentActionRequestHandler);
 
-        AWDirectActionRequestHandler directActionRequestHandler = new AWDirectActionRequestHandler();
+        AWDirectActionRequestHandler directActionRequestHandler =
+                new AWDirectActionRequestHandler();
         directActionRequestHandler.init(this, DirectActionRequestHandlerKey);
-        registerRequestHandlerForKey(directActionRequestHandler, DirectActionRequestHandlerKey);
+        registerRequestHandlerForKey(directActionRequestHandler,
+                DirectActionRequestHandlerKey);
     }
 
     private void initStandardClasses ()
@@ -277,7 +342,7 @@ abstract public class AWConcreteApplication
 
     /**
         Ariba Web framework by default does not allow application to
-        to add seesion time and leave it to app server to do that
+        to add session time and leave it to app server to do that
         but if the application feels the urge to do this, they can
         do this by overriding the sessionTimeout() method
         --adas
@@ -292,9 +357,9 @@ abstract public class AWConcreteApplication
     {
         super.init();
         // force registration or orderedList class extension
-        Log.aribaweb.debug("AWConcreteApplication.valueUnbound() called with session timeout %d",
-                           initSessionTimeout());
-        // Touch the AWOrderdList class to force it to initialize.
+        Log.aribaweb.debug("AWConcreteApplication.valueUnbound() called " +
+                "with session timeout %d", initSessionTimeout());
+        // Touch the AWOrderedList class to force it to initialize.
         OrderedList.class.getName();
         _componentDefinitionHashtable = new GrowOnlyHashtable();
         _httpSessionCheckoutManager = createHttpSessionCheckoutManager();
@@ -304,11 +369,14 @@ abstract public class AWConcreteApplication
         IsRequestLoggingEnabled = initRequestLoggingEnabled();
         IsResponseLoggingEnabled = initResponseLoggingEnabled();
         IsDirectConnectEnabled = initDirectConnectEnabled();
+        IsUserCommunityEnabled = initUserCommunityEnabled();
         IsCookieSessionTrackingEnabled = initCookieSessionTrackingEnabled();
         RemoteHostMask = initRemoteHostMask();
         _monitorStats = createMonitorStats();
         _bookmarker = createBookmarker();
         _adaptorUrl = initAdaptorUrl();
+        _aribaUserCommunityUrl = initAribaUserCommunityUrl();
+        _foldInSituOnWindowSize = initFoldInSituOnWindowSize();
         _adaptorUrlSecure = initAdaptorUrlSecure();
         _brandManager = initBrandManager();
         _nodeManager = initNodeManager();
@@ -318,7 +386,8 @@ abstract public class AWConcreteApplication
         _pollInterval = initPollInterval();
         //force init of AWTdContainer (registers td with template parser)
         String className = "ariba.ui.aribaweb.html.AWTdContainer";
-        Assert.that(AWUtil.classForName(className) != null, "Unable to load %s", className);
+        Assert.that(AWUtil.classForName(className) != null,
+                "Unable to load %s", className);
         // Load the safe HTML tags and attributes definition
         loadSafeHtmlConfig();
 
@@ -326,6 +395,7 @@ abstract public class AWConcreteApplication
         
         ShutdownManager.addShutdownDelayer(this);
         initSessionMonitor();
+        initCommunityContext();
     }
 
     private static class ContentCollector implements CSVConsumer
@@ -350,7 +420,7 @@ abstract public class AWConcreteApplication
     }
     /**
        read a csv file, and split the contents into an array of String.
-       These Strings are trimed and converted into lower case.
+       These Strings are trimmed and converted into lower case.
     */
     private static String[] readFileToStrings (URL url)
     {
@@ -382,12 +452,14 @@ abstract public class AWConcreteApplication
             if (tagsFile.canRead()) {
                 try {
                     return tagsFile.toURL();
-                } catch (MalformedURLException e) {
+                }
+                catch (MalformedURLException e) {
                     // ignore
                 }
             }
         }
-        return Thread.currentThread().getContextClassLoader().getResource(relativePath + fileName);
+        return Thread.currentThread().getContextClassLoader().
+                getResource(relativePath + fileName);
     }
 
     private static void loadSafeHtmlConfig ()
@@ -396,8 +468,10 @@ abstract public class AWConcreteApplication
         URL safeTagsUrl = urlForResource("resource/html/", SAFE_TAGS_FILE);
 
         if (safeAttrsUrl != null || safeTagsUrl != null) {
-            String[] safeTags = (safeTagsUrl != null) ? readFileToStrings(safeTagsUrl) : new String[0];
-            String[] safeAttrs = (safeAttrsUrl != null) ? readFileToStrings(safeAttrsUrl) : new String[0];
+            String[] safeTags =
+                (safeTagsUrl != null) ? readFileToStrings(safeTagsUrl) : new String[0];
+            String[] safeAttrs =
+                (safeAttrsUrl != null) ? readFileToStrings(safeAttrsUrl) : new String[0];
             HTML.setSafeConfig(safeTags, safeAttrs);
         }
         else {
@@ -405,8 +479,6 @@ abstract public class AWConcreteApplication
         }
     }
 
-
-	
     public static AWServerApplication sharedInstance ()
     {
         return AWConcreteServerApplication.sharedInstance();
@@ -456,16 +528,51 @@ abstract public class AWConcreteApplication
         return _adaptorUrlSecure;
     }
 
+    /**
+     * Simple class that encapsulates information calculated from the request.
+     */
     public class RequestURLInfo
     {
+        /**
+         The key that used to determine how the request is handled.
+         Typically, this is either "aw" (a component request) or "ad"
+         (a direct action.)
+         For a URL that comes in as follows:
+         /{web-app-name}/{servlet-name}/{request-handler-key}/{extra-stuff}
+         this data member will hold the value of {request-handler-key}.
+         */
         public String requestHandlerKey;
+
+        /**
+         The application number for applications which define such a concept.
+         Is often null.
+         For a URL that comes in as follows:
+         /{web-app-name}/{servlet-name}/{application-number}/{request-handler-key}/{extra-stuff}
+         this data member will hold the value of {application-number}.
+         */
         public String applicationNumber;
+
+        /**
+         The tab index of the request. If there is a number after the servlet-
+         name, then we need to check the servlet-name for an underscore. This
+         indicates that the URL is tabbed and that the number is the
+         tab-index and not the application-number.
+         For a URL that comes in as follows:
+         /{web-app-name}/_{servlet-name}/{tab-index}/{request-handler-key}/{extra-stuff}
+         /{web-app-name}/_{servlet-name}/{tab-index}/{application-number}/{request-handler-key}/{extra-stuff}
+         this data member will hold the value of {tab-index}.
+         */
+        public String tabIndex;
+
+        /**
+         An array containing: [ {request-handler-key}, {extra-stuff}, ...]
+         */
         public String[] requestHandlerPath;
     }
 
     /*
-        Parse URL in app-specific way and return its components.
-        Used by AWBaseRequest.InternalRequest for internal direct action dispatch.
+    Parse URL in app-specific way and return its components.
+    Used by AWBaseRequest.InternalRequest for internal direct actiondispatch.
      */
     public RequestURLInfo requestUrlInfo (String url)
     {
@@ -491,7 +598,7 @@ abstract public class AWConcreteApplication
         return null;
     }
 
-    public Map<String,TimeZone> getTimeZoneByOffsetKeys()
+    public Map<String,TimeZone> getTimeZoneByOffsetKeys ()
     {
         return null;
     }
@@ -502,12 +609,17 @@ abstract public class AWConcreteApplication
     public AWComponent createPageWithName (String componentName,
                                            AWRequestContext requestContext)
     {
-        AWComponentDefinition componentDefinition = componentDefinitionForName(componentName);
+        AWComponentDefinition componentDefinition =
+                componentDefinitionForName(componentName);
         if (componentDefinition == null) {
-            throw new AWGenericException("Unable to locate page with name \"" + componentName + "\"");
+            throw new AWGenericException("Unable to locate page with name \""
+                    + componentName + "\"");
         }
-        AWComponentReference sharedComponentReference = componentDefinition.sharedComponentReference();
-        AWComponent newComponent = componentDefinition.createComponent(sharedComponentReference, null, requestContext);
+        AWComponentReference sharedComponentReference =
+                componentDefinition.sharedComponentReference();
+        AWComponent newComponent =
+                componentDefinition.createComponent(sharedComponentReference,
+                        null, requestContext);
         AWPage page = newComponent.page();
         newComponent.ensureAwake(page);
         page.ensureAwake(requestContext);
@@ -531,10 +643,12 @@ abstract public class AWConcreteApplication
 
     public AWResponseGenerating mainPage (AWRequestContext requestContext)
     {
-        AWResponseGenerating page = createPageWithName(mainPageName(), requestContext);
+        AWResponseGenerating page =
+                createPageWithName(mainPageName(), requestContext);
 
         if (page instanceof AWResponseGenerating.ResponseSubstitution) {
-            page = ((AWResponseGenerating.ResponseSubstitution)page).replacementResponse();
+            page =
+                ((AWResponseGenerating.ResponseSubstitution)page).replacementResponse();
         }
         return page;
     }
@@ -558,13 +672,16 @@ abstract public class AWConcreteApplication
             throw new AWGenericException(illegalAccessException);
         }
         catch (InstantiationException exception) {
-            String message = Fmt.S("Error: cannot create instance of httpSession class \"%s\"", sessionClass.getName());
+            String message = Fmt.S("Error: cannot create instance of httpSession" +
+                    " class \"%s\"", sessionClass.getName());
             throw new AWGenericException(message, exception);
         }
         newSession.init(this, requestContext);
 
         // default the timezone
-        if (newSession.clientTimeZone() == null) newSession.setClientTimeZone(TimeZone.getDefault());
+        if (newSession.clientTimeZone() == null) {
+            newSession.setClientTimeZone(TimeZone.getDefault());
+        }
 
         return newSession;
     }
@@ -573,7 +690,8 @@ abstract public class AWConcreteApplication
     {
         HttpSession httpSession = request.getSession(false);
         if (shouldInvalidateHttpSession(httpSession)) {
-            Log.aribaweb.debug("restoreHttpSession: httpSession invalidated: %s", sessionId);
+            Log.aribaweb.debug("restoreHttpSession: httpSession invalidated: %s",
+                    sessionId);
             Log.logStack(Log.aribaweb_session);
 
             httpSession = null;
@@ -634,7 +752,7 @@ abstract public class AWConcreteApplication
 
     /**
         This method only locks the sessionId -- do not expect it to return an HttpSession
-        The method signature is here for backward comatibility, but only the WOAdaptor
+        The method signature is here for backward compatibility, but only the WOAdaptor
         actually returns an HttpSession here.
     */
     public void checkoutHttpSessionId (String sessionId)
@@ -684,7 +802,7 @@ abstract public class AWConcreteApplication
 
     public void deregisterSession (AWSession session)
     {
-        // when dregistering a session that have been marked for termination,
+        // when registering a session that have been marked for termination,
         // we need to decrement the marked for termination session count.
         // Otherwise, the active session count will be incorrect.
         if (session.isMarkedForTermination()) {
@@ -700,7 +818,9 @@ abstract public class AWConcreteApplication
         monitorStats().incrementMarkedForTerminationSessionCount(session);
     }
 
-    protected void updateSessionStatusTable (ConcurrentLinkedQueue<AWConcreteApplication.SessionWrapper> connectList, List existingSessions)
+    protected void updateSessionStatusTable (
+            ConcurrentLinkedQueue<AWConcreteApplication.SessionWrapper> connectList,
+            List existingSessions)
     {
         if (_sessionStatusManager != null) {
             _sessionStatusManager.updateSessionStatusTable(connectList, existingSessions);
@@ -738,19 +858,25 @@ abstract public class AWConcreteApplication
             throw new AWGenericException(exception);
         }
         catch (InstantiationException exception) {
-            throw new AWGenericException("Error: cannot create instance of AWRequestContext class: " + RequestContextClass + " exception: ", exception);
+            throw new AWGenericException("Error: cannot create instance of " +
+                    "AWRequestContext class: " + RequestContextClass +
+                    " exception: ", exception);
         }
         requestContext.init(this, request);
-        if (_Staticizer != null) _Staticizer.didCreateRequestContext(requestContext);
+        if (_Staticizer != null) {
+            _Staticizer.didCreateRequestContext(requestContext);
+        }
         return requestContext;
     }
 
     public AWHandleExceptionPage handleExceptionPage (AWRequestContext requestContext)
     {
-        return (AWHandleExceptionPage)createPageWithName(AWXHandleExceptionPage.PageName, requestContext);
+        return (AWHandleExceptionPage)createPageWithName(AWXHandleExceptionPage.PageName,
+                requestContext);
     }
 
-    public AWResponseGenerating handleException (AWRequestContext requestContext, Exception exception)
+    public AWResponseGenerating handleException (AWRequestContext requestContext,
+                                                 Exception exception)
     {
         logString(SystemUtil.stackTrace(exception));
         // Log to server log
@@ -763,7 +889,8 @@ abstract public class AWConcreteApplication
         return exceptionPage;
     }
 
-    public static void appendGenericExceptionMessageToResponse (AWResponse response, Throwable throwable)
+    public static void appendGenericExceptionMessageToResponse (AWResponse response,
+                                                                Throwable throwable)
     {
         response.appendContent("<html><body>");
         response.appendContent("<h3>Exception encountered.</h3>");
@@ -775,12 +902,15 @@ abstract public class AWConcreteApplication
         response.appendContent("</body></html>");
     }
 
-    public AWSessionRestorationErrorPage handleSessionRestorationErrorPage (AWRequestContext requestContext)
+    public AWSessionRestorationErrorPage handleSessionRestorationErrorPage (
+            AWRequestContext requestContext)
     {
-        return (AWSessionRestorationErrorPage)createPageWithName(AWXSessionRestorationErrorPage.PageName, requestContext);
+        return (AWSessionRestorationErrorPage)createPageWithName(
+                AWXSessionRestorationErrorPage.PageName, requestContext);
     }
 
-    public AWResponseGenerating handleSessionRestorationError (AWRequestContext requestContext)
+    public AWResponseGenerating handleSessionRestorationError (
+            AWRequestContext requestContext)
     {
         AWResponseGenerating response = null;
         AWSessionValidator sessionValidator = getSessionValidator();
@@ -793,18 +923,21 @@ abstract public class AWConcreteApplication
         return response;
     }
 
-    public AWResponseGenerating handleComponentActionSessionValidationError (AWRequestContext requestContext, Exception exception)
+    public AWResponseGenerating handleComponentActionSessionValidationError (
+            AWRequestContext requestContext, Exception exception)
     {
         AWResponseGenerating response = null;
         AWSessionValidator sessionValidator = getSessionValidator();
         if (sessionValidator != null) {
-            response = sessionValidator.handleComponentActionSessionValidationError(requestContext, exception);
+            response = sessionValidator.handleComponentActionSessionValidationError(
+                    requestContext, exception);
         }
         return response;
     }
 
 
-    public AWResponseGenerating handleSiteUnavailableException (AWRequestContext requestContext)
+    public AWResponseGenerating handleSiteUnavailableException (
+            AWRequestContext requestContext)
     {
         return null;
     }
@@ -818,12 +951,29 @@ abstract public class AWConcreteApplication
         return handleSessionRestorationError(requestContext);
     }
 
-    public AWResponseGenerating handleSessionValidationError (AWRequestContext requestContext, Exception exception)
+    public AWResponseGenerating handleMaxWindowException (
+            AWRequestContext requestContext,
+            MaximumTabExceededException exception)
+    {
+        AWComponentDefinition componentDefinition =
+                createComponentDefinitionForNameAndClass(
+                        AWMultiTabException.Name, AWMultiTabException.class);
+        _componentDefinitionHashtable.put(componentDefinition, AWMultiTabException.Name);
+        AWHandleExceptionPage exceptionPage =
+                (AWHandleExceptionPage) createPageWithName(
+                        AWMultiTabException.Name, requestContext);
+        exceptionPage.setException(exception);
+        return exceptionPage;
+    }
+
+    public AWResponseGenerating handleSessionValidationError (
+            AWRequestContext requestContext, Exception exception)
     {
         AWResponseGenerating response = null;
         AWSessionValidator sessionValidator = getSessionValidator();
         if (sessionValidator != null) {
-            response = sessionValidator.handleSessionValidationError(requestContext, exception);
+            response = sessionValidator.handleSessionValidationError(
+                    requestContext, exception);
         }
         else {
             throw new AWGenericException("AWSessionValidator must be registered " +
@@ -834,7 +984,7 @@ abstract public class AWConcreteApplication
 
     protected boolean shouldRefuseResponse (AWRequest request)
     {
-        // if we're refusing new sessions and there is not an existing httpsession
+        // if we're refusing new sessions and there is not an existing httpSession
         // and this is not a special server management direct action, then
         // refuse response
         return (_refusingNewSessions && (request.sessionId() == null) &&
@@ -862,7 +1012,8 @@ abstract public class AWConcreteApplication
     public AWResponse dispatchRequest (AWRequest request)
     {
         if (IsRequestLoggingEnabled) {
-            logRequestMessage("uri " + request.uri() + " formValues: " + request.formValues());
+            logRequestMessage("uri " + request.uri() + " formValues: "
+                    + request.formValues());
         }
 
         AWResponse response = null;
@@ -976,7 +1127,8 @@ abstract public class AWConcreteApplication
             List<NamedValue> list = getUISessionCountBuckets();
             for (int i = 0; i < list.size(); i++) {
                 NamedValue nv = list.get(i);
-                ariba.util.log.Log.shutdown.info(10339, this.name(), nv.getName(), nv.getValue());
+                ariba.util.log.Log.shutdown.info(10339, this.name(),
+                        nv.getName(), nv.getValue());
             }
             return false;
         }
@@ -999,6 +1151,11 @@ abstract public class AWConcreteApplication
         return _sessionMonitor.sessionCountBuckets();
     }
 
+    public List<NamedValue> getUISessionStatusBuckets ()
+    {
+        return _sessionMonitor.sessionStatusBuckets();
+    }
+
     public void cancelShutdown ()
     {
         AWMonitorStats monitorStats = monitorStats();
@@ -1011,7 +1168,8 @@ abstract public class AWConcreteApplication
     ////////////////////////////////
     // ComponentDefinition Handling
     ////////////////////////////////
-    public AWComponentDefinition createComponentDefinitionForNameAndClass (String componentName, Class componentClass)
+    public AWComponentDefinition createComponentDefinitionForNameAndClass (
+            String componentName, Class componentClass)
     {
         AWComponentDefinition componentDefinition = new AWComponentDefinition();
         componentDefinition.init(componentName, componentClass);
@@ -1034,9 +1192,11 @@ abstract public class AWConcreteApplication
         if (indexOfOpenComment != -1) {
             int indexOfClosingComment = templateString.indexOf("-->", indexOfClassName);
             if (indexOfClosingComment == -1) {
-                throw new AWGenericException("Missing closing comment when parsing class name from " + resource.url());
+                throw new AWGenericException("Missing closing comment " +
+                        "when parsing class name from " + resource.url());
             }
-            String className = templateString.substring(indexOfClassName, indexOfClosingComment).trim();
+            String className = templateString.substring(indexOfClassName,
+                    indexOfClosingComment).trim();
             componentClass = AWUtil.classForName(className);
         }
         return componentClass;
@@ -1044,7 +1204,7 @@ abstract public class AWConcreteApplication
 
     public AWComponentDefinition componentDefinitionForName (String componentName)
     {
-        // Note: This gets called while warming up but not much after that.  The AWIncludeComponent does call this alot, though.
+        // Note: This gets called while warming up but not much after that.  The AWIncludeComponent does call this a lot, though.
         // I have made the _componentDefinitionHashtable effectively immutable -- its always copied rather than added to directly
         AWComponentDefinition componentDefinition = null;
         if (componentName != null) {
@@ -1092,7 +1252,8 @@ abstract public class AWConcreteApplication
             }
         }
         else {
-            throw new AWGenericException(getClass().getName() + ": null componentName not allowed.");
+            throw new AWGenericException(getClass().getName() +
+                    ": null componentName not allowed.");
         }
         return componentDefinition;
     }
@@ -1105,7 +1266,8 @@ abstract public class AWConcreteApplication
     }
 
     /** returns a vector of AWTemplates */
-    public List preinstantiateAllComponents (boolean instantiateDefinitions, AWRequestContext requestContext)
+    public List preinstantiateAllComponents (boolean instantiateDefinitions,
+                                             AWRequestContext requestContext)
     {
         List allTemplates = ListUtil.list();
         Map alreadyParsedTemplates = MapUtil.map();
@@ -1123,17 +1285,20 @@ abstract public class AWConcreteApplication
                     logString("*** Skipping parse of AXEtd.awl");
                     continue;
                 }
-                if (relativePath.endsWith(".awl") || relativePath.endsWith(".htm") || relativePath.endsWith(".html")) {
+                if (relativePath.endsWith(".awl") || relativePath.endsWith(".htm")
+                        || relativePath.endsWith(".html")) {
 
                     try {
                         if (instantiateDefinitions) {
                             String componentName = (new File(relativePath).getName());
                             componentName = AWUtil.substringTo(componentName, '.');
-                            logString("-Loading " + relativePath + " (" + componentName + ")");
+                            logString("-Loading " + relativePath + " ("
+                                    + componentName + ")");
 
                             AWComponentDefinition componentDefinition = null;
                             try {
-                                componentDefinition = componentDefinitionForName(componentName);
+                                componentDefinition =
+                                        componentDefinitionForName(componentName);
                             }
                             catch (AWGenericException e) {
                                 // fall through to test below...
@@ -1144,10 +1309,13 @@ abstract public class AWConcreteApplication
                                 continue;
                             }
 
-                            AWComponentReference sharedComponentReference = componentDefinition.sharedComponentReference();
+                            AWComponentReference sharedComponentReference =
+                                    componentDefinition.sharedComponentReference();
                             // AWComponent instance = componentDefinition.createComponent(sharedComponentReference, null, requestContext);
-                            AWComponent instance = componentDefinition.newComponentInstance();
-                            instance._setup(sharedComponentReference, new AWPage(instance,  requestContext));
+                            AWComponent instance =
+                                    componentDefinition.newComponentInstance();
+                            instance._setup(sharedComponentReference,
+                                    new AWPage(instance,  requestContext));
 
                             if (instance == null) {
                                  logWarning("         *** null component instance");
@@ -1166,9 +1334,12 @@ abstract public class AWConcreteApplication
                         }
                         else {
                             InputStream inputStream = resource.inputStream();
-                            String templateString = AWComponent.readTemplateString(inputStream);
+                            String templateString =
+                                    AWComponent.readTemplateString(inputStream);
                             logString("-Parsing " + relativePath);
-                            AWTemplate template = AWComponent.defaultTemplateParser().templateFromString(templateString, relativePath);
+                            AWTemplate template =
+                                AWComponent.defaultTemplateParser().
+                                templateFromString(templateString, relativePath);
                             allTemplates.add(template);
                         }
                     }
@@ -1178,7 +1349,8 @@ abstract public class AWConcreteApplication
                         //throw runtimeException;
                     }
                 }
-                else if (!relativePath.endsWith(".gif") && !relativePath.equals("scratch"))  {
+                else if (!relativePath.endsWith(".gif")
+                        && !relativePath.equals("scratch"))  {
                     logString("**** Skipping: " + relativePath);
                 }
             }
@@ -1203,15 +1375,21 @@ abstract public class AWConcreteApplication
                     if (relativePath.endsWith("AXEtd.awl")) {
                         continue;
                     }
-                    if (relativePath.endsWith(".awl") || relativePath.endsWith(".htm") || relativePath.endsWith(".html")) {
+                    if (relativePath.endsWith(".awl") ||
+                        relativePath.endsWith(".htm") ||
+                        relativePath.endsWith(".html")) {
                         try {
-                            String componentName = getComponentNameFromTemplatePath(relativePath);
-                            logString("Generating component definition: " + componentName);
-                            AWComponentDefinition componentDefinition = componentDefinitionForName(componentName);
+                            String componentName =
+                                    getComponentNameFromTemplatePath(relativePath);
+                            logString("Generating component definition: "
+                                    + componentName);
+                            AWComponentDefinition componentDefinition =
+                                    componentDefinitionForName(componentName);
                             componentDefinitions.add(componentDefinition);
                         }
                         catch (Throwable t) {
-                            logWarning("Error prevented getting component definition for " + relativePath + ": " + t);
+                            logWarning("Error prevented getting component " +
+                                    "definition for " + relativePath + ": " + t);
                         }
                     }
                 }
@@ -1249,7 +1427,7 @@ abstract public class AWConcreteApplication
      */
     public interface ComponentDefinitionResolver
     {
-        public AWComponentDefinition definitionWithName(String name, AWComponent parent);
+        public AWComponentDefinition definitionWithName (String name, AWComponent parent);
     }
 
     private ComponentDefinitionResolver _resolverInstance = null;
@@ -1264,7 +1442,8 @@ abstract public class AWConcreteApplication
         _resolverInstance = instance;
     }
 
-    public AWComponentDefinition _componentDefinitionForName (String componentName, AWComponent component)
+    public AWComponentDefinition _componentDefinitionForName (String componentName,
+                                                              AWComponent component)
     {
         AWComponentDefinition definition = null;
 
@@ -1342,21 +1521,23 @@ abstract public class AWConcreteApplication
     //////////////////////////
     // Package level flags
     ///////////////////////////
-    public boolean isPackageLevelFlagEnabled(String packageName, int flag)
+    public boolean isPackageLevelFlagEnabled (String packageName, int flag)
     {
         return ((resourceManager().packageFlags(packageName) & flag) != 0);
     }
 
-    public void enablePackageLevelFlag(String packageName, int flag)
+    public void enablePackageLevelFlag (String packageName, int flag)
     {
         AWMultiLocaleResourceManager resourceManager = resourceManager();
-        resourceManager.setPackageFlags(packageName, resourceManager().packageFlags(packageName) | flag);
+        resourceManager.setPackageFlags(packageName,
+                resourceManager().packageFlags(packageName) | flag);
     }
 
-    public void disablePackageLevelFlag(String packageName, int flag)
+    public void disablePackageLevelFlag (String packageName, int flag)
     {
         AWMultiLocaleResourceManager resourceManager = resourceManager();
-        resourceManager.setPackageFlags(packageName, resourceManager().packageFlags(packageName) & ~flag);
+        resourceManager.setPackageFlags(packageName,
+                resourceManager().packageFlags(packageName) & ~flag);
     }
 
     //////////////////////
@@ -1482,7 +1663,7 @@ abstract public class AWConcreteApplication
     // Component Configuration
     ///////////////////////////
     public void registerComponentConfigurationSource (Class componentClass,
-                                                      AWComponentConfigurationSource source)
+                                AWComponentConfigurationSource source)
     {
         _componentConfigurationSources.put(componentClass, source);
     }
@@ -1491,7 +1672,8 @@ abstract public class AWConcreteApplication
         Class componentClass)
     {
         return
-            (AWComponentConfigurationSource)_componentConfigurationSources.get(componentClass);
+            (AWComponentConfigurationSource)_componentConfigurationSources.get(
+                    componentClass);
     }
 
     ///////////////////////////
@@ -1518,7 +1700,7 @@ abstract public class AWConcreteApplication
     }
 
     /**
-     * Default pollinterval for the application in seconds.  Should be overridden
+     * Default pollInterval for the application in seconds.  Should be overridden
      * by applications to set default poll interval.
      * @aribaapi private
      */
@@ -1537,7 +1719,8 @@ abstract public class AWConcreteApplication
 
     }
 
-    private ConcurrentLinkedQueue<SessionWrapper> _sessionProcessList = new ConcurrentLinkedQueue<SessionWrapper>();
+    private ConcurrentLinkedQueue<SessionWrapper> _sessionProcessList =
+            new ConcurrentLinkedQueue<SessionWrapper>();
 
     enum SessionOp {
         Add, Remove
@@ -1553,7 +1736,7 @@ abstract public class AWConcreteApplication
         {
             op = o;
             session = sess;
-            if(AWConcreteApplication.IsDebuggingEnabled || 
+            if (AWConcreteApplication.IsDebuggingEnabled || 
                 Log.aribaweb_userstatus.isDebugEnabled()) {
                 callTrace = new Exception();
             }
@@ -1587,7 +1770,7 @@ abstract public class AWConcreteApplication
 
         public List<NamedValue> sessionCountBuckets ()
         {
-            Map<String, Integer> buckets = MapUtil.map();
+            Map<String, Integer> buckets = MapUtil.map(16);
             for (int i = _sessionList.size() - 1; i >= 0; i--) {
                 Object b = ((AWSession)_sessionList.get(i)).monitorBucket();
                 String bucket = b == null ? "null" : b.toString();
@@ -1596,7 +1779,7 @@ abstract public class AWConcreteApplication
                     count = count + 1;
                 }
                 else {
-                    count = new Integer(1);
+                    count = Constants.getInteger(1);
                 }
                 buckets.put(bucket, count);
             }
@@ -1604,6 +1787,64 @@ abstract public class AWConcreteApplication
             List<NamedValue> ret = ListUtil.list();
             for (String bucket : buckets.keySet()) {
                 NamedValue nv = new NamedValue(bucket, buckets.get(bucket));
+                ret.add(nv);
+            }
+            return ret;
+        }
+
+        /**
+         * For defects 1-AS11R9 / 1-BGIP86 / 1-CF04UZ, number of active sessions can be
+         * seen from Ops monitoring page as high as 12000 for a realm with 24k users.
+         * This maybe caused by the fact that idling user sessions are being timed
+         * out by app server (Tomcat)
+         * which is set at 30 mins, so as users login and idle, these sessions won't be
+         * removed until 30 mins later or til user logs out directly, and so they still being
+         * counted as active sessions.
+         * <p/>
+         * So this method will return a list of active sessions that are accounted for
+         * by Ops monitoring page which includes user name and sessionId and session statuses.
+         * <br/>For example,
+         * &lt;sessionStatusesForBucket2>superuser (776162E3E075B38AC8D0DDBDFF53A79A; false;
+         * false; 2013-08-02 19:32:27 EDT), cnoll (97B7D4B6B3529441A3176063EB47CA87;
+         * false; false; 2013-08-02 19:30:37 EDT)&lt;/sessionStatusesForBucket2>
+         * <p/>
+         * Note that this extra sessionStatuses are optional and need the URL param as below:
+         * http://czheng:8050/Buyer/Main/ad/monitorStats?showSessionStatus=true
+         *
+         * @return
+         */
+        public List<NamedValue> sessionStatusBuckets ()
+        {
+            Date tempDate = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss zzz");
+
+            // Not need to expanding map until about 12+ realms (in one community)
+            Map<String, FastStringBuffer> buckets = MapUtil.map(16);
+            for (int i = _sessionList.size() - 1; i >= 0; i--) {
+                Object b = ((AWSession)_sessionList.get(i)).monitorBucket();
+                String bucket = b == null ? "null" : b.toString();
+                FastStringBuffer fsb = buckets.get(bucket);
+                if (fsb == null) {
+                    // 100 users * 100 chars for status string
+                    fsb = new FastStringBuffer(100 * 100);
+                    buckets.put(bucket, fsb);
+                }
+                else {
+                    fsb.append(", ");
+                }
+                AWSession s = (AWSession)_sessionList.get(i);
+                tempDate.setTime(s.getLastAccessedTime());
+                fsb.append(Fmt.S("%s (%s; %s; %s; %s)",
+                    s.getFieldValue("RealUserUniqueName"),
+                    s.sessionId(),
+                    s.isTerminated(),
+                    s.isInvalidated(),
+                    sdf.format(tempDate)));
+            }
+
+            List<NamedValue> ret = ListUtil.list();
+            for (String bucket : buckets.keySet()) {
+                NamedValue nv = new NamedValue(bucket, buckets.get(bucket).toString());
                 ret.add(nv);
             }
             return ret;
@@ -1619,16 +1860,17 @@ abstract public class AWConcreteApplication
                     if (paused) {
                         continue;
                     }
-
                     if (Log.aribaweb_userstatus.isDebugEnabled()) {
-                        if (_sessionProcessList != null && !_sessionProcessList.isEmpty()) {
+                        if (_sessionProcessList != null &&
+                            !_sessionProcessList.isEmpty()) {
                             Log.aribaweb_userstatus.debug(
                                 "AWSessionMonitor -- existing sessions: %s processing %s",
                                 _sessionList.size(), _sessionProcessList.size());
                         }
                     }
 
-                    _application.updateSessionStatusTable(_sessionProcessList, _sessionList);
+                    _application.updateSessionStatusTable(_sessionProcessList,
+                            _sessionList);
 
                 }
                 catch (InterruptedException e) {
@@ -1655,11 +1897,13 @@ abstract public class AWConcreteApplication
         _Staticizer = staticizer;
     }
 
-    public String formatUrlForResource (String urlPrefix, AWResource resource, boolean forCache)
+    public String formatUrlForResource (String urlPrefix,
+                                        AWResource resource, boolean forCache)
     {
         return (_Staticizer != null)
                 ? _Staticizer.formatUrlForResource(urlPrefix, resource, forCache)
-                : StringUtil.strcat(urlPrefix, "/", resource.relativePath().replace('\\', '/'));
+                : StringUtil.strcat(urlPrefix, "/",
+                resource.relativePath().replace('\\', '/'));
     }
 
     public boolean canCacheResourceUrls ()
@@ -1684,6 +1928,21 @@ abstract public class AWConcreteApplication
         return new AWSessionStatusManager();
     }
 
+
+    /**
+     * Applications should register their domain objects, activities, etc. on AWCommunityContext.
+     * They should then call super.
+     */
+    protected void initCommunityContext()
+    {
+
+    }
+
+
+    protected void initMultiTabSupport ()
+    {
+
+    }
     ////////////////////////////
     // Deprecated - remove soon
     ////////////////////////////

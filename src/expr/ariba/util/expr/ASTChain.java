@@ -1,5 +1,6 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright (c) 1996-2013 Ariba, Inc.
+    All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,26 +13,26 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/expr/ariba/util/expr/ASTChain.java#7 $
-*/
+    $Id: //ariba/platform/util/expr/ariba/util/expr/ASTChain.java#8 $
+ */
 //--------------------------------------------------------------------------
-//	Copyright (c) 1998-2004, Drew Davidson and Luke Blanshard
+//  Copyright (c) 1998-2004, Drew Davidson and Luke Blanshard
 //  All rights reserved.
 //
-//	Redistribution and use in source and binary forms, with or without
+//  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
 //
-//	Redistributions of source code must retain the above copyright notice,
+//  Redistributions of source code must retain the above copyright notice,
 //  this list of conditions and the following disclaimer.
-//	Redistributions in binary form must reproduce the above copyright
+//  Redistributions in binary form must reproduce the above copyright
 //  notice, this list of conditions and the following disclaimer in the
 //  documentation and/or other materials provided with the distribution.
-//	Neither the name of the Drew Davidson nor the names of its contributors
+//  Neither the name of the Drew Davidson nor the names of its contributors
 //  may be used to endorse or promote products derived from this software
 //  without specific prior written permission.
 //
-//	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 //  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 //  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 //  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
@@ -55,23 +56,23 @@ import ariba.util.fieldtype.TypeInfo;
  */
 class ASTChain extends SimpleNode implements Symbol
 {
-    public ASTChain(int id)
+    public ASTChain (int id)
     {
         super(id);
     }
 
-    public ASTChain(ExprParser p, int id)
+    public ASTChain (ExprParser p, int id)
     {
         super(p, id);
     }
 
-    public void jjtClose()
+    public void jjtClose ()
     {
         // flattenTree();
     }
 
-    protected Object getValueBody( ExprContext context, Object source )
-        throws ExprException
+    protected Object getValueBody (ExprContext context, Object source)
+    throws ExprException
     {
         Integer symbolKind = context.getSymbolKind(this);
         TypeInfo type = context.getSymbolType(this);
@@ -89,8 +90,8 @@ class ASTChain extends SimpleNode implements Symbol
                 null);
     }
 
-    protected void setValueBody( ExprContext context, Object target, Object value )
-        throws ExprException
+    protected void setValueBody (ExprContext context, Object target, Object value)
+    throws ExprException
     {
         Object object = children[0].getValue( context, target );
         // if the last child is null, then skip the evaluation.  This is
@@ -101,8 +102,8 @@ class ASTChain extends SimpleNode implements Symbol
         }
     }
 
-    public boolean isSimpleNavigationChain( ExprContext context )
-        throws ExprException
+    public boolean isSimpleNavigationChain (ExprContext context)
+    throws ExprException
     {
         boolean     result = false;
 
@@ -111,7 +112,8 @@ class ASTChain extends SimpleNode implements Symbol
             for (int i = 0; result && (i < children.length); i++) {
                 if (children[i] instanceof SimpleNode) {
                     result = ((SimpleNode)children[i]).isSimpleProperty(context);
-                } else {
+                }
+                else {
                     result = false;
                 }
             }
@@ -124,7 +126,7 @@ class ASTChain extends SimpleNode implements Symbol
         return toString();
     }
 
-    public String toString()
+    public String toString ()
     {
         String      result = "";
 
@@ -146,5 +148,13 @@ class ASTChain extends SimpleNode implements Symbol
         // Let the visitor navigate.  This is breaking the pattern, until
         // the navigation chain is represented as a subtree.
         visitor.visit(this);
+    }
+
+    @Override
+    protected void traceEvaluation (final Object result)
+    {
+        if (SimpleNode.shouldTraceValue(result)) {
+            super.traceEvaluation(result);
+        }
     }
 }

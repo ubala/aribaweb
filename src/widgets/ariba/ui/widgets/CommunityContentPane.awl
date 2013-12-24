@@ -1,0 +1,3 @@
+<iframe id="communityContentIframe" name="communityContentIframe"
+        src="$getCommunityContentIframeSrc" frameborder="0" class="aucIframeExpanded">
+</iframe>

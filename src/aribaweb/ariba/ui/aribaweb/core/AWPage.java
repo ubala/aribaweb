@@ -12,45 +12,45 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#137 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWPage.java#138 $
 */
 
 package ariba.ui.aribaweb.core;
 
+import ariba.ui.aribaweb.util.AWArrayManager;
 import ariba.ui.aribaweb.util.AWBaseObject;
-import ariba.util.core.MapUtil;
+import ariba.ui.aribaweb.util.AWChangeNotifier;
 import ariba.ui.aribaweb.util.AWCharacterEncoding;
+import ariba.ui.aribaweb.util.AWCommunityContext;
+import ariba.ui.aribaweb.util.AWContentType;
 import ariba.ui.aribaweb.util.AWDisposable;
 import ariba.ui.aribaweb.util.AWEncodedString;
 import ariba.ui.aribaweb.util.AWEnvironmentStack;
+import ariba.ui.aribaweb.util.AWGenericException;
 import ariba.ui.aribaweb.util.AWResourceManager;
 import ariba.ui.aribaweb.util.AWSingleLocaleResourceManager;
 import ariba.ui.aribaweb.util.AWStringDictionary;
 import ariba.ui.aribaweb.util.AWUtil;
 import ariba.ui.aribaweb.util.Log;
-import ariba.ui.aribaweb.util.AWGenericException;
-import ariba.ui.aribaweb.util.AWChangeNotifier;
-import ariba.ui.aribaweb.util.AWArrayManager;
-import ariba.ui.aribaweb.util.AWContentType;
-
-import java.util.Map;
-import ariba.util.core.StringUtil;
-import ariba.util.core.ListUtil;
-import ariba.util.core.Fmt;
-import ariba.util.core.PerformanceState;
-import ariba.util.core.FastStringBuffer;
 import ariba.util.core.Constants;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.List;
-import java.util.Set;
-import java.util.ArrayList;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
+import ariba.util.core.FastStringBuffer;
+import ariba.util.core.Fmt;
+import ariba.util.core.ListUtil;
+import ariba.util.core.MapUtil;
+import ariba.util.core.PerformanceState;
+import ariba.util.core.StringUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 import javax.servlet.http.HttpSession;
 
 public final class AWPage extends AWBaseObject implements AWDisposable, AWRequestContext._SubcomponentLookup
@@ -101,6 +101,9 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     private boolean _initiatePolling = false;
     private int _pollInterval = defaultPollInterval();
     List _currScriptList;
+
+    // the community context to be passed when requesting help
+    private AWCommunityContext _communityContext;
 
     // Allocated by the RequestHistory (but maintained by AWPage)
     public static class BrowserState {
@@ -1473,4 +1476,22 @@ public final class AWPage extends AWBaseObject implements AWDisposable, AWReques
     {
         return _formValueManager != null;
     }
+
+    //////////////////////////
+    // Community Context
+    //////////////////////////
+
+    /**
+     * Fetch the community context
+     */
+    public AWCommunityContext getCommunityContext()
+    {
+        if (_communityContext == null) {
+            _communityContext = new AWCommunityContext(); 
+            _communityContext.setPage(perfPageName());
+            _communityContext.setApplication(AWConcreteApplication.sharedInstance().name());
+        }
+        return _communityContext;
+    }
+
 }

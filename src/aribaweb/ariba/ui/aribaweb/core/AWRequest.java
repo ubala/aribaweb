@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequest.java#17 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequest.java#21 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -61,8 +61,11 @@ public interface AWRequest
     public boolean isBrowserMicrosoft ();
     public boolean isBrowserIE55 ();
     public boolean isBrowserSafari();
+    public boolean isBrowserChrome();
     public boolean isMacintosh ();
+    public boolean isIPad ();
     public boolean isSecureScheme ();
+    public boolean isTooManyTabRequest ();
     public String uri ();
     public String queryString ();
     public String requestId ();

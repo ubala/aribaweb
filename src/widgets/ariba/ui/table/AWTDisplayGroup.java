@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2012 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#83 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/table/AWTDisplayGroup.java#84 $
 */
 package ariba.ui.table;
 
@@ -28,6 +28,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 public final class AWTDisplayGroup
 {
@@ -101,7 +102,7 @@ public final class AWTDisplayGroup
     /**
      * This is the column that should hear about value source changes.
      */
-    private AWTDataTable.Column itemListener = null;
+    private Map<AWTDataTable.Column, Object> _itemListeners = null;
 
     /**
      * This is the the containing table.
@@ -126,7 +127,7 @@ public final class AWTDisplayGroup
      * @param listener the column that is told about current items
      * @aribaapi private
      */
-    public void setItemListener (AWTDataTable.Column listener)
+    public void addItemListener (AWTDataTable.Column listener, Object listenerState)
     {
         /*
             This method is a slight wart, needed for ARWTGroup.  That special
@@ -135,7 +136,15 @@ public final class AWTDisplayGroup
             of items).  Note that since there is only one listener, we only
             support a single ARWTGroup.
         */
-        itemListener = listener;
+        if(_itemListeners == null) {
+            _itemListeners = new LinkedHashMap<AWTDataTable.Column, Object>();
+        }
+        _itemListeners.put(listener,listenerState);
+    }
+
+    public Object getListenerState (AWTDataTable.Column listener)
+    {
+        return MapUtil.nullOrEmptyMap(_itemListeners) ? null : _itemListeners.get(listener);
     }
 
     /**
@@ -192,8 +201,10 @@ public final class AWTDisplayGroup
         // of the selection...
         _validateSelection();
 
-        if (itemListener != null) {
-            itemListener.rowsReset(_owningTable);
+        if (_itemListeners != null) {
+            for (AWTDataTable.Column listener : _itemListeners.keySet()) {
+                listener.rowsReset(_owningTable);
+            }
         }
     }
 
@@ -926,8 +937,10 @@ public final class AWTDisplayGroup
     public void setCurrentItem (Object item)
     {
         _currentItem = item;
-        if (itemListener != null) {
-            itemListener.setCurrentItem(item, _owningTable);
+        if (_itemListeners != null) {
+            for (AWTDataTable.Column listener : _itemListeners.keySet()) {
+                listener.setCurrentItem(item, _owningTable);
+            }
         }
 
         return;

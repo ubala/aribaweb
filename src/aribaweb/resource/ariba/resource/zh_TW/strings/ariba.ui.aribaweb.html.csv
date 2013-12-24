@@ -1,9 +1,9 @@
 Big5,,,,
 "AWBody",a001,"Please wait. An action is pending...","請稍候。有項動作正處於待決狀態...",""
 "AWErrorFlag",a001,"Error","錯誤",""
-"AWFileUploadInternals",a001,"Error: Your request cannot be processed. Please check that file paths for all file uploads are valid.","錯誤: 無法處理您的請求，請檢查所有檔案上載的路徑是否有效。",""
+"AWFileUploadInternals",a001,"Error: Your request cannot be processed. Please check that file paths for all file uploads are valid.","錯誤：無法處理您的請求，請檢查所有檔案上載的路徑是否有效。",""
 "AWPasswordField",a001,"Warning","警告",""
-"AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","警告: 大寫鍵功能開啟，這可能讓您輸入錯誤的密碼。",""
+"AWPasswordField",a002,"Warning: Caps Lock is on. This may cause you to enter your password incorrectly.","警告：大寫鍵功能開啟，這可能讓您輸入錯誤的密碼。",""
 "AWSubmitButton",a001,"Submit","提交",""
 "AWTextArea",a001,"Characters left","餘下字元數目",""
 "AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","處理您的請求時發生錯誤。請重新整理頁面，然後重試。",""

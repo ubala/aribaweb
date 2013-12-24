@@ -7,3 +7,7 @@
 "AWSubmitButton",a001,"Submit","Submit",""
 "AWTextArea",a001,"Characters left","Characters left",""
 "AWPopup",1,"An error has occurred while processing your request. Refresh the page and try again.","An error has occurred while processing your request. Refresh the page and try again.",""
+"MultiTabExceptionPageTitle",1,"Tab Limit","Tab Limit"
+"MultiTabExceptionPageMessage",2,"Too Many Tabs or Windows Opened","Too Many Tabs or Windows Opened"
+"MultiTabExceptionMessage",3,"You have already opened 10 tabs or windows, which is the maximum allowed by this application.","You have already opened 10 tabs or windows, which is the maximum allowed by this application.",""
+"MultiTabExceptionReportMessage",4,"Close one of the other tabs or windows and try again.","Close one of the other tabs or windows and try again.",""

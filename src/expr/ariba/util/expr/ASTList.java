@@ -1,21 +1,27 @@
+/*
+    Copyright (c) 2013 Ariba, Inc.
+    All rights reserved. Patents pending.
+
+    $Id: //ariba/platform/util/expr/ariba/util/expr/ASTList.java#4 $
+ */
 //--------------------------------------------------------------------------
-//	Copyright (c) 1998-2004, Drew Davidson and Luke Blanshard
+//  Copyright (c) 1998-2004, Drew Davidson and Luke Blanshard
 //  All rights reserved.
 //
-//	Redistribution and use in source and binary forms, with or without
+//  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
 //
-//	Redistributions of source code must retain the above copyright notice,
+//  Redistributions of source code must retain the above copyright notice,
 //  this list of conditions and the following disclaimer.
-//	Redistributions in binary form must reproduce the above copyright
+//  Redistributions in binary form must reproduce the above copyright
 //  notice, this list of conditions and the following disclaimer in the
 //  documentation and/or other materials provided with the distribution.
-//	Neither the name of the Drew Davidson nor the names of its contributors
+//  Neither the name of the Drew Davidson nor the names of its contributors
 //  may be used to endorse or promote products derived from this software
 //  without specific prior written permission.
 //
-//	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 //  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
 //  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 //  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
@@ -30,7 +36,8 @@
 //--------------------------------------------------------------------------
 package ariba.util.expr;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Luke Blanshard (blanshlu@netscape.net)
@@ -38,28 +45,31 @@ import java.util.*;
  */
 class ASTList extends SimpleNode
 {
-    public ASTList(int id) {
+    public ASTList (int id)
+    {
         super(id);
     }
 
-    public ASTList(ExprParser p, int id) {
+    public ASTList (ExprParser p, int id)
+    {
         super(p, id);
     }
 
-    protected Object getValueBody( ExprContext context, Object source ) throws ExprException
+    protected Object getValueBody (ExprContext context, Object source)
+    throws ExprException
     {
-        List answer = new ArrayList( jjtGetNumChildren() );
-        for ( int i=0; i < jjtGetNumChildren(); ++i )
-            answer.add( children[i].getValue(context, source) );
+        List<Object> answer = new ArrayList<Object>(jjtGetNumChildren());
+        for (int i = 0; i < jjtGetNumChildren(); ++i) {
+            answer.add(children[i].getValue(context, source));
+        }
         return answer;
     }
 
-    public String toString()
+    public String toString ()
     {
         String      result = "[";
 
-
-        for ( int i=0; i < jjtGetNumChildren(); ++i ) {
+        for (int i=0; i < jjtGetNumChildren(); ++i) {
             if (i > 0) {
                 result = result + ", ";
             }
@@ -72,5 +82,11 @@ class ASTList extends SimpleNode
     {
         acceptChildren(visitor);
         visitor.visit(this);
+    }
+
+    @Override
+    protected void traceEvaluation (final Object result)
+    {
+        // do not trace this node
     }
 }

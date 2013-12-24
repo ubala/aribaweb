@@ -12,6 +12,11 @@ ariba.Input = function() {
     var Debug = ariba.Debug;
     var Dom = ariba.Dom;
 
+    if (Dom.IsIE) {
+        document.createStyleSheet().addRule("v\\: *", "behavior:url(#default#VML);");
+        !document.namespaces.rvml && document.namespaces.add("v", "urn:schemas-microsoft-com:vml");
+    }
+
     // private vars
 
     // Id for the setTimeout function -- allows for calling clearTimeout()
@@ -108,7 +113,7 @@ ariba.Input = function() {
                 AWWaitAlertDiv.style.visibility = "";
             }
 
-            _disableShowUntil = (new Date()).getTime() + 500;
+            var waitAlertMillis = this.waitAlertSettings();
             this.disableInput(true);
 
             if (!AWShowWaitAlertDisabled) {
@@ -116,9 +121,15 @@ ariba.Input = function() {
                 // this can happen when we are loading multiple lazy divs
                 clearTimeout(AWWaitAlertTimeoutId);
                 clearTimeout(AWWaitTimeoutId);
-                AWWaitAlertTimeoutId = setTimeout(this.showWaitAlert.bind(this), this.AWWaitAlertMillis);
-                AWWaitTimeoutId = setTimeout(this.hideWaitCursor.bind(this), this.AWWaitAlertMillis + this.AWWaitMillis);
+                AWWaitAlertTimeoutId = setTimeout(this.showWaitAlert.bind(this), waitAlertMillis);
+                AWWaitTimeoutId = setTimeout(this.hideWaitCursor.bind(this), waitAlertMillis + this.AWWaitMillis);
             }
+        },
+
+        waitAlertSettings : function (message)
+        {
+            _disableShowUntil = (new Date()).getTime() + 500;
+            return this.AWWaitAlertMillis;
         },
 
         updateWaitMessage : function (message)
@@ -232,16 +243,15 @@ ariba.Input = function() {
             //no-op
         },
 
-        coverDocument : function (zIndex, opacity)
+        createCoverDiv : function (zIndex, opacity)
         {
             var coverDiv = null;
             var coverStyle = null;
             if (Dom.IsIE) {
-                document.createStyleSheet().addRule("v\\: *", "behavior:url(#default#VML)");
-                !document.namespaces.rvml && document.namespaces.add("v", "urn:schemas-microsoft-com:vml");
                 coverDiv = document.createElement('<v:rect stroked="False">');
-                coverDiv.appendChild(document.createElement('<v:fill opacity="50%" color="black">'));
-                document.body.appendChild(coverDiv, document.body.firstChild);
+                var fill = document.createElement('<v:fill color="black">');
+                fill.opacity = opacity + "%";
+                coverDiv.appendChild(fill);
                 coverStyle = coverDiv.style;
             }
             else {
@@ -252,8 +262,14 @@ ariba.Input = function() {
             }            
             coverStyle.position = "absolute";
             coverStyle.zIndex = zIndex;
-            var docBody = document.body
+            return coverDiv;
+        },
+
+        coverDocument : function (zIndex, opacity)
+        {
+            var coverDiv = this.createCoverDiv(zIndex, opacity);            
             this.updateCoverSize(coverDiv);
+            var docBody = document.body
             // Need to insert at beginning (not end) otherwise on Firefox it will occlude the dialog despite z-index order
             docBody.appendChild(coverDiv, document.body.firstChild);
             coverDiv.style.display = "";
@@ -496,7 +512,180 @@ ariba.Input = function() {
             AWAllowSelectFirstText = true;
         },
 
+		/**
+		 * A useful function that automates implementing a client-side only
+		 * message related to an input element.
+		 * 
+		 * This can be tricky to use as their are a bunch of required data
+		 * attributes. Here is an explanation:
+		 * 
+		 *	 The input must have the following attributes set:
+		 *		~ data-rxmatcher="..." This should contain the regular expression you want to use to match the input against. Use parenthesis to make groups available in the replacement.
+		 *		~ data-placeholder="..." This should be a character to use as a placeholder when the user input does not yet equal max length.
+		 *		~ data-replacement="..." This should be the replacement string to use in conjunction with the rxmatcher before inserting into the sibling element.
+		 *		~ maxlength="..." The maximum length that can be entered for this value (should match the regex).
+		 *
+		 *   Here is a sample input element:
+		 *		<input data-placeholder="0" data-rxmatcher="(\d{3})(\d{3})(\d{4})" data-replacement="$1-$2-$3" maxlength="10" id="id_test_input"/>
+		 *
+		 *	 Here is sample JavaScript to initialize:
+		 *		ariba.Input.initRegexNote("id_test_input");
+		 * 
+		 * @param sId {String} The id of an input element.
+		 * @param oOptions? {Object} Object literal overriding defaults.
+		 */
+        initRegexNote : function (sId, oOptions) {
+            var oDefaults = {
+                    dataAttrMatcherRegex: 'rxmatcher',
+                    dataAttrPlaceholder: 'placeholder',
+                    dataAttrReplacement: 'replacement',
+                    invalidText: 'Invalid input',
+                    replacementFunction: null,
+                    targetClass: 'regexInputNote'
+                },
+                oSettings,
+                fnReplacer,
+                iMaxLength,
+                iTimeoutId,
+                rxMatcher,
+                sPlaceholder,
+                sReplacement,
+                el = document.getElementById(sId),
+                elTarget;
+
+            function fnUpdate() {
+                clearTimeout(iTimeoutId);
+                var sVal = el.value;
+
+                if (fnReplacer) {
+                    elTarget.innerHTML = fnReplacer(sVal);
+                }
+                else {
+                    while (sVal.length < iMaxLength) {
+                        sVal += sPlaceholder;
+                    }
+
+                    elTarget.innerHTML = sVal.match(rxMatcher) ?
+                            sVal.replace(rxMatcher, sReplacement) :
+                            oSettings.invalidText;
+                }
+            }
+
+            function fnOnChange() {
+                fnUpdate();
+            }
+
+            function fnOnKey() {
+                clearTimeout(iTimeoutId);
+                iTimeoutId = setTimeout(function() {
+                    fnUpdate();
+                }, 100);
+            }
+
+            function init() {
+                var sTemp,
+                    elTemp = el;
+                oSettings = ariba.Util.extend({}, oDefaults);
+                oSettings = ariba.Util.extend(oSettings, oOptions);
+
+                while (elTemp.nextSibling) {
+                    elTemp = elTemp.nextSibling;
+                    if (elTemp.className && -1 !== elTemp.className.indexOf(
+                            oSettings.targetClass)) {
+                        elTarget = elTemp;
+                        break;
+                    }
+                }
+
+                sTemp = el.getAttribute(
+                    "data" + oSettings.dataAttrMatcherRegex);
+                iMaxLength = parseInt(el.getAttribute('maxlength'), 10);
+                sPlaceholder = '' + el.getAttribute(
+                    "data" + oSettings.dataAttrPlaceholder);
+                sReplacement = el.getAttribute(
+                    "data" + oSettings.dataAttrReplacement);
+                rxMatcher = new RegExp(sTemp);
+                fnReplacer = oSettings.replacementFunction;
+                Event.addEvent(el, 'onchange', fnOnChange);
+                Event.addEvent(el, 'onkeyup', fnOnKey);
+
+                if (!fnReplacer) {
+                    if (!iMaxLength) {
+                        alert('RegexInputNode - please specify the maxlength ' +
+                            'attribute');
+                    }
+                    if (!sPlaceholder) {
+                        alert('RegexInputNode - please specify dataAttrPlaceholder ' +
+                            'or use `' + oSettings.dataAttrPlaceholder +
+                            '` attribute.');
+                    }
+                    if (!sReplacement) {
+                        alert('RegexInputNode - please specify dataAttrReplacement ' +
+                            'or use `' + oSettings.dataAttrReplacement +
+                            '` attribute.');
+                    }
+                    if (!rxMatcher) {
+                        alert('RegexInputNode - please specify dataAttrMatcherRegex ' +
+                            'or use `' + oSettings.dataAttrMatcherRegex +
+                            '` attribute.');
+                    }
+                    if (!elTarget) {
+                        alert('RegexInputNode - please specify targetClass ' +
+                            'or apply `' + oSettings.targetClass +
+                            '` to a nextSibling of the target element.');
+                    }
+                }
+            }
+
+            init();
+        },
+
         EOF:0};
+
+    //
+    // iPad - specific methods
+    //
+    if (Dom.isIPad) Util.extend(Input, function () {
+        return {
+            waitAlertSettings : function (message)
+            {
+                _disableShowUntil = (new Date()).getTime();
+                return 500;
+            },
+
+            updateWaitMessage : function (message)
+            {
+                if (!AWIsWaitAlertActive) this.showWaitAlert();
+                var span = Dom.getElementById("awwaitMessage");
+                if (span) {
+                    span.innerHTML = message;
+                    span.style.paddingTop = "15px";
+                    Dom.positionDialogBox(AWWaitAlertDiv);
+                }
+            },
+
+            hideWaitAlert : function ()
+            {
+                if (AWIsWaitAlertActive) {
+                    AWIsWaitAlertActive = false;
+                    window.onscroll = AWOriginalWindowOnScroll;
+                    window.onresize = AWOriginalWindowOnResize;
+                    AWOriginalWindowOnScroll = null;
+                    AWOriginalWindowOnResize = null;
+                    if (AWWaitAlertDiv != null) {
+                        AWWaitAlertDiv.style.display = "none";
+                        var span = Dom.getElementById("awwaitMessage");
+                        if (span) {
+                            span.innerHTML = "";
+                            span.style.paddingTop = "0px";
+                        }
+                        Dom.unoverlay(AWWaitAlertDiv);
+                    }
+                }
+            },
+
+        EOF:0};
+    }());
 
     //
     // IE6 - specific methods
@@ -638,7 +827,7 @@ ariba.Input = function() {
             disableInput : function (showWaitAlert)
             {
                 // Wait cursor is broken in Safari (only changes on mouse move) -- disabling...
-                if (Dom.isSafari) return;
+                if (Dom.isSafari && !Dom.isIPad) return;
 
                 var docBody = document.body;
                 if (showWaitAlert) {

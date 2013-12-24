@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2010 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HelpActionHandler.java#19 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/HelpActionHandler.java#20 $
 */
 
 package ariba.ui.widgets;
@@ -91,6 +91,11 @@ public class HelpActionHandler extends ActionHandler
         return "";
     }
 
+    protected String getUserName (AWRequestContext requestContext)
+    {
+        return "";
+    }
+
     protected String getRealmName (AWRequestContext requestContext)
     {
         return "";
@@ -128,6 +133,7 @@ public class HelpActionHandler extends ActionHandler
         }
 
         String userType = getUserType(requestContext);
+        String userName = getUserName(requestContext);
         String realmName = getRealmName(requestContext);
         String anId = getANId(requestContext);
         String userLang = getUserLanguage(requestContext);
@@ -155,10 +161,10 @@ public class HelpActionHandler extends ActionHandler
         // live during each request/response, ensuring we're using the appropriate
         // session locale
         String[] args = { helpUrl, SharedToken,
-                          helpKey, userType,
+                          helpKey, userType, userName,
                           realmName, userLang, anId,
                           featureString, area, windowAttribute};
-        _helpUrl = Fmt.S("javascript:ariba.Widgets.gotoDoc('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');"+
+        _helpUrl = Fmt.S("javascript:ariba.Widgets.gotoDoc('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s');"+
             "ariba.Event.cancelBubble(event);ariba.Menu.hideActiveMenu();", args);
     }
 

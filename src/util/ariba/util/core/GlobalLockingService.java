@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/GlobalLockingService.java#5 $
+    $Id: //ariba/platform/util/core/ariba/util/core/GlobalLockingService.java#6 $
 */
 
 package ariba.util.core;
@@ -144,6 +144,15 @@ public interface GlobalLockingService
     public void deleteLockGroup (String groupName)
       throws GlobalLockingException;
 
+
+    /**
+        Returns true if the specified lock is held by the specified node.
+        
+        @param lockName The name of the lock
+        @param nodeName The name of the node
+    */
+    public boolean nodeHasLock (String lockName, String nodeName);
+    
     public final static String CleanupTopic =
         "ariba.util.GlobalLocking.Cleanup";
 }

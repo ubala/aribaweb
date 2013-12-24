@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Widgets.java#73 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/Widgets.java#75 $
 */
 
 package ariba.ui.widgets;
@@ -220,6 +220,8 @@ public final class Widgets
                                     new DisplayProductImageInBannerAreaConditionHandler());
         ConditionHandler.setHandler("hideBannerImage",
                                     new HideBannerImageConditionHandler());
+        ConditionHandler.setHandler("removeContentLeftRightMargin",
+                                    new RemoveContentLeftRightMarginHandler());
     }
 
     private static void initializeSubpackages ()
@@ -274,10 +276,10 @@ public final class Widgets
 
     }
 
-		// resourceFilePath is the pathname of the docroot
-		// resourceURL is the URL for the docroot resources
-	private static void registerWidgetsResources (String packageRootPath, String resourceFilePath, String resourceURL)
-	{
+        // resourceFilePath is the pathname of the docroot
+        // resourceURL is the URL for the docroot resources
+    private static void registerWidgetsResources (String packageRootPath, String resourceFilePath, String resourceURL)
+    {
         // register root package.  (Should be in aribaweb?)
         registerResourceDirectory(packageRootPath, resourceURL);
         registerResourceDirectory("./ariba/resource",
@@ -288,7 +290,7 @@ public final class Widgets
 
         registerResourceDirectory(StringUtil.strcat(resourceFilePath, WidgResourcePath),
                                   StringUtil.strcat(resourceURL, WidgResourcePath));
-	}
+    }
 
     // Used for AribaUI to register RecordPlayback control to appear
     // below TOC on login and other pages
@@ -304,31 +306,87 @@ public final class Widgets
     }
 
     /** Style sheet registration **/
-    private static List<StyleSheetInfo> StyleSheets = ListUtil.list();
+    private static List<StyleSheetInfo> StyleSheetsAW5 = ListUtil.list();
+    private static List<StyleSheetInfo> StyleSheetsAW6 = ListUtil.list();
 
     static {
-        registerStyleSheet("widgets.css");
+        // next gen UI
+        registerStyleSheet("widg/aw6_widgets.css", null, true);
+
+        // current gen UI
+        registerStyleSheet("widgets.css", null, false);
+
+        // both
         registerStyleSheet("print.css", "print");
     }
 
+    /**
+     * Registers a static stylesheet with appropriate UI version list. Will
+     * register the stylesheet with both AW5 and AW6, and not include a
+     * media type (will be included for all media types).
+     * @param filename The relative path of the file.
+     */
     public static void registerStyleSheet (String filename)
     {
         registerStyleSheet(filename, null);
     }
 
+    /**
+     * Registers a static stylesheet with appropriate UI version list. Will
+     * register the stylesheet with both AW5 and AW6.
+     * @param filename The relative path of the file.
+     * @param media The media type.
+     */
     public static void registerStyleSheet (String filename, String media)
+    {
+        registerStyleSheet(filename, media, false);
+        registerStyleSheet(filename, media, true);
+    }
+
+    /**
+     * Registers a static stylesheet with appropriate UI version list.
+     * @param filename The relative path of the file.
+     * @param media The media type.
+     * @param isAW6 Is this for aw6 or not.
+     */
+    public static void registerStyleSheet (
+            String filename, String media, boolean isAW6)
     {
         StyleSheetInfo styleSheetInfo = new StyleSheetInfo();
         styleSheetInfo._filename = filename;
         styleSheetInfo._media = media;
-        StyleSheets.add(styleSheetInfo);
+        (isAW6 ? StyleSheetsAW6 : StyleSheetsAW5).add(styleSheetInfo);
     }
 
+    /**
+     * @return A list of static stylesheets for AW5.
+     * @deprecated Use styleSheetsAW5 instead.
+     */
     public static List<StyleSheetInfo> styleSheets ()
     {
-        return StyleSheets;
+        return StyleSheetsAW5;
     }
 
+    /**
+     * @return A list of static stylesheets for AW5.
+     */
+    public static List<StyleSheetInfo> styleSheetsAW5 ()
+    {
+        return StyleSheetsAW5;
+    }
+
+    /**
+     * @return A list of static stylesheets for AW6.
+     */
+    public static List<StyleSheetInfo> styleSheetsAW6 ()
+    {
+        return StyleSheetsAW6;
+    }
+
+    /**
+     * This is a simple container class for stylehseet files and their
+     * media type.
+     */
     public static class StyleSheetInfo
     {
         public String _filename;

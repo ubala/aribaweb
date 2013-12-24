@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,16 +12,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestUtil.java#6 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWRequestUtil.java#12 $
 */
 package ariba.ui.aribaweb.core;
 
+import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.ui.aribaweb.util.AWUtil;
 import ariba.util.core.FastStringBuffer;
 import ariba.util.core.MapUtil;
-import ariba.util.core.Constants;
 import ariba.util.core.StringUtil;
-import ariba.ui.aribaweb.util.AWUtil;
-import ariba.ui.aribaweb.util.AWGenericException;
+import ariba.util.http.multitab.MultiTabSupport;
 
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -51,7 +51,8 @@ public class AWRequestUtil
     {
         if (url.indexOf(BeginQueryChar) == -1) {
             url.append(BeginQueryChar);
-        } else {
+        }
+        else {
             if (url.charAt(url.length()-1) != QueryDelimiter) {
                 url.append(QueryDelimiter);
             }
@@ -117,7 +118,8 @@ public class AWRequestUtil
      */
     public static String addDirectActionRequestHandlerKey (String url)
     {
-        return addRequestHandlerKey(url, AWConcreteApplication.DirectActionRequestHandlerKey);
+        return addRequestHandlerKey(
+                url, AWConcreteApplication.DirectActionRequestHandlerKey);
     }
 
     public static Map parseParameters (String url)
@@ -150,7 +152,9 @@ public class AWRequestUtil
     {
         AWApplication application = requestContext.application();
         String baseUrl = application.adaptorUrl();
-        if (baseUrl == null) return;
+        if (baseUrl == null) {
+            return;
+        }
         String applicationName = application.name();
         if (!baseUrl.endsWith(HTTP_DELIMITERSTRING) &&
             applicationName.indexOf(HTTP_DELIMITER) != 0) {
@@ -214,6 +218,13 @@ public class AWRequestUtil
         return _applicationBaseUrl;
     }
 
+    /**
+     * Returns the URL key for the given request context. The URL key
+     * is essentially the web app name + the name of the servlet separated
+     * by a slash (e.g. /Buyer/Main).
+     * @param requestContext
+     * @return URL key
+     */
     public static String urlKey (AWRequestContext requestContext)
     {
         if (_urlKey == null) {
@@ -222,6 +233,12 @@ public class AWRequestUtil
         return _urlKey;
     }
 
+    /**
+     * Returns the "delimited URL key" i.e. the URL key with a trailing
+     * slash.
+     * @param requestContext
+     * @return The "delimited URL key"
+     */
     public static String urlKeyDelimited (AWRequestContext requestContext)
     {
         if (_urlKeyDelimited == null) {
@@ -240,21 +257,23 @@ public class AWRequestUtil
     public static String getRequestUrl (AWRequestContext requestContext)
     {
         // get what the appserver believes to be the current request
-        String requestUrl = requestContext.requestUrl();
+        MultiTabSupport multiTabSupport = MultiTabSupport.Instance.get();
+        String requestUrl = multiTabSupport.stripTabFromUri(requestContext.requestUrl());
         String urlSuffix;
         int keyIndex = requestUrl.indexOf(urlKeyDelimited(requestContext));
         String urlKey = urlKey(requestContext);
+
         if (keyIndex == -1) {
             // look without slash
             keyIndex = requestUrl.indexOf(urlKey);
             while (keyIndex != -1 &&
-                   keyIndex+urlKey.length() != requestUrl.length() &&
-                   requestUrl.charAt(keyIndex+urlKey.length()) !=
-                   BeginQueryChar) {
+                    keyIndex + urlKey.length() != requestUrl.length() &&
+                    requestUrl.charAt(keyIndex + urlKey.length()) !=
+                            BeginQueryChar) {
                 // if the key found is not the last part of the requestURL
                 // or it doesn't end with ? or /, then keep searching since
                 // we've just found a spurious match
-                keyIndex = requestUrl.indexOf(urlKey,keyIndex+1);
+                keyIndex = requestUrl.indexOf(urlKey, keyIndex + 1);
             }
         }
 
@@ -266,10 +285,11 @@ public class AWRequestUtil
         else {
             // could not find either key or delimited key
             throw new AWGenericException("Unable to match request url: " + requestUrl +
-                " to application base url: " + applicationBaseUrl(requestContext));
+                    " to application base url: " + applicationBaseUrl(requestContext));
         }
 
-        return applicationBaseUrl(requestContext) + urlSuffix;
+        return multiTabSupport.insertTabInUri(applicationBaseUrl(requestContext) +
+                urlSuffix, requestContext.getTabIndex(), true);
     }
 
     public static String getRequestUrlMinusQueryString (AWRequestContext requestContext)
@@ -279,6 +299,6 @@ public class AWRequestUtil
         // (but isn't portable...)
         String requestUrl = requestContext.requestUrl();
         int qIndex = requestUrl.indexOf("?");
-        return (qIndex != -1) ? requestUrl.substring(0, qIndex) : requestUrl;
+        return (qIndex != -1) ? requestUrl.substring(0, qIndex): requestUrl;
     }
 }

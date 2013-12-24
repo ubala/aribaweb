@@ -2,7 +2,7 @@
     Copyright (c) 1996-2012 Ariba, Inc.
     All rights reserved. Patents pending.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#34 $
+    $Id: //ariba/platform/util/core/ariba/util/core/MapUtil.java#38 $
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ public final class MapUtil
 
     /**
      * Creates an empty ConcurrentHashMap
-     * 
+     *
      * @return new empty ConcurrentHashMap implementation
      * @see java.util.concurrent.ConcurrentHashMap
      * @aribaapi private
@@ -348,6 +348,40 @@ public final class MapUtil
     }
 
     /**
+     * Merges ReadOnlyMap into Map. The source map has precedence.
+     * <p/>
+     *
+     * @param dest the map into which <code>source</code> is to be merged
+     * @param source the map to merge into <code>dest</code>
+     * @return the destination map
+     * @See {@link #mergeMapIntoMap(Map, Map)}
+     * @aribaapi private
+     */
+    public static <K, V> Map<K, V> mergeMapIntoMap (Map<K, V> dest,
+        ReadOnlyMap<K, V> source)
+    {
+        return mergeMapIntoMap(dest, source.immutableMap());
+    }
+
+    /**
+     * Merges ReadOnlyMap into Map. The source map has precedence.
+     * <p/>
+     *
+     * @param dest the map into which <code>source</code> is to be merged
+     * @param source the map to merge into <code>dest</code>
+     * @param appendMergeListProperties
+     * @return the destination map
+     * @See {@link #mergeMapIntoMap(Map, Map, boolean)
+     * @aribaapi private
+     */
+    public static <K, V> Map<K, V> mergeMapIntoMap (Map<K, V> dest,
+        ReadOnlyMap<K, V> source,
+        boolean appendMergeListProperties)
+    {
+        return mergeMapIntoMap(dest, source.immutableMap(), appendMergeListProperties);
+    }
+
+    /**
         Merges two Maps together. The source map has precedence. <p/>
 
         The allowed keys and values in <code>source</code> and <code>dest</code>
@@ -380,117 +414,51 @@ public final class MapUtil
         @return the destination map
         @aribaapi private
     */
-    public static Map mergeMapIntoMap (Map dest, Map source)
+    public static <K, V> Map<K, V> mergeMapIntoMap (Map<K, V> dest, Map<K, V> source)
     {
         return mergeMapIntoMap(dest, source, false);
     }
 
-    public static Map mergeMapIntoMap (Map dest, Map source,
-                                       boolean appendMergeListProperties)
+    public static <K, V> Map<K, V> mergeMapIntoMap (Map<K, V> dest,
+        Map<K, V> source,
+        boolean appendMergeListProperties)
     {
+        for (Map.Entry<K, V> entry : source.entrySet()) {
+            updateMap(dest, appendMergeListProperties, entry.getKey(), entry.getValue());
+        }
 
-        Iterator i = source.keySet().iterator();
+        return dest;
+    }
 
-        while (i.hasNext()) {
-            Object key = i.next();
-            Object sourceValue = source.get(key);
-            Object destValue = dest.get(key);
-            if (destValue == null) {
-                dest.put(key, ListUtil.copyValue(sourceValue));
-                continue;
-            }
-            else if ((destValue instanceof Map) &&
-                     (sourceValue instanceof Map))
-            {
+    private static void updateMap (Map dest,
+        boolean appendMergeListProperties,
+        Object key,
+        Object sourceValue)
+    {
+        Object destValue = dest.get(key);
+        if (destValue == null) {
+            dest.put(key, ListUtil.copyValue(sourceValue));
+            return;
+        }
+        else if ((destValue instanceof Map) &&
+                 (sourceValue instanceof Map))
+        {
+            dest.put(key,
+                     mergeMapIntoMap(
+                         copyMap((Map)destValue),
+                         (Map)sourceValue));
+        }
+        else if ((destValue instanceof Map) &&
+                 (sourceValue instanceof List))
+        {
+            if (allElementsAreStrings((List)sourceValue)) {
                 dest.put(key,
                          mergeMapIntoMap(
                              copyMap((Map)destValue),
-                             (Map)sourceValue));
+                             convertListToMap(
+                                 (List)sourceValue)));
             }
-            else if ((destValue instanceof Map) &&
-                     (sourceValue instanceof List))
-            {
-                if (allElementsAreStrings((List)sourceValue)) {
-                    dest.put(key,
-                             mergeMapIntoMap(
-                                 copyMap((Map)destValue),
-                                 convertListToMap(
-                                     (List)sourceValue)));
-                }
-                else {
-                    List sourceVect = ListUtil.copyList((List)sourceValue);
-                    if (appendMergeListProperties) {
-                        ListUtil.appendAndRemoveIfPresent(sourceVect, destValue);
-                    }
-                    else {
-                        ListUtil.addElementIfAbsent(sourceVect, destValue);
-                    }
-                    dest.put(key, sourceVect);
-                }
-            }
-            else if ((destValue instanceof List) &&
-                     (sourceValue instanceof Map))
-            {
-                if (allElementsAreStrings((List)destValue)) {
-                    dest.put(key,
-                             mergeMapIntoMap(
-                                 convertListToMap((List)destValue),
-                                 (Map)sourceValue));
-                }
-                else {
-                    if (appendMergeListProperties) {
-                        ListUtil.appendAndRemoveIfPresent(((List)destValue),
-                                                     copyMap((Map)sourceValue));
-                    }
-                    else {
-                        ListUtil.addElementIfAbsent(((List)destValue),
-                                                    copyMap((Map)sourceValue));
-                    }
-                }
-            }
-            else if ((destValue instanceof Map) &&
-                     (sourceValue instanceof String))
-            {
-                Map destValueMap =
-                    copyMap((Map)destValue);
-                if (destValueMap.get(sourceValue) == null) {
-                    ((Map)destValue).put(sourceValue, map());
-                }
-            }
-            else if ((destValue instanceof String) &&
-                     (sourceValue instanceof Map))
-            {
-                Map sourceHash = copyMap((Map)sourceValue);
-                if (sourceHash.get(destValue) == null) {
-                    sourceHash.put(destValue, map());
-                }
-                dest.put(key, sourceHash);
-            }
-            else if ((destValue instanceof List) &&
-                     (sourceValue instanceof List))
-            {
-                if (appendMergeListProperties) {
-                    ListUtil.appendAndRemoveIfPresent((List)destValue,
-                                                  ListUtil.copyList((List)sourceValue));
-                }
-                else {
-                    ListUtil.addElementsIfAbsent((List)destValue,
-                                                 ListUtil.copyList((List)sourceValue));
-                }
-            }
-            else if ((destValue instanceof List) &&
-                     (sourceValue instanceof String))
-            {
-                if (appendMergeListProperties) {
-                    ListUtil.appendAndRemoveIfPresent((List)destValue, sourceValue);
-                }
-                else {
-                    ListUtil.addElementIfAbsent((List)destValue, sourceValue);
-                }
-            }
-            else if ((destValue instanceof String) &&
-                     (sourceValue instanceof List))
-            {
+            else {
                 List sourceVect = ListUtil.copyList((List)sourceValue);
                 if (appendMergeListProperties) {
                     ListUtil.appendAndRemoveIfPresent(sourceVect, destValue);
@@ -500,23 +468,94 @@ public final class MapUtil
                 }
                 dest.put(key, sourceVect);
             }
-            else if ((destValue instanceof String) &&
-                     (sourceValue instanceof String))
-            {
-                dest.put(key, sourceValue);
+        }
+        else if ((destValue instanceof List) &&
+                 (sourceValue instanceof Map))
+        {
+            if (allElementsAreStrings((List)destValue)) {
+                dest.put(key,
+                         mergeMapIntoMap(
+                             convertListToMap((List)destValue),
+                             (Map)sourceValue));
             }
-            else if (sourceValue == null) {
-                // explicit null
-                try {
-                    dest.put(key, null);
+            else {
+                if (appendMergeListProperties) {
+                    ListUtil.appendAndRemoveIfPresent(((List)destValue),
+                                                 copyMap((Map)sourceValue));
                 }
-                catch (NullPointerException e) {
-                    // dest doesn't support nulls, remove the value instead
-                    dest.remove(key);
+                else {
+                    ListUtil.addElementIfAbsent(((List)destValue),
+                                                copyMap((Map)sourceValue));
                 }
             }
         }
-        return dest;
+        else if ((destValue instanceof Map) &&
+                 (sourceValue instanceof String))
+        {
+            Map destValueMap =
+                copyMap((Map)destValue);
+            if (destValueMap.get(sourceValue) == null) {
+                ((Map)destValue).put(sourceValue, map());
+            }
+        }
+        else if ((destValue instanceof String) &&
+                 (sourceValue instanceof Map))
+        {
+            Map sourceHash = copyMap((Map)sourceValue);
+            if (sourceHash.get(destValue) == null) {
+                sourceHash.put(destValue, map());
+            }
+            dest.put(key, sourceHash);
+        }
+        else if ((destValue instanceof List) &&
+                 (sourceValue instanceof List))
+        {
+            if (appendMergeListProperties) {
+                ListUtil.appendAndRemoveIfPresent((List)destValue,
+                                              ListUtil.copyList((List)sourceValue));
+            }
+            else {
+                ListUtil.addElementsIfAbsent((List)destValue,
+                                             ListUtil.copyList((List)sourceValue));
+            }
+        }
+        else if ((destValue instanceof List) &&
+                 (sourceValue instanceof String))
+        {
+            if (appendMergeListProperties) {
+                ListUtil.appendAndRemoveIfPresent((List)destValue, sourceValue);
+            }
+            else {
+                ListUtil.addElementIfAbsent((List)destValue, sourceValue);
+            }
+        }
+        else if ((destValue instanceof String) &&
+                 (sourceValue instanceof List))
+        {
+            List sourceVect = ListUtil.copyList((List)sourceValue);
+            if (appendMergeListProperties) {
+                ListUtil.appendAndRemoveIfPresent(sourceVect, destValue);
+            }
+            else {
+                ListUtil.addElementIfAbsent(sourceVect, destValue);
+            }
+            dest.put(key, sourceVect);
+        }
+        else if ((destValue instanceof String) &&
+                 (sourceValue instanceof String))
+        {
+            dest.put(key, sourceValue);
+        }
+        else if (sourceValue == null) {
+            // explicit null
+            try {
+                dest.put(key, null);
+            }
+            catch (NullPointerException e) {
+                // dest doesn't support nulls, remove the value instead
+                dest.remove(key);
+            }
+        }
     }
 
     /**
@@ -537,7 +576,8 @@ public final class MapUtil
         return mergeMapIntoMapWithObjects(dest, source, false);
     }
 
-    public static Map mergeMapIntoMapWithObjects (Map dest, Map source, boolean overwriteMismatchedClasses)
+    public static Map mergeMapIntoMapWithObjects (Map dest, Map source,
+                                                  boolean overwriteMismatchedClasses)
     {
         Iterator i = source.keySet().iterator();
 
@@ -1166,6 +1206,48 @@ public final class MapUtil
     }
 
     /**
+     * Get a Map value out of the map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the Map value, or null if it isn't found for any reason
+     */
+    public static <K, V> Map<K, V> getMapArg (Map args, String key)
+    {
+        if (args == null || key == null) {
+            return null;
+        }
+
+        Object value = args.get(key);
+        if (! (value instanceof Map)) {
+            return null;
+        }
+
+        return (Map<K, V>)value;
+    }
+
+    /**
+     * Get a List value out of the map
+     *
+     * @param args the maps to get the key from
+     * @param key the key of the value we're looking up
+     * @return the List value, or null if it isn't found for any reason
+     */
+    public static <K> List<K> getListArg (Map args, String key)
+    {
+        if (args == null || key == null) {
+            return null;
+        }
+
+        Object value = args.get(key);
+        if (! (value instanceof List)) {
+            return null;
+        }
+
+        return (List<K>)value;
+    }
+
+    /**
      * Get a List value out of the map
      *
      * @param args the maps to get the key from
@@ -1377,12 +1459,14 @@ public final class MapUtil
                             if (!changeValue.equals(baselineValue)) {
                                 if (   changeValue instanceof Map
                                         && baselineValue instanceof Map) {
-                                    delta.put(key, diff((Map)changeValue,(Map)baselineValue));
+                                    delta.put(key,
+                                            diff((Map)changeValue,(Map)baselineValue));
                                     continue;
                                 }
                                 if (   changeValue instanceof List
                                         && baselineValue instanceof List) {
-                                    delta.put(key, ListUtil.diff((List)changeValue,(List)baselineValue));
+                                    delta.put(key, ListUtil.diff((List)changeValue,
+                                            (List)baselineValue));
                                     continue;
                                 }
                                 if (!changeValue.equals(baselineValue)) {

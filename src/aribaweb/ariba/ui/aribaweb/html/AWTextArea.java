@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.java#32 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWTextArea.java#33 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -286,4 +286,12 @@ public class AWTextArea extends AWComponent
         return _placeholder == null ? null :
                 AWEncodedString.sharedEncodedString("ariba.Handlers.hTextBlur(this, event)");
     }
+
+    public AWEncodedString onPasteString ()
+    {
+        return AWEncodedString.sharedEncodedString(
+            "var fnc=function(){ariba.Dom.limitTextLength(this," + maxLength()
+                    + ");}; setTimeout(fnc.bind(this),250)");
+    }
+
 }

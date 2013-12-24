@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuLink.awl#32 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/PopupMenuLink.awl#33 $
     </Copyright>
 
     <Overview>
@@ -115,6 +115,10 @@
     <Binding key="shouldOpen" direction="get" type="boolean" required="$false">
         Tells weather the popup menu has to be open by default when displayed.
     </Binding>
+
+     <Binding key="behavior" direction="get" type="String" required="$false" default="PML">
+        Override the default behavior (opening the popup menu).
+    </Binding>
 </a:Api>
 <!--- Note that we generate a span to handle key clicks, and an anchor to handle mouse down events
       for compatibility with IE on Mac OS, which does not allow click events from being handled in anchors -->\
@@ -125,7 +129,7 @@
     invokeAction="$null"
     isSender="$isSender"
     id="$elementId"
-    bh="PML"
+    bh="$^behavior:PML"
     _pos="$position"
     _mid="$menuId"
     onMouseOver="$^onMouseOver"
@@ -142,7 +146,7 @@
     <a:RefreshRegion alwaysRender="$true">\
         <a:ClientSideScript>\
             var link = ariba.Dom.getElementById('$elementId');
-            ariba.Menu.menuLinkOnClick(link, link.getAttribute("_mid"), '$elementId', null);
+            ariba.Menu.PML.click(link);
         </a:ClientSideScript>\
     </a:RefreshRegion>
 </a:If>\

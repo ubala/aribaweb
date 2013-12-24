@@ -115,7 +115,23 @@ ariba.Refresh = function() {
             // pick up the scratch div
             var tmpDiv = document.createElement("div");
             tmpDiv.innerHTML = _currentUpdateSource.getOuterHtml(sourceHandle);
-            var tmpTable = tmpDiv.firstChild;
+            // CR #1-CI005F ahebert 08/26/13 :
+            // First child should work but invalid html mark-up may
+            // cause floating markup before the table get rendered. It can
+            // happen that we have span or any other tag in table templates.
+            // If we are in this function, the source and the target better
+            // be tables so this loop check for the child and set tmpTable
+            // to the first child that is actually a table.
+            var tmpTable = null;
+            for (var i = 0 ; i < tmpDiv.childNodes.length ; ++i){
+                if (tmpDiv.childNodes[i].tagName === poTarget.tagName){
+                    tmpTable = tmpDiv.childNodes[i];
+                    break;
+                }
+            }
+            if (tmpTable == null){
+                tmpTable = tmpDiv.firstChild;
+            }
             this.replaceRows(tmpTable, poTarget);
         },
 

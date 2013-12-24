@@ -280,6 +280,13 @@ ariba.Menu = function() {
             return false;
         },
 
+        // get the element to be used as a reference while positioning the menu.
+        getMenuTarget : function (pos, elm)
+        {
+            var target = (pos == null || pos == "this" || pos == "right") ? elm : Dom.getElementById(pos);
+            return target;
+        },
+
         // see if menus doesn't fit on screen; if so make it two column
         checkMenuLayout : function (div, lazyDiv)
         {
@@ -518,13 +525,27 @@ ariba.Menu = function() {
 
         EOF:0};
 
-    // overrides on Widgets    
+    // overrides on Widgets
     Util.extend(Widgets, {
         hideActiveMenu : function ()
         {
             Menu.hideActiveMenu();
         }
     });
+
+    //
+    // iPad - specific methods
+    //
+    if (Dom.isIPad) Util.extend(Menu, function () {
+        return {
+            getMenuTarget : function (pos, elm)
+            {
+                return elm;
+            },
+
+        EOF:0};
+
+    }());
 
     //
     // IE - specific methods
@@ -780,25 +801,26 @@ ariba.Menu = function() {
         EOF:0};
     }());
 
+    Menu.PML = {
+         click : function (elm, evt) {
+             ariba.Widgets.hideActiveHoverCard();
+             Menu.activateMenuLink(elm);
+             var ret = true;
+             var pos = elm.getAttribute("_pos");
+             var target = Menu.getMenuTarget(pos, elm);
+             ret = Menu._menuLinkOnClick(pos, target, elm.getAttribute("_mid"), elm.id, evt);
+             return ret;
+         },
+        
+         keydown : function (elm, evt) {
+             Menu.activateMenuLink(elm);
+             return Menu.menuLinkOnKeyDown(elm, elm.getAttribute("_mid"), elm.id, evt);
+         }
+    };
+
     Event.registerBehaviors({
         // PopupMenuLink
-        PML : {
-             click : function (elm, evt) {
-                 ariba.Widgets.hideActiveHoverCard();
-                 Menu.activateMenuLink(elm);
-                 var ret = true;
-                 var pos = elm.getAttribute("_pos");
-                 var target = (pos == null || pos == "this" || pos == "right") ? elm : Dom.getElementById(pos);
-                 ret = Menu._menuLinkOnClick(pos, target, elm.getAttribute("_mid"), elm.id, evt);
-                 return ret;
-             },
-
-
-             keydown : function (elm, evt) {
-                 Menu.activateMenuLink(elm);
-                 return Menu.menuLinkOnKeyDown(elm, elm.getAttribute("_mid"), elm.id, evt);
-             }
-         },
+        PML : Menu.PML,
 
          // PMI - PopupMenuItem
          PMI_NoHover : {

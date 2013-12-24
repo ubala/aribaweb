@@ -33,7 +33,7 @@
     <import file="${aw.home}/tools/build-module.xml"/>
 
     <property name="build.plugin.dir" value="${dist.root.dir}/ide"/>
-    <property name="dest.jar" location="${build.plugin.dir}/aribawebIdeaPlugin.jar"/>
+    <property name="dest.jar" location="${build.plugin.dir}/aribawebIdeaPlugin-12.jar"/>
 
     <available file="lib/idea" property="idea.lib.dir" value="lib/idea"/>
 
@@ -72,8 +72,15 @@
     </target>
 
     <target name="copy-resources">
+        <echo message="FROM ${dest.jar} TO ${build.classes.dir} " />
         <copy todir="${build.classes.dir}">
-            <fileset dir="${src.resource.path}" includes="**/*.xml" excludes="build*.xml,project/"/>
+            <fileset dir="${src.resource.path}" >
+                <include name="ariba/**/*.xml"/>
+                <include name="**/*.png"/>
+                <exclude name="build*.xml" />
+                <exclude name="project" />
+                <exclude name="**/build/**/*" />
+            </fileset>
         </copy>
     </target>
 

@@ -12,26 +12,27 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXDebugResourceActions.java#15 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWXDebugResourceActions.java#17 $
 */
 package ariba.ui.aribaweb.core;
 
 import ariba.ui.aribaweb.util.AWContentType;
-import ariba.ui.aribaweb.util.AWResourceManager;
 import ariba.ui.aribaweb.util.AWFileResource;
-import ariba.ui.aribaweb.util.Log;
 import ariba.ui.aribaweb.util.AWResource;
+import ariba.ui.aribaweb.util.AWResourceManager;
+import ariba.ui.aribaweb.util.Log;
 import ariba.util.core.Assert;
-import ariba.util.core.StringUtil;
-import ariba.util.core.GrowOnlyHashtable;
 import ariba.util.core.Fmt;
+import ariba.util.core.GrowOnlyHashtable;
+import ariba.util.core.StringUtil;
+import ariba.util.http.multitab.MultiTabSupport;
 
-import javax.servlet.http.HttpSession;
-import java.util.Locale;
-import java.util.Map;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Locale;
+import java.util.Map;
+import javax.servlet.http.HttpSession;
 
 public class AWXDebugResourceActions extends AWDirectAction
 {
@@ -105,7 +106,7 @@ public class AWXDebugResourceActions extends AWDirectAction
             AWContentType type = AWContentType.contentTypeForFileExtension(ext);
             if (type != null) {
                 response.setContentType(type);
-            }            
+            }
         }
 
         response.setBrowserCachingEnabled(true);
@@ -122,7 +123,7 @@ public class AWXDebugResourceActions extends AWDirectAction
     {
         return urlForResourceInDirectory(requestContext, dir, resourcePath, false);
     }
-    
+
     public static String urlForResourceInDirectory (AWRequestContext requestContext, String dir, String resourcePath,
                                                     boolean useFullURL)
     {
@@ -168,8 +169,15 @@ public class AWXDebugResourceActions extends AWDirectAction
         if (index > 0) {
             urlString = urlString.substring(0, index);
         }
-        return urlString;
 
+        if (requestContext == null) {
+            return urlString;
+        }
+        else {
+            MultiTabSupport multiTabSupport = MultiTabSupport.Instance.get();
+            return multiTabSupport.insertTabInUri(urlString, requestContext.getTabIndex(),
+                    true);
+        }
     }
 
     public static String  urlForResourceNamed (AWRequestContext requestContext, String name)

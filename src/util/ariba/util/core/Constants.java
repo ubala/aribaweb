@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1996-2011 Ariba, Inc.
+    Copyright (c) 1996-2013 Ariba, Inc.
     All rights reserved. Patents pending.
 
     Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Constants.java#27 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Constants.java#28 $
 */
 
 package ariba.util.core;
@@ -245,6 +245,12 @@ public class Constants implements Externalizable
         @aribaapi ariba
     */
     public static final String MapType = Map.class.getName();
+
+    /**
+        String constant for <code>java.lang.StringBuffer</code>
+        @aribaapi ariba
+    */
+    public static final String StringBufferType = StringBuffer.class.getName();
 
 
     /**

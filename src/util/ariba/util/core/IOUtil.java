@@ -1,6 +1,10 @@
 /*
-    Copyright (c) 1996-2011 Ariba, Inc.
+    Copyright (c) 1996-2013 Ariba, Inc.
     All rights reserved. Patents pending.
+
+    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#30 $
+
+    Responsible: platform
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,34 +16,34 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
-    $Id: //ariba/platform/util/core/ariba/util/core/IOUtil.java#27 $
 */
 
 package ariba.util.core;
 
 import ariba.util.i18n.I18NUtil;
 import ariba.util.log.Log;
+import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.Writer;
+import java.io.UnsupportedEncodingException;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Closeable;
 import java.io.LineNumberReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.List;
@@ -863,6 +867,69 @@ public final class IOUtil
     }
 
     /**
+     Execute the Url String.
+     Going forward this method name makes sense for executing Url
+
+     The reason for not using IOUtil.stringFromURL() api is that
+     it uses the available() method on InputStream which is not
+     advisable to determine the content length.
+
+     This method will return the content existing at the given URL
+     in the String form using the encoding passed. If encoding is
+     passed as null, then it will use the UTF8 encoding.
+     @param url the URL to read
+     @param encoding encoding of the content present at given url
+     @return the contents of the URL, or null if there
+     are any problems
+     @aribaapi documented
+     */
+    public static String executeURL (String url, String encoding)
+    {
+        BufferedReader reader = null;
+        InputStream inputStream = null;
+        try
+        {
+            URL httpUrl = URLUtil.makeURL(url);
+            URLConnection urlConnection = httpUrl.openConnection();
+            inputStream = urlConnection.getInputStream();
+
+            if (encoding == null) {
+                encoding = I18NUtil.EncodingUTF8;
+            }
+            reader = IOUtil.bufferedReader(inputStream, encoding);
+            String line;
+            FastStringBuffer response = new FastStringBuffer();
+            while ((line = reader.readLine()) != null)
+            {
+                response.append(line);
+                response.append(System.getProperty("line.separator"));
+            }
+            return response.toString();
+        }
+        catch (IOException ioe)
+        {
+            Log.util.warning(11773, url, SystemUtil.stackTrace(ioe));
+            return null;
+        }
+        finally
+        {
+            close(reader);
+            close(inputStream);
+        }
+    }
+
+    /**
+     * Returns the content of URL in String form using UTF8 encoding.
+     * @param url the URL to read
+     * @return  the contents of the URL, or null if there
+     * are any problems
+     */
+    public static String executeURL (String url)
+    {
+        return executeURL(url, null);
+    }
+
+    /**
         Read the contents of a URL as a string.
 
         @param url the URL to read
@@ -1064,73 +1131,19 @@ public final class IOUtil
     }
 
     /**
-        Helper method to close an input stream without exceptions in a
-        null safe manner.
-        @param in the InputStream to close.
-        @aribaapi ariba
-    */
-    public static final void close (InputStream in)
+     * Helper method to close an Object which implements
+     * Closeable interface without exceptions in
+     * a null safe manner.
+     * @param obj   Object needs to be closed
+     */
+    public static void close (Closeable obj)
     {
-        if (in != null) {
+        if (obj != null) {
             try {
-                in.close();
+                obj.close();
             }
-            catch (IOException ex) {
-                Log.util.warning(8510, SystemUtil.stackTrace(ex));
-            }
-        }
-    }
-
-    /**
-        Helper method to close an output stream without exceptions in
-        a null safe manner.
-        @param out the OutputStream to close.
-        @aribaapi ariba
-    */
-    public static final void close (OutputStream out)
-    {
-        if (out != null) {
-            try {
-                out.close();
-            }
-            catch (IOException ex) {
-                Log.util.warning(8512, SystemUtil.stackTrace(ex));
-            }
-        }
-    }
-
-    /**
-        Helper method to close a Reader without exceptions in a
-        null safe manner.
-        @param in the InputStream to close.
-        @aribaapi ariba
-    */
-    public static final void close (Reader in)
-    {
-        if (in != null) {
-            try {
-                in.close();
-            }
-            catch (IOException ex) {
-                Log.util.warning(8510, SystemUtil.stackTrace(ex));
-            }
-        }
-    }
-
-    /**
-        Helper method to close a Writer without exceptions in
-        a null safe manner.
-        @param out the OutputStream to close.
-        @aribaapi ariba
-    */
-    public static final void close (Writer out)
-    {
-        if (out != null) {
-            try {
-                out.close();
-            }
-            catch (IOException ex) {
-                Log.util.warning(8512, SystemUtil.stackTrace(ex));
+            catch (IOException ioe) {
+                Log.util.warning(11772, obj, SystemUtil.stackTrace(ioe));
             }
         }
     }
@@ -1183,8 +1196,7 @@ public final class IOUtil
         Reader reader = null;
         FileInputStream fis = new FileInputStream(file);
         try {
-            reader = new BufferedReader(
-                new InputStreamReader(fis, charset), 1024);
+            reader = IOUtil.bufferedReader(fis, charset.name());
             return grep(reader, regex);
         }
         finally {
@@ -1263,8 +1275,7 @@ public final class IOUtil
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(input);
-            reader = new BufferedReader(
-                new InputStreamReader(fis, charset), 1024);
+            reader = IOUtil.bufferedReader(fis, charset.name());
             searchReplace(reader, writer, regexToFind, toReplace);
         }
         finally {
@@ -1309,8 +1320,7 @@ public final class IOUtil
         Writer writer = null;
         try {
             fos = new FileOutputStream(output);
-            writer = new BufferedWriter(
-                new OutputStreamWriter(fos, charset), 1024);
+            writer = IOUtil.bufferedWriter(fos, charset.name());
             searchReplace(input, writer, regexToFind, toReplace);
         }
         finally {
@@ -1378,7 +1388,7 @@ public final class IOUtil
         List<String> result = ListUtil.list();
         try {
             is = new BufferedInputStream(new FileInputStream(file));
-            Reader reader = new InputStreamReader(is, charset);
+            Reader reader = IOUtil.bufferedReader(is, charset.name());
             LineNumberReader lineNumberReader =
                 new LineNumberReader(reader);
             for (int i = 0; i < n; i++) {
@@ -1425,7 +1435,7 @@ public final class IOUtil
         InputStream is = null;
         try {
             is = new BufferedInputStream(new FileInputStream(file));
-            Reader reader = new InputStreamReader(is, charset);
+            Reader reader = IOUtil.bufferedReader(is, charset.name());
             LineNumberReader lineNumberReader = new LineNumberReader(reader);
             FastStringBuffer buffer = new FastStringBuffer();
 
@@ -1475,7 +1485,7 @@ public final class IOUtil
         OutputStream os = null;
         try {
             os = new BufferedOutputStream(new FileOutputStream(file, append));
-            Writer writer = new OutputStreamWriter(os, charset);
+            Writer writer = IOUtil.bufferedWriter(os, charset.name());
             writer.write(object.toString());
             writer.flush();
         }

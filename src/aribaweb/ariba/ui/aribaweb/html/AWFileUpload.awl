@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUpload.awl#16 $
+        $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUpload.awl#18 $
     </Copyright>
 
     <Overview>
@@ -106,11 +106,15 @@
         This option can only be selected if the AWApplication provides an encryption provider.
     </Binding>
     
+    <Binding key="disabled" type="boolean" direction="get" required="$false">
+        Makes the File upload control unclickable and greys out its appearance.
+    </Binding>
+
 </a:Api>\
 <!--- Bogus conditional to deal elementId cross-phase mismatch in AWFileUploadInternals -->
 <a:If ifTrue="$true">
     <a:FileUploadInternals inputStream="$^inputStream" bytes="$^bytes" file="$^file"
         filename="$^filename" mimeType="$^mimeType" fileSizeExceeded="$^fileSizeExceeded"
         name="$^name" newMode="$^newMode" maxLength="$^maxLength" encrypt="$^encrypt"
-        otherBindings="$otherBindingsValues"/>
+        otherBindings="$otherBindingsValues" disabled="$^disabled"/>
 </a:If>

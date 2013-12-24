@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StringHandler.java#21 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/StringHandler.java#22 $
 */
 
 package ariba.ui.widgets;
@@ -35,6 +35,7 @@ public abstract class StringHandler extends BaseHandler
     public static final String Training = "Training";
     public static final String Support = "Support";
     public static final String QuickTour = "QuickTour";
+    public static final String FeatureLink = "FeatureLink";
     public static final String Contact = "Contact";
     public static final String Logout = "Logout";
     public static final String Preferences = "Preferences";

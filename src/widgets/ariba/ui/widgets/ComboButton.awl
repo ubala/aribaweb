@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ComboButton.awl#1 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/ComboButton.awl#2 $
     </Copyright>
 
     <NamedContent name="default" required="true">
@@ -31,7 +31,7 @@
         <td width="1%" nowrap="true" class="multiple_button_left">\
             <a:IncludeContent name="default"/>\
         </td>\
-        <td width="20">\
+        <td>\
             <w:PopupMenuLink menuId="$elementId" position="right" class="multiple_button_right">\
                 <div class="dropdownarrow" style="position:relative;top:10px;left:2px;height:16px;"></div>\
             </w:PopupMenuLink>\

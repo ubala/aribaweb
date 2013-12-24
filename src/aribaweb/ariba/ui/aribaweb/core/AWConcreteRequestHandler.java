@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteRequestHandler.java#21 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWConcreteRequestHandler.java#22 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -134,6 +134,11 @@ abstract public class AWConcreteRequestHandler extends AWBaseObject implements A
         return url;
     }
 
+    /**
+     * The adaptorPrefix is the part of the URL reserved for
+     * {tomcat-application-name}.
+     * @return The tomcat-application-name.
+     */
     public String adaptorPrefix ()
     {
         return _adaptorPrefix;

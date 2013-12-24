@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseMonitorStatsPage.java#12 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWBaseMonitorStatsPage.java#13 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -65,14 +65,27 @@ public class AWBaseMonitorStatsPage extends AWComponent implements AWMonitorStat
         return false;
     }
 
-    public int activeSessionCount()
+    public int activeSessionCount ()
     {
-        return ((AWConcreteApplication)AWConcreteApplication.sharedInstance()).getUISessionCount();
+        return ((AWConcreteApplication)AWConcreteApplication.sharedInstance())
+            .getUISessionCount();
     }
 
     public List<NamedValue> activeSessionCountBuckets ()
     {
-        return ((AWConcreteApplication)AWConcreteApplication.sharedInstance()).getUISessionCountBuckets();
+        return ((AWConcreteApplication)AWConcreteApplication.sharedInstance())
+            .getUISessionCountBuckets();
+    }
+
+    public List<NamedValue> activeSessionStatusBuckets ()
+    {
+        boolean showSessionStatus = "true".equals(pageComponent().requestContext()
+            .formValueForKey("showSessionStatus"));
+        if (showSessionStatus) {
+            return ((AWConcreteApplication)AWConcreteApplication.sharedInstance())
+                .getUISessionStatusBuckets();
+        }
+        return null;
     }
 
     public List getItemsToDisplay ()

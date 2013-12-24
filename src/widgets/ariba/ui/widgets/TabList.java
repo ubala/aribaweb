@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.java#4 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.java#5 $
 */
 
 package ariba.ui.widgets;
@@ -44,6 +44,7 @@ public final class TabList extends AWComponent
     private int _currentIndex;
     private Object _selectedTabDefinition;
     private AWBinding _labelBinding;
+    private AWBinding _tipBinding;
     private boolean _wasPreviousSelected;
     private AWBinding _semanticKeyBinding;
     public AWEncodedString _allTabsMenuId;
@@ -71,6 +72,7 @@ public final class TabList extends AWComponent
             _visibleTabs = _allTabs;
         }
         _isSubmitForm = initSubmitForm();
+        _tipBinding = bindingForName(AWBindingNames.tip, false);
     }
 
     protected void sleep ()
@@ -88,6 +90,7 @@ public final class TabList extends AWComponent
         _currentTabDefinition = null;
         _currentIndex = 0;
         _labelBinding = null;
+        _tipBinding = null;
         _allTabsMenuId = null;
     }
 
@@ -130,6 +133,35 @@ public final class TabList extends AWComponent
         return encodedStringValueForBinding(_labelBinding);
     }
 
+    public AWEncodedString currentTip ()
+    {
+        return encodedStringValueForBinding(_tipBinding);
+    }
+
+    public boolean showTip ()
+    {
+        return booleanValueForBinding(AWBindingNames.showTip) &&
+               !nullOrEmptyTip();
+    }
+
+    public AWResponseGenerating closeTabTip ()
+    {
+        boolean showTip = booleanValueForBinding(AWBindingNames.showTip);
+        if (!showTip) {
+            return null;
+        }
+
+        setValueForBinding(false, AWBindingNames.showTip);
+        return null;
+    }
+  
+    private boolean nullOrEmptyTip ()
+    {
+        AWEncodedString tip = currentTip();
+        return tip == null ||
+               StringUtil.nullOrEmptyOrBlankString(tip.string());
+    }
+    
     public void setCurrentIndex (int index)
     {
         _currentIndex = index;
@@ -231,9 +263,12 @@ public final class TabList extends AWComponent
     {
         _semanticKeyBinding = bindingForName(AWBindingNames.awname, false);
         _labelBinding = bindingForName(AWBindingNames.label, false);
+        _tipBinding = bindingForName(AWBindingNames.tip, false);
         _barExtensionBackground = AWBaseImage.imageUrl(requestContext, component, "awxBarExtension.gif");
+        
         super.renderResponse(requestContext, component);
         _labelBinding = null;
+        _tipBinding = null;
         _barExtensionBackground = null;
     }
 

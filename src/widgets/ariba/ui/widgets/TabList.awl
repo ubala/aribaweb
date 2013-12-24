@@ -13,7 +13,7 @@
         See the License for the specific language governing permissions and
         limitations under the License.
 
-        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#12 $
+        $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/TabList.awl#14 $
     </Copyright>
 
     <Overview>
@@ -136,14 +136,33 @@
                                         <td class="$currentTabCssClass"><div class="tabLeft"></div></td>\
                                         <td>
                                             <div class="$currentTabCssClass">\
-                                                <a:Hyperlink omitTags="$^disabled"
-                                                             action="$tabClicked"
-                                                             class="$currentTabCssClass"
-                                                               submitForm="$isSubmitForm"
-                                                             awname="$currentTabSemanticKey">\
-                                                    <a:String value="$currentLabel"
-                                                              escapeUnsafeHtml="$true"/>\
-                                                </a:Hyperlink>\
+                                                <a:If ifTrue="$showTip">\
+                                                    <w:HoverCard position="bottom" disableLazyDiv="false" class="" shouldOpen="$true">
+                                                        <a:Content name="link">
+                                                            <a:Hyperlink omitTags="$^disabled"
+                                                                         action="$tabClicked"
+                                                                         class="$currentTabCssClass"
+                                                                         submitForm="$isSubmitForm"
+                                                                         awname="$currentTabSemanticKey">\
+                                                                <a:String value="$currentLabel"
+                                                                          escapeUnsafeHtml="$true"/>\
+                                                            </a:Hyperlink>\
+                                                        </a:Content>
+                                                        <a:Content name="content">
+                                                            <div class="tip_close"><a:Hyperlink action="$closeTabTip">X</a:Hyperlink></div>\
+                                                            <a:String value="$^tip" escapeUnsafeHtml="$true"/>\
+                                                        </a:Content>
+                                                    </w:HoverCard>\
+                                                <a:Else/>
+                                                    <a:Hyperlink omitTags="$^disabled"
+                                                                 action="$tabClicked"
+                                                                 class="$currentTabCssClass"
+                                                                 submitForm="$isSubmitForm"
+                                                                 awname="$currentTabSemanticKey">\
+                                                        <a:String value="$currentLabel"
+                                                                  escapeUnsafeHtml="$true"/>\
+                                                    </a:Hyperlink>\
+                                                </a:If>
                                             </div>\
                                         </td>
                                         <td class="$currentTabCssClass"><div class="tabRight"></div></td>\
@@ -168,7 +187,8 @@
                                     <a:For list="$tabDefinitions" item="$currentTabDefinition">
                                         <w:PopupMenuItem action="$tabClicked"
                                                        style="$currentTabMenuItemStyle">\
-                                            $currentLabel
+                                            <a:String value="$currentLabel"
+                                                      escapeUnsafeHtml="$true"/>\
                                         </w:PopupMenuItem>
                                     </a:For>
                                 </w:PopupMenu>

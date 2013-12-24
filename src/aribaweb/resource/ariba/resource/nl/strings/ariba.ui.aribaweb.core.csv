@@ -1,5 +1,5 @@
 Cp1252,,,,
-"AWBaseRequest",1,"Uploaded %s KB of %s KB...","%s KB van %s KB geüploaded...","Appears in file upload panel"
+"AWBaseRequest",1,"Uploaded %s KB of %s KB...","%s KB van %s KB geüpload...","Appears in file upload panel"
 "AWComponentActionRequestHandler",1,"Waiting for previous request to complete ...","Wachten tot vorige verzoek is voltooid...","Appears in page loading status panel"
 "AWComponentActionRequestHandler",2,"Processing request ...","Verzoek wordt verwerkt...","Appears in page loading status panel"
 "AWErrorInfo",1,"Unknown Error","Onbekende fout",""

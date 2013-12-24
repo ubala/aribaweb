@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#95 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/core/AWSession.java#96 $
 */
 
 package ariba.ui.aribaweb.core;
@@ -1487,6 +1487,8 @@ public class AWSession extends AWBaseObject
 
                 stats.setShutdownMode(Boolean.toString(
                     application().monitorStats().isInShutdownWarningPeriod()));
+
+                stats.setTabIndex(Integer.toString(requestContext.getTabIndex()));
             }
 
             _lastAccessedTime = _httpSession.getLastAccessedTime();

@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#9 $
+    $Id: //ariba/platform/ui/aribaweb/ariba/ui/aribaweb/html/AWFileUploadInternals.java#11 $
 */
 
 package ariba.ui.aribaweb.html;
@@ -49,7 +49,7 @@ public final class AWFileUploadInternals extends AWComponent
         BindingNames.inputStream, BindingNames.bytes, BindingNames.name,
         BindingNames.filename, BindingNames.mimeType, BindingNames.fileSizeExceeded,
         BindingNames.file, BindingNames.newMode, BindingNames.maxLength,
-        BindingNames.encrypt
+        BindingNames.encrypt, BindingNames.disabled
     };
 
     public AWEncodedString _elementId;
@@ -80,6 +80,12 @@ public final class AWFileUploadInternals extends AWComponent
             }
         }
         return _fileUploadName;
+    }
+
+    public Object disabled ()
+    {
+        boolean disabledBinding = booleanValueForBinding(BindingNames.disabled);
+        return disabledBinding ? "true": null;
     }
 
     public void renderResponse(AWRequestContext requestContext, AWComponent component)

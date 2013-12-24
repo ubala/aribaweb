@@ -1,5 +1,5 @@
 /*
-    Copyright 1996-2008 Ariba, Inc.
+    Copyright 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,13 +12,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/Chrono.java#7 $
+    $Id: //ariba/platform/util/core/ariba/util/core/Chrono.java#10 $
 */
 
 package ariba.util.core;
 
 import ariba.util.log.Log;
 import ariba.util.log.Logger;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.util.List;
 
 /**
     Simple timing class, used for timing one or more trials of an event.
@@ -51,7 +54,21 @@ public class Chrono
     private Logger log;
     private int startInfoId = -1;
     private int stopInfoId = -1;
+    private long cpuStart;
+    private long cpuStop;
+    private long userStart;
+    private long userStop;
 
+    private static ThreadLocal<List<String>> _stack = new ThreadLocal<List<String>>()
+    {
+        @Override
+        protected List<String> initialValue ()
+        {
+            return ListUtil.list();
+        }
+    };
+
+    private String parent = null;
 
     /**
         Creates a new instance of a <code>Chrono</code> timer.
@@ -77,6 +94,10 @@ public class Chrono
         enabled = true;
         start = 0;
         stop = 0;
+        cpuStart = 0;
+        cpuStop = 0;
+        userStart = 0;
+        userStop = 0;
         totalTime = 0;
         trials = 0;
         log = logger;
@@ -105,8 +126,13 @@ public class Chrono
     {
         start = 0;
         stop = 0;
+        cpuStart = 0;
+        cpuStop = 0;
+        userStart = 0;
+        userStop = 0;
         totalTime = 0;
         trials = 0;
+        _stack.get().clear();
     }
 
     /**
@@ -120,12 +146,30 @@ public class Chrono
         }
         if (enabled) {
             start = System.currentTimeMillis();
+            if (log != null && log.isDebugEnabled()) {
+                ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+                cpuStart = bean.getCurrentThreadCpuTime();
+                userStart = bean.getCurrentThreadUserTime();
+            }
+            List<String> stack = null;
+            if (_stack != null) {
+                stack = _stack.get();
+            }
+            if (!ListUtil.nullOrEmptyList(stack)) {
+                parent = stack.get(stack.size() - 1);
+            }
+            if (stack != null) {
+                stack.add(name);                
+            }
             if (log != null) {
+                String fullName = Fmt.S("%s (%s) (Thread %s)",
+                             name, parent, Thread.currentThread().getName());
+
                 if (startInfoId > 0) {
-                    log.info(startInfoId, name);
+                    log.info(startInfoId, fullName);
                 }
                 else {
-                    log.debug("Phase '%s' started", name);
+                    log.debug("Phase '%s' started", fullName);
                 }
             }
         }
@@ -144,22 +188,29 @@ public class Chrono
             }
             else {
                 stop = System.currentTimeMillis();
+                if (log != null && log.isDebugEnabled()) {
+                    ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+                    cpuStop = bean.getCurrentThreadCpuTime();
+                    userStop = bean.getCurrentThreadUserTime();
+                }
             }
 
             int trialTime = (int)(stop - start);
             totalTime += trialTime;
             trials++;
             if (log != null) {
+                String fullName = Fmt.S("%s (%s) (Thread %s)",
+                             name, parent, Thread.currentThread().getName());
                 if (stopInfoId > 0 && log.isInfoEnabled()) {
                     log.info(stopInfoId,
-                             name,
+                             fullName,
                              Integer.toString(trials),
                              Double.toString(trialTime / 1000),
                              getExtraInfo(true));
                 }
                 else if (log.isDebugEnabled()) {
                     log.debug("Phase '%s' (trial #%s) finished: duration=%ss%s",
-                              name,
+                              fullName,
                               Integer.toString(trials),
                               Double.toString(trialTime / 1000),
                               getExtraInfo(true));
@@ -167,6 +218,13 @@ public class Chrono
             }
             start = 0;
             stop = 0;
+            List<String> stack = null;
+            if (_stack != null) {
+                stack = _stack.get();
+                if (!ListUtil.nullOrEmptyList(stack)) {
+                    stack.remove(stack.size() - 1);
+                }
+            }
         }
     }
 
@@ -227,17 +285,21 @@ public class Chrono
         }
 
         if (trials == 1) {
-            return Fmt.S("Timing for %s: %ss%s",
+            return Fmt.S("Timing for %s (%s) (Thread %s): %ss%s",
                          name,
+                         parent,
+                         Thread.currentThread().getName(),
                          Double.toString(getTotalSeconds()),
                          getExtraInfo(false));
         }
-        return Fmt.S("Timing for %s (%s trials): total = %ss, avg = %ss%s",
-                     name,
+        return Fmt.S("Timing for %s (%s) (Thread %s) (%s trials): total = %ss, avg = %ss%s",
+                     new Object[] {name,
+                     parent,
+                     Thread.currentThread().getName(),
                      Integer.toString(trials),
                      Double.toString(getTotalSeconds()),
                      Double.toString(getAverageSeconds()),
-                     getExtraInfo(false));
+                     getExtraInfo(false)});
     }
 
     /**
@@ -249,6 +311,10 @@ public class Chrono
     */
     protected String getExtraInfo (boolean latestTrial)
     {
+        if (log != null && log.isDebugEnabled()) {
+            return Fmt.S(" (User: %sms, Total: %sms)",
+                    (userStop - userStart)/1000000, (cpuStop - cpuStart)/1000000);
+        }
         return "";
     }
 }

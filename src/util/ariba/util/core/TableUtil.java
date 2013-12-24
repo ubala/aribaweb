@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/TableUtil.java#12 $
+    $Id: //ariba/platform/util/core/ariba/util/core/TableUtil.java#13 $
 */
 
 package ariba.util.core;
@@ -173,8 +173,9 @@ public final class TableUtil
             return null;
         }
         try {
+            //add for fix :1-BTXAQH
             return loadObject(IOUtil.bufferedReader(url.openStream(),
-                                                  I18NUtil.EncodingISO8859_1));
+                                                    I18NUtil.EncodingUTF_8));
         }
         catch (IOException e) {
             return null;
@@ -341,9 +342,10 @@ public final class TableUtil
     public static boolean writeObject (OutputStream outputStream,
                                        Object       object)
     {
-        try {
+        try {  
+            //add for fix :1-BTXAQH
             PrintWriter printWriter = IOUtil.printWriter(outputStream,
-                                                       I18NUtil.EncodingASCII);
+                                                         I18NUtil.EncodingUTF_8);
             boolean result = writeObject(printWriter, object);
             printWriter.flush();
             return result;

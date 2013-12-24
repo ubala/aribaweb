@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BindingNames.java#55 $
+    $Id: //ariba/platform/ui/widgets/ariba/ui/widgets/BindingNames.java#56 $
 */
 
 package ariba.ui.widgets;
@@ -46,6 +46,7 @@ public class BindingNames extends ariba.ui.aribaweb.html.BindingNames
     public static final String allowsWrapping   = "allowsWrapping";
     public static final String allSelected      = "allSelected";
     public static final String applicationCSS   = "applicationCSS";
+    public static final String banner           = "banner";
     public static final String bodyClass        = "bodyClass";
     public static final String bodyHeader       = "bodyHeader";
     public static final String buttonClass      = "buttonClass";
@@ -80,6 +81,7 @@ public class BindingNames extends ariba.ui.aribaweb.html.BindingNames
     public static final String position         = "position";
     public static final String preferencesEnabled = "preferencesEnabled";
     public static final String globalNavPrefEnabled = "globalNavPrefEnabled";
+    public static final String overrideGlobalBanner = "overrideGlobalBanner";
     public static final String overrideGlobalCommandBar = "overrideGlobalCommandBar";
     public static final String rawForm          = "rawForm";
     public static final String selectAllUrl     = "selectAllUrl";
@@ -131,4 +133,5 @@ public class BindingNames extends ariba.ui.aribaweb.html.BindingNames
     public static final String ignoreCase       = "ignoreCase";
     public static final String showTip          = "showTip";
     public static final String basic            = "basic";
+    public static final String removeContentLeftRightMargin = "removeContentLeftRightMargin";
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright (c) 1996-2011 Ariba, Inc.
+    Copyright (c) 1996-2013 Ariba, Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    $Id: //ariba/platform/util/core/ariba/util/core/FileUtil.java#27 $
+    $Id: //ariba/platform/util/core/ariba/util/core/FileUtil.java#29 $
 */
 
 package ariba.util.core;
-
 
 import ariba.util.log.Log;
 import java.io.File;
@@ -39,6 +38,7 @@ public final class FileUtil
 
     public static final String DefaultBackupFileSuffix = "bak";
     public static final int DefaultMaxBackupNumber = 20;
+    private static final int MinimumAgeInHours = 1;
 
     //-----------------------------------------------------------------------
     // nested class
@@ -250,7 +250,12 @@ public final class FileUtil
     public static File directory (File dir) throws IOException
     {
         if (!dir.exists()) {
-            if (!dir.mkdirs()) {
+            boolean success = dir.mkdirs();
+            // mkdir could fail in multi-threaded calls and return false. Check 
+            // to see if the dir exists then don't throw error.
+            // not using a synchronized lock, relying on underlying OS to 
+            // guarantee no file corruption
+            if (!success && !dir.exists()) {
                 Log.util.warning(10886, dir, dir.getAbsolutePath(), SystemUtil.stackTrace());
                 String s = Fmt.S("can't create directory %s", dir.getAbsolutePath());
                 throw new IOException(s);
@@ -469,22 +474,27 @@ public final class FileUtil
     */
     public static void purgeLocalTempDir ()
     {
-        purgeLocalTempDir(null);
+        File dir = SystemUtil.getLocalTempDirectory();
+        int filesDeleted = purgeDir(dir, null);
+        // Deleted {0} file(s) from local temp directory "{1}."
+        Log.utilIO.info(8906, filesDeleted, dir.getPath());
     }
 
+    
     /**
-        Recursively remove all files from the local temp directory. Use
-        the supplied filter to select a subset of the files.
-
-     @param filter the selection filter for the directory and its subdirectories;
-                   May be null to indicate that all files are to be deleted.
-     @throws SecurityException if some files don't have read access.
-     @aribaapi ariba
-    */
-    public static void purgeLocalTempDir (FileFilter filter)
-    {
+     * Recursively remove all files from the local temp directory. Use the
+     * supplied filter to select a subset of the files.
+     * 
+     * @param filter
+     *            the selection filter for the directory and its subdirectories;
+     *            May be null to indicate that all files are to be deleted.
+     * @throws SecurityException
+     *             if some files don't have read access.
+     * @aribaapi ariba
+     */
+    public static void purgeLocalTempDir(FileFilter filter, int minimumDirAge) {
         File dir = SystemUtil.getLocalTempDirectory();
-        int filesDeleted = purgeDir(dir, filter);
+        int filesDeleted = purgeDir(dir, filter,minimumDirAge);
         // Deleted {0} file(s) from local temp directory "{1}."
         Log.utilIO.info(8906, filesDeleted, dir.getPath());
     }
@@ -515,6 +525,25 @@ public final class FileUtil
     {
         File dir = SystemUtil.getSharedTempDirectory();
         int filesDeleted = purgeDir(dir, filter);
+        // Deleted {0} file(s) from shared temp directory "{1}."
+        Log.utilIO.info(8909, filesDeleted, dir.getPath());
+    }
+    
+    /**
+     * Recursively remove all files from the shared temp directory. Use the
+     * supplied filter to select a subset of the files. Use minimumDirAge
+     * to specify minimum dir age eligible for deletion.
+     * 
+     * @param filter
+     *            the selection filter for the directory and its subdirectories;
+     *            May be null to indicate that all files are to be deleted.
+     * @throws SecurityException
+     *             if some files don't have read access.
+     * @aribaapi ariba
+     */
+    public static void purgeSharedTempDir(FileFilter filter, int minimumDirAge) {
+        File dir = SystemUtil.getSharedTempDirectory();
+        int filesDeleted = purgeDir(dir, filter,minimumDirAge);
         // Deleted {0} file(s) from shared temp directory "{1}."
         Log.utilIO.info(8909, filesDeleted, dir.getPath());
     }
@@ -640,6 +669,10 @@ public final class FileUtil
     */
     public static int purgeDir (File dir, FileFilter filter)
     {
+        return purgeDir(dir, filter, MinimumAgeInHours);
+    }
+
+    public static int purgeDir(File dir, FileFilter filter, int minimumAgeInHours) {
         int filesDeleted = 0;
         if (dir != null) {
             File[] files = dir.listFiles(filter);
@@ -653,14 +686,29 @@ public final class FileUtil
             for (int i = 0; i < files.length; i++) {
                 File f = files[i];
                 if (f.isDirectory()) {
-                    filesDeleted += purgeDir(f, filter);
+                    boolean canPurge = isModifiedBefore(f,minimumAgeInHours);
+                    
+                    filesDeleted += purgeDir(f, filter,minimumAgeInHours);
                     /**
-                        Note that we don't attempt to delete an empty directory
-                        here. There's no real advantage (it will probably be
-                        recreated soon anyway), and we don't know if we'll
-                        correctly identify an empty directory because the file
-                        system may be deleting the files asynchronously.
+                        Note that we attempt to delete an empty directory here.
+                        Conditions checked -
+                        1) Directory should not be modified in last X hours,
+                           specified by MinimumAgeInHours. 
+                           How - When we delete files from a directory its lastmodified
+                           time is changed, hence we check condition before deleting 
+                           its contents.
+                           Why - This is to ensure we do not by mistake delete a
+                           directory created just now by application thread who is about
+                           to create a tmp file inside it.
+                           
+                        2) Directory should be empty
                      */
+                    
+                    if (canPurge && (f.list().length == 0)) {
+                        if (f.delete()) {
+                            filesDeleted++;
+                        }
+                    }
                 }
                 else {
                     try {
@@ -690,6 +738,32 @@ public final class FileUtil
         return filesDeleted;
     }
 
+    /**
+     * returns true if file was not modified in last X hour
+     * specified by - minimumAge
+     * 
+     * @param f - file whose last modified date needs to be checked.
+     * @param minimumAgeInHours - age in hours
+     * @return
+     */
+    private static boolean isModifiedBefore(File f, int minimumAgeInHours)
+    {        
+        long timeAtPreviousHour = System.currentTimeMillis() -
+                              minimumAgeInHours * Date.MillisPerHour;
+        long lastMod = 0;
+        try {
+            lastMod = f.lastModified();
+        }
+        catch (SecurityException se) {
+            Log.utilIO.error(8911, f);
+        }
+    
+        if (lastMod == 0 || lastMod > timeAtPreviousHour) {
+            return false;
+        }        
+        return true;
+    }
+
     public static void deleteSubdirectoryIfEmpty(FileFilter purgeTempFileFilter, File dir, boolean removeSelf) {
         // 1. if having some sub dir, run recursively for them 
         // 2. Chk if all subdirs /files are removed , i.e if directory is empty and removeself is true, delete
@@ -716,43 +790,7 @@ public final class FileUtil
                 }           
             }
         }
-    }
-
-    public static void populateAllSubdirectories(List dirList,
-                                                 FileFilter purgeTempFolderFilter,
-                                                 File dir, boolean addSelfToList) {
-        if (dir != null) {
-            File[] files = dir.listFiles(purgeTempFolderFilter);
-            if (files != null) {
-                for (int i = 0; i < files.length; i++) {
-                    File f = files[i];
-                    if (f.isDirectory()) {
-                        populateAllSubdirectories(dirList, purgeTempFolderFilter, f, true);
-                    }
-                }
-            }
-            if (addSelfToList) {
-                dirList.add(dir);
-            }
-        }
-    }
-
-    public static void deleteAllEmptySubdirectories(List<File> dirList) {
-        if (ListUtil.nullOrEmptyList(dirList)) {
-            return;
-        }
-        for (File dir : dirList) {
-            try {
-                File[] files = dir.listFiles();
-                if (files == null || files.length < 1) {
-                    dir.delete();
-                }
-            }
-            catch (SecurityException se) {
-                Log.utilIO.error(8911, dir);
-            }
-        }
-    }   
+    } 
 
     /**
         Lists the files in a specific directory that satisfy the filter.

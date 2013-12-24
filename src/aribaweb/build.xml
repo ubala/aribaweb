@@ -38,8 +38,10 @@
     <!-- Generate merged JS file -->
     <property name="js.merge.destpath" value="ariba/ui/aribaweb"/>
     <property name="js.merge.destfile" value="aribaweb_all.js"/>
+    <!-- requires that //ariba/3rdParty/jquery.foundation/jquery/main/gnu make was run first -->
     <filelist id="merge.js.filelist" dir="${src.dir}/resource/webserver/"
-              files="Util.js Dom.js Event.js Input.js Request.js Refresh.js Handlers.js"/>
+              files="jquery.js Util.js Dom.js Event.js Input.js Request.js Refresh.js Handlers.js"/>
     <filelist id="unmerged.js.filelist" dir="${src.dir}/resource/webserver/"
               files="Debug.js AWJSDebugWin.js"/>
+
 </project>
